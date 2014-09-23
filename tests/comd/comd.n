@@ -1,0 +1,486 @@
+with particles;
+
+
+// ****************************************************************************
+// * DEFINES
+// ****************************************************************************
+#define amu_to_m_e (1822.83)
+#define bohr_per_atu_to_A_per_s (0.529/2.418e-17)
+
+
+// ****************************************************************************
+// * OPTIONS
+// ****************************************************************************
+options{
+  Integer option_nx     = 20;
+  Integer option_ny     = 20;
+  Integer option_nz     = 20;
+  Real option_lat       = 2.07514e-317;
+  Real option_defgrad   = 1.0; // stretch in x direction (deformation gradient)
+  Real option_cutoff    = 4.59;
+  Real option_boxfactor = 1.0;
+  Integer option_max_iteration = 20;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles (alias 'boxes')
+// ****************************************************************************
+cells{
+  Real natom;
+  Real3 dcenter;
+  Real cell_energy;
+  Real cell_stress;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux particules
+// ****************************************************************************
+particles{
+  Integer id;
+  Integer iType;  // the type of the atom
+  Real3 r;        // position
+  Real3 μ;        // momenta of the atom
+  Real3 f;
+  Real energy;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  Integer xNbx;   // number of boxes in each dimension
+  Integer yNbx;   // number of boxes in each dimension
+  Integer zNbx;   // number of boxes in each dimension
+  Integer nboxes; // total number of boxes
+  Integer ntot;   // total number of atoms
+  Real xBoxsize;  // size of domains
+  Real yBoxsize;  // size of domains
+  Real zBoxsize;  // size of domains
+  Real rho;       // rhosum for EAM potential
+  Real fi;        // rhobar for EAM potential
+  Real e;         // the total energy of the system
+  Real stress;    // virial stress
+  Real defgrad;   // deformation gradient
+  Real lat;       // Lattice constant
+  Real xBounds;   // x periodic bounds
+  Real yBounds;   // y periodic bounds
+  Real zBounds;   // z periodic bounds
+  Real boxfactor;
+  // Lennard-Jones potential (pmd_base_potential_t *pot)
+  Real σ;       // the finite distance at which the inter-particle potential is zero
+  Real ε;       // the depth of the potential well
+  Real cutoff;  // potential cutoff distance in Angstroms 
+  Real mass;    // mass of the atom in atomic mass units
+  // Simulation needs
+  Real ts;
+  Real te;
+  Integer nsteps;
+  Real ns;
+  Real s6;
+  Real etot;
+  Real r2cut;
+};
+
+
+// ********************************************************
+// * fonctions outils
+// ********************************************************
+Real usPeratom(Real tend, Real tstart){
+  return (double)((Integer)((1.0e6*(tend-tstart)/(double)ns/(double)ntot)*1000.0))/1000.0;
+}
+
+Real timeNow(void){
+  return (Real)((Integer)(ElapsedTime*1000.0))/1000.0;
+}
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+
+
+// ********************************************************
+// * récupération des options
+// ********************************************************
+void iniOptions(void) @ -12.0{
+  cutoff    = option_cutoff;
+  defgrad   = option_defgrad;
+  boxfactor = option_boxfactor;
+}
+
+
+// ********************************************************
+// * Initialisation propre au potentiel Lennard-Jones
+// ********************************************************
+void iniLJPotentialValues(void) @ -11.0{
+  σ=1.53;
+  ε=0.0085;
+  cutoff=3.0*σ;
+  mass = 1.0;
+  lat=1.122462048*cutoff;
+  info()<<"[iniLJPotentialValues] cutoff="<<cutoff<<", lattice="<<lat;
+}
+
+
+// ********************************************************
+// * Initialisation propre au potentiel Lennard-Jones
+// ********************************************************
+void iniLattice(void) @ -10.0{
+  xBounds = option_nx * lat * defgrad;
+  yBounds = option_ny * lat;
+  zBounds = option_nz * lat;
+}
+
+
+// ********************************************************
+// * Initialisation du domaine
+// ********************************************************
+void iniDomain(void) @ -9.0{
+  Real strain =1.0;
+  info() << "bounds = "<<xBounds<<","<<yBounds<<","<<zBounds
+         << ", cutoff = "<<cutoff<<", box factor = "<<boxfactor
+         << ", strain = "<<strain;
+  xNbx = (int)floor(xBounds/(cutoff*boxfactor*strain));
+  yNbx = (int)floor(yBounds/(cutoff*boxfactor*strain));
+  zNbx = (int)floor(zBounds/(cutoff*boxfactor*strain));
+  nboxes = xNbx*yNbx*zNbx;
+  xBoxsize=xBounds/(Real)xNbx;
+  yBoxsize=yBounds/(Real)yNbx;
+  zBoxsize=zBounds/(Real)zNbx;
+}
+
+
+// ********************************************************
+// * Initialisation des particules
+// ********************************************************
+particles void iniParticles(void) out (particle id) @ -9.0{
+  f=μ=r=0.0;
+  energy=0.0;
+  id=iType=0;
+}
+
+
+// ********************************************************
+// * Initialisation des mailles et calcul du centre
+// ********************************************************
+cells void computeDomainCenter(void) @ -8.0{
+  natom=0.0;
+  dcenter=0.0;
+  foreach node dcenter+=coord;
+  dcenter/=nbNode;
+}
+
+// given x,y,z in world co-ordinates return the box in which those coordinates fall
+int getBoxIDWorldCoords(Real x, Real y, Real z){
+  int ibox,ibx[3];
+  ibx[0] = (int)(floor(x/xBoxsize));
+  ibx[1] = (int)(floor(y/yBoxsize));
+  ibx[2] = (int)(floor(z/zBoxsize));
+  ibox = ibx[0]+xNbx*ibx[1]+xNbx*yNbx*ibx[2];
+  return ibox;
+}
+
+// finds an appropriate box for an atom based on the spatial coordinates and puts it in there
+void putAtomInBox(const int n, Real x, Real y, Real z) {
+  Real3 ρ;
+  // push atom into primary period
+  if (x<0.0) x+=xBounds; else if (x>=xBounds) x-=xBounds;
+  if (y<0.0) y+=yBounds; else if (y>=yBounds) y-=yBounds;
+  if (z<0.0) z+=zBounds; else if (z>=zBounds) z-=zBounds;
+  ρ.x=x; ρ.y=y; ρ.z=z;
+  particleAddToCell(n,getBoxIDWorldCoords(x,y,z),ρ);
+  ntot=ntot+1;
+}
+
+// ********************************************************
+// * Remplissage des boîtes
+// ********************************************************
+void putAtomsInBoxes(void) @ -7.0{
+  Real x,y,z;
+  int i,j,k,n;
+  Real halflat=lat/2.0;
+  for(z=lat/4.0,i=j=k=n=0; z<zBounds; z+=halflat,k++)
+    for(y=lat/4.0; y<yBounds; y+=halflat,j++)
+      for(x=lat*defgrad/4.0; x<xBounds; x+=halflat*defgrad,i++)
+        if ((i+j+k) % 2) putAtomInBox(n++,x,y,z);
+  particleSyncToCell();
+}
+
+
+// ********************************************************
+// * Initialisation des particules
+// ********************************************************
+particles void iniAtomTheBox(void) in (cell dcenter)
+  out (particle id, particle iType, particle r) @ -6.0{
+  id = uid;
+  iType = 1;
+  r -= dcenter;
+}
+
+
+// ********************************************************
+// * Mise à jour du nombre de particules dans chaque maille
+// ********************************************************
+own cells void iniParticlesInCells(void) in (particle id, particle r)@ -5.9{
+  foreach particle{
+    natom+=1.0;
+    //cell_energy=0.0;
+    //if (!(uid%1024)) info()<<"cell #"<<uid<<" has particle "<< id <<" @ coords="<<r;
+  }
+}
+
+
+// ********************************************************
+// * Initialisation des variables de la simulation
+// ********************************************************
+void initSim(void) @ -5.0{
+  info() << "total atoms is: "<< ntot;
+  info() << "box factor is "<< xBoxsize/cutoff
+         << " " << yBoxsize/cutoff << " " << zBoxsize/cutoff;
+  nsteps=10;
+  info() << "Starting simulation";
+  δt = 1.0e-15;
+  ts=timeNow();
+  ns=(double)(1+nsteps);
+}
+
+
+// ****************************************************************************
+// * calculates forces for the 12-6 lennard jones potential
+// * Notes on LJ:
+// * http://en.wikipedia.org/wiki/Lennard_Jones_potential
+// * LJ is a simple potential of the form:
+// * e_lj(r) = 4*ε*((σ/r)^12 - (σ/r)^6)
+// * F(r) = 4*ε*(12*σ^12/r^13 - 6*σ^6/r^7)
+// * ε and σ are the adjustable parameters in the potential.
+// *    ε = well depth
+// *    σ   = hard sphere diameter
+// * You can also adjust the 12 & 6, but few people do.
+// * Some typical values for ε and σ:
+// *   material            ε            σ   
+// *     N                 36.20 K             3.299 A
+// *     O                 44.06 K             2.956 A
+// ****************************************************************************
+void iniComputeForce(void){
+  e = 0.0;
+  etot = 0.0;
+  stress = 0.0;
+  s6 = σ*σ*σ*σ*σ*σ;
+  r2cut = cutoff*cutoff;
+}
+particles void particleZeroForcesEnergy(void){
+  //if (!particle->cell().isOwn()) continue;
+  f=0.0;
+  energy=0.0;
+}
+void cellComputeForce(Cell i, Cell j){
+  register Real etotl=0.0;
+  register Real strss=0.0;
+  register Real r2,r6,rs,fr;
+  Real3 dr;
+  Real3 drbox=dcenter[i]-dcenter[j];
+
+  // PERIODIC test could be done here
+  //if (drbox.x < -0.5*xBounds) drbox.x += xBounds;
+  //if (drbox.y < -0.5*yBounds) drbox.y += yBounds;
+  //if (drbox.z < -0.5*zBounds) drbox.z += zBounds;
+  foreach i particle{
+    strss -= - μ[pi].x*μ[pi].x/mass;
+    foreach j particle{
+      if (id[pj]<=id[pi]) continue;
+      dr = drbox+(r[pi]-r[pj]);
+      r2 = dot(dr,dr);
+      if (r2>r2cut) continue;
+      // Important note: from this point on r actually refers to 1.0/r
+	   r2 = 1.0/r2;
+      r6 = (r2*r2*r2);
+      rs = 0.5*r6*(s6*r6 - 1.0);
+      energy[pi] += rs; 
+      energy[pj] += rs;
+      etotl += r6*(s6*r6 - 1.0);
+      // different formulation to avoid sqrt computation
+      fr = 4.0*ε*s6*r6*r2*(12.0*s6*r6-6.0);
+      f[pi] += dr*fr;
+	   f[pj] -= dr*fr;
+      strss += 2.0*fr*dr.x*dr.x;
+    } // loop over atoms in j
+  } // loop over atoms in i
+  cell_energy[i]+=etotl;
+  cell_stress[i]+=strss;
+}
+// loop over all boxes in system via pairs
+own cells void cellsComputeForceViaPairs(void) {
+  cell_stress=cell_energy=0.0;
+  cellComputeForce(*this,*this);            // itself
+  foreach cell cellComputeForce(*this,*cc);  // neighbors
+}
+own cells Real computeSumEnergy(Real nrj) in (cell cell_energy){
+  nrj+=cell_energy;
+  return nrj;
+}
+own cells Real computeSumStress(Real s) in (cell cell_stress){
+  s+=cell_stress;
+  return s;
+}
+void endComputeForce(void) {
+  etot = etot*4.0*ε*s6;
+  e = etot;
+  // renormalize stress
+  stress = stress/(xBounds*yBounds*zBounds);
+}
+void computeForce(void){
+  iniComputeForce();
+  particleZeroForcesEnergy();
+  cellsComputeForceViaPairs();
+  etot=computeSumEnergy(etot);
+  stress=computeSumStress(stress);
+  etot=mpi_reduce(ReduceSum,etot);
+  stress=mpi_reduce(ReduceSum,stress);
+  endComputeForce();
+}
+
+
+// ********************************************************
+// * Initialisation des forces avant la boucle
+// ********************************************************
+void firstComputeForce(void) @ -0.5{
+  computeForce();
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+oo[ 
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * do_compute_work
+// ****************************************************************************
+void do_compute_work(void) @ 1.0{
+  te=timeNow();
+  info() << "Iteration #"<<(GlobalIteration-1)*nsteps<<", total system energy e="<< e
+         << ", computed in "<<(te-ts)<<"s ("<< usPeratom(te,ts) <<"us/atom for "<<ntot<<" atoms)";
+  ts=timeNow();
+}
+
+
+// ****************************************************************************
+// * advanceVelocity
+// ****************************************************************************
+particles void advanceVelocity(Real dt) in (particle f) out (particle p){
+  μ -= dt*f;
+}
+
+
+// ****************************************************************************
+// * All computations are done in atomic units.
+// * (http://en.wikipedia.org/wiki/Atomic_units)
+// * In these units the mass of an electrion is
+// * assumed to be 1.0.  Since our mass is in
+// * amu, we need to multiply it by 1822.83 to
+// * get the mass in amu.
+// ****************************************************************************
+particles void advancePositions(Real dt) in (particle mass){
+  r += dt*μ/(amu_to_m_e*mass);
+}
+
+
+
+int getIx(int iBox) { return (iBox%xNbx);}
+int getIy(int iBox) { return (iBox/xNbx)%(yNbx);}
+int getIz(int iBox) { return (iBox/xNbx/yNbx)%zNbx;}
+int getIBoxFromIxyz3(int x, int y, int z){
+  int rtn;
+  info()<<"\33[7m getIBoxFromIxyz3 "<<x<<"x"<<y<<"x"<<z<<"\33[m";
+  if (x<0) x+=xNbx; if (x>=xNbx) x-=xNbx;
+  if (y<0) y+=yNbx; if (y>=yNbx) y-=yNbx;
+  if (z<0) z+=zNbx; if (z>=zNbx) z-=zNbx;
+  info()<<"\33[7m getIBoxFromIxyz3 "<<x<<"x"<<y<<"x"<<z<<"\33[m";
+  rtn = x + y*xNbx + z*xNbx*yNbx;
+  info()<<"\33[7m getIBoxFromIxyz3 rtn="<<rtn<<"\33[m";
+  return rtn;
+}
+
+
+// ****************************************************************************
+// * reBoxAll
+// ****************************************************************************
+cells void reBoxAll(void){
+  int ibox=uid;
+  int iXold=getIx(uid);
+  int iYold=getIy(uid);
+  int iZold=getIz(uid);
+  //info()<<"\33[7mreBoxAll cell #"<<uid<<":"<<iXold<<"x"<<iYold<<"x"<<iZold<<"\33[m";
+  foreach particle{
+    int jbox;
+    int iXnew,iYnew,iZnew;
+    Real3 rnew=r;
+    
+    info()<<"\33[35m In box #"<<uid<<", particle #"<<id<<" r="<<r<<"\33[m";
+    info()<<" xBoxsize="<<xBoxsize()<<", yBoxsize="<<yBoxsize()<<", zBoxsize="<<zBoxsize();
+    
+    if (r.x < 0.0) { iXnew = iXold-1; rnew.x += xBoxsize; }
+    else if (r.x >= xBoxsize) { iXnew = iXold+1; rnew.x -= xBoxsize; }
+    else { iXnew = iXold; }
+
+    if (r.y < 0.0) { iYnew = iYold-1; rnew.y += yBoxsize; }
+    else if (r.y >= yBoxsize) { iYnew = iYold+1; rnew.y -= yBoxsize; }
+    else { iYnew = iYold; }
+    
+    if (r.z < 0.0) { iZnew = iZold-1; rnew.z += zBoxsize; }
+    else if (r.z >= zBoxsize) { iZnew = iZold+1; rnew.z -= zBoxsize; }
+    else { iZnew = iZold; }
+    
+    jbox = getIBoxFromIxyz3(iXnew,iYnew,iZnew);
+
+    if((jbox<0)||(jbox==ibox)){
+      /* do nothing if same box or non-periodic boundary */
+    }else{
+      r=rnew;
+      /*
+ at 0x46F4A3: Arcane::Item::Item(Arcane::ItemInternal* const*, int) (Item.h:134)
+ by 0x46FA7C: Arcane::Particle::Particle(Arcane::ItemInternal* const*, int) (Item.h:1011)
+ by 0x476EC9: Arcane::ItemEnumeratorT<Arcane::Particle>::operator*() const (ItemEnumerator.h:134)
+ by 0x46CEF6: CoMDModule::reBoxAll() (CoMDModule.cc:454)
+      moveAtomInBox(*p, jbox);
+      */
+      moveAtomInBox(id, jbox);
+    }
+  }
+}
+
+
+// ****************************************************************************
+// * Standard verlet algorithm:
+// *   1: advance positions half a timestep using current velocities
+// *   2: compute forces
+// *   3: advance velocities (momenta) a full timestep
+// *   4: advance positions half a timestep to bring in sync with velocities.
+// ****************************************************************************
+void nTimeSteps(void) @ 2.0{
+  int i;
+  Real dt = δt * bohr_per_atu_to_A_per_s;
+  for(i=0;i<nsteps;i++){
+    advancePositions(dt/2.);
+    computeForce();
+    advanceVelocity(dt); 
+    advancePositions(dt/2.);
+    //reBoxAll();
+  }
+  // compute force to make consistent
+  computeForce();
+  te=timeNow();
+}
+
+
+// ****************************************************************************
+// * exit_compute_work
+// ****************************************************************************
+void exit_compute_work(void) @ 3.0{
+  if (GlobalIteration > option_max_iteration) exit;
+}
+
+// ~400 lignes contre ~800 dans CoMD-master/src-flat

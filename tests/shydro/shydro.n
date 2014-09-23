@@ -1,0 +1,426 @@
+// ****************************************************************************
+// * DEFINES
+// ****************************************************************************
+#define ZG_INI_DENSITY           1.0
+#define ZG_INI_PRESSURE          1.0
+#define ZG_INI_ADIABATIC_CST     1.4
+#define ZD_INI_DENSITY           0.125
+#define ZD_INI_PRESSURE          0.1
+#define ZD_INI_ADIABATIC_CST     1.4
+#define XMIN_INI_VALUE           0.0
+#define YMIN_INI_VALUE           0.0
+#define ZMIN_INI_VALUE           0.0
+#define VISCOSITY_LINEAR_COEF    1.0
+#define VISCOSITY_QUADRATIC_COEF 1.0
+
+// ****************************************************************************
+// * OPTIONS
+// ****************************************************************************
+#define OPTION_CFL            0.3
+#define OPTION_DELTAT_INI     1e-3
+#define OPTION_DELTAT_MIN     1e-5
+#define OPTION_DELTAT_MAX     1e-4
+#define OPTION_TIME_INI       OPTION_DELTAT_INI
+#define OPTION_TIME_END       0.01
+
+// ****************************************************************************
+// * Récupération de code externe à-là-'computeCQs'
+// ****************************************************************************
+inline void computeCQs(Real3*,Real3*,Real3*);
+
+
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
+nodes{
+  Real nMass;
+  Real3 force;
+  Real3 velocity;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Real cMass;
+  Real volume;
+  Real dxSound;
+  Real kLength;
+  Real density;
+  Real pressure;
+  Real oldVolume;
+  Real3 cqs[nodes];
+  Real sound_speed;
+  Real adiabatic_cst;
+  Real internal_energy;
+  Real viscosity_force;  // Contribution locale des forces de viscosité
+  Real viscosity_work;   // Travail des forces de viscosité par maille
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  Real density_ratio_maximum; //!< Accroissement max de la densité sur un dt
+  // Real delta_t_n;             //!< Delta t n       entre t^{n-1/2} et t^{n+1/2}
+  // Real delta_t_f;             //!< Delta t n+\demi entre t^{n}     et t^{n+1}
+  // Real old_dt_f;              //!< Delta t n-\demi entre t^{n-1}   et t^{n}
+  };
+
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-oo,-0[
+// ****************************************************************************
+
+// ****************************************************************************
+// * Code d'initialisation propre à la simulation
+// ****************************************************************************
+void ini(void) @ -6{
+  m_cell_cqs.resize(8);
+  deltat=OPTION_DELTAT_INI;
+}
+
+
+// ****************************************************************************
+// * Conditions initiales pour les mailles
+// ****************************************************************************
+cells void iniCells(void)
+  out(cell density, cell pressure, cell adiabatic_cst) @ -5{  
+// On regarde si le noeud '0' de la maille est à la frontière ZG/ZD
+  if (coord[0].x < 0.5){
+    density=ZG_INI_DENSITY;
+    pressure=ZG_INI_PRESSURE;
+    adiabatic_cst=ZG_INI_ADIABATIC_CST;
+  }else{
+    density=ZD_INI_DENSITY;
+    pressure=ZD_INI_PRESSURE;
+    adiabatic_cst=ZD_INI_ADIABATIC_CST;
+  }
+}
+
+// ****************************************************************************
+// * Conditions initiales pour les noeuds
+// ****************************************************************************
+nodes void iniNodes(void) out (node nMass, node force, node velocity) @ -5{
+  nMass=0.0;
+  force.x = force.y = force.z = 0.0;
+  velocity.x = velocity.y = velocity.z = 0.0;
+}
+
+// ****************************************************************************
+// * Mise à jour de la géométrie
+// ****************************************************************************
+void iniGeometry(void) @ -4{
+  computeGeometricKlength() @ 0; // L'ordre est important ici
+  computeGeometricVolume() @ 1;
+}
+
+// ****************************************************************************
+// * Initialise l'équation d'état aux mailles,
+// * calcule la vitesse du son et l'énergie interne 
+// ****************************************************************************
+cells void initEOS(void)
+  in (cell pressure, cell adiabatic_cst, cell density)
+  out (cell internal_energy, cell sound_speed) @ -3{
+  internal_energy = pressure / ((adiabatic_cst - 1.0) * density);
+  sound_speed = sqrt(adiabatic_cst * pressure / density);
+}
+
+// ****************************************************************************
+// * Calcul de la masse d'une maille
+// ****************************************************************************
+cells void iniCellMass(void) in (cell density, cell volume) out (cell cMass) @ -2{
+  cMass = density * volume;
+}
+
+// ****************************************************************************
+// * Calcul de la masse d'un noeud
+// ****************************************************************************
+nodes void iniNodeMass(void) in (cell cMass) out (node nMass) @ -1{
+  foreach cell
+    nMass += 0.125 * cMass;
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+oo[ 
+// ****************************************************************************
+
+// ****************************************************************************
+// * Mise à zéro des forces aux noeuds
+// ****************************************************************************
+nodes void computeIniPressureForce(void)
+  in (cell pressure, cell cqs) inout (node force) @ 0.1{
+  force.x = force.y = force.z = 0.0;
+}
+
+// ****************************************************************************
+// * Calcul pour chaque noeud de chaque maille la contribution
+// * des forces de pression et de la pseudo-viscosite
+// ****************************************************************************
+cells void computePressureAndCellPseudoViscosityForces(void)
+  in(cell density, cell pressure, cell cqs, cell sound_speed, node velocity)
+  out (cell viscosity_force, node force) @ 0.2 {
+  Real linear_coef = VISCOSITY_LINEAR_COEF;
+  Real quadratic_coef = VISCOSITY_QUADRATIC_COEF;
+
+  const Real rho = density;
+  //const Real pressure = pressure;
+  
+  // Calcul de la divergence de la vitesse
+  Real delta_speed = 0.0;
+  foreach node{
+    delta_speed += dot(velocity, cqs);
+  }
+  delta_speed /= volume;
+  
+  // Capture uniquement les chocs
+  if (delta_speed<0.0){
+    //Real soundSpeed = sound_speed;
+    Real dx = kLength;
+    Real quadratic_viscosity = rho * dx * dx * delta_speed * delta_speed;
+    Real linear_viscosity = -rho * sound_speed * dx * delta_speed;
+    Real scalar_viscosity =
+      linear_coef * linear_viscosity + quadratic_coef * quadratic_viscosity;
+    viscosity_force = scalar_viscosity;
+    foreach node
+      force += (pressure+scalar_viscosity)*cqs;
+  }else{
+    viscosity_force = 0.0;
+    foreach node{
+     force += pressure * cqs;
+    }
+  }
+}
+
+// ****************************************************************************
+// * Calcule l'impulsion aux noeuds
+// ****************************************************************************
+nodes void computeVelocity(void)
+  in (node nMass, node force) inout (node velocity) @ 1{
+  velocity+=(deltat/nMass)*force;
+}
+
+// ****************************************************************************
+// * Calcul du travail des forces de viscosité dans une maille
+// ****************************************************************************
+cells void computeViscosityWork(void)
+  in (cell viscosity_force, cell cqs, node velocity) out (cell viscosity_work) @1.1{
+  Real work = 0.;
+  Real scalarViscosity = viscosity_force;
+  if (!isZero(scalarViscosity)){
+    foreach node
+      work += dot(scalarViscosity * cqs, velocity);
+  }
+  viscosity_work = work;
+}
+
+// ****************************************************************************
+// * Applique les conditions aux bords
+// ****************************************************************************
+nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
+  // MIN boundaries
+  if (coord.x==0.0){velocity.x=0.0;}
+  if (coord.y==0.0){velocity.y=0.0;}
+  if (coord.z==0.0){velocity.z=0.0;}
+  // MAX boundaries
+#warning ###############################
+#warning MAX boundaries need to fit mesh
+#warning ###############################
+  if (coord.x==1.0) {velocity.x=0.0;}
+  if (coord.y==0.16){velocity.y=0.0;}
+  if (coord.z==0.16){velocity.z=0.0;}
+}
+
+// ****************************************************************************
+// * Calcul des nouvelles coordonnées des noeuds
+// ****************************************************************************
+nodes void moveNodes(void) in (node velocity) @ 3{
+  coord += deltat * velocity;
+  //info()<< "[moveNodes] coord="<<coord;
+}
+
+// ****************************************************************************
+// * Calcule la longueur caractéristique d'une maille héxahédrique
+// ****************************************************************************
+cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4{
+  Real3 coords[8];       // Copie locale des coordonnées des sommets d'une maille
+  Real3 face_coord[6];   // Coordonnées des centres des faces
+  
+  foreach node       // Recopie des coordonnées locales
+    coords[n] = coord;
+
+  {                      // Calcul les coordonnées des centres des faces
+    face_coord[0] = 0.25 * (coords[0] + coords[3] + coords[2] + coords[1]);
+    face_coord[1] = 0.25 * (coords[0] + coords[4] + coords[7] + coords[3]);
+    face_coord[2] = 0.25 * (coords[0] + coords[1] + coords[5] + coords[4]);
+    face_coord[3] = 0.25 * (coords[4] + coords[5] + coords[6] + coords[7]);
+    face_coord[4] = 0.25 * (coords[1] + coords[2] + coords[6] + coords[5]);
+    face_coord[5] = 0.25 * (coords[2] + coords[3] + coords[7] + coords[6]);
+  } @ 1;
+
+  {                      // Calcule la longueur caractéristique de la maille
+    Real3 median1 = face_coord[0] - face_coord[3];
+    Real3 median2 = face_coord[2] - face_coord[5];
+    Real3 median3 = face_coord[1] - face_coord[4];
+    Real d1 = norm(median1);
+    Real d2 = norm(median2);
+    Real d3 = norm(median3);
+    Real dx_numerator = d1*d2*d3;
+    Real dx_denominator = d1*d2 + d1*d3 + d2*d3;
+    kLength = dx_numerator/dx_denominator;
+  } @ 2;
+
+  // Calcule les résultantes aux sommets
+  computeCQs(coords, face_coord, &cqs) @ 3; 
+}
+
+// ****************************************************************************
+// * computeVolume: Calcule le volume de la maille
+// ****************************************************************************
+cells void computeGeometricVolume(void)
+  in (cell cqs) out (cell oldVolume) inout(cell volume) @ 5 {
+  Real tmpVolume = 0.0;// @ 0;
+  oldVolume = volume @ 0;
+  foreach node
+    tmpVolume += dot(coord, cqs);
+  tmpVolume /= 3.0 @ 1;
+  volume=tmpVolume;
+}
+
+// ****************************************************************************
+// * updateDensity
+// ****************************************************************************
+void updateDensityRatioMaximum(void)@6{
+  density_ratio_maximum=0.0;
+}
+cells void updateDensity(void)
+  in (cell cMass, cell volume) out (cell density) @ .1{
+  Real old_density = density;
+  Real new_density = cMass/volume;
+  Real density_ratio;
+  
+  density = new_density;
+  density_ratio = (new_density - old_density) / new_density;
+  if (density_ratio_maximum<density_ratio)
+    density_ratio_maximum = density_ratio;
+  //density = cMass/volume;
+}
+
+// ****************************************************************************
+// * Calcul de l'energie interne
+// ****************************************************************************
+cells void computeInternalEnergy(void)
+  in (cell volume, cell oldVolume, cell adiabatic_cst, cell viscosity_work, cell cMass)
+  out (cell internal_energy) @ 7{
+  Real γVolume = volume / oldVolume;
+  Real x = 0.5 * (adiabatic_cst - 1.0);
+  Real numer_accrois_nrj = 1.0 + x * (1.0 - γVolume);
+  Real denom_accrois_nrj = 1.0 + x * (1.0 - 1.0 / γVolume);
+  internal_energy *= numer_accrois_nrj / denom_accrois_nrj;
+  internal_energy -= deltat * viscosity_work / (cMass*denom_accrois_nrj);
+}
+
+// ****************************************************************************
+// * Applique l'équation d'état aux mailles
+// * et calcule la vitesse du son et la pression
+// ****************************************************************************
+cells void applyEOS(void)
+  in (cell density, cell adiabatic_cst, cell internal_energy)
+  out (cell sound_speed) inout (cell pressure) @ 8{
+  // On calcule en premier la pression
+  pressure = (adiabatic_cst - 1.0) * density * internal_energy @ 0;
+  // Que l'on va utiliser pour le calcule de la vitesse du son
+  sound_speed = sqrt((adiabatic_cst * pressure) / density) @ 2;
+}
+
+
+// ****************************************************************************
+// * Calcul du pas de temps pour le respect du critère de CFL
+// ****************************************************************************
+cells void computeDxSound(void)
+  in (cell kLength, cell sound_speed)
+  out(cell dxSound) @ 9{
+  dxSound = kLength/sound_speed;
+}
+cells Real computeMinDxSound(Real minimum_aux) in (cell dxSound){
+  minimum_aux = min(minimum_aux, dxSound);
+  return minimum_aux;
+}
+void computeDeltaT(void) @ 10{
+  Real new_dt,minimum_aux;
+  minimum_aux = computeMinDxSound(HUGE_VALL);
+  new_dt = OPTION_CFL* minimum_aux;
+#warning parallele reduce
+  // respect des valeurs min et max imposées par les options
+  new_dt = min(new_dt, OPTION_DELTAT_MAX); 
+  new_dt = max(new_dt, OPTION_DELTAT_MIN);
+  if (time+new_dt >= OPTION_TIME_END)
+    subDomain()->timeLoopMng()->stopComputeLoop(true);
+  deltat=new_dt;
+  info()<<"[computeDeltaT] delta_t="<<deltat;
+}
+
+
+// ****************************************************************************
+// * computeCQs
+// ****************************************************************************
+inline void computeCQs(Real3* node_coord, Real3* face_coord, Real3 *cell_cqs){
+  Real3 c0 = face_coord[0];  
+  Real3 c1 = face_coord[1];
+  Real3 c2 = face_coord[2];
+  Real3 c3 = face_coord[3];
+  Real3 c4 = face_coord[4];
+  Real3 c5 = face_coord[5];
+  double demi = 0.5;
+  double five = 5.0;
+  // Calcul des normales face 1 :
+  Real3 n1a04 = demi * cross(node_coord[0] - c0 , node_coord[3] - c0);
+  Real3 n1a03 = demi * cross(node_coord[3] - c0 , node_coord[2] - c0);
+  Real3 n1a02 = demi * cross(node_coord[2] - c0 , node_coord[1] - c0);
+  Real3 n1a01 = demi * cross(node_coord[1] - c0 , node_coord[0] - c0);
+  // Calcul des normales face 2 :
+  Real3 n2a05 = demi * cross(node_coord[0] - c1 , node_coord[4] - c1);
+  Real3 n2a12 = demi * cross(node_coord[4] - c1 , node_coord[7] - c1);
+  Real3 n2a08 = demi * cross(node_coord[7] - c1 , node_coord[3] - c1);
+  Real3 n2a04 = demi * cross(node_coord[3] - c1 , node_coord[0] - c1);
+  // Calcul des normales face 3 :
+  Real3 n3a01 = demi * cross(node_coord[0] - c2 , node_coord[1] - c2);
+  Real3 n3a06 = demi * cross(node_coord[1] - c2 , node_coord[5] - c2);
+  Real3 n3a09 = demi * cross(node_coord[5] - c2 , node_coord[4] - c2);
+  Real3 n3a05 = demi * cross(node_coord[4] - c2 , node_coord[0] - c2);
+  // Calcul des normales face 4 :
+  Real3 n4a09 = demi * cross(node_coord[4] - c3 , node_coord[5] - c3);
+  Real3 n4a10 = demi * cross(node_coord[5] - c3 , node_coord[6] - c3);
+  Real3 n4a11 = demi * cross(node_coord[6] - c3 , node_coord[7] - c3);
+  Real3 n4a12 = demi * cross(node_coord[7] - c3 , node_coord[4] - c3);
+  // Calcul des normales face 5 :
+  Real3 n5a02 = demi * cross(node_coord[1] - c4 , node_coord[2] - c4);
+  Real3 n5a07 = demi * cross(node_coord[2] - c4 , node_coord[6] - c4);
+  Real3 n5a10 = demi * cross(node_coord[6] - c4 , node_coord[5] - c4);
+  Real3 n5a06 = demi * cross(node_coord[5] - c4 , node_coord[1] - c4);
+  // Calcul des normales face 6 :
+  Real3 n6a03 = demi * cross(node_coord[2] - c5 , node_coord[3] - c5);
+  Real3 n6a08 = demi * cross(node_coord[3] - c5 , node_coord[7] - c5);
+  Real3 n6a11 = demi * cross(node_coord[7] - c5 , node_coord[6] - c5);
+  Real3 n6a07 = demi * cross(node_coord[6] - c5 , node_coord[2] - c5);
+  double real_1div12 = 1./12.;
+  cell_cqs[0] = (five*(n1a01 + n1a04 + n2a04 + n2a05 + n3a05 + n3a01) +
+                 (n1a02 + n1a03 + n2a08 + n2a12 + n3a06 + n3a09))*real_1div12;
+  cell_cqs[1] = (five*(n1a01 + n1a02 + n3a01 + n3a06 + n5a06 + n5a02) +
+                 (n1a04 + n1a03 + n3a09 + n3a05 + n5a10 + n5a07))*real_1div12;
+  cell_cqs[2] = (five*(n1a02 + n1a03 + n5a07 + n5a02 + n6a07 + n6a03) +
+                 (n1a01 + n1a04 + n5a06 + n5a10 + n6a11 + n6a08))*real_1div12;
+  cell_cqs[3] = (five*(n1a03 + n1a04 + n2a08 + n2a04 + n6a08 + n6a03) +
+                 (n1a01 + n1a02 + n2a05 + n2a12 + n6a07 + n6a11))*real_1div12;  
+  cell_cqs[4] = (five*(n2a05 + n2a12 + n3a05 + n3a09 + n4a09 + n4a12) +
+                 (n2a08 + n2a04 + n3a01 + n3a06 + n4a10 + n4a11))*real_1div12;
+  cell_cqs[5] = (five*(n3a06 + n3a09 + n4a09 + n4a10 + n5a10 + n5a06) +                 
+                 (n3a01 + n3a05 + n4a12 + n4a11 + n5a07 + n5a02))*real_1div12;  
+  cell_cqs[6] = (five*(n4a11 + n4a10 + n5a10 + n5a07 + n6a07 + n6a11) +
+                 (n4a12 + n4a09 + n5a06 + n5a02 + n6a03 + n6a08))*real_1div12;  
+  cell_cqs[7] = (five*(n2a08 + n2a12 + n4a12 + n4a11 + n6a11 + n6a08) +
+                 (n2a04 + n2a05 + n4a09 + n4a10 + n6a07 + n6a03))*real_1div12;
+}

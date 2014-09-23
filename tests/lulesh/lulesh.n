@@ -1,0 +1,1606 @@
+// ****************************************************************************
+// * Benchmarks and Metrics
+// * This standard configuration runs in 1495 iterations of the main loop.
+// * We expect that a UHPC system should be able to run a calculation containing
+// * more than one billion mesh elements and potentially more than that,
+// * depending on available memory.
+// g++ -O2 -o luleshcc lulesh.cc
+// ****************************************************************************
+with cartesian;
+
+
+// ****************************************************************************
+// * WARNINGS
+// ****************************************************************************
+#warning DEFINES vs ARC FILE
+#warning EDGE_ELEMS must be divisible by np_proc if z total is true
+
+
+// ****************************************************************************
+// * Simulation Defines
+// * 1.125/nx donne le delta  5: 0.225,
+// *                         10: 0.1125
+// *                         32: 0.03515625
+// *                         45: 0.025
+// *                         64: 0.017578125
+// ****************************************************************************
+#define EDGE_TICK       0.1125
+#define EDGE_ELEMS      4
+
+// Pour vérifier avec 10*10*10:
+
+//*I-Master *** ITERATION 594  TEMPS 1.0e-02   DELTAT 7.371787135086565e-05 ***
+//*I-luleshModule dtt_courant=0.000517090697738913
+//*I-luleshModule dtt_hydro  =0.00025773497246004
+
+
+// ****************************************************************************
+// * Inlined geometrics functions
+// ****************************************************************************
+inline Real3 sum4(Real3 a, Real3 b, Real3 c, Real3 d){ return (a+b+c+d); }
+inline Real tripleProduct(Real x1, Real y1, Real z1,
+                          Real x2, Real y2, Real z2,
+                          Real x3, Real y3, Real z3){
+  return ((x1)*((y2)*(z3)-(z2)*(y3))
+          + (x2)*((z1)*(y3)-(y1)*(z3))
+          + (x3)*((y1)*(z2)-(z1)*(y2)));
+}
+
+
+// ****************************************************************************
+// * Defines
+// ****************************************************************************
+#define XI_M        0x003
+#define XI_M_SYMM   0x001
+#define XI_M_FREE   0x002
+#define XI_P        0x00C
+#define XI_P_SYMM   0x004
+#define XI_P_FREE   0x008
+#define ETA_M       0x030
+#define ETA_M_SYMM  0x010
+#define ETA_M_FREE  0x020
+#define ETA_P       0x0C0
+#define ETA_P_SYMM  0x040
+#define ETA_P_FREE  0x080
+#define ZETA_M      0x300
+#define ZETA_M_SYMM 0x100
+#define ZETA_M_FREE 0x200
+#define ZETA_P      0xC00
+#define ZETA_P_SYMM 0x400
+#define ZETA_P_FREE 0x800
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  Real option_dtfixed            = -1.0e-7;  // fixed time increment
+  Real option_δt_initial         = 1.0e-7;   // variable time increment
+  Real option_δt_courant         = 1.0e+20;
+  Real option_δt_hydro           = 1.0e+20;
+  Real option_δt_mult_lower_b    = 1.1;
+  Real option_δt_mult_upper_b    = 1.2;
+  Real option_initial_energy     = 3.948746e+7;
+  Real option_stoptime           = 1.0e-2;   // end time for simulation
+  Real option_hgcoef             = 3.0;      // hourglass control
+  Real option_qstop              = 1.0e+12;  // excessive q indicator
+  Real option_monoq_max_slope    = 1.0;
+  Real option_monoq_limiter_mult = 2.0;
+  Real option_e_cut              = 1.0e-7;   // energy tolerance
+  Real option_p_cut              = 1.0e-7;   // pressure tolerance
+  Real option_q_cut              = 1.0e-7;   // q tolerance
+  Real option_u_cut              = 1.0e-7;   // node velocity cut-off value
+  Real option_v_cut              = 1.0e-10;  // relative volume tolerance
+  Real option_qlc_monoq          = 0.5;      // linear term coef for q
+  Real option_qqc_monoq          = 0.66666666666666666;  // quadratic term coef for q
+  Real option_qqc                = 2.0;
+  Real option_eosvmax            = 1.0e+9;
+  Real option_eosvmin            = 1.0e-9;
+  Real option_pmin               = 0.0;      // pressure floor
+  Real option_emin               = -1.0e+15; // energy floor
+  Real option_dvovmax            = 0.1;      // maximum allowable volume change
+  Real option_refdens            = 1.0;      // reference density
+  Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
+  Real option_tick               = EDGE_TICK;
+  Integer option_sizeX           = EDGE_ELEMS; // X,Y,Z extent of this block
+  Integer option_sizeY           = EDGE_ELEMS;
+  Integer option_sizeZ           = EDGE_ELEMS;
+  // Still for Cuda
+  Real OPTION_DELTAT_INI         = 0.0001;
+  Real OPTION_TIME_END           = 0.1;
+};
+
+
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+nodes{
+  Real3 nVelocity;     // Velocity vector      xd(),yd(),zd(), (to synchronize)
+  Real3 nAcceleration; // Acceleration vector  xdd(),ydd(),zdd()
+  Real3 nForce;        // Force vector         fx(),fy(),fz()
+  Real nMass;          // Nodal mass           nodalMass()
+};
+
+
+// ****************************************************************************
+// * Element Variables
+// ****************************************************************************
+cells{
+  // Table 1.2 Element Variables  ////////////////
+  Real p;              // pressure
+  Real e;              // internal energy, (to synchronize)
+  Real q;              // artificial viscosity
+  Real v;              // relative volume
+  Real calc_volume;    // instant relative volume
+  Real vdov;           // relative volume change per volume
+  Real delv;           // relative volume change
+  Real volo;           // reference (initial) volume
+  Real arealg;         // characteristic length
+  Real3 ε;             // diagonal terms of deviatoric strain  dxx(),dyy(),dzz()
+  Real ql;             // artificial viscosity linear term, (to synchronize)
+  Real qq;             // artificial viscosity quadratic term, (to synchronize)
+  Real3 sig;           // stresses
+  Real determ;         // element volume
+  Real DetJ;           // 
+  // Hourglass ///////////////////////////////////
+  Real3 dvd[nodes];
+  Real3 Χ[nodes];      // Recopie des coordonnées locales
+  Real3 Χvel[nodes];   // Recopie des coordonnées 0.5*δt*nVelocity
+  // Temporaries /////////////////////////////////
+  Real delv_xi;        // velocity gradient
+  Real delv_eta;
+  Real delv_zeta;
+  Real delx_xi;        // coordinate gradient
+  Real delx_eta;
+  Real delx_zeta;
+  Real phixi;
+  Real phieta;
+  Real phizeta;
+  Real vnew;           // new relative volume
+  Real elemMass;       // mass
+  Real3 B[nodes];      // shape function derivatives
+  Real D[faces];
+  // EoS /////////////////////////////////////////
+  Real e_old;
+  Real delvc;
+  Real p_old;
+  Real q_old;
+  Real compression;
+  Real compHalfStep;
+  Real work;
+  Real p_new;
+  Real e_new;
+  Real q_new;
+  Real bvc;
+  Real pbvc;
+  Real vnewc;
+  Real pHalfStep;
+  Real sound_speed;
+  ////////////////////////////////////////////////
+  //Integer matElemlist;   // material indexset
+  Integer elemBC;          // symmetry/free-surface flags for each elem face
+};
+
+global{
+  Real δt_courant;         // Courant time constraint
+  Real δt_hydro;           // Hydro time constraint
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Partie d'initialisation ]-oo,-0[
+///////////////////////////////////////////////////////////////////////////////
+
+
+// ****************************************************************************
+// * ini
+// ****************************************************************************
+void ini(void) @ -10.0{
+  δt=0.0;
+  δt_hydro=option_δt_hydro;
+  δt_courant=option_δt_courant;
+  if (option_eosvmax==0.) fatal("ini", "option_eosvmax==0.");
+  if (option_eosvmin==0.) fatal("ini", "option_eosvmin==0.");
+}
+
+
+// ****************************************************************************
+// * Set up boundary condition information
+// * Set up elemement connectivity information
+// ****************************************************************************
+cells void iniCellBC(void) out (cell elemBC) @ -9.5{
+  Real maxBoundaryX = option_tick*option_sizeX;
+  Real maxBoundaryY = option_tick*option_sizeY;
+  Real maxBoundaryZ = option_tick*option_sizeZ;
+  //debug()<<"maxBoundaryX="<<maxBoundaryX;
+  //debug()<<"maxBoundaryY="<<maxBoundaryY;
+  //debug()<<"maxBoundaryZ="<<maxBoundaryZ;
+  elemBC=0; // clear BCs by default
+  foreach node{
+    //debug()<<"#"<<lid<<" coord="<<coord;
+    // faces on "external" boundaries will be symmetry plane or free surface BCs 
+    if (coord.x==0.0) {elemBC |= XI_M_SYMM;}// debug()<<"XI_M_SYMM";}
+    if (coord.y==0.0) {elemBC |= ETA_M_SYMM;}// debug()<<"ETA_M_SYMM";}
+    if (coord.z==0.0) {elemBC |= ZETA_M_SYMM;}// debug()<<"ZETA_M_SYMM";}
+    if (coord.x==maxBoundaryX) {elemBC |= XI_P_FREE;}// debug()<<"XI_P_FREE";}
+    if (coord.y==maxBoundaryY) {elemBC |= ETA_P_FREE;}// debug()<<"ETA_P_FREE";}
+    if (coord.z==maxBoundaryZ) {elemBC |= ZETA_P_FREE;}// debug()<<"ZETA_P_FREE";}
+  }
+}
+
+
+// ****************************************************************************
+// * fetchCoordsToLocal
+// ****************************************************************************
+cells void fetchCoordsToLocal(void) out (cell Χ) @ -9.0 {
+  foreach node Χ = coord; // Recopie des coordonnées locales
+}
+
+// @ -8.0 calcElemVolume
+// initial volume calculations
+cells void iniVolume(void) in (cell calc_volume) out (cell e, cell volo, cell elemMass, node nMass) @ -7.0{
+  Real volume=calc_volume;
+  //debug()<<"[iniVolume] volume="<<volume;
+  volo=elemMass=volume;
+  //debug()<< "[iniVolume] volo #"<<lid<<"="<<volo;
+  foreach node nMass += volo / 8.0;
+}
+
+// ****************************************************************************
+// * depositEnergy
+// ****************************************************************************
+cells void iniCellStateAndDepositEnergy(void) out (cell e, cell v) @ -2{
+  v=1.0;
+  e=0.0;
+  if (uid==0) e=option_initial_energy;
+}
+
+
+// ****************************************************************************
+// * set up elemement connectivity information
+// ****************************************************************************
+//cells void setUpElemementConnectivityInformation(void){}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Partie de calcul ]+0,+oo[ = timestep to solution
+//    initialize nodal coordinates
+//    embed hexehedral elements in nodal point lattice
+//    Create a material IndexSet (entire domain same material for now)
+//    initialize field data
+//    volume calculations
+//    set up symmetry nodesets
+//    set up elemement connectivity information
+//    set up boundary condition information
+//    faces on "external" boundaries will be symmetry plane or free surface BCs
+//    timestep to solution
+///////////////////////////////////////////////////////////////////////////////
+
+
+// ****************************************************************************
+// * timeIncrement
+// * The routine CalcTimeIncrement() computes the time increment δtn for the
+// * current timestep loop iteration. We aim for a "target" value of t_final-tn
+// * for δtn . However, the actual time increment is allowed to grow by a
+// * certain prescribed amount from the value used in the previous step and is
+// * subject to the constraints δt_Courant and δt_hydro described in Section 1.5.3.
+// ****************************************************************************
+void timeIncrement(void) @ 0.1 {
+  Real target_δt;
+  target_δt = option_stoptime - time;
+  if (GlobalIteration==1) δt=option_δt_initial;
+  if ((option_dtfixed <= 0.0) && (GlobalIteration != 1)){
+    Real ratio ;
+    Real old_δt = δt ;
+     Real new_δt = 1.0e+20;
+    if (δt_courant < new_δt) new_δt = δt_courant/2.0;
+    if (δt_hydro < new_δt) new_δt = δt_hydro*2.0/3.0;
+    ratio = new_δt / old_δt ;
+    if (ratio >= 1.0) {
+      if (ratio < option_δt_mult_lower_b) {
+        new_δt = old_δt ;
+      } else if (ratio > option_δt_mult_upper_b){
+        new_δt = old_δt*option_δt_mult_upper_b;
+      }
+    }
+    if (new_δt > option_dtmax) new_δt = option_dtmax ;
+    δt = new_δt;
+  }
+  // Try to prevent very small scaling on the next cycle
+  if ((target_δt>δt) && (target_δt<(4.0*δt/3.0)))
+    target_δt = 2.0 * δt / 3.0;
+  if (target_δt < δt) δt = target_δt ;
+  δt=mpi_reduce(ReduceMin, δt);
+  // Cuda δt=option_δt_initial;
+  //debug()<< "\33[7m[timeIncrement] δt="<<δt<<"\33[m";
+  if (δt == 0.) exit;
+}
+
+
+// ****************************************************************************
+// * lagrangeLeapFrog
+// * The routine LagrangeLeapFrog() advances the solution from tn to tn+1
+// * over the time increment tn.
+// * The process of advancing the solution is comprised of two major parts.
+// * The first advances nodal variables on the mesh.
+// * The second advances element variables on the mesh.
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * Sum contributions to total stress tensor
+// * pull in the stresses appropriate to the hydro integration
+// * Initialize stress terms for each element. Recall that our assumption of
+// * an inviscid isotropic stress tensor implies that the three principal
+// * stress components are equal, and the shear stresses are zero.
+// * Thus, we initialize the diagonal terms of the stress tensor to
+// * -(p + q) in each element.
+// ****************************************************************************
+cells void initStressTermsForElems(void) in (cell p, cell q) out (cell sig) @ 0.1 {
+  sig.x = sig.y = sig.z = -p-q;
+}
+
+
+nodes void calcForceForNodesIni(void) out (node nForce) @ 0.2 {
+  nForce=0.0;
+}
+
+// ****************************************************************************
+// * collectDomainNodesToElemNodes
+// ****************************************************************************
+cells void collectDomainNodesToElemNodes(void) out (cell Χ) @ 0.3{
+  foreach node Χ = coord; // Recopie des coordonnées locales
+}
+
+
+// ****************************************************************************
+// * IntegrateStressForElems @ [1,2]
+// ****************************************************************************
+
+// ****************************************************************************
+// * IntegrateStressForElems (1/3)
+// * Volume calculation involves extra work for numerical consistency.
+// ****************************************************************************
+Real calcElemShapeFunctionDerivatives(Real3 *_Χ, Real3 *_B){
+  Real rtn;
+  Real3 fjxi,fjet,fjze;
+  Real3 cjxi,cjet,cjze;
+  const double oneEighth = 1.0/8.0;
+  fjxi = oneEighth * ((_Χ[6]-_Χ[0])+(_Χ[5]-_Χ[3])-(_Χ[7]-_Χ[1])-(_Χ[4]-_Χ[2]));
+  fjet = oneEighth * ((_Χ[6]-_Χ[0])-(_Χ[5]-_Χ[3])+(_Χ[7]-_Χ[1])-(_Χ[4]-_Χ[2]));
+  fjze = oneEighth * ((_Χ[6]-_Χ[0])+(_Χ[5]-_Χ[3])+(_Χ[7]-_Χ[1])+(_Χ[4]-_Χ[2]));
+  // compute cofactors
+  cjxi =   cross(fjet,fjze);
+  cjet = - cross(fjxi,fjze);
+  cjze =   cross(fjxi,fjet);
+  // calculate partials: this need only be done for 0,1,2,3
+  // since, by symmetry, (6,7,4,5) = - (0,1,2,3)
+  _B[0] = - cjxi - cjet - cjze;
+  _B[1] =   cjxi - cjet - cjze;
+  _B[2] =   cjxi + cjet - cjze;
+  _B[3] = - cjxi + cjet - cjze;
+  _B[4] = -_B[2];
+  _B[5] = -_B[3];
+  _B[6] = -_B[0];
+  _B[7] = -_B[1];
+  // calculate jacobian determinant (volume)
+  rtn = 8.0 * dot(fjet,cjet);
+  //debug()<<"[calcElemShapeFunctionDerivatives] rtn="<<rtn;
+  return rtn;
+}
+cells void calcElemShapeFunctionDerivativesForDeterm(void)
+  in (cell Χ) out (cell determ, cell B) @ 1.0 {
+  determ=calcElemShapeFunctionDerivatives(&Χ,&B);
+}
+
+// ****************************************************************************
+// * integrateStressForElems (2/3): calcElemNodeNormals
+// ****************************************************************************
+inline Real3 sumElemFaceNormal(int ia,int ib,int ic,int id, Real3 *_Χ){
+  Real3 _area;
+  Real3 bisect0 = 0.5*(_Χ[id]+_Χ[ic]-_Χ[ib]-_Χ[ia]);
+  Real3 bisect1 = 0.5*(_Χ[ic]+_Χ[ib]-_Χ[id]-_Χ[ia]);
+  _area = 0.25*cross(bisect0, bisect1);
+  //debug()<<"[sumElemFaceNormal] area="<<_area;
+  return _area;  
+}
+cells void calcElemNodeNormals(void) in (cell Χ) out (cell B) @ 1.2{
+  Real3 fNormals;
+  foreach node B=0.0;
+  fNormals = sumElemFaceNormal(0,1,2,3,&Χ);
+  B[0] += fNormals;
+  B[1] += fNormals;
+  B[2] += fNormals;
+  B[3] += fNormals;
+  fNormals= sumElemFaceNormal(0,4,5,1,&Χ);
+  B[0] += fNormals;
+  B[4] += fNormals;
+  B[5] += fNormals;
+  B[1] += fNormals;
+  fNormals=sumElemFaceNormal(1,5,6,2,&Χ);
+  B[1] += fNormals;
+  B[5] += fNormals;
+  B[6] += fNormals;
+  B[2] += fNormals;
+  fNormals=sumElemFaceNormal(2,6,7,3,&Χ);
+  B[2] += fNormals;
+  B[6] += fNormals;
+  B[7] += fNormals;
+  B[3] += fNormals;
+  fNormals=sumElemFaceNormal(3,7,4,0,&Χ);
+  B[3] += fNormals;
+  B[7] += fNormals;
+  B[4] += fNormals;
+  B[0] += fNormals;
+  fNormals=sumElemFaceNormal(4,7,6,5,&Χ);
+  B[4] += fNormals;
+  B[7] += fNormals;
+  B[6] += fNormals;
+  B[5] += fNormals;
+}
+
+// ****************************************************************************
+// * integrateStressForElems (3/3): sumElemStressesToNodeForces
+// ****************************************************************************
+cells void sumElemStressesToNodeForces(void)
+  in (cell sig, cell B) out (node nForce)  @ 1.3{
+  foreach node nForce += -sig*B;
+  //foreach node debug()<< "SumElemStressesToNodeForces " << nForce;
+}
+
+
+
+
+// ****************************************************************************
+// * calcElemVolumeDerivative
+// ****************************************************************************
+inline Real3 voluDer(Real3 Χ0, Real3 Χ1, Real3 Χ2, Real3 Χ3, Real3 Χ4, Real3 Χ5){
+  register Real3 v01 = Χ0+Χ1;
+  register Real3 v12 = Χ1+Χ2;
+  register Real3 v25 = Χ2+Χ5;
+  register Real3 v04 = Χ0+Χ4;
+  register Real3 v34 = Χ3+Χ4;
+  register Real3 v35 = Χ3+Χ5;
+  return 1.0/12.0 * (cross(v12,v01) + cross(v04,v34) - cross(v25,v35));
+}
+cells void calcElemVolumeDerivative(void) in (cell Χ) out (cell dvd) @ 2.1{
+  dvd[0] = voluDer(Χ[1], Χ[2], Χ[3], Χ[4], Χ[5], Χ[7]);
+  dvd[3] = voluDer(Χ[0], Χ[1], Χ[2], Χ[7], Χ[4], Χ[6]);
+  dvd[2] = voluDer(Χ[3], Χ[0], Χ[1], Χ[6], Χ[7], Χ[5]);
+  dvd[1] = voluDer(Χ[2], Χ[3], Χ[0], Χ[5], Χ[6], Χ[4]);
+  dvd[4] = voluDer(Χ[7], Χ[6], Χ[5], Χ[0], Χ[3], Χ[1]);
+  dvd[5] = voluDer(Χ[4], Χ[7], Χ[6], Χ[1], Χ[0], Χ[2]);
+  dvd[6] = voluDer(Χ[5], Χ[4], Χ[7], Χ[2], Χ[1], Χ[3]);
+  dvd[7] = voluDer(Χ[6], Χ[5], Χ[4], Χ[3], Χ[2], Χ[0]);
+}
+
+
+// ****************************************************************************
+// * calcElemFBHourglassForce
+// ****************************************************************************
+inline void calcElemFBHourglassForce(Real3 *xd,
+                                     Real *hourgam0,
+                                     Real *hourgam1,
+                                     Real *hourgam2,
+                                     Real *hourgam3,
+                                     Real *hourgam4,
+                                     Real *hourgam5,
+                                     Real *hourgam6,
+                                     Real *hourgam7,
+                                     Real coefficient,
+                                     Real3 *_hgf){
+  Real3 h00 =
+    hourgam0[0]*xd[0] + hourgam1[0]*xd[1] + hourgam2[0]*xd[2] + hourgam3[0]*xd[3]  + 
+    hourgam4[0]*xd[4] + hourgam5[0]*xd[5] + hourgam6[0]*xd[6] + hourgam7[0]*xd[7];
+  Real3 h01 =
+    hourgam0[1]*xd[0] + hourgam1[1]*xd[1] + hourgam2[1]*xd[2] + hourgam3[1]*xd[3]  + 
+    hourgam4[1]*xd[4] + hourgam5[1]*xd[5] + hourgam6[1]*xd[6] + hourgam7[1]*xd[7];
+  Real3 h02 =
+    hourgam0[2]*xd[0] + hourgam1[2]*xd[1] + hourgam2[2]*xd[2] + hourgam3[2]*xd[3] + 
+    hourgam4[2]*xd[4] + hourgam5[2]*xd[5] + hourgam6[2]*xd[6] + hourgam7[2]*xd[7];
+  Real3 h03 =
+    hourgam0[3]*xd[0] + hourgam1[3]*xd[1] + hourgam2[3]*xd[2] + hourgam3[3]*xd[3]  + 
+    hourgam4[3]*xd[4] + hourgam5[3]*xd[5] + hourgam6[3]*xd[6] + hourgam7[3]*xd[7];
+   
+  _hgf[0] = coefficient*(hourgam0[0]*h00 + hourgam0[1]*h01 + hourgam0[2]*h02 + hourgam0[3]*h03);
+  _hgf[1] = coefficient*(hourgam1[0]*h00 + hourgam1[1]*h01 + hourgam1[2]*h02 + hourgam1[3]*h03);
+  _hgf[2] = coefficient*(hourgam2[0]*h00 + hourgam2[1]*h01 + hourgam2[2]*h02 + hourgam2[3]*h03);
+  _hgf[3] = coefficient*(hourgam3[0]*h00 + hourgam3[1]*h01 + hourgam3[2]*h02 + hourgam3[3]*h03);
+  _hgf[4] = coefficient*(hourgam4[0]*h00 + hourgam4[1]*h01 + hourgam4[2]*h02 + hourgam4[3]*h03);
+  _hgf[5] = coefficient*(hourgam5[0]*h00 + hourgam5[1]*h01 + hourgam5[2]*h02 + hourgam5[3]*h03);
+  _hgf[6] = coefficient*(hourgam6[0]*h00 + hourgam6[1]*h01 + hourgam6[2]*h02 + hourgam6[3]*h03);
+  _hgf[7] = coefficient*(hourgam7[0]*h00 + hourgam7[1]*h01 + hourgam7[2]*h02 + hourgam7[3]*h03);
+}
+
+
+// ****************************************************************************
+// * compute the hourglass modes
+// ****************************************************************************
+void _computeHourglassModes(int i1,
+                            Real _determ,
+                            Real3 *_dvd,
+                            Real gamma[][8],
+                            Real3 *x8n,
+                            Real *hourgam0, Real *hourgam1,
+                            Real *hourgam2, Real *hourgam3,
+                            Real *hourgam4, Real *hourgam5,
+                            Real *hourgam6, Real *hourgam7){
+  Real volinv=1.0/_determ;
+  Real3 hourmod =
+    x8n[0]*gamma[i1][0] + x8n[1]*gamma[i1][1] +
+    x8n[2]*gamma[i1][2] + x8n[3]*gamma[i1][3] +
+    x8n[4]*gamma[i1][4] + x8n[5]*gamma[i1][5] +
+    x8n[6]*gamma[i1][6] + x8n[7]*gamma[i1][7];
+  hourgam0[i1] = gamma[i1][0] - volinv*(dot(_dvd[0], hourmod));
+  hourgam1[i1] = gamma[i1][1] - volinv*(dot(_dvd[1], hourmod));
+  hourgam2[i1] = gamma[i1][2] - volinv*(dot(_dvd[2], hourmod));
+  hourgam3[i1] = gamma[i1][3] - volinv*(dot(_dvd[3], hourmod));
+  hourgam4[i1] = gamma[i1][4] - volinv*(dot(_dvd[4], hourmod));
+  hourgam5[i1] = gamma[i1][5] - volinv*(dot(_dvd[5], hourmod));
+  hourgam6[i1] = gamma[i1][6] - volinv*(dot(_dvd[6], hourmod));
+  hourgam7[i1] = gamma[i1][7] - volinv*(dot(_dvd[7], hourmod));
+}
+
+cells void computeHourglassModes(Real gamma[][8],
+                                 Real *hourgam0, Real *hourgam1,
+                                 Real *hourgam2, Real *hourgam3,
+                                 Real *hourgam4, Real *hourgam5,
+                                 Real *hourgam6, Real *hourgam7,
+                                 Real hourg, Real3 *hgf)
+  in (cell determ, cell dvd, cell sound_speed, cell elemMass,
+      node nVelocity, node nForce){
+  Real3 x8n[8];
+  Real3 hourmod;
+  Real coefficient;
+  Real ss1, mass1, volume13;
+  Real3 velocity[8];
+  foreach node x8n[n]=coord;
+  _computeHourglassModes(0, determ, &dvd, gamma, x8n, 
+                         hourgam0, hourgam1, hourgam2, hourgam3,
+                         hourgam4, hourgam5, hourgam6, hourgam7);
+  _computeHourglassModes(1, determ, &dvd, gamma, x8n,
+                         hourgam0, hourgam1, hourgam2, hourgam3,
+                         hourgam4, hourgam5, hourgam6, hourgam7);
+  _computeHourglassModes(2, determ, &dvd, gamma, x8n,
+                         hourgam0, hourgam1, hourgam2, hourgam3,
+                         hourgam4, hourgam5, hourgam6, hourgam7);
+  _computeHourglassModes(3, determ, &dvd, gamma, x8n,
+                         hourgam0, hourgam1, hourgam2, hourgam3,
+                         hourgam4, hourgam5, hourgam6, hourgam7);
+  // compute forces
+  // store forces into h arrays (force arrays)
+  ss1=sound_speed;
+  //debug()<< "computeHourglassModes ss1="<<ss1;
+  mass1=elemMass;
+  volume13=cbrt(determ);
+  //debug()<< "computeHourglassModes volume13="<<volume13;
+  coefficient = - hourg * 0.01 * ss1 * mass1 / volume13;
+  //debug()<< "computeHourglassModes coefficient="<<coefficient;
+  foreach node velocity[n]=nVelocity;
+  calcElemFBHourglassForce(velocity,
+                           hourgam0,hourgam1,hourgam2,hourgam3,
+                           hourgam4,hourgam5,hourgam6,hourgam7,
+                           coefficient, hgf);
+  foreach node nForce += hgf[n];
+  //foreach node debug()<< "computeHourglassModes nForce="<<nForce;  
+}
+
+// ****************************************************************************
+// * calcFBHourglassForceForElems
+// * Calculates the Flanagan-Belytschko anti-hourglass force
+// ****************************************************************************
+void calcFBHourglassForceForElems(void) @ 2.7{//Real hourg){
+  Real3 hgf[8];
+  Real gamma[4][8];
+  Real hourgam0[4], hourgam1[4], hourgam2[4], hourgam3[4] ;
+  Real hourgam4[4], hourgam5[4], hourgam6[4], hourgam7[4];
+  Real hourg=option_hgcoef;
+  
+  if (hourg <= 0.) return;
+  gamma[0][0] =  1.;
+  gamma[0][1] =  1.;
+  gamma[0][2] = -1.;
+  gamma[0][3] = -1.;
+  gamma[0][4] = -1.;
+  gamma[0][5] = -1.;
+  gamma[0][6] =  1.;
+  gamma[0][7] =  1.;
+  gamma[1][0] =  1.;
+  gamma[1][1] = -1.;
+  gamma[1][2] = -1.;
+  gamma[1][3] =  1.;
+  gamma[1][4] = -1.;
+  gamma[1][5] =  1.;
+  gamma[1][6] =  1.;
+  gamma[1][7] = -1.;
+  gamma[2][0] =  1.;
+  gamma[2][1] = -1.;
+  gamma[2][2] =  1.;
+  gamma[2][3] = -1.;
+  gamma[2][4] =  1.;
+  gamma[2][5] = -1.;
+  gamma[2][6] =  1.;
+  gamma[2][7] = -1.;
+  gamma[3][0] = -1.;
+  gamma[3][1] =  1.;
+  gamma[3][2] = -1.;
+  gamma[3][3] =  1.;
+  gamma[3][4] =  1.;
+  gamma[3][5] = -1.;
+  gamma[3][6] =  1.;
+  gamma[3][7] = -1.;
+  //compute the hourglass modes
+  computeHourglassModes(gamma,
+                        hourgam0, hourgam1, hourgam2, hourgam3,
+                        hourgam4, hourgam5, hourgam6, hourgam7,
+                        hourg, &hgf[0]);
+
+}
+
+
+// ****************************************************************************
+// * calcHourglassControlForElems @ [2,3]
+// ****************************************************************************
+cells void calcHourglassControlForElemsLoad(void)
+  in (cell volo, cell v) out (cell determ)@ 2.2{
+  // load into temporary storage for FB Hour Glass control
+   //debug()<<"volo="<<volo<<", volume="<<v;
+   determ = volo * v;
+   //debug()<<"determ="<<determ;
+}
+
+cells void calcHourglassControlForElemsCheck(void) out (cell determ) @ 2.4{
+  // Do a check for negative volumes
+  if (determ <= 0.0)
+    fatal ("[calcHourglassControlForElemsCheck]","negative volumes");
+}
+
+/*void calcHourglassControlForElems(void){//Real hgcoef){
+  //if (hgcoef > 0.)
+  calcFBHourglassForceForElems();//hgcoef);
+  }*/
+
+
+// ****************************************************************************
+// * The routine CalcVolumeForceForElems() calculates the volume force
+// * contribution for each mesh element.
+// * The main steps in this process are:
+// *    1. Initialize stress terms for each element
+// *    2. Integrate the volumetric stress contributions for each element
+// *    3. Perform a diagnostic check
+// *    4. Calculate the hourglass control contribution for each element.
+// ****************************************************************************
+//calcVolumeForceForElems launches calcFBHourglassForceForElems
+/*void calcVolumeForceForElems(void) {
+  //Real  hgcoef = option_hgcoef;
+  calcHourglassControlForElems();
+  }*/
+
+
+// ****************************************************************************
+// * The routine CalcForceForNodes() calculates a three-dimensional force
+// * vector F at each mesh node based on the values of mesh variables at time tn.
+// * First, the components of F are set to zero at each node.
+// * Then, a volume force contribution is calculated within each mesh element.
+// * The force in each element is used to distribute a force contribution to
+// * each of its surrounding nodes.
+// * The total nodal force is accumulated as all elements in the mesh are traversed.
+// ****************************************************************************
+// calcForceForNodes only launches calcFBHourglassForceForElems@ 2.7
+/*void calcForceForNodes(void) @ 2.7{
+  //calcVolumeForceForElems() ; // which launches job calcFBHourglassForceForElems
+  calcFBHourglassForceForElems();
+  }*/
+
+
+// ****************************************************************************
+// * The routine CalcAccelerationForNodes() calculates a three-dimensional
+// * acceleration vector A at each mesh node from F.
+// * The acceleration is computed using Newton's Second Law of Motion,
+// * F = m0 A, where m0 is the mass at the node.
+// * Note that since the mass in each element is constant in time for our calculations,
+// * the mass at each node is also constant in time.
+// * The nodal mass values are set during the problem set up.
+// ****************************************************************************
+nodes void calcAccelerationForNodes(void)
+  in (node nForce, node nMass) out (node nAcceleration) @ 2.8{
+  nAcceleration = nForce / nMass;
+  //debug()<<"calcAccelerationForNodes "<<nAcceleration;
+}
+
+
+// ****************************************************************************
+// * The routine ApplyAccelerationBoundaryConditions() applies symmetry boundary
+// * conditions at nodes on the boundaries of the mesh where these were specified
+// * during problem set up. A symmetry boundary condition sets the normal
+// * component of A at the boundary to zero.
+// * This implies that the normal component of the velocity vector U will
+// * remain constant in time.
+// ****************************************************************************
+outer nodes void applyAccelerationBoundaryConditionsForNodes(void)
+  out (node nAcceleration) @ 2.9 {
+  //Real maxBoundaryX = option_tick*option_sizeX;
+  //Real maxBoundaryY = option_tick*option_sizeY;
+  //Real maxBoundaryZ = option_tick*option_sizeZ;
+  // MIN boundaries
+  if (coord.x==0.0) {nAcceleration.x=0.0;}
+  if (coord.y==0.0) {nAcceleration.y=0.0;}
+  if (coord.z==0.0) {nAcceleration.z=0.0;}
+  // MAX boundaries
+  //if (coord.x==maxBoundaryX) {nAcceleration.x=0.0;}
+  //if (coord.y==maxBoundaryY) {nAcceleration.y=0.0;}
+  //if (coord.z==maxBoundaryZ) {nAcceleration.z=0.0;}
+}
+/*nodes void debugAccelerationBoundaryConditionsForNodes(void) @ 2.91{
+  //debug()<<"debugAccelerationBoundaryConditionsForNodes "<<nAcceleration;
+  }*/
+
+
+// ****************************************************************************
+// * The routine CalcVelocityForNodes() integrates the acceleration at each node
+// * to advance the velocity at the node to tn+1.
+// * Note that this routine also applies a cut-off to each velocity vector value.
+// * Specifically, if a value is below some prescribed value, that term is set to zero.
+// * The reason for this cutoff is to prevent spurious mesh motion which may arise
+// * due to floating point roundoff error when the velocity is near zero.
+// ****************************************************************************
+nodes void calcVelocityForNodes(void)
+  in (node nAcceleration) inout (node nVelocity) @ 3.0{
+  Real3 velocity = nVelocity + nAcceleration * δt ;
+  if (norm(velocity) < option_u_cut ) velocity = 0.0;
+  nVelocity = velocity ;
+  //debug()<<"calcVelocityForNodes "<<nVelocity;
+}
+void eieio301(void) @ 3.01{
+  synchronize(nVelocity);
+}
+
+
+// ****************************************************************************
+// * The routine CalcPositionForNodes() performs the last step in the nodal
+// * advance portion of the algorithm by integrating the velocity at each node
+// * to advance the position of the node to tn+1.
+// ****************************************************************************
+nodes void calcPositionForNodes(void) in (node nVelocity) @ 3.1{
+  coord += δt * nVelocity;
+}
+/*nodes void debugPositionForNodes(void) in (node nVelocity) @ 3.11{
+  //debug()<< "debugPositionForNodes #"<<uid<<":"<<coord ;
+  }*/
+cells void cachePositionForNodes(void) out (cell Χ) @ 3.2{
+  foreach node Χ = coord; // Recopie des coordonnées locales
+}
+
+
+// ****************************************************************************
+// * lagrangeNodal
+// * calculate nodal forces, accelerations, velocities, positions, with
+// * applied boundary conditions and slide surface considerations
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * calcElemVolume
+// ****************************************************************************
+inline Real _calcElemVolume(const Real x0, const Real x1,
+                            const Real x2, const Real x3,
+                            const Real x4, const Real x5,
+                            const Real x6, const Real x7,
+                            const Real y0, const Real y1,
+                            const Real y2, const Real y3,
+                            const Real y4, const Real y5,
+                            const Real y6, const Real y7,
+                            const Real z0, const Real z1,
+                            const Real z2, const Real z3,
+                            const Real z4, const Real z5,
+                            const Real z6, const Real z7){
+  Real twelveth = 1.0/12.0;
+  Real dx61 = x6-x1;
+  Real dy61 = y6-y1;
+  Real dz61 = z6-z1;
+  Real dx70 = x7-x0;
+  Real dy70 = y7-y0;
+  Real dz70 = z7-z0;
+  Real dx63 = x6-x3;
+  Real dy63 = y6-y3;
+  Real dz63 = z6-z3;
+  Real dx20 = x2-x0;
+  Real dy20 = y2-y0;
+  Real dz20 = z2-z0;
+  Real dx50 = x5-x0;
+  Real dy50 = y5-y0;
+  Real dz50 = z5-z0;
+  Real dx64 = x6-x4;
+  Real dy64 = y6-y4;
+  Real dz64 = z6-z4;
+  Real dx31 = x3-x1;
+  Real dy31 = y3-y1;
+  Real dz31 = z3-z1;
+  Real dx72 = x7-x2;
+  Real dy72 = y7-y2;
+  Real dz72 = z7-z2;
+  Real dx43 = x4-x3;
+  Real dy43 = y4-y3;
+  Real dz43 = z4-z3;
+  Real dx57 = x5-x7;
+  Real dy57 = y5-y7;
+  Real dz57 = z5-z7;
+  Real dx14 = x1-x4;
+  Real dy14 = y1-y4;
+  Real dz14 = z1-z4;
+  Real dx25 = x2-x5;
+  Real dy25 = y2-y5;
+  Real dz25 = z2-z5;
+  Real tp1 = tripleProduct((dx31+dx72), dx63, dx20,
+                           (dy31+dy72), dy63, dy20,
+                           (dz31+dz72), dz63, dz20);
+  Real tp2 = tripleProduct((dx43+dx57), dx64, dx70,
+                           (dy43+dy57), dy64, dy70,
+                           (dz43+dz57), dz64, dz70);
+  Real tp3 = tripleProduct((dx14+dx25), dx61, dx50,
+                           (dy14+dy25), dy61, dy50,
+                           (dz14+dz25), dz61, dz50);
+  Real _volume =tp1+tp2+tp3;
+  _volume *= twelveth;
+  return _volume ;
+}
+
+
+// ****************************************************************************
+// * calcElemVolume
+// ****************************************************************************
+cells void calcElemVolume(void) in (cell Χ) out (cell calc_volume) @ -8.0,4.0{
+  calc_volume = _calcElemVolume(Χ[0].x, Χ[1].x, Χ[2].x, Χ[3].x, Χ[4].x, Χ[5].x, Χ[6].x, Χ[7].x,
+                                Χ[0].y, Χ[1].y, Χ[2].y, Χ[3].y, Χ[4].y, Χ[5].y, Χ[6].y, Χ[7].y,
+                                Χ[0].z, Χ[1].z, Χ[2].z, Χ[3].z, Χ[4].z, Χ[5].z, Χ[6].z, Χ[7].z);
+}
+
+
+// ****************************************************************************
+// * AreaFace
+// ****************************************************************************
+inline Real AreaFace( const Real x0, const Real x1,
+                      const Real x2, const Real x3,
+                      const Real y0, const Real y1,
+                      const Real y2, const Real y3,
+                      const Real z0, const Real z1,
+                      const Real z2, const Real z3){
+  Real fx = (x2 - x0) - (x3 - x1);
+  Real fy = (y2 - y0) - (y3 - y1);
+  Real fz = (z2 - z0) - (z3 - z1);
+  Real gx = (x2 - x0) + (x3 - x1);
+  Real gy = (y2 - y0) + (y3 - y1);
+  Real gz = (z2 - z0) + (z3 - z1);
+  Real area =
+    (fx * fx + fy * fy + fz * fz) *
+    (gx * gx + gy * gy + gz * gz) -
+    (fx * gx + fy * gy + fz * gz) *
+    (fx * gx + fy * gy + fz * gz);
+  return area ;
+}
+
+
+// ****************************************************************************
+// * calcElemCharacteristicLength
+// ****************************************************************************
+inline Real calcElemCharacteristicLength( const Real x[8],
+                                          const Real y[8],
+                                          const Real z[8],
+                                          const Real _volume){
+  Real a, charLength = 0.0;
+  a = AreaFace(x[0],x[1],x[2],x[3],
+               y[0],y[1],y[2],y[3],
+               z[0],z[1],z[2],z[3]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[4],x[5],x[6],x[7],
+               y[4],y[5],y[6],y[7],
+               z[4],z[5],z[6],z[7]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[0],x[1],x[5],x[4],
+               y[0],y[1],y[5],y[4],
+               z[0],z[1],z[5],z[4]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[1],x[2],x[6],x[5],
+               y[1],y[2],y[6],y[5],
+               z[1],z[2],z[6],z[5]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[2],x[3],x[7],x[6],
+               y[2],y[3],y[7],y[6],
+               z[2],z[3],z[7],z[6]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[3],x[0],x[4],x[7],
+               y[3],y[0],y[4],y[7],
+               z[3],z[0],z[4],z[7]) ;
+  charLength = max(a,charLength) ;
+  charLength = 4.0 * _volume / sqrt(charLength);
+  return charLength;
+}
+
+
+// ****************************************************************************
+// * The routine CalcKinematicsForElems() calculates terms in the total strain
+// * rate tensor tot that are used to compute the terms in the deviatoric strain
+// * rate tensor.
+// * These calculations are done for each element in a loop over elements as follows:
+// *    1. Gather node coordinates for element into local arrays
+// *    2. Calculate volume from element coordinates
+// *    3. Calculate the characteristic length lchar for the element.
+// *    4. Gather node velocities for element into local arrays.
+// *    5. Modify nodal positions in local array so that they are at the time
+// *       halfway between tn and tn+1
+// *    6. Call the routine CalcElemShapeFunctionDerivatives() which calculates
+// *       shape function derivatives for the element which are used to compute
+// *       the velocity gradient for the element.
+// *    7. Calculate element velocity gradient which defines the terms of tot.
+// *       The diagonal entries of tot are then used to initialize the diagonal
+// *       entries of the strain rate tensor.
+// ****************************************************************************
+// @ 4.0 volume = CalcElemVolume(x_local, y_local, z_local );
+cells void calcKinematicsForElems(void)
+  in (node nVelocity,
+      cell v, cell Χ, cell volo,
+      cell calc_volume) out(cell delv,cell arealg, cell vnew) @ 4.2{
+  Real x_local[8] ;
+  Real y_local[8] ;
+  Real z_local[8] ;
+  Real volume=calc_volume;
+  Real relativeVolume = volume/volo;
+  //debug()<<"calcKinematicsForElems volume="<<volume<<", v="<<v<<", volo="<<volo;
+  vnew = relativeVolume ;
+  delv = relativeVolume - v;
+  //debug()<<"calcKinematicsForElems vnew="<<vnew;
+  //debug()<<"calcKinematicsForElems delv="<<delv;
+  // set characteristic length
+  foreach node{
+    x_local[n]=Χ.x;
+    y_local[n]=Χ.y;
+    z_local[n]=Χ.z;
+  }
+  arealg = calcElemCharacteristicLength(x_local, y_local, z_local, volume);
+  //debug()<<"calcKinematicsForElems arealg="<<arealg;
+}
+
+
+// ****************************************************************************
+// * calcElemVelocityGrandient 1/2
+// ****************************************************************************
+cells void calcElemVelocityGrandient1out2(void)
+  in (node nVelocity, cell B)
+  out(cell Χvel, cell DetJ) @ 4.4 {
+  Real dt2= 0.5*δt;
+  Real3 d_local[8];
+  // get nodal velocities from global array and copy into local arrays.
+  foreach node Χvel = coord;
+  foreach node d_local[n] = nVelocity;
+  foreach node Χvel -= dt2 * d_local[n];
+  DetJ=calcElemShapeFunctionDerivatives(&Χvel,&B);
+  //debug()<<"DetJ="<<DetJ;
+}
+
+
+// ****************************************************************************
+// * calcElemVelocityGrandient 2/2
+// ****************************************************************************
+cells void calcElemVelocityGrandient2out2(void)
+  in(cell DetJ, node nVelocity, cell B)
+  out(cell ε, cell D)@ 4.42 {
+  Real inv_detJ = 1.0 / DetJ;
+  Real pfx[8], pfy[8], pfz[8];
+  Real xvel[8], yvel[8], zvel[8];
+  Real dyddx, dxddy, dzddx, dxddz, dzddy, dyddz;
+  foreach node{
+    xvel[n] = nVelocity.x;
+    yvel[n] = nVelocity.y;
+    zvel[n] = nVelocity.z;
+  }
+  foreach node{
+    pfx[n] = B.x;
+    pfy[n] = B.y;
+    pfz[n] = B.z;
+  }
+  foreach node {
+    xvel[n] = nVelocity.x;
+    yvel[n] = nVelocity.y;
+    zvel[n] = nVelocity.z;
+  }
+  // CalcElemVelocityGrandient
+  ε.x = D[0] = inv_detJ * ( pfx[0] * (xvel[0]-xvel[6])
+                            + pfx[1] * (xvel[1]-xvel[7])
+                            + pfx[2] * (xvel[2]-xvel[4])
+                            + pfx[3] * (xvel[3]-xvel[5]) );
+  ε.y = D[1] = inv_detJ * ( pfy[0] * (yvel[0]-yvel[6])
+                            + pfy[1] * (yvel[1]-yvel[7])
+                            + pfy[2] * (yvel[2]-yvel[4])
+                            + pfy[3] * (yvel[3]-yvel[5]) );
+  ε.z = D[2] = inv_detJ * ( pfz[0] * (zvel[0]-zvel[6])
+                            + pfz[1] * (zvel[1]-zvel[7])
+                            + pfz[2] * (zvel[2]-zvel[4])
+                            + pfz[3] * (zvel[3]-zvel[5]) );
+  dyddx  = inv_detJ * ( pfx[0] * (yvel[0]-yvel[6])
+                      + pfx[1] * (yvel[1]-yvel[7])
+                      + pfx[2] * (yvel[2]-yvel[4])
+                      + pfx[3] * (yvel[3]-yvel[5]) );
+  dxddy  = inv_detJ * ( pfy[0] * (xvel[0]-xvel[6])
+                      + pfy[1] * (xvel[1]-xvel[7])
+                      + pfy[2] * (xvel[2]-xvel[4])
+                      + pfy[3] * (xvel[3]-xvel[5]) );
+  dzddx  = inv_detJ * ( pfx[0] * (zvel[0]-zvel[6])
+                      + pfx[1] * (zvel[1]-zvel[7])
+                      + pfx[2] * (zvel[2]-zvel[4])
+                      + pfx[3] * (zvel[3]-zvel[5]) );
+  dxddz  = inv_detJ * ( pfz[0] * (xvel[0]-xvel[6])
+                      + pfz[1] * (xvel[1]-xvel[7])
+                      + pfz[2] * (xvel[2]-xvel[4])
+                      + pfz[3] * (xvel[3]-xvel[5]) );
+  dzddy  = inv_detJ * ( pfy[0] * (zvel[0]-zvel[6])
+                      + pfy[1] * (zvel[1]-zvel[7])
+                      + pfy[2] * (zvel[2]-zvel[4])
+                      + pfy[3] * (zvel[3]-zvel[5]) );
+  dyddz  = inv_detJ * ( pfz[0] * (yvel[0]-yvel[6])
+                      + pfz[1] * (yvel[1]-yvel[7])
+                      + pfz[2] * (yvel[2]-yvel[4])
+                      + pfz[3] * (yvel[3]-yvel[5]) );
+  D[5]  = .5 * ( dxddy + dyddx );
+  D[4]  = .5 * ( dxddz + dzddx );
+  D[3]  = .5 * ( dzddy + dyddz );
+}
+
+
+// ****************************************************************************
+// * The routine CalcLagrangeElements() calculates various element quantities
+// * that are based on the new kinematic node quantities U and X.
+// ****************************************************************************
+cells void calcLagrangeElements(void)
+  in (cell vnew)
+  inout (cell ε)
+  out (cell vdov) @ 4.5{
+  // @ 4.2->4.4 CalcKinematicsForElems(numElem, deltatime) ;
+  //calc strain rate and apply as constraint (only done in FB element)
+  vdov = ε.x+ε.y+ε.z;
+  //debug()<<"calcLagrangeElements vdov="<<vdov;
+  // make the rate of deformation tensor deviatoric
+  ε.x -= vdov/3.0;
+  ε.y -= vdov/3.0;
+  ε.z -= vdov/3.0;
+  // See if any volumes are negative, and take appropriate action.
+  if (vnew <= 0.0)
+    fatal("calcLagrangeElements","VolumeError");
+}
+
+
+
+// ****************************************************************************
+// * The routine CalcMonotonicQGradientsForElems() performs the first
+// * computational part of the artificial viscosity term q for each element.
+// * For each element in a loop over elements, this routine does the following:
+// *    1. Gather nodal coordinates for element into local arrays.
+// *    2. Gather nodal velocities for element into local arrays.
+// *    3. Compute various discrete spatial gradients of nodal coordinates
+// *       and velocity gradients with respect to a reference coordinate system
+// ****************************************************************************
+cells void calcMonotonicQGradientsForElems(void)
+  in (node nVelocity, cell volo, cell vnew)
+  out(cell delx_xi, cell delv_xi,
+      cell delx_eta, cell delv_eta,
+      cell delx_zeta, cell delv_zeta)@ 4.6{
+  const Real ptiny = 1.e-36;
+  Real3 a ;
+  Real3 dv;
+  Real3 x[8];  
+  Real3 xv[8];
+  foreach node {
+    x[n] = coord;
+    xv[n] = nVelocity;
+  }
+  {
+    register Real vol = volo*vnew;
+    register Real nrm = 1.0 / ( vol + ptiny ) ;
+    register Real3 dj = (-0.25)*(sum4(x[0],x[1],x[5],x[4]) - sum4(x[3],x[2],x[6],x[7])) ;
+    register Real3 di = ( 0.25)*(sum4(x[1],x[2],x[6],x[5]) - sum4(x[0],x[3],x[7],x[4])) ;
+    register Real3 dk = ( 0.25)*(sum4(x[4],x[5],x[6],x[7]) - sum4(x[0],x[1],x[2],x[3])) ;
+    /* find delvk and delxk ( i cross j ) */
+    a=cross(di,dj);
+    delx_zeta = vol / sqrt(dot(a,a) + ptiny) ;
+    a *= nrm ;
+    dv = (0.25)*(sum4(xv[4],xv[5],xv[6],xv[7]) - sum4(xv[0],xv[1],xv[2],xv[3])) ;
+    delv_zeta = dot(a,dv);
+    //debug()<<"calcMonotonicQGradientsForElems delv_z="<<delv_zeta;
+    /* find delxi and delvi ( j cross k ) */
+    a=cross(dj,dk);
+    delx_xi = vol / sqrt(dot(a,a) + ptiny) ;
+    a *= nrm ;
+    dv = (0.25)*(sum4(xv[1],xv[2],xv[6],xv[5]) - sum4(xv[0],xv[3],xv[7],xv[4])) ;
+    delv_xi = dot(a,dv);
+    //debug()<<"calcMonotonicQGradientsForElems delv_x="<<delv_xi;
+   /* find delxj and delvj ( k cross i ) */
+    a=cross(dk,di);
+    delx_eta = vol / sqrt(dot(a,a) + ptiny) ;
+    a *= nrm ;
+    dv = (-0.25)*(sum4(xv[0],xv[1],xv[5],xv[4]) - sum4(xv[3],xv[2],xv[6],xv[7])) ;
+    delv_eta = dot(a,dv);
+    //debug()<<"calcMonotonicQGradientsForElems delv_e="<<delv_eta;
+   }
+}
+
+
+// ****************************************************************************
+// * The routine CalcMonotonicQForElems() (==CalcMonotonicQRegionForElems)
+// * performs the second part of the q calculation.
+// * This routine calls CalcMonotonicQRegionForElems() which uses the spatial
+// * gradient information computed earlier to compute linear and quadratic
+// * terms for q, qlin and qquad, respectively.
+// * The actual element values of q are calculated during the application of
+// * material properties in each element.
+// ****************************************************************************
+cells void calcMonotonicQForElemsByDirectionX(xyz direction)
+  in (cell elemBC, cell delv_xi, cell phixi){
+  Real monoq_limiter_mult = option_monoq_limiter_mult;
+  Real monoq_max_slope = option_monoq_max_slope;
+  Real ptiny = 1.e-36;
+  Integer bcSwitch;
+  Real delvm=0.;
+  Real delvp=0.;
+  Real nrm;
+  nrm = 1./(delv_xi+ptiny);
+  bcSwitch = elemBC & XI_M;
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_xi[prevCell];
+  if (bcSwitch == XI_M_SYMM) delvm = delv_xi;
+  if (bcSwitch == XI_M_FREE) delvm = 0.0;
+  bcSwitch = elemBC & XI_P;
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_xi[nextCell];//lxip
+  if (bcSwitch == XI_P_SYMM) delvp = delv_xi;
+  if (bcSwitch == XI_P_FREE) delvp = 0.0;
+  //debug()<<"CalcMonotonicQRegionForElems "<< delvm<<", "<<delvp;
+  delvm = delvm * nrm ;
+  delvp = delvp * nrm ;
+  phixi = .5 * (delvm + delvp) ;
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  if (delvm < phixi) phixi = delvm ;
+  if (delvp < phixi) phixi = delvp ;
+  if (phixi < 0.) phixi = 0.0 ;
+  if (phixi > monoq_max_slope) phixi = monoq_max_slope;
+}
+
+cells void calcMonotonicQForElemsByDirectionY(xyz direction)
+  in (cell elemBC, cell delv_eta, cell phieta){
+  Real monoq_limiter_mult = option_monoq_limiter_mult;
+  Real monoq_max_slope = option_monoq_max_slope;
+  Real ptiny = 1.e-36;
+  Integer bcSwitch;
+  Real delvm=0.;
+  Real delvp=0.;
+  Real nrm;
+  nrm = 1./(delv_eta+ptiny);
+  bcSwitch = elemBC & ETA_M;
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_eta[prevCell];//letam
+  if (bcSwitch == ETA_M_SYMM) delvm = delv_eta;
+  if (bcSwitch == ETA_M_FREE) delvm = 0.0;
+  bcSwitch = elemBC & ETA_P;
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_eta[nextCell];//letap
+  if (bcSwitch == ETA_P_SYMM) delvp = delv_eta;
+  if (bcSwitch == ETA_P_FREE) delvp = 0.0;
+  delvm = delvm * nrm ;
+  delvp = delvp * nrm ;
+  phieta = .5 * ( delvm + delvp ) ;
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  if ( delvm  < phieta ) phieta = delvm ;
+  if ( delvp  < phieta ) phieta = delvp ;
+  if ( phieta < 0.) phieta = 0. ;
+  if ( phieta > monoq_max_slope)  phieta = monoq_max_slope;
+}
+
+cells void calcMonotonicQForElemsByDirectionZ(xyz direction)
+  in (cell elemBC, cell delv_zeta, cell phizeta){
+  Real monoq_limiter_mult = option_monoq_limiter_mult;
+  Real monoq_max_slope = option_monoq_max_slope;
+  Real ptiny = 1.e-36;
+  Integer bcSwitch;
+  Real delvm=0.;
+  Real delvp=0.;
+  Real nrm;
+  nrm = 1./(delv_zeta+ptiny) ;
+  bcSwitch = elemBC & ZETA_M;
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_zeta[prevCell];//lzetam
+  if (bcSwitch == ZETA_M_SYMM) delvm = delv_zeta;
+  if (bcSwitch == ZETA_M_FREE) delvm = 0.0;
+  bcSwitch = elemBC & ZETA_P;
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_zeta[nextCell];//lzetap
+  if (bcSwitch == ZETA_P_SYMM) delvp = delv_zeta;
+  if (bcSwitch == ZETA_P_FREE) delvp = 0.0;
+  delvm = delvm * nrm ;
+  delvp = delvp * nrm ;
+  phizeta = .5 * ( delvm + delvp ) ;
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  if ( delvm   < phizeta ) phizeta = delvm ;
+  if ( delvp   < phizeta ) phizeta = delvp ;
+  if ( phizeta < 0.) phizeta = 0.;
+  if ( phizeta > monoq_max_slope ) phizeta = monoq_max_slope;
+}
+
+void calcMonotonicQForElems(void) @ 4.7{
+  calcMonotonicQForElemsByDirectionX(MD_DirX);
+  calcMonotonicQForElemsByDirectionY(MD_DirY);
+  calcMonotonicQForElemsByDirectionZ(MD_DirZ);
+}
+
+
+cells void calcMonotonicQForElemsQQQL(void)
+  in (cell vdov, cell elemMass, cell volo, cell vnew,
+      cell  delx_xi, cell delv_eta, cell delx_eta,
+      cell delv_zeta, cell delx_zeta, cell delv_xi,
+      cell phixi, cell phieta, cell phizeta)
+  out(cell qq, cell ql)@ 4.72{
+  Real qlc_monoq = option_qlc_monoq;
+  Real qqc_monoq = option_qqc_monoq;
+  Real qlin, qquad ;
+   // Remove length scale
+   if ( vdov > 0.){
+     qlin  = qquad = 0.;
+   } else {
+     Real rho = elemMass/(volo*vnew);
+     Real delvxxi   = delv_xi   * delx_xi   ;
+     Real delvxeta  = delv_eta  * delx_eta  ;
+     Real delvxzeta = delv_zeta * delx_zeta ;
+     if ( delvxxi   > 0.) delvxxi   = 0. ;
+     if ( delvxeta  > 0.) delvxeta  = 0. ;
+     if ( delvxzeta > 0.) delvxzeta = 0. ;
+     qlin = -qlc_monoq * rho *
+       (  delvxxi   * (1. - phixi) +
+          delvxeta  * (1. - phieta) +
+          delvxzeta * (1. - phizeta)  ) ;
+     qquad = qqc_monoq * rho *
+       (  delvxxi*delvxxi     * (1. - phixi*phixi) +
+          delvxeta*delvxeta   * (1. - phieta*phieta) +
+          delvxzeta*delvxzeta * (1. - phizeta*phizeta)  ) ;
+   }
+   qq = qquad ;
+   ql = qlin  ;
+   //debug()<<"calcMonotonicQForElems ql="<<ql<<", qq="<<qq;
+}
+void eieio473(void) @ 4.73{
+  synchronize(ql);
+  synchronize(qq);
+}
+
+
+// ****************************************************************************
+// * The routine CalcQForElems() calculates the artificial viscosity term q
+// * for each element. The calculation is partitioned into two parts.
+// * CalcQForElems
+// ****************************************************************************
+cells void calcQForElemsExcessiveArtificialViscosityTest(void)
+  in (cell q)@ 4.8{
+  // Don't allow excessive artificial viscosity
+  if (q > option_qstop)
+    fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
+}
+
+
+// ****************************************************************************
+// * The routine ApplyMaterialPropertiesForElems() updates the pressure and
+// * internal energy variables to their values at the new time, p_n+1 and e_n+1.
+// * The routine first initializes a temporary array with the values of Vn+1 for
+// * each element that was computed earlier. Then, upper and lower cut-off
+// * values are applied to each array value to keep the relative volumes
+// * within a prescribed range (not too close to zero and not too large).
+// * Next, the routine EvalEOSForElems() is called and the array of modified
+// * relative element volumes is passed to it.
+// ****************************************************************************
+cells void applyMaterialPropertiesForElems0(void)
+  in (cell vnew)
+  out(cell vnewc)@ 5.0{
+  vnewc = vnew ;
+  //debug()<<"vnewc="<<vnewc;
+}
+cells void applyMaterialPropertiesForElems1(void)
+  inout(cell vnewc) @ 5.1{
+  if (vnewc < option_eosvmin) vnewc = option_eosvmin ;
+}
+cells void applyMaterialPropertiesForElems2(void)
+  inout (cell vnewc)@ 5.2{
+  if (vnewc > option_eosvmax) vnewc = option_eosvmax ;
+}
+cells void applyMaterialPropertiesForElems3(void) in (cell v) @ 5.3{
+  Real vc = v ;
+  if (vc < option_eosvmin) vc = option_eosvmin ;
+  if (vc > option_eosvmax) vc = option_eosvmax ;
+  if (vc <= 0.) fatal("applyMaterialPropertiesForElems3", "VolumeError");
+}
+
+
+// ****************************************************************************
+// * The routine EvalEOSForElems() calculates updated values for pressure p_n+1
+// * and internal energy e_n+1.
+// * The computation involves several loops over elements to pack various mesh
+// * element arrays (e.g., p, e, q, etc.) into local temporary arrays.
+// * Several other quantities are computed and stored in element length
+// * temporary arrays also.
+// * The temporary arrays are needed because the routine CalcEnergyForElems()
+// * calculates p_n+1 and e_n+1 in each element in an iterative process that
+// * requires knowledge of those variables at time tn while it computes the
+// * new time values.
+// ****************************************************************************
+cells void evalEOSForElems0(void)
+  in (cell e, cell delv, cell p, cell q, cell vnewc)
+  out(cell e_old, cell delvc, cell p_old, cell q_old,
+      cell compression, cell compHalfStep) @ 6.02{
+  Real vchalf ;
+  e_old = e;
+  delvc = delv;
+  p_old = p;
+  q_old = q ;
+  compression = (1.0/vnewc) - 1.0;
+  vchalf = vnewc - (delvc * 0.5);
+  compHalfStep = (1.0/vchalf)-1.0;
+  //debug()<<"evalEOSForElems0 "<<compression<<", "<<vchalf<<", "<<compHalfStep;
+}
+
+cells void evalEOSForElems1(void)
+  in (cell vnewc, cell compression)
+  out(cell compHalfStep)@ 6.1 {
+  if (vnewc <= option_eosvmin)
+    compHalfStep = compression;
+}
+cells void evalEOSForElems6(void)
+  in (cell vnewc, cell compHalfStep)
+  out(cell p_old, cell compression) @ 6.6 {
+  if (vnewc < option_eosvmax) continue; 
+  p_old = compression = compHalfStep = 0.0;
+}
+cells void evalEOSForElems7(void) out(cell work)@ 6.7 {
+  work = 0.; 
+}
+
+
+
+// ****************************************************************************
+// * calcPressureForElems
+// * p_new => pHalfStep
+// * compression => compHalfStep
+// * e_old => e_new
+// ****************************************************************************
+cells void calcPressureForElemspHalfStepcompHalfStep(void)
+  in (cell compHalfStep, cell bvc, cell e_new, cell vnewc)
+  inout(cell pHalfStep)
+  out (cell pbvc)@ 7.2{
+  Real c1s = 2.0/3.0 ;
+  bvc = c1s * (compHalfStep + 1.0);
+  pbvc = c1s;
+  pHalfStep = bvc * e_new ;
+  if (fabs(pHalfStep) < option_p_cut) pHalfStep = 0.0;
+  if (vnewc >= option_eosvmax ) pHalfStep = 0.0; // impossible condition here?
+  if (pHalfStep < option_pmin) pHalfStep = option_pmin;
+  //debug()<< "calcPressureForElemspHalfStepcompHalfStep" << "pHalfStep=" << pHalfStep << ", compHalfStep=" << compHalfStep;
+}
+
+cells void calcPressureForElemsPNewCompression(void)
+  in (cell compression,
+      cell bvc,
+      cell e_new, cell vnewc)
+  inout (cell pbvc, cell p_new) @ 7.5,7.7{
+  Real c1s = 2.0/3.0 ;
+  bvc = c1s * (compression + 1.0);
+  pbvc = c1s;
+  p_new = bvc * e_new ;
+  if (fabs(p_new) < option_p_cut) p_new = 0.0;
+  if (vnewc >= option_eosvmax ) p_new = 0.0;
+  if (p_new < option_pmin) p_new = option_pmin;
+  //debug()<<"calcPressureForElemsPNewCompression" << " p_new=" << p_new << ", compression=" << compression;
+}
+
+
+// ****************************************************************************
+// * The routine CalcEnergyForElems() calls CalcPressureForElems() repeatedly.
+// * The function CalcPressureForElems() is the Equation of State model
+// * for a "gamma law" gas.
+// * The value c1s passed to the routine is defined to be γ - 1.
+// * The Equation of State calculation is a core part of any hydrocode.
+// * In a production code, one of any number of Equation of State functions
+// * may be called to generate a pressure that is needed to close the system
+// * of equations and generate a unique solution.
+// ****************************************************************************
+cells void calcEnergyForElems1(void)
+  in (cell e_old, cell delvc, cell p_old, cell q_old, cell work)
+  inout (cell e_new)@ 7.1{
+  //debug()<<"e_old="<<e_old<<", delvc="<< delvc <<", work="<< work;
+  e_new = e_old - 0.5*delvc*(p_old + q_old) + 0.5*work;
+  if (e_new < option_emin) e_new = option_emin ;
+  //debug()<<"e_new="<<e_new;
+}
+
+// @ 7.2 CalcPressureForElems(pHalfStep, bvc, pbvc, e_new, compHalfStep, vnewc, pmin, p_cut, eosvmax, length);
+
+cells void calcEnergyForElems3(void)
+  in (cell compHalfStep, cell delvc, cell pbvc, cell ql, cell qq,
+      cell bvc, cell pHalfStep, cell p_old, cell q_old)
+  out(cell q_new)
+  inout(cell e_new)@ 7.3{
+  Real vhalf = 1. / (1. + compHalfStep);
+  if (delvc > 0. ) {
+    q_new /* = qq[i] = ql[i] */ = 0. ;
+  } else {
+    Real ssc = ( pbvc * e_new + vhalf * vhalf * bvc * pHalfStep ) / option_refdens ;
+    if ( ssc <= 0. ) {
+      ssc =.333333e-36 ;
+    } else {
+      ssc = sqrt(ssc) ;
+    }
+    q_new = (ssc*ql + qq) ;
+  }
+  e_new = e_new + 0.5*delvc*(3.0*(p_old+q_old) - 4.0*(pHalfStep+q_new)) ;
+}
+
+cells void calcEnergyForElems4(void) in (cell work)
+  inout (cell e_new)@ 7.4{
+  e_new += 0.5*work;
+  if (fabs(e_new) < option_e_cut) e_new = 0.;
+  if (e_new < option_emin) e_new = option_emin;
+}
+
+// @ 7.5 CalcPressureForElems(p_new, bvc, pbvc, e_new, compression, vnewc, pmin, p_cut, eosvmax, length);
+
+cells void calcEnergyForElems6(void)
+  in (cell delvc, cell bvc, cell pbvc, cell vnewc, cell p_new, cell ql, cell qq,
+      cell p_old, cell q_old, cell pHalfStep, cell q_new)
+  inout(cell e_new)@ 7.6{
+  const Real sixth = 1.0/6.0;
+  Real q_tilde ;
+  if (delvc > 0.) {
+    q_tilde = 0. ;
+  } else {
+    Real ssc = ( pbvc * e_new + vnewc * vnewc * bvc * p_new)/option_refdens;
+    if ( ssc <= 0. ) {
+      ssc = .333333e-36 ;
+    } else {
+      ssc = sqrt(ssc) ;
+    }
+    q_tilde = (ssc*ql + qq) ;
+  }
+  e_new = e_new - (  7.0*(p_old + q_old)
+                     - (8.0)*(pHalfStep + q_new)
+                     + (p_new + q_tilde)) * delvc*sixth ;
+  if (fabs(e_new) < option_e_cut) e_new = 0.;
+  if (e_new < option_emin) e_new = option_emin;
+}
+
+// @ 7.7 CalcPressureForElems(p_new, bvc, pbvc, e_new, compression, vnewc, pmin, p_cut, eosvmax, length);
+
+cells void calcEnergyForElems8(void)
+  in (cell delvc, cell bvc, cell pbvc, cell e_new, cell vnewc, cell p_new, cell ql, cell qq)
+  inout(cell q_new)@ 7.8{
+  if (delvc <= 0.) {
+    Real ssc = (pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
+    if ( ssc <= 0.){
+      ssc = .333333e-36;
+    }else {
+      ssc = sqrt(ssc);
+    }
+    q_new=(ssc*ql+qq) ;
+    if (fabs(q_new) < option_q_cut) q_new = 0.;
+  }
+}
+
+cells void evalEOSForElems8(void)
+  in (cell p_new, cell e_new, cell q_new)
+  out(cell p, cell e, cell q)@ 8.0{
+  p = p_new;
+  e = e_new;
+  q = q_new;
+  //debug()<<"p_new="<<p_new<<", e_new="<< e_new <<", q_new="<< q_new;
+}
+void eieio801(void) @ 8.01 {
+  synchronize(e);
+}
+
+
+
+// ****************************************************************************
+// * Lastly, the routine CalcSoundSpeedForElems() calculates the sound speed
+// * sound_speed in each element using p_n+1 and e_n+1.
+// * The maximum value of sound_speed is used to calculate constraints on t_n+1
+// * which will be used for the next time advance step.
+// ****************************************************************************
+//   CalcSoundSpeedForElems(vnewc, rho0, e_new, p_new, pbvc, bvc, ss4o3, length) ;
+cells void calcSoundSpeedForElems(void)
+  in (cell bvc, cell pbvc, cell e_new, cell vnewc, cell p_new)
+  out (cell sound_speed) @ 9.0{
+  Real ssTmp;
+  //debug()<<"pbvc="<<pbvc<<" e_new="<<e_new<<" vnewc="<<vnewc<<" bvc="<<bvc<<" p_new="<<p_new <<" option_refdens="<<option_refdens;
+  ssTmp = (pbvc * e_new + vnewc * vnewc * bvc * p_new) / option_refdens;
+  if (ssTmp <= 1.111111e-36) ssTmp = 1.111111e-36;
+  sound_speed = sqrt(ssTmp);
+  //debug()<<"CalcSoundSpeedForElems "<<sound_speed;
+}
+
+
+
+// ****************************************************************************
+// * The routine UpdateVolumesForElems() updates the relative volume to V_n+1.
+// * This routine basically resets the current volume V_n in each element to
+// * the new volume V_n+1 so the simulation can continue to the next time
+// * increment.
+// * Note that this routine applies a cut-off to the relative volume V in
+// * each element. Specifically, if V is sufficiently close to one (a
+// * prescribed tolerance), then V is set to one.
+// * The reason for this cutoff is to prevent spurious deviations of volume
+// * from their initial values which may arise due to floating point roundoff
+// * error.
+// ****************************************************************************
+cells void updateVolumesForElems(void)
+  in (cell vnew) out (cell v) @ 10.0{
+  Real tmpV = vnew;
+  //debug()<<"updateVolumesForElems tmpV="<<tmpV;
+  if (fabs(tmpV-1.0) < option_v_cut) tmpV = 1.0 ;
+  v = tmpV ;
+  //debug()<<"updateVolumesForElems v="<<v;
+}
+
+
+// ****************************************************************************
+// * The routine LagrangeElements() advances the element mesh quantities,
+// * primarily pressure p, internal energy e, and relative volume V.
+// * The artificial viscosity q in each element is also calculated here.
+// * The main steps in this process are:
+// *     1. Calculate element quantities based on nodal kinematic quantities
+// *     2. Calculate element artificial viscosity terms
+// *     3. Apply material properties in each element needed
+// *        to calulate updated pressure pn+1 and internal energy en+1
+// *     4. Compute updated element volume Vn+1
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * The routine CalcCourantConstraintForElems() calculates the Courant timestep
+// * constraint δt_Courant. This constraint is calculated only in elements
+// * whose volumes are changing that is, dV/V!=0.
+// * If all element volumes remain the same, there is no Courant constraint
+// * applied during the subsequent δt calculation.
+// ****************************************************************************
+cells Real calcCourantConstraintForElems(Real dtcourant) in (cell sound_speed,
+                                                             cell arealg,
+                                                             cell vdov) {
+  Real qqc2 = 64.0 * option_qqc * option_qqc ;
+  Real dtf = sound_speed * sound_speed ;
+  if ( vdov < 0. ) dtf +=  qqc2 * arealg * arealg * vdov * vdov ;
+  dtf = sqrt(dtf) ;
+  dtf = arealg/dtf ;
+  if (vdov != 0.) dtcourant=min(dtcourant,dtf);
+  return dtcourant;
+}          
+
+
+// ****************************************************************************
+// * The routine CalcHydroConstraintForElems() calculates the hydro timestep
+// * constraint. Similar to δt_Courant, δt_hydro is calculated only in elements
+// * whose volumes are changing. When an element is undergoing volume change,
+// * δt_hydro for the element is some maximum allowable element volume change
+// * (prescribed) divided by dV/V in the element.
+// ****************************************************************************
+cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
+  if (vdov != 0.){
+    Real dtdvov = option_dvovmax / (fabs(vdov)+1.e-20);
+    if ( dthydro > dtdvov ) dthydro = dtdvov ;
+  }
+  return dthydro;
+}
+
+// ****************************************************************************
+// * After all solution variables are advanced to t_n+1, the constraints δtCourant
+// * and δthydro for the next time increment t_n+1 are calculated in this routine.
+// * Each constraint is computed in each element and then the final constraint value
+// * is the minimum over all element values.
+// * The constraints are applied during the computation of δt for the next time step.
+// ****************************************************************************
+void calcTimeConstraintsForElems(void) @ 12.1{
+  Real hdr,crnt;
+  hdr=calcHydroConstraintForElems(1.0e+20);
+  crnt=calcCourantConstraintForElems(1.0e+20);
+  δt_courant=mpi_reduce(ReduceMin, crnt);
+  δt_hydro=mpi_reduce(ReduceMin, hdr);
+  //info()<<"δt_courant="<<δt_courant;
+  //info()<<"δt_hydro  ="<<δt_hydro;
+}

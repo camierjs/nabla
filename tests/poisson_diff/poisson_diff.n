@@ -1,0 +1,155 @@
+with aleph;
+
+// ****************************************************************************
+// * Déclaration des options
+// ****************************************************************************
+options{
+  Real option_deltat = 0.0001;
+  Real option_ini_temperature = 300.0;
+  Real option_hot_temperature = 700.0;
+  Integer option_max_iterations = 8;
+  // Options d'Aleph
+  Real alephEpsilon = 1.e-8;
+  Integer alephUnderlyingSolver = 0;
+  Integer alephMaxIterations = 16384;
+  Integer alephPreconditionerMethod = 0; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                         // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  Integer alephSolverMethod = 3; //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  Integer alephNumberOfCores = 0;
+  Bool option_aleph_dump_matrix = false;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Integer coefs;
+  Real cell_temperature;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux faces
+// ****************************************************************************
+faces{
+  Real face_temperature;
+};
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+
+void ini(void) @ -10.0{
+  δt=option_deltat;
+}
+
+cells void iniCells(void) out (cell cell_temperature) @ -10.0{
+  cell_temperature=option_ini_temperature;
+}
+faces void iniFaces(void) out (face face_temperature) @ -9.9{
+  face_temperature=option_ini_temperature;
+}
+
+own outer faces void iniHotFaces(void) @ -9.0{
+  if (!((coord[0].x==0.0) || (coord[0].y==0.0)|| (coord[0].z==0.0))) continue;
+  face_temperature=option_hot_temperature;
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+
+/***************************************************************************
+ * geoFaceSurface
+ ***************************************************************************/
+Real geoFaceSurface(Face f){
+  if (f.nbNode()==4){
+    const register Real3 xyz0=nodesCoordinates()[f.node(0)];
+    const register Real3 xyz1=nodesCoordinates()[f.node(1)];
+    const register Real3 xyz3=nodesCoordinates()[f.node(3)];
+    return (xyz0-xyz1).abs()*(xyz0-xyz3).abs();
+  }
+  if (f.nbNode()==2){
+    const register Real3 xyz0=nodesCoordinates()[f.node(0)];
+    const register Real3 xyz1=nodesCoordinates()[f.node(1)];
+    return (xyz0-xyz1).abs();
+  }
+  return 0.0;
+}
+
+
+// ****************************************************************************
+// * Remplissage du RHS
+// ****************************************************************************
+void rhsInit(void) @ 1.0{
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
+own cells void addRhsCellValues(void) @ 1.1{
+  Real value=cell_temperature;
+  ℵ rhs setValue(cell_temperature,this,value);
+}
+own outer faces void setRhsFaceValues(void) @ 1.2{
+  Real dt=δt;
+  Real value=dt*(face_temperature/geoFaceSurface(*this));
+  ℵ rhs setValue(cell_temperature, cell(0), value);
+}
+
+// ********************************************************
+// * Launch Aleph initialization
+// * Could be done as: 'alephInitialize @ 2;'
+// ********************************************************
+void getMatrixAndVectors(void) @ 2.0 {alephInitialize();}
+
+own cells void zeroCoefs(void) @ 2.1 {coefs=0.0;}
+
+inner faces void setInnerFacesValues(void) @ 2.2{
+  Real dt=δt;
+  const register Real surface=geoFaceSurface(*this);
+  if (backCell.isOwn()){
+    ℵ matrix setValue(cell_temperature, backCell,
+                      cell_temperature, frontCell, -dt/surface);
+    coefs[backCell]+=1.0/surface;
+  }
+  if (frontCell.isOwn()){
+    ℵ matrix setValue(cell_temperature, frontCell,
+                      cell_temperature, backCell, -dt/surface);
+    coefs[frontCell]+=1.0/surface;
+  }
+}
+
+outer faces void setOuterFacesValues(void) @ 2.3{
+  if (!cell(0).isOwn()) continue;
+  coefs[cell(0)]+=1.0/geoFaceSurface(*this);
+}
+
+own cells void setCellsValues(void) @ 2.4{
+  Real dt=δt;
+  Real value=1.0+dt*coefs;
+  ℵ matrix setValue(cell_temperature, this,
+                    cell_temperature, this, value);
+}
+
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
+
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+own cells void getCellResults(void) out (cell cell_temperature) @ 4.1{
+  cell_temperature=ℵ lhs getValue(cell_temperature, this);
+}
+
+
+// ****************************************************************************
+// * Sync & test for Quit
+// ****************************************************************************
+void testForQuit(void) @ 5.0{
+  synchronize(cell_temperature);
+  if (GlobalIteration >= option_max_iterations) exit;
+}

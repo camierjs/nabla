@@ -1,0 +1,298 @@
+
+
+// ****************************************************************************
+// * Inlined geometrics functions
+// ****************************************************************************
+inline Real3 sum4(const Real3 a, const Real3 b,
+                  const Real3 c, const Real3 d){
+  return (a+b+c+d);
+}
+inline Real tripleProduct(const Real x1, const Real y1, const Real z1,
+                          const Real x2, const Real y2, const Real z2,
+                          const Real x3, const Real y3, const Real z3){
+  return ((x1)*((y2)*(z3)-(z2)*(y3))
+          + (x2)*((z1)*(y3)-(y1)*(z3))
+          + (x3)*((y1)*(z2)-(z1)*(y2)));
+}
+
+// ****************************************************************************
+// * IntegrateStressForElems (1/3)
+// * Volume calculation involves extra work for numerical consistency.
+// ****************************************************************************
+inline Real calcElemShapeFunctionDerivatives(const Real3 *_Χ, Real3* restrict _B){
+  Real rtn;
+  const Real3 fjxi = ⅛*((_Χ[6]-_Χ[0])+(_Χ[5]-_Χ[3])-(_Χ[7]-_Χ[1])-(_Χ[4]-_Χ[2]));
+  const Real3 fjet = ⅛*((_Χ[6]-_Χ[0])-(_Χ[5]-_Χ[3])+(_Χ[7]-_Χ[1])-(_Χ[4]-_Χ[2]));
+  const Real3 fjze = ⅛*((_Χ[6]-_Χ[0])+(_Χ[5]-_Χ[3])+(_Χ[7]-_Χ[1])+(_Χ[4]-_Χ[2]));
+  // compute cofactors
+  const Real3 cjxi =  (fjet ⨯ fjze);
+  const Real3 cjet = -(fjxi ⨯ fjze);
+  const Real3 cjze =  (fjxi ⨯ fjet);
+  // calculate partials: this need only be done for 0,1,2,3
+  // since, by symmetry, (6,7,4,5) = - (0,1,2,3)
+  _B[0] = - cjxi-cjet-cjze;
+  _B[1] =   cjxi-cjet-cjze;
+  _B[2] =   cjxi+cjet-cjze;
+  _B[3] = - cjxi+cjet-cjze;
+  _B[4] = -_B[2];
+  _B[5] = -_B[3];
+  _B[6] = -_B[0];
+  _B[7] = -_B[1];
+  // calculate jacobian determinant (volume)
+  rtn= 8.0*(fjet⋅cjet);
+  //info()<<"[calcElemShapeFunctionDerivatives] determ="<<rtn;
+  return rtn;
+}
+
+inline void CalcElemVelocityGradient( const Real *xvel,
+                                      const Real *yvel,
+                                      const Real *zvel,
+                                      const Real3 B[8],
+                                      const Real detJ,
+                                      Real * restrict d){
+  const Real inv_detJ = Real(1.0) / detJ ;
+  const Real dyddx  = inv_detJ * ( B[0].x * (yvel[0]-yvel[6]) + B[1].x * (yvel[1]-yvel[7])
+                                   + B[2].x * (yvel[2]-yvel[4]) + B[3].x * (yvel[3]-yvel[5]) );
+  const Real dxddy  = inv_detJ * ( B[0].y * (xvel[0]-xvel[6]) + B[1].y * (xvel[1]-xvel[7])
+                                   + B[2].y * (xvel[2]-xvel[4]) + B[3].y * (xvel[3]-xvel[5]) );
+  const Real dzddx  = inv_detJ * ( B[0].x * (zvel[0]-zvel[6]) + B[1].x * (zvel[1]-zvel[7])
+                                   + B[2].x * (zvel[2]-zvel[4]) + B[3].x * (zvel[3]-zvel[5]) );
+  const Real dxddz  = inv_detJ * ( B[0].z * (xvel[0]-xvel[6]) + B[1].z * (xvel[1]-xvel[7])
+                                   + B[2].z * (xvel[2]-xvel[4]) + B[3].z * (xvel[3]-xvel[5]) );
+  const Real dzddy  = inv_detJ * ( B[0].y * (zvel[0]-zvel[6]) + B[1].y * (zvel[1]-zvel[7])
+                                   + B[2].y * (zvel[2]-zvel[4]) + B[3].y * (zvel[3]-zvel[5]) );
+  const Real dyddz  = inv_detJ * ( B[0].z * (yvel[0]-yvel[6]) + B[1].z * (yvel[1]-yvel[7])
+                                   + B[2].z * (yvel[2]-yvel[4]) + B[3].z * (yvel[3]-yvel[5]) );
+  d[0] = inv_detJ * ( B[0].x * (xvel[0]-xvel[6]) + B[1].x * (xvel[1]-xvel[7])
+                     + B[2].x * (xvel[2]-xvel[4]) + B[3].x * (xvel[3]-xvel[5]) );
+  d[1] = inv_detJ * ( B[0].y * (yvel[0]-yvel[6]) + B[1].y * (yvel[1]-yvel[7])
+                     + B[2].y * (yvel[2]-yvel[4]) + B[3].y * (yvel[3]-yvel[5]) );
+  d[2] = inv_detJ * ( B[0].z * (zvel[0]-zvel[6]) + B[1].z * (zvel[1]-zvel[7])
+                     + B[2].z * (zvel[2]-zvel[4]) + B[3].z * (zvel[3]-zvel[5]) );
+  d[5]  =  .5 * ( dxddy + dyddx );
+  d[4]  =  .5 * ( dxddz + dzddx );
+  d[3]  =  .5 * ( dzddy + dyddz );
+}
+
+
+// ****************************************************************************
+// * calcElemVolume
+// ****************************************************************************
+inline Real _calcElemVolume(const Real x0, const Real x1,
+                            const Real x2, const Real x3,
+                            const Real x4, const Real x5,
+                            const Real x6, const Real x7,
+                            const Real y0, const Real y1,
+                            const Real y2, const Real y3,
+                            const Real y4, const Real y5,
+                            const Real y6, const Real y7,
+                            const Real z0, const Real z1,
+                            const Real z2, const Real z3,
+                            const Real z4, const Real z5,
+                            const Real z6, const Real z7){
+  const Real twelveth = 1.0/12.0;
+  const Real dx61 = x6-x1;
+  const Real dy61 = y6-y1;
+  const Real dz61 = z6-z1;
+  const Real dx70 = x7-x0;
+  const Real dy70 = y7-y0;
+  const Real dz70 = z7-z0;
+  const Real dx63 = x6-x3;
+  const Real dy63 = y6-y3;
+  const Real dz63 = z6-z3;
+  const Real dx20 = x2-x0;
+  const Real dy20 = y2-y0;
+  const Real dz20 = z2-z0;
+  const Real dx50 = x5-x0;
+  const Real dy50 = y5-y0;
+  const Real dz50 = z5-z0;
+  const Real dx64 = x6-x4;
+  const Real dy64 = y6-y4;
+  const Real dz64 = z6-z4;
+  const Real dx31 = x3-x1;
+  const Real dy31 = y3-y1;
+  const Real dz31 = z3-z1;
+  const Real dx72 = x7-x2;
+  const Real dy72 = y7-y2;
+  const Real dz72 = z7-z2;
+  const Real dx43 = x4-x3;
+  const Real dy43 = y4-y3;
+  const Real dz43 = z4-z3;
+  const Real dx57 = x5-x7;
+  const Real dy57 = y5-y7;
+  const Real dz57 = z5-z7;
+  const Real dx14 = x1-x4;
+  const Real dy14 = y1-y4;
+  const Real dz14 = z1-z4;
+  const Real dx25 = x2-x5;
+  const Real dy25 = y2-y5;
+  const Real dz25 = z2-z5;
+  const Real tp1 = tripleProduct((dx31+dx72), dx63, dx20,
+                                 (dy31+dy72), dy63, dy20,
+                                 (dz31+dz72), dz63, dz20);
+  const Real tp2 = tripleProduct((dx43+dx57), dx64, dx70,
+                                 (dy43+dy57), dy64, dy70,
+                                 (dz43+dz57), dz64, dz70);
+  const Real tp3 = tripleProduct((dx14+dx25), dx61, dx50,
+                                 (dy14+dy25), dy61, dy50,
+                                 (dz14+dz25), dz61, dz50);
+  return twelveth*(tp1+tp2+tp3);
+}
+
+
+// ****************************************************************************
+// * AreaFace
+// ****************************************************************************
+inline Real AreaFace(const Real x0, const Real x1,
+                     const Real x2, const Real x3,
+                     const Real y0, const Real y1,
+                     const Real y2, const Real y3,
+                     const Real z0, const Real z1,
+                     const Real z2, const Real z3){
+  const Real fx = (x2-x0)-(x3-x1);
+  const Real fy = (y2-y0)-(y3-y1);
+  const Real fz = (z2-z0)-(z3-z1);
+  const Real gx = (x2-x0)+(x3-x1);
+  const Real gy = (y2-y0)+(y3-y1);
+  const Real gz = (z2-z0)+(z3-z1);
+  return (fx*fx + fy*fy + fz*fz) * (gx*gx + gy*gy + gz*gz) -
+         (fx*gx + fy*gy + fz*gz) * (fx*gx + fy*gy + fz*gz);
+}
+
+
+// ****************************************************************************
+// * calcElemCharacteristicLength
+// ****************************************************************************
+inline Real calcElemCharacteristicLength(const Real x[8],
+                                         const Real y[8],
+                                         const Real z[8],
+                                         const Real _volume){
+  Real a, charLength = 0.0;
+  a = AreaFace(x[0],x[1],x[2],x[3],
+               y[0],y[1],y[2],y[3],
+               z[0],z[1],z[2],z[3]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[4],x[5],x[6],x[7],
+               y[4],y[5],y[6],y[7],
+               z[4],z[5],z[6],z[7]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[0],x[1],x[5],x[4],
+               y[0],y[1],y[5],y[4],
+               z[0],z[1],z[5],z[4]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[1],x[2],x[6],x[5],
+               y[1],y[2],y[6],y[5],
+               z[1],z[2],z[6],z[5]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[2],x[3],x[7],x[6],
+               y[2],y[3],y[7],y[6],
+               z[2],z[3],z[7],z[6]) ;
+  charLength = max(a,charLength) ;
+  a = AreaFace(x[3],x[0],x[4],x[7],
+               y[3],y[0],y[4],y[7],
+               z[3],z[0],z[4],z[7]) ;
+  charLength = max(a,charLength) ;
+  return 4.0 * _volume/√(charLength);
+}
+
+
+// ****************************************************************************
+// * sumElemFaceNormal
+// ****************************************************************************
+inline void sumElemFaceNormal(Real3* _B0,
+                               Real3* _B1,
+                               Real3* _B2,
+                               Real3* _B3,
+                              const int ia, const int ib,
+                              const int ic, const int id,
+                              const Real3* _Χ){
+  const Real3 bisect0 = ½*(_Χ[id]+_Χ[ic]-_Χ[ib]-_Χ[ia]);
+  const Real3 bisect1 = ½*(_Χ[ic]+_Χ[ib]-_Χ[id]-_Χ[ia]);
+  const Real3 _area = ¼*(bisect0⨯bisect1);
+  //debug()<<"[sumElemFaceNormal] area="<<_area;
+  *_B0 += _area;  
+  *_B1 += _area;  
+  *_B2 += _area;  
+  *_B3 += _area;  
+}
+
+// ****************************************************************************
+// * calcElemVolumeDerivative
+// ****************************************************************************
+inline Real3 voluDer(const Real3 Χ0, const Real3 Χ1, const Real3 Χ2,
+                     const Real3 Χ3, const Real3 Χ4, const Real3 Χ5){
+  const Real3 v01 = Χ0+Χ1;
+  const Real3 v12 = Χ1+Χ2;
+  const Real3 v25 = Χ2+Χ5;
+  const Real3 v04 = Χ0+Χ4;
+  const Real3 v34 = Χ3+Χ4;
+  const Real3 v35 = Χ3+Χ5;
+  return (1.0/12.0) * (v12⨯v01+v04⨯v34-v25⨯v35);
+}
+
+
+// ****************************************************************************
+// * calcElemFBHourglassForce
+// ****************************************************************************
+inline void calcElemFBHourglassForce(const Real3* restrict xd,
+                                     const Real* restrict hourgam0,
+                                     const Real* restrict hourgam1,
+                                     const Real* restrict hourgam2,
+                                     const Real* restrict hourgam3,
+                                     const Real* restrict hourgam4,
+                                     const Real* restrict hourgam5,
+                                     const Real* restrict hourgam6,
+                                     const Real* restrict hourgam7,
+                                     const Real coefficient,
+                                     Real3* restrict _hgf){
+  const Real3 h00 =
+    hourgam0[0]*xd[0] + hourgam1[0]*xd[1] + hourgam2[0]*xd[2] + hourgam3[0]*xd[3]  + 
+    hourgam4[0]*xd[4] + hourgam5[0]*xd[5] + hourgam6[0]*xd[6] + hourgam7[0]*xd[7];
+  const Real3 h01 =
+    hourgam0[1]*xd[0] + hourgam1[1]*xd[1] + hourgam2[1]*xd[2] + hourgam3[1]*xd[3]  + 
+    hourgam4[1]*xd[4] + hourgam5[1]*xd[5] + hourgam6[1]*xd[6] + hourgam7[1]*xd[7];
+  const Real3 h02 =
+    hourgam0[2]*xd[0] + hourgam1[2]*xd[1] + hourgam2[2]*xd[2] + hourgam3[2]*xd[3] + 
+    hourgam4[2]*xd[4] + hourgam5[2]*xd[5] + hourgam6[2]*xd[6] + hourgam7[2]*xd[7];
+  const Real3 h03 =
+    hourgam0[3]*xd[0] + hourgam1[3]*xd[1] + hourgam2[3]*xd[2] + hourgam3[3]*xd[3]  + 
+    hourgam4[3]*xd[4] + hourgam5[3]*xd[5] + hourgam6[3]*xd[6] + hourgam7[3]*xd[7];
+  _hgf[0] = coefficient*(hourgam0[0]*h00 + hourgam0[1]*h01 + hourgam0[2]*h02 + hourgam0[3]*h03);
+  _hgf[1] = coefficient*(hourgam1[0]*h00 + hourgam1[1]*h01 + hourgam1[2]*h02 + hourgam1[3]*h03);
+  _hgf[2] = coefficient*(hourgam2[0]*h00 + hourgam2[1]*h01 + hourgam2[2]*h02 + hourgam2[3]*h03);
+  _hgf[3] = coefficient*(hourgam3[0]*h00 + hourgam3[1]*h01 + hourgam3[2]*h02 + hourgam3[3]*h03);
+  _hgf[4] = coefficient*(hourgam4[0]*h00 + hourgam4[1]*h01 + hourgam4[2]*h02 + hourgam4[3]*h03);
+  _hgf[5] = coefficient*(hourgam5[0]*h00 + hourgam5[1]*h01 + hourgam5[2]*h02 + hourgam5[3]*h03);
+  _hgf[6] = coefficient*(hourgam6[0]*h00 + hourgam6[1]*h01 + hourgam6[2]*h02 + hourgam6[3]*h03);
+  _hgf[7] = coefficient*(hourgam7[0]*h00 + hourgam7[1]*h01 + hourgam7[2]*h02 + hourgam7[3]*h03);
+}
+
+
+// ****************************************************************************
+// * compute the hourglass modes
+// ****************************************************************************
+inline void _computeHourglassModes(const int i1,
+                                   const Real _determ,
+                                   const Real3 *_dvd,
+                                   const Real gamma[4][8],
+                                   const Real3 *x8n,
+                                   Real* restrict hourgam0, Real* restrict hourgam1,
+                                   Real* restrict hourgam2, Real* restrict hourgam3,
+                                   Real* restrict hourgam4, Real* restrict hourgam5,
+                                   Real* restrict hourgam6, Real* restrict hourgam7){
+  const Real volinv=1.0/_determ;
+  const Real3 hourmod =
+    x8n[0]*gamma[i1][0] + x8n[1]*gamma[i1][1] +
+    x8n[2]*gamma[i1][2] + x8n[3]*gamma[i1][3] +
+    x8n[4]*gamma[i1][4] + x8n[5]*gamma[i1][5] +
+    x8n[6]*gamma[i1][6] + x8n[7]*gamma[i1][7];
+  hourgam0[i1] = gamma[i1][0]-volinv*((_dvd[0]⋅hourmod));//info()<<"hourgam0[i1]="<<hourgam0[i1];
+  hourgam1[i1] = gamma[i1][1]-volinv*((_dvd[1]⋅hourmod));
+  hourgam2[i1] = gamma[i1][2]-volinv*((_dvd[2]⋅hourmod));
+  hourgam3[i1] = gamma[i1][3]-volinv*((_dvd[3]⋅hourmod));
+  hourgam4[i1] = gamma[i1][4]-volinv*((_dvd[4]⋅hourmod));
+  hourgam5[i1] = gamma[i1][5]-volinv*((_dvd[5]⋅hourmod));
+  hourgam6[i1] = gamma[i1][6]-volinv*((_dvd[6]⋅hourmod));
+  hourgam7[i1] = gamma[i1][7]-volinv*((_dvd[7]⋅hourmod));
+}
+

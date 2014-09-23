@@ -1,0 +1,54 @@
+TGT=$(lastword $(MAKECMDGOALS))
+MESH_FLAGS = -DX_EDGE_ELEMS=32 -DY_EDGE_ELEMS=31 -DZ_EDGE_ELEMS=31 -DX_EDGE_TICK=.031000 -DY_EDGE_TICK=.032000 -DZ_EDGE_TICK=.032000 -DLENGTH=.992000
+
+####################
+# CUDA COMPILATION #
+####################
+PATH_BullEL_6__x86_64=${CUDA_TOOLKIT_ROOT_DIR}
+ARCH_BullEL_6__x86_64=sm_21
+
+PATH_RHEL_5__x86_64=/usr/local/opendev1/gcc/cuda/2.3
+ARCH_RHEL_5__x86_64=sm_13
+
+NV_PATH = $(PATH_$(shell cea_os))
+NV_ARCH = $(ARCH_$(shell cea_os))
+
+# ${CUDA_TOOLKIT_ROOT_DIR} ${CUDA_NVCC_EXECUTABLE} ${CUDA_INCLUDE_DIRS} ${CUDA_CUDART_LIBRARY}
+NV = $(NV_PATH)/bin/nvcc
+NVFLAGS = -O2 -shared -arch=$(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
+NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
+NV_INCLUDE = -I. -I$(NV_PATH)/include
+
+CC_PATH = /usr/local/opendev1/gcc/gcc/4.7.2/bin
+CC = $(CC_PATH)/gcc
+CCFLAGS = -Wall -O2 -malign-double -fPIC
+
+
+$(TGT): all;-rm -f $(TGT)Entity.*
+
+all:$(TGT).cuda $(TGT)Entity.cu
+
+$(TGT)Entity.cu : $(TGT).n
+#	${ARCANEBUILDROOT}/nabla/nabla -t -v $(TGT).log $(NABLA_EXTRA_FLAGS) -m $(TGT) -i $(TGT) && sync
+	${ARCANEBUILDROOT}/nabla/nabla --cuda $(TGT) -i $(TGT).n && sync
+
+$(TGT)Entity.o : $(TGT)Entity.cu
+	@echo NVIDIA-CC
+	$(NV) $(NVFLAGS) $(NV_INCLUDE) -c -o $@ $<
+
+$(TGT).cuda: $(TGT)Entity.o
+	@echo GCC-LINKING
+	$(CC) -o $@ $^ $(NV_LIBRARY)
+
+e:
+	$(CC) -E -xc $(TGT).cu -o $(TGT).E.cu
+
+%.o: %.c
+	@echo GCC-CC
+	$(CC) $(CCFLAGS) $(CC_INCLUDES) -o $@ $*.c
+
+cln:
+	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT)Entity.* $(TGT).E.* *.log *.dot *.svg main.cc $(TGT).config
+
+g1:$(TGT)
+	./$(TGT).cuda

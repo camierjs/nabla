@@ -1,0 +1,459 @@
+with ℵ;
+ 
+// ****************************************************************************
+// * Déclaration des options
+// ****************************************************************************
+options{
+  Real option_deltat = 0.0001;
+  Real option_deltat_factor = 10.0;
+  Real option_epsilon = 0.0001;
+  Real option_ini_borders = 1.0;
+  Integer option_ini_iterations = 1;
+  Integer option_max_iterations = 8;
+  // Options du solveur
+  Real alephEpsilon = 1.e-8;
+  Integer alephUnderlyingSolver = 0;
+  Integer alephMaxIterations = 16384;
+  Integer alephPreconditionerMethod = 0; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                         // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  Integer alephSolverMethod = 3;          //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  Integer alephNumberOfCores = 0;
+  Bool option_aleph_dump_matrix = false;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
+nodes{
+  Real node_area;
+  Real node_is_an_edge;
+  Real node_density;
+  Real node_density_re;
+  Real node_density_im;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Integer cell_nb_nodes;
+  Real3 ccc;
+  Real cell_area;
+  Real cell_volume;
+  Real cell_density;
+  Real cell_density_re;
+  Real cell_density_im;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux faces
+// ****************************************************************************
+faces{
+  Real sdivs;
+  Real α;
+  Real β;
+  Real δ;
+  Real γ;
+  Real σ;
+  Real Cosθ;
+  Real Sinθ;
+  Real edge_density_re;
+  Real edge_density_im;
+  Uid cellLowId;
+  Uid nodeLowId;
+};
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+
+//void ini(void) @ -10.0{  δt=option_deltat;}
+
+cells void iniCells(void) out (cell cell_nb_nodes,
+                               cell cell_density,
+                               cell cell_density_re,
+                               cell cell_density_im) @ -10.0{
+  // Mise à jour du nombre de noeuds.
+  // On pourrait le faire en live après, mais pas encore au sein d'un foreach
+  cell_nb_nodes=nbNode; 
+  // Initialisation des valeures aux mailles
+  cell_density =
+    cell_density_re =
+    cell_density_im = 0.0;
+  //info()<<"\33[7mcell["<<uid<<"]"<<"\33[m";
+}
+
+nodes void iniNodes(void) out (node node_density,
+                               node node_density_re,
+                               node node_density_im) @ -10.0{
+  node_density=node_density_re=node_density_im=0.0;
+  //info()<<"\33[7mnode["<<uid<<"]"<<"\33[m";
+}
+
+faces void iniFaces(void) out (face face_density) @ -10.0{
+  edge_density_re=edge_density_im=option_ini_borders;
+  //info()<<"\33[7mface["<<uid<<"]"<<"\33[m";
+}
+
+cells void cellArea(void) out (cell cell_area) @ -10.0{
+  const Real3 a=coord[0];
+  const Real3 b=coord[1];
+  const Real3 c=coord[2];
+  register Real ab,bc,ca,p;
+  if (!(a.z==0.&&b.z==0.&&c.z==0.))
+    fatal("cellArea", "Failed with coplanarity");
+  ab=norm(a-b);
+  bc=norm(b-c);
+  ca=norm(c-a);
+  p=0.5*(ab+bc+ca);
+  cell_area=sqrt(p*(p-ab)*(p-bc)*(p-ca));
+}
+
+cells void cellVolume(void) out (cell cell_volume){
+  const register Real3 a1 = coord[1] - coord[0];
+  const register Real3 a2 = coord[2] - coord[0];
+  const register Real3 a3 = coord[3] - coord[0];
+  cell_volume = math::mixteMul(a1,a2,a3)/6.0;
+}
+
+cells void cellGravityCenter(void) out (cell ccc) @ -10.0{
+  ccc=0.;
+  foreach node ccc+=coord;
+  ccc/=nbNode;
+}
+
+nodes void nodeArea(void)
+  in (cell cell_area, cell cell_nb_nodes)
+  out (node node_area) @ -9.0{
+  node_area=0.0;
+  foreach cell node_area+=cell_area/cell_nb_nodes;
+}
+
+faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -9.0{
+  Real3 fn0 = coord[0];
+  Real3 fn1 = coord[1];
+  Real s=norm(fn0-fn1);
+  Real3 ccc0;
+  Real3 ccc1;
+  if (nbCell==2){
+    ccc0=ccc[frontCell];
+    ccc1=ccc[backCell];
+  }
+  if (nbCell==1){
+    ccc0=ccc[cell(0)];
+    ccc1=(fn0+fn1)/2.;
+  }
+  σ=norm(ccc0-ccc1);
+  if (σ==0.0) fatal("faceSbySigma", "σ==0.0");
+  sdivs=s/σ;  
+}
+
+// ****************************************************************************
+// * Initialisation du δt en fonction des options
+// ****************************************************************************
+faces Real computeMin_σ(Real min_σ) in (face σ){
+  min_σ = min(min_σ,σ);
+  return min_σ;
+}
+void ini_δt(void) @ -8.5{
+  if (option_deltat==0.0){
+    Real min_σ=computeMin_σ(1.0e+20);
+    Real reduced_min_σ = mpi_reduce(ReduceMin,min_σ);
+    δt=reduced_min_σ/option_deltat_factor;
+  }else δt=option_deltat;
+  info()<< "\33[7m[ini_δt] δt="<<δt<<"\33[m";
+}
+
+// ****************************************************************************
+// * faceTheta
+// ****************************************************************************
+faces void faceTheta(void) in (cell ccc) out (face Cosθ,
+                                              face Sinθ) @ -8.0{
+  Real3 n0=coord[0];
+  Real3 n1=coord[1];  
+  Real3 c1,c0,τ,tan,nrm;
+  Real sinTauTan,nrm_xτ,nΤ,nTan;
+  if (nbCell==1){
+    c0=ccc[cell(0)];
+    c1=(n0+n1)/2.;
+    cellLowId=cell(0).uniqueId();
+  }else{
+    if (backCellUid>frontCellUid){
+      c0=ccc[frontCell];
+      c1=ccc[backCell];
+      cellLowId=frontCell.uniqueId();
+   }else{
+      c0=ccc[backCell];
+      c1=ccc[frontCell];
+      cellLowId=backCell.uniqueId();
+    }
+  }
+  τ=(c1-c0);  // Vecteur tangentiel des mailles
+  nΤ=norm(τ);
+  tan=(n1-n0);  // Vecteur tangentiel des noeuds
+  nTan=norm(tan);
+  // Le sinus de ces deux vecteurs afin d'orienter la normale
+  sinTauTan= cross2D(τ,tan)/(nΤ*nTan);
+  nodeLowId=((sinTauTan>0.)?node(0).uniqueId():node(1).uniqueId());
+  // Le vecteur normal du tangentiel des noeuds
+  nrm.x=-tan.y;
+  nrm.y=+tan.x;
+  nrm.z=0.;
+  // Que l'on réoriente en fonction de la normale
+  nrm*=(sinTauTan>0)?-1.:+1.;
+  nrm_xτ=norm(nrm)*nΤ;// Calcul de la norme
+  // Le theta entre ce vecteur normal et le tangentiel des mailles
+  Cosθ=dot(nrm,τ)/nrm_xτ;
+  Sinθ=cross2D(nrm,τ)/nrm_xτ;
+}
+
+// ****************************************************************************
+// * updateAlphaBetaGammaDelta
+// ****************************************************************************
+faces void updateAlphaBetaGammaDelta(void)
+  in (face sdivs, face Cosθ, face Sinθ)
+  out (face α, face β, face δ) @ -7.0{
+  α = δt*sdivs/Cosθ;
+  β = γ = δt*(-Sinθ/Cosθ);
+  δ = δt*(1./(sdivs*Cosθ));
+}
+
+// ****************************************************************************
+// * iniNodeIsAnEdge, iniOuterNodeIsAnEdge
+// ****************************************************************************
+nodes void iniNodeIsAnEdge(void) out (node node_is_an_edge) @ -6.0{
+  node_is_an_edge=false;
+}
+own outer nodes void iniOuterNodeIsAnEdge(void) out (node node_is_an_edge) @ -5.0{
+  node_is_an_edge=true;
+}
+
+void sync(void) @ -7.0{
+  synchronize(ccc);
+  synchronize(node_area);
+  synchronize(node_is_an_edge);
+}
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+// ****************************************************************************
+// * Remplissage du RHS
+// ****************************************************************************
+void rhsInit(void) @ 1.0{
+  ℵ rhs reset;
+}
+own cells void setRhsCellValues(void) in (cell cell_density_re,
+                                          cell cell_density_im) @ 1.1{
+  Real re=cell_density_re;
+  Real im=cell_density_im;
+  ℵ rhs setValue(cell_density_re,this, +re);
+  ℵ rhs setValue(cell_density_im,this, -im);
+}
+own nodes void setRhsNodeValues(void) in (node node_density_re,
+                                          node node_density_im) @ 1.2{
+  Real re=node_density_re;
+  Real im=node_density_im;
+  ℵ rhs setValue(node_density_re,this, +re);
+  ℵ rhs setValue(node_density_im,this, -im);
+}
+own outer faces void setRhsFaceValues(void) in (face edge_density_re,
+                                                face edge_density_im) @ 1.3{
+  Real re=edge_density_re;
+  Real im=edge_density_im;
+  ℵ rhs setValue(edge_density_re,this, +re);
+  ℵ rhs setValue(edge_density_im,this, -im);
+}
+
+// ****************************************************************************
+// On met lors des 'option_ini_iterations' premières itérations à 'option_ini_borders'
+// les noeuds et faces de l'ensemble des bords
+// ****************************************************************************
+own outer faces void setStdRhsEdgesOnBorders(void) in (face edge_density_re,
+                                                       face edge_density_im)@ 1.4{
+  const double ini=(GlobalIteration>option_ini_iterations)?0.0:option_ini_borders;
+  ℵ rhs setValue(edge_density_re,this, +ini);
+  ℵ rhs setValue(edge_density_im,this, -ini); 
+  if (node(0).isOwn()){
+    ℵ rhs setValue(node_density_re,node(0), +ini);
+    ℵ rhs setValue(node_density_im,node(0), -ini);
+  }
+  if (node(1).isOwn()){
+    ℵ rhs setValue(node_density_re,node(1), +ini);
+    ℵ rhs setValue(node_density_im,node(1), -ini);
+  }
+}
+//void dumpRhs(void) @ 1.5 { info()<<rhs; }
+
+
+// ********************************************************
+// * Initialisation ℵ
+// * Could be done as: 'alephInitialize @ 2;'
+// ********************************************************
+void getMatrixAndVectors(void) @ 2.0 { alephInitialize(); }
+
+// ****************************************************************************
+// * alphaCells
+// ****************************************************************************
+own cells void alphaCells(void) in (cell cell_area,
+                                    cell cell_matrix_idx_re,
+                                    cell cell_matrix_idx_im,
+                                    face edge_density_im,
+                                    face edge_density_re) @ 3.1{
+  register Real αc, Σα=0.0;
+  foreach face {
+    αc=α/cell_area;
+    Σα+=sdivs/Cosθ;
+    if (nbCell==2){
+      if (frontCell==*this){
+        ℵ matrix addValue(cell_density_re,this, cell_density_im,backCell, αc);
+        ℵ matrix addValue(cell_density_im,this, cell_density_re,backCell, αc);
+      } else{
+        ℵ matrix addValue(cell_density_re,this, cell_density_im,frontCell, αc);
+        ℵ matrix addValue(cell_density_im,this, cell_density_re,frontCell, αc);
+      }
+    }
+    if (nbCell==1){
+      ℵ matrix addValue(cell_density_re,this, edge_density_im,f, αc);
+      ℵ matrix addValue(cell_density_im,this, edge_density_re,f, αc);
+    }
+  }
+  Σα*=(δt/cell_area);
+  ℵ matrix addValue(cell_density_re,this, cell_density_re,this, +1.0);
+  ℵ matrix addValue(cell_density_re,this, cell_density_im,this, -Σα);
+  ℵ matrix addValue(cell_density_im,this, cell_density_re,this, -Σα);
+  ℵ matrix addValue(cell_density_im,this, cell_density_im,this, -1.0);
+}
+
+// ****************************************************************************
+// * betaCells
+// ****************************************************************************
+own cells void betaCells(void) in (cell cell_area,
+                                   cell cell_matrix_idx_re,
+                                   cell cell_matrix_idx_im,
+                                   node node_density_re,
+                                   node node_density_im) @ 3.2{
+  Node nD,nE;
+  Cell cP;
+  foreach face{
+    Real βc=β/cell_area;
+    nD=(node(0).uniqueId()==nodeLowId)?node(0):node(1);
+    nE=(node(0).uniqueId()==nodeLowId)?node(1):node(0);
+    cP=(cell(0).uniqueId()==cellLowId)?cell(0):(nbCell==2)?cell(1):cell(0);
+    if (*this!=cP) βc*=-1.;
+    ℵ matrix addValue(cell_density_re,this, node_density_im,nE, +βc);
+    ℵ matrix addValue(cell_density_im,this, node_density_re,nE, +βc);
+    ℵ matrix addValue(cell_density_re,this, node_density_im,nD, -βc);
+    ℵ matrix addValue(cell_density_im,this, node_density_re,nD, -βc);
+  }
+}
+
+// ****************************************************************************
+// * gammaCells
+// ****************************************************************************
+own nodes void gammaNodes(void) in (node node_area,
+                                    node node_is_an_edge,
+                                    cell cell_density_re,
+                                    cell cell_density_im) @ 3.3{
+  Node nD,nE;
+  Cell cP,cQ;
+  if (node_is_an_edge==true) continue;
+  foreach face {
+    Real γn=γ/node_area;
+    nD=(node(0).uniqueId()==nodeLowId)?node(0):node(1);
+    nE=(node(0).uniqueId()==nodeLowId)?node(1):node(0);
+    cP=(cell(0).uniqueId()==cellLowId)?cell(0):(nbCell==2)?cell(1):cell(0);
+    cQ=(cell(0).uniqueId()==cellLowId)?(nbCell==2)?cell(1):cell(0):cell(0);
+    if (cP==cQ) fatal("Gamma", "Should have been filtered");
+    if (*this!=nD) γn*=-1.;
+    ℵ matrix addValue(node_density_re,this, cell_density_im,cQ, +γn);
+    ℵ matrix addValue(node_density_im,this, cell_density_re,cQ, +γn);
+    ℵ matrix addValue(node_density_re,this, cell_density_im,cP, -γn);
+    ℵ matrix addValue(node_density_im,this, cell_density_re,cP, -γn);
+  }
+}
+
+// ****************************************************************************
+// * deltaCells
+// ****************************************************************************
+own nodes void deltaNodes(void) in (node node_area,
+                                    node node_is_an_edge) @ 3.4{
+  register Real δn,Σδ=0.;
+  if (node_is_an_edge==true) continue;
+  foreach face {
+    δn=δ/node_area;
+    Σδ+=1.0/(Cosθ*sdivs);
+    ℵ matrix addValue(node_density_re,this,
+                      node_density_im,(node(0)==*this)?node(1):node(0),
+                      +δn);
+    ℵ matrix addValue(node_density_im,this,
+                      node_density_re,(node(0)==*this)?node(1):node(0),
+                      +δn);
+  }
+  Σδ*=δt/node_area;
+  ℵ matrix addValue(node_density_re,this, node_density_re,this, +1.0);
+  ℵ matrix addValue(node_density_re,this, node_density_im,this, -Σδ);
+  ℵ matrix addValue(node_density_im,this, node_density_re,this, -Σδ);
+  ℵ matrix addValue(node_density_im,this, node_density_im,this, -1.0);
+}
+ 
+
+// ****************************************************************************
+// * Conditions de Dirichlet
+// ****************************************************************************
+own outer faces void dirichletFaces(void) in (face edge_density_re,
+                                              face edge_density_im) @ 3.5{
+  ℵ matrix addValue(edge_density_re,this, edge_density_re,this, +1.0);
+  ℵ matrix addValue(edge_density_im,this, edge_density_im,this, +1.0);
+}
+own nodes void dirichletNodes(void) in (face edge_density_re,
+                                              face edge_density_im) @ 3.6{
+  if (node_is_an_edge==false) continue;
+  ℵ matrix addValue(node_density_re,this, node_density_re,this, +1.0);
+  ℵ matrix addValue(node_density_im,this, node_density_im,this, +1.0);
+}
+
+// ****************************************************************************
+// * ℵ Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+own cells void getCellResults(void) out (cell cell_density_re,
+                                         cell cell_density_im) @ 4.1{
+  cell_density_re=ℵ lhs getValue(cell_density_re,this);
+  cell_density_im=ℵ lhs getValue(cell_density_im,this);
+}
+own nodes void getNodeResults(void) out (node node_density_re,
+                                         node node_density_im) @ 4.2{
+  node_density_re=ℵ lhs getValue(node_density_re,this);
+  node_density_im=ℵ lhs getValue(node_density_im,this);
+}
+own cells void saveCellDensity(void) in (cell cell_density_re,
+                                         cell cell_density_im)
+                                    out (cell cell_density) @ 4.3{
+  cell_density = sqrt(cell_density_re*cell_density_re +
+                      cell_density_im*cell_density_im);
+}
+own nodes void saveNodeDensity(void) in (node node_density_re,
+                                         node node_density_im)
+                                    out (node node_density) @ 4.3{
+  node_density = sqrt(node_density_re*node_density_re +
+                      node_density_im*node_density_im);
+}
+
+// ****************************************************************************
+// * Sync & test for Quit
+// ****************************************************************************
+void testForQuit(void) @ 5.0{
+  synchronize(cell_density);
+  synchronize(cell_density_re);
+  synchronize(cell_density_im);
+  synchronize(node_density);
+  synchronize(node_density_re);
+  synchronize(node_density_im);
+  if (GlobalIteration >= option_max_iterations) exit;
+}

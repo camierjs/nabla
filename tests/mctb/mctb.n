@@ -1,0 +1,1124 @@
+with particles;
+
+
+// ****************************************************************************
+// * DEFINES
+// ****************************************************************************
+#define MAXREAL DBL_MAX
+#define UT_INT32_MAX 0x7FFFFFFFl
+
+#define MAX_PARTICLES 10
+#define DIMMAX 3
+#define MC_COORD_DIR_MAX 4
+#define MC_COS_DIR_MAX DIMMAX
+
+#define EPS_PRECIS 1e-6
+#define VS 16
+#define __USE_GNU
+#define MAXREAL DBL_MAX
+
+#define bc_undefined        0
+#define bc_vaccum           1
+#define bc_specular         2
+#define bc_incoming_current 3
+#define bc_MAX              4
+
+#define dir_x 0
+#define dir_y 1
+#define dir_z 2
+
+#define left  0
+#define right 1
+
+// Reference frame axis
+#define ref_x   0
+#define ref_y   1
+#define ref_z   2
+#define ref_MAX 3
+
+// Cylindrical frame axis (particle-comoving frame)
+#define cyl_z    0 //!< cyl_z <=> ref_z
+#define cyl_r    1
+#define cyl_cost 2 //!< cos(\theta)
+#define cyl_sint 3 //!< sin(\theta)
+#define cyl_MAX  4
+
+#define _four_pi 4.0*M_PI
+#define _two_pi  2.0*M_PI
+
+#define SEED_DEF  ((seed_t)(1) << 33)
+
+#define ev_undefined  0
+#define ev_census     1
+#define ev_cell_exit  2
+#define ev_scattering 3
+#define ev_MAX        4
+
+#define true  1
+#define false 0
+
+
+// ****************************************************************************
+// * TYPEDEF~DEFINE
+// ****************************************************************************
+#define seed_t Int64
+
+
+// ****************************************************************************
+// * OPTIONS
+// ****************************************************************************
+options{
+  // MC simulation parameters
+  Integer dim            = 2;       // Problem dimension
+  Integer NX             = 280;     // Number of cells in X direction
+  Integer NY             = 80;      // Number of cells in Y direction
+  Real min_coord_x       = 0.0;     // Left corner coordinates
+  Real min_coord_y       = 0.0;     // Down corner coordinates
+  Real max_coord_x       = 1.0;     // Right corner coordinates
+  Real max_coord_y       = 0.12;    // Up corner coordinates
+  Real absorption_rate   = 0.1;     // sigma_a = absorption_rate * sigma_t, sigma_s = sigma_t - sigma_a
+  Real vsrc_sig_ratio    = 1.8e-18; // = volumic source term vol_src/(sigma_t*dt)
+  Real bnd_src           = 2.1e-15; // Surfacic source term for the left boundary ([Weight]/[S]/[T])
+  Real velocity          = 3e2;     // particle velocity (same velocity for all particles)
+  Integer Nmc_ini        = 100000;  // Number of MC particles (as a goal)
+  Real dt_cycle          = 1.e-2;   // Time step
+  Integer nb_of_iter     = 1;       // Number of time step iterations
+  Integer bc_x_L         = bc_incoming_current;
+  Integer bc_x_R         = bc_vaccum;
+  Integer bc_y_L         = bc_specular;
+  Integer bc_y_R         = bc_vaccum;
+  // TEST CASE DEFINITION
+  Real zc                = 0.5;  // cm
+  Real rc                = 0.0;  // cm
+  Real option_z0         = 0.1;  // cm
+  Real option_r0         = 0.06; // cm
+  Real cst_sigma_t0      = 1.e-1;
+  Real cst_sigma_t1      = 1.e+5;
+};
+
+ 
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Int64 c_vsrc_seed; // Volumic source seeds
+  Int64 c_bnd_seed;  // Boundary seeds
+  Real c_sigma_t;    // Total cross section
+  Real c_vol_src;    // Volumic source term ([Weight]/[V])
+  Real c_coord_z;
+  Real c_coord_r;
+  Real c_coord_comp;
+  Integer c_adjface[4];
+  // Tallies
+  Real c_Wa;          // Absorbed weight (calculated by track length estimator)
+  Int64 c_nb_of_scat; // Number of scattering during tracking
+  Int64 c_Wa_int64;
+  Real c_Wa_sig;
+  // Mesh info
+  Real c_volume;
+  // to particles
+  Real c_wmc;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux particules
+// ****************************************************************************
+particles{
+  Integer id;
+  Real3 r;//ρ;//coord
+  Real3 p_cosd;
+  Real wmc;
+  Int64 p_seed;
+  Real dt_census;
+  Integer face_entrance;
+  Bool mask;
+  Integer cell_ini;
+  Int64 seed_ini;
+  Real wmc_ini;
+  Real3 p_coord;
+  Real p_coord_z;
+  Real p_coord_r;
+  Real p_coord_cosΘ;
+  Real p_coord_sinΘ;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  // Variables for the MC simulation
+  Int64 mc_vars_seed_cur; // General seed
+  Integer Nmc;            // Total number of MC particles to track
+  Integer Ndim_X;
+  Integer Ndim_Y;
+  Real mesh_getStepDir_x; // δx
+  Real mesh_getStepDir_y; // δy
+  // Sampling
+  Real W_tot;Real W_pres;Real W_vsrc;Real W_bnd;
+  Real W_moy_pres;
+  Real W_moy_vsrc;
+  Real W_moy_bnd;
+  Integer Nmc_pres;
+  Integer Nmc_vsrc;
+  Integer Nmc_bnd;
+  Real step_cyl_comp; // space step in direction z
+  Real step_cyl_z; // space step in direction z
+  Real step_cyl_r; // space step in radial direction
+};
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+
+void ini(void) @ -10.0 {
+  mc_vars_seed_cur = SEED_DEF; // initial seed
+  Ndim_X=NX;
+  Ndim_Y=NY;
+  δt=dt_cycle;
+}
+
+
+// INITIAL CELL SEEDS CALCULATION
+cells void iniCellSeeds(void) @ -9.0 {
+  mc_vars_seed_cur=RNGGlobal_rsampling64(mc_vars_seed_cur);
+  c_vsrc_seed = c_bnd_seed = mc_vars_seed_cur;
+}
+
+
+cells void iniCellCrossSection(void) @ -8.0 {
+  const Real z = c_coord_z;
+  const Real _r = c_coord_r;
+  const Real rap_z = (z - zc) / option_z0;
+  const Real rap_r = (_r - rc) / option_r0;
+  const Real delta = 10.*( rap_z*rap_z + rap_r*rap_r - 1. );
+  c_sigma_t = cst_sigma_t0 + (cst_sigma_t1 - cst_sigma_t0) / (1. + exp(delta));
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ POURSUITE DES PARTICULES
+// ****************************************************************************
+void testForExit(void) @ 1.0{
+  if (GlobalIteration > nb_of_iter) exit;
+  //if (time > 1.0) exit;
+}
+
+
+cells void iniCellBeforeTracking(void) in (cell c_sigma_t)
+  out (cell c_vol_src, cell c_Wa, cell c_nb_of_scat, cell c_Wa_int64) @ 1.0 {
+  c_Wa=0.0;
+  c_nb_of_scat=c_Wa_int64=0;
+  c_vol_src = vsrc_sig_ratio * c_sigma_t * δt;
+}
+
+
+// PARTICLES SAMPLING 
+particles Real getTotalWmc(Real w) {
+  w+=wmc;
+  return w;
+}
+
+
+cells Real computeVolumicW(Real w){
+  //if (isBoundary()) continue;
+  w += c_vol_src * c_volume;
+  return w;
+}
+cells Real computeBoundaryW(Real w){
+  //if (!isBoundary()) continue;
+  w += c_vol_src * c_volume;
+  return w;
+}
+
+
+int sampl_int_RNGGlobal(const Real r_nb, seed_t *sampl_seed){
+  const int i_nb = (int)r_nb;
+  const Real R = r_nb - (Real)i_nb;
+  const Real Rsampl = RNGGlobal_rsampling(sampl_seed);
+  return (R > Rsampl ? i_nb+1 : i_nb);
+}
+int sampl_int_RNGCell(const Real r_nb, seed_t *sampl_seed){
+  const int i_nb = (int)r_nb;
+  const Real R = r_nb - i_nb;
+  const Real Rsampl = RNGCell_rsampling(sampl_seed);
+  return (R > Rsampl ? i_nb+1 : i_nb);
+}
+int sampl_int_RNGCell(const Real r_nb, seed_t sampl_seed){
+  return sampl_int_RNGCell(r_nb, &sampl_seed);
+}
+
+
+void mcSampling(void) @ 2.0{
+  Int64 _seed=mc_vars_seed_cur;
+  Real rNmc_pres,rNmc_vsrc,rNmc_bnd;
+  const Real bnd_src_dt = bnd_src * δt;
+
+  W_pres = computeVolumicW(0.0);
+  W_vsrc = computeBoundaryW(0.0);
+  W_bnd  = bnd_src_dt * M_PI * max_coord_x * max_coord_y;
+  W_tot= W_pres + W_vsrc + W_bnd ;
+  rNmc_pres = Nmc_ini * W_pres/W_tot;
+  rNmc_vsrc = Nmc_ini * W_vsrc/W_tot;
+  rNmc_bnd  = Nmc_ini * W_bnd /W_tot;
+  Nmc_pres = sampl_int_RNGGlobal(rNmc_pres, &_seed);
+  Nmc_vsrc = sampl_int_RNGGlobal(rNmc_vsrc, &_seed);
+  Nmc_bnd  = sampl_int_RNGGlobal(rNmc_bnd , &_seed);
+  mc_vars_seed_cur=_seed;
+  if (W_pres > 0 && Nmc_pres == 0) Nmc_pres = 1;
+  if (W_vsrc > 0 && Nmc_vsrc == 0) Nmc_vsrc = 1;
+  if (W_bnd  > 0 && Nmc_bnd  == 0) Nmc_bnd  = 1;
+
+  W_moy_pres = (Nmc_pres ? W_pres/Nmc_pres : 0.);
+  W_moy_vsrc = (Nmc_vsrc ? W_vsrc/Nmc_vsrc : 0.);
+  W_moy_bnd  = (Nmc_bnd  ? W_bnd /Nmc_bnd  : 0.);
+  
+  Nmc=0;
+  Nmc_pres = 0; // Present particles
+  Nmc_bnd  = 0; //Particles sampling on boundary
+  // TODO : russian roulette + splitting
+}
+
+
+cells void particlesSamplingOnBoundary(void){
+  const Real bnd_src_dt = bnd_src * δt;
+  Real coef_bnd  = 2. * M_PI * mesh_getStepDir_y;
+  int i;//,iface,ind_cart[DIMMAX] = {0, 0, 0};
+  Nmc_bnd  = 0;
+  if (!(W_moy_bnd>0.)) continue;
+  {
+    const Real S = coef_bnd  * coord[0].y;
+    const Real W_cell = bnd_src_dt * S;
+    const Real r_nb_partic = W_cell / W_moy_bnd ;
+    int nmc = sampl_int_RNGCell(r_nb_partic, c_bnd_seed);
+    c_bnd_seed = RNGCell_rsampling64(c_bnd_seed);
+    if (W_cell > 0. && nmc == 0) nmc = 1;
+    c_wmc = W_cell / nmc;
+    // Particles creation & initialization
+    for(i = 0 ; i < nmc ; i++) {
+      Real3 ρ;
+      particleAddToCell(i,uid,ρ);
+      Nmc_bnd=Nmc_bnd+1;
+      Nmc=Nmc+1;
+    }
+  }
+}
+particles void particleIniOnBoundary(void){
+  c_bnd_seed = RNGCell_rsampling64(c_bnd_seed);
+  seed_ini = c_bnd_seed;
+  p_seed = seed_ini;
+  // weight, position and direction
+  wmc = c_wmc;
+  samplingPositionOneParticOnFace(dir_x, left, *this, cell());
+  setNormalDirectionOnePartic(dir_x, left, *this,cell());
+  // for tracking
+  mask = true;
+  dt_census = δt * (Real)RNGPartic_rsampling(p_seed);
+  wmc_ini = wmc;
+  face_entrance = (dir_x * 2 + left);
+}
+
+
+cells void volumicSourceParticles(void){
+  Nmc_vsrc = 0;
+  if (!(W_moy_vsrc > 0.)) continue;
+  {
+    int inmc;
+    const Real W_cell = c_vol_src * c_volume;
+    const Real r_nb_partic = W_cell / W_moy_vsrc;
+    int nmc = sampl_int_RNGCell(r_nb_partic, c_vsrc_seed);
+    if (W_cell > 0. && nmc == 0) nmc = 1;
+    c_wmc = W_cell / nmc;
+    // Particles creation & initialization
+    for(inmc = 0 ; inmc < nmc ; inmc++){
+      Real3 ρ;
+      particleAddToCell(inmc,uid,ρ);
+      Nmc=Nmc+1;
+		Nmc_vsrc=Nmc_vsrc+1;
+    }
+  }
+}
+particles void volumicParticleIni(void){
+  c_vsrc_seed = RNGCell_rsampling64(c_vsrc_seed);
+  seed_ini = c_vsrc_seed;
+  p_seed = seed_ini;
+  // weight, position and direction
+  wmc = c_wmc;
+  samplingPositionOnePartic(*this, cell());
+  samplingIsotropicDirectionOnePartic(*this,cell());
+  // for tracking
+  mask = true;
+  dt_census = δt * RNGPartic_rsampling(p_seed);
+  wmc_ini = wmc;
+  face_entrance = -1;
+}
+
+void samplingDebugging(void){
+  printf("\n");
+  printf("\tParticles created : (Nmc, W)\n");
+  printf("\tTotal      : %9d, %.6e\n", Nmc,  W_tot);
+  printf("\tPresent    : %9d, %.6e\n", Nmc_pres, W_pres);
+  printf("\tVol.   src : %9d, %.6e\n", Nmc_vsrc, W_vsrc);
+  printf("\tBound. src : %9d, %.6e\n", Nmc_bnd , W_bnd );
+  printf("\n");
+}
+
+
+
+particles void trackVolumicParticles(void){
+	Real W = 0.;
+	int nb_partics_ev_max  = 0;
+	int nb_partics_patho   = 0;
+	int nb_partics_outside = 0;
+	int nb_partics_disable = 0;
+	int nb_partics_alive   = 0;
+	int nb_partics_killed  = 0;
+	//int bc_count[DIMMAX][2] = {{0, 0}, {0, 0}, {0, 0}};
+const Real ratio_w_wini = 1.e-3;
+	const Real cst_inv_vel = 1./velocity;
+	const int nb_ev_partic_max = 100000;
+	int nb_ev_census     = 0;
+	int nb_ev_cell_exit  = 0;
+	int nb_ev_scattering = 0;
+	int Nmc_10 = Nmc / 10 + 1;
+	int ipmc = 0;
+	int iNmc_10 = 0;
+	//int Ndim[DIMMAX];
+   Bool track_over = ((mask == false) || (dt_census == 0.));
+   // Particle tallies variables for the same cell
+   Real Wa_contrib = 0.;
+   Int64 nb_of_scat_contrib = 0;
+   const Real wmc_min = ratio_w_wini * wmc_ini;
+   int nb_ev_partic = 0;
+
+   if (track_over) continue;
+   do{ // until track_over == true
+     //const int nc = pmc->cell;
+     Real d_census, d_exit, d_scat, d_min;
+     int face_exit=0;
+     Real face_exit_coord[MC_COORD_DIR_MAX];
+     int event;
+     Bool disable_particle = false;
+     // cell number before exiting (in the case where event == ev_cell_exit)
+     //int nc_orig=0; 
+     // Cross sections
+     const Real sigma_t = c_sigma_t;
+     const Real sigma_a = absorption_rate * sigma_t;
+     const Real sigma_s = sigma_t - sigma_a;
+     // Distance to scattering
+     Real log_nb01_scat;
+     nb_ev_partic++;
+     do{
+       const Real nb01_scat = RNGPartic_rsampling(p_seed);
+       log_nb01_scat = log(nb01_scat);
+     } while( log_nb01_scat == 0. || isinf(log_nb01_scat) );
+     if (sigma_s > 0.)
+       d_scat = - log_nb01_scat / sigma_s;
+     else
+       d_scat = MAXDOUBLE;
+     // Distance in vaccum
+     d_census = dt_census*velocity; 
+     // Distance to the cell boundary
+     d_exit = distanceToCellExit(*this,cell(), face_exit, face_exit_coord);
+     if (face_exit < 0){
+       // Pb with the particle during trajectography
+       // The particle will be killed
+       nb_partics_patho++;
+       disable_particle = true;
+       event = ev_undefined;
+     }else{
+       // Event particle choice : scattering, cell exit or census ?
+       d_min = d_scat;
+       event = ev_scattering;
+       if (d_census < d_min){
+         d_min = d_census;
+         event = ev_census;
+       }
+       if (d_exit < d_min){
+         d_min = d_exit;
+         event = ev_cell_exit;
+       }
+     }
+     if (nb_ev_partic_max > 0 && nb_ev_partic > nb_ev_partic_max){
+       // To many events for this particle
+       // The particle will be killed
+       nb_partics_ev_max++;
+       disable_particle = true;
+       event = ev_undefined;	
+     }
+     if (event==ev_undefined){}
+     if (event==ev_census){
+       nb_ev_census++;
+       // Particle displacement
+       moveOnePartic(*this,cell(), d_min);
+       // Declare the particle inside the cell
+       face_entrance = -1;
+       // absorption tally in local cell
+       {
+         const Real dw = 
+           wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // census means particle's tracking is over for the time step
+       track_over = true;
+       dt_census = 0.;
+       // Accumulate tallies in mesh arrays
+       accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+     }
+     if (event==ev_cell_exit){
+       nb_ev_cell_exit++;
+       // Particle displacement EXACTLY on the exit cell face
+       putOneParticOnFace(*this,cell(), face_exit_coord);
+       // absorption tally in local cell
+       {
+         const Real dw = 
+           wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // Moving cell
+       {
+         Bool stays_in_cell = false;
+         int  dir_exit  =  (face_exit / 2);
+         int side_exit = (face_exit % 2);
+         int opp_side = (side_exit == left ? right : left);
+         //const int ind_face_exit = 0;//c_adjface[dir_exit][side_exit][nc_orig];
+         const Bool on_boundary = false; // (side_exit == left ? ind_face_exit == 0 : ind_face_exit == Ndim[dir_exit]);
+         //nc_orig = cell().localId();
+         if (on_boundary){
+           // Particle is in on a domain boundary
+           //bc_count[dir_exit][side_exit]++; // only for statistics
+           if (bc_vaccum || bc_incoming_current){
+             stays_in_cell = false;
+             nb_partics_outside++;
+             track_over = true;
+             // particle will be killed
+             mask = false;
+           }
+           if (bc_specular){
+             stays_in_cell = true;
+             bcSpecularOnePartic(dir_exit, *this,cell());
+             face_entrance = face_exit;
+           }
+         }else{
+           // Particle is in the middle of domain
+           //pmc->cell = _mesh.getNcv(dir_exit, side_exit, nc_orig);
+           face_entrance = dir_exit * 2 + opp_side;
+           }
+         if (!stays_in_cell){
+           // Accumulate tallies in mesh arrays
+           accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+         }
+       }
+       // Updating time to census
+       dt_census = fmax(0., dt_census - d_min*cst_inv_vel);
+     } 
+
+     if (event==ev_scattering){
+       nb_ev_scattering++;
+       // Particle displacement
+       moveOnePartic(*this,cell(), d_min);
+       // Declare the particle inside the cell
+       face_entrance = -1;
+       // absorption tally in local cell
+       {
+         const Real dw = 
+           wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // Scattering tally in local cell
+       {
+         nb_of_scat_contrib+=1;
+       }
+       // Sampling new direction 
+       samplingIsotropicDirectionOnePartic(*this,cell());
+       // Updating time to census
+       dt_census = fmax(0., dt_census - d_min*cst_inv_vel);
+     } 
+
+     // Is the weight too much low ?
+     if (wmc < wmc_min){
+       nb_partics_disable++;
+       disable_particle = true;
+     }
+
+     if (disable_particle){
+       //int nc_dis;
+       // the whole particle is absorbed in local cell
+       Wa_contrib +=wmc;
+       track_over = true;
+       mask = false;
+       //nc_dis = (event == ev_cell_exit ? nc_orig : 0/*cell*/);
+       // Accumulate tallies in mesh arrays
+       accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+     }
+   } while(!track_over);
+
+   if (mask){
+     nb_partics_alive++;
+     W += wmc;
+   }else{
+     nb_partics_killed++;
+   }
+   ipmc++;
+   if (ipmc % Nmc_10 == 0) {
+     iNmc_10++;
+     printf("%3d %%\n", iNmc_10*10);
+   }else if (ipmc == Nmc){
+     printf("100 %%\n");
+   }	    
+}
+
+
+particles void trackBoundaryParticles(void){
+	Real W = 0.;
+	int nb_partics_ev_max  = 0;
+	int nb_partics_patho   = 0;
+	int nb_partics_outside = 0;
+	int nb_partics_disable = 0;
+	int nb_partics_alive   = 0;
+	int nb_partics_killed  = 0;
+	//int bc_count[DIMMAX][2] = {{0, 0}, {0, 0}, {0, 0}};
+	const Real ratio_w_wini = 1.e-3;
+	const Real cst_inv_vel = 1./velocity;
+	const int nb_ev_partic_max = 100000;
+	int nb_ev_census     = 0;
+	int nb_ev_cell_exit  = 0;
+	int nb_ev_scattering = 0;
+	int Nmc_10 = Nmc / 10 + 1;
+	int ipmc = 0;
+	int iNmc_10 = 0;
+	//int Ndim[DIMMAX];
+   Bool track_over = ((mask == false) || (dt_census == 0.));
+   // Particle tallies variables for the same cell
+   Real Wa_contrib = 0.;
+   Int64 nb_of_scat_contrib = 0;
+   const Real wmc_min = ratio_w_wini * wmc_ini;
+   int nb_ev_partic = 0;
+   
+   if (track_over) continue;
+   
+   // Particle tallies variables for the same cell
+   do{ // until track_over == true
+     //const int nc = pmc->cell;
+     Real d_census, d_exit, d_scat, d_min;
+     int face_exit=0;
+     Real face_exit_coord[MC_COORD_DIR_MAX];
+     int event;
+     Bool disable_particle = false;
+     // cell number before exiting (in the case where event == ev_cell_exit)
+     //int nc_orig; 
+     // Cross sections
+     const Real sigma_t = c_sigma_t;
+     const Real sigma_a = absorption_rate * sigma_t;
+     const Real sigma_s = sigma_t - sigma_a;
+     // Distance to scattering
+     Real log_nb01_scat;
+     nb_ev_partic++;
+     do{
+       const Real nb01_scat = RNGPartic_rsampling(p_seed);
+       log_nb01_scat = log(nb01_scat);
+     }while( log_nb01_scat == 0. || isinf(log_nb01_scat) );
+     if (sigma_s > 0.)
+       d_scat = - log_nb01_scat / sigma_s;
+     else
+       d_scat = MAXDOUBLE;
+     // Distance in vaccum
+     d_census = dt_census*velocity; 
+     // Distance to the cell boundary
+     d_exit = distanceToCellExit(*this,cell(), face_exit, face_exit_coord);
+     if (face_exit < 0){
+       // Pb with the particle during trajectography
+       // The particle will be killed
+       nb_partics_patho++;
+       disable_particle = true;
+       event = ev_undefined;
+     }else{
+       // Event particle choice : scattering, cell exit or census ?
+       d_min = d_scat;
+       event = ev_scattering;
+       if (d_census < d_min){
+         d_min = d_census;
+         event = ev_census;
+       }
+       if (d_exit < d_min){
+         d_min = d_exit;
+         event = ev_cell_exit;
+       }
+     }
+     if (nb_ev_partic_max > 0 && nb_ev_partic > nb_ev_partic_max){
+       // To many events for this particle
+       // The particle will be killed
+       nb_partics_ev_max++;
+       disable_particle = true;
+       event = ev_undefined;	
+
+     }
+
+     if (event==ev_undefined){}
+     if (event==ev_census){
+       nb_ev_census++;
+       // Particle displacement
+       moveOnePartic(*this,cell(), d_min);
+       // Declare the particle inside the cell
+       face_entrance = -1;
+       // absorption tally in local cell
+       {
+         const Real dw = wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // census means particle's tracking is over for the time step
+       track_over = true;
+       dt_census = 0.;
+       // Accumulate tallies in mesh arrays
+       accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+     }
+
+     if (event==ev_cell_exit){
+       nb_ev_cell_exit++;
+       // Particle displacement EXACTLY on the exit cell face
+       putOneParticOnFace(*this,cell(), face_exit_coord);
+       // absorption tally in local cell
+       {
+         const Real dw = 
+           wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // Moving cell
+       {
+         Bool stays_in_cell = false;
+         int dir_exit = (face_exit / 2);
+         int side_exit = (face_exit % 2);
+         int opp_side = (side_exit == left ? right : left);
+         //const int ind_face_exit = _mesh.c_adjface[dir_exit][side_exit][nc_orig];
+         const Bool on_boundary = true;// (side_exit == left ? ind_face_exit == 0 : ind_face_exit == Ndim[dir_exit]);
+         //nc_orig = nc;
+         if (on_boundary){
+           // Particle is in on a domain boundary
+           //bc_count[dir_exit][side_exit]++; // only for statistics
+           if (bc_vaccum || bc_incoming_current){
+             stays_in_cell = false;
+             nb_partics_outside++;
+             track_over = true;
+             // particle will be killed
+             mask = false;
+           }
+           if (bc_specular){
+             stays_in_cell = true;
+             bcSpecularOnePartic(dir_exit, *this,cell());
+             face_entrance = face_exit;
+           }
+         }else{
+           // Particle is in the middle of domain
+           //pmc->cell = _mesh.getNcv(dir_exit, side_exit, nc_orig);
+           face_entrance = dir_exit * 2 + opp_side;
+           }
+         if (!stays_in_cell){
+           // Accumulate tallies in mesh arrays
+           accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+         }
+       }
+       // Updating time to census
+       dt_census = fmax(0., dt_census - d_min*cst_inv_vel);
+     }
+
+     if (event==ev_scattering){
+       nb_ev_scattering++;
+       // Particle displacement
+       moveOnePartic(*this,cell(), d_min);
+       // Declare the particle inside the cell
+       face_entrance = -1;
+       // absorption tally in local cell
+       {
+         const Real dw = 
+           wmc * (1. - exp( - sigma_a * d_min));
+         wmc -= dw;
+         Wa_contrib += dw;
+       }
+       // Scattering tally in local cell
+       {
+         nb_of_scat_contrib+=1;
+       }
+       // Sampling new direction 
+       samplingIsotropicDirectionOnePartic(*this,cell());
+       // Updating time to census
+       dt_census = fmax(0., dt_census - d_min*cst_inv_vel);
+     }
+
+     // Is the weight too much low ?
+     if (wmc < wmc_min) {
+       nb_partics_disable++;
+       disable_particle = true;
+     }
+
+     if (disable_particle){
+       //int nc_dis;
+       // the whole particle is absorbed in local cell
+       Wa_contrib += wmc;
+       track_over = true;
+       mask = false;
+       //nc_dis = (event == ev_cell_exit ? 0 : 0/*pmc->cell*/);
+       // Accumulate tallies in mesh arrays
+       accuMeshCell(cell(), Wa_contrib, nb_of_scat_contrib);
+     }
+   } while(!track_over);
+   if (mask){
+     nb_partics_alive++;
+     W += wmc;
+   }else{
+     nb_partics_killed++;
+   }
+   ipmc++;
+   if (ipmc % Nmc_10 == 0){
+     iNmc_10++;
+     printf("%3d %%\n", iNmc_10*10);
+   }else if (ipmc == Nmc){
+     printf("100 %%\n");
+   }	 
+}
+
+/*void trackingStatistics(void){
+  printf("Tracking statistics :\n");
+  printf("\n");
+  printf("\tNb. of particles :\n");
+  printf("\t\talive   : %d\n", nb_partics_alive);
+  printf("\t\tkilled  : %d\n", nb_partics_killed);
+  printf("\t\tdisable : %d\n", nb_partics_disable);
+  printf("\t\tpatho   : %d\n", nb_partics_patho);
+  printf("\t\tev max  : %d\n", nb_partics_ev_max);
+  printf("\t\toutside : %d\n", nb_partics_outside);
+  printf("\t\t\tXL : %d\n", bc_count[dir_x][left]);
+  printf("\t\t\tXR : %d\n", bc_count[dir_x][right]);
+  printf("\t\t\tYL : %d\n", bc_count[dir_y][left]);
+  printf("\t\t\tYR : %d\n", bc_count[dir_y][right]);
+  printf("\n");
+  printf("\tNb. of events :\n");
+  printf("\t\tcensus    : %d\n", nb_ev_census);
+  printf("\t\tcell exit : %d\n", nb_ev_cell_exit);
+  printf("\t\tscattering: %d\n", nb_ev_scattering);
+  printf("\n");
+  printf("\tTotal weight : %.6e\n", W);
+  printf("\n");
+  }*/
+
+
+cells void timeStepTermination(void){
+  Real Wa_tot = 0.;
+  const Real inv_vol = 1./c_volume;
+  c_Wa = swtToReal(W_tot, c_Wa_int64);
+  Wa_tot += c_Wa;
+  c_Wa *= inv_vol;
+  c_Wa_sig = c_Wa / c_sigma_t;
+}
+
+
+
+
+// ****************************************************************************
+// * Trajecto2DAxi
+// ****************************************************************************
+void samplingPositionOnePartic(Particle p, Cell c){
+  const Real sampl_Z = RNGPartic_rsampling(p_seed[p]);
+  const Real sampl_R = RNGPartic_rsampling(p_seed[p]);
+  const Real sampl_T = RNGPartic_rsampling(p_seed[p]);
+  const Real Θ = _two_pi*sampl_T;
+  p_coord_z[p] = c_coord_z[c] + step_cyl_z*(sampl_Z - 0.5);
+  p_coord_r[p] = c_coord_r[c] + step_cyl_r*(sampl_R - 0.5);
+  p_coord_cosΘ[p] = cos(Θ);
+  p_coord_sinΘ[p] = sin(Θ);
+}
+
+void samplingPositionOneParticOnFace(int dir, int side, Particle p, Cell c){
+  int cyl_main = (dir == dir_x ? cyl_z : cyl_r);
+  int cyl_comp = (dir == dir_x ? cyl_r : cyl_z);
+  const Real sampl_comp = RNGPartic_rsampling(p_seed[p]);
+  const Real sampl_T    = RNGPartic_rsampling(p_seed[p]);
+  const int ind_face = 0;//c_adjface[dir][side][nc];
+  const Real coord_face = getAxisCoord(dir, ind_face);
+  const Real theta = _two_pi*sampl_T;
+  p_coord[p][cyl_main] = coord_face;
+  p_coord[p][cyl_comp] = c_coord_comp[c] + step_cyl_comp*(sampl_comp - 0.5);
+  p_coord_cosΘ[p] = cos(theta);
+  p_coord_sinΘ[p] = sin(theta);
+}
+
+void samplingIsotropicDirectionOnePartic(Particle p, Cell c){
+  const Real φ = _two_pi*RNGPartic_rsampling(p_seed[p]);
+  const Real cosΘ = 2.0*RNGPartic_rsampling(p_seed[p]) - 1.0;
+  const Real sinΘ = sqrt(1. - cosΘ*cosΘ);
+  p_cosd[p].x = sinΘ*cos(φ);
+  p_cosd[p].y = sinΘ*sin(φ);
+  p_cosd[p].z = cosΘ;
+}
+
+void setNormalDirectionOnePartic(int dir, int side, Particle p, Cell c){
+  const Real sign = (side == left ? +1 : -1);
+  if (dir==cyl_z) {
+    p_cosd[p].x = 0.; 
+    p_cosd[p].y = 0.;
+    p_cosd[p].z = sign;
+  }
+  if (dir==cyl_r) {
+    p_cosd[p].x = sign*p_coord_cosΘ[p];
+    p_cosd[p].y = sign*p_coord_sinΘ[p];
+    p_cosd[p].z = 0.;
+  }
+}
+
+void bcSpecularOnePartic(int dir, Particle p, Cell c){
+  if (dir == cyl_r)	{
+    const Real ctheta = p_coord_cosΘ[p];
+    const Real stheta = p_coord_sinΘ[p];
+    const Real cos_2theta = 2.*ctheta*ctheta - 1.;
+    const Real sin_2theta = 2.*ctheta*stheta;
+    const Real alpha = p_cosd[p][ref_x];
+    const Real beta  = p_cosd[p][ref_y];
+    p_cosd[p][ref_x] = -alpha*cos_2theta - beta*sin_2theta;
+    p_cosd[p][ref_y] = -alpha*sin_2theta + beta*cos_2theta;
+  } else { // dir_traj_2DAxi(dir) == cyl_z
+    p_cosd[p][ref_z] = -p_cosd[p][ref_z];
+  }
+}
+
+void moveOnePartic(Particle p, Cell c, const Real d_displ){
+  const Real x = p_coord_r[p]*p_coord_cosΘ[p] + p_cosd[p][ref_x]*d_displ;
+  const Real y = p_coord_r[p]*p_coord_sinΘ[p] + p_cosd[p][ref_y]*d_displ;
+  const Real z = p_coord_z[p]                 + p_cosd[p][ref_z]*d_displ;
+  p_coord_z[p]    = z;
+  p_coord_r[p]    = sqrt(x*x + y*y);
+  p_coord_cosΘ[p] = x/p_coord_r[p];
+  p_coord_sinΘ[p] = y/p_coord_r[p];
+}
+
+void putOneParticOnFace(Particle p, Cell c, Real face_coord[MC_COORD_DIR_MAX]){
+  p_coord_z[p]    = face_coord[cyl_z];
+  p_coord_r[p]    = face_coord[cyl_r];
+  p_coord_cosΘ[p] = face_coord[cyl_cost];
+  p_coord_sinΘ[p] = face_coord[cyl_sint];
+}
+
+Real distanceToCellExit(Particle p, Cell c, int face_exit, Real face_exit_coord[4]){
+  //const int nc = pmc.cell;
+  Real d_exit = MAXDOUBLE;
+  const Real alpha = p_cosd[p][ref_x];
+  const Real beta  = p_cosd[p][ref_y];
+  const Real gamma = p_cosd[p][ref_z];
+  const Real R0 = p_coord[p][cyl_r];
+  const Real x0 = R0*p_coord[p][cyl_cost];
+  const Real y0 = R0*p_coord[p][cyl_sint];
+  const Real z0 = p_coord[p][cyl_z];
+  const Real a = alpha*alpha + beta*beta;
+  const Real b = 2*(x0*alpha + y0*beta);
+  const Real c_red = R0*R0;
+  const Real fabs_a     = fabs(a);
+  const Real fabs_gamma = fabs(gamma);
+  int  dir_exit  = dir_x;
+  int side_exit = left;
+  //Bool found = false;
+  if (fabs_a > EPS_PRECIS){
+    int side;
+    const Real inv_2a = 0.5 / a;
+    for(side = 0 ; side < 2 ; side++) {
+      const int ind_face = c_adjface[c][dir_y];
+      const Real R = getAxisCoord(dir_y, ind_face);
+		const int face_cur = dir_y * 2 + side;
+      if (face_cur == face_entrance[p]) { 
+        /*
+          La particule se found déjà sur le cylindre R
+          On cherche à résoudre l'équation linéaire:
+          a*s + b = 0, On exclut s < 0
+        */
+        const Real s = -2.*b*inv_2a;
+        if (s > 0. && s < d_exit) {
+          const Real x = x0 + s*alpha;
+          const Real y = y0 + s*beta;
+          d_exit = s;
+          dir_exit = dir_y;
+          side_exit = (int)side;
+          face_exit = dir_exit * 2 + side_exit;
+          face_exit_coord[cyl_r] = R0;
+          // IMPORTTANT : pour éviter des erreurs numériques,
+          // on ne recalcule pas pos_face[cyl_r] comme etant sqrt(x**2 + y**2),
+          // mais on l'affecte au rayon EXACT (numériquement parlant) de la face
+          face_exit_coord[cyl_z] = z0 + s*gamma;
+          face_exit_coord[cyl_cost] = x/R0;
+          face_exit_coord[cyl_sint] = y/R0;
+          //found = true;
+        }
+		}else if (R == R0){
+        d_exit = 0;
+        dir_exit = dir_y;
+        side_exit = (int)side;
+        face_exit = dir_exit * 2 + side_exit;
+        face_exit_coord[cyl_r]    = p_coord_r[p];
+        face_exit_coord[cyl_z]    = p_coord_z[p];
+        face_exit_coord[cyl_cost] = p_coord_cosΘ[p];
+        face_exit_coord[cyl_sint] = p_coord_sinΘ[p];
+        //found = true;
+		}else{
+        /*
+          On cherche à résoudre le trinome du second degré
+          a*s^2 + b*s + c = 0
+          qui correspond à l'intersection entre la droite de vecteur directeur (P0, n)
+          avec le cylindre infini de rayon R et d'axis Oz
+          Avec P0 = (x0, y0, z0) est la position initiale de la particule
+          et n = (alpha, beta, gamma) est le cosinus directeur
+          s (l'inconnue) est l'abscisse curviligne sur cette droite, dont l'origine est P0
+          La solution s négative ne peut pas être retenue (déplacement arrière)
+          s = 0 ne peut pas être retenue car cela signifie que P0 est déjà sur le cyclindre
+          s > 0 donne la distance de la particule à la sortie du cyclindre R
+        */
+        const Real R_2 = R*R;
+        const Real c = c_red - R_2;
+        const Real fabs_c = fabs(c);
+        const Real discr = b*b - 4*a*c;
+        if (fabs_c < EPS_PRECIS * R_2){
+          face_exit = -1;
+          return -1.;
+        }
+        if (discr > 0. && discr < EPS_PRECIS*fabs_c*fabs_c){
+          face_exit = -1;
+          return -1.;
+        }else if (discr > 0.) {
+          const Real sqrt_discr = sqrt(discr);
+          const Real s1 = (-b + sqrt_discr) * inv_2a;
+          const Real s2 = (-b - sqrt_discr) * inv_2a;
+          const Real s_nul = EPS_PRECIS * R;
+          if ((s1 > 0. && s1 < s_nul) || (s2 > 0. && s2 < s_nul)){
+            face_exit = -1;
+            return -1.;
+          }
+          if (s1 > s_nul || s2 > s_nul) {
+            Real s; // la future solution
+            if (s1 > s_nul && s2 > s_nul) {
+              s = min(s1, s2);
+            } else {
+              s = max(s1, s2);
+            }
+            if (s < d_exit) {
+              const Real x = x0 + s*alpha;
+              const Real y = y0 + s*beta;
+              d_exit = s;
+              dir_exit = dir_y;
+              side_exit = (int)side;
+              face_exit = dir_exit * 2 + side_exit;
+              face_exit_coord[cyl_r] = R;
+              // IMPORTANT : pour éviter des erreurs numériques,
+              // on ne recalcule pas pos_face[cyl_r] comme etant sqrt(x**2 + y**2),
+              // mais on l'affecte au rayon EXACT (numériquement parlant) de la face
+              face_exit_coord[cyl_z] = z0 + s * gamma;
+              face_exit_coord[cyl_cost] = x/R;
+              face_exit_coord[cyl_sint] = y/R;
+              //found = true;
+            }
+          } // else, pas de solution acceptable (distance négative ou nulle)                
+        } /*
+            else, 
+            soit discr nul => une seule solution
+            => la droite est tangente au cylindre
+            => la particule ne sort pas par ce cylindre => on ne retient pas cette solution
+            soit discr neg => pas de solution => pas d'intersection
+          */
+      }
+    }
+  }
+  else if (fabs_a > 0. && fabs_a <= EPS_PRECIS){
+    face_exit = -1;
+    return -1.;
+  }
+  if (fabs_gamma > EPS_PRECIS){
+    int side;
+    for(side = 0 ; side < 2 ; side++) {
+      const int ind_face = c_adjface[c][dir_x];
+      const Real Z = getAxisCoord(dir_x, ind_face);
+      const Real s = (Z - z0) / gamma; // abscisse curviligne du point d'intersection avec le plan
+      if (s > 0. && s < d_exit) {
+        const Real x = x0 + s*alpha;
+        const Real y = y0 + s*beta;
+        d_exit = s;
+        dir_exit = dir_x;
+        side_exit = (int)side;
+        face_exit = dir_exit * 2 + side_exit;
+        face_exit_coord[cyl_r]    = sqrt(x*x + y*y);
+        face_exit_coord[cyl_z]    = Z;
+        face_exit_coord[cyl_cost] = x/face_exit_coord[cyl_r];
+        face_exit_coord[cyl_sint] = y/face_exit_coord[cyl_r];
+        //found = true;
+      }
+    }
+  }else if (fabs_gamma > 0.)	{
+    face_exit = -1;
+    return -1.;
+  }
+  //assert(found);
+  return d_exit;
+}
+
+/*!
+ * \brief Accumulate one-cell-tallies in mesh arrays
+ * \param[in]    nc                 Cell number
+ * \param[inout] Wa_contrib         (IN) Absorbed weight tally. (OUT) Zero
+ * \param[inout] nb_of_scat_contrib (IN) Number of scattering tally. (OUT) Zero
+ */
+void accuMeshCell(Cell c, Real Wa_contrib, Int64 nb_of_scat_contrib){
+  c_Wa_int64[c] += realToSwt(W_tot,Wa_contrib);
+  Wa_contrib = 0.;
+  c_nb_of_scat[c] += nb_of_scat_contrib;
+  nb_of_scat_contrib = 0;
+}
+
+
+
+
+// ****************************************************************************
+// * RNG seed coded on 64 bits
+// ****************************************************************************
+// RNGGlobal is RandomReal<RNG64v2> which comes from G=3512401965023503517ull, C=0, P=1<<63
+inline seed_t RNGGlobal_rsampling64(seed_t Si) {
+  return (3512401965023503517ull*Si + 0) % (1ull<<63);
+}
+inline Real RNGGlobal_rsampling(seed_t *seed) {
+  *seed = RNGGlobal_rsampling64(*seed);
+  return *seed / (Real)(1ull << 63);
+}
+
+// RNGCell is RandomReal<RNG64> which comes from G=9219741426499971445ull, C=1, P=1<<63
+inline seed_t RNGCell_rsampling64(seed_t Si) {
+  return (9219741426499971445ull*Si + 1) % (1ull<<63);
+}
+inline seed_t RNGCell_rsampling(seed_t *seed) {
+  *seed = RNGCell_rsampling64(*seed);
+  return *seed / (Real)(1ull << 63);
+}
+
+// RNGPartic is RandomReal<RNG64v1> which comes frome G=1987591058829310733ull, C=2, P=1<<63
+inline seed_t RNGPartic_rsampling64(seed_t Si) {
+  return (1987591058829310733ull*Si + 2) % (1ull<<63);
+}
+inline seed_t RNGPartic_rsampling(seed_t *seed) {
+  *seed = RNGPartic_rsampling64(*seed);
+  return *seed / (Real)(1ull << 63);
+}
+inline seed_t RNGPartic_rsampling(seed_t seed) {
+  return RNGPartic_rsampling(&seed);
+}
+Real swtToReal(Real max_value, Real value){
+  Int64 max_int64 = (Int64)-1;
+  Real ratio = max_value/(Real)max_int64;
+  return ((Real)value)*ratio;
+}
+Int64 realToSwt(Real max_value, Real value){
+  Int64 max_int64 = (Int64)-1;
+  Real inverted_ratio = (Real)max_int64/max_value;
+  return (Int64)(value*inverted_ratio);
+}
+
+Real getAxisCoord(int dir, int ind){
+  return 0.0;//_axis[dir][ind];
+}

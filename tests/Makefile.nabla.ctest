@@ -1,0 +1,102 @@
+NABLA_BIN = nabla
+ARCANE_ROOT = ${NABLA_TEST_ROOT}
+ARCANE_SRC_PATH = ${NABLA_SWITCH_SRC}
+ARCANE_PKG_PATH = ${NABLA_SWITCH_PKG}
+
+########################## 
+# ARCANE_LIBS and CFLAGS #
+##########################
+ARCANE_AXL_EXE  = $(ARCANE_ROOT)/bin/axl2cc
+ARCANE_EXTRA_LIBS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --libs arcane)
+#/usr/local/opendev1/gcc/paraview/3.10.0/lib/paraview-3.10/libvtkIO.so -Wl,-rpath,/usr/local/opendev1/gcc/paraview/3.10.0/lib/paraview-3.10 /usr/local/opendev1/gcc/paraview/3.10.0/lib/paraview-3.10/libXdmf.so -Wl,-rpath,/usr/local/opendev1/gcc/paraview/3.10.0/lib/paraview-3.10
+# -larcane_ios
+ARCANE_LIBS = -L$(ARCANE_ROOT)/lib\
+ -larcane_std\
+ -larcane_mpithread\
+ -larcane_mpi\
+ -larcane_thread\
+ -larcane_impl\
+ -larcane_mesh\
+ -larcane_core\
+ -larcane_utils\
+ -larcane_driverlib\
+ -larcane_cea\
+ -larcane_aleph\
+ -larcane_aleph_sloop\
+ -larcane_aleph_hypre\
+ -larcane_aleph_trilinos\
+ -larcane_hyoda\
+ $(ARCANE_EXTRA_LIBS)\
+ -Wl,-rpath,$(ARCANE_ROOT)/lib
+
+ARCANE_USE_CXX11 = @ARCANE_USE_CXX11@
+ifeq ($(ARCANE_USE_CXX11),TRUE)
+  ARCANE_CXX11_FLAGS := -std=c++11
+endif
+ARCANE_CFLAGS = -I$(ARCANE_SRC_PATH)/src -I$(ARCANE_ROOT) -I$(ARCANE_SRC_PATH)/../src $(ARCANE_CXX11_FLAGS)
+#ARCANE_CFLAGS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --cflags arcane)
+ARCANE_HYODA = $(ARCANE_ROOT)/src/arcane/hyoda/gui/hyoda
+
+
+
+#########################
+# THIRD PARTY LIBRARIES #
+#########################
+TRILINOS_RHEL_5__x86_64=10.12.1
+TRILINOS_BullEL_6__x86_64=11.0.3
+TRILINOS_RedHat-6-x86_64=11.0.3
+include /usr/local/opendev1/natif/trilinos/$(TRILINOS_$(shell cea_os))${WANTED_MPI_PREFIX}/include/Makefile.export.Trilinos
+ICET_DIR = /usr/local/opendev1/gcc/iceT/2.1${WANTED_MPI_PREFIX}
+OSMESA_DIR = /usr/local/opendev1/gcc/mesa/7.10.3
+CUDA_INC_RHEL_5__x86_64=
+CUDA_LIB_RHEL_5__x86_64=
+CUDA_INC_BullEL_6__x86_64=-I/opt/cuda/5.0/include
+CUDA_LIB_BullEL_6__x86_64=-larcane_aleph_cuda -L/opt/cuda/5.0/lib64 -Wl,-rpath,/opt/cuda/5.0/lib64 -lcudart -lcublas
+TBB_DIR = /usr/local/opendev1/gcc/tbb/4.0.1
+TBB_LIB = -L$(TBB_DIR)/lib -ltbb -Wl,-rpath,$(TBB_DIR)/lib
+GMP_DIR = /usr/local/opendev1/gcc/gmp/5.0.5
+GMP_LIB = -L$(GMP_DIR)/lib -lgmp -Wl,-rpath,$(GMP_DIR)/lib
+
+
+#############
+# COMPILERS #
+#############
+CXX=@CMAKE_CXX_COMPILER@
+IFLAGS = -I${MPI_INCLUDE_DIR} $(Trilinos_INCLUDE_DIRS) -I${SLOOP_INCLUDE_DIRS} -I${HYPRE_INCLUDE_DIRS} -I$(GMP_DIR)/include $(CUDA_INC_$(shell cea_os))
+CFLAGS = -g -O2 -Wall -fPIC $(IFLAGS) $(ARCANE_CFLAGS)
+LIBS = @CMAKE_EXE_LINKER_FLAGS@ ${SLOOP_LIBRARIES} ${HYPRE_LIBRARIES}\
+ $(Trilinos_LIBRARY_DIRS) $(Trilinos_LIBRARIES) $(Trilinos_TPL_LIBRARIES)\
+ ${PARMETIS_LIBRARY} ${METIS_LIBRARY}\
+ -L$(ICET_DIR)/lib -lIceTCore -lIceTGL -lIceTMPI -Wl,-rpath,$(ICET_DIR)/lib\
+ -L$(OSMESA_DIR)/lib -lOSMesa -Wl,-rpath,$(OSMESA_DIR)/lib\
+ ${ICET_CORE_LIBRARY} ${ICET_GL_LIBRARY} ${ICET_MPI_LIBRARY}\
+ $(CUDA_LIB_$(shell cea_os)) $(GMP_LIB) /usr/local/sr/lib/libcea_user.a\
+ $(TBB_LIB) ${MPI_LIBRARY}
+
+
+############################
+# CTEST TARGET and LAUCHES #
+############################
+CTEST_TARGET = $(lastword $(MAKECMDGOALS))
+$(CTEST_TARGET):
+	$(ARCANE_ROOT)/$(NABLA_BIN)/nabla -v $(CTEST_TARGET).log --arcane --alone $(CTEST_TARGET) -i $(CTEST_TARGET).n
+	$(ARCANE_AXL_EXE) -l c++ $(CTEST_TARGET).axl
+	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
+	$(CXX) -c $(CFLAGS) $(ADDITIONAL_DEFINES) $(CTEST_TARGET)Module.cc -o $(CTEST_TARGET)Module.o
+	$(CXX) -c $(CFLAGS) main.cc -o main.o
+	$(CXX) -g -o $(CTEST_TARGET) $(CTEST_TARGET)Module.o main.o -Wl,-rpath,. $(LIBS) $(ARCANE_LIBS) ${SUPERLU_LIBRARY}
+
+run1:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPI_EXEC_NAME} -n 1 ./$(CTEST_TARGET) ./$(CTEST_TARGET).arc
+continue1:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPI_EXEC_NAME} -n 1 ./$(CTEST_TARGET) -arcane_opt continue ./$(CTEST_TARGET).arc
+hyoda1:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi $(ARCANE_HYODA) ${MPI_EXEC_NAME} -n 1 $(shell pwd)/$(CTEST_TARGET) $(shell pwd)/$(CTEST_TARGET).arc
+
+run4:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPI_EXEC_NAME} -n 4 ./$(CTEST_TARGET) ./$(CTEST_TARGET).arc
+continue4:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPI_EXEC_NAME} -n 4 ./$(CTEST_TARGET) -arcane_opt continue ./$(CTEST_TARGET).arc
+hyoda4:$(CTEST_TARGET)
+	ARCANE_PARALLEL_SERVICE=Mpi $(ARCANE_HYODA) ${MPI_EXEC_NAME} -n 4 $(shell pwd)/$(CTEST_TARGET) $(shell pwd)/$(CTEST_TARGET).arc
+

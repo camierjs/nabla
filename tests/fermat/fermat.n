@@ -1,0 +1,123 @@
+with mail;
+with gmp, slurm;
+
+// n /usr/local/opendev1/gcc/gmp/5.0.5/share/doc/gmp/gmp.pdf
+
+// ********************************************************
+// * options
+// ********************************************************
+options{
+  Integer option_ini_nth = 1;
+  Integer option_log_tremain = 8192;
+  Integer option_tst_tremain = 60;
+  Integer option_max_iterations = 1;
+};
+
+
+// ********************************************************
+// * variables aux mailles
+// ********************************************************
+cells{
+  Integer i;
+  Integer nth;
+  Real cpuTime;       // Le temps mis pour le résultat
+  precise Integer Fn; // Fn Fermat integer
+  volatile precise Integer Fnp1;
+};
+
+
+// ********************************************************
+// * variables globales
+// ********************************************************
+global{
+  Integer meshSize;
+  Integer firstIteration;
+};
+
+
+// ********************************************************
+// * iniGlobals
+// ********************************************************
+void iniGlobals(void) @ -1.0{
+  δt=1.0;
+  meshSize=0;
+  firstIteration=0;
+  if (option_ini_nth<1)
+    fatal("iniGlobals", "Option first ini must be >= 1!");
+}
+
+
+// ********************************************************
+// * iniCells
+// ********************************************************
+own cells void iniCells(void) out (cell i, cell nth) @ -1.0{
+  i=0ul;       // On flush le rang de l'itérateur
+  cpuTime=0.0;
+  nth=option_ini_nth+uid; // Au début, on set nth à uid pour créer une rampe d'indice
+  info()<<"nth="<<nth;
+  mpz_set_ui(Fn,3ul); // F0=3
+}
+
+
+// ********************************************************
+// * iniMeshSize + reduceMeshSize to set meshSize = mesh size
+// ********************************************************
+own cells Integer iniMeshSize(void) out (cell meshSize){
+  meshSize=max(uid,meshSize);
+  return meshSize;
+}
+void reduceMeshSize(void) @ -0.9{
+  meshSize=1+mpi_reduce(ReduceMax,iniMeshSize());
+}
+
+
+// ********************************************************
+// * continueInit
+// ********************************************************
+void continueInit(void) @ 0.0{
+  firstIteration=GlobalIteration-1;
+  info()<<"\33[7;32m[continueInit] Reloading from iteration "<<firstIteration<<"\33[m"; 
+}
+
+
+// ********************************************************
+// * bodyLoop
+// ********************************************************
+own cells void bodyLoop(void) @ 1.0{
+  int probab_prime;
+  i+=1ul;
+  info()<<"cell #"<<uid<<" @ "<<i<<"/"<<nth;
+  mpz_sub_ui(Fn,Fn,1ul); // Fn = Fn-1
+  mpz_mul(Fn,Fn,Fn);   // Fn = (Fn-1)^2
+  mpz_add_ui(Fn,Fn,1ul); // Fn = (Fn-1)^2+1
+  if (i!=nth) continue;
+  //info()<<"cell #"<<uid<<" testing primality...";
+  probab_prime=mpz_probab_prime_p(Fn,7);
+  //mpz_get_ui(Fn)
+  if (probab_prime==2)
+    warning()<<"\33[41;37mcell #"<<uid<<", F"<<nth<<" is definitely a prime in "<<(ElapsedTime-cpuTime)<<"s\33[m";
+  if (probab_prime==1)
+    warning()<<"\33[41;37mcell #"<<uid<<", F"<<nth<<" is probably a prime in "<<(ElapsedTime-cpuTime)<<"s\33[m";
+  if (probab_prime==0)
+    info()<<"cell #"<<uid<<", F"<<nth<<" is definitely not a prime in "<<(ElapsedTime-cpuTime)<<"s";
+  // En boucle de calcule, la rampe étant déjà initialisée,
+  // il reste à s'incrémenter du nombre de mailles présentes
+  nth+=meshSize;
+  cpuTime=ElapsedTime; // On flush le temps mis pour ce test
+  i=0ul;
+  mpz_set_ui(Fn,3ul); // F0=3
+}
+
+
+// ********************************************************
+// * testForQuit
+// ********************************************************
+void testForQuit(void) @ 4.0{
+  if (!(GlobalIteration%option_log_tremain))
+    info()<<"\33[43;30m#"<<GlobalIteration<<", remaining "<< time remain << "/" <<time limit <<"s\33[m";
+  // Si le temps restant est inférieur à notre borne, on sort
+  if (time remain < option_tst_tremain) exit;
+  // Pareil si on a atteint le nombre max d'itérations par run
+  if (GlobalIteration >= (firstIteration+option_max_iterations)) exit;
+}
+

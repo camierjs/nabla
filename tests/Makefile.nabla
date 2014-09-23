@@ -1,0 +1,3 @@
+TGT=${name}
+
+include ../Makefile.nabla.${backend}

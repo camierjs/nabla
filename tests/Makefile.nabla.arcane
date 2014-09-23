@@ -1,0 +1,94 @@
+MPI_PATH = ${MPI_PATH}
+MPI_RUN = $(MPI_PATH)/bin/mpirun
+
+ARCANE_ROOT = ${ARCANE_ROOT}
+ARCANE_PKG_PATH = $(ARCANE_ROOT)/lib/pkgconfig
+
+NABLA = ${NABLA_BINARY_DIR}/nabla
+TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
+ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
+
+
+########################## 
+# ARCANE_LIBS and CFLAGS #
+##########################
+ARCANE_AXL_EXE  = $(ARCANE_ROOT)/bin/axl2cc
+ARCANE_PKG_LIBS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --libs arcane)
+ARCANE_PKG_CFLAGS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --cflags arcane)
+ARCANE_LIBS = -L$(ARCANE_ROOT)/lib\
+ -larcane_std\
+ -larcane_mpithread\
+ -larcane_mpi\
+ -larcane_thread\
+ -larcane_impl\
+ -larcane_mesh\
+ -larcane_core\
+ -larcane_utils\
+ -larcane_driverlib\
+ -larcane_ios\
+ -larcane_cea\
+ -larcane_aleph\
+ -larcane_aleph_sloop\
+ -larcane_aleph_hypre\
+ $(ARCANE_PKG_LIBS)\
+ -Wl,-rpath,$(ARCANE_ROOT)/lib
+# -larcane_hyoda
+# -larcane_aleph_trilinos
+
+
+#############
+# COMPILERS #
+#############
+CXX=${ARCANE_CXX}
+CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
+			-I$(MPI_PATH)/include\
+			-I$(ARCANE_ROOT)/include\
+			-I${SLOOP_INC}\
+			-I${GMP_DIR}/include\
+			-I${HYPRE_INC}/include\
+			$(ARCANE_CFLAGS)
+
+
+#######
+# ALL #
+#######
+all: $(TGT) $(NABLA) 
+
+
+###############
+# .n 2 target #
+###############
+$(TGT)Module.o:$(TGT_FILE) $(ARC_FILE) $(NABLA)
+	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
+	$(NABLA) --arcane --alone $(TGT) -i $(TGT_FILE)
+	$(ARCANE_AXL_EXE) -l c++ $(TGT).axl
+	$(CXX) -c $(CFLAGS) $(ADDITIONAL_DEFINES) $(TGT)Module.cc -o $(TGT)Module.o
+
+########
+# MAIN #
+########
+main.o:$(TGT)Module.o
+	$(CXX) -c $(CFLAGS) main.cc -o main.o
+
+
+$(TGT):main.o
+	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB}
+
+
+#####################
+# STANDARD LAUNCHES #
+#####################
+run1:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 ./$(TGT) $(ARC_FILE)
+runc1:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 ./$(TGT) -arcane_opt continue $(ARC_FILE)
+
+run4:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) $(ARC_FILE)
+runc4:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) -arcane_opt continue $(ARC_FILE)
+
+
+cln:
+	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT).axl $(TGT)_axl.h $(TGT)Module.* $(TGT).E.* *.log *.dot *.svg main.cc mcuda.config
+	@-rm -rf output* signal* fatal* logs *.o *.a *.so *.co $(TGT) $(TGT)Module* $(TGT).E.* *.log *.dot *.svg main.cc *.config errors

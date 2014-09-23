@@ -1,0 +1,105 @@
+/*!
+\page arcane_nabla_sample_lulesh &nabla;LULESH: Hydrodynamics Challenge Problem (LLNL)
+Le code &nabla;LULESH a été écrit depuis le code séquentiel LULESH v1.0.
+
+\section arcane_nabla_sample_lulesh_options Déclaration des options
+\code
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  Real option_dtfixed            = -1.0e-7;  // fixed time increment
+  Real option_δt_initial         = 1.0e-7;   // variable time increment
+  Real option_δt_courant         = 1.0e+20;
+  Real option_δt_hydro           = 1.0e+20;
+  Real option_δt_mult_lower_b    = 1.1;
+  Real option_δt_mult_upper_b    = 1.2;
+  Real option_initial_energy     = 3.948746e+7;
+  Real option_stoptime           = 1.0e-2;   // end time for simulation
+  Real option_hgcoef             = 3.0;      // hourglass control
+  Real option_qstop              = 1.0e+12;  // excessive q indicator
+  Real option_monoq_max_slope    = 1.0;
+  Real option_monoq_limiter_mult = 2.0;
+  Real option_e_cut              = 1.0e-7;   // energy tolerance
+  Real option_p_cut              = 1.0e-7;   // pressure tolerance
+  Real option_q_cut              = 1.0e-7;   // q tolerance
+  Real option_u_cut              = 1.0e-7;   // node velocity cut-off value
+  Real option_v_cut              = 1.0e-10;  // relative volume tolerance
+  Real option_qlc_monoq          = 0.5;      // linear term coef for q
+  Real option_qqc_monoq          = 0.66666666666666666;  // quadratic term coef for q
+  Real option_qqc                = 2.0;
+  Real option_eosvmax            = 1.0e+9;
+  Real option_eosvmin            = 1.0e-9;
+  Real option_pmin               = 0.0;      // pressure floor
+  Real option_emin               = -1.0e+15; // energy floor
+  Real option_dvovmax            = 0.1;      // maximum allowable volume change
+  Real option_refdens            = 1.0;      // reference density
+  Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
+  Real option_tick               = EDGE_TICK;
+  Integer option_sizeX           = EDGE_ELEMS; // X,Y,Z extent of this block
+  Integer option_sizeY           = EDGE_ELEMS;
+  Integer option_sizeZ           = EDGE_ELEMS;
+  // Still for Cuda
+  Real OPTION_DELTAT_INI         = 0.0001;
+  Real OPTION_TIME_END           = 0.1;
+};
+\endcode
+
+
+\section arcane_nabla_sample_lulesh_items Déclaration des variables aux 'items'
+\code   
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+nodes{
+  Real3 nVelocity;     // Velocity vector      xd(),yd(),zd(), (to synchronize)
+  Real3 nAcceleration; // Acceleration vector  xdd(),ydd(),zdd()
+  Real3 nForce;        // Force vector         fx(),fy(),fz()
+  Real nMass;          // Nodal mass           nodalMass()
+};
+\endcode
+
+
+\section arcane_nabla_sample_lulesh_arc Fichier 'arc' du code LULESH associé au backend Arcane
+\code
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<case codeversion="1.0" codename="lulesh" xml:lang="en">
+  <arcane>
+	 <title>Livermore Unstructured Lagrange Explicit Shock Hydrodynamics</title>
+	 <timeloop>luleshLoop</timeloop>
+  </arcane>
+  <main>
+    <do-time-history>0</do-time-history>
+  </main>
+  <arcane-post-processing>
+    <save-init>0</save-init>
+	 <output-period>0</output-period>
+    <output-history-period>0</output-history-period>
+    <end-execution-output>0</end-execution-output>
+    <output>
+      <variable>cell_p</variable>
+      <variable>cell_e</variable>
+      <variable>cell_q</variable>
+      <variable>cell_v</variable>
+      <variable>cell_vdov</variable>
+      <variable>cell_delv</variable>
+      <variable>cell_ql</variable>
+      <variable>cell_qq</variable>
+    </output>
+  </arcane-post-processing>
+  <arcane-checkpoint>
+    <do-dump-at-end>false</do-dump-at-end>
+  </arcane-checkpoint>
+  <mesh>
+    <meshgenerator><sod zyx='true'>
+        <x set='true' delta='0.1125'>10</x>
+        <y set='true' delta='0.1125'>10</y>
+        <z set='true' delta='0.1125' total='true'>10</z>
+      </sod></meshgenerator>
+  </mesh>
+  <module-main></module-main>
+</case>
+\endcode
+
+
+*/
