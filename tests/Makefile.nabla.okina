@@ -11,7 +11,7 @@ SIMD_mic_FLAGS = -DWARP_BIT=3 -mmic
 CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(ADDITIONAL_CFLAGS) $(MESH_FLAGS)
 
 
-MESH = 40
+MESH = 16
 SIMD = avx
 COLORS = aos
 PARALLEL = omp
@@ -26,13 +26,21 @@ export Z_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
 export LENGTH = $(shell echo 1.125)
 export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
 
+all:$(TGT) $(NABLA) 
 
-all:$(TGT)
-	$(CXX) -fopenmp -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o
-
-$(TGT):
+$(TGT).cc: $(TGT_FILE) $(NABLA)
 	$(NABLA) -v $(TGT).log --okina $(TGT) --$(SIMD) --$(COLORS) --$(PARALLEL) -i $(TGT_FILE) $(TGT_ADDITIONAL_FILES)
+
+$(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
+
+$(TGT):$(TGT).o $(TGT_FILE)
+	$(CXX) -fopenmp -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
+
+run1:$(TGT) $(NABLA) 
+	OMP_NUM_THREADS=1 CILK_NWORKERS=1 time ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
+run4:$(TGT) $(NABLA) 
+	OMP_NUM_THREADS=4 CILK_NWORKERS=4 time ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)

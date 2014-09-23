@@ -12,6 +12,9 @@ project(Nabla)
 enable_language(ASM) 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+set(NABLA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+#set(NABLA_TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+set(NABLA_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 
 # FLEX, BISON
@@ -157,4 +160,4 @@ target_link_libraries(nabla ${FLEX_LIBRARIES})
 #########
 # TESTS #
 #########
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)

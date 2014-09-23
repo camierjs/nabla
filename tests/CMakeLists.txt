@@ -2,7 +2,7 @@
 # Now testing #
 ###############
 enable_testing()
-#set(ARCANE_TESTS true)
+set(ARCANE_TESTS true)
 set(OKINA_TESTS true)
 
 
@@ -25,54 +25,11 @@ set(CEA_LIB /usr/local/sr/lib/libcea_user.a)
 #set(TBB_DIR /usr/local/opendev1/gcc/tbb/4.0.1)
 
 
-###################################################
-# Fonction d'ajout de test avec le backend ARCANE #
-###################################################
-#function(add_nabla_test name)
-#  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}arcane${VT100_FG_CYAN}${VT100_RESET}")
-#  add_custom_command(TARGET nabla POST_BUILD
-#    COMMAND nabla ARGS --arcane --alone ${name} -i ${CMAKE_CURRENT_SOURCE_DIR}/tests/${name}/${name}.n
-#    COMMAND ${ARCANE_PATH}/bin/axl2cc -l c++ ${name}.axl
-#    COMMAND ${GXX} ARGS -c -O2 -std=c++11 -Wall ${INCLUDES} ${name}Module.cc -o ${name}Module.o
-#    COMMAND ${GXX} ARGS -c -O2 -std=c++11 -Wall ${INCLUDES} main.cc -o main.o
-#    COMMAND ${GXX} ARGS -g -O2 -o ${name} ${name}Module.o main.o -Wl,-rpath,. -Wl,-rpath,/usr/local/opendev1/gcc/gcc/4.8.1/lib64 ${ARCANE_STD_LIBS} ${ARCANE_ADD_LIBS} ${ARCANE_EXTRA_LIBS} ${SUPERLU_LIB}
-#    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#    COMMENT "Now building test ${name}" VERBATIM)
-#  add_test(NAME ${name} COMMAND ${name} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${name}/${name}.arc)
-#endfunction(add_nabla_test name)
-
-
-###############
-# CTESTS List #
-###############
-#add_nabla_test(cartesian)
-#add_nabla_test(comd) 
-#add_nabla_test(ddfv)
-#add_nabla_test(fermat)
-#add_nabla_test(gad)
-#add_nabla_test(glace)
-#add_nabla_test(lulesh)
-#add_nabla_test(materials)
-#add_nabla_test(mc1d)
-#add_nabla_test(mctb)
-#add_nabla_test(mhydro)
-#add_nabla_test(poisson_ddfv)
-#add_nabla_test(poisson_diff)
-#add_nabla_test(schrodinger)
-#add_nabla_test(sethi)
-#add_nabla_test(shydro)
-#add_nabla_test(trefle)
-
-
 ##########
 # Meshes #
 ##########
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/unf/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/nabla.unf)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/unf/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/sod_triangles.unf)
-
-
-
-
 
 
 #######################################
@@ -101,7 +58,7 @@ function(NABLA_ADD_OKINA_TEST name nb_proc cmd)
    set(backend okina)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
 	add_test(NAME nabla_${name}_okina_${nb_proc}proc_${cmd} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	  COMMAND /bin/sh -c "${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina") #${cmd}${nb_proc}
+	  COMMAND /bin/sh -c "${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)
