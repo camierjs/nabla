@@ -35,8 +35,6 @@ nopIncludes		^\$\$.*
 "goto"				{ return tok(&yylval, GOTO);}
 "switch"				{ return tok(&yylval, SWITCH);}
 "union"				{ return tok(&yylval, UNION);}
-0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
-0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
 //"iNode"           { return tok(&yylval, INODE);}
 */
 
@@ -187,6 +185,8 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "boundaryCell"    { return tok(&yylval, BOUNDARY_CELL);}
 
 {L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER);}
+0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
+0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
 {D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
 L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CONSTANT);}
 {D}+{E}{FS}?		     { return tok(&yylval, R_CONSTANT);}

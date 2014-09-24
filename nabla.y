@@ -167,16 +167,16 @@ type_specifier
 | UIDTYPE {Y1($$,$1)}
 | FILETYPE {Y1($$,$1)} 
 //!| MATERIAL {Y1($$,$1)}
-//!| VOLATILE GMP_PRECISE INTEGER {volatilePreciseY1($$,GMP_INTEGER)}
-//!| GMP_PRECISE INTEGER {preciseY1($$,GMP_INTEGER)}
+//| VOLATILE GMP_PRECISE INTEGER {volatilePreciseY1($$,GMP_INTEGER)}
+| GMP_PRECISE INTEGER {preciseY1($$,GMP_INTEGER)}
 //!| GMP_PRECISE REAL    {preciseY1($$,GMP_REAL)}
 //!| struct_or_union_specifier {Y1($$,$1)}
 //!| enum_specifier {Y1($$,$1)}
 ; 
 type_qualifier:
   CONST {Y1($$,$1)}
-//| ALIGNED {Y1($$,$1)}
-//| VOLATILE {Y1($$,$1)}
+| ALIGNED {Y1($$,$1)}
+| VOLATILE {Y1($$,$1)}
 //| '&' {Y1($$,$1)}
 ;
 type_qualifier_list:
@@ -266,9 +266,9 @@ pointer:
 ;
 
 
-/*
- * INITIALIZERS
- */
+//////////////////
+// INITIALIZERS //
+//////////////////
 initializer:
   assignment_expression {Y1($$,$1)}
 | '{' initializer_list '}'{Y3($$,$1,$2,$3)}
@@ -283,10 +283,17 @@ initializer_list:
 //////////////////
 // DeclaraTIONS //
 //////////////////
+storage_class_specifier
+: EXTERN {Y1($$,$1)}
+| STATIC {Y1($$,$1)}
+| AUTO {Y1($$,$1)}
+| INLINE {Y1($$,$1)}
+| REGISTER {Y1($$,$1)}
+;
 declaration_specifiers
-: //storage_class_specifier {Y1($$,$1)}
-//| storage_class_specifier declaration_specifiers{Y2($$,$1,$2)}
- type_specifier {Y1($$,$1)}
+: storage_class_specifier {Y1($$,$1)}
+| storage_class_specifier declaration_specifiers{Y2($$,$1,$2)}
+| type_specifier {Y1($$,$1)}
 | type_specifier declaration_specifiers{Y2($$,$1,$2)}
 | type_qualifier {Y1($$,$1)}
 | type_qualifier declaration_specifiers{Y2($$,$1,$2)}
@@ -328,6 +335,8 @@ direct_declarator
 ;
 init_declarator
 :	declarator {Y1($$,$1)}
+// Permet de faire des appels constructeurs à-là '=Real3(0.0,0.0,0.0)'
+|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
 |	declarator '=' initializer{Y3($$,$1,$2,$3)}
 ;
 init_declarator_list
@@ -432,8 +441,8 @@ primary_expression
 //!| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
 | nabla_item {Y1($$,$1)} // Permet de rajouter les items Nabla au sein des corps de fonctions
 | nabla_system {Y1($$,$1)}
-//| HEX_CONSTANT {Y1($$,$1)} 
-//| OCT_CONSTANT {Y1($$,$1)}
+| HEX_CONSTANT {Y1($$,$1)} 
+| OCT_CONSTANT {Y1($$,$1)}
 | Z_CONSTANT {Y1($$,$1)}
 //| '-' Z_CONSTANT {Y2($$,$1,$2)}
 //| '-' R_CONSTANT {Y2($$,$1,$2)}
@@ -449,9 +458,8 @@ primary_expression
  }
 | QUOTE_LITERAL {Y1($$,$1)}
 | STRING_LITERAL {Y1($$,$1)}
+//| type_specifier '(' expression ')'	{Y4($$,$1,$2,$3,$4)}
 | '(' expression ')'	{Y3($$,$1,$2,$3)}
-// Pour les classes
-//!| type_specifier '(' expression ')'	{Y4($$,$1,$2,$3,$4)}
 ;
 
 postfix_expression
@@ -511,7 +519,7 @@ unary_expression
 | '&' unary_expression {Yp2p($$,$1,$2)}
 | unary_operator cast_expression {Y2($$,$1,$2)}
 | SIZEOF unary_expression {Y2($$,$1,$2)}
-//| SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
+| SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
 ;
 cast_expression
 : unary_expression {Y1($$,$1)}
@@ -820,16 +828,10 @@ aleph_expression
 ///////////////////////////
 // Junk to look at later //
 ///////////////////////////
-/*
-  
-storage_class_specifier
-: EXTERN {Y1($$,$1)}
-| STATIC {Y1($$,$1)}
-| AUTO {Y1($$,$1)}
-| INLINE {Y1($$,$1)}
-| REGISTER {Y1($$,$1)}
-;
 
+  
+
+/*
 struct_declaration
 : specifier_qualifier_list struct_declarator_list ';'{Y2($$,$1,$2)}
 ;
