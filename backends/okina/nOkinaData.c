@@ -54,7 +54,7 @@ void okinaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum)
   if (n->tokenid == THIS)          nprintf(arc, "/*chs THIS*/", NULL);
   if (n->tokenid == NBNODE)        nprintf(arc, "/*chs NBNODE*/", NULL);
   if (n->tokenid == NBCELL)        nprintf(arc, "/*chs NBCELL*/", NULL);
-  if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
+  //if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
   if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException");
   if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[%s->backCell()]",(enum_enum=='\0')?itm:etm);

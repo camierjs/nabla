@@ -96,30 +96,30 @@ void okinaMesh(nablaMain*);
 void nccOkinaMainMeshPrefix(nablaMain*);
 void nccOkinaMainMeshPostfix(nablaMain*);
 
-void okinaHookFunctionName(nablaMain *arc);
-void okinaHookFunction(nablaMain *nabla, astNode *n);
-void okinaHookJob(nablaMain *nabla, astNode *n);
-void okinaHookLibraries(astNode * n, nablaEntity*);
-char* okinaHookPrefixEnumerate(nablaJob *job);
-char* okinaHookDumpEnumerateXYZ(nablaJob *job);
-char* okinaHookDumpEnumerate(nablaJob *job);
-char* okinaHookPostfixEnumerate(nablaJob *job);
-char* okinaHookItem(const char, const char, char);
-void okinaHookSwitchToken(astNode *, nablaJob*);
+void okinaHookFunctionName(nablaMain*);
+void okinaHookFunction(nablaMain*, astNode*);
+void okinaHookJob(nablaMain*, astNode*);
+void okinaHookLibraries(astNode*, nablaEntity*);
+char* okinaHookPrefixEnumerate(nablaJob*);
+char* okinaHookDumpEnumerateXYZ(nablaJob*);
+char* okinaHookDumpEnumerate(nablaJob*);
+char* okinaHookPostfixEnumerate(nablaJob*);
+char* okinaHookItem(nablaJob*,const char, const char, char);
+void okinaHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *okinaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void okinaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum);
-void okinaHookAddExtraParameters(nablaMain* nabla, nablaJob *job, int *numParams);
-void okinaHookDumpNablaParameterList(nablaMain *nabla, nablaJob *job, astNode *n, int *numParams);
-void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg);
-void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n);
+void okinaHookSystem(astNode*,nablaMain*, const char cnf, char enum_enum);
+void okinaHookAddExtraParameters(nablaMain*, nablaJob*, int *numParams);
+void okinaHookDumpNablaParameterList(nablaMain*, nablaJob*, astNode *n, int *numParams);
+void okinaHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable *var, char cnfg);
+void okinaHookJobDiffractStatement(nablaMain*, nablaJob*, astNode **n);
 
 // Pour dumper les arguments necessaire dans le main
-void okinaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams);
-void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n,bool);
-void okinaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams);
-void okinaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables);
-void okinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams);
-void okinaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams);
+void okinaDumpNablaArgumentList(nablaMain*, astNode *n, int *numParams);
+void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain*, astNode *n,bool);
+void okinaAddExtraArguments(nablaMain*, nablaJob*, int *numParams);
+void okinaAddNablaVariableList(nablaMain*, astNode *n, nablaVariable **variables);
+void okinaAddExtraConnectivitiesParameters(nablaMain*, int*);
+void okinaAddExtraConnectivitiesArguments(nablaMain*, int*);
 
 NABLA_STATUS nccOkina(nablaMain*, astNode*, const char*, const char*);
 

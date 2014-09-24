@@ -216,7 +216,8 @@ static void nccArcLibAlephMatAddValue(nablaMain *arc){
  ******************************************************************************/
 static void nccArcLibAlephRhsSet(nablaMain *arc){
   fprintf(arc->entity->src, "\nvoid %s%s::alephRhsSet(Integer row, Real value){\n\
-\tconst register Integer rank_offset=m_aleph_kernel->topology()->part()[m_aleph_kernel->rank()];\n\
+\tconst Integer kernel_rank = m_aleph_kernel->rank();\n\
+\tconst Integer rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];\n\
 \trhs[row-rank_offset]=value;\n\
 }",arc->name,nablaArcaneColor(arc));
   fprintf(arc->entity->src, "\nvoid %s%s::alephRhsSet(const VariableRef &var, const Item &itm, Real value){\n\
@@ -229,7 +230,8 @@ static void nccArcLibAlephRhsSet(nablaMain *arc){
  ******************************************************************************/
 static void nccArcLibAlephRhsAdd(nablaMain *arc){
   fprintf(arc->entity->src, "\nvoid %s%s::alephRhsAdd(Integer row, Real value){\n\
-\tconst register Integer rank_offset=m_aleph_kernel->topology()->part()[m_aleph_kernel->rank()];\n\
+\tconst Integer kernel_rank = m_aleph_kernel->rank();\n\
+\tconst Integer rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];\n\
 \trhs[row-rank_offset]+=value;\n}",
           arc->name,
           nablaArcaneColor(arc));
@@ -241,7 +243,8 @@ static void nccArcLibAlephRhsAdd(nablaMain *arc){
  ******************************************************************************/
 static void nccArcLibAlephRhsGet(nablaMain *arc){
   fprintf(arc->entity->src, "\ndouble %s%s::alephRhsGet(Integer row){\n\
-\tconst register Integer rank_offset=m_aleph_kernel->topology()->part()[m_aleph_kernel->rank()];\n\
+\tconst Integer kernel_rank = m_aleph_kernel->rank();\n\
+\tconst register Integer rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];\n\
 \treturn rhs[row-rank_offset];\n}",
           arc->name,
           nablaArcaneColor(arc));

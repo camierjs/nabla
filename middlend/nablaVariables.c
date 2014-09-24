@@ -123,42 +123,44 @@ what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *nabla,
                                                        char enum_enum){
   // On cherche la primary_expression coté gauche du premier postfix_expression
   dbg("\n\t[nablaVariable] Looking for 'primary_expression':");
-  astNode *nPrimaryExpression=dfsFetch(n->children,rulenameToId("primary_expression"));
-  
-  // Par contre, on va chercher les éventuels 'nabla_item' ou 'nabla_system' après le '['
+  astNode *primary_expression=dfsFetch(n->children,rulenameToId("primary_expression"));
+  // On va chercher l'éventuel 'nabla_item' après le '['
   dbg("\n\t[nablaVariable] Looking for 'nabla_item':");
-  astNode *nItem=dfsFetch(n->children->next->next,rulenameToId("nabla_item"));
+  astNode *nabla_item=dfsFetch(n->children->next->next,rulenameToId("nabla_item"));
+  // On va chercher l'éventuel 'nabla_system' après le '['
   dbg("\n\t[nablaVariable] Looking for 'nabla_system':");
-  astNode *nNablaSystem=dfsFetch(n->children->next->next,rulenameToId("nabla_system"));
+  astNode *nabla_system=dfsFetch(n->children->next->next,rulenameToId("nabla_system"));
   
-  dbg("\n\t[nablaVariable] nPrimaryExpression->token=%s, nItem=%s, nNablaSystem=%s",
-      (nPrimaryExpression!=NULL)?nPrimaryExpression->token:"NULL",
-      (nItem!=NULL)?nItem->token:"NULL",
-      (nNablaSystem!=NULL)?nNablaSystem->token:"NULL");
-  
-  if (nPrimaryExpression->token!=NULL && nPrimaryExpression!=NULL){
-    nablaVariable *var=nablaVariableFind(nabla->variables, strdup(nPrimaryExpression->token));
-    if (var!=NULL){
-      // On a trouvé une variable nabla
-      if (nItem==NULL && nNablaSystem==NULL){
-        // Rien à faire, elle est bien postfixée mais par qq chose d'inconnu (variable locale?)
+  dbg("\n\t[nablaVariable] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
+      (primary_expression!=NULL)?primary_expression->token:"NULL",
+      (nabla_item!=NULL)?nabla_item->token:"NULL",
+      (nabla_system!=NULL)?nabla_system->token:"NULL");
+  // SI on a bien une primary_expression
+  if (primary_expression->token!=NULL && primary_expression!=NULL){
+    // On récupère de nom de la variable potentielle de cette expression
+    nablaVariable *var=nablaVariableFind(nabla->variables, strdup(primary_expression->token));
+    if (var!=NULL){ // On a bien trouvé une variable nabla
+      if (nabla_item==NULL && nabla_system==NULL){
+        // Mais elle est bien postfixée mais par qq chose d'inconnu: variable locale?
         nprintf(nabla, "/*no_item_system*/", NULL);
         return postfixed_nabla_variable_with_unknown;
       }
-      if (nItem!=NULL && nNablaSystem==NULL){
-        //fprintf(nabla->entity->src, "/*nablaVariable nItem*/m_%s_%s[", var->item, var->name);
-        //nablaItem(nabla,cnf,nItem->token[0],enum_enum);
+      if (nabla_item!=NULL && nabla_system==NULL){
+        // Et elle est postfixée avec un nabla_item
+        //fprintf(nabla->entity->src, "/*nablaVariable nabla_item*/m_%s_%s[", var->item, var->name);
+        //nablaItem(nabla,cnf,nabla_item->token[0],enum_enum);
         nprintf(nabla, "/*is_item*/", NULL);
         return postfixed_nabla_variable_with_item;
       }
-      if (nItem==NULL && nNablaSystem!=NULL){
+      if (nabla_item==NULL && nabla_system!=NULL){
+        // Et elle est postfixée avec un nabla_system
         char *hookPrev=nabla->simd->prevCell();
         char *hookNext=nabla->simd->nextCell();
-        char *hookNextPrev=(nNablaSystem->tokenid==NEXTCELL)?hookNext:hookPrev;
+        char *hookNextPrev=(nabla_system->tokenid==NEXTCELL)?hookNext:hookPrev;
         nprintf(nabla, "/*is_system*/", "%s%s_%s",
                 (nabla->backend==BACKEND_ARCANE)?"m_":hookNextPrev,
                 var->item, var->name);
-        nabla->hook->system(nNablaSystem,nabla,cnf,enum_enum);
+        nabla->hook->system(nabla_system,nabla,cnf,enum_enum);
         nprintf(nabla, "/*EndOf: is_system*/", "",NULL);
         // Variable postfixée par un mot clé system (prev/next, ...)
         return postfixed_nabla_system_keyword;
@@ -167,7 +169,7 @@ what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *nabla,
       nprintf(nabla, "/*var==NULL*/", NULL);
     }
   }else{
-    nprintf(nabla, "/*token==NULL || nPrimaryExpression==NULL*/", NULL);
+    nprintf(nabla, "/*token==NULL || primary_expression==NULL*/", NULL);
   }
   nprintf(nabla, "/*return postfixed_not_a_nabla_variable*/", NULL);
   return postfixed_not_a_nabla_variable;

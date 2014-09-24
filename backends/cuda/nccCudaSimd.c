@@ -20,7 +20,7 @@ char *nccCudaBits(void){return "";}
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nccCudaGather(nablaVariable* var, enum_phase phase){
+char* nccCudaGather(nablaJob* job, nablaVariable* var, enum_phase phase){
   return "";
 }
 

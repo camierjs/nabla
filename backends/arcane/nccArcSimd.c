@@ -20,7 +20,7 @@ char *nccArcBits(void){return "";}
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nccArcGather(nablaVariable* var, enum_phase phase){
+char* nccArcGather(nablaJob* job,nablaVariable* var, enum_phase phase){
   return "";
 }
 

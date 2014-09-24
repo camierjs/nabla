@@ -140,17 +140,17 @@ char* cudaHookPostfixEnumerate(nablaJob *job){
 /***************************************************************************** 
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
-char* cudaHookItem(const char job, const char itm, char enum_enum){
-  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
-  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
-  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
-  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
-  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
+  if (j=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (j=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (j=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (j=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (j=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (j=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (j=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (j=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (j=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
+  if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
   error(!0,0,"Could not switch in cudaHookItem!");
   return NULL;
 }
@@ -345,7 +345,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }    
   case (NBNODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->nbNode()"); break; }    
-  case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
+    //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
   case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}

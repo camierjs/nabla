@@ -337,7 +337,7 @@ char* okinaHookPostfixEnumerate(nablaJob *job){
 /***************************************************************************** 
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
-char* okinaHookItem(const char job, const char itm, char enum_enum){
+char* okinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
   if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
   if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
   if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
@@ -574,7 +574,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }    
   case (NBNODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "8/*cell->nbNode()*/"); break; }    
-  case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
+    //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
   case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}

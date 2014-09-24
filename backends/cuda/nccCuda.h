@@ -15,8 +15,8 @@
 #define _NCC_CUDA_H_
 
 char *nccCudaBits(void);
-char* nccCudaGather(nablaVariable* var, enum_phase phase);
-char* nccCudaScatter(nablaVariable* var);
+char* nccCudaGather(nablaJob*,nablaVariable*, enum_phase);
+char* nccCudaScatter(nablaVariable*);
 char* nccCudaPrevCell(void);
 char* nccCudaNextCell(void);
 char* nccCudaIncludes(void);
@@ -48,7 +48,7 @@ char* cudaHookPrefixEnumerate(nablaJob *job);
 char* cudaHookDumpEnumerateXYZ(nablaJob *job);
 char* cudaHookDumpEnumerate(nablaJob *job);
 char* cudaHookPostfixEnumerate(nablaJob *job);
-char* cudaHookItem(const char, const char, char);
+char* cudaHookItem(nablaJob*, const char, const char, char);
 void cudaHookSwitchToken(astNode *, nablaJob*);
 nablaVariable *cudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void cudaHookSystem(astNode * n,nablaMain*, const char cnf, char enum_enum);

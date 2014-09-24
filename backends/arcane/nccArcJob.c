@@ -170,7 +170,7 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
 
   if (j=='f' && enum_enum=='\0' && itm=='f') return "face";//"/*arcaneItem-f0f*/face";
   if (isPostfixed!=2 && j=='f' && enum_enum=='\0' && itm=='n') return "face->";//"/*arcaneItem-f0n*/face->";
-  if (isPostfixed==2 && j=='f' && enum_enum=='\0' && itm=='n') return "/*face->*/";//"/*arcaneItem-f0n*/face->";
+  if (isPostfixed==2 && j=='f' && enum_enum=='\0' && itm=='n') return "face->";//"/*arcaneItem-f0n*/face->";
   if (j=='f' && enum_enum=='\0' && itm=='c') return "face->";//"/*arcaneItem-f0c*/face->";
   //if (j=='f' && enum_enum=='n' && itm=='n') return "/**/";
 
@@ -444,7 +444,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
-  case (INODE):{ if (support=='c') nprintf(arc, NULL, "cell->node"); break; }    
+    //case (INODE):{ if (support=='c') nprintf(arc, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(arc, "/*XYZ*/", NULL); break;}
   case (NEXTCELL):{ nprintf(arc, "/*NEXTCELL*/", "nextCell"); break;}

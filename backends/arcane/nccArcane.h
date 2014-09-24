@@ -16,7 +16,7 @@
 
 
 char *nccArcBits(void);
-char* nccArcGather(nablaVariable* var, enum_phase phase);
+char* nccArcGather(nablaJob*,nablaVariable* var, enum_phase phase);
 char* nccArcScatter(nablaVariable* var);
 char* nccArcPrevCell(void);
 char* nccArcNextCell(void);
@@ -116,4 +116,22 @@ void arcaneHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *arcaneHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void arcaneHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char);
 void arcaneHookSystem(astNode*,nablaMain*, const char, char);
+
+// Transformations
+char *cellJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *cellJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *cellJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *cellJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *cellJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+
+char *nodeJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *nodeJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *nodeJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *nodeJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+
+char *faceJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *faceJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+
 #endif // _NABLA_ARCANE_H_

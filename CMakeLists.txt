@@ -25,7 +25,7 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
-bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--verbose --report=all")
+bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--report=all --warnings=all,error")
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c)
 add_flex_bison_dependency(nScanner nParser)
 
@@ -45,8 +45,10 @@ set(MIDDLEND_C middlend/nablaMiddlend.c middlend/nablaItems.c middlend/nablaVari
 # BACKEND ARCANE
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}ARCANE${VT100_RESET}")
 set(BACKEND_ARCANE_C backends/arcane/nccArc.c backends/arcane/nccArcConfig.c backends/arcane/nccArcModule.c
-							backends/arcane/nccArcAxl.c backends/arcane/nccArcFunction.c backends/arcane/nccArcJob.c
-                     backends/arcane/nccArcMain.c backends/arcane/nccArcVariable.c backends/arcane/nccArcSimd.c)
+							backends/arcane/nccArcAxl.c backends/arcane/nccArcFunction.c 
+                     backends/arcane/nccArcJob.c backends/arcane/nccArcJobCells.c
+                     backends/arcane/nccArcJobNodes.c backends/arcane/nccArcJobFaces.c
+                     backends/arcane/nccArcMain.c backends/arcane/nccArcHooks.c backends/arcane/nccArcSimd.c)
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}ARCANE${VT100_RESET} libraries:${VT100_RESET}")
 info("\t${VT100_FG_YELLOW}GMP${VT100_RESET}")
 info("\t${VT100_FG_YELLOW}DFT${VT100_RESET}")
