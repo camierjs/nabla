@@ -25,7 +25,7 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
-bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c)
+bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--verbose --report=all")
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c)
 add_flex_bison_dependency(nScanner nParser)
 

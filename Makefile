@@ -7,8 +7,7 @@ CTEST = $(CMAKE_PATH)/bin/ctest
 
 BUILD_PATH = /tmp/$(USER)/nabla
 
-
-all:build
+all:
 	(cd $(BUILD_PATH) && make)
 
 tst:
@@ -17,7 +16,7 @@ tstv:
 	(cd $(BUILD_PATH)/tests && ctest -V)
 
 build:
-	mkdir -p $(BUILD_PATH) && cd $(BUILD_PATH) && $(CMAKE) ~nabla/nabla
+	(mkdir -p $(BUILD_PATH) && cd $(BUILD_PATH) && $(CMAKE) ~nabla/root)
 
 cln:
 	\rm -rf $(BUILD_PATH)

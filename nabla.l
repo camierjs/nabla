@@ -25,6 +25,18 @@ extern int yylineno;
 static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 
 static void ignoreLineComments(void);
+ 
+/* Terminals unused in grammar
+nopIncludes		^\$\$.*
+"struct"				{ return tok(&yylval, STRUCT);}
+"case"				{ return tok(&yylval, CASE);}
+"default"			{ return tok(&yylval, DEFAULT);}
+"enum"				{ return tok(&yylval, ENUM);}
+"goto"				{ return tok(&yylval, GOTO);}
+"switch"				{ return tok(&yylval, SWITCH);}
+"union"				{ return tok(&yylval, UNION);}
+*/
+
 %}
 
 D					[0-9]
@@ -35,26 +47,21 @@ FS					(f|F|l|L)
 IS					(u|U|l|L)*
 preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-3])*
 includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
-nopIncludes		^\$\$.*
 
 %%
 "/*"					{ ignoreBlocComments();}
 "//"              { ignoreLineComments();}
 "auto"				{ return tok(&yylval, AUTO);}
 "break"				{ return tok(&yylval, BREAK);}
-"case"				{ return tok(&yylval, CASE);}
 "char"				{ return tok(&yylval, CHAR);}
 "const"				{ return tok(&yylval, CONST);}
 "continue"			{ return tok(&yylval, CONTINUE);}
-"default"			{ return tok(&yylval, DEFAULT);}
 "do"					{ return tok(&yylval, DO);}
 "double"				{ return tok(&yylval, DOUBLE);}
 "else"				{ return tok(&yylval, ELSE);}
-"enum"				{ return tok(&yylval, ENUM);}
 "extern"				{ return tok(&yylval, EXTERN);}
 "float"				{ return tok(&yylval, FLOAT);}
 "for"					{ return tok(&yylval, FOR);}
-"goto"				{ return tok(&yylval, GOTO);}
 "if"					{ return tok(&yylval, IF);}
 "inline" 			{ return tok(&yylval, INLINE);}
 "int"					{ return tok(&yylval, INT);}
@@ -67,17 +74,10 @@ nopIncludes		^\$\$.*
 "signed"				{ return tok(&yylval, SIGNED);}
 "sizeof"				{ return tok(&yylval, SIZEOF);}
 "static"				{ return tok(&yylval, STATIC);}
-"struct"				{ return tok(&yylval, STRUCT);}
-"switch"				{ return tok(&yylval, SWITCH);}
-"union"				{ return tok(&yylval, UNION);}
 "unsigned"			{ return tok(&yylval, UNSIGNED);}
 "void"				{ return tok(&yylval, VOID);}
 "volatile"			{ return tok(&yylval, VOLATILE);}
 "while"				{ return tok(&yylval, WHILE);}
-
-"nand"            { return tok(&yylval, NAND_OP);}
-"and"             { return tok(&yylval, AND_OP);}
-"or"              { return tok(&yylval, IOR_OP);}
 
 "#"			      { return tok(&yylval, DIESE);}
 "@"			      { return tok(&yylval, AT);}
@@ -183,8 +183,6 @@ nopIncludes		^\$\$.*
 "sid" 	         { return tok(&yylval, SID);}
 "uid" 	         { return tok(&yylval, UID);}
 "boundaryCell"    { return tok(&yylval, BOUNDARY_CELL);}
-"[n]"             { return tok(&yylval, FOREACH_NODE_INDEX);}
-"[c]"             { return tok(&yylval, FOREACH_CELL_INDEX);}
 
 {L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER);}
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
@@ -204,29 +202,34 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "*="					{ return tok(&yylval, MUL_ASSIGN);}
 "/="					{ return tok(&yylval, DIV_ASSIGN);}
 "%="					{ return tok(&yylval, MOD_ASSIGN);}
-"\&\="				{ return tok(&yylval, AND_ASSIGN);}
+"\&\="		    		{ return tok(&yylval, AND_ASSIGN);}
 "^="					{ return tok(&yylval, XOR_ASSIGN);}
 "\|="					{ return tok(&yylval, IOR_ASSIGN);}
+
 ">>"					{ return tok(&yylval, RSH_OP);}
 "<<"					{ return tok(&yylval, LSH_OP);}
 "++"					{ return tok(&yylval, INC_OP);}
 "--"					{ return tok(&yylval, DEC_OP);}
 "->"					{ return tok(&yylval, PTR_OP);}
-"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
-"∧"					{ return tok(&yylval, AND_OP);}  // And a788e2
+
 "&&"					{ return tok(&yylval, AND_OP);}
-"∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
+"∧"					{ return tok(&yylval, AND_OP);}  // a788e2
+"and"             { return tok(&yylval, AND_OP);}
+
+"or"              { return tok(&yylval, IOR_OP);}
 "||"					{ return tok(&yylval, IOR_OP);}
+"∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
+
 "<="					{ return tok(&yylval, LEQ_OP);}
 ">="					{ return tok(&yylval, GEQ_OP);}
 "=="					{ return tok(&yylval, EEQ_OP);}
 "!="					{ return tok(&yylval, NEQ_OP);}
+
 ";"					{ return tok(&yylval, ';');}
 "{"		      	{ return tok(&yylval, '{');}
 "}"			      { return tok(&yylval, '}');}
 ","					{ return tok(&yylval, ',');}
 ":"					{ return tok(&yylval, ':');}
-"::"					{ return tok(&yylval, NAMESPACE);}
 "="					{ return tok(&yylval, '=');}
 "("					{ return tok(&yylval, '(');}
 ")"					{ return tok(&yylval, ')');}
@@ -234,11 +237,8 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "]"			      { return tok(&yylval, ']');}
 "."					{ return tok(&yylval, '.');}
 "&"					{ return tok(&yylval, '&');}
-"⊻"					{ return tok(&yylval, XOR_OP);} // Xor 22BB
-""					{ return tok(&yylval, XNOR_OP);}// Xnor F4A2
-"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
-"¬"					{ return tok(&yylval, NOT_OP);} // Not 00AC
 "!"					{ return tok(&yylval, '!');}
+"¬"					{ return tok(&yylval, '!');} // 00AC
 "~"					{ return tok(&yylval, '~');}
 "-"					{ return tok(&yylval, '-');}
 "+"					{ return tok(&yylval, '+');}
@@ -248,11 +248,24 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "<"					{ return tok(&yylval, '<');}
 ">"					{ return tok(&yylval, '>');}
 "^"					{ return tok(&yylval, '^');}
-"\|"					{ return tok(&yylval, '|');}
-"\?"					{ return tok(&yylval, '?');}
+"|"					{ return tok(&yylval, '|');}
+"?"					{ return tok(&yylval, '?');}
 
+"²"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_TWO);}
+"³"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_THREE);}
 "√"					{ return tok(&yylval, SQUARE_ROOT_OP);}// SQUARE ROOT 9a88e2
 "∛"					{ return tok(&yylval, CUBE_ROOT_OP);}//9a88e2
+
+"½"					{ return tok(&yylval, FRACTION_ONE_HALF_CST);}//bdc2
+"⅓"					{ return tok(&yylval, FRACTION_ONE_THIRD_CST);}//9385e2
+"¼"					{ return tok(&yylval, FRACTION_ONE_QUARTER_CST);}//bcc2
+"⅛"					{ return tok(&yylval, FRACTION_ONE_EIGHTH_CST);}//9b85e2
+
+"∞"               { return tok(&yylval, BUILTIN_INFF);}//9e88e2
+
+"[n]"             { return tok(&yylval, FOREACH_NODE_INDEX);}
+"[c]"             { return tok(&yylval, FOREACH_CELL_INDEX);}
+
 
 "⋅"					{ return tok(&yylval, CENTER_DOT_OP);} // MIDDLE DOT 858be2
 "⨯"					{ return tok(&yylval, CROSS_OP);}//afa8e2
@@ -261,24 +274,22 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "⨂"					{ return tok(&yylval, N_ARY_CIRCLED_TIMES_OP);}//82a8e2
 "⊛"					{ return tok(&yylval, CIRCLED_ASTERISK_OP);}//9b8ae2
 
-"½"					{ return tok(&yylval, FRACTION_ONE_HALF_CST);}//bdc2
-"⅓"					{ return tok(&yylval, FRACTION_ONE_THIRD_CST);}//9385e2
-"¼"					{ return tok(&yylval, FRACTION_ONE_QUARTER_CST);}//bcc2
-"⅛"					{ return tok(&yylval, FRACTION_ONE_EIGHTH_CST);}//9b85e2
-"∞"               { return tok(&yylval, BUILTIN_INFF);}//9e88e2
+[ \t\v\f]		   { /*ignore*/ }
 
-"²"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_TWO);}
-"³"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_THREE);}
-
-[ \t\v\f]			   { /*ignore*/ }
 {preprocs}		   { return tok(&yylval, PREPROCS); }
 {includes}		   { return tok(&yylval, INCLUDES); }
-{nopIncludes}		{ return tok(&yylval, NOPINCLUDES); }
 .						{ /* ignore bad characters */
   printf("\nREJECTing '%s' in ",yytext);
   REJECT;}
 \n                { yylineno+=1; /*ignore*/}
 %% 
+//"nand"             { return tok(&yylval, NAND_OP);}
+//"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
+//"⊻"					{ return tok(&yylval, XOR_OP);} // Xor 22BB
+//""					{ return tok(&yylval, XNOR_OP);}// Xnor F4A2
+//"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
+//"::"					{ return tok(&yylval, NAMESPACE);}
+//{nopIncludes}		{ return tok(&yylval, NOPINCLUDES); }
 
 // Absorbd line comments
 static void ignoreLineComments(void){

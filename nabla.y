@@ -22,12 +22,23 @@
 int yylex(void);
 void yyerror(astNode **root, char *s);
 %}
+
  
-// COMMENTS
-%token COMMENTS SINGLE_LINE_COMMENTS
+/////////////////////////////////
+// Terminals unused in grammar //
+/////////////////////////////////
+/*
+  %token COMMENTS SINGLE_LINE_COMMENTS
+  %token NOPINCLUDES
+  %token NAMESPACE
+  %token STRUCT UNION ENUM
+  %token CASE DEFAULT GOTO
+  %token SWITCH
+  %token NAND_OP NOR_OP XOR_OP XNOR_OP
+*/
 
  // C-GRAMMAR
-%token SPACE PREPROCS NOPINCLUDES INCLUDES NAMESPACE
+%token SPACE PREPROCS INCLUDES 
 %token IDENTIFIER STRING_LITERAL QUOTE_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LSH_OP RSH_OP LEQ_OP GEQ_OP EEQ_OP NEQ_OP
 %token AND_OP IOR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -35,15 +46,14 @@ void yyerror(astNode **root, char *s);
 %token XOR_ASSIGN IOR_ASSIGN
 %token EXTERN STATIC AUTO REGISTER RESTRICT ALIGNED
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-%token STRUCT UNION ENUM ELLIPSIS
-%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+%token ELLIPSIS
+%token IF ELSE WHILE DO FOR CONTINUE BREAK RETURN
 %token INLINE GLOBAL
 %token HEX_CONSTANT OCT_CONSTANT Z_CONSTANT R_CONSTANT
 %token CALL ARGS POSTFIX_CONSTANT POSTFIX_CONSTANT_VALUE
 %token PREFIX_PRIMARY_CONSTANT POSTFIX_PRIMARY_CONSTANT
 
  // MATHS tokens
-%token NAND_OP NOT_OP NOR_OP XOR_OP XNOR_OP
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
 %token CENTER_DOT_OP CROSS_OP CROSS_OP_2D CIRCLED_TIMES_OP CIRCLED_ASTERISK_OP
 %token FRACTION_ONE_HALF_CST FRACTION_ONE_THIRD_CST
@@ -101,9 +111,9 @@ void yyerror(astNode **root, char *s);
 %nonassoc ELSE
 
  // Specific options
-//%debug
-//%error-verbose
-//%start entry_point
+%debug
+%error-verbose
+%start entry_point
 %token-table
 %parse-param {astNode **root}
 
@@ -137,7 +147,7 @@ end_scope
 
 // OPERATORS
 unary_operator
-:N_ARY_CIRCLED_TIMES_OP
+: N_ARY_CIRCLED_TIMES_OP
 | CENTER_DOT_OP
 | CIRCLED_ASTERISK_OP
 | CIRCLED_TIMES_OP
@@ -160,14 +170,14 @@ assignment_operator
 |	SUB_ASSIGN {Y1($$,$1)}
 |	LSH_ASSIGN {Y1($$,$1)}
 |	RSH_ASSIGN {Y1($$,$1)}
-|	AND_ASSIGN {Y1($$,$1)}
+|	AND_ASSIGN {Y1($$,$1)} 
 |	XOR_ASSIGN {Y1($$,$1)}
 |	IOR_ASSIGN {Y1($$,$1)}
 ;
 
 
 // ENUMERATORS
-enumerator
+/*enumerator
 : IDENTIFIER {Y1($$,$1)}
 | IDENTIFIER '=' constant_expression{Y3($$,$1,$2,$3)}
 ;
@@ -179,27 +189,25 @@ enum_specifier
 : ENUM '{' enumerator_list '}'{Y4($$,$1,$2,$3,$4)}
 | ENUM IDENTIFIER '{' enumerator_list '}'{Y5($$,$1,$2,$3,$4,$5)}
 | ENUM IDENTIFIER{Y2($$,$1,$2)}
-;
+;*/
 
 // SPECIFIERS
-struct_or_union
+/*struct_or_union
 : STRUCT {Y1($$,$1)}
 | UNION {Y1($$,$1)}
 ;
 
-/*
- * Structs or Unions
- */
+// Structs or Unions
 struct_or_union_specifier
 : struct_or_union IDENTIFIER '{' struct_declaration_list '}'{Y5($$,$1,$2,$3,$4,$5)}
 | struct_or_union '{' struct_declaration_list '}'{Y4($$,$1,$2,$3,$4)}
 | struct_or_union IDENTIFIER{Y2($$,$1,$2)}
-;
+;*/
 
-mathlinks:
+/*mathlinks:
 | MATHLINK PRIME '[' IDENTIFIER ']' {primeY1ident($$,$4)}
 | MATHLINK PRIME '[' Z_CONSTANT ']' {primeY1($$,$4)}
-;
+;*/
 
 type_specifier
 : VOID {Y1($$,$1)}
@@ -211,8 +219,8 @@ type_specifier
 | DOUBLE {Y1($$,$1)}
 | SIGNED {Y1($$,$1)}
 | UNSIGNED {Y1($$,$1)}
-| struct_or_union_specifier {Y1($$,$1)}
-| enum_specifier {Y1($$,$1)}
+//!| struct_or_union_specifier {Y1($$,$1)}
+//!| enum_specifier {Y1($$,$1)}
 | REAL {Y1($$,$1)}
 | REAL2 {Y1($$,$1)}
 | REAL3 {Y1($$,$1)}
@@ -228,11 +236,11 @@ type_specifier
 | PARTICLETYPE {Y1($$,$1)}
 | FACETYPE {Y1($$,$1)}
 | UIDTYPE {Y1($$,$1)}
-| FILETYPE {Y1($$,$1)}
-| MATERIAL {Y1($$,$1)}
-| VOLATILE GMP_PRECISE INTEGER {volatilePreciseY1($$,GMP_INTEGER)}
-| GMP_PRECISE INTEGER {preciseY1($$,GMP_INTEGER)}
-| GMP_PRECISE REAL    {preciseY1($$,GMP_REAL)}
+| FILETYPE {Y1($$,$1)} 
+//!| MATERIAL {Y1($$,$1)}
+//!| VOLATILE GMP_PRECISE INTEGER {volatilePreciseY1($$,GMP_INTEGER)}
+//!| GMP_PRECISE INTEGER {preciseY1($$,GMP_INTEGER)}
+//!| GMP_PRECISE REAL    {preciseY1($$,GMP_REAL)}
 ; 
 
 storage_class_specifier
@@ -252,7 +260,7 @@ nabla_item
 | NODE {Y1($$,$1)}
 | FACE {Y1($$,$1)}
 | PARTICLE {Y1($$,$1)}
-| MATERIAL {Y1($$,$1)}
+//!| MATERIAL {Y1($$,$1)}
 //| ENVIRONMENT {Y1($$,$1)}
 ;
 
@@ -262,8 +270,8 @@ nabla_items
 | FACES {Y1($$,$1)}
 | GLOBAL {Y1($$,$1)}
 | PARTICLES {Y1($$,$1)}
-| MATERIALS {Y1($$,$1)}
-| ENVIRONMENTS {Y1($$,$1)}
+//!| MATERIALS {Y1($$,$1)}
+//!| ENVIRONMENTS {Y1($$,$1)}
 ;
 
 nabla_group
@@ -380,7 +388,7 @@ declaration_specifiers
 | type_specifier {Y1($$,$1)}
 | type_specifier declaration_specifiers{Y2($$,$1,$2)}
 | type_qualifier {Y1($$,$1)}
-| type_qualifier declaration_specifiers{Y2($$,$1,$2)}
+//!| type_qualifier declaration_specifiers{Y2($$,$1,$2)}
 ;
 
 declaration
@@ -397,14 +405,14 @@ declaration_list
 |	declaration_list declaration{Y2($$,$1,$2)}
 ;
 
-struct_declaration
+/*struct_declaration
 : specifier_qualifier_list struct_declarator_list ';'{Y2($$,$1,$2)}
 ;
 
 struct_declaration_list
 :	struct_declaration {Y1($$,$1)}
 |	struct_declaration_list struct_declaration{Y2($$,$1,$2)}
-;
+;*/
 
 
 /*
@@ -416,7 +424,7 @@ declarator
 ;
 
 direct_declarator
-: IDENTIFIER {Y1($$,$1)}
+: /*!!!*/IDENTIFIER {Y1($$,$1)}
 | '(' declarator ')'{Y3($$,$1,$2,$3)}
 | direct_declarator '[' constant_expression ']'{Y4($$,$1,$2,$3,$4)}
 | direct_declarator '[' ']'{Y3($$,$1,$2,$3)}
@@ -453,7 +461,7 @@ direct_abstract_declarator
 | direct_abstract_declarator '(' parameter_type_list ')'{Y4($$,$1,$2,$3,$4)}
 ;
 
-struct_declarator
+/*struct_declarator
 : declarator {Y1($$,$1)}
 | ':' constant_expression{Y2($$,$1,$2)}
 | declarator ':' constant_expression{Y3($$,$1,$2,$3)}
@@ -461,7 +469,7 @@ struct_declarator
 struct_declarator_list
 : struct_declarator {Y1($$,$1)}
 |	struct_declarator_list ',' struct_declarator{Y3($$,$1,$2,$3)}
-;
+;*/
 
 
 /*
@@ -479,8 +487,8 @@ parameter_list
 
 parameter_declaration
 : nabla_xyz_declaration {Y1($$,$1)}
-| nabla_mat_declaration {Y1($$,$1)}
-| nabla_env_declaration {Y1($$,$1)}
+//| nabla_mat_declaration {Y1($$,$1)}
+//| nabla_env_declaration {Y1($$,$1)}
 | declaration_specifiers declarator {Y2($$,$1,$2)}
 | declaration_specifiers abstract_declarator {Y2($$,$1,$2)}
 | declaration_specifiers {Y1($$,$1)}
@@ -489,11 +497,11 @@ parameter_declaration
 nabla_xyz_direction:IDENTIFIER {Y1($$,$1)};
 nabla_xyz_declaration: XYZ nabla_xyz_direction {Y2($$,$1,$2)};
 
-nabla_mat_material:IDENTIFIER {Y1($$,$1)};
-nabla_mat_declaration: MAT nabla_mat_material {Y2($$,$1,$2)};
+//nabla_mat_material:IDENTIFIER {Y1($$,$1)};
+//nabla_mat_declaration: MAT nabla_mat_material {Y2($$,$1,$2)};
 
-nabla_env_environment:IDENTIFIER {Y1($$,$1)};
-nabla_env_declaration: ENV nabla_env_environment {Y2($$,$1,$2)};
+//nabla_env_environment:IDENTIFIER {Y1($$,$1)};
+//nabla_env_declaration: ENV nabla_env_environment {Y2($$,$1,$2)};
 
 nabla_parameter_declaration
 : nabla_item direct_declarator {Y2($$,$1,$2)}
@@ -535,16 +543,16 @@ primary_expression
 | DIESE {Y1($$,$1)}  // Permet d'écrire un '#' à la place d'un [n] (FOREACH_NODE_INDEX)
                      // ou [c] (FOREACH_CELL_INDEX) qui devraient alors disparaître
 | IDENTIFIER {Y1($$,$1)}
-| NAMESPACE IDENTIFIER {Y2($$,$1,$2)}
+//!| NAMESPACE IDENTIFIER {Y2($$,$1,$2)}
 //| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
-| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
+//!| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
 | nabla_item {Y1($$,$1)} // Permet de rajouter les items Nabla au sein des corps de fonctions
 | nabla_system {Y1($$,$1)}
 | HEX_CONSTANT {Y1($$,$1)}
 | OCT_CONSTANT {Y1($$,$1)}
-| Z_CONSTANT {Y1($$,$1)}
-| '-' Z_CONSTANT {Y2($$,$1,$2)}
-| '-' R_CONSTANT {Y2($$,$1,$2)}
+//!| Z_CONSTANT {Y1($$,$1)} 
+//| '-' Z_CONSTANT {Y2($$,$1,$2)}
+//| '-' R_CONSTANT {Y2($$,$1,$2)}
 | R_CONSTANT {
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de cette constante
   astNode *cstPrefixNode=astNewNodeToken();
@@ -559,7 +567,7 @@ primary_expression
 | STRING_LITERAL {Y1($$,$1)}
 | '(' expression ')'	{Y3($$,$1,$2,$3)}
 // Pour les classes
-| type_specifier '(' expression ')'	{Y4($$,$1,$2,$3,$4)}
+//!| type_specifier '(' expression ')'	{Y4($$,$1,$2,$3,$4)}
 ;
 
 
@@ -580,7 +588,7 @@ postfix_expression
 | postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
 | postfix_expression '(' ')' {Y3($$,$1,$2,$3)}
 // On traite l'appel à fatal différemment qu'un CALL standard
-| FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
+//| FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
 | postfix_expression '(' argument_expression_list ')'{
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
   astNode *callNode=astNewNodeToken();
@@ -599,7 +607,7 @@ postfix_expression
 | postfix_expression PTR_OP primary_expression {Y3($$,$1,$2,$3)}
 | postfix_expression INC_OP {Y2($$,$1,$2)}
 | postfix_expression DEC_OP {Y2($$,$1,$2)}
-| mathlinks
+//| mathlinks
 | aleph_expression
 ;
 
@@ -610,18 +618,18 @@ argument_expression_list
 
 unary_expression
 : postfix_expression {Y1($$,$1)}
-| unary_expression SUPERSCRIPT_DIGIT_TWO {Ypow($$,$1,2)}
-| unary_expression SUPERSCRIPT_DIGIT_THREE {Ypow($$,$1,3)}
+//!| unary_expression SUPERSCRIPT_DIGIT_TWO {Ypow($$,$1,2)}
+//!| unary_expression SUPERSCRIPT_DIGIT_THREE {Ypow($$,$1,3)}
 | SQUARE_ROOT_OP unary_expression {Y2($$,$1,$2)}
 | CUBE_ROOT_OP unary_expression {Y2($$,$1,$2)}
 | INC_OP unary_expression {Y2($$,$1,$2)}
 | DEC_OP unary_expression {Y2($$,$1,$2)}
-//| '&' primary_expression {Y2($$,$1,$2)}
-| '&' unary_expression {Yp2p($$,$1,$2)}
-//| '&' cast_expression {Y2($$,$1,$2)}
+//!| '&' primary_expression {Y2($$,$1,$2)}
+//!| '&' unary_expression {Yp2p($$,$1,$2)}
+//!| '&' cast_expression {Y2($$,$1,$2)}
 | unary_operator cast_expression {Y2($$,$1,$2)}
 | SIZEOF unary_expression {Y2($$,$1,$2)}
-| SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
+//!| SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
 ;
 
 cast_expression
@@ -701,7 +709,7 @@ conditional_expression
 assignment_expression
 :	conditional_expression {Y1($$,$1)}
 |	unary_expression assignment_operator assignment_expression {Y3($$,$1,$2,$3)}
-|	unary_expression assignment_operator logical_or_expression '?' unary_expression {YopDuaryExpression($$,$1,$2,$3,$5)}
+//!|	unary_expression assignment_operator logical_or_expression '?' unary_expression {YopDuaryExpression($$,$1,$2,$3,$5)}
 ;
 
 expression
@@ -771,7 +779,7 @@ jump_statement
 
 statement
 : compound_statement {Y1($$,$1)}
-| PREPROCS {Y1($$,$1)}
+//| PREPROCS {Y1($$,$1)}
 | expression_statement {Y1($$,$1)}
 | selection_statement {Y1($$,$1)}
 | iteration_statement {Y1($$,$1)}
@@ -824,7 +832,7 @@ nabla_item_declaration_list
 nabla_item_declaration
 : type_specifier direct_declarator ';' {Y2($$,$1,$2)}
 | type_specifier direct_declarator '[' nabla_items ']' ';' {Y3($$,$1,$2,$4)}  
-| type_specifier direct_declarator '[' primary_expression ']' ';' {Y3($$,$1,$2,$4)}  
+//| type_specifier direct_declarator '[' primary_expression ']' ';' {Y3($$,$1,$2,$4)}  
 ;
 
 
@@ -846,7 +854,7 @@ nabla_option_declaration
 /////////////////////////////
 // NABLA MATERIALS DEFINITION
 /////////////////////////////
-nabla_materials_definition
+/*nabla_materials_definition
 : MATERIALS '{' nabla_materials_declaration_list '}' ';' {Y1($$,$3)}
 ;
 nabla_materials_declaration_list
@@ -855,13 +863,13 @@ nabla_materials_declaration_list
 ;
 nabla_material_declaration
 : IDENTIFIER {Y1($$,$1)}
-;
+;*/
 
 
 ////////////////////////////////
 // NABLA ENVIRONMENTS DEFINITION
 ////////////////////////////////
-nabla_environments_definition
+/*nabla_environments_definition
 : ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {Y1($$,$3)}
 ;
 nabla_environments_declaration_list
@@ -870,7 +878,7 @@ nabla_environments_declaration_list
 ;
 nabla_environment_declaration
 : IDENTIFIER '{' nabla_materials_declaration_list '}' ';' {Y2($$,$1,$3)}
-;
+;*/
 
 
 /////////////////////
@@ -925,7 +933,7 @@ single_library:
 | PARTICLES       {Y1($$,$1)}
 | LIB_ALEPH       {Y1($$,$1)}
 | LIB_SLURM       {Y1($$,$1)}
-| LIB_MATENV      {Y1($$,$1)}
+//| LIB_MATENV      {Y1($$,$1)}
 | LIB_CARTESIAN   {Y1($$,$1)}
 | LIB_MATHEMATICA {Y1($$,$1)}
 ;
@@ -947,14 +955,14 @@ nabla_grammar
 //| INCLUDES                      {Y1($$,$1)}
 //| NOPINCLUDES                   {Y1($$,$1)}
 : SPACE	                       {Y1($$,$1)}
-| function_definition	        {Y1($$,$1)}
 | declaration				        {Y1($$,$1)}
-| nabla_item_definition         {Y1($$,$1)}
-| nabla_options_definition      {Y1($$,$1)}
-| nabla_materials_definition    {Y1($$,$1)}
-| nabla_environments_definition {Y1($$,$1)}
-| nabla_job_definition          {Y1($$,$1)}
 | with_library                  {Y1($$,$1)}
+| nabla_options_definition      {Y1($$,$1)}
+| nabla_item_definition         {Y1($$,$1)}
+//| nabla_materials_definition    {Y1($$,$1)}
+//| nabla_environments_definition {Y1($$,$1)}
+| function_definition	        {Y1($$,$1)}
+| nabla_job_definition          {Y1($$,$1)}
 ;
 
 %%

@@ -40,7 +40,7 @@ function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd addition
    set(backend arcane)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
 	add_test(NAME nabla_${name}_arcane_${nb_proc}proc_${cmd} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	  COMMAND /bin/sh -c "export TGT=${name} && export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.arcane ${cmd}${nb_proc}")
+	  COMMAND /bin/sh -c "export TGT=${name} && export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane ${cmd}${nb_proc}")
  endfunction(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
 
 function(NABLA_ADD_ARCANE_TEST name nb_proc cmd)
