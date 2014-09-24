@@ -122,7 +122,7 @@ inner faces void setInnerFacesValues(void) @ 2.2{
 
 outer faces void setOuterFacesValues(void) @ 2.3{
   if (!cell(0).isOwn()) continue;
-  coefs[cell(0)]+=1.0/geoFaceSurface(*this);
+  coefs[0]+=1.0/geoFaceSurface(*this);
 }
 
 own cells void setCellsValues(void) @ 2.4{

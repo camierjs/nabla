@@ -151,7 +151,7 @@ faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -8.4{
     ccc1=ccc[backCell];
   }
   if (nbCell==1){
-    ccc0=ccc[cell(0)];
+    ccc0=ccc[0];
     ccc1=(fn0+fn1)/2.;
   }
   σ=norm(ccc0-ccc1);
@@ -190,7 +190,7 @@ faces void faceTheta(void) out (face Cosθ, face Sinθ) @ -8.3{
   Real3 c1,c0,τ,tan,nrm;
   Real sinTauTan,nrm_xτ,nΤ,nTan;
   if (nbCell==1){
-    c0=ccc[cell(0)];
+    c0=ccc[0];
     c1=(n0+n1)/2.;
     cellLowId=cell(0).uniqueId();
     //unGlitch(c1,c0);

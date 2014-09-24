@@ -458,7 +458,6 @@ primary_expression
  }
 | QUOTE_LITERAL {Y1($$,$1)}
 | STRING_LITERAL {Y1($$,$1)}
-//| type_specifier '(' expression ')'	{Y4($$,$1,$2,$3,$4)}
 | '(' expression ')'	{Y3($$,$1,$2,$3)}
 ;
 
