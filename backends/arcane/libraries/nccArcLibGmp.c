@@ -221,7 +221,7 @@ void nccArcLibGmpIni(nablaMain *arc){
   nablaJob *gmpInitFunction=nablaJobNew(arc->entity);
   gmpInitFunction->is_an_entry_point=true;
   gmpInitFunction->is_a_function=true;
-  gmpInitFunction->group  = strdup("NoGroup");
+  gmpInitFunction->scope  = strdup("NoGroup");
   gmpInitFunction->region = strdup("NoRegion");
   gmpInitFunction->item   = strdup("\0");
   gmpInitFunction->rtntp  = strdup("void");
@@ -247,7 +247,7 @@ void nccArcLibGmpIni(nablaMain *arc){
   nablaJob *gmpContinueInit=nablaJobNew(arc->entity);
   gmpContinueInit->is_an_entry_point=true;
   gmpContinueInit->is_a_function=true;
-  gmpContinueInit->group  = strdup("NoGroup");
+  gmpContinueInit->scope  = strdup("NoGroup");
   gmpContinueInit->region = strdup("NoRegion");
   gmpContinueInit->item   = strdup("\0");
   gmpContinueInit->rtntp  = strdup("void");

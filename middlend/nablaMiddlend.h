@@ -70,7 +70,7 @@ typedef struct nablaOptionStruct{
 typedef struct nablaJobStruct{
   bool is_an_entry_point;
   bool is_a_function;
-  char *group;
+  char *scope;
   char *region;
   char *item;
   char *rtntp;//return_type;

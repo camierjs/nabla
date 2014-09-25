@@ -143,7 +143,7 @@ void nccArcLibDftIni(nablaMain *arc){
   nablaJob *dftInitFunction=nablaJobNew(arc->entity);
   dftInitFunction->is_an_entry_point=true;
   dftInitFunction->is_a_function=true;
-  dftInitFunction->group  = strdup("NoGroup");
+  dftInitFunction->scope  = strdup("NoGroup");
   dftInitFunction->region = strdup("NoRegion");
   dftInitFunction->item   = strdup("\0");
   dftInitFunction->rtntp  = strdup("void");
@@ -170,7 +170,7 @@ void nccArcLibDftIni(nablaMain *arc){
   nablaJob *dftContinueInit=nablaJobNew(arc->entity);
   dftContinueInit->is_an_entry_point=true;
   dftContinueInit->is_a_function=true;
-  dftContinueInit->group  = strdup("NoGroup");
+  dftContinueInit->scope  = strdup("NoGroup");
   dftContinueInit->region = strdup("NoRegion");
   dftContinueInit->item   = strdup("\0");
   dftContinueInit->rtntp  = strdup("void");

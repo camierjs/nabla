@@ -22,7 +22,7 @@
 void dfsUtf8(astNode * n){
   if (n==NULL) return;
   if (n->token!=NULL){
-    dbg("\n\t\t[dfsUtf8] n->token=%s",n->token);
+    //dbg("\n\t\t[dfsUtf8] n->token=%s",n->token);
     n->token_utf8=strdup(n->token);
     nUtf8SupThree(&n->token_utf8);
   }

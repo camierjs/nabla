@@ -25,7 +25,7 @@ nablaJob *nablaJobNew(nablaEntity *entity){
   assert(job != NULL);
   job->is_an_entry_point=false;
   job->is_a_function=false;
-  job->group=job->region=job->item=job->name=job->xyz=job->drctn=NULL;
+  job->scope=job->region=job->item=job->name=job->xyz=job->drctn=NULL;
   job->at[0]=0;
   job->whenx=0;
   for(i=0;i<32;++i)
@@ -333,9 +333,13 @@ void nablaJobFill(nablaMain *nabla,
   /*if (nabla->optionDumpTree==true)
     fprintf(nabla->dot, "\n\t%sJob_%s;", job->item, job->name);
   */
-  job->group  = dfsFetchFirst(n->children,rulenameToId("nabla_group"));
+  job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
   job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
   job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
+  // Si on a pas trouvé avec les items, cela doit être un matenvs
+  if (job->item==NULL)
+    job->item = dfsFetchFirst(n->children,rulenameToId("nabla_matenvs"));
+  assert(job->item!=NULL);
   job->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   assert(n->children->next->next->token!=NULL);
   job->name   = strdup(n->children->next->next->token);
@@ -362,8 +366,8 @@ void nablaJobFill(nablaMain *nabla,
   // Récupération de la liste des paramètres
   assert(n->children->next->next->next->ruleid==rulenameToId("parameter_type_list"));
   job->stdParamsNode=n->children->next->next->next->children;
-  dbg("\n\t[nablaJobFill] group=%s region=%s item=%s type_de_retour=%s name=%s",
-      (job->group!=NULL)?job->group:"", (job->region!=NULL)?job->region:"",
+  dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
+      (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->rtntp, job->name);
   scanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
   scanForNablaJobAtConstant(n->children, rulenameToId("at_constant"), nabla);
@@ -438,6 +442,7 @@ void nablaJobFill(nablaMain *nabla,
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
   nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->postfixEnumerate(job));
+  dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
   // Et on dump les tokens dans ce job
   dbg("\n\t[nablaJobFill] Now parsing...");

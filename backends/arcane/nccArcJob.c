@@ -19,7 +19,8 @@
  * Fonction prefix à l'ENUMERATE_*
  *****************************************************************************/
 char* arcaneHookPrefixEnumerate(nablaJob *j){
-  char *grp=j->group;   // OWN||ALL
+  dbg("\n\t[arcaneHookPrefixEnumerate]");
+  char *grp=j->scope;   // OWN||ALL
   char *rgn=j->region;  // INNER, OUTER
   char itm=j->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   char *drctn=j->drctn; // Direction
@@ -61,7 +62,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
  * Fonction produisant l'ENUMERATE_* avec XYZ
  *****************************************************************************/
 char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
-  char *grp=job->group;   // OWN||ALL
+  char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal|(p)articles
   // Pour une fonction, on fait rien ici
@@ -83,7 +84,7 @@ char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
 char* arcaneHookDumpEnumerate(nablaJob *job){
-  char *grp=job->group;   // OWN||ALL
+  char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   char *xyz=job->xyz;// Direction
@@ -127,14 +128,21 @@ char* arcaneHookDumpEnumerate(nablaJob *job){
  * Fonction postfix à l'ENUMERATE_*
  *****************************************************************************/
 char* arcaneHookPostfixEnumerate(nablaJob *job){
-  char *grp=job->group; // OWN||ALL
+  char *grp=job->scope;  // OWN||ALL
   char *rgn=job->region; // INNER, OUTER
-  char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  char *xyz=job->xyz;// Direction
-  if (xyz==NULL) return "";// void ENUMERATE postfix";
-// Pour une fonction, on fait rien ici
-  if (itm=='\0') return "";
-  if (itm=='c') return "\tDirCell cc(cdm.cell(*cell));\n\
+  char *itm=job->item;   // (c)ells|(f)aces|(n)odes|(g)lobal
+  char *xyz=job->xyz;    // Direction
+  if (xyz==NULL){
+    dbg("\n\t[postfixEnumerate] no xyz, returning");
+    return "";// void ENUMERATE postfix";
+  }
+  assert(itm!=NULL);
+  if (itm[0]=='\0'){
+    dbg("\n\t[postfixEnumerate] function, returning");
+    return "";// Pour une fonction, on fait rien ici
+  }
+  dbg("\n\t[postfixEnumerate] job with direction, working!");  
+  if (itm[0]=='c') return "\tDirCell cc(cdm.cell(*cell));\n\
 \t\t__attribute__((unused)) Cell nextCell=cc.next();\n\
 \t\t// Should test for !nextCell.null() to build ccn\n\
 \t\t//                      DirCell ccn(cdm.cell(nextCell));\n\
@@ -144,8 +152,8 @@ char* arcaneHookPostfixEnumerate(nablaJob *job){
 \t\t//                        DirCell ccp(cdm.cell(prevCell));\n\
 \t\t//__attribute__((unused)) Cell prevPrevCell=ccp.previous();\n\
 \t\t__attribute__((unused)) DirCellNode cn(cdm.cellNode(*cell));\n";  
-  if (itm=='n') return "\tDirNode cc(ndm.node(*node));\n\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
-  dbg("\n\t[postfixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm);
+  if (itm[0]=='n') return "\tDirNode cc(ndm.node(*node));\n\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
+  dbg("\n\t[postfixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm[0]);
   error(!0,0,"Could not distinguish ENUMERATE!");
   return NULL;
 }

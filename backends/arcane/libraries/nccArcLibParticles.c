@@ -128,7 +128,7 @@ void nccArcLibParticlesIni(nablaMain *arc){
   nablaJob *particlesInit=nablaJobNew(arc->entity);
   particlesInit->is_an_entry_point=true;
   particlesInit->is_a_function=true;
-  particlesInit->group  = strdup("NoGroup");
+  particlesInit->scope  = strdup("NoGroup");
   particlesInit->region = strdup("NoRegion");
   particlesInit->item   = strdup("\0");
   particlesInit->rtntp  = strdup("void");

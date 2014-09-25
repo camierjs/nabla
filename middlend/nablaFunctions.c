@@ -131,7 +131,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
 
   // On ne traite qu'un TOKEN ici, on break systématiquement
   for(;n->token != NULL;){
-    //dbg("\n\t[nablaFunctionParse] TOKEN '%s'", n->token);
+    dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
  
     //if(n->tokenid==CONST){
     //  nprintf(nabla, "/*CONST*/", "__declspec(align(WARP_ALIGN)) const ");
@@ -273,13 +273,15 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       dbg("\n\t[nablaFunctionParse] OPTION hit!");
       break;
     }
+
+    dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
     if (nabla->hook->turnTokenToVariable(n, nabla, fct)!=NULL) break;
     if (n->tokenid == '{'){ fprintf(nabla->entity->src, "{\n"); break; }
     if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
     
     // Dernière action possible: on dump
-    //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump");
+    dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;
     fprintf(nabla->entity->src,"%s",n->token);
     nablaInsertSpace(nabla,n);
@@ -312,9 +314,9 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
     dbg("\n\t[nablaFctFill] direction=%s, xyz=%s",
         fct->drctn?fct->drctn:"NULL", fct->xyz?fct->xyz:"NULL");
   //if (nabla->optionDumpTree==true) fprintf(nabla->dot, "\n\t%sFct_%s;", fct->item, fct->name);
-  fct->group  = strdup("NoGroup");
+  fct->scope  = strdup("NoGroup");
   fct->region = strdup("NoRegion");
-  fct->item   = strdup("\0");
+  fct->item   = strdup("\0function\0");fct->item[0]=0;
   fct->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->rtntp);
   //assert(n->children->next->children->children->children->token!=NULL);
@@ -338,9 +340,11 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   assert(n->children->next->children->children->next->next->children->ruleid==rulenameToId("parameter_list"));
   nParams=n->children->next->children->children->next->next->children;
   fct->stdParamsNode=n;
-  dbg("\n\t[nablaFctFill] group=%s region=%s item=%s type=%s name=%s",
-      (fct->group!=NULL)?fct->group:"", (fct->region!=NULL)?fct->region:"",
-      fct->item, fct->rtntp, fct->name);
+  dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
+      (fct->scope!=NULL)?fct->scope:"Null",
+      (fct->region!=NULL)?fct->region:"Null",
+      2+fct->item,
+      fct->rtntp, fct->name);
   //scanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
   scanForNablaJobAtConstant(n->children, rulenameToId("at_constant"), nabla);
   dbg("\n\t[nablaFctFill] scan'ed ForNablaJobAtConstant");
@@ -375,27 +379,28 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   for(n=n->children->next;
       n->ruleid!=rulenameToId("compound_statement");
       n=n->next) {
-    dbg("\n[nabla_fct_definition] n rule is '%s'", n->rule);
+    dbg("\n\t[nabla_fct_definition] n rule is '%s'", n->rule);
   }
-  dbg("\n[nabla_fct_definition] n rule is finally '%s'", n->rule);
+  dbg("\n\t[nabla_fct_definition] n rule is finally '%s'", n->rule);
   // On saute le premier '{'
   n=n->children->next;
   nprintf(nabla, NULL, "){\n");
 
   // On prépare le bon ENUMERATE
-  dbg("\n[nablaFctFill] prefixEnumerate");
+  dbg("\n\t[nablaFctFill] prefixEnumerate");
   nprintf(nabla, NULL, "\t%s", nabla->hook->prefixEnumerate(fct));
-  dbg("\n[nablaFctFill] dumpEnumerate");
+  dbg("\n\t[nablaFctFill] dumpEnumerate");
   nprintf(nabla, NULL, "\n\t%s", nabla->hook->dumpEnumerate(fct));
-  dbg("\n[nablaFctFill] postfixEnumerate");
+  dbg("\n\t[nablaFctFill] postfixEnumerate");
   nprintf(nabla, NULL, "\t%s", nabla->hook->postfixEnumerate(fct));
   
   // Et on dump les tokens dans ce fct
+  dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nablaFunctionParse(n,fct);
   
   //if (nabla->backend==BACKEND_CUDA)    nprintf(nabla, NULL, "// du tid test\n}");
 
-  dbg("done");
+  dbg("\n\t[nablaFctFill] done");
 }
 
 

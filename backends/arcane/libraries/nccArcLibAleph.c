@@ -379,7 +379,7 @@ void nccArcLibAlephIni(nablaMain *arc){
   nablaJob *alephInitFunction=nablaJobNew(arc->entity);
   alephInitFunction->is_an_entry_point=true;
   alephInitFunction->is_a_function=true;
-  alephInitFunction->group  = strdup("NoGroup");
+  alephInitFunction->scope  = strdup("NoScope");
   alephInitFunction->region = strdup("NoRegion");
   alephInitFunction->item   = strdup("\0");
   alephInitFunction->rtntp  = strdup("void");

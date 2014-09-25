@@ -169,11 +169,11 @@ static inline bool p4s(char *p, const unsigned int hex, const char *str, char **
 void nUtf8SupThree(char **read){//read
   char *r=*read;
   char *w=r;//write
-  dbg("\n\t\t[nUtf8SupThree] in \"%s\"", r);
+  //dbg("\n\t\t[nUtf8SupThree] in \"%s\"", r);
   for(w=r;*r!=0;r++){
-    dbg("\n\t\t\t[nUtf8SupThree] '%c'", *r);
+    //dbg("\n\t\t\t[nUtf8SupThree] '%c'", *r);
     if (p4c3(w,r,0x959c9df0,"∂")){// 𝜕 -> ∂
-      dbg("\n\t\t\t\t[nUtf8SupThree] HIT 𝜕->∂!");
+      //dbg("\n\t\t\t\t[nUtf8SupThree] HIT 𝜕->∂!");
       r+=3;//+1 avec le r++
       w+=3;
       continue;
@@ -182,7 +182,7 @@ void nUtf8SupThree(char **read){//read
     *w++=*r;
   }
   *w='\0';
-  dbg("\n\t\t[nUtf8SupThree] out \"%s\"", *read);
+  //dbg("\n\t\t[nUtf8SupThree] out \"%s\"", *read);
 }
 
 /******************************************************************************
@@ -210,9 +210,9 @@ void nUtf8(char **bkp){
     *bkp=strdup("aleph"); 
     return;
     }*/
-  dbg("\n\t\t[nUtf8] '%s':", *bkp);
+  //dbg("\n\t\t[nUtf8] '%s':", *bkp);
   for(;*p!=0;p++){
-    dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
+    //dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
     // αβγδεζηθικλμνξοπρςστυφχψω
     if (p2c(p,0xb1ce,"al")) p+=1; // α = alpha    → 'al'
     if (p2c(p,0xb2ce,"bt")) p+=1; // β = beta     → 'bt'
@@ -267,11 +267,11 @@ void nUtf8(char **bkp){
     if (p2c(p,0xa9ce,"Mg")) p+=1; // Ω = Omega    → 'Mg'
     // Partial 𝝏
     if (p4c(p,0x8f9d9df0,"Part")){
-      dbg("\n\t\t\t\t[nUtf8SupThree] HIT p4c ∂->Part!");
+      //dbg("\n\t\t\t\t[nUtf8SupThree] HIT p4c ∂->Part!");
       p+=3; // ∂(!=𝝏) = Partial → 'Part'
     }
     if (p4c(p,0x959c9df0,"Part")){
-      dbg("\n\t\t\t\t[nUtf8SupThree] HIT p4c 𝜕->Part!");
+      //dbg("\n\t\t\t\t[nUtf8SupThree] HIT p4c 𝜕->Part!");
       p+=3; // 𝝏 = Partial → 'Part'
     }
     // Aleph ℵ

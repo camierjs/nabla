@@ -51,7 +51,7 @@ void nccArcLibMathematicaIni(nablaMain *arc){
   nablaJob *mathlinkIniFunction=nablaJobNew(arc->entity);
   mathlinkIniFunction->is_an_entry_point=true;
   mathlinkIniFunction->is_a_function=true;
-  mathlinkIniFunction->group  = strdup("NoGroup");
+  mathlinkIniFunction->scope  = strdup("NoGroup");
   mathlinkIniFunction->region = strdup("NoRegion");
   mathlinkIniFunction->item   = strdup("\0");
   mathlinkIniFunction->rtntp  = strdup("void");

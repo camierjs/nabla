@@ -95,7 +95,7 @@ char* cudaHookDumpEnumerateXYZ(nablaJob *job){
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
 char* cudaHookDumpEnumerate(nablaJob *job){
-  char *grp=job->group;   // OWN||ALL
+  char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   //if (job->xyz!=NULL) return cudaHookDumpEnumerateXYZ(job);

@@ -51,7 +51,7 @@ void nccArcLibCartesianIni(nablaMain *arc){
   nablaJob *libCartesianInitialize=nablaJobNew(arc->entity);
   libCartesianInitialize->is_an_entry_point=true;
   libCartesianInitialize->is_a_function=true;
-  libCartesianInitialize->group  = strdup("NoGroup");
+  libCartesianInitialize->scope  = strdup("NoGroup");
   libCartesianInitialize->region = strdup("NoRegion");
   libCartesianInitialize->item   = strdup("\0");
   libCartesianInitialize->rtntp  = strdup("void");

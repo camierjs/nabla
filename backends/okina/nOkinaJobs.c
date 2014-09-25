@@ -122,7 +122,7 @@ static char * okinaReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
 static char* okinaSelectEnumerate(nablaJob *job){
-  const char *grp=job->group;   // OWN||ALL
+  const char *grp=job->scope;   // OWN||ALL
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   //if (job->xyz!=NULL) return okinaHookDumpEnumerateXYZ(job);
