@@ -53,6 +53,8 @@ static nablaDefine arcaneDefines[] ={
   {"dot(a,b)","math::scaMul(a,b)"},
   {"cross(a,b)","math::vecMul(a,b)"},
   {"cross2D(a,b)","math::vecMul2D(a,b)"},
+  {"mixteMul(a,b,c)","math::mixteMul(a,b,c)"},
+  {"matrix3x3Id","math::matrix3x3Id"},
   {"norm(v)","(v).abs()"},
   {"absolute(v)","math::abs(v)"},
   {"nbNodes","defaultMesh()->nbNode()"},
@@ -62,6 +64,8 @@ static nablaDefine arcaneDefines[] ={
   {"rcbrt(v)","::cbrt(v)"},
   {"knAt(a)",""},
   {"mat","int"},
+  {"matrixDeterminant(A)","math::matrixDeterminant(A)"},
+  {"inverseMatrix(A,d)","math::inverseMatrix(A,d)"},
   {"xyz","eMeshDirection"},
   {"isZero(a)","math::isZero(a)"},
   {"rsqrt(a)","math::sqrt(a)"},
@@ -138,6 +142,7 @@ NABLA_STATUS nccArcaneEntityIncludes(nablaEntity *entity){
 %s\n\
 #include \"%s%s%s_axl.h\"\n\n\
 using namespace Arcane;\n\
+//using namespace math;\n\
 using namespace Parallel;\n\
 \n\
 /*inline Cell opTernary(bool cond, Cell ifStatement, Cell elseStatement){\n \

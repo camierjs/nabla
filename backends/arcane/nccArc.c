@@ -29,10 +29,17 @@ static void arcaneTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "subDomain()->commonVariables().globalTime()");
 }
 static void arcaneFatal(struct nablaMainStruct *nabla){
+  dbg("\n[arcaneFatal]");
   nprintf(nabla, NULL, "throw FatalErrorException");
 } 
-static void arcaneAddCallNames(struct nablaMainStruct *nabla,nablaJob *job,astNode *n){/*nothing to do*/}
-static void arcaneAddArguments(struct nablaMainStruct *nabla,nablaJob *job){/*nothing to do*/}
+static void arcaneAddCallNames(struct nablaMainStruct *nabla,nablaJob *job,astNode *n){
+  dbg("\n[arcaneAddCallNames]");
+  /*nothing to do*/
+}
+static void arcaneAddArguments(struct nablaMainStruct *nabla,nablaJob *job){
+  dbg("\n[arcaneAddArguments]");
+  /*nothing to do*/
+}
 static void arcaneTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o arc*/", "options()->%s()", opt->name);
 }

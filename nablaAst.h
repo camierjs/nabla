@@ -70,7 +70,7 @@ int rulenameToId(const char *rulename);
   timeLimitNode->tokenid=YYTRANSLATE(LIMIT);                          \
   Y1(lhs,timeLimitNode)
 
-#define volatilePreciseY1(lhs, gmpType)                               \
+#define volatilePreciseY1(lhs, gmpType){                              \
   astNode *mpTypeNode=astNewNodeToken();                              \
   astNode *volatileNode=astNewNodeToken();                            \
   if (gmpType==GMP_INTEGER)                                           \
@@ -80,16 +80,16 @@ int rulenameToId(const char *rulename);
   volatileNode->tokenid=VOLATILE;                                     \
   volatileNode->token=strdup("VOLATILE");                             \
   mpTypeNode->tokenid=YYTRANSLATE(gmpType);                           \
-  Y2(lhs,mpTypeNode,volatileNode)
+  Y2(lhs,mpTypeNode,volatileNode);}
 
-#define preciseY1(lhs, gmpType)                                       \
+#define preciseY1(lhs, gmpType){                                      \
   astNode *mpTypeNode=astNewNodeToken();                              \
   if (gmpType==GMP_INTEGER)                                           \
     mpTypeNode->token=strdup("mpInteger");                            \
   else                                                                \
     mpTypeNode->token=strdup("mpReal");                               \
   mpTypeNode->tokenid=YYTRANSLATE(gmpType);                           \
-  Y1(lhs,mpTypeNode)
+  Y1(lhs,mpTypeNode);}
 
 #define primeY1ident(lhs, ident)                                      \
   char token[1024];                                                   \

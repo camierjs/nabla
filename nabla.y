@@ -21,6 +21,9 @@
 
 int yylex(void);
 void yyerror(astNode **root, char *s);
+ 
+bool type_volatile=false;
+bool type_precise=false;
 %}
 
  
@@ -118,6 +121,7 @@ void yyerror(astNode **root, char *s);
 %token-table
 %parse-param {astNode **root}
 
+//%left ':'
 
 %%
 
@@ -133,8 +137,7 @@ nabla_inputstream: nabla_grammar {Y1($$,$1)}
 // ∇ scopes: std & std+@ //
 ///////////////////////////
 start_scope: '{' {Y1($$,$1)};
-end_scope: '}' {Y1($$,$1)}
-| '}' AT at_constant {Y3($$,$1,$2,$3)};
+end_scope: '}' {Y1($$,$1)} | '}' AT at_constant {Y3($$,$1,$2,$3)};
 
 
 //////////////////////////////////////////////////
@@ -150,14 +153,22 @@ type_specifier
 | DOUBLE {Y1($$,$1)}
 | SIGNED {Y1($$,$1)}
 | UNSIGNED {Y1($$,$1)}
-| REAL {Y1($$,$1)}
 | REAL2 {Y1($$,$1)}
 | REAL3 {Y1($$,$1)}
 | REAL3x3 {Y1($$,$1)}
 | REAL2x2 {Y1($$,$1)}
 | BOOL {Y1($$,$1)}
 | SIZE_T {Y1($$,$1)}
-| INTEGER {Y1($$,$1)}
+//| REAL {Y1($$,$1)}
+//| INTEGER {Y1($$,$1)}
+| REAL { if (type_precise) preciseY1($$,GMP_REAL) else Y1($$,$1); type_precise=type_volatile=false;}
+| INTEGER {
+    if (type_precise){
+      if (type_volatile) volatilePreciseY1($$,GMP_INTEGER)
+      else preciseY1($$,GMP_INTEGER)
+    }else Y1($$,$1);
+    type_precise=type_volatile=false;
+  }
 | INT32 {Y1($$,$1)}
 | INT64 {Y1($$,$1)} 
 | CELLTYPE {Y1($$,$1)}
@@ -167,30 +178,34 @@ type_specifier
 | UIDTYPE {Y1($$,$1)}
 | FILETYPE {Y1($$,$1)} 
 //| MATERIAL {Y1($$,$1)}
-//| VOLATILE GMP_PRECISE INTEGER {volatilePreciseY1($$,GMP_INTEGER)}
-| GMP_PRECISE INTEGER {preciseY1($$,GMP_INTEGER)}
-//!| GMP_PRECISE REAL    {preciseY1($$,GMP_REAL)}
 //!| struct_or_union_specifier {Y1($$,$1)}
 //!| enum_specifier {Y1($$,$1)}
 ; 
-type_qualifier:
-  CONST {Y1($$,$1)}
+storage_class_specifier
+: EXTERN {Y1($$,$1)}
+| STATIC {Y1($$,$1)}
+| AUTO {Y1($$,$1)}
+| INLINE {Y1($$,$1)}
+| REGISTER {Y1($$,$1)}
+;
+type_qualifier
+: CONST {Y1($$,$1)}
 | ALIGNED {Y1($$,$1)}
-| VOLATILE {Y1($$,$1)}
-//| '&' {Y1($$,$1)}
+| VOLATILE {Y1($$,$1);type_volatile=true;}
+| GMP_PRECISE {Y1($$,$1);type_precise=true;}
 ;
 type_qualifier_list:
   type_qualifier {Y1($$,$1)}
 | type_qualifier_list type_qualifier {Y2($$,$1,$2)}
 ;
-specifier_qualifier_list:
-  type_specifier specifier_qualifier_list{Y2($$,$1,$2)}
-| type_specifier {Y1($$,$1)}
-| type_qualifier specifier_qualifier_list{Y2($$,$1,$2)}
+specifier_qualifier_list
+: type_specifier {Y1($$,$1)}
+| type_specifier specifier_qualifier_list{Y2($$,$1,$2)}
 | type_qualifier {Y1($$,$1)}
+| type_qualifier specifier_qualifier_list{Y2($$,$1,$2)}
 ;
-type_name:
-  specifier_qualifier_list {Y1($$,$1)}
+type_name
+: specifier_qualifier_list {Y1($$,$1)}
 | specifier_qualifier_list abstract_declarator{Y2($$,$1,$2)}
 ;
 
@@ -229,8 +244,7 @@ nabla_system
 | THIS{Y1($$,$1)}
 | NBNODE{Y1($$,$1)}
 | NBCELL{Y1($$,$1)}
-//| INODE{Y1($$,$1)}
-| FATAL{Y1($$,$1)}
+//| FATAL{Y1($$,$1)}
 | BOUNDARY_CELL{Y1($$,$1)}
 | BACKCELL{Y1($$,$1)}
 | BACKCELLUID{Y1($$,$1)}
@@ -259,11 +273,9 @@ nabla_system
 pointer:
   '*' {Y1($$,$1)}
 | '*' type_qualifier_list{Y2($$,$1,$2)}
-//| '*' RESTRICT {Y2($$,$1,$2)}
-//| '*' pointer{Y2($$,$1,$2)}
+| '*' RESTRICT {Y2($$,$1,$2)}
 | '*' type_qualifier_list pointer{Y2($$,$1,$2)}
 ;
-
 
 //////////////////
 // INITIALIZERS //
@@ -273,22 +285,15 @@ initializer:
 | '{' initializer_list '}'{Y3($$,$1,$2,$3)}
 | '{' initializer_list ',' '}'{Y4($$,$1,$2,$3,$4)}
 ;
-initializer_list:
-  initializer {Y1($$,$1)}
-| initializer_list ',' initializer{Y3($$,$1,$2,$3)}
+initializer_list
+: initializer {Y1($$,$1)}
+| initializer_list ',' initializer {Y3($$,$1,$2,$3)}
 ;
 
 
 //////////////////
 // DeclaraTIONS //
 //////////////////
-storage_class_specifier
-: EXTERN {Y1($$,$1)}
-| STATIC {Y1($$,$1)}
-| AUTO {Y1($$,$1)}
-| INLINE {Y1($$,$1)}
-| REGISTER {Y1($$,$1)}
-;
 declaration_specifiers
 : storage_class_specifier {Y1($$,$1)}
 | storage_class_specifier declaration_specifiers{Y2($$,$1,$2)}
@@ -335,7 +340,8 @@ direct_declarator
 init_declarator
 :	declarator {Y1($$,$1)}
 // Permet de faire des appels constructeurs à-là '=Real3(0.0,0.0,0.0)'
-|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
+//|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
+|	declarator '=' type_specifier '(' ')' {Y4($$,$1,$2,$3,$4)}
 |	declarator '=' initializer{Y3($$,$1,$2,$3)}
 ;
 init_declarator_list
@@ -349,7 +355,7 @@ abstract_declarator
 ;
 direct_abstract_declarator
 : '(' abstract_declarator ')'{Y3($$,$1,$2,$3)}
-| '[' ']'
+| '[' ']'{Y2($$,$1,$2)}
 | '[' constant_expression ']'{Y3($$,$1,$2,$3)}
 | direct_abstract_declarator '[' ']'{Y3($$,$1,$2,$3)}
 | direct_abstract_declarator '[' constant_expression ']'{Y4($$,$1,$2,$3,$4)}
@@ -401,23 +407,16 @@ nabla_parameter_list
 /////////////////////////
 // ∇ IN/OUT parameters //
 /////////////////////////
-nabla_parameter: nabla_in_parameter_list {Y1($$,$1)}
+nabla_parameter
+: nabla_in_parameter_list {Y1($$,$1)}
 | nabla_out_parameter_list {Y1($$,$1)}
 | nabla_inout_parameter_list {Y1($$,$1)};
-nabla_parameter_list: nabla_parameter {Y1($$,$1)}
+nabla_parameter_list
+: nabla_parameter {Y1($$,$1)}
 | nabla_parameter_list nabla_parameter{Y2($$,$1,$2)};
 nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {Y2($$,$1,$3)}; 
 nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};  
 nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};  
-
-
-///////////////
-// Arguments //
-///////////////
-argument_expression_list
-: assignment_expression {Y1($$,$1)}
-| argument_expression_list ',' assignment_expression {Y3($$,$1,$2,$3)}
-;
 
 
 /////////////////
@@ -432,8 +431,7 @@ primary_expression
 | FRACTION_ONE_THIRD_CST {Y1($$,$1)}
 | FRACTION_ONE_QUARTER_CST {Y1($$,$1)}
 | FRACTION_ONE_EIGHTH_CST {Y1($$,$1)}
-| DIESE {Y1($$,$1)}  // Permet d'écrire un '#' à la place d'un [n] (FOREACH_NODE_INDEX)
-                     // ou [c] (FOREACH_CELL_INDEX) qui devraient alors disparaître
+| DIESE {Y1($$,$1)}  // Permet d'écrire un '#' à la place d'un [c|n]
 | IDENTIFIER {Y1($$,$1)}
 //!| NAMESPACE IDENTIFIER {Y2($$,$1,$2)}
 //| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
@@ -444,26 +442,21 @@ primary_expression
 | OCT_CONSTANT {Y1($$,$1)}
 | Z_CONSTANT {Y1($$,$1)}
 | R_CONSTANT {Y1($$,$1)}
-/*{
-  // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de cette constante
-  astNode *cstPrefixNode=astNewNodeToken();
-  cstPrefixNode->token=strdup(""); // ! actOptionsPrimaryExpression dumps this to the axl
-  cstPrefixNode->tokenid=PREFIX_PRIMARY_CONSTANT;
-  astNode *cstPostfixNode=astNewNodeToken();
-  cstPostfixNode->token=strdup("");
-  cstPostfixNode->tokenid=POSTFIX_PRIMARY_CONSTANT;
-  Y3($$,cstPrefixNode,$1,cstPostfixNode)
-  }*/
 | QUOTE_LITERAL {Y1($$,$1)}
 | STRING_LITERAL {Y1($$,$1)}
 | '(' expression ')'	{Y3($$,$1,$2,$3)}
 ;
-
+argument_expression_list
+: assignment_expression {Y1($$,$1)}
+| argument_expression_list ',' assignment_expression {Y3($$,$1,$2,$3)}
+;
 postfix_expression
 : primary_expression {Y1($$,$1)} 
 | postfix_expression FOREACH_NODE_INDEX {Y2($$,$1,$2)}
 | postfix_expression FOREACH_CELL_INDEX {Y2($$,$1,$2)}
 | postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
+//| type_specifier '(' ')'  {Y3($$,$1,$2,$3)}
+//type_specifier '(' expression_list ')'  {Y4($$,$1,$2,$3,$4)}
 //| postfix_expression '[' nabla_system ']' {Y4($$,$1,$2,$3,$4)}
 //| postfix_expression '[' Z_CONSTANT ']'  {
 //  // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de ce postfix
@@ -475,7 +468,7 @@ postfix_expression
 // }
 | postfix_expression '(' ')' {Y3($$,$1,$2,$3)}
 // On traite l'appel à fatal différemment qu'un CALL standard
-//!| FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
+| FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
 | postfix_expression '(' argument_expression_list ')'{
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
   astNode *callNode=astNewNodeToken();
@@ -491,7 +484,7 @@ postfix_expression
 | postfix_expression '.' nabla_item '(' Z_CONSTANT ')'{Y6($$,$1,$2,$3,$4,$5,$6)}
 | postfix_expression '.' nabla_system {Y3($$,$1,$2,$3)}
 //| postfix_expression PTR_OP IDENTIFIER {Y3($$,$1,$2,$3)}
-| postfix_expression PTR_OP primary_expression {Y3($$,$1,$2,$3)}
+| postfix_expression PTR_OP primary_expression {Y3($$,$1,$2,$3)} 
 | postfix_expression INC_OP {Y2($$,$1,$2)}
 | postfix_expression DEC_OP {Y2($$,$1,$2)}
 //| mathlinks
@@ -501,7 +494,9 @@ postfix_expression
 // Unaries (operator,expression) //
 ///////////////////////////////////
 unary_operator
-: //N_ARY_CIRCLED_TIMES_OP | CENTER_DOT_OP | CIRCLED_ASTERISK_OP | CIRCLED_TIMES_OP | CROSS_OP | CROSS_OP_2D
+: //N_ARY_CIRCLED_TIMES_OP | CENTER_DOT_OP
+//|CIRCLED_ASTERISK_OP | CIRCLED_TIMES_OP
+//| CROSS_OP | CROSS_OP_2D
  '⋅' | '*' | '+' | '-' | '~' | '!';
 unary_expression
 : postfix_expression {Y1($$,$1)}
@@ -519,7 +514,7 @@ unary_expression
 ;
 cast_expression
 : unary_expression {Y1($$,$1)}
-|'(' type_name ')' cast_expression{Y4($$,$1,$2,$3,$4)}
+| '(' type_name ')' cast_expression {Y4($$,$1,$2,$3,$4)}
 ;
 multiplicative_expression
 : cast_expression {Y1($$,$1)}
@@ -551,29 +546,29 @@ relational_expression
 |	relational_expression GEQ_OP shift_expression{Y3($$,$1,$2,$3)}
 ;
 equality_expression
-:relational_expression {Y1($$,$1)}
-|	equality_expression EEQ_OP relational_expression{Y3($$,$1,$2,$3)}
-|	equality_expression NEQ_OP relational_expression{Y3($$,$1,$2,$3)}
+: relational_expression {Y1($$,$1)}
+| equality_expression EEQ_OP relational_expression{Y3($$,$1,$2,$3)}
+| equality_expression NEQ_OP relational_expression{Y3($$,$1,$2,$3)}
 ;
 and_expression
-:	equality_expression {Y1($$,$1)}
-|	and_expression '&' equality_expression{Y3($$,$1,$2,$3)}
+: equality_expression {Y1($$,$1)}
+| and_expression '&' equality_expression{Y3($$,$1,$2,$3)}
 ;
 exclusive_or_expression
-:	and_expression {Y1($$,$1)}
-|	exclusive_or_expression '^' and_expression{Y3($$,$1,$2,$3)}
+: and_expression {Y1($$,$1)}
+| exclusive_or_expression '^' and_expression{Y3($$,$1,$2,$3)}
 ;
 inclusive_or_expression
-:	exclusive_or_expression {Y1($$,$1)}
-|	inclusive_or_expression '|' exclusive_or_expression{Y3($$,$1,$2,$3)}
+: exclusive_or_expression {Y1($$,$1)}
+| inclusive_or_expression '|' exclusive_or_expression {Y3($$,$1,$2,$3)}
 ;
 logical_and_expression
-:inclusive_or_expression {Y1($$,$1)}
-|	logical_and_expression AND_OP inclusive_or_expression{Y3($$,$1,$2,$3)}
+: inclusive_or_expression {Y1($$,$1)}
+| logical_and_expression AND_OP inclusive_or_expression {Y3($$,$1,$2,$3)}
 ;
 logical_or_expression
-:	logical_and_expression {Y1($$,$1)}
-|	logical_or_expression IOR_OP logical_and_expression{Y3($$,$1,$2,$3)}
+: logical_and_expression {Y1($$,$1)}
+| logical_or_expression IOR_OP logical_and_expression{Y3($$,$1,$2,$3)}
 ;
 conditional_expression
 :	logical_or_expression {Y1($$,$1)}
@@ -584,15 +579,17 @@ conditional_expression
 ///////////////////////////////////////
 assignment_operator
 :  '=' {Y1($$,$1)}
-|	MUL_ASSIGN {Y1($$,$1)} | DIV_ASSIGN {Y1($$,$1)} | MOD_ASSIGN {Y1($$,$1)}
-|	ADD_ASSIGN {Y1($$,$1)} | SUB_ASSIGN {Y1($$,$1)}
-|	LSH_ASSIGN {Y1($$,$1)} | RSH_ASSIGN {Y1($$,$1)}
-|	AND_ASSIGN {Y1($$,$1)} | XOR_ASSIGN {Y1($$,$1)} | IOR_ASSIGN {Y1($$,$1)}
+| MUL_ASSIGN {Y1($$,$1)} | DIV_ASSIGN {Y1($$,$1)} | MOD_ASSIGN {Y1($$,$1)}
+| ADD_ASSIGN {Y1($$,$1)} | SUB_ASSIGN {Y1($$,$1)}
+| LSH_ASSIGN {Y1($$,$1)} | RSH_ASSIGN {Y1($$,$1)}
+| AND_ASSIGN {Y1($$,$1)} | XOR_ASSIGN {Y1($$,$1)} | IOR_ASSIGN {Y1($$,$1)}
 ;
 assignment_expression
-:	conditional_expression {Y1($$,$1)}
-|	unary_expression assignment_operator assignment_expression {Y3($$,$1,$2,$3)}
-//!|	unary_expression assignment_operator logical_or_expression '?' unary_expression {YopDuaryExpression($$,$1,$2,$3,$5)}
+: conditional_expression {Y1($$,$1)}
+| unary_expression assignment_operator assignment_expression {Y3($$,$1,$2,$3)}
+| unary_expression assignment_operator type_specifier '(' initializer_list ')' {Y6($$,$1,$2,$3,$4,$5,$6)}
+| unary_expression assignment_operator type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
+| unary_expression assignment_operator logical_or_expression '?' unary_expression {YopDuaryExpression($$,$1,$2,$3,$5)}
 ;
 expression
 : assignment_expression {Y1($$,$1)}
@@ -685,7 +682,7 @@ nabla_direct_declarator
 : IDENTIFIER {Y1($$,$1)}
 | IDENTIFIER '[' nabla_items ']'{Y2($$,$1,$3)};
 | IDENTIFIER '[' primary_expression ']'{Y2($$,$1,$3)};
-nabla_item_declaration: type_specifier nabla_direct_declarator ';' {Y2($$,$1,$2)};
+nabla_item_declaration: type_name nabla_direct_declarator ';' {Y2($$,$1,$2)};
 
 
 //////////////////////////
@@ -699,8 +696,6 @@ nabla_option_declaration_list
 nabla_option_declaration
 : type_specifier direct_declarator ';' {Y2($$,$1,$2)}
 | type_specifier direct_declarator '=' expression ';' {Y4($$,$1,$2,$3,$4)}  
-//| type_specifier direct_declarator '=' '+' primary_expression ';' {Y5($$,$1,$2,$3,$4,$5)}  
-//| type_specifier direct_declarator '=' '-' primary_expression ';' {Y5($$,$1,$2,$3,$4,$5)}
 ;
 
 
@@ -753,7 +748,6 @@ nabla_job_definition
   {Y8_compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement
   {Y12_compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13,$14)}
-//| nabla_family AT at_constant compound_statement {Y4($$,$1,$2,$3,$4)}
 ;
 
 

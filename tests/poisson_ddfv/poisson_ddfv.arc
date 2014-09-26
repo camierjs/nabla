@@ -17,22 +17,22 @@
 	</arcane-post-processing>
 
    <mesh>
-     <!--file internal-partition="true">nabla.unf</file-->
-     <meshgenerator>
+     <file internal-partition="true">../nabla.unf</file>
+     <!--meshgenerator>
  		 <cartesian>
-			<nsd>4 1</nsd>
+			<nsd>2 2</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="16" prx="1.0">1.0</lx>
-			<ly ny="16" pry="1.0">1.0</ly>
+			<lx nx="128" prx="1.0">1.0</lx>
+			<ly ny="128" pry="1.0">1.0</ly>
 		 </cartesian> 
-     </meshgenerator>
+     </meshgenerator-->
    </mesh>
 
    <poisson_ddfv>
-     <option_quads>true</option_quads>
-     <option_triangles>false</option_triangles>
+     <option_quads>false</option_quads>
+     <option_triangles>true</option_triangles>
 
-     <option_deltat>0.0001</option_deltat>
+     <option_deltat>0.001</option_deltat>
     <option_max_iterations>2</option_max_iterations>
    </poisson_ddfv>
 </case>

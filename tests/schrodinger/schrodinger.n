@@ -106,14 +106,14 @@ cells void cellArea(void) out (cell cell_area) @ -10.0{
   bc=norm(b-c);
   ca=norm(c-a);
   p=0.5*(ab+bc+ca);
-  cell_area=sqrt(p*(p-ab)*(p-bc)*(p-ca));
+  cell_area=√(p*(p-ab)*(p-bc)*(p-ca));
 }
 
 cells void cellVolume(void) out (cell cell_volume){
   const register Real3 a1 = coord[1] - coord[0];
   const register Real3 a2 = coord[2] - coord[0];
   const register Real3 a3 = coord[3] - coord[0];
-  cell_volume = math::mixteMul(a1,a2,a3)/6.0;
+  cell_volume = mixteMul(a1,a2,a3)/6.0;
 }
 
 cells void cellGravityCenter(void) out (cell ccc) @ -10.0{
@@ -140,7 +140,7 @@ faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -9.0{
     ccc1=ccc[backCell];
   }
   if (nbCell==1){
-    ccc0=ccc[cell(0)];
+    ccc0=ccc[0];
     ccc1=(fn0+fn1)/2.;
   }
   σ=norm(ccc0-ccc1);
@@ -174,7 +174,7 @@ faces void faceTheta(void) in (cell ccc) out (face Cosθ,
   Real3 c1,c0,τ,tan,nrm;
   Real sinTauTan,nrm_xτ,nΤ,nTan;
   if (nbCell==1){
-    c0=ccc[cell(0)];
+    c0=ccc[0];
     c1=(n0+n1)/2.;
     cellLowId=cell(0).uniqueId();
   }else{
@@ -435,13 +435,13 @@ own nodes void getNodeResults(void) out (node node_density_re,
 own cells void saveCellDensity(void) in (cell cell_density_re,
                                          cell cell_density_im)
                                     out (cell cell_density) @ 4.3{
-  cell_density = sqrt(cell_density_re*cell_density_re +
+  cell_density = √(cell_density_re*cell_density_re +
                       cell_density_im*cell_density_im);
 }
 own nodes void saveNodeDensity(void) in (node node_density_re,
                                          node node_density_im)
                                     out (node node_density) @ 4.3{
-  node_density = sqrt(node_density_re*node_density_re +
+  node_density = √(node_density_re*node_density_re +
                       node_density_im*node_density_im);
 }
 

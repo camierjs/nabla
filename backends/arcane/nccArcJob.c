@@ -210,14 +210,6 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     if (support=='f' && foreach!='\0') nprintf(arc, NULL, "%c.index()", foreach);
     break;
   }
-  case(PREFIX_PRIMARY_CONSTANT):{
-    nprintf(arc, "/*PREFIX_PRIMARY_CONSTANT*/", NULL);
-    break;
-  }
-  case(POSTFIX_PRIMARY_CONSTANT):{
-    nprintf(arc, "/*POSTFIX_PRIMARY_CONSTANT*/", NULL);
-    break;
-  }
 
   case(LIB_ALEPH):{
     nprintf(arc, "/*LIB_ALEPH*/",NULL);

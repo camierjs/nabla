@@ -411,17 +411,6 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*ALIGNED*/", "__declspec(align(64)) ");
     break;
   }
-
-  case(PREFIX_PRIMARY_CONSTANT):{
-    if (job->parse.left_of_assignment_operator==false)
-      nprintf(nabla, "/*PREFIX_PRIMARY_CONSTANT*/", "(");//set1
-    break;
-  }
-  case(POSTFIX_PRIMARY_CONSTANT):{
-    if (job->parse.left_of_assignment_operator==false)
-      nprintf(nabla, "/*POSTFIX_PRIMARY_CONSTANT*/", ")");
-    break;
-  }
     
   case(INTEGER):{
     nprintf(nabla, "/*INTEGER*/", "integer ");

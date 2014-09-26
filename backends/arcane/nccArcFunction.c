@@ -22,6 +22,7 @@ void arcaneHookFunctionName(nablaMain *arc){
  * Prise en charge d'une fonction
  *****************************************************************************/
 void arcaneHookFunction(nablaMain *arc, astNode *n){
+  dbg("\n\t\t[arcaneHookFunction]");
   nablaJob *fct=nablaJobNew(arc->entity);
   nablaJobAdd(arc->entity, fct);
   nablaFctFill(arc,fct,n,arc->name);

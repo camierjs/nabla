@@ -16,9 +16,9 @@ options{
   Real alephEpsilon             = 1.e-8;
   Integer alephUnderlyingSolver = 0;
   Integer alephMaxIterations    = 16384;
-  Integer alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  Integer alephPreconditionerMethod = 5; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
                                          // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
-  Integer alephSolverMethod     = 0;     // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  Integer alephSolverMethod     = 3;     // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   Integer alephNumberOfCores    = 0;
   Bool option_aleph_dump_matrix = false;
 };

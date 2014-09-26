@@ -59,9 +59,9 @@ char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
  foreach_node=%d, foreach_face=%d, foreach_cell=%d",
       scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
   
-  //if (resolve && foreach_cell) return "/*fn:rc*/";
-  //if (resolve && foreach_node) return "/*fn:rn*/";
-  //if (resolve && foreach_face) return "/*fn:rf*/";
+  if (resolve && foreach_cell) return "/*fn:rc*/[c]";
+  if (resolve && foreach_node) return "/*fn:rn*/[n]";
+  if (resolve && foreach_face) return "/*fn:rf*/[f]";
   //if (resolve && foreach_none) return "/*fn:r0*/";
     
   //if (!resolve && foreach_cell) return "/*fn:!rc*/";

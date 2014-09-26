@@ -131,7 +131,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
 
   // On ne traite qu'un TOKEN ici, on break systématiquement
   for(;n->token != NULL;){
-    dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
+    //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
  
     //if(n->tokenid==CONST){
     //  nprintf(nabla, "/*CONST*/", "__declspec(align(WARP_ALIGN)) const ");
@@ -218,7 +218,9 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     }
     
     if (n->tokenid == CALL){
+      dbg("\n\t[nablaFunctionParse] CALL");
       nabla->hook->addCallNames(nabla,fct,n);
+      dbg("\n\t[nablaFunctionParse] CALL done");
       break;
     }
     
