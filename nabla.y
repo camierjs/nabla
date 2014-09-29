@@ -120,8 +120,7 @@ bool type_precise=false;
 %start entry_point
 %token-table
 %parse-param {astNode **root}
-
-//%left ':'
+%right '?' ':' ','
 
 %%
 
@@ -568,11 +567,11 @@ logical_and_expression
 ;
 logical_or_expression
 : logical_and_expression {Y1($$,$1)}
-| logical_or_expression IOR_OP logical_and_expression{Y3($$,$1,$2,$3)}
+| logical_or_expression IOR_OP logical_and_expression {Y3($$,$1,$2,$3)}
 ;
 conditional_expression
-:	logical_or_expression {Y1($$,$1)}
-|	logical_or_expression '?' expression ':' conditional_expression {YopTernary5p($$,$1,$2,$3,$4,$5)}
+: logical_or_expression {Y1($$,$1)}
+| logical_or_expression '?' expression ':' conditional_expression {YopTernary5p($$,$1,$2,$3,$4,$5)}
 ;
 ///////////////////////////////////////
 // Assignments (operator,expression) //
@@ -587,9 +586,9 @@ assignment_operator
 assignment_expression
 : conditional_expression {Y1($$,$1)}
 | unary_expression assignment_operator assignment_expression {Y3($$,$1,$2,$3)}
+| unary_expression assignment_operator logical_or_expression '?' expression {YopDuaryExpression($$,$1,$2,$3,$5)}
 | unary_expression assignment_operator type_specifier '(' initializer_list ')' {Y6($$,$1,$2,$3,$4,$5,$6)}
 | unary_expression assignment_operator type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
-| unary_expression assignment_operator logical_or_expression '?' unary_expression {YopDuaryExpression($$,$1,$2,$3,$5)}
 ;
 expression
 : assignment_expression {Y1($$,$1)}
