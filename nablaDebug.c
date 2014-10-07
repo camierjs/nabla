@@ -1,5 +1,5 @@
 /*****************************************************************************\
-* File     : ncc_dbg.c   																		*
+* File     : nablaDebug.c 																		*
 * Author   : Camier Jean-Sylvain																*
 *******************************************************************************
 * Description: 																					*
@@ -31,14 +31,12 @@ void dbgt(const bool flag, const int fd, const char *msg, ...){
   va_end(args);  
 }
 
+
 /*****************************************************************************\
  *																										*
 \*****************************************************************************/
-/*NABLA_STATUS dbg(unsigned long flg, const char *str, ...){*/
 NABLA_STATUS dbg(const char *str, ...){
-  /*if ((flg & dbgFlg)==flg){*/
   va_list args;
-
   va_start(args, str);
   if (fTrace!=NULL){
     if (vfprintf(fTrace, str, args)<0)
@@ -47,7 +45,6 @@ NABLA_STATUS dbg(const char *str, ...){
       exit(printf("[dbg] Could not flush to file\n"));
   }
   va_end(args);
-  //}
   return NABLA_OK;
 }
 
@@ -63,12 +60,13 @@ void dbgOpenTraceFile(const char *file){
 
 
 /*****************************************************************************\
- * Function to close specified dbg trace file												*
+ * Function to close specified dbg trace file											*
 \*****************************************************************************/
 void dbgCloseTraceFile(void){
   if (fTrace!=NULL)
     (void)fclose(fTrace);
 }
+
 
 /*****************************************************************************\
  * Function to get the set flag	 															*
@@ -79,7 +77,7 @@ unsigned long dbgGet(void){
 
 
 /*****************************************************************************\
- * Function to set the flag				 														*
+ * Function to set the flag				 													*
 \*****************************************************************************/
 unsigned long dbgSet(unsigned long flg){
   return (dbgFlg=flg);

@@ -97,7 +97,7 @@ typedef enum{
 // ****************************************************************************
 // * NABLA STR & HARDCODED DEFINES
 // ****************************************************************************
-#define NABLA_MAX_FILE_NAME 1024
+#define NABLA_MAX_FILE_NAME 8192
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
 
 #include "nablaDebug.h"

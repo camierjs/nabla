@@ -12,6 +12,12 @@ all:
 
 tst:
 	(cd $(BUILD_PATH)/tests && ctest)
+tstg:
+	(cd $(BUILD_PATH)/tests && ctest -R gen)
+tstr:
+	(cd $(BUILD_PATH)/tests && ctest -R run)
+tst4:
+	(cd $(BUILD_PATH)/tests && ctest -j 4)
 tstv:
 	(cd $(BUILD_PATH)/tests && ctest -V)
 

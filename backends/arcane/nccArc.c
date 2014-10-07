@@ -106,7 +106,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL,//dumpNablaParameterList
     arcaneHookTurnBracketsToParentheses,
     NULL,//diffractStatement
-#warning Arcane backend does not support Real3 globals
+// Is this true ? #warning Arcane backend does not support Real3 globals
     // Other hooks
     arcaneHookFunctionName,
     arcaneHookFunction,

@@ -91,7 +91,9 @@ int sysPreprocessor(const char *nabla_entity_name,
   // Pour chaque fichier .n en entrée, on va le cat'er et insérer des délimiteurs
   cat_command[0]='\0';
   printf("Loading: ");
-  for(i=0,nabla_file=strtok(dup_list_of_nabla_files, " ");nabla_file!=NULL;i+=1,nabla_file=strtok(NULL, " ")){
+  for(i=0,nabla_file=strtok(dup_list_of_nabla_files, " ");
+      nabla_file!=NULL;
+      i+=1,nabla_file=strtok(NULL, " ")){
     printf("%s%s",i==0?"":", ",nabla_file);
     snprintf(tok_command,NABLA_MAX_FILE_NAME-1,          
              "%scat --squeeze-blank %s|sed -e 's/#include/ include/g' %s %s",
@@ -101,7 +103,7 @@ int sysPreprocessor(const char *nabla_entity_name,
              cat_sed_temporary_file_name);
     strcat(cat_command,tok_command);
     //printf("\ncat_command: %s", cat_command);
-    dbg("\n[sysPreprocessor] cat_command is %s",cat_command);
+    dbg("\n\n[sysPreprocessor] cat_command is %s",cat_command);
   }
   free(dup_list_of_nabla_files);
   printf("\n");
@@ -144,7 +146,7 @@ void nablaPreprocessor(char *nabla_entity_name,
     if (*scanForSpaceToPutZero==0) break;
   }
   if (*scanForSpaceToPutZero==32) *scanForSpaceToPutZero=0;
-  dbg("\n[nablaBackend] But giving nabla_input_file = %s, unique_temporary_file = %s",
+  dbg("\n[nablaPreprocessor] But giving nabla_input_file = %s, unique_temporary_file = %s",
       list_of_nabla_files, unique_temporary_file_name);
   
   if (sysPreprocessor(nabla_entity_name,
@@ -152,6 +154,7 @@ void nablaPreprocessor(char *nabla_entity_name,
                       unique_temporary_file_name,
                       unique_temporary_file_fd)!=0)
     exit(NABLA_ERROR|fprintf(stderr, "\n[nablaPreprocessor] Error in preprocessor stage\n"));
+  dbg("\n[nablaPreprocessor] done!");
 }
 
 

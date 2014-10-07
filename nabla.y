@@ -30,7 +30,7 @@ bool type_precise=false;
 /////////////////////////////////
 // Terminals unused in grammar //
 /////////////////////////////////
-/*
+/* 
   %token COMMENTS SINGLE_LINE_COMMENTS
   %token NOPINCLUDES
   %token NAMESPACE
@@ -339,8 +339,8 @@ direct_declarator
 init_declarator
 :	declarator {Y1($$,$1)}
 // Permet de faire des appels constructeurs à-là '=Real3(0.0,0.0,0.0)'
-//|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
-|	declarator '=' type_specifier '(' ')' {Y4($$,$1,$2,$3,$4)}
+|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
+|	declarator '=' type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
 |	declarator '=' initializer{Y3($$,$1,$2,$3)}
 ;
 init_declarator_list

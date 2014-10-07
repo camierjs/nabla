@@ -475,7 +475,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
-    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "cell->uniqueId().asInteger()");
+    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "(*cell)->uniqueId().asInteger()");
     if (foreach=='\0' && support=='n') nprintf(arc, NULL, "node->uniqueId().asInteger()");
     if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->uniqueId().asInteger()");
     if (foreach=='\0' && support=='p') nprintf(arc, NULL, "particle->uniqueId().asInteger()");

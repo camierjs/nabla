@@ -134,4 +134,10 @@ char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
 char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
 char *faceJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
 
+char *particleJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *particleJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *particleJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+
+char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+
 #endif // _NABLA_ARCANE_H_

@@ -276,14 +276,14 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
 
-    dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
+    // dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
     if (nabla->hook->turnTokenToVariable(n, nabla, fct)!=NULL) break;
     if (n->tokenid == '{'){ fprintf(nabla->entity->src, "{\n"); break; }
     if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
     
     // Dernière action possible: on dump
-    dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
+    //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;
     fprintf(nabla->entity->src,"%s",n->token);
     nablaInsertSpace(nabla,n);

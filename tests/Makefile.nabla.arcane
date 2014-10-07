@@ -55,14 +55,23 @@ CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
 all: $(TGT) $(NABLA) 
 
 
+##############
+# GENERATION #
+##############
+gen1:$(TGT)Module.cc $(NABLA) 
+
+
 ###############
 # .n 2 target #
 ###############
-$(TGT)Module.o:$(TGT_FILE) $(ARC_FILE) $(NABLA)
+$(TGT)Module.cc:$(TGT_FILE) $(ARC_FILE) $(NABLA)
 	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
 	$(NABLA) --arcane --alone $(TGT) -i $(TGT_FILE)
 	$(ARCANE_AXL_EXE) -l c++ $(TGT).axl
+
+$(TGT)Module.o:$(TGT)Module.cc
 	$(CXX) -c $(CFLAGS) $(ADDITIONAL_DEFINES) $(TGT)Module.cc -o $(TGT)Module.o
+
 
 ########
 # MAIN #

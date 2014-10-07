@@ -56,7 +56,6 @@ int tokenidToRuleid(int tokenid);
 int yyNameTranslate(int tokenid);
 int rulenameToId(const char *rulename);
 
-//#define SET_TOKEN(node,newToken) node->token=strdup(newToken)
 
 #define remainY1(lhs)                                                 \
   astNode *timeRemainNode=astNewNodeToken();                          \
@@ -122,13 +121,13 @@ int rulenameToId(const char *rulename);
   Y4(lhs,n1,pIn,n2,pOut)
 
 #define Ypow(lhs,n1,pow)                                                \
-  astNode *pPow=astNewNodeToken();                                       \
-  pPow->token=strdup("pow");                                             \
-  pPow->tokenid=IDENTIFIER;                                              \
+  astNode *pPow=astNewNodeToken();                                      \
+  pPow->token=strdup("pow");                                            \
+  pPow->tokenid=IDENTIFIER;                                             \
   astNode *pIn=astNewNodeToken();                                       \
   pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(');                 \
   astNode *pTwo=astNewNodeToken();                                      \
-  pTwo->token=strdup("," #pow ".0");pTwo->tokenid=IDENTIFIER;                     \
+  pTwo->token=strdup("," #pow ".0");pTwo->tokenid=IDENTIFIER;           \
   astNode *pOut=astNewNodeToken();                                      \
   pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');               \
   Y5(lhs,pPow,pIn,n1,pTwo,pOut)

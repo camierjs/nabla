@@ -47,7 +47,7 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_ARCANE_C backends/arcane/nccArc.c backends/arcane/nccArcConfig.c backends/arcane/nccArcModule.c
 							backends/arcane/nccArcAxl.c backends/arcane/nccArcFunction.c 
                      backends/arcane/nccArcJob.c backends/arcane/nccArcJobCells.c
-                     backends/arcane/nccArcJobNodes.c backends/arcane/nccArcJobFaces.c
+                     backends/arcane/nccArcJobNodes.c backends/arcane/nccArcJobFaces.c backends/arcane/nccArcJobParticles.c
                      backends/arcane/nccArcMain.c backends/arcane/nccArcHooks.c backends/arcane/nccArcSimd.c)
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}ARCANE${VT100_RESET} libraries:${VT100_RESET}")
 info("\t${VT100_FG_YELLOW}GMP${VT100_RESET}")

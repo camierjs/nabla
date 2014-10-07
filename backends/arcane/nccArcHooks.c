@@ -77,15 +77,15 @@ void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
 nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
                                              nablaMain *arc,
                                              nablaJob *job){
-  dbg("\n\t\t[arcaneHookTurnTokenToVariable]");
+  //dbg("\n\t\t[arcaneHookTurnTokenToVariable]");
   assert(job->item!=NULL);
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
   int isPostfixed=job->parse.isPostfixed;
-  dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
+  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
   nablaVariable *var=nablaVariableFind(arc->variables, n->token);
-  dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");
+  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");
   
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
   if (job->parse.alephKeepExpression==true){
@@ -96,11 +96,11 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
     
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL){
-    dbg("\n\t\t[arcaneHookTurnTokenToVariable] Pas une variable!");
+    //dbg("\n\t\t[arcaneHookTurnTokenToVariable] Pas une variable!");
     //nprintf(arc,NULL,"/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
     return NULL;
   }
-  dbg("\n\t\t[arcaneHookTurnTokenToVariable] m_%s_%s token=%s", var->item, var->name, n->token);
+  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] m_%s_%s token=%s", var->item, var->name, n->token);
 
   //nprintf(arc, NULL, "/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
   if (var->gmpRank==-1){
@@ -131,81 +131,15 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
   nprintf(arc,NULL,faceJobNodeVar(arc,job,var),NULL);
   nprintf(arc,NULL,faceJobFaceVar(arc,job,var),NULL);
   nprintf(arc,NULL,faceJobGlobalVar(arc,job,var),NULL);
-  
-  switch (cnfg){  
-    ///////////////
-    // PARTICLES job
-    ///////////////
-  case ('p'):{
-    nprintf(arc, "/*ParticleJob*/", NULL);
-    switch (var->item[0]){
-    case ('p'):{
-      nprintf(arc, "/*ParticleVar*/", NULL); // Particle variable
-      nprintf(arc, NULL, "[particle]");
-      break;
-    }
-    case ('c'):{
-      nprintf(arc, "/*CellVar*/", "[particle->cell()]");// CELL variable
-      break;
-    }
-    case ('n'):{
-      nprintf(arc, "/*NodeVar*/", NULL); // NODE variable
-      nprintf(arc, NULL, "\n#error ParticleJob NodeVar");
-      break;
-    }
-    case ('f'):{
-      nprintf(arc, "/*FaceVar*/", NULL);// FACE variable
-      nprintf(arc, NULL, "\n#error ParticleJob FaceVar");
-      break;
-    }
-    case ('g'):{
-      nprintf(arc, "/*GlobalVar*/", NULL); // GLOBAL variable
-      nprintf(arc, NULL, "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de récupérer les m_global_...()
-      break;
-    }
-    default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] PARTICLES job arcaneHookTurnTokenToVariable\n"));
-    }
-    break;
-  }
+
+  // Lancement de tous les transformations connues au sein des Particles jobs
+  nprintf(arc,NULL,particleJobParticleVar(arc,job,var),NULL);
+  nprintf(arc,NULL,particleJobCellVar(arc,job,var),NULL);
+  nprintf(arc,NULL,particleJobGlobalVar(arc,job,var),NULL);
 
 
-    
-    ///////////////
-    // Fonction standard
-    ///////////////
-  case ('\0'):{
-    switch (var->item[0]){
-    case ('c'):{
-      nprintf(arc, NULL, NULL);// CELL variable
-      break;
-    }
-    case ('n'):{
-      nprintf(arc, "/*NodeVar*/", NULL); // NODE variable
-      break;
-    }
-    case ('f'):{
-      nprintf(arc, "/*FaceVar*/", NULL);// FACE variable
-      break;
-    }
-    case ('p'):{
-      nprintf(arc, "/*ParticleVar*/", NULL); // NODE variable
-      break;
-    }
-    case('g'):{
-      nprintf(arc, "/*GlobalVar*/", NULL); // GLOBAL variable
-      nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de récupérer les m_global_...()
-      break;
-    }
-    default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob arcaneHookTurnTokenToVariable\n"));
-    }
-    break;
-  }
-  default:
-    nprintf(arc, "/*OtherJob*/", NULL);
-    // Ce cas arrive pour les fonctions sans support qui jouent avec des variables Arcane
-    // Pas sûr que cela doit arriver à terme, mais pour l'instant c'est le cas
-    break;
-  }
+// Lancement de tous les transformations connues au sein des fonctions
+  nprintf(arc,NULL,functionGlobalVar(arc,job,var),NULL);
 
   return var;
 }
