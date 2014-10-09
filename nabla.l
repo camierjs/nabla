@@ -118,6 +118,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Uid"             { return tok(&yylval, UIDTYPE);}
 "file"            { return tok(&yylval, FILETYPE);}
 "File"            { return tok(&yylval, FILETYPE);}
+"FILE"            { return tok(&yylval, FILETYPE);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
@@ -184,6 +185,14 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "uid" 	         { return tok(&yylval, UID);}
 "boundaryCell"    { return tok(&yylval, BOUNDARY_CELL);}
 
+"&&"					{ return tok(&yylval, AND_OP);}
+"∧"					{ return tok(&yylval, AND_OP);}  // a788e2
+"and"             { return tok(&yylval, AND_OP);}
+
+"||"					{ return tok(&yylval, IOR_OP);}
+"∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
+"or"              { return tok(&yylval, IOR_OP);}
+
 {L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER);}
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
@@ -211,14 +220,6 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "++"					{ return tok(&yylval, INC_OP);}
 "--"					{ return tok(&yylval, DEC_OP);}
 "->"					{ return tok(&yylval, PTR_OP);}
-
-"&&"					{ return tok(&yylval, AND_OP);}
-"∧"					{ return tok(&yylval, AND_OP);}  // a788e2
-"and"             { return tok(&yylval, AND_OP);}
-
-"or"              { return tok(&yylval, IOR_OP);}
-"||"					{ return tok(&yylval, IOR_OP);}
-"∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
 
 "<="					{ return tok(&yylval, LEQ_OP);}
 ">="					{ return tok(&yylval, GEQ_OP);}

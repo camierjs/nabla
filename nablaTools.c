@@ -287,6 +287,7 @@ void nUtf8(char **bkp){
     if (p3s(p,0x9a88e2,"rsqrt",bkp)) p+=2;
     // Cbrt
     if (p3s(p,0x9b88e2,"rcbrt",bkp)) p+=2;
+    
     if (p3s(p,0xa788e2,"&&",bkp)) p+=2;
     if (p3s(p,0xa888e2,"||",bkp)) p+=2;
     
