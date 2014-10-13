@@ -1,0 +1,22 @@
+/*options{
+  Real wtf = -1.0e-15;
+  Bool option_a = true;
+};
+*/
+cells{
+  Real alpha[4];
+  Real theta[nodes];
+};
+/*
+global{
+  Int64 mc_vars_seed_cur;
+  Int64 array[4];
+};
+*/
+/*cells Real inverse(Real ε){
+  ε=(ε!=0.0)?1.0/ε:ε;
+  return ε;
+  }*/
+
+cells void inverse(void){
+}

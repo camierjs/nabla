@@ -188,6 +188,7 @@ int main(int argc, char * argv[]){
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
        {"sse",no_argument,NULL,BACKEND_COLOR_OKINA_SSE},
        {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
+       {"avx2",no_argument,NULL,BACKEND_COLOR_OKINA_AVX2},
        {"mic",no_argument,NULL,BACKEND_COLOR_OKINA_MIC},
        {"cilk",no_argument,NULL,BACKEND_COLOR_OKINA_CILK},
        {"omp",no_argument,NULL,BACKEND_COLOR_OKINA_OpenMP},
@@ -230,13 +231,11 @@ int main(int argc, char * argv[]){
 \t\t[36m--std[0m\t\tSTD 1=2^(WARP_BIT=0) vector depth\n\
 \t\t[36m--sse[0m\t\tSSE 2=2^(WARP_BIT=1) vector depth\n\
 \t\t[36m--avx[0m\t\tAVX 4=2^(WARP_BIT=2) vector depth\n\
+\t\t[36m--avx2[0m\t\tAVX 4=2^(WARP_BIT=2) vector depth + gather & FMA\n\
 \t\t[36m--mic[0m\t\tMIC 8=2^(WARP_BIT=3) vector depth\n\
 \t\t[36m--cilk[0m\t\tCilk+ parallel implementation\n\
 \t\t[36m--omp[0m\t\tOpenMP parallel implementation\n\
 \t\t[36m--seq[0m\t\tNo parallel implementation\n\
-\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n\
-\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n\
-\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n\
 [1;36mEMACS MODE[0m\n\
 \t(setq load-path (cons \"/cea/BS/home/s3/camierjs/.emacs.d\" load-path))\n\
 \t(autoload 'nabla-mode \"nabla-mode\" \"Nabla Mode\" t)\n\
@@ -245,9 +244,12 @@ int main(int argc, char * argv[]){
 \t(setq locale-coding-system 'utf-8)\n\
 \t(set-language-environment 'utf-8)\n\
 [1;36mAUTHOR[0m\n\
-\tJean-Sylvain Camier (5568) <camierjs@cea.fr>\n\
+\tJean-Sylvain Camier (#5568) <jean-sylvain.camier@cea.fr>\n\
 [1;36mBUGS[0m\n\
 \tTest bugs are to be reported to the above address.\n"));
+//\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n        \
+//\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n                     \
+//\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n    \
 
   while ((c=getopt_long(argc, argv, "tv:I:p:n:i:",longopts,&longindex))!=-1){
     switch (c){
@@ -339,6 +341,10 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_OKINA_AVX:
       backend_color|=BACKEND_COLOR_OKINA_AVX;
       dbg("\n[nabla] Command line specifies OKINA's AVX option");
+      break;
+    case BACKEND_COLOR_OKINA_AVX2:
+      backend_color|=BACKEND_COLOR_OKINA_AVX2;
+      dbg("\n[nabla] Command line specifies OKINA's AVX2 option");
       break;
     case BACKEND_COLOR_OKINA_MIC:
       backend_color|=BACKEND_COLOR_OKINA_MIC;

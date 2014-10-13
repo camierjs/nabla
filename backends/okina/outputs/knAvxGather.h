@@ -1,7 +1,7 @@
 #ifndef _KN_GATHER_H_
 #define _KN_GATHER_H_
 
-
+#ifndef __AVX2__
 /******************************************************************************
  * Gather: (X is the data @ offset x)       a            b       c   d
  * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      
@@ -94,7 +94,6 @@ inline void gather3k(const int a, const int b,
   gather3ki(a,b,c,d, data, gthr,2);
 }
 
-
 // ******************************************************************************
 // *
 // ******************************************************************************
@@ -127,5 +126,89 @@ inline void gatherFromNode_3kArray8(const int a, const int a_corner,
   gatherFromNode_3kiArray8(a,a_corner,b,b_corner,c,c_corner,d,d_corner,data,gthr,2);
 }
 
+
+#else // now __AVX2__
+
+
+inline void gatherk(const int a, const int b,
+                    const int c, const int d,
+                    real *data, real *gthr){
+  const __m128i index= _mm_set_epi32(d,c,b,a);
+  const double *adrs=(double*)&data[0];
+  *gthr = _mm256_i32gather_pd(adrs,index, _MM_SCALE_4);
+}
+
+inline __m256d gatherk_and_zero_neg_ones(const int a, const int b,
+                                         const int c, const int d,
+                                         real *data){
+  const __m256d zero256=_mm256_set1_pd(0.0);
+  const __m128i index= _mm_set_epi32(d,c,b,a);
+  const double *adrs=(double*)&data[0];
+  const __m256d gathered = _mm256_i32gather_pd(adrs,index, _MM_SCALE_4);
+  return opTernary(_mm256_cmp_pd(gathered,zero256,_CMP_GE_OQ),gathered,zero256);
+}
+
+inline void gatherFromNode_k(const int a, const int b,
+                             const int c, const int d,
+                             real *data, real *gthr){
+  *gthr=gatherk_and_zero_neg_ones(a,b,c,d,data);
+}
+
+// ******************************************************************************
+// * Gather avec des real3
+// ******************************************************************************
+/*inline void gather3ki(const int a, const int b,
+                      const int c, const int d,
+                      real3 *data, real3 *gthr,
+                      int i){
+  __m128i index= _mm_set_epi32(d,c,b,a);
+  const __m256d dcba = _mm256_i32gather_pd(index, data, _MM_SCALE_4);
+  if (i==0) (*gthr).x=dcba;
+  if (i==1) (*gthr).y=dcba;
+  if (i==2) (*gthr).z=dcba;
+  }*/
+
+inline void gather3k(const int a, const int b,
+                     const int c, const int d,
+                     real3 *data, real3 *gthr){
+  const __m128i index= _mm_set_epi32(d,c,b,a);
+  const double *adrsx=(double*)&data[0].x;
+  const double *adrsy=(double*)&data[0].y;
+  const double *adrsz=(double*)&data[0].z;
+  const __m256d gthrx = _mm256_i32gather_pd(adrsx, index, _MM_SCALE_4);
+  const __m256d gthry = _mm256_i32gather_pd(adrsy, index, _MM_SCALE_4);
+  const __m256d gthrz = _mm256_i32gather_pd(adrsz, index, _MM_SCALE_4);
+  *gthr = Real3(gthrx,gthry,gthrz);
+}
+
+
+inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
+                                     const int b, const int b_corner,
+                                     const int c, const int c_corner,
+                                     const int d, const int d_corner,
+                                     real3 *data, real3 *gthr, int i){
+  const __m128i index= _mm_set_epi32(4*(3*8*WARP_BASE(d)+3*d_corner+i)+WARP_OFFSET(d),
+                               4*(3*8*WARP_BASE(c)+3*c_corner+i)+WARP_OFFSET(c),
+                               4*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b),
+                               4*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a));
+  const double *adrsx=(double*)&data[0].x;
+  const double *adrsy=(double*)&data[0].y;
+  const double *adrsz=(double*)&data[0].z;
+  const __m256d gthrx = _mm256_i32gather_pd(adrsx, index, _MM_SCALE_4);
+  const __m256d gthry = _mm256_i32gather_pd(adrsy, index, _MM_SCALE_4);
+  const __m256d gthrz = _mm256_i32gather_pd(adrsz, index, _MM_SCALE_4);
+  *gthr = Real3(gthrx,gthry,gthrz);
+}
+
+inline void gatherFromNode_3kArray8(const int a, const int a_corner,
+                                    const int b, const int b_corner,
+                                    const int c, const int c_corner,
+                                    const int d, const int d_corner,
+                                    real3 *data, real3 *gthr){
+  gatherFromNode_3kiArray8(a,a_corner,b,b_corner,c,c_corner,d,d_corner,data,gthr,0);
+  gatherFromNode_3kiArray8(a,a_corner,b,b_corner,c,c_corner,d,d_corner,data,gthr,1);
+  gatherFromNode_3kiArray8(a,a_corner,b,b_corner,c,c_corner,d,d_corner,data,gthr,2);
+}
+#endif //  __AVX2__ vs __AVX__
 
 #endif //  _KN_GATHER_H_

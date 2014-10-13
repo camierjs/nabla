@@ -1,0 +1,366 @@
+
+
+
+
+// ****************************************************************************
+// * Other tools
+// ****************************************************************************
+
+int isX(void){
+  return ((((GlobalIteration-1)%4)==0) || ((GlobalIteration-1)%4)==3);
+}
+
+
+void eieio(void){
+  synchronize(old_ρ);
+  synchronize(old_u); // Normal momentum
+  synchronize(old_v); // Transverse momentum
+  synchronize(old_E);
+}
+
+
+// ****************************************************************************
+// * Dump old_*
+// ****************************************************************************
+cells void dump_old_ρ(void){
+  if (lid==0) printf("\n[dump] old_ID");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", old_ρ);
+}
+cells void dump_old_u(void){
+  if (lid==0) printf("\n[dump] old_IU");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", old_u);
+}
+cells void dump_old_v(void){
+  if (lid==0) printf("\n[dump] old_IV");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", old_v);
+}
+cells void dump_old_E(void){
+  if (lid==0) printf("\n[dump] old_IP");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", old_E);
+}
+void dump_old_ρuvE(void){
+  dump_old_ρ();
+  dump_old_u();
+  dump_old_v();
+  dump_old_E();
+}
+
+
+// ****************************************************************************
+// * Dump ρ,u,v,E
+// ****************************************************************************
+cells void dump_ρ(void){
+  if (lid==0) printf("\n[dump] ID");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", ρ);
+}
+cells void dump_info_ρ(void){
+  info()<< "[dump_info_ρ] #"<<uid<<" ρ="<<ρ;
+}
+cells void dump_u(void){
+  if (lid==0) printf("\n[dump] IU");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", u);
+}
+cells void dump_info_u(void){
+  info()<< "[dump_info_ρ] #"<<uid<<" u="<<u;
+}
+cells void dump_v(void){
+  if (lid==0) printf("\n[dump] IV");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", v);
+}
+cells void dump_info_v(void){
+  info()<< "[dump_info_ρ] #"<<uid<<" v="<<v;
+}
+cells void dump_E(void){
+  if (lid==0) printf("\n[dump] IP");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", E);
+}
+cells void dump_info_E(void){
+  info()<< "[dump_info_ρ] #"<<uid<<" E="<<E;
+}
+void dump_ρuvE(void){
+  dump_ρ();
+  dump_u();
+  dump_v();
+  dump_E();
+}
+void dump_info_ρuvE(void){
+  dump_info_ρ();
+  dump_info_u();
+  dump_info_v();
+  dump_info_E();
+}
+
+
+// ****************************************************************************
+// * Dump primitives
+// ****************************************************************************
+cells void dump_prim_ρ(void){
+  if (lid==0) printf("\n[dump] prim_ID");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", prim_ρ);
+}
+cells void dump_prim_u(void){
+  if (lid==0) printf("\n[dump] prim_IU");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", prim_u);
+}
+cells void dump_prim_v(void){
+  if (lid==0) printf("\n[dump] prim_IV");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", prim_v);
+}
+cells void dump_prim_E(void){
+  if (lid==0) printf("\n[dump] prim_IP");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", E_internal);
+}
+cells void dump_prim_p(void){
+  if (lid==0) printf("\n[dump] prim_p");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", prim_p);
+}
+cells void dump_prim_c(void){
+  if (lid==0) printf("\n[dump] prim_c");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", prim_c);
+}
+cells void dump_info_prim_ρ(void){
+  info()<< "[dump_info_prim_ρ] #"<<uid<<" prim_ρ="<<prim_ρ;
+}
+cells void dump_info_prim_u(void){
+  info()<< "[dump_info_prim_u] #"<<uid<<" prim_u="<<prim_u;
+}
+cells void dump_info_prim_v(void){
+  info()<< "[dump_info_prim_v] #"<<uid<<" prim_v="<<prim_v;
+}
+cells void dump_info_prim_E(void){
+  info()<< "[dump_info_prim_E] #"<<uid<<" prim_E="<<E_internal;
+}
+cells void dump_info_prim_p(void){
+  info()<< "[dump_info_prim_p] #"<<uid<<" prim_p="<<prim_p;
+}
+cells void dump_info_prim_c(void){
+  info()<< "[dump_info_prim_c] #"<<uid<<" prim_c="<<prim_c;
+}
+void dump_info_prim_ρuvEpc(void){
+  dump_info_prim_ρ();
+  dump_info_prim_u();
+  dump_info_prim_v();
+  dump_info_prim_E();
+  dump_info_prim_p();
+  dump_info_prim_c();
+}
+
+
+// ****************************************************************************
+// * Dump slopes
+// ****************************************************************************
+cells void dump_dρ(void){
+  if (lid==0) printf("\n[dump] slope_ρ");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", slope_ρ);
+}
+cells void dump_du(void){
+  if (lid==0) printf("\n[dump] slope_u");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", slope_u);
+}
+cells void dump_dv(void){
+  if (lid==0) printf("\n[dump] slope_v");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", slope_v);
+}
+cells void dump_dp(void){
+  if (lid==0) printf("\n[dump] slope_p");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", slope_p);
+}
+void dump_slopes(void){
+  dump_dρ();
+  dump_du();
+  dump_dv();
+  dump_dp();
+}
+
+
+
+// ****************************************************************************
+// * Dump flux
+// ****************************************************************************
+cells void dump_flux_ρ_left(void){
+  if (lid==0) printf("\n[dump] flux_ρ_left");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_ρ_left);
+}
+cells void dump_flux_u_left(void){
+  if (lid==0) printf("\n[dump] flux_u_left");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_u_left);
+}
+cells void dump_flux_v_left(void){
+  if (lid==0) printf("\n[dump] flux_v_left");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_v_left);
+}
+cells void dump_flux_p_left(void){
+  if (lid==0) printf("\n[dump] flux_p_left");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_p_left);
+}
+
+cells void dump_flux_ρ_right(void){
+  if (lid==0) printf("\n[dump] flux_ρ_right");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_ρ_right);
+}
+cells void dump_flux_u_right(void){
+  if (lid==0) printf("\n[dump] flux_u_right");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_u_right);
+}
+cells void dump_flux_v_right(void){
+  if (lid==0) printf("\n[dump] flux_v_right");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_v_right);
+}
+cells void dump_flux_p_right(void){
+  if (lid==0) printf("\n[dump] flux_p_right");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_p_right);
+}
+void dump_flux(void){
+  dump_flux_ρ_left();
+  dump_flux_u_left();
+  dump_flux_v_left();
+  dump_flux_p_left();
+  
+  dump_flux_ρ_right();
+  dump_flux_u_right();
+  dump_flux_v_right();
+  dump_flux_p_right();
+}
+
+
+// ****************************************************************************
+// * Dump left/right flux
+// ****************************************************************************
+cells void dump_qflux_ρ_left(void){
+  if (lid==0) printf("\n[dump] [33mq_ρ_left[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_ρ_left);
+}
+cells void dump_qflux_u_left(void){
+  if (lid==0) printf("\n[dump] [33mq_u_left[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_u_left);
+}
+cells void dump_qflux_v_left(void){
+  if (lid==0) printf("\n[dump] [33mq_v_left[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_v_left);
+}
+cells void dump_qflux_p_left(void){
+  if (lid==0) printf("\n[dump] [33mq_p_left[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_p_left);
+}
+cells void dump_qflux_ρ_right(void){
+  if (lid==0) printf("\n\n[dump] [36mq_ρ_right[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_ρ_right);
+}
+cells void dump_qflux_u_right(void){
+  if (lid==0) printf("\n[dump] [36mq_u_right[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_u_right);
+}
+cells void dump_qflux_v_right(void){
+  if (lid==0) printf("\n[dump] [36mq_v_right[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_v_right);
+}
+cells void dump_qflux_p_right(void){
+  if (lid==0) printf("\n[dump] [36mq_p_right[m");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", q_p_right);
+}
+void dump_qleftright(void){
+  dump_qflux_ρ_left();
+  dump_qflux_u_left();
+  dump_qflux_v_left();
+  dump_qflux_p_left();
+  dump_qflux_ρ_right();
+  dump_qflux_u_right();
+  dump_qflux_v_right();
+  dump_qflux_p_right();
+}
+
+
+// ****************************************************************************
+// * Dump Riemann solutions
+// ****************************************************************************
+cells void dump_gdnv_ρ(void){
+  if (lid==0) printf("\n[dump] gdnv_ρ");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", gdnv_ρ);
+}
+cells void dump_gdnv_u(void){
+  if (lid==0) printf("\n[dump] gdnv_u");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", gdnv_u);
+}
+cells void dump_gdnv_v(void){
+  if (lid==0) printf("\n[dump] gdnv_v");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", gdnv_v);
+}
+cells void dump_gdnv_p(void){
+  if (lid==0) printf("\n[dump] gdnv_p");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", gdnv_p);
+}
+void dump_riemann(void){
+  dump_gdnv_ρ();
+  dump_gdnv_u();
+  dump_gdnv_v();
+  dump_gdnv_p();
+}
+
+
+// ****************************************************************************
+// * Dump computed fluxes from solution
+// ****************************************************************************
+cells void dump_flux_ρ(void){
+  if (lid==0) printf("\n[dump] flux_ρ");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_ρ);
+}
+cells void dump_flux_u(void){
+  if (lid==0) printf("\n[dump] flux_u");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_u);
+}
+cells void dump_flux_v(void){
+  if (lid==0) printf("\n[dump] flux_v");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_v);
+}
+cells void dump_flux_E(void){ 
+  if (lid==0) printf("\n[dump] flux_E");
+  if ((lid%4)==0) printf("\n\t");
+  printf("%12.12f ", flux_E);
+}
+void dump_cmpflx(void){
+  dump_flux_ρ();
+  dump_flux_u();
+  dump_flux_v();
+  dump_flux_E();
+}

@@ -2,19 +2,21 @@ NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_ADDITIONAL_FILES = ${NABLA_SOURCE_DIR}/tests/$(TGT)/luleshInlines.n
 
+MESH = 16
+#SIMD = avx
+COLORS = aos
+#PARALLEL = omp
+
 CXX=/usr/local/intel/Compiler/14.0/144/bin/icc
 ADDITIONAL_CFLAGS = -finline -inline-forceinline -fno-alias -alias-const -no-ipo
-SIMD_std_FLAGS = -DWARP_BIT=0 -march=pentium3 
-SIMD_sse_FLAGS = -DWARP_BIT=1 -msse #4.2 -mno-avx
-SIMD_avx_FLAGS = -DWARP_BIT=2 -mavx 
-SIMD_mic_FLAGS = -DWARP_BIT=3 -mmic
+SIMD_std_FLAGS  = -DWARP_BIT=0 -march=pentium3 
+SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse #4.2 #-mno-avx
+SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx 
+SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
+SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic
 CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(ADDITIONAL_CFLAGS) $(MESH_FLAGS)
 
 
-MESH = 16
-SIMD = avx
-COLORS = aos
-PARALLEL = omp
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(shell echo $(MESH)-1|bc -l)

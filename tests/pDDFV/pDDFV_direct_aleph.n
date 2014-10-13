@@ -1,0 +1,85 @@
+// ****************************************************************************
+// * Remplissage matriciel, coté Dual Direct
+// ****************************************************************************
+inner faces void dDualMtx(void) @ 16.0 if (!option_indirect){
+  const Real pvalue = interior_dual_c_sd;
+  const Real qvalue = interior_dual_c_se;
+
+  // Cas où on a pas trouvé de tail ou de head
+  if (interior_dual_c_jk || interior_dual_c_lm) continue;
+  
+  assert(pvalue>=0.0 && qvalue>=0.0);
+  
+  if (node_is_on_𝜕Ω[0] && node_is_on_𝜕Ω[1]) continue;
+  
+  if (node(0).isOwn() && !node_is_on_𝜕Ω[0]){
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(0), +pvalue);
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(1), -qvalue);
+  }
+  if (node(1).isOwn() && !node_is_on_𝜕Ω[1]){
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(1), +qvalue);
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(0), -pvalue);
+  }
+}
+
+
+// ********************************************************
+// Ici, c'est okHead et D=node[0] qui est on_𝜕Ω, μ=0
+// On peut tester ce cas avec l'analytique
+// et k=10000, θ=π/6, en regardant la convergence
+// et débrayant les asserts du second membre
+// et en mettant à 1.0 le bord et l'init
+// ********************************************************
+inner faces void dDualMtxLM(void) @ 16.1 if (!option_indirect){
+  Cell back,front;
+  const Real evalue = interior_dual_c_se;
+  const Real lvalue = interior_dual_c_sl;
+  const Real mvalue = interior_dual_c_sm;
+  if (node_is_on_𝜕Ω[1]) continue;
+  if (!node(1).isOwn()) continue;
+  if (!interior_dual_c_lm) continue;
+  loopOnThisNodeToFindPositiveDualFaceCells(node(1),
+                                            interior_dual_face_uid,
+                                            interior_dual_face_swap,
+                                            &back, &front);
+  if (option_debug_dual)
+    info()<<"\t\t\33[7m[deltaInnerCellsLM] Now doing LM face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid<<"\33[m";
+  assert(evalue>0.0 && lvalue>0.0 &&mvalue>0.0);
+  ℵ matrix addValue(node_θ,node(1), node_θ,node(1), +evalue);
+  ℵ matrix addValue(node_θ,node(1), cell_θ,back, -lvalue);
+  ℵ matrix addValue(node_θ,node(1), cell_θ,front, -mvalue);
+}
+
+
+// ********************************************************
+// Ici, c'est okTail et E=node[1] qui est on_𝜕Ω, μ=1.0
+// Cette fonction 'hit' moins que celle du dessus du fait
+// de la numérotation de Magix des faces depuis les outer nodes
+// qui sont orientés vers l'intérieur
+// ********************************************************
+inner faces void dDualMtxJK(void) @ 16.2 if (!option_indirect){
+  Cell back,front;
+  const Real dvalue = interior_dual_c_sd;
+  const Real jvalue = interior_dual_c_sj;
+  const Real kvalue = interior_dual_c_sk;
+  if (node_is_on_𝜕Ω[0]) continue;
+  if (!node(0).isOwn()) continue;
+  if (!interior_dual_c_jk) continue;
+  if (option_debug_dual)
+    info()<<"\t\t\33[7m[deltaInnerCells] Now doing JK face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid<<"\33[m";
+  loopOnThisNodeToFindPositiveDualFaceCells(node(0),
+                                            interior_dual_face_uid,
+                                            interior_dual_face_swap,
+                                            &back, &front);
+  assert(dvalue>0.0 && kvalue>0.0 && jvalue>0.0);
+  ℵ matrix addValue(node_θ,node(0), node_θ,node(0), +dvalue);
+  ℵ matrix addValue(node_θ,node(0), cell_θ,back, -jvalue);
+  ℵ matrix addValue(node_θ,node(0), cell_θ,front, -kvalue);
+}
+

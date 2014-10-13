@@ -1,0 +1,219 @@
+with cartesian;
+
+#define ZERO 0.0
+#define ONE  1.0
+#define defined_eps 1.e-13
+
+
+// ****************************************************************************
+// * Inlined functions
+// ****************************************************************************
+inline Real limiter(Real r){
+  //return 1.;                                        // No flux limiter
+  //return max( 0., min(1., r));                      // Minmod
+  //return max( 0., max( min(2.*r, 1.), min(r, 2.))); // Superbee
+  //return (r+fabs(r))/(1.+fabs(r));                  // Van Leer
+  //return max( 0., min( min(.5*(1.+r), 2.*r), 2.));  // Monotonized Centered
+  return max( ZERO, min(ONE, r));                     // Minmod 
+  //2 flop -> min(a,b) == (a < b) ? a : b;
+}
+
+
+// ****************************************************************************
+// * OPTIONS
+// ****************************************************************************
+options{
+  Real    option_L          = 1.0;
+  Real    option_n          = 512;
+  Real    option_gamma      = 1.4;
+  Real    option_cfl        = 0.10;
+  Integer option_order      = 1;
+  Real    option_δt_ini     = 1.e-3;
+  Real    option_δt_inc_max = 1.1;
+  Real    option_time_max   = 0.2;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Real p;
+  Real r;
+  Real u;
+  Real e;
+  Real E;
+  Real c;
+  Real x;
+  Real us;
+  Real ps;
+  Real usgod;
+  Real psgod;
+};
+
+void eieio(void){
+  synchronize(p);
+  synchronize(r);
+  synchronize(u);
+  synchronize(e);
+  synchronize(E);
+  synchronize(c);
+  synchronize(x);
+  synchronize(us);
+  synchronize(ps);
+  synchronize(usgod);
+  synchronize(psgod);
+}
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0] 
+// ****************************************************************************
+
+void initTables(void) @ -10.0{
+  δt = option_δt_ini;
+}
+
+cells void initCellsTableUpr(void) out (cell p, cell r) @ -10.0{
+  u = 0.0;
+  p = (coord[0].x<0.5)?1.0:0.1;
+  r = (coord[0].x<0.5)?1.0:0.125;
+  x = ((double)uid)*option_L/((double)(option_n+1));
+  x=(uid==option_n-1)?option_L:x;
+}
+void syncUprx(void) @ -9.9 { eieio(); }
+
+cells void initCellsTableE(void) @ -9.0{
+  const Real invR=1.0/r;
+  const Real pDr=p*invR;
+  E = e = pDr/(option_gamma-1.0);
+}
+
+cells void initCellsTableC(void) @ -9.0{
+  const Real invR=1.0/r;
+  const Real pDr=p*invR;
+  c = √(option_gamma*pDr);
+}
+void syncEc(void) @ -8.9 { eieio(); }
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+cells Real minCellsCfl(xyz direction, Real δt_final){ // [0,n[
+  if (nextCell.null()) continue;
+  δt_final = min(δt_final, option_cfl*(x[nextCell]-x)/c);
+  return δt_final;
+}
+
+void timeStepControlAndCFLCondition(void) @ 1.0{
+  const Real δt_final=minCellsCfl(MD_DirX,1.e99);
+  δt = min(δt_final, option_δt_inc_max*δt);
+}
+
+
+cells void firstOrderNumericalFluxXYZ(xyz dir){ // [1,n[
+  if (prevCell.null()) continue;
+  if (nextCell.null()) continue;
+  {
+    const Real rcg = r[prevCell]*c[prevCell];
+    const Real rcd = r*c;
+    const Real up = u[prevCell];
+    const Real pp = p[prevCell];
+    const Real inv_rcgpd = 1.0/(rcg+rcd);
+    // GODUNOV's flux 
+    usgod = us = (rcg*up + rcd*u + pp - p)*inv_rcgpd;
+    psgod = ps = (rcg*p + rcd*pp + rcg*rcd*(up-u))*inv_rcgpd;
+  }
+}
+void firstOrderNumericalFlux(void) @ 2.0{
+  firstOrderNumericalFluxXYZ(MD_DirX);
+}
+void syncFirstOrderFlux(void) @ 2.1 {eieio();}
+
+
+cells void secondOrderNumericalFluxXYZ(xyz dir) {// [1,n[
+  if (prevCell.null()) continue;
+  if (nextCell.null()) continue;
+  {
+    const Real cp = c[prevCell];
+    const Real xp = x[prevCell];
+    const Real xn = x[nextCell];
+    const Real up = u[prevCell];
+    const Real pp = p[prevCell];
+    const Real usgodp = usgod[prevCell];
+    const Real usgodn = usgod[nextCell];
+    const Real psgodp = psgod[prevCell];
+    const Real psgodn = psgod[nextCell];
+    const Real sigmac = δt * 0.5*(cp+c) / (0.5*(xp+xn));
+    const Real phipu = limiter((up-usgodp)/((u-usgod)+defined_eps));
+    const Real phipp = limiter((pp-psgodp)/((p-psgod)+defined_eps));
+    const Real phimu = limiter((usgodn-u)/((usgod-up)+defined_eps));
+    const Real phimp = limiter((psgodn-p)/((psgod-pp)+defined_eps));
+    // GAD flux
+    us += ½ * (1.0-sigmac) * (phipu*(u-usgod) - phimu*(usgod-up));
+    ps += ½ * (1.0-sigmac) * (phipp*(p-psgod) - phimp*(psgod-pp));
+  }
+}
+void secondOrderNumericalFlux(void) @ 3.0 {
+  if (option_order==2) secondOrderNumericalFluxXYZ(MD_DirX);
+}
+void syncSecondOrderFlux(void) @ 3.1 {eieio();}
+
+
+cells void boundaryConditionsXYZ(xyz dir){
+  u = (uid==0)?0.0:u;
+  ps = (uid==0)? p:ps;
+  
+  if (uid==option_n-1-1){
+    us[nextCell] = 0.0;
+    ps[nextCell] = p[prevCell];
+    us = 0.0;
+    ps = p[prevCell];
+  }
+}
+void boundaryConditions(void) @ 4.0{
+  boundaryConditionsXYZ(MD_DirX);
+}
+void syncBC(void)@4.1{eieio();}
+
+
+cells void fluxBalanceAndEosClosureEquationXYZ(xyz dir) { // [0,n[
+  if (nextCell.null()) continue;
+  {
+    const Real dxa = x[nextCell] - x;
+    const Real dx  =  dxa + δt*( us[nextCell] - us );
+    const Real dm = r * (x[nextCell]-x);
+    r = r*dxa/dx;
+    u += δt / dm * ( ps - ps[nextCell]);
+    E += δt / dm * ( us*ps - us[nextCell]*ps[nextCell]);
+    e = E - ½*u*u;
+    p = (option_gamma-1.0)*r*e;
+    c = √(option_gamma*p/r);
+  }
+}
+void fluxBalanceAndEosClosureEquation(void) @ 5.0{
+  fluxBalanceAndEosClosureEquationXYZ(MD_DirX);
+}
+void syncBalance(void)@5.1{eieio();}
+
+
+cells void movePositions(void) @ 6.0{ //[0,n]
+  x += us * δt ;
+}
+void syncPositions(void)@6.1{eieio();}
+
+
+/*void endOfCycle(void) @ 7.0{
+  int niter=GlobalIteration;
+  printf(" niter = %d, t = %e, dt = %e \n", niter, time, δt);
+  }*/
+
+void testWhileTinfTmax(void) @ 10.0{
+  if (time >= option_time_max) exit;
+}
+
+
+
+

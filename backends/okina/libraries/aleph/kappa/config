@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?><!-- -*- SGML -*- -->
+<makefile type="library">
+
+<needed-components>
+  <component name="arcane" />
+</needed-components>
+
+<files language="c++">
+  <file>AlephKappa</file>
+</files>
+
+<files language="c++header">
+  <file>AlephKappa</file>
+</files>
+</makefile>

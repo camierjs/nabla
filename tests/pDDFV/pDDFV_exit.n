@@ -1,0 +1,34 @@
+// ****************************************************************************
+// * MàP Quit
+// ****************************************************************************
+void dumpExit(void) @ 50.0{
+  if (!option_only_one_iteration) return;
+  info()<<"[1;7;31mExiting after first iteration![0m";
+  exit;
+}
+
+
+// ****************************************************************************
+// * Test for Quit
+// ****************************************************************************
+void testForQuit(void) @ 50.0{
+  if (GlobalIteration >= option_max_iterations) exit;
+}
+
+
+// ********************************************************
+// * testForSlurm
+// ********************************************************
+void testForSlurm(void) @ 51.0{
+  const Integer tlimit=time limit;
+  const Integer tremain=time remain;
+  info()<<"\33[43;30m#"<<GlobalIteration<<", remaining "
+        << tremain << "/" <<tlimit <<"(s)\33[m";
+  // Si le temps restant est inférieur à notre borne, on sort
+  if (tremain < option_slurm_tremain){
+    info()<<"\33[43;30m#"<<GlobalIteration<<" now EXITing! ("
+          << tremain << "<" <<option_slurm_tremain<<"(s))\33[m";
+    exit;
+  }
+}
+

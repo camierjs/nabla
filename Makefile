@@ -14,6 +14,14 @@ tst:
 	(cd $(BUILD_PATH)/tests && ctest)
 tstg:
 	(cd $(BUILD_PATH)/tests && ctest -R gen)
+tstga2:
+	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_gen_1)
+tstra2:
+	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_run_1_avx2)
+tstro:
+	(cd $(BUILD_PATH)/tests && ctest -V -R run_omp)
+tstrc:
+	(cd $(BUILD_PATH)/tests && ctest -V -R run_cilk)
 tstr:
 	(cd $(BUILD_PATH)/tests && ctest -R run)
 tst4:
@@ -25,5 +33,5 @@ build:
 	(mkdir -p $(BUILD_PATH) && cd $(BUILD_PATH) && $(CMAKE) ~nabla/root)
 
 cln:
-	\rm -rf $(BUILD_PATH)
+	\rm -rf $(BUILD_PATH)/*
 

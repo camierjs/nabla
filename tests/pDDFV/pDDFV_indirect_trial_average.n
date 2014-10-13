@@ -1,0 +1,261 @@
+// ****************************************************************************
+// * Parties qui s'occupe des inconnues aux faces introduites.
+// * Cette façon de faire impose brutalement μ à 0.0 ou 1.0,
+// * ceci afin de calculer les valeures aux faces en fonction
+// * des valeures voisines aux noeuds et aux mailles
+// ****************************************************************************
+
+// On doit pas s'en servir quand on revient au mode average!
+
+
+// ****************************************************************************
+// * Fonction de test du secteur soumis
+// ****************************************************************************
+Bool iTrialLoopAvg(Bool dbg, Face f, Real3x3 kappa, Real3 νs, Real3 s,
+                   Real *pj, Real *pk, Real *α, Real *β, Real *Aire){
+  const Real3 D=coord[f->node(0)];
+  const Real3 E=coord[f->node(1)];
+  const Real3 S=½*(D+E);
+  const Real3 P=cell_mass_center[f->backCell()];
+  const Real3 Q=cell_mass_center[f->frontCell()];
+  //const Integer nid0 = 1+f->node(0)->uniqueId().asInteger();
+  //const Integer nid1 = 1+f->node(1)->uniqueId().asInteger();
+  Real3 J,K;
+  const Real ε=__DBL_EPSILON__;
+
+  // Quart QE
+  J=Q;
+  K=E;
+  *α=round((n(S,K)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(J,S)⋅(kappa⨂νs))/ε)*ε;
+  *pj=cell_θ[f->frontCell()];
+  *pk=node_θ[f->node(1)];
+  *Aire=geomComputeTriangleArea(S,J,K);
+  if (dbg) info()<<"\t\t\33[36m[trialFluxes] QE alpha="<<*α<<", beta="<<*β<<"\33[m";
+  if (*α>=0.0 && *β>=0.0) return true;
+
+  // Quart DQ
+  J=D;
+  K=Q;
+  *α=round((n(S,K)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(J,S)⋅(kappa⨂νs))/ε)*ε;
+  *pj=node_θ[f->node(0)];
+  *pk=cell_θ[f->frontCell()];
+  *Aire=geomComputeTriangleArea(S,J,K);
+  if (dbg) info()<<"\t\t\33[36m[trialFluxes] DQ alpha="<<*α<<", beta="<<*β<<"\33[m";
+  if (*α>=0.0 && *β>=0.0) return true;
+
+  // Quart PD
+  J=P;
+  K=D;
+  *α=round((n(S,K)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(J,S)⋅(kappa⨂νs))/ε)*ε;
+  *pj=cell_θ[f->backCell()];
+  *pk=node_θ[f->node(0)];
+  *Aire=geomComputeTriangleArea(S,J,K);
+  if (dbg) info()<<"\t\t\33[36m[trialFluxes] PD alpha="<<*α<<", beta="<<*β<<"\33[m";
+  if (*α>=0.0 && *β>=0.0) return true;
+  
+  // Quart EP
+  J=E;
+  K=P;
+  *α=round((n(S,K)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(J,S)⋅(kappa⨂νs))/ε)*ε;
+  *pj=node_θ[f->node(1)];
+  *pk=cell_θ[f->backCell()];
+  *Aire=geomComputeTriangleArea(S,J,K);
+  if (dbg) info()<<"\t\t\33[36m[trialFluxes] EP alpha="<<*α<<", beta="<<*β<<"\33[m";
+  if (*α>=0.0 && *β>=0.0) return true;
+
+  return false;
+}
+
+
+
+// ****************************************************************************
+// Pour les faces internes, tout est bien déterminé, pas de ré-orientation à prévoir
+// ****************************************************************************
+own inner faces void iInnerTrialAvg(void) @ 1.0 if (option_indirect &&
+                                                    !option_trial &&                                                    
+                                                    !option_trial_average){
+  const Real3 D=coord[0];
+  const Real3 E=coord[1];
+  const Real3 S=½*(D+E);
+  const Real3 P=cell_mass_center[backCell];
+  const Real3 Q=cell_mass_center[frontCell];
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  Real αQE,βQE,AQE,pjQE,pkQE;
+  Real αDQ,βDQ,ADQ,pjDQ,pkDQ;
+  Real αPD,βPD,APD,pjPD,pkPD;
+  Real αEP,βEP,AEP,pjEP,pkEP;
+  Bool dbg=option_debug_trial;
+  //const Real ε=__DBL_EPSILON__;
+  Bool okQE,okDQ,okPD,okEP;
+ 
+  // Pour chaque face en vis-à-vis, on calcul les contributions des diamants
+  // Les quatres possibles pour quads sont QE, DQ, PD ou EP
+  if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", QE\33[m";
+  okQE=iTrialLoopAvg(dbg, *this, κ, n(Q,E), S, &pjQE, &pkQE, &αQE, &βQE, &AQE);
+  
+  if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", DQ\33[m";
+  okDQ=iTrialLoopAvg(dbg, *this, κ, n(D,Q), S, &pjDQ, &pkDQ, &αDQ, &βDQ, &ADQ);
+  
+  if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", PD\33[m";
+  okPD=iTrialLoopAvg(dbg, *this, κ, n(P,D), S, &pjPD, &pkPD, &αPD, &βPD, &APD);
+  
+  if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", EP\33[m";
+  okEP=iTrialLoopAvg(dbg, *this, κ, n(E,P), S, &pjEP, &pkEP, &αEP, &βEP, &AEP);
+  assert(okQE && okDQ && okPD && okEP);
+  if (okQE){
+    const Real α=αQE;
+    const Real β=βQE;
+    const Real A=AQE;
+    interior_trial_s[0] = ½*(α+β)/A;
+    interior_trial_q[0] = ½*α/A;
+    interior_trial_e[0] = ½*β/A;
+  }
+  if (okDQ){
+    const Real α=αDQ;
+    const Real β=βDQ;
+    const Real A=ADQ;
+    interior_trial_s[1] = ½*(α+β)/A;
+    interior_trial_q[1] = ½*α/A;
+    interior_trial_e[1] = ½*β/A;
+  }
+  if (okPD){
+    const Real α=αPD;
+    const Real β=βPD;
+    const Real A=APD;
+    interior_trial_s[2] = ½*(α+β)/A;
+    interior_trial_q[2] = ½*α/A;
+    interior_trial_e[2] = ½*β/A;
+  }
+  if (okEP){
+    const Real α=αEP;
+    const Real β=βEP;
+    const Real A=AEP;
+    interior_trial_s[3] = ½*(α+β)/A;
+    interior_trial_q[3] = ½*α/A;
+    interior_trial_e[3] = ½*β/A;
+  }
+}
+
+
+
+
+// ****************************************************************************
+// * Second membre, coté Trial
+// ****************************************************************************
+own inner faces void iInnerTrialRhsAvg(void) @ 13.1 if (option_indirect &&
+                                                        !option_trial &&                                                                                                  
+                                                        !option_trial_average){
+  const Real3 D=coord[0];
+  const Real3 E=coord[1];
+  const Real3 S=½*(D+E);
+  const Real3 P=cell_mass_center[backCell];
+  const Real3 Q=cell_mass_center[frontCell];
+  const Real face_area = geomComputeTriangleArea(D,Q,E)+geomComputeTriangleArea(D,E,P);
+  const Real h=face_area*f(S);
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+    
+  if (option_debug_trial)
+    info()<<"\33[36m[alephRhsTrialInner] Aleph RHS Trial Inner face "
+          <<nid0<<"->"<<nid1<<"\33[m";
+  ℵ rhs addValue(face_θ,this, h);
+}
+
+own outer faces void iOuterTrialRhsAvg(void) @ 13.1 if (!option_trial &&
+                                                        option_indirect &&                                                                                                  
+                                                        !option_trial_average){
+  const Real3 D=coord[0];
+  const Real3 E=coord[1];
+  const Real3 S=½*(D+E);
+  const Real h=g(S);
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+    
+  if (option_debug_trial)
+    info()<<"\33[36m[alephRhsTrialOuter] Aleph RHS Trial Outer face "
+          <<nid0<<"->"<<nid1<<"\33[m";
+  ℵ rhs addValue(face_θ,this, h);
+ }
+
+
+
+
+// ****************************************************************************
+// * Remplissage matriciel, coté Trial
+// ****************************************************************************
+inner faces void iTrialMtxAvg(void) @ 16.4 if (!option_trial &&
+                                               option_indirect &&                                                                                                  
+                                               !option_trial_average ){
+  const Real svalue =
+     interior_trial_s[0]
+    +interior_trial_s[1]
+    +interior_trial_s[2]
+    +interior_trial_s[3];
+  const Real q0value = interior_trial_q[0];
+  const Real e0value = interior_trial_e[0];
+  const Real q1value = interior_trial_q[1];
+  const Real e1value = interior_trial_e[1];
+  const Real q2value = interior_trial_q[2];
+  const Real e2value = interior_trial_e[2];
+  const Real q3value = interior_trial_q[3];
+  const Real e3value = interior_trial_e[3];
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  
+  
+  if (option_debug_trial)
+    info()<<"\t\t\t\33[36m[innerFacesOutside] Aleph Matrix filling face "
+          <<nid0<<"->"<<nid1<<"\33[m";
+  
+  ℵ matrix addValue(face_θ,this, face_θ,this, +svalue);
+  
+  // Quart QE
+  ℵ matrix addValue(face_θ,this, cell_θ,frontCell, -q0value);
+  ℵ matrix addValue(face_θ,this, node_θ,node(1),   -e0value);
+  
+  // Quart DQ
+  ℵ matrix addValue(face_θ,this, node_θ,node(0),   -q1value);
+  ℵ matrix addValue(face_θ,this, cell_θ,frontCell, -e1value);
+  
+  // Quart PD
+  ℵ matrix addValue(face_θ,this, cell_θ,backCell, -q2value);
+  ℵ matrix addValue(face_θ,this, node_θ,node(0),  -e2value);
+  
+  // Quart EP
+  ℵ matrix addValue(face_θ,this, node_θ,node(1),  -q3value);
+  ℵ matrix addValue(face_θ,this, cell_θ,backCell, -e3value);
+}
+
+
+// ****************************************************************************
+// * Conditions de Dirichlet
+// ****************************************************************************
+own outer faces void iTrialDirichletAvg(void) @ 17.0 if (!option_trial &&
+                                                         option_indirect &&                                                                                                  
+                                                        !option_trial_average){
+  ℵ matrix addValue(face_θ,this, face_θ,this, +1.0);
+}
+
+
+
+// ****************************************************************************
+// * Récupération des résultats, coté Trial
+// ****************************************************************************
+own faces void getTrialAvg(void) @ 20.0 if (!option_trial &&
+                                            option_indirect &&                                                                                                  
+                                            !option_trial_average){
+  Real face_θ_kp1;
+  face_θ_kp1=ℵ lhs getValue(face_θ,this);
+  if (face_θ_kp1<0.0)
+    info()<<"\t\33[33m[getFaceResults] face_theta="<< face_θ_kp1 <<"\33[m";
+  assert(face_θ_kp1>=0.0);
+  if (GlobalIteration==1.0) face_θ_1m0=face_θ_kp1mk;
+  face_θ_kp1mk=fabs(face_θ_kp1-face_θ);
+  face_θ=face_θ_kp1;
+ }
+

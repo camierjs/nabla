@@ -15,13 +15,6 @@
 
 
 // ****************************************************************************
-// * Fonctions tests pour voir si l'on est en AVX ou MIC
-// ****************************************************************************
-//bool avx(nablaMain *nabla){return ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX);}
-//bool mic(nablaMain *nabla){return ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC);}
-
-
-// ****************************************************************************
 // * Dump des variables appelées
 // ****************************************************************************
 static void okinaDfsForCalls(struct nablaMainStruct *nabla,
@@ -195,7 +188,8 @@ static void okinaHeaderSimd(nablaMain *nabla){
     fprintf(nabla->entity->hdr,knMicGather_h);
     fprintf(nabla->entity->hdr,knMicScatter_h);
     fprintf(nabla->entity->hdr,knMicOStream_h);
-  }else if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX){
+  }else if (((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)||
+            ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)){
     fprintf(nabla->entity->hdr,knAvxInteger_h);
     fprintf(nabla->entity->hdr,knAvxReal_h);
     //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
@@ -315,6 +309,8 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
   if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
     nabla->simd=&nablaOkinaSimdSseHooks;
   if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
+    nabla->simd=&nablaOkinaSimdAvxHooks;
+  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
     nabla->simd=&nablaOkinaSimdAvxHooks;
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
     nabla->simd=&nablaOkinaSimdMicHooks;

@@ -55,12 +55,13 @@ typedef enum {
   BACKEND_COLOR_OKINA_STD      = 1<<(7),
   BACKEND_COLOR_OKINA_SSE      = 1<<(8),
   BACKEND_COLOR_OKINA_AVX      = 1<<(9),
-  BACKEND_COLOR_OKINA_MIC      = 1<<(10),
-  BACKEND_COLOR_OKINA_SEQ      = 1<<(11),
-  BACKEND_COLOR_OKINA_OpenMP   = 1<<(12),
-  BACKEND_COLOR_OKINA_CILK     = 1<<(13),
-  BACKEND_COLOR_OKINA_SOA      = 1<<(14),
-  BACKEND_COLOR_OKINA_AOS      = 1<<(15)
+  BACKEND_COLOR_OKINA_AVX2     = 1<<(10),
+  BACKEND_COLOR_OKINA_MIC      = 1<<(11),
+  BACKEND_COLOR_OKINA_SEQ      = 1<<(12),
+  BACKEND_COLOR_OKINA_OpenMP   = 1<<(13),
+  BACKEND_COLOR_OKINA_CILK     = 1<<(14),
+  BACKEND_COLOR_OKINA_SOA      = 1<<(15),
+  BACKEND_COLOR_OKINA_AOS      = 1<<(16)
 } BACKEND_COLORS;
 
 
@@ -100,12 +101,15 @@ typedef enum{
 #define NABLA_MAX_FILE_NAME 8192
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
 
-#include "nablaDebug.h"
-#include "nablaAst.h" 
+#include "frontend/nablaDebug.h"
+#include "frontend/nablaAst.h" 
+
 #include "middlend/nablaMiddlend.h"
+
 #include "backends/arcane/nccArcane.h"
 #include "backends/cuda/nccCuda.h"
 #include "backends/okina/nOkina.h"
-#include "nablaTools.h"
+
+#include "frontend/nablaTools.h"
 
 #endif // _NABLA_H_

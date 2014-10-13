@@ -1,0 +1,500 @@
+//#include "assert.h"
+with ℵ;
+
+// ****************************************************************************
+// * Déclaration des options
+// ****************************************************************************
+options{
+  Bool option_quads             = false;
+  Bool option_triangles         = true;  
+  Real option_deltat            = 0.001;
+  Real option_deltat_factor     = 10.0;
+  Real option_ini_temperature   = 300.0;
+  Real option_hot_temperature   = 700.0;
+  Integer option_max_iterations = 8;
+  // Options d'Aleph
+  Real alephEpsilon             = 1.e-8;
+  Integer alephUnderlyingSolver = 0;
+  Integer alephMaxIterations    = 16384;
+  Integer alephPreconditionerMethod = 0; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                         // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  Integer alephSolverMethod     = 6;     // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  Integer alephNumberOfCores    = 0;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  // Température à la maille
+  Real cell_θ;
+  // Ses attributs géométriques
+  Bool swap[faces];
+  Real cell_area;
+  Real3 cell_mass_center;
+  //Uid cell_node_uid[nodes];
+  // On travaille excessivement sur les KMi, on les garde
+  Real3 KMi[nodes];
+  Real InverseNormKMi[nodes];
+  // Projeté du centre de masse sur les droites portées par les faces
+  Real3 KO[faces];
+  Real InverseNormKO[faces];
+  // Indices des noeuds des faces de la mailles
+  // On les initialise afin de commencer la recherche de la base à ces noeuds
+  Integer face_tail_offset[faces];
+  Integer face_head_offset[faces];
+  // Indices des noeuds formant la base positive
+  Integer base_tail_offset[faces];
+  Integer base_head_offset[faces];
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
+nodes{
+  // Température au noeud
+  Real node_θ;
+  Bool dual_swap[faces];
+  Real node_area;
+  Bool node_is_an_edge;
+  //Uid node_face_uid[faces];
+  // Variables coté dual
+  Real3 dual_KMi[cells];
+  Real dual_InverseNormKMi[cells];
+  // Projeté des noeuds sur les droites portées par les faces duales
+  Real3 dual_KO[faces];
+  Real dual_InverseNormKO[faces];
+  // Indices des centres de masse des mailles
+  Integer dual_face_tail_offset[faces];
+  Integer dual_face_head_offset[faces];
+  Integer dual_base_tail_offset[faces];
+  Integer dual_base_head_offset[faces];
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux faces
+// ****************************************************************************
+faces{
+  // Températures aux faces pour les conditions limites
+  Real face_θ;
+  // Longueur de la face
+  Real e;//primal
+  Real σ;//dual
+  Real dual_e;
+  // Son inverse
+  Real inv_e;
+  Real dual_inv_e;
+  // Son milieu
+  Real3 middle;
+  Real3 dual_middle;
+  // Coefficient de diffusion
+  Real κ;
+  // Distances optiques jusqu'aux centres de masses des back|front-cells
+  Real backcell_optical_depth;
+  Real dual_backcell_optical_depth;
+  Real frontcell_optical_depth;
+  Real dual_frontcell_optical_depth;
+  // α et β back & front
+  Real α_front;
+  Real dual_α_front;
+  Real α_back;
+  Real dual_α_back;
+  Real β_front;  
+  Real dual_β_front;  
+  Real β_back;  
+  Real dual_β_back;  
+  // Coefficients pour assurer la positivité
+  Real a1;
+  Real dual_a1;
+  Real a2;
+  Real dual_a2;
+  Real μ1;
+  Real dual_μ1;
+  Real μ2;
+  Real dual_μ2;
+  // Bool de swap des back/front pour avoir un ordre croissant d'UID
+  Bool swap_orientation;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  Bool full_quads;
+  Bool full_triangles;
+};
+
+
+// ****************************************************************************
+// * Inlined functions
+// ****************************************************************************
+inline Real3 Perp(Real3 v){ return Real3(v.y,-v.x,0.0); }
+inline Real3 computeOnLine(const Real3 s0, const Real3 s1){
+  Real3 length;
+  length.x =  (s1.y-s0.y);
+  length.y = -(s1.x-s0.x);
+  length.z = 0.0;
+  return length;
+}
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * @ -10: Vérification full_quads ^ full_triangles
+// ****************************************************************************
+cells Integer computeMinNbNode(Integer minNbNode){
+  minNbNode = min(minNbNode,nbNode);
+  return minNbNode;
+}
+cells Integer computeMaxNbNode(Integer maxNbNode){
+  maxNbNode = max(maxNbNode,nbNode);
+  return maxNbNode;
+}
+void testForQuadsorTriangles(void) @ -10.0{
+  Real minNbNode=computeMinNbNode(1024);
+  Real maxNbNode=computeMaxNbNode(0);
+  Integer rMinNbNode = mpi_reduce(ReduceMin,minNbNode);
+  Integer rMaxNbNode = mpi_reduce(ReduceMax,maxNbNode);
+  full_quads=false;full_triangles=false;
+  if ((rMinNbNode==4) && (rMaxNbNode==4)) full_quads=true;
+  if ((rMinNbNode==3) && (rMaxNbNode==3)) full_triangles=true;
+  if (!(full_quads^full_triangles)) fatal("testForQuadsorTriangles", "Not an exclusive mesh!");
+  if (full_quads!=option_quads) fatal("testForQuadsorTriangles", "Not a told quad mesh!");
+  if (full_triangles!=option_triangles) fatal("testForQuadsorTriangles", "Not a told triangular mesh!"); 
+}
+
+
+// * @ -9 *********************************************************************
+// * Initialisations diverses
+// ****************************************************************************
+
+// Initialisation du coefficient scalaire de diffusion
+faces void iniFaces(void) @ -9.5{
+  κ=1.0;
+  //info()<<"Face #"<<uid<<" has nodes";
+  //foreach node info()<<"\tnode #"<<uid<<" @"<<coord;
+  //info()<<"backCell #"<<backCell->uniqueId()<<", frontCell #"<<frontCell->uniqueId();
+  //info()<<"cell(0) #"<<cell(0)->uniqueId();
+  //if (nbCell==1) continue;
+  //info()<<"cell(1) #"<<cell(1)->uniqueId();
+}
+outer faces void iniOuterFaces(void) @ -9.0{
+  face_θ=option_hot_temperature;
+}
+
+// Initialisations des températures
+cells void iniCells(void) @ -9.5{
+  cell_θ=option_ini_temperature;
+  //info()<<"Cell #"<<uid<<" has nodes";
+  //foreach node info()<<"\tnode #"<<uid<<" @"<<coord;
+  //foreach face info()<<"\tface #"<<uid;
+  // On sauvegarde quelles bases doivent être réorientées
+  foreach face{
+    const Real3 α=coord[0]-cell_mass_center;
+    const Real3 β=coord[1]-cell_mass_center;
+    //swap = (α⨯β)<0.0;
+    swap = cross2D(α,β)<0.0;
+  }
+}
+
+
+
+// * @ -8.0 *******************************************************************
+// * Initialisation du δt en fonction des options
+// * ou d'une longueur caractéristique à-la 'min_σ'
+// ****************************************************************************
+// * Calcul de la variable 'σ' pour avoir une idée d'une métrique du maillage
+faces void faceSigma(void) @ -8.5{
+  const Real3 fn0 = coord[0];
+  const Real3 fn1 = coord[1];
+  const Real3 ccc0= cell_mass_center[cell(0)];
+  Real3 ccc1;
+  if (nbCell==2)
+    ccc1=cell_mass_center[cell(1)];
+  else
+    ccc1=½*(fn0+fn1);
+  σ=dual_e=norm(ccc0-ccc1);
+}
+faces Real computeMin_σ(Real min_σ) in (face σ){
+  min_σ = min(min_σ,σ);
+  return min_σ;
+}
+void ini_δt(void) @ -8.0{
+  if (option_deltat==0.0){
+    Real min_σ=computeMin_σ(1.0e+20);
+    Real reduced_min_σ = mpi_reduce(ReduceMin,min_σ);
+    δt=reduced_min_σ/option_deltat_factor;
+  }else δt=option_deltat;
+  info()<< "\33[7m[ini_δt] δt="<<δt<<"\33[m";
+}
+
+
+// * @ -7.0 *******************************************************************
+// * Orientations:  On chercher à orienter les arrêtes selon un ordre
+// * croissant  d'UID des back/front cells
+// ****************************************************************************
+faces void swapOrientation(void) @ -7.0{
+  swap_orientation=false;
+  if (backCellUid>frontCellUid){
+    swap_orientation=true;
+    //info()<<"Swaping face #"<<uid<<" for primal";
+  }
+}
+
+
+// * @ -6.0 *******************************************************************
+// * 'Positive' part: ‖e‖, 1/‖e‖, middle
+// ****************************************************************************
+// Calcule de ‖e‖ pour chaque face, de son inverse et du milieu
+faces void primFaceE(void) @ -6.0 {
+  const register Real3 s0=coord[0];
+  const register Real3 s1=coord[1];
+  register Real3 vector=s1-s0;
+  e = norm(vector);
+  //info()<<"face #"<<uid<<" e="<<e;
+  assert(e!=0.0);
+  inv_e = 1.0/e;
+  middle=½*(s0+s1);
+}
+
+
+// * @ -5.0 *******************************************************************
+// * 'Positive' part: ‖KMi‖, 1/‖KMi‖
+// ****************************************************************************
+// Calculs une fois pour toute des vecteurs KMi
+cells void primKMi(void) @ -5.5 {
+  foreach node{
+    KMi=coord/*[#]*/-cell_mass_center;
+    //info()<<"primalKMi (c"<<this->uniqueId()<<",n"<<uid<<")="<<KMi;
+  }
+}
+// On calcule une fois pour toute l'inverse de la norme des longueurs ‖KMi‖
+cells void primNormKMi(void) @ -5.0{
+  foreach node{
+    InverseNormKMi=1.0/norm(KMi);
+    //info()<<"NormKMi (c"<<this->uniqueId()<<",n"<<uid<<")="<<KMi.abs();
+  }
+}
+
+
+// * @ -4.0 *******************************************************************
+// * 'Positive' part: repères dans les mailles (offset)
+// ****************************************************************************
+
+// Récupération des UIDs des noeuds de cette maille
+// Cela va nous servir pour se repérer dans la maille
+/*cells void primNodesUid(void) @ -4.5{
+  foreach node{
+    cell_node_uid=uid;
+    //info()<<"cell_node_uid (c"<<this->uniqueId()<<",n"<<uid<<")="<<cell_node_uid;
+  }
+  }*/
+
+cells void primCellFacesTailOffset(void) @ -4.2{
+  foreach face{
+    face_tail_offset=#;
+    face_head_offset=(#+1)%nbNode;
+    /*info()<<"cell #"<<this->uniqueId()<<", face #"<<uid
+          <<": " <<node(0)->uniqueId()<<"->" <<node(1)->uniqueId()
+          <<", face_tail_offset="<<face_tail_offset
+          <<", face_head_offset="<<face_head_offset;*/
+  }
+}
+
+
+// * @ -3.0 *******************************************************************
+// * 'Positive' part: Optical depth
+// ****************************************************************************
+faces void primalDoubleOpticalDepth(void) @ -3.0 {
+  if (nbCell==1) continue;
+  const Real3 Af = computeOnLine(coord[0],coord[1]);
+  const Real3 Xf = middle;
+  const Real3 XQf = cell_mass_center[frontCell];
+  const Real3 XQb = cell_mass_center[backCell];
+  frontcell_optical_depth=absolute(((XQf-Xf)⋅Af)*inv_e);
+  backcell_optical_depth=absolute(((Xf-XQb)⋅Af)*inv_e);
+  //info()<<"\tfrontcell_optical_depth="<<frontcell_optical_depth;
+  //info()<<"\tbackcell_optical_depth="<<backcell_optical_depth;
+}
+
+faces void primalSingleOpticalDepth(void) @ -3.0 {
+  if (nbCell==2) continue;
+  const Real3 Af = computeOnLine(coord[0],coord[1]);
+  const Real3 Xf = middle;
+  const Real3 XQf = cell_mass_center[cell(0)];
+  backcell_optical_depth = 0.0;
+  frontcell_optical_depth=absolute(((XQf-Xf)⋅Af)*inv_e);
+  //info()<<"\tfrontcell_optical_depth="<<frontcell_optical_depth;
+}
+
+cells void primO12(void) @ -2.1 {
+  foreach face{
+    const Real3 vector=swap?coord[0]-coord[1]:coord[1]-coord[0];
+    const Real3 nKe=Perp(vector)*inv_e;
+    KO=frontcell_optical_depth*nKe;
+    if (nbCell==2 && *this==backCell)
+      KO=backcell_optical_depth*nKe;
+    //info()<<"cell #"<<this->uniqueId()<<", face #"<<uid<<", vector="<<vector<<", KO="<<KO;
+    InverseNormKO=norm(KO);
+    assert(InverseNormKO!=0.0);
+    InverseNormKO=1.0/InverseNormKO;
+  }
+}
+
+
+// * @ -1.0 *******************************************************************
+// * 'Positive' part: calcule des α,β
+// ****************************************************************************
+
+// Recherche de la base orientée positive coté primal
+cells void primAlphaBeta(void) @ -1.0 {
+  Real α,β;
+  foreach face {
+    α=β=-1;
+    //info()<<"\tcell #"<<this->uniqueId()<<", face #"<<uid;
+    for(int i=0;i<nbNode;i+=1){
+      const Integer i1=(i+face_tail_offset[#])%nbNode;
+      const Integer i2=(i+face_head_offset[#])%nbNode;
+      const Real3 KM1=KMi[i1];
+      const Real3 KM2=KMi[i2];
+      const Real invNrmKM1=InverseNormKMi[i1];
+      const Real invNrmKM2=InverseNormKMi[i2];
+      const Real sinθ=cross2D(KM1,KM2)*invNrmKM1*invNrmKM2;
+      const Real invSinθ=1.0/sinθ;
+      const Real sinθ1=cross2D(KM1,KO)*invNrmKM1*InverseNormKO;
+      const Real sinθ2=cross2D(KO,KM2)*invNrmKM2*InverseNormKO;
+      //info()<<"\ti1="<<i1<<", i2="<<i2;
+      α=(sinθ2*invSinθ)*invNrmKM1;
+      β=(sinθ1*invSinθ)*invNrmKM2;
+      // On chercher le couple α & β >= 0
+      if (!((α>=0.0) && (β>=0.0))){
+        //info()<<"\tSkipping α="<<α<<", β="<<β;
+        continue;
+      }
+      //info()<<"Hit α="<<α<<", β="<<β;
+      if (*this==backCell) α_back=α;
+      if (*this==backCell) β_back=β;
+      if (*this==frontCell) α_front=α;
+      if (*this==frontCell) β_front=β;
+      base_tail_offset=i1;
+      base_head_offset=i2;
+      break;
+    }
+    assert((α>=0.0) && (β>=0.0));
+  }
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+
+// * @ +0.0 *******************************************************************
+// * Calcul des constantes a1,a1,μ1,μ2
+// ****************************************************************************
+cells void primA1A2(void) @ 0.25 {
+  foreach face{
+    // On va chercher les températures aux noeuds de la face
+    Real θM1=swap?node_θ[1]:node_θ[0];
+    Real θM2=swap?node_θ[0]:node_θ[1];
+    if (*this==backCell) a1=e*κ*(β_back*θM2+α_back*θM1);
+    if (*this==frontCell) a2=e*κ*(β_front*θM2+α_front*θM1);
+  }
+}
+
+faces void primMu1Mu2(void) @ 0.75 {
+  if (a1+a2==0.0) a1=a2=¼;
+  const register Real sum_ai=a1+a2;
+  const register Real inv_sum_ai=1.0/sum_ai;
+  μ1=a2*inv_sum_ai;
+  μ2=a1*inv_sum_ai;
+}
+
+
+
+// ****************************************************************************
+// * Initialisation de la partie Algèbre Linéaire
+// ****************************************************************************
+void rhsInit(void) @ 1.0{
+  alephInitialize();
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
+
+own cells void setRhsCellValues(void) @ 1.1{
+  const Real θ=cell_θ;
+  ℵ rhs setValue(cell_θ,this, θ);
+}
+
+own outer faces void setRhsFaceValues(void) @ 1.3{
+  ℵ rhs setValue(face_θ,this, option_hot_temperature);
+}
+
+
+// ****************************************************************************
+// * alphaCells
+// ****************************************************************************
+own inner faces void alphaInnerCells(void) @ 3.1{
+  const Real extra_diag_coef_bck2frt = -μ2*e*κ*(β_front+α_front);
+  const Real extra_diag_coef_frt2bck = -μ1*e*κ*(β_back+α_back);
+  ℵ matrix addValue(cell_θ, backCell, cell_θ,frontCell, extra_diag_coef_bck2frt);
+  ℵ matrix addValue(cell_θ,frontCell, cell_θ, backCell, extra_diag_coef_frt2bck);
+}
+own outer faces void alphaOuterCells(void) @ 3.2{
+  const Real extra_diag_coef = -μ2*e*κ*(β_front+α_front);
+  ℵ matrix addValue(face_θ, this, cell_θ,frontCell, extra_diag_coef);
+  //ℵ matrix addValue(cell_θ,frontCell,face_θ, *this, extra_diag_coef);
+}
+own cells void alphaDiagonale(void) @ 3.3{
+  Real Σα=0.0;
+  foreach face{
+    if (nbCell==1) continue;
+    if (*this==backCell)
+      Σα += κ*μ1*e*(α_back+β_back);
+    else 
+      Σα += κ*μ2*e*(α_front+β_front);
+  }
+  Σα*=δt/cell_area;
+  ℵ matrix addValue(cell_θ,this, cell_θ, this, 1.0+Σα);
+}
+
+// ****************************************************************************
+// * Conditions de Dirichlet
+// ****************************************************************************
+own outer faces void dirichletFaces(void) @ 3.5{
+  ℵ matrix addValue(face_θ,this, face_θ,this, +1.0);
+}
+
+
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
+
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+own cells void getCellResults(void) @ 4.1{
+  cell_θ=ℵ lhs getValue(cell_θ,this);
+}
+
+// ****************************************************************************
+// * Sync & test for Quit
+// ****************************************************************************
+void testForQuit(void) @ 5.0{
+  synchronize(cell_θ);
+  synchronize(node_θ);
+  if (GlobalIteration >= option_max_iterations) exit;
+}
+
+
+

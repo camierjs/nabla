@@ -1,0 +1,54 @@
+// ****************************************************************************
+// * Dump de la géométrie
+// ****************************************************************************
+nodes void dumpNodeGeometry(void) @ -0.5 if (option_debug_geometry){
+  info()<<"\tnode #"<<1+uid<<" owned by #"<< this->owner()<<" (isOwn:"<<this->isOwn()<<") @"<<coord;
+}
+
+faces void dumpGeometry(void) @ -0.5 if (option_debug_geometry){
+  info()<<"Face #"<<1+uid<<" has nodes";
+  foreach node{
+    info()<<"\tnode #"<<1+uid<<" @"<<coord;
+    info()<<"\tnode #"<<1+uid<<" area="<<node_area;
+  }
+  info()<<"backCell #"<<backCell->uniqueId()<<", frontCell #"<<frontCell->uniqueId();
+  info()<<"cell(0) #"<<cell(0)->uniqueId();
+  info()<<"cell(0)_area ="<<m_cell_cell_area[cell(0)];
+  if (nbCell==1) continue;
+  info()<<"cell(1) #"<<cell(1)->uniqueId();
+  info()<<"cell(1)_area ="<<m_cell_cell_area[cell(1)];
+}
+
+
+// ****************************************************************************
+// * Dump des solutions exactes
+// ****************************************************************************
+cells void debugIniCells(void) @ -9.5 if (option_debug_solutions){
+  info()<<"[iniCells] cell_exact_solution #"<<1+uid<<"="<<cell_exact_solution;
+}
+
+nodes void debugIniNodes(void) @ -9.5 if (option_debug_solutions){
+  info()<<"[iniNodes] node_exact_solution #"<<1+uid<<"="<<node_exact_solution;
+}
+
+
+// ****************************************************************************
+// * Debug des variables solutions d'Aleph
+// ****************************************************************************
+own cells void debugGetFinalCellResults(void) @ 31.0 if (option_debug_aleph_sol){
+  info()<<"\t\t[getFinalCellResults] Cell #"<<1+uid<<", cell_θ="<<cell_θ
+        <<", cell_θ-cell_exact_solution="<<cell_θ-cell_exact_solution;
+}
+own nodes void debugGetFinalNodeResults(void) @ 31.0 if (option_debug_aleph_sol){
+  info()<<"\t\t[getFinalNodeResults] Node #"<<1+uid<<", node_θ="<<node_θ
+        <<", node_θ-node_exact_solution="<<node_θ-node_exact_solution;
+}
+
+
+// ****************************************************************************
+// * Debug des erreurs
+// ****************************************************************************
+void debugRelativeError(void) @ 48.0 {
+  if(!option_debug_errors) return;
+  info()<<"\t[relativeError] eh2="<<eh2;
+}

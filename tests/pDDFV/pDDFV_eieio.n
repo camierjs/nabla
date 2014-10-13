@@ -1,0 +1,48 @@
+void syncBeforeGeom(void) @ -9.9{
+  synchronize(cell_mass_center);
+}
+
+void syncBeforeAleph(void) @ 9.9{
+  synchronize(interior_primal_c_sp);
+  synchronize(interior_primal_c_sq);
+  synchronize(interior_dual_c_sd);
+  synchronize(interior_dual_c_se);
+  synchronize(interior_dual_c_lm);
+  synchronize(interior_dual_c_sl);
+  synchronize(interior_dual_c_sm);
+  synchronize(interior_dual_face_uid);
+  synchronize(interior_dual_face_swap);
+  synchronize(interior_dual_c_jk);
+  synchronize(interior_dual_c_sj);
+  synchronize(interior_dual_c_sk);
+
+  synchronize(interior_dual_c_sd_q);
+  synchronize(interior_dual_c_se_q);
+  synchronize(interior_dual_c_lm_q);
+  synchronize(interior_dual_c_sl_q);
+  synchronize(interior_dual_c_sm_q);
+  synchronize(interior_dual_c_jk_q);
+  synchronize(interior_dual_c_sj_q);
+  synchronize(interior_dual_c_sk_q);
+  synchronize(interior_dual_face_uid_q);
+  synchronize(interior_dual_face_swap_q);
+
+  synchronize(interior_dual_c_sd_p);
+  synchronize(interior_dual_c_se_p);
+  synchronize(interior_dual_c_lm_p);
+  synchronize(interior_dual_c_sl_p);
+  synchronize(interior_dual_c_sm_p);
+  synchronize(interior_dual_c_jk_p);
+  synchronize(interior_dual_c_sj_p);
+  synchronize(interior_dual_c_sk_p);
+  synchronize(interior_dual_face_uid_p);
+  synchronize(interior_dual_face_swap_p);
+
+}
+
+
+void syncAfterSolve(void) @ 30.0 {
+  synchronize(cell_θ);
+  synchronize(face_θ);
+  synchronize(node_θ);
+}

@@ -1,0 +1,189 @@
+with ℵ;
+with slurm;
+
+
+// ****************************************************************************
+// * Déclaration des options
+// ****************************************************************************
+options{
+  Bool option_indirect          = true;
+      
+  // Option si l'on souhaite utiliser les valeures aux faces
+  // ou une moyenne des noeuds
+  Bool option_trial             = true;
+  Bool option_trial_average     = false;
+
+  // Options de debug
+  Bool option_debug_primal      = false;
+  Bool option_debug_dual        = false;
+  Bool option_debug_trial       = false;
+  Bool option_debug_dual_aleph  = false;
+  Bool option_debug_trial_aleph = false;
+
+  // Options pour les maillages
+  Bool option_quads             = false;
+  Bool option_triangles         = false;
+
+  Bool option_dag               = false;
+  
+  Bool option_sncq              = false;
+  Real option_sncq_θ            = 0.25;
+  
+  Bool option_rdq               = false;
+  Real option_rdq_α             = 0.3;
+   
+  // Options pour les solutions
+  Bool option_hole              = false;
+  Bool option_atan              = true;
+  Bool option_isotropic         = false;
+ 
+  
+  // Valeures à l'initialisation
+  Real option_k                 = 1.0;
+  Real option_θ                 = 0.0;
+  Bool option_spin_θ            = true;
+  Real option_spin_θ_x          = 2.0;
+  Real option_spin_θ_y          = 2.0;  
+  Real option_ini_temperature   = 0.0;
+  Real option_𝜕Ω_temperature    = 0.0;
+  
+  // Critères de sortie
+  Integer option_max_iterations = 8;
+  Bool option_only_one_iteration= false;
+  Bool option_quit_when_finish  = true;
+   
+  // Itérations de Picard
+  Real option_picard_ε          = 1.0e-10;
+  
+  // Options d'Aleph
+  Real alephEpsilon             = 1.e-10;
+  Integer alephUnderlyingSolver = 0;
+  Integer alephMaxIterations    = 16384;
+  Integer alephPreconditionerMethod = 0;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  Integer alephSolverMethod     = 6;
+  // PCG=0, BiCGStab=1, BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  Integer alephNumberOfCores    = 0;
+  Bool option_aleph_dump_matrix = true;
+  // Options de debug
+  Bool option_debug_geometry    = false;
+  Bool option_debug_solutions   = false;
+  Bool option_debug_tpfa_sums   = false;
+  Bool option_debug_aleph_rhs   = false;
+  Bool option_debug_aleph_sol   = false;
+  Bool option_debug_errors      = false;
+
+  Integer option_slurm_tremain  = 300; 
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  Real cell_θ;                  // Températures aux mailles
+  Real cell_θ_1m0;
+  Real cell_θ_diff;
+  Real cell_θ_kp1mk;
+  Real cell_area;               // Aires
+  Real cell_sd_id;
+  Real3 cell_mass_center;       // Centre de masse
+  Real cell_exact_solution;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
+nodes{
+  Real node_θ;                   // Temperatures aux noeuds
+  Real node_θ_diff;
+  Real node_θ_1m0;
+  Real node_θ_kp1mk;
+  Real node_area;                // Aires
+  Real node_sd_id;
+  Bool node_is_on_𝜕Ω;
+  Real node_exact_solution;
+  Integer node_unique_id;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux faces
+// ****************************************************************************
+faces{
+  Real face_θ;                  // Températures aux faces
+  Real face_θ_diff;
+  Real face_θ_1m0;
+  Real face_θ_kp1mk;
+  //Real face_area;                // Aires
+  Real face_sd_id;
+  Bool face_is_on_𝜕Ω;
+  Real face_exact_solution;
+  Integer face_unique_id;
+  Real3x3 κ; // Coefficient de diffusion
+  
+  // Primal aux bords
+  Real boundary_primal_c_sp;
+  Real boundary_primal_d_sp;
+  // Primal standard
+  Real interior_primal_c_sp;
+  Real interior_primal_c_sq;
+  
+  // Dual Direct standard
+  Real interior_dual_c_sd;
+  Real interior_dual_c_se;
+  // Dual Direct E-LM
+  Bool interior_dual_c_lm;
+  Real interior_dual_c_sl;
+  Real interior_dual_c_sm;
+  //  Dual Direct D-JK
+  Bool interior_dual_c_jk;
+  Real interior_dual_c_sj;
+  Real interior_dual_c_sk;
+  //  Dual Direct pour les cas E-LM et D-JK
+  Uid interior_dual_face_uid;
+  Bool interior_dual_face_swap;
+  
+  // Dual Indirect Q
+  Real interior_dual_c_sd_q;
+  Real interior_dual_c_se_q;
+  Bool interior_dual_c_lm_q;
+  Real interior_dual_c_sl_q;
+  Real interior_dual_c_sm_q;
+  Bool interior_dual_c_jk_q;
+  Real interior_dual_c_sj_q;
+  Real interior_dual_c_sk_q;
+  Uid interior_dual_face_uid_q;
+  Bool interior_dual_face_swap_q;
+
+  // Dual Indirect P
+  Real interior_dual_c_sd_p;
+  Real interior_dual_c_se_p;
+  Bool interior_dual_c_lm_p;
+  Real interior_dual_c_sl_p;
+  Real interior_dual_c_sm_p;
+  Bool interior_dual_c_jk_p;
+  Real interior_dual_c_sj_p;
+  Real interior_dual_c_sk_p;
+  Uid interior_dual_face_uid_p;
+  Bool interior_dual_face_swap_p;
+  
+  // Trial Generic
+  Bool interior_trial_head[4];
+  Bool interior_trial_tail[4];
+  Real interior_trial_s[4];
+  Real interior_trial_q[4];
+  Real interior_trial_e[4];
+};
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  Real eh2;                // Relative error
+  Real Δl;                 // Length of the sides, before touching mesh
+  Bool full_quads;
+  Bool full_triangles;
+  Integer globalNbCells;
+  Integer globalNbNodes;
+};
+

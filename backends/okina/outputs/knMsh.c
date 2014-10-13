@@ -31,8 +31,12 @@ static void nabla_ini_node_coords(void){
 #warning __MIC__
   __m512d x,y,z;
   double dy0,dy1,dy2,dy3,dy4,dy5,dy6,dy7;
-#elif __AVX__
-#warning __AVX__
+#elif __AVX__||__AVX2__
+   #ifdef __AVX2__
+      #warning __AVX2__
+   #elif __AVX__
+      #warning __AVX__
+   #endif
    __m256d x,y,z;
    double dy0,dy1,dy2,dy3;
 #elif __SSE2__

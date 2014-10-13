@@ -1,0 +1,219 @@
+
+/*                          time (s)
+  #       nth    prime len  gmp   dft
+  #01       1        2
+  #02       2        3
+  #03       3        5
+  #04       4        7
+  #05       6       13
+  #06       7       17
+  #07       8       19
+  #08      11       31
+  #09      18       61
+  #10      24       89
+  #11      28      107
+  #12      31      127
+  #13      98      521
+  #14     111      607
+  #15     207     1279
+  #16     328     2203
+  #17     339     2281
+  #18     455     3217    X
+  #19     583     4253    2
+  #20     602     4423    2
+  #21    1196     9689    2
+  #22    1226     9941    2
+  #23    1357    11213    2
+  #24    2254    19937    2
+  #25    2435    21701    2
+  #26    2591    23209    2
+  #27    4624    44497    2
+  #28    8384    86243    4  225   8
+  #29   10489   110503    6  337  20
+  #30   12331   132049    7  455  34
+  #31   19292   216091   11 1236 106  97@2-threads
+  #32   60745   756839   40    ? 985 471@4-threads
+  #33   68301   859433   44    ? 664@2-threads
+  #34   97017  1257787   64    Could not make it
+  #35  106991  1398269   72     1360@2-threads
+  #36  215208  2976221  160     3991@4-threads
+  #37  218239  3021377  160     4079@4-threads
+  #38  475544  6982593  352
+  #39  877615 13466917  704
+  #40 1329726 20996011 1152
+  #41 1509263 24036583 1280
+  #42 1622441 25964951 1408
+  #43 1881339 30402457 1664
+  #44 2007537 32582657 1792
+  #45 2270720 37156667 2048
+  #46 2584328 42643801 2304
+  #47 2610944 43112609 2304
+  #48 3443958 57885161 3072 0.02s/iter => 13 jours @4-threads
+*/
+
+
+with mail;
+with gmp, dft, slurm;
+//with mathematica;
+
+
+// ********************************************************
+// * options
+// ********************************************************
+options{
+  Integer option_nth_prime = 2;
+  Integer option_log_modulo = 4;
+  Integer option_tst_tremain = 300;
+  Integer option_max_iterations = 1;
+};
+
+
+// ********************************************************
+// * variables aux mailles
+// ********************************************************
+cells{
+  Integer i;
+  Integer nth;       // the nth of the nth prime number
+  Integer inc;       // l'incrément utilisé
+  Integer prime;     // the nth prime number
+  Real cpuTime;      // Le temps mis pour le résultat
+  volatile precise Integer next_prime;
+};
+
+
+// ********************************************************
+// * variables globales
+// ********************************************************
+global{
+  Integer meshSize;
+  Integer firstIteration;
+};
+
+
+// ********************************************************
+// * iniGlobals
+// ********************************************************
+void iniGlobals(void) @ -1.0{
+  //info()<<"sizeof(int)="<<sizeof(int);
+  //info()<<"sizeof(double)="<<sizeof(double);
+  δt=0.01;
+  meshSize=0;
+  firstIteration=0;
+  if (option_nth_prime<2)
+    fatal("iniGlobals", "Option first nth must be >= 2!");
+}
+
+
+// ********************************************************
+// * iniCells
+// ********************************************************
+own cells void iniCells(void) out (cell i, cell prime, cell inc, cell nth) @ -1.0{
+  inc=nth=option_nth_prime+uid; // Au début, on set inc à nth à uid pour créer une rampe d'indice
+  i=prime=1ul;                  // On flush le rang de l'itérateuret le prime (il faut i==prime)
+  //info()<<"inc=nth="<<inc;
+}
+
+
+// ********************************************************
+// * iniMeshSize + reduceMeshSize to set meshSize = mesh size
+// ********************************************************
+own cells Integer iniMeshSize(void) in (cell nth) out (cell meshSize){
+  meshSize=max(uid,meshSize);
+  return meshSize;
+}
+void reduceMeshSize(void) @ -0.9{
+  meshSize=1+mpi_reduce(ReduceMax,iniMeshSize());
+  //info()<<"meshSize="<<meshSize;
+}
+
+
+
+// ********************************************************
+// * iniPrime via GMP
+// ********************************************************
+own cells void iniPrimeGmp(void) in (cell inc, cell nth) out (cell i, cell prime, cell cpuTime) @ -0.8,2.0{
+  int tmp,percent=0;
+  if (i!=prime) continue;
+  // On flush le rang de l'itérateur
+  i=0; 
+  mpz_set_ui(next_prime,prime);
+  // On utilise la rampe d'indice pour chercher l'ensemble des primes associés
+  info()<<"\33[45;30m[iniPrimeGmp] Looking prime for cell #"<<uid<<", nth="<<nth<<"\33[m"; 
+  for(int k=0;k<inc;k+=1){
+    if (percent != (tmp=(int)((((double)k)/inc)*100.0))){
+      printf("\r*I-nahea      \33[45;30m[iniPrimeGmp] %d%%\33[m",percent=tmp);
+      fflush(stdout);
+    }
+    mpz_nextprime(next_prime,next_prime);
+  }
+  prime=mpz_get_ui(next_prime);
+  printf("\n\r");
+  info()<<"\33[45;30m[iniPrimeGmp] Setting prime to "<<prime<<"\33[m"; 
+  cpuTime=ElapsedTime; // On flush le temps mis pour ce test
+}
+
+
+// ********************************************************
+// * continueInit
+// ********************************************************
+void continueInit(void) @ 0.0{
+  firstIteration=GlobalIteration-1;
+  info()<<"\33[7;32m[continueInit] Reloading from iteration "<<firstIteration<<"\33[m"; 
+}
+cells void cellsContinueInit(void) @ 0.0{
+  info()<<"\33[7;32m[continueInit] Restoring next_prime="<<prime<<"\33[m";
+  mpz_set_ui(next_prime,prime);
+}
+
+
+// ********************************************************
+// * lltLaunchWork
+// ********************************************************
+own cells void lltLaunchWork(void) @ 1.0{
+  double seconds = ((double)((int)(1000.0*(ElapsedTime-cpuTime))))/1000.0;
+  i += dftLlt(this,prime,i);
+  info()<<"\33[32mcell #"<<uid<<", nth="<<nth<<" "<<i<<"/"<<prime<<"\33[m";
+
+  if (i==prime){
+    mail()<< "cell #"<<uid<<", nth="<<nth<<" hits prime "<<prime<<" in "<<(seconds);
+    warning()<< "\33[41;37mcell #"<<uid<<", nth="<<nth<<" hits prime "<<prime<<" in "<<(seconds)<<"s\33[m";
+  }
+
+  if (i==(prime-2))
+    info()<<"cell #"<<uid<<", nth="<<nth<<" miss prime "<< prime<<" in "<<seconds<<"s";
+
+  if ((i==prime) || (i==(prime-2))){
+    // En boucle de calcule, la rampe étant déjà initialisée,
+    // il reste à s'incrémenter du nombre de mailles présentes
+    inc=meshSize;
+    nth+=meshSize;
+    // et on force ceci pour qu'iniPrimeGmp se déclenche
+    i=prime;
+  }//else info()<<"cell #"<<uid<<", nth="<<nth<<" still running...";
+}
+
+ 
+// ********************************************************
+// * testForQuit
+// ********************************************************
+void testForQuit(void) @ 4.0{
+  register Integer tremain, tlimit;
+  if (GlobalIteration%option_log_modulo) return;
+  tlimit=time limit;
+  tremain=time remain;
+  info()<<"\33[43;30m#"<<GlobalIteration<<", remaining "
+        << tremain << "/" <<tlimit <<"(s)\33[m";
+  // Si le temps restant est inférieur à notre borne, on sort
+  if (tremain < option_tst_tremain){
+    info()<<"\33[43;30m#"<<GlobalIteration<<" now EXITing! ("
+          << tremain << "<" <<option_tst_tremain<<"(s))\33[m";
+    exit;
+  }
+  // Pareil si on a atteint le nombre max d'itérations par run
+  if (GlobalIteration >= (firstIteration+option_max_iterations)){
+    info()<<"\33[43;30m#"<<GlobalIteration<<" now EXITing! ("
+          << GlobalIteration << ">=" <<(firstIteration+option_max_iterations)<<")\33[m";
+    exit;
+  }
+}
+

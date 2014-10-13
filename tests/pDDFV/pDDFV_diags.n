@@ -1,0 +1,51 @@
+// ****************************************************************************
+// * Calcul de la longueur caractéristique
+// ****************************************************************************
+own cells Real volumeOfΩ(Real sum){
+  sum+=cell_area;
+  return sum;
+}
+own cells Real getNbCell(Real sum){
+  sum+=1.0;
+  return sum;
+}
+void characteristicLength(void) {//@ 47.0{
+  const Real h=√(volumeOfΩ(0.0)/getNbCell(0.0));
+  info()<<"\t[characteristicLength] h="<<h;
+}
+
+
+// ****************************************************************************
+// * Calcul de l'erreur relative
+// ****************************************************************************
+own cells Real relativeErrorCellPhMinusPe(Real sum){
+  const Real Pp=fabs(cell_θ-cell_exact_solution);
+  sum+=cell_θ_diff=cell_area*Pp*Pp;
+  return sum;
+}
+own nodes Real relativeErrorNodePhMinusPe(Real sum){
+  const Real Pd=fabs(node_θ-node_exact_solution);
+  sum+=node_θ_diff=node_area*Pd*Pd;
+  return sum;
+}
+own cells Real relativeErrorCellPe(Real sum){
+  sum+=cell_area*(cell_exact_solution*cell_exact_solution);
+  return sum;
+}
+own nodes Real relativeErrorNodePe(Real sum){
+  sum+=node_area*(node_exact_solution*node_exact_solution);
+  return sum;
+}
+void relativeError(void) @ 48.0{
+  const Real relative_error_cell_θ_num = mpi_reduce(ReduceSum, relativeErrorCellPhMinusPe(0.0));
+  const Real relative_error_node_θ_num = mpi_reduce(ReduceSum, relativeErrorNodePhMinusPe(0.0));
+  const Real relative_error_num=√(½*(relative_error_cell_θ_num+relative_error_node_θ_num));
+  
+  const Real relative_error_cell_θ_denum = mpi_reduce(ReduceSum, relativeErrorCellPe(0.0));
+  const Real relative_error_node_θ_denum = mpi_reduce(ReduceSum, relativeErrorNodePe(0.0));
+  const Real relative_error_denum=√(½*(relative_error_cell_θ_denum+relative_error_node_θ_denum));
+  
+  eh2=relative_error_num/relative_error_denum;
+  //info()<<"\t[relativeError]   Error = "<<eh2;
+  printf("*I-pDDFV        [relativeError] \33[1;33m#%d\33[m \33[1;32m%.3e\33[m\n",GlobalIteration,eh2);
+}

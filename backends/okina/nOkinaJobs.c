@@ -599,6 +599,8 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "/*uid*/(n)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
       nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
+    if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
+      nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
       nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3,WARP_SIZE*c+4,WARP_SIZE*c+5,WARP_SIZE*c+6,WARP_SIZE*c+7)");
     break;

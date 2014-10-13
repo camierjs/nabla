@@ -1,0 +1,151 @@
+// ****************************************************************************
+// * Fonctions du maillage Primal
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * Fonction de test du secteur soumis
+// ****************************************************************************
+Bool iHitPrimalFace(Bool dbg, Face fc, Real3x3 kappa, Real3 ns, Real3 p,
+                   Real3 *f, Real3 *g, Real *pf, Real *pg, Real *α, Real *β){
+  const Node n0=fc->node(0);
+  const Node n1=fc->node(1);
+  const Integer nid0 = 1+fc->node(0).uniqueId().asInteger();
+  const Integer nid1 = 1+fc->node(1).uniqueId().asInteger();
+  const Real3 s=½*(coord[n0]+coord[n1]);
+  // Swap selon le vecteur normal de la face de test et le vecteur PS
+  const Bool swap=((s-p)⋅n(coord[n0],coord[n1]))<0.0;
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] Trying "
+                 <<(swap?"\33[31mswaped\33[36m ":"")
+                 <<"face \33[32m"
+                 <<nid0<<"->"<<nid1<<"\33[m";
+  *f=swap?coord[n1]:coord[n0];
+  *g=swap?coord[n0]:coord[n1];
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] G="<<*g<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] F="<<*f<<"\33[m";
+  *α=n(p,*g)⋅(kappa⨂ns);
+  *β=n(*f,p)⋅(kappa⨂ns);
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] n(p,*g)="<<n(p,*g)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] n(*f,p)="<<n(*f,p)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[iHitPrimalFace] alpha="<<*α<<", beta="<<*β<<"\33[m";
+  if (!(*α>=0.0 && *β>=0.0)) return false;
+  if (dbg) info()<<"\t\t\33[7;36m[iHitPrimalFace] true"
+                 <<" with face "<<(swap?"\33[31m":"\33[32m")<<(swap?nid1:nid0)
+                 <<"->"<<(swap?nid0:nid1)<<"\33[m";
+  *pf=swap?node_θ[n1]:node_θ[n0];
+  *pg=swap?node_θ[n0]:node_θ[n1];
+  return true;
+}
+
+
+// ****************************************************************************
+// * Fonction qui déclenche les tests aux différentes faces
+// * afin de trouver le bon secteur
+// ****************************************************************************
+Bool iPrimalLoop(Bool dbg,Cell c, Real3x3 kappa, Real3 ns, Real3 p,
+                Real3 *f, Real3 *g, Real *pf, Real *pg,
+                Real *α, Real *β, Face this_face){
+  const Integer cid=1+c->uniqueId().asInteger();
+  if (dbg) info()<<"\t\33[33m[iPrimalLoop] Focus on \33[32mcell #"
+                 <<cid <<" ["
+                 << 1+c->node(0).uniqueId().asInteger() <<","
+                 << 1+c->node(1).uniqueId().asInteger() <<","
+                 << 1+c->node(2).uniqueId().asInteger() <<","
+                 << (full_quads?1+c->node(3).uniqueId().asInteger():-1/*not in triangles*/)
+                 <<"]\33[33m, kNs="<<kappa⨂ns<<"\33[m";
+  // this_face en premier
+  if (iHitPrimalFace(dbg,this_face,kappa,ns,p,f,g,pf,pg,α,β))
+    return true;
+  // puis les autres
+  foreach c face{
+    if (*fc==this_face) continue;
+    if (iHitPrimalFace(dbg,*fc,kappa,ns,p,f,g,pf,pg,α,β))
+      return true;
+  }
+  fatal("iPrimalLoop: Should not be there!");
+}
+
+
+
+// ****************************************************************************
+// Pour les faces externes, on ré-oriente éventuellement la normale vers l'exterieur
+// ****************************************************************************
+own outer faces void iOuterPrimal(void) @ 1.0 if (option_indirect){
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  Real3 f,g;
+  Real pf,pg,ap,bp;
+  const Bool dbg=option_debug_primal;
+  const Real3 d=coord[0];
+  const Real3 e=coord[1];
+  const Real3 s=½*(d+e);
+  const Real3 p=cell_mass_center[cell(0)];
+  const Real3 Nde=n(d,e);
+  // Ré-orientation de la normale s'il le faut
+  const Bool swap=((s-p)⋅Nde)<0.0;
+  const Real3 ns=swap?-Nde:Nde;
+  if (dbg) info()<<"\33[7;32m[iOuterPrimal] "
+                 <<(swap?"\33[31mSwaped\33[32m ":"")
+                 <<"Outer Primal Face #"<<uid<<":\33[0m\33[32m "<<nid0<<"-"<<nid1<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tD="<<d<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tE="<<e<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tP="<<p<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tS="<<s<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tNde="<<Nde<<"\33[m";
+  if (dbg) info()<<"\33[32m[iOuterPrimal] \tns="<<ns<<"\33[m";
+  {
+    const Bool ok=iPrimalLoop(dbg,cell(0),κ,ns,p,&f,&g,&pf,&pg,&ap,&bp,*this);
+    const Real Ap=geomComputeTriangleArea(p,f,g);
+    assert(ok); // Vérification et calcul des flux
+    assert(Ap>0.0);
+    boundary_primal_c_sp=½*(ap+bp)/Ap;
+    boundary_primal_d_sp=½*(ap*pf+bp*pg)/Ap;
+  }
+}
+
+
+// ****************************************************************************
+// Pour les faces internes, tout est bien déterminé, pas de ré-orientation à prévoir
+// ****************************************************************************
+own inner faces void iInnerPrimal(void) @ 1.0 if (option_indirect){
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  Real3 f,g, h,i;
+  Real pf,pg, ph,pi;
+  Real ap,bp, aq,bq;
+  const Bool dbg=option_debug_primal;
+  const Real3 d=coord[0];
+  const Real3 e=coord[1];
+  const Real3 s=½*(d+e);
+  const Real3 p=cell_mass_center[backCell];
+  const Real3 q=cell_mass_center[frontCell];
+  const Real3 ns=n(d,e);
+  if (dbg) info()<<"\33[7;37m[iInnerPrimal] Face #"<<uid<<":\33[0m\33[32m "
+                 <<nid0<<"-"<<nid1<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tD="<<d<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tE="<<e<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tP="<<p<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tQ="<<q<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tS="<<s<<"\33[m";
+  if (dbg) info()<<"\33[37m[iInnerPrimal] \tns="<<ns<<"\33[m";
+  {
+    const Bool okBack=iPrimalLoop(dbg, (backCell),κ, ns,p,&f,&g,&pf,&pg,&ap,&bp,*this);
+    const Bool okFrnt=iPrimalLoop(dbg,(frontCell),κ,-ns,q,&h,&i,&ph,&pi,&aq,&bq,*this);
+    const Real Ap=geomComputeTriangleArea(p,f,g);
+    const Real Aq=geomComputeTriangleArea(q,h,i);
+    const Real λsp_num=aq*ph+bq*pi;
+    const Real λsq_num=ap*pf+bp*pg;
+    const Real λs_denum=Aq*(ap*pf+bp*pg)+Ap*(aq*ph+bq*pi);
+    const Bool null=(λs_denum==0.0);
+    const Real λsp=null?½:λsp_num;
+    const Real λsq=null?½:λsq_num;
+    const Real λsp_denum=null?Ap:λs_denum;
+    const Real λsq_denum=null?Aq:λs_denum;
+    assert(okBack && okFrnt);
+    assert(Ap>0.0);
+    assert(Aq>0.0);
+    interior_primal_c_sp = ½*(ap+bp)*λsp/λsp_denum;
+    interior_primal_c_sq = ½*(aq+bq)*λsq/λsq_denum;
+  }
+}
+

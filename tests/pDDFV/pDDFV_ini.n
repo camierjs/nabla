@@ -1,0 +1,63 @@
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+void iniδt(void) @ -10.0{
+  δt=1.0;
+}
+
+
+cells void iniCells(void) @ -9.5{
+  cell_sd_id=this->owner();
+  cell_θ=option_ini_temperature;
+  cell_exact_solution=exact_solution(cell_mass_center);
+}
+
+
+nodes void iniNodes(void) @ -9.5{
+  node_is_on_𝜕Ω=false;
+  node_unique_id=uid;
+  node_sd_id=this->owner();
+  node_θ=option_ini_temperature;
+  node_exact_solution=exact_solution(coord);
+}
+
+outer nodes void iniOuterNodes(void) @ -9.0 {
+  node_is_on_𝜕Ω=is_on_𝜕Ω(coord);
+  if (node_is_on_𝜕Ω) node_θ=g(coord);
+}
+
+
+faces void iniFaces(void) @ -9.5{
+  const Real3 s = ½*(coord[0]+coord[1]);
+  const Real k = option_isotropic?1.0:option_k;
+  const Real θ = option_isotropic?0.0:KappaWaves(s, option_θ);
+  const Real3x3 P  =Real3x3(Real3( cos(θ), sin(θ), 0.0),
+                            Real3(-sin(θ), cos(θ), 0.0),
+                            Real3(    0.0,    0.0, 1.0));
+  const Real3x3 Pm1=Real3x3(Real3( cos(θ),-sin(θ), 0.0),
+                            Real3( sin(θ), cos(θ), 0.0),
+                            Real3(    0.0,    0.0, 1.0));
+  const Real3x3 M  =Real3x3(Real3(1.0, 0.0, 0.0),
+                            Real3(0.0,   k, 0.0),
+                            Real3(0.0, 0.0, 0.0));
+  κ=P⊛M⊛Pm1;
+  face_unique_id=uid;
+  face_sd_id=this->owner();
+  face_θ=option_ini_temperature;
+  face_exact_solution=exact_solution(s);
+  face_is_on_𝜕Ω=false;
+  interior_dual_c_lm = interior_dual_c_jk = false;
+  interior_dual_c_lm_q = interior_dual_c_jk_q = false;
+  interior_dual_c_lm_p = interior_dual_c_jk_p = false;
+  interior_trial_head[0] = interior_trial_head[1] =
+    interior_trial_head[2] = interior_trial_head[3] = false;
+  interior_trial_tail[0] = interior_trial_tail[1] =
+    interior_trial_tail[2] = interior_trial_tail[3] = false;
+}
+
+outer faces void iniOuterFaces(void) @ -9.0 {
+  const Real3 s = ½*(coord[0]+coord[1]);
+  face_is_on_𝜕Ω=is_on_𝜕Ω(s);
+  if (face_is_on_𝜕Ω) face_θ=g(s);
+}

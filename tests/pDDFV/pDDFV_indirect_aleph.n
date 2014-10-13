@@ -1,0 +1,172 @@
+// ****************************************************************************
+// * Remplissage matriciel, coté Dual Indirect, coté Q
+// ****************************************************************************
+inner faces void iDualMtxQ(void) @ 16.0 if (option_indirect){
+  const Real pvalue = interior_dual_c_sd_q;
+  const Real qvalue = interior_dual_c_se_q;
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+   
+  if (interior_dual_c_jk_q || interior_dual_c_lm_q) continue;
+
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\t\33[32m[iDualMtxQ] Aleph Dual Q face "<<nid0<<"->"<<nid1<<"\33[m";
+  
+  if (node_is_on_𝜕Ω[0] && node_is_on_𝜕Ω[1]) continue;
+
+  if (node(0).isOwn() && !node_is_on_𝜕Ω[0]){
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(0), +pvalue);
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(1), -qvalue);
+  }
+  
+  if (node(1).isOwn() && !node_is_on_𝜕Ω[1]){
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(1), +qvalue);
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(0), -pvalue);
+  }
+}
+
+
+// ****************************************************************************
+// * Remplissage matriciel, coté Dual Indirect, coté P
+// ****************************************************************************
+inner faces void iDualMtxP(void) @ 16.0 if (option_indirect){
+  const Real pvalue = interior_dual_c_sd_p;
+  const Real qvalue = interior_dual_c_se_p;
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+   
+  if (interior_dual_c_jk_p || interior_dual_c_lm_p) continue;
+
+  if (node_is_on_𝜕Ω[0] && node_is_on_𝜕Ω[1]) continue;
+
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\t\33[32m[iDualMtxP] Aleph Dual P face "<<nid0<<"->"<<nid1<<"\33[m";
+  
+  if (node_is_on_𝜕Ω[0] && node_is_on_𝜕Ω[1]) continue;
+
+  if (node(0).isOwn() && !node_is_on_𝜕Ω[0]){
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(0), +pvalue);
+    ℵ matrix addValue(node_θ,node(0), node_θ,node(1), -qvalue);
+  }
+  
+  if (node(1).isOwn() && !node_is_on_𝜕Ω[1]){
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(1), +qvalue);
+    ℵ matrix addValue(node_θ,node(1), node_θ,node(0), -pvalue);
+  }
+}
+
+
+// ****************************************************************************
+// * LM_Q
+// ****************************************************************************
+inner faces void iDualMtxLMHead(void) @ 16.1 if (option_indirect){
+  Face f;
+  Cell back,front;
+  const Real evalue = interior_dual_c_se_q;
+  const Real lvalue = interior_dual_c_sl_q*node_θ[1];
+  const Real mvalue = interior_dual_c_sm_q*node_θ[1];
+  if (node_is_on_𝜕Ω[1]) continue;
+  if (!node(1).isOwn()) continue;
+  if (!interior_dual_c_lm_q) continue;
+  f=loopOnThisNodeToFindPositiveDualFaceCells(node(1),
+                                              interior_dual_face_uid_q,
+                                              interior_dual_face_swap_q,
+                                              &back, &front);
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\33[7m[iDualMtxLMHead] Aleph Dual LM_q face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid_q
+          <<", interior_dual_face_swap: "<<(interior_dual_face_swap_q?"\33[31mswaped\33[36m":"not")
+          <<"\33[m";
+  assert(evalue>=0.0 && lvalue>=0.0 && mvalue>=0.0);
+  ℵ matrix addValue(node_θ,node(1), node_θ,node(1), evalue);
+  ℵ rhs addValue(node_θ,node(1), lvalue);
+  ℵ rhs addValue(node_θ,node(1), mvalue);
+}
+
+// ****************************************************************************
+// * LM_P
+// ****************************************************************************
+inner faces void iDualMtxLMTail(void) @ 16.1 if (option_indirect){
+  Face f;
+  Cell back,front;
+  const Real evalue = interior_dual_c_se_p;
+  const Real lvalue = interior_dual_c_sl_p*node_θ[1];
+  const Real mvalue = interior_dual_c_sm_p*node_θ[1];
+  if (node_is_on_𝜕Ω[1]) continue;
+  if (!node(1).isOwn()) continue;
+  if (!interior_dual_c_lm_p) continue;
+  f=loopOnThisNodeToFindPositiveDualFaceCells(node(1),
+                                              interior_dual_face_uid_p,
+                                              interior_dual_face_swap_p,
+                                              &back, &front);
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\33[7m[iDualMtxLMTail] Aleph Dual LM_p face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid_p
+          <<", interior_dual_face_swap: "<<(interior_dual_face_swap_p?"\33[31mswaped\33[36m":"not")
+          <<"\33[m";
+  assert(evalue>=0.0 && lvalue>=0.0 &&mvalue>=0.0);
+  ℵ matrix addValue(node_θ,node(1), node_θ,node(1), evalue);
+  ℵ rhs addValue(node_θ,node(1), lvalue);
+  ℵ rhs addValue(node_θ,node(1), mvalue);
+}
+
+
+
+// ****************************************************************************
+// * JK_Q
+// ****************************************************************************
+inner faces void iDualMtxJKHead(void) @ 16.2 if (option_indirect){
+  Face f;
+  Cell back,front;
+  const Real dvalue = interior_dual_c_sd_q;
+  const Real jvalue = interior_dual_c_sj_q*node_θ[0];
+  const Real kvalue = interior_dual_c_sk_q*node_θ[0];
+  if (node_is_on_𝜕Ω[0]) continue;
+  if (!node(0).isOwn()) continue;
+  if (!interior_dual_c_jk_q) continue;
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\33[7m[iDualMtxJKHead] Aleph Dual JK_q face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid
+          <<"\33[m";
+  f=loopOnThisNodeToFindPositiveDualFaceCells(node(0),
+                                              interior_dual_face_uid_q,
+                                              interior_dual_face_swap_q,
+                                              &back, &front);
+  assert(dvalue>=0.0 && kvalue>=0.0 && jvalue>=0.0);
+  ℵ matrix addValue(node_θ,node(0), node_θ,node(0), dvalue);
+  ℵ rhs addValue(node_θ,node(0), jvalue);
+  ℵ rhs addValue(node_θ,node(0), kvalue);
+}
+
+// ****************************************************************************
+// * JK_P
+// ****************************************************************************
+inner faces void iDualMtxJKTail(void) @ 16.2 if (option_indirect){
+  Face f;
+  Cell back,front;
+  const Real dvalue = interior_dual_c_sd_p;
+  const Real jvalue = interior_dual_c_sj_p*node_θ[0];
+  const Real kvalue = interior_dual_c_sk_p*node_θ[0];
+  if (node_is_on_𝜕Ω[0]) continue;
+  if (!node(0).isOwn()) continue;
+  if (!interior_dual_c_jk_p) continue;
+  if (option_debug_dual_aleph)
+    info()<<"\t\t\33[7m[iDualMtxJKTail] Aleph Dual JK_p face: "
+          <<1+node(0)->uniqueId().asInteger()<<"->"
+          <<1+node(1)->uniqueId().asInteger()
+          <<", looking for speciale face:"<<interior_dual_face_uid<<"\33[m";
+  f=loopOnThisNodeToFindPositiveDualFaceCells(node(0),
+                                              interior_dual_face_uid_p,
+                                              interior_dual_face_swap_p,
+                                              &back, &front);
+  assert(dvalue>=0.0 && kvalue>=0.0 && jvalue>=0.0);
+  ℵ matrix addValue(node_θ,node(0), node_θ,node(0), dvalue);
+  ℵ rhs addValue(node_θ,node(0), jvalue);
+  ℵ rhs addValue(node_θ,node(0), kvalue);
+}

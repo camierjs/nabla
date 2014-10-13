@@ -1,0 +1,226 @@
+
+// ****************************************************************************
+// * Fonctions trigonométriques
+// ****************************************************************************
+inline Real Cos(Real3 a, Real3 b){
+  return (a⋅b)/(norm(a)*norm(b));
+}
+
+inline Real Sin(Real3 a, Real3 b){
+  return (a⤫b)/(norm(a)*norm(b));
+}
+
+
+// ****************************************************************************
+// Calcul l'Aire du Triangle, elle est positive
+// ****************************************************************************
+inline Real geomComputeTriangleArea(Real3 a, Real3 b, Real3 c){
+  Real area=½*fabs((b-a)⤫(c-a));
+  return area;
+}
+
+// ****************************************************************************
+// Calcul algébrique de l'Aire du Triangle, elle peut être négative
+// ****************************************************************************
+inline Real geomComputeTriangleAlgebraicArea(Real3 a, Real3 b, Real3 c){
+  Real area=½*cross2D((b-a),(c-a));
+  return area;
+}
+
+// ****************************************************************************
+// Calcul algébrique de l'Aire du Quadrilatère, elle peut être négative
+// ****************************************************************************
+inline Real geomComputeQuadAlgebraicArea(Real3 s0, Real3 s1, Real3 s2, Real3 s3){
+  const Real3 c = ¼*(s0+s1+s2+s3);
+  const Real surface[4] = {
+    geomComputeTriangleAlgebraicArea(s0,s1,c), geomComputeTriangleAlgebraicArea(s1,s2,c),
+    geomComputeTriangleAlgebraicArea(s2,s3,c), geomComputeTriangleAlgebraicArea(s3,s0,c)};
+  Real total_surface = 0.0;
+  for(int i=0;i<4;i+=1)
+    total_surface += surface[i]; 
+  return total_surface;
+}
+
+
+// ****************************************************************************
+// * Vecteur Normal n_{ab} (de 'a' vers 'b' il faut lire) / |n_{ab}|=|ab|
+// ****************************************************************************
+inline Real3 n(Real3 a, Real3 b){
+  return Real3(b.y-a.y,-b.x+a.x,0.0);
+}
+
+
+// ****************************************************************************
+// * Vérification que l'on soit bien en full triangle ou quads
+// ****************************************************************************
+cells Integer computeMinNbNode(Integer minNbNode){
+  minNbNode = min(minNbNode,nbNode);
+  return minNbNode;
+}
+cells Integer computeMaxNbNode(Integer maxNbNode){
+  maxNbNode = max(maxNbNode,nbNode);
+  return maxNbNode;
+}
+
+cells Real computeCellMassCenterDelta(Real minDelta){
+  foreach cell
+    minDelta=min(minDelta,norm(cell_mass_center[cc]-cell_mass_center));
+  return minDelta;
+}
+void testForQuadsOrTriangles(void) @ -31.0{
+  Real minNbNode=computeMinNbNode(1024);
+  Real maxNbNode=computeMaxNbNode(0);
+  Integer rMinNbNode = mpi_reduce(ReduceMin,minNbNode);
+  Integer rMaxNbNode = mpi_reduce(ReduceMax,maxNbNode);
+  full_quads=false;full_triangles=false;
+  if ((rMinNbNode==4) && (rMaxNbNode==4)) full_quads=true;
+  if ((rMinNbNode==3) && (rMaxNbNode==3)) full_triangles=true;
+  if (!(full_quads^full_triangles)) fatal("testForQuadsorTriangles", "Not an exclusive mesh!");
+  if (full_quads!=option_quads) fatal("testForQuadsorTriangles", "Not a told quad mesh!");
+  if (full_triangles!=option_triangles) fatal("testForQuadsorTriangles", "Not a told triangular mesh!");
+}
+
+// Calcul de Δl: Length of the sides, before touching mesh
+void computeΔl(void) @ -30.0{
+  const Real ε=1.0e-15;
+  if (full_triangles) geomTriMassCenter();
+  if (full_quads) geomQuadMassCenter();
+  Δl=round(mpi_reduce(ReduceMin,computeCellMassCenterDelta(+∞))/ε)*ε;
+  info()<<"\33[33m[computeΔl] Δl="<<Δl<<"\33[m";
+}
+
+// Calcul du nombre de noeuds sans les own
+own cells Integer computeNbCells(Integer localNbCells){
+  localNbCells+=1;
+  return localNbCells;
+}
+own nodes Integer computeNbNodes(Integer localNbNodes){
+  localNbNodes+=1;
+  return localNbNodes;
+}
+void sumNbCellsNodes(void) @ -30.0{
+  globalNbCells=mpi_reduce(ReduceSum,computeNbCells(0));
+  globalNbNodes=mpi_reduce(ReduceSum,computeNbNodes(0));
+  info()<<"\33[33m[computeSumNbCellsNodes] globalNbCells="<<globalNbCells<<"\33[m";
+  info()<<"\33[33m[computeSumNbCellsNodes] globalNbNodes="<<globalNbNodes<<"\33[m";
+}
+
+// ****************************************************************************
+// * Calcul des Centres de Gravité
+// ****************************************************************************
+cells void geomTriMassCenter(void) @ -10.0 if (option_triangles){
+  cell_mass_center=0.0;
+  foreach node cell_mass_center+=coord;
+  cell_mass_center/=nbNode;
+  //info()<<"[geomComputeCellTriangleMassCenter] cell_mass_center #"<<uid<<"="<<cell_mass_center;
+}
+
+cells void geomQuadMassCenter(void) @ -10.0 if (option_quads){
+  const Integer cid=1+this->uniqueId().asInteger();
+  const Real3 s0 = coord[0];
+  const Real3 s1 = coord[1];
+  const Real3 s2 = coord[2];
+  const Real3 s3 = coord[3];
+  const Real3 c = ¼*(s0+s1+s2+s3);
+  const Real surface[4]= {
+    geomComputeTriangleAlgebraicArea(s0,s1,c), geomComputeTriangleAlgebraicArea(s1,s2,c),
+    geomComputeTriangleAlgebraicArea(s2,s3,c), geomComputeTriangleAlgebraicArea(s3,s0,c)};
+  const Real3 barycentre_triangle[4] =
+    {⅓*(s0+s1+c), ⅓*(s1+s2+c), ⅓*(s2+s3+c), ⅓*(s3+s0+c)};
+  Real total_surface = 0.0;
+  Real3 center = Real3(0.0,0.0,0.0);
+  Integer convex=0;
+  foreach node{
+    if (surface[#]<0.0){
+      // On shift et on encode
+      convex*=10;
+      convex+=#;
+      if (option_debug_geometry)
+        info()<<"\33[33m[geomComputeCellQuadMassCenter] Cell #"<<cid
+              <<" has some negative surfaces in it!\33[m";
+    }
+    center += barycentre_triangle[#]*surface[#];
+    total_surface += surface[#]; 
+  }
+ 
+  //info()<<"\33[33m[geomComputeCellQuadMassCenter] Convexity="<<convex<<"\33[m";
+  if (convex==0){
+    //#warning cell_mass_center tied to c
+    cell_mass_center = center / total_surface;
+    continue;
+  }
+  //#warning Zzz tries
+  //fatal("\33[31m[geomComputeCellQuadMassCenter] Zzz tries here!\33[m");
+
+  // Pour le cas SNCQ: 3,12
+  if (convex==1){
+    cell_mass_center = ¼*(s0+s1+s2+s3);
+    continue;
+  }
+  if (convex==3 || convex==12 ){
+    cell_mass_center= ½*(s0+s2);
+    continue;
+  }
+  
+  info()<<"\33[33m[geomComputeCellQuadMassCenter] UnHandled Convexity="<<convex<<"\33[m";
+  fatal("\33[31m[geomComputeCellQuadMassCenter] UnHandled Convexity!\33[m");
+}
+
+
+// ****************************************************************************
+// * Calcul des Aires des mailles primales
+// ****************************************************************************
+cells void geomTriSurface(void)  @ -9.0 if (option_triangles){
+  cell_area = geomComputeTriangleArea(coord[0],coord[1],coord[2]);
+  if (cell_area<0.0) info()<<"\33[33m[geomComputeTriangleArea] cell_area"<<cell_area<<"\33[m";
+  assert(cell_area>0.0);
+}
+
+cells void geomQuadSurface(void) @ -9.0 if (option_quads){
+  const Integer cid=1+this->uniqueId().asInteger();
+  const Real3 s0 = coord[0];
+  const Real3 s1 = coord[1];
+  const Real3 s2 = coord[2];
+  const Real3 s3 = coord[3];
+  const Real3 c = ¼*(s0+s1+s2+s3);
+  const Real surface[4]= {
+    geomComputeTriangleAlgebraicArea(s0,s1,c), geomComputeTriangleAlgebraicArea(s1,s2,c),
+    geomComputeTriangleAlgebraicArea(s2,s3,c), geomComputeTriangleAlgebraicArea(s3,s0,c)};
+  cell_area = 0.0;
+  foreach node
+    cell_area += surface[#];
+  if (cell_area<0.0)
+    info()<<"\33[33m[geomComputeQuadSurface] Cell #"<<cid<<", cell_area="<<cell_area<<"\33[m";
+  assert(cell_area>0.0);
+ }
+
+
+// ****************************************************************************
+// * Calcul des Aires des mailles duales dans les cas directs/indirects
+// ****************************************************************************
+nodes void geomNodeAreaDirect(void) @ -8.5 if (!option_indirect){
+  node_area=0.0;
+  foreach cell
+    node_area+=cell_area/nbNode;
+  if (node_area<0.0) info()<<"\33[33m[geomComputeNodeAreaDirect] node_area"<<node_area<<"\33[m";
+  assert(node_area>0.0);
+}
+
+nodes void geomNodeAreaIndirect(void) @ -8.5 if (option_indirect){
+  node_area=0.0;
+  foreach face{
+    const Real3 d=coord[node(0)];
+    const Real3 e=coord[node(1)];
+    const Real3 s=½*(d+e);
+    if (nbCell==2){
+      const Real3 p=cell_mass_center[backCell];
+      const Real3 q=cell_mass_center[frontCell];
+      node_area+=geomComputeTriangleArea(d,q,s);
+      node_area+=geomComputeTriangleArea(d,s,p);
+    }else{
+      const Real3 p=cell_mass_center[cell(0)];
+      node_area+=geomComputeTriangleArea(d,s,p);
+    }
+  }
+}
+

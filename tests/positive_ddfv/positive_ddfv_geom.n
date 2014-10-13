@@ -1,0 +1,97 @@
+// ****************************************************************************
+// * Géométrie
+// ****************************************************************************
+
+
+
+
+// ****************************************************************************
+// * Calcul des Aires
+// ****************************************************************************
+#define computeTriangleArea2D(a, b, c) (½*cross2D((b-a),(c-a)))
+
+cells void geomComputeTriangleSurface(void)  @ -9.0 if (option_triangles){
+  cell_area = computeTriangleArea2D(coord[0],coord[1],coord[2]);
+}
+
+cells void geomComputeQuadSurface(void) @ -10.0 if (option_quads){
+  const Real3 fst_edge = coord[2]-coord[0];
+  const Real3 snd_edge = coord[3]-coord[1];
+  //cell_area=½*(fst_edge⨯snd_edge);
+  cell_area=½*cross2D(fst_edge,snd_edge);
+}
+
+nodes void geomComputeNodeArea(void) @ -8.5{
+  node_area=0.0;
+  foreach cell
+    node_area+=cell_area/nbNode;
+}
+
+
+
+
+// ****************************************************************************
+// * Calcul des Centres de Gravité
+// ****************************************************************************
+cells void geomComputeCellTriangleMassCenter(void) @ -10.0 if (option_triangles){
+  cell_mass_center=0.0;
+  foreach node cell_mass_center+=coord;
+  cell_mass_center/=nbNode;
+}
+
+cells void geomComputeCellQuadMassCenter(void) @ -10.0 if (option_quads){
+  const register Real3 s0 = coord[0];
+  const register Real3 s1 = coord[1];
+  const register Real3 s2 = coord[2];
+  const register Real3 s3 = coord[3];
+  const register Real3 c = ¼*(s0+s1+s2+s3);
+  const register Real surface[4]= {
+    computeTriangleArea2D(s0,s1,c), computeTriangleArea2D(s1,s2,c),
+    computeTriangleArea2D(s2,s3,c), computeTriangleArea2D(s3,s0,c)};
+  const register Real3 barycentre_triangle[4] =
+    {⅓*(s0+s1+c), ⅓*(s1+s2+c), ⅓*(s2+s3+c), ⅓*(s3+s0+c)};
+  register Real total_surface = 0.0;
+  register Real3 center = Real3(0.0,0.0,0.0);
+  foreach node{
+    center += barycentre_triangle[#]*surface[#];
+    total_surface += surface[#]; 
+  }
+  cell_mass_center = center / total_surface;
+}
+
+
+
+
+// ***************************************************************
+// Calcul les aires orientées des sous-volumes de contrôle au bord
+// ***************************************************************
+/*outer faces void geom_computeSubZoneNormal_Triangle(void){
+  foreach node{
+    const register Real3 s0 = coord[#%3];
+    const register Real3 s1 = coord[(#+1)%3];
+    const register Real3 s2 = coord[(#+2)%3];
+    // A-là computeTriangleSubZoneNormal
+    boundary_face_node_oriented_area[#] = -0.5*math::vecMul(s2-s0, s1-s0)*(1./3.);
+    if (this->isSubDomainBoundaryOutside()) // normale intérieure
+      boundary_face_node_oriented_area[#] *= -1.0;
+  }
+}
+
+outer faces void geom_computeSubZoneNormal_Quad(void){
+  const Real3 centre=0.25*(coord[0]+coord[1]+coord[2]+coord[3]);
+  foreach node{
+    const register Real3 s0 = coord[#];
+    const register Real3 s1 = coord[(#+1)%4];
+    const register Real3 s2 = coord[(#+2)%4];
+    const register Real3 s3 = coord[(#+3)%4];
+    // A-là computeQuadSubZoneNormal
+    Real3 nf01 = 0.5*math::vecMul(s1-centre, s0-centre);
+    Real3 nf30 = 0.5*math::vecMul(s0-centre, s3-centre);
+    Real3 nf12 = 0.5*math::vecMul(s2-centre, s1-centre);
+    Real3 nf23 = 0.5*math::vecMul(s3-centre, s2-centre);
+    boundary_face_node_oriented_area[#] = -(5.*(nf01+nf30)+(nf12+nf23))*(1./12.);
+    if (this->isSubDomainBoundaryOutside()) // normale intérieure
+      boundary_face_node_oriented_area[#] *= -1.0;
+  }
+  }*/
+ 

@@ -1,0 +1,332 @@
+// ****************************************************************************
+// * Fonctions utilisées dans le cas du maillage dual INDIRECT
+// ****************************************************************************
+
+
+Bool hitOuterFace(Bool dbg, Face fnd, const Real3x3 kappa, const Real3 νs, Real3 d,
+                      Real3 *j, Real3 *k, Real *pj, Real *pk,
+                      Real *α, Real *β, int *face_uid, Bool *face_swap){
+  const Node n0=fnd->node(0);
+  const Node n1=fnd->node(1);
+  const Integer nid0 = 1+fnd->node(0).uniqueId().asInteger();
+  const Integer nid1 = 1+fnd->node(1).uniqueId().asInteger();
+  const Real3 D=coord[n0];
+  const Real3 E=coord[n1];
+  const Real3 s=½*(D+E);
+  const Cell bC = fnd->cell(0);
+  const Real3 p=cell_mass_center[bC];
+  // Ré-orientation de la normale s'il le faut
+  const Bool edged=((s-p)⋅n(D,E))<0.0;
+  // Swap selon le vecteur de la face (duale) DE et DS
+  const Bool swap=((E-D)⋅(s-d))<0.0;
+  // Faire le schéma des 4 cas
+  const Bool edgedSwap = !(edged ^ swap);
+  const Real ε=__DBL_EPSILON__;
+
+  const Real avg_node_θ=½*(node_θ[n0]+node_θ[n1]);
+  *face_swap=edgedSwap;
+  *face_uid=fnd->uniqueId().asInteger();
+  if (dbg) info()<<"\t\t\33[36m[hitOuterFace] Trying \33[31mOUTER\33[36m "
+                 <<(swap?"\33[31mswaped\33[36m ":"")
+                 <<(edged?"\33[31mEdged\33[36m ":"")
+                 <<"face \33[32m"
+                 <<nid0<<"->"<<nid1/*<<", ns="<<ns*/<<"\33[m";
+  *j=edgedSwap?s:p;
+  *k=edgedSwap?p:s;
+  *α=round((n(d,*k)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(*j,d)⋅(kappa⨂νs))/ε)*ε;
+  if (dbg) info()<<"\t\t\33[36m[hitOuterFace] n(d,*k)="<<n(d,*k)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitOuterFace] n(*j,d)="<<n(*j,d)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitOuterFace] alpha=" <<*α<<", beta="<<*β<<"\33[m";
+  if (!(*α>=0.0 && *β>=0.0)) return false;
+  if (dbg) info()<<"\t\t\33[7;36m[hitOuterFace] true"
+                 <<" with face "<<(edgedSwap?"\33[31m":"\33[32m")<<(edgedSwap?nid1:nid0)
+                 <<"->"<<(edgedSwap?nid0:nid1)<<"\33[m";
+  *pj=edgedSwap?(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ):cell_θ[bC];
+  *pk=edgedSwap?cell_θ[bC]:(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ);
+  return true;
+}
+
+
+Bool hitInnerFaceMinus(Bool dbg, Face fnd, const Real3x3 kappa, const Real3 νs, Real3 d,
+                       Real3 *j, Real3 *k, Real *pj, Real *pk,
+                       Real *α, Real *β, int *face_uid, Bool *face_swap){
+  const Real ε=__DBL_EPSILON__;
+  const Node n0=fnd->node(0);
+  const Node n1=fnd->node(1);
+  const Integer nid0 = 1+fnd->node(0).uniqueId().asInteger();
+  const Integer nid1 = 1+fnd->node(1).uniqueId().asInteger();
+  const Real3 D=coord[n0];
+  const Real3 E=coord[n1];
+  const Real3 s=½*(D+E);
+  const Cell bC = fnd->backCell();
+  const Real3 p=cell_mass_center[bC];
+  // Swap selon le vecteur de la face (duale) DE et DS
+  const Bool swap=((E-D)⋅(s-d))<0.0;
+  const Real avg_node_θ=½*(node_θ[n0]+node_θ[n1]);
+  *face_swap=swap;
+  *face_uid=fnd->uniqueId().asInteger();
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFaceMinus] Trying "
+                 <<(swap?"\33[31mswaped\33[36m ":"")
+                 <<"face \33[32m"
+                 <<nid0<<"->"<<nid1<<"-\33[m";
+  *j=swap?p:s;
+  *k=swap?s:p;
+  *α=round((n(d,*k)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(*j,d)⋅(kappa⨂νs))/ε)*ε;
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFaceMinus] n(d,*k)="<<n(d,*k)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFaceMinus] n(*j,d)="<<n(*j,d)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFaceMinus] alpha=" <<*α<<", beta="<<*β<<"\33[m";
+  if (!(*α>=0.0 && *β>=0.0)) return false;
+  if (dbg) info()<<"\t\t\33[7;36m[hitInnerFaceMinus] true"
+                 <<" with face "<<(swap?"\33[31m":"\33[32m")<<(swap?nid1:nid0)
+                 <<"->"<<(swap?nid0:nid1)<<"-\33[m";
+  *pj=swap?cell_θ[bC]:(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ);
+  *pk=swap?(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ):cell_θ[bC];
+  return true;
+}
+
+
+Bool hitInnerFacePlus(Bool dbg, Face fnd, const Real3x3 kappa, const Real3 νs, Real3 d,
+                      Real3 *j, Real3 *k, Real *pj, Real *pk,
+                      Real *α, Real *β, int *face_uid, Bool *face_swap){
+  const Real ε=__DBL_EPSILON__;
+  const Node n0=fnd->node(0);
+  const Node n1=fnd->node(1);
+  const Integer nid0 = 1+fnd->node(0).uniqueId().asInteger();
+  const Integer nid1 = 1+fnd->node(1).uniqueId().asInteger();
+  const Real3 D=coord[n0];
+  const Real3 E=coord[n1];
+  const Real3 s=½*(D+E);
+  const Cell fC = fnd->frontCell();
+  const Real3 q=cell_mass_center[fC];
+  // Swap selon le vecteur de la face (duale) DE et DS
+  const Bool swap=((E-D)⋅(s-d))<0.0;
+  const Real avg_node_θ=½*(node_θ[n0]+node_θ[n1]);
+  *face_swap=swap;
+  *face_uid=fnd->uniqueId().asInteger();
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFacePlus] Trying "
+                 <<(swap?"\33[31mswaped\33[36m ":"")
+                 <<"face \33[32m"
+                 <<nid0<<"->"<<nid1<<"+\33[m";
+  *j=swap?s:q;
+  *k=swap?q:s;
+  *α=round((n(d,*k)⋅(kappa⨂νs))/ε)*ε;
+  *β=round((n(*j,d)⋅(kappa⨂νs))/ε)*ε;
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFacePlus] n(d,*k)="<<n(d,*k)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFacePlus] n(*j,d)="<<n(*j,d)<<"\33[m";
+  if (dbg) info()<<"\t\t\33[36m[hitInnerFacePlus] alpha=" <<*α<<", beta="<<*β<<"\33[m";
+  if (!(*α>=0.0 && *β>=0.0)) return false;
+  if (dbg) info()<<"\t\t\33[7;36m[hitInnerFacePlus] true"
+                 <<" with face "<<(swap?"\33[31m":"\33[32m")
+                 <<(swap?nid1:nid0)
+                 <<"->"<<(swap?nid0:nid1)<<"+\33[m";
+  *pj=swap?(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ):cell_θ[fC];
+  *pk=swap?cell_θ[fC]:(option_trial&&!option_trial_average?face_θ[fnd]:avg_node_θ);
+  return true;
+}
+
+
+// ****************************************************************************
+// * Fonction 'qui tourne' pour trouver le bon secteur dans le cas non-convex
+// ****************************************************************************
+Bool iDualLoop(Bool dbg, Node nd,
+                  const Real3x3 kappa, const Real3 νs, Real3 d,
+                  Real3 *j, Real3 *k, Real *pj, Real *pk,
+                  Real *α, Real *β,
+                  int *face_uid, 
+              Bool *face_swap, Face this_face, Bool Γsq){
+  const Integer nid=1+nd->uniqueId().asInteger();
+  // this_face est inner, elle a 2 cells pour sûr
+  if (dbg) info()<<"\t\33[33m[iDualLoop] Focus on \33[32mnode #"
+                 <<nid<<"\33[33m, kNus="<<kappa⨂νs<<"\33[m";
+  { // On essaie d'abord avec this_face, si c'est Γsq, on fait le + puis le -, sinon l'inverse
+    if (this_face->nbCell()==2 &&  Γsq
+        && hitInnerFacePlus(dbg,this_face,kappa,νs,d,j,k,pj,pk,
+                            α,β,face_uid,face_swap)) return true;
+    if (this_face->nbCell()==2 &&  Γsq
+        && hitInnerFaceMinus(dbg,this_face,kappa,νs,d,j,k,pj,pk,
+                             α,β,face_uid,face_swap)) return true;
+
+    if (this_face->nbCell()==2 && !Γsq
+        && hitInnerFaceMinus(dbg,this_face,kappa,νs,d,j,k,pj,pk,
+                             α,β,face_uid,face_swap)) return true;
+    if (this_face->nbCell()==2 && !Γsq
+        && hitInnerFacePlus(dbg,this_face,kappa,νs,d,j,k,pj,pk,
+                            α,β,face_uid,face_swap)) return true;
+
+    if (this_face->nbCell()==1
+        && hitOuterFace(dbg,this_face,kappa,νs,d,j,k,pj,pk,
+                        α,β,face_uid,face_swap)) return true;
+  }
+  // Sinon les autres +,- selon Γsq
+  foreach nd face{
+    if (*fnd==this_face) continue;
+    if (Γsq){
+      if (fnd->nbCell()==2
+          && hitInnerFacePlus(dbg,*fnd,kappa,νs,d,j,k,pj,pk
+                              ,α,β,face_uid,face_swap)) return true;
+      if (fnd->nbCell()==2
+          && hitInnerFaceMinus(dbg,*fnd,kappa,νs,d,j,k,pj,pk,
+                               α,β,face_uid,face_swap)) return true;
+    }else{
+      if (fnd->nbCell()==2
+          && hitInnerFaceMinus(dbg,*fnd,kappa,νs,d,j,k,pj,pk,
+                               α,β,face_uid,face_swap)) return true;
+      if (fnd->nbCell()==2
+          && hitInnerFacePlus(dbg,*fnd,kappa,νs,d,j,k,pj,pk,
+                              α,β,face_uid,face_swap)) return true;
+    }
+    if (fnd->nbCell()==1
+        && hitOuterFace(dbg,*fnd,kappa,νs,d,j,k,pj,pk,
+                        α,β,face_uid,face_swap)) return true;
+  }
+  return false;
+}
+
+
+
+// ****************************************************************************
+// * Fonction qui détermine les coéfficients des duaux indirects
+// ****************************************************************************
+own inner faces void iInerDual(void) @ 1.0 if (option_indirect){
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  const Bool dbg=option_debug_dual;// && uid==6;
+  // Variables locales pour le coté + (Q)
+  Real3 jq,kq,lq,mq;
+  Real pjq,pkq,plq,pmq;
+  Real adq,bdq,aeq,beq;
+  int tail_face_uid_q, head_face_uid_q;
+  Bool tail_face_swap_q, head_face_swap_q;
+  // Variables locales pour le coté - (P)
+  Real3 jp,k_p,lp,mp;
+  Real pjp,pkp,plp,pmp;
+  Real adp,bdp,aep,bep;
+  int tail_face_uid_p, head_face_uid_p;
+  Bool tail_face_swap_p, head_face_swap_p;
+  const Real3 d=coord[0];
+  const Real3 e=coord[1];
+  const Real3 s=½*(d+e);
+  const Real3 p=cell_mass_center[backCell];
+  const Real3 q=cell_mass_center[frontCell];
+  const Real3 νsq=n(q,s); // Vecteur normal au vecteur de q vers s
+  const Real3 νsp=n(s,p);
+  Bool okPlus, okTailQ, okHeadQ;
+  Bool okMinus, okTailP, okHeadP;
+  
+  if (dbg) info()<<"\33[7;32m[iInnerDual] Face #"<<uid<<":\33[0m\33[32m "
+                 <<nid0<<"-"<<nid1<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tD="<<d<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tE="<<e<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tP="<<p<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tQ="<<q<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tS="<<s<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tNuQ="<<νsq<<"\33[m";
+  if (dbg) info()<<"\33[32m[iInnerDual] \tNuP="<<νsp<<"\33[m";
+  
+  if (dbg) info()<<"\33[32mLooking for \33[1mTail SQ:\33[m";
+  okTailQ = iDualLoop(dbg,node(0),κ,νsq,d,&jq,&kq,&pjq,&pkq,&adq,&bdq,
+                     &tail_face_uid_q, &tail_face_swap_q,*this,true);
+  if (dbg) info()<<"\33[32mLooking for \33[1mTail SP:\33[m";
+  okTailP = iDualLoop(dbg,node(0),κ,νsp,d,&jp,&k_p,&pjp,&pkp,&adp,&bdp,
+                     &tail_face_uid_p, &tail_face_swap_p,*this,false);
+  if (dbg) info()<<"\33[32mLooking for \33[1mHead SQ:\33[m";
+  okHeadQ = iDualLoop(dbg,node(1),κ,-νsq,e,&lq,&mq,&plq,&pmq,&aeq,&beq,
+                     &head_face_uid_q, &head_face_swap_q,*this,true);
+  if (dbg) info()<<"\33[32mLooking for \33[1mHead SP:\33[m";
+  okHeadP = iDualLoop(dbg,node(1),κ,-νsp,e,&lp,&mp,&plp,&pmp,&aep,&bep,
+                     &head_face_uid_p, &head_face_swap_p,*this,false);
+ 
+  // On compose les résultats
+  okPlus = okTailQ || okHeadQ;
+  okMinus = okTailP || okHeadP;
+  if (okPlus){
+    const Real Adq=geomComputeTriangleArea(d,jq,kq);
+    const Real Aeq=geomComputeTriangleArea(e,lq,mq);
+    if (okTailQ && okHeadQ){
+      const Real μsd_num_q=aeq*plq+beq*pmq;
+      const Real μse_num_q=adq*pjq+bdq*pkq;
+      const Real μs_denum_q=Aeq*(adq*pjq+bdq*pkq)+Adq*(aeq*plq+beq*pmq);
+      const Bool nullq=(μs_denum_q==0.0);
+      const Real μsdq=nullq?½:μsd_num_q;
+      const Real μseq=nullq?½:μse_num_q;
+      const Real μsd_denum_q=nullq?Adq:μs_denum_q;
+      const Real μse_denum_q=nullq?Aeq:μs_denum_q;
+      interior_dual_c_sd_q = ½*(adq+bdq)*μsdq/μsd_denum_q;
+      interior_dual_c_se_q = ½*(aeq+beq)*μseq/μse_denum_q;
+    }else{
+      if (okHeadQ){
+        if (option_debug_dual)
+          info()<<"\33[7;32m[iInnerDual] Face #"<<uid<<":\33[0m\33[32m "
+                <<nid0<<"-"<<nid1<<": \t\33[33mokHeadQ\33[m";
+        interior_dual_c_lm_q = true;
+        interior_dual_face_uid_q=head_face_uid_q;
+        interior_dual_face_swap_q=head_face_swap_q;
+        interior_dual_c_se_q = ½*(aeq+beq)/Aeq;
+        interior_dual_c_sd_q = -∞;
+        interior_dual_c_sl_q = ½*aeq/Aeq;
+        interior_dual_c_sm_q = ½*beq/Aeq;
+      }
+      if (okTailQ){
+        if (option_debug_dual)
+          info()<<"\33[7;32m[iInnerDual] Face #"<<uid<<":\33[0m\33[32m "
+                <<nid0<<"-"<<nid1<<": \t\33[33mokTailQ\33[m";
+        interior_dual_c_jk_q = true;
+        interior_dual_face_uid_q=tail_face_uid_q;
+        interior_dual_face_swap_q=tail_face_swap_q;
+        interior_dual_c_sd_q = ½*(adq+bdq)/Adq;
+        interior_dual_c_se_q = -∞; 
+        interior_dual_c_sj_q = ½*adq/Adq;
+        interior_dual_c_sk_q = ½*bdq/Adq;
+      }
+    }
+  }
+      
+  if (okMinus){
+    const Real Adp=geomComputeTriangleArea(d,jp,k_p);
+    const Real Aep=geomComputeTriangleArea(e,lp,mp);
+    if (okTailP && okHeadP){
+      const Real μsd_num_p=aep*plp+bep*pmp;
+      const Real μse_num_p=adp*pjp+bdp*pkp;
+      const Real μs_denum_p=Aep*(adp*pjp+bdp*pkp)+Adp*(aep*plp+bep*pmp);
+      const Bool nullp=(μs_denum_p==0.0);
+      const Real μsdp=nullp?½:μsd_num_p;
+      const Real μsep=nullp?½:μse_num_p;
+      const Real μsd_denum_p=nullp?Adp:μs_denum_p;
+      const Real μse_denum_p=nullp?Aep:μs_denum_p;
+      interior_dual_c_sd_p = ½*(adp+bdp)*μsdp/μsd_denum_p;
+      interior_dual_c_se_p = ½*(aep+bep)*μsep/μse_denum_p;
+      continue;
+    }else{
+      if (okHeadP){
+        if (option_debug_dual)
+          info()<<"\33[7;32m[iInnerDual] Face #"<<uid<<":\33[0m\33[32m "
+                <<nid0<<"-"<<nid1<<": \t\33[33mokHeadP\33[m";
+        interior_dual_c_lm_p = true;
+        interior_dual_face_uid_p=head_face_uid_p;
+        interior_dual_face_swap_p=head_face_swap_p;
+        interior_dual_c_se_p = ½*(aep+bep)/Aep;
+        interior_dual_c_sd_p = -∞;
+        interior_dual_c_sl_p = ½*aep/Aep;
+        interior_dual_c_sm_p = ½*bep/Aep;
+        continue;
+      }
+      if (okTailP){
+        if (option_debug_dual)
+          info()<<"\33[7;32m[iInnerDual] Face #"<<uid<<":\33[0m\33[32m "
+                <<nid0<<"-"<<nid1<<": \t\33[33mokTailP\33[m";
+        interior_dual_c_jk_p = true;
+        interior_dual_face_uid_p=tail_face_uid_p;
+        interior_dual_face_swap_p=tail_face_swap_p;
+        interior_dual_c_sd_p = ½*(adp+bdp)/Adp;
+        interior_dual_c_se_p = -∞; 
+        interior_dual_c_sj_p = ½*adp/Adp;
+        interior_dual_c_sk_p = ½*bdp/Adp;
+        continue;
+      }
+    }
+  }
+  fatal("Should not be there!");
+}
+

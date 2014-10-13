@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?><!-- -*- SGML -*- -->
+<makefile type="library">
+
+<!-- Liste des packages utilisés -->
+<needed-packages>
+  <package name="hypre" need="required"/>
+</needed-packages>
+
+<!-- Liste des composantes nécessaires -->
+<needed-components>
+  <component name="arcane" />
+</needed-components>
+
+<files language="c++">
+  <file>IAlephHypre</file>
+</files>
+
+<files language="c++header">
+  <file>IAlephHypre</file>
+</files>
+</makefile>

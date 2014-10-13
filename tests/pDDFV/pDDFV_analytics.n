@@ -1,0 +1,133 @@
+// ****************************************************************************
+// * Solution exacte, terme Source et Conditions de Dirichlet
+// ****************************************************************************
+
+
+/////////////////////////////////////////////
+// Pilotage du Kappa pour faire des Waves
+/////////////////////////////////////////////
+Real KappaWaves(Real3 p, Real θ){
+  if (option_spin_θ)
+    return M_PI*sin(option_spin_θ_x*M_PI*p.x)*sin(option_spin_θ_y*M_PI*p.y);
+  return θ;
+}
+
+
+/////////////////////////////////////////////
+// ISOtropic Diffusion Square withOUT Hole //
+/////////////////////////////////////////////
+Real exact_solution_isotropic_without_hole(Real3 p){
+  return sin(M_PI*p.x)*sin(M_PI*p.y)+option_𝜕Ω_temperature;
+}
+Real f_isotropic_without_hole(Real3 p){
+  return 2.0*M_PI*M_PI*sin(M_PI*p.x)*sin(M_PI*p.y);
+}
+Real g_isotropic_without_hole(Real3 p){
+  return option_𝜕Ω_temperature;
+}
+Bool is_on_𝜕Ω_isotropic_without_hole(Real3 p){
+  // On arrive ici suite à un outer!
+  return true;
+}
+
+
+///////////////////////////////////////////////
+// ANIsotropic Diffusion Square withOUT Hole //
+// But with option_θ that must be tied to 0, //
+// for A and B to be positives.              //
+///////////////////////////////////////////////
+Real exact_solution_anisotropic_without_hole_and_null_θ(Real3 p){
+  assert(option_𝜕Ω_temperature==0.0);
+  return option_𝜕Ω_temperature+sin(M_PI*p.x)*sin(M_PI*p.y);
+}
+Real f_anisotropic_without_hole_and_null_θ(Real3 p){
+  assert(option_θ==0.0);
+  return M_PI*M_PI*((option_k+1.0)*sin(M_PI*p.x)*sin(M_PI*p.y)
+    -(option_k-1.0)*cos(M_PI*p.x)*cos(M_PI*p.y)*sin(2.0*option_θ));}
+Real g_anisotropic_without_hole_and_null_θ(Real3 p){
+  return option_𝜕Ω_temperature;
+}
+Bool is_on_𝜕Ω_anisotropic_without_hole_and_null_θ(Real3 p){
+  // On arrive ici suite à un outer!
+  return true;
+}
+
+
+///////////////////////////////////////////////
+// ANIsotropic Diffusion Square withOUT Hole //
+// Found a function so that p and f are >=0  //
+///////////////////////////////////////////////
+Real exact_solution_anisotropic_without_hole(Real3 p){
+  const Real γ=1.0/atan(½);
+  return γ*atan(½-((p.x-½)²+(p.y-½)²));
+}
+Real f_anisotropic_without_hole(Real3 p){
+  const Real x=p.x;
+  const Real y=p.y;
+  const Real γ=1.0/atan(½);
+  const Real θ=option_θ;
+  const Real k=option_k;
+  const Real dnm = (1.0+(x²-x+y²-y)²)²;
+  const Real num =
+    -16.0*γ*(k-1.0)*(x-½)*(y-½)*(-x+x²+(y-1.0)*y)*cos(θ)*sin(θ)
+    -8.0*γ*(y-½)²*(x²-x+y*(y-1.0))*(k*cos(θ)²+sin(θ)²)
+    -8.0*γ*(x-½)²*(x²-x+y*(y-1.0))*(cos(θ)²+k*sin(θ)²)
+    +2.0*γ*(1.0+(x²-x+(y-1.0)*y)²)*(k*cos(θ)²+sin(θ)²)
+    +2.0*γ*(1.0+(x²-x+(y-1.0)*y)²)*(cos(θ)²+k*sin(θ)²);
+  //if (x==0.5 && y==0.5) info()<<"\33[7m[f_anisotropic_without_hole] ("<<x<<","<<y<<")="<<(num/dnm)<<"\33[m";
+  return num/dnm;
+}
+Real g_anisotropic_without_hole(Real3 p){
+  return exact_solution_anisotropic_without_hole(p);
+}
+Bool is_on_𝜕Ω_anisotropic_without_hole(Real3 p){
+  // On arrive ici suite à un outer!
+  return true;
+}
+
+
+////////////////////////////////////////////
+// ANIsotropic Diffusion Square WITH Hole //
+////////////////////////////////////////////
+Real exact_solution_with_hole(Real3 p){ /*dummy*/ return 1.0;}
+Real f_with_hole(Real3 p){ return 0.0;}
+Real g_with_hole(Real3 p){
+  const Real θ_hole = option_𝜕Ω_temperature+2.0;
+  const Real θ_bord = option_𝜕Ω_temperature;
+  if (p.x==0.0 || p.x== 1.0) return θ_bord;
+  if (p.y==0.0 || p.y== 1.0) return θ_bord;
+  return θ_hole;
+}
+Bool is_on_𝜕Ω_with_hole(Real3 p){
+  // On arrive ici suite à un outer!
+  return true;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Switch between Isotropic/Anisotropic Diffusion Square WITH/withOUT Hole //
+/////////////////////////////////////////////////////////////////////////////
+Real exact_solution(Real3 p){
+  if (option_hole) return exact_solution_with_hole(p);
+  if (option_isotropic) return exact_solution_isotropic_without_hole(p);
+  if (option_atan) return exact_solution_anisotropic_without_hole(p);
+  return exact_solution_anisotropic_without_hole_and_null_θ(p);
+}
+Real f(Real3 p){
+  if (option_hole) return f_with_hole(p);
+  if (option_isotropic) return f_isotropic_without_hole(p);
+  if (option_atan) return f_anisotropic_without_hole(p);
+  return f_anisotropic_without_hole_and_null_θ(p);
+}
+Real g(Real3 p){
+  if (option_hole) return g_with_hole(p);
+  if (option_isotropic) return g_isotropic_without_hole(p);
+  if (option_atan) return g_anisotropic_without_hole(p);
+  return g_anisotropic_without_hole_and_null_θ(p);
+}
+Bool is_on_𝜕Ω(Real3 p){
+  if (option_hole) return is_on_𝜕Ω_with_hole(p);
+  if (option_isotropic) return is_on_𝜕Ω_isotropic_without_hole(p);
+  if (option_atan) return is_on_𝜕Ω_anisotropic_without_hole(p);
+  return is_on_𝜕Ω_anisotropic_without_hole_and_null_θ(p);
+}

@@ -4,15 +4,15 @@
         .global error_h
         .global extra_h
 real3_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/cuda/real3.h"
+	     .incbin "real3.h"
         .byte 0
 debug_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/cuda/debug.h"
+	     .incbin "debug.h"
         .byte 0
 error_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/cuda/error.h"
+	     .incbin "error.h"
         .byte 0
 extra_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/cuda/extra.h"
+	     .incbin "extra.h"
         .byte 0   
          

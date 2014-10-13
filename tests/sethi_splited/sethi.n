@@ -1,0 +1,477 @@
+with cartesian;
+
+// ****************************************************************************
+// * OPTIONS
+// ****************************************************************************
+options{
+  Real    δx             = 0.00390625;
+  Real    time_end       = 50.0;
+  Real    courant_number = 0.8; 
+  Real    slope_type     = 1.0;
+  Integer nstepmax       = 2;
+  Integer testcase       = 0;
+  Int64   uid_bubble_one = 0;
+  Int64   uid_bubble_two = 0;
+  // static constants
+  Real    γ              = 1.4;
+  Real    SMALLC         = 1e-10;
+  Real    SMALLR         = 1e-10;
+  Real    ε              = 1e-8;
+  Integer NITER_RIEMANN  = 10;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{
+  // old
+  Real old_ρ;
+  Real old_u; // Normal momentum
+  Real old_v; // Transverse momentum
+  Real old_E;
+  Real old_p;
+  Real old_c;
+  // conservative
+  Real ρ;
+  Real u; // Normal momentum
+  Real v; // Transverse momentum
+  Real E;
+  Real p;
+  Real c;
+  // primitive
+  Real prim_ρ;
+  Real inv_prim_ρ;
+  Real prim_u;
+  Real prim_v;
+  Real E_internal;
+  Real prim_p;
+  Real prim_c;
+  // Slopes
+  Real slope_ρ;
+  Real slope_u;
+  Real slope_v;
+  Real slope_p;
+  // Flux left,right
+  Real flux_ρ_left; Real flux_ρ_right;
+  Real flux_u_left; Real flux_u_right;
+  Real flux_v_left; Real flux_v_right;
+  Real flux_p_left; Real flux_p_right;
+  // Flux left,right
+  Real q_ρ_left; Real q_ρ_right;
+  Real q_u_left; Real q_u_right;
+  Real q_v_left; Real q_v_right;
+  Real q_p_left; Real q_p_right;
+  // Flux
+  Real flux_ρ;
+  Real flux_u;
+  Real flux_v;
+  Real flux_E;
+  // Godunov
+  Real gdnv_ρ;
+  Real gdnv_u;
+  Real gdnv_v;
+  Real gdnv_p;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables globales
+// ****************************************************************************
+global{
+  Real    dt_δx;
+  Real    inv_slope_type;
+  Real    γ6;
+  Real    SMALLP;
+  Real    SMALLPP;
+  Real    ZEROL;
+  Real    ZEROR;
+  Real    PROJECT;
+};
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0] 
+// ****************************************************************************
+
+void print_params(void) @ -10.0{
+  info()<< "TESTCASE            =" << testcase;
+  info()<< "NSTEPMAX            =" << nstepmax;
+  info()<< "COURANT_NUMBER      =" << courant_number;
+  info()<< "DX                  =" << δx;
+  info()<< "TEND                =" << time_end;
+}
+
+void ini(void) @ -10.0{
+  γ6 = (γ + 1.0) / (2.0 * γ);
+  SMALLP = SMALLC * SMALLC / γ;
+  SMALLPP = SMALLR * SMALLP;
+  inv_slope_type=1.0/slope_type;
+}
+
+cells void init_hydro(void)
+  out (cell ρ, cell u, cell v, cell E, cell p, cell c) @ -9.1{
+  old_ρ=ρ=1.0;
+  old_u=u=old_v=v=0.0;
+  old_E=E=1.0e-5;
+  if (testcase==0 && uid==0) old_E=E=1.0/δx/δx;
+  if (testcase==1 && uid==uid_bubble_one) old_E=E=0.5/δx/δx;
+  if (testcase==1 && uid==uid_bubble_two) old_E=E=0.25/δx/δx;
+  old_p=p=old_c=c=0.0;
+}
+
+own cells Real courant(Real courantv)
+  in (cell prim_u, cell prim_v, cell prim_c){
+  courantv = max(courantv, max(prim_c+fabs(prim_u), prim_c+fabs(prim_v)));
+  return courantv;
+}
+Real compute_δt(void) {
+  Real crt,courantv;
+  gatherConservativeVariables();eieio();
+  conservative_to_primitive();eieio();
+  equation_of_state();eieio();
+  speed_of_sound();eieio();
+  crt=courant(SMALLC);
+  courantv=mpi_reduce(ReduceMax,crt);
+  return courant_number * δx / courantv;
+}
+
+void init_δt(void) @ -4.0{
+  δt=compute_δt()/2.0;
+  dt_δx=δt/δx;
+  ZEROL   = -100.0/dt_δx;
+  ZEROR   =  100.0/dt_δx;
+  PROJECT =  1.0;
+  info() << "[7m[init_δt] δt="<<δt<<", dt/δx="<<dt_δx<<"[m";
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+cells void gatherConservativeVariables(void) @ 0.5{
+  ρ=old_ρ;
+  if (isX()){
+    u=old_u;
+    v=old_v;
+  }else{
+    v=old_u;
+    u=old_v;
+  }
+  E=old_E;
+}
+
+cells void conservative_to_primitive(void)
+  in (cell old_ρ, cell old_u, cell old_v, cell old_E)
+  out (cell prim_ρ, cell inv_prim_ρ, cell prim_u,
+       cell prim_v, cell E_internal) @ 1.0{
+  prim_ρ = max(ρ, SMALLR);
+  inv_prim_ρ = 1.0/prim_ρ;
+  prim_u = u * inv_prim_ρ;
+  prim_v = v * inv_prim_ρ;
+  {
+    const Real E_kinetic = 0.5*(prim_u*prim_u+prim_v*prim_v);
+    E_internal = E * inv_prim_ρ - E_kinetic;
+  }
+}
+
+cells void equation_of_state(void)
+  in (cell prim_ρ, cell E_internal)
+  out (cell prim_p) @ 2.0{
+  prim_p = max((γ - 1.0) * prim_ρ * E_internal, SMALLP);
+}
+
+cells void speed_of_sound(void)
+  in (cell prim_inv_ρ, cell prim_p)
+  out (cell prim_c) @ 3.0{
+  prim_c = sqrt(γ * prim_p * inv_prim_ρ);
+}
+
+
+// ****************************************************************************
+// * Compute Slopes @ 4.0
+// ****************************************************************************
+Real slope(const Real nbv_m, const Real nbv_0, const Real nbv_p){
+  Real rtn;
+  const Real left = slope_type * (nbv_0 - nbv_m);
+  const Real right = slope_type * (nbv_p - nbv_0);
+  const Real center = 0.5 * (left + right) * inv_slope_type;
+  const Real sign = (center > 0.0) ? 1.0 : -1.0;
+  const Real llftrgt = (left * right) <= 0.0;
+  const Real t1 = fmin(fabs(left), fabs(right));
+  rtn = sign * fmin((1.0-llftrgt)*t1, fabs(center));
+  return rtn;
+}
+inner cells void compute_inner_slopes_xyz(xyz direction)
+  in (cell ρ, cell u, cell v, cell p)
+  out (cell slope_ρ, cell slope_u, cell slope_v, cell slope_p){
+  slope_ρ=slope(prim_ρ[prevCell],prim_ρ,prim_ρ[nextCell]);
+  slope_u=slope(prim_u[prevCell],prim_u,prim_u[nextCell]);
+  slope_v=slope(prim_v[prevCell],prim_v,prim_v[nextCell]);
+  slope_p=slope(prim_p[prevCell],prim_p,prim_p[nextCell]);
+}
+outer cells void compute_outer_slopes_xyz(xyz direction)
+  in (cell ρ, cell u, cell v, cell p)
+  out (cell slope_ρ, cell slope_u, cell slope_v, cell slope_p){
+  if (prevCell.null()){ // Frontière gauche
+    slope_ρ=slope(prim_ρ,prim_ρ,prim_ρ[nextCell]);
+    slope_u=slope(-prim_u[nextCell],-prim_u,prim_u);
+    slope_v=slope(prim_v,prim_v,prim_v[nextCell]);
+    slope_p=slope(prim_p,prim_p,prim_p[nextCell]);
+
+    continue;
+  }
+  if (nextCell.null()){ // Frontière droite
+    slope_ρ=slope(prim_ρ[prevCell],prim_ρ,prim_ρ);
+    slope_u=slope(prim_u,-prim_u,-prim_u[prevCell]);
+    slope_v=slope(prim_v[prevCell],prim_v,prim_v);
+    slope_p=slope(prim_p[prevCell],prim_p,prim_p);
+    continue;
+  }
+}
+void compute_slopes(void) @ 4.0{
+  if (isX()){
+    compute_inner_slopes_xyz(MD_DirX) @ 0.0;
+    compute_outer_slopes_xyz(MD_DirX) @ 0.0;
+  }else{
+    compute_inner_slopes_xyz(MD_DirY) @ 0.0;
+    compute_outer_slopes_xyz(MD_DirY) @ 0.0;
+  }
+}
+
+// ****************************************************************************
+// * Compute fluxes
+// ****************************************************************************
+cells void compute_right_flux(void) @ 5.0{
+  const Real inv_c = 1.0/prim_c;
+  const Real alpha_m = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) - slope_u)*prim_ρ*inv_c;
+  const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
+  const Real alpha_0r = slope_ρ - slope_p * (inv_c*inv_c);
+  const Real alpha_0v = slope_v;
+  const Real sp_m = ((prim_u - prim_c) >= ZEROR) ? PROJECT : (prim_u - prim_c) * dt_δx + 1.0;
+  const Real sp_p = ((prim_u + prim_c) >= ZEROR) ? PROJECT : (prim_u + prim_c) * dt_δx + 1.0;
+  const Real sp_0 = (prim_u >= ZEROR) ? PROJECT : prim_u * dt_δx + 1.0;
+  const Real a_p = -0.5 * sp_p * alpha_p;
+  const Real a_m = -0.5 * sp_m * alpha_m;
+  const Real a_0r = -0.5 * sp_0 * alpha_0r;
+  const Real a_0v = -0.5 * sp_0 * alpha_0v;
+  q_ρ_right = flux_ρ_right = prim_ρ + (a_p + a_m + a_0r);
+  q_u_right = flux_u_right = prim_u + (a_p - a_m) * prim_c * inv_prim_ρ;
+  q_v_right = flux_v_right = prim_v + a_0v;
+  q_p_right = flux_p_right = prim_p + (a_p + a_m) * prim_c * prim_c;
+}
+cells void compute_left_flux(void) @ 5.0{
+  const Real inv_c = 1.0/prim_c;
+  const Real alpha_m = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) - slope_u)*prim_ρ*inv_c;
+  const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
+  const Real alpha_0r = slope_ρ - slope_p * (inv_c*inv_c);
+  const Real alpha_0v = slope_v;
+  const Real sp_m = ((prim_u - prim_c) <= ZEROL) ? -PROJECT : (prim_u - prim_c) * dt_δx - 1.0;
+  const Real sp_p = ((prim_u + prim_c) <= ZEROL) ? -PROJECT : (prim_u + prim_c) * dt_δx - 1.0;
+  const Real sp_0 = (prim_u <= ZEROL) ? -PROJECT : prim_u * dt_δx - 1.0;
+  const Real a_p = -0.5 * sp_p * alpha_p;
+  const Real a_m = -0.5 * sp_m * alpha_m;
+  const Real a_0r = -0.5 * sp_0 * alpha_0r;
+  const Real a_0v = -0.5 * sp_0 * alpha_0v;
+  q_ρ_left = flux_ρ_left = prim_ρ + (a_p + a_m + a_0r);
+  q_u_left = flux_u_left = prim_u + (a_p - a_m) * prim_c * inv_prim_ρ;
+  q_v_left = flux_v_left = prim_v + a_0v;
+  q_p_left = flux_p_left = prim_p + (a_p + a_m) * prim_c * prim_c;
+}
+
+// ****************************************************************************
+// * Compute qleftright
+// ****************************************************************************
+inner cells void inner_qleftright_std(xyz direction){
+  q_ρ_left = flux_ρ_left[prevCell];
+  q_u_left = flux_u_left[prevCell];
+  q_v_left = flux_v_left[prevCell];
+  q_p_left = flux_p_left[prevCell];
+}
+outer cells void outer_qleftright(xyz direction){
+  if (prevCell.null()){ // Frontière gauche
+    q_u_left = -flux_u_right;
+    continue;
+  }
+  if (nextCell.null()){ // Frontière droite
+    q_ρ_left = flux_ρ_left[prevCell];
+    q_u_left = flux_u_left[prevCell];
+    q_v_left = flux_v_left[prevCell];
+    q_p_left = flux_p_left[prevCell];
+    continue;
+  }
+}
+void do_qleftright(void) @ 5.5{
+  if (isX()){
+    inner_qleftright_std(MD_DirX);
+    outer_qleftright(MD_DirX);
+  }else{
+    inner_qleftright_std(MD_DirY);
+    outer_qleftright(MD_DirY);
+  }
+}
+
+
+// ****************************************************************************
+// * Compute Riemann @ 6.0
+// ****************************************************************************
+cells void riemann(void)
+  in (face q_ρ_left, face q_u_left, face q_v_left, face q_p_left,
+      face q_ρ_right, face q_u_right, face q_v_right, face q_p_right)
+  out (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 6.0{
+  const Real in_left_ρ=q_ρ_left;
+  const Real in_left_u=q_u_left;
+  const Real in_left_v=q_v_left;
+  const Real in_left_p=q_p_left;
+  const Real in_right_ρ=q_ρ_right;
+  const Real in_right_u=q_u_right;
+  const Real in_right_v=q_v_right;
+  const Real in_right_p=q_p_right;
+  const Real left_ρ = fmax(in_left_ρ, SMALLR);
+  const Real left_u = in_left_u;
+  const Real left_v = in_left_v;
+  const Real left_p = fmax(in_left_p, left_ρ * SMALLP);
+  const Real left_c = γ * left_p * left_ρ;
+  const Real right_ρ = fmax(in_right_ρ, SMALLR);
+  const Real right_u = in_right_u;
+  const Real right_v = in_right_v;
+  const Real right_p = fmax(in_right_p, right_ρ * SMALLP);
+  const Real right_c = γ * right_p * right_ρ;
+  const Real left_w = sqrt(left_c);
+  const Real right_w = sqrt(right_c);
+  Real p_star;
+  Bool goon = true;
+  p_star = fmax((right_w*left_p + left_w*right_p + left_w*right_w*(left_u-right_u))
+                /(left_w+right_w), 0.0);
+  for(int i = 0; i < NITER_RIEMANN; ++i){
+    if(goon){
+      const Real left_ww2 = left_c*(1.0+γ6*(p_star-left_p)/left_p);
+      const Real left_ww = sqrt(left_ww2);
+      const Real right_ww2 =right_c*(1.0+γ6*(p_star-right_p)/right_p);
+      const Real right_ww = sqrt(right_ww2);
+      const Real tmp_num = 2.0*left_ww2*right_ww2*(left_ww*right_ww*(left_u-right_u)
+                                                   -left_ww*(p_star-right_p)
+                                                   -right_ww*(p_star-left_p));
+      const Real tmp_den =right_ww2*right_ww*(left_ww2+left_c)+left_ww2*left_ww*(right_ww2+right_c);
+      const Real tmp = tmp_num /(tmp_den);
+      const Real deleft_p = fmax(tmp, -p_star);
+      p_star+= deleft_p;
+      {
+        const Real uo = fabs(deleft_p/(p_star + SMALLPP));
+        goon = uo > ε;
+      }
+    }
+  }
+  {
+    const Real left_w2 = left_c*(1.0+γ6*(p_star-left_p)/left_p);
+    const Real left_w = sqrt(left_w2);
+    const Real right_w2 = right_c*(1.0+γ6*(p_star-right_p)/right_p);
+    const Real right_w = sqrt(right_w2);
+    const Real u_star = 0.5 * (left_u+(left_p-p_star)/left_w + right_u-(right_p-p_star)/right_w);
+    const Real sgnm = (u_star > 0.0) ? 1.0 : -1.0;
+    const Real ρ_0 = (u_star > 0.0) ? left_ρ : right_ρ;
+    const Real u_0 = (u_star > 0.0) ? left_u : right_u;
+    const Real p_0 = (u_star > 0.0) ? left_p : right_p;
+    const Real w_0 = (u_star > 0.0) ? left_w : right_w;
+    const Real inv_ρ_0 = 1.0/(ρ_0);
+    const Real c_0 = fmax(sqrt(fabs(γ * p_0 * inv_ρ_0)), SMALLC);
+    const Real ρ_star = fmax(ρ_0/(1.0+ρ_0*(p_0-p_star)/(w_0*w_0)), SMALLR);
+    const Real c_star = fmax(sqrt(fabs(γ*p_star/ρ_star)), SMALLC);
+    const Real ushock = w_0 * inv_ρ_0 - sgnm * u_0;
+    const Real spout = (p_star >= p_0) ? ushock : c_0 - sgnm * u_0;
+    const Real spin = (p_star >= p_0) ? ushock : c_star - sgnm * u_star;
+    Real frac;
+    if(spout < 0.0) frac = 0.0;
+    else if(spin > 0.0) frac = 1.0;
+    else {
+      const Real scr = fmax(spout - spin, SMALLC + fabs(spout + spin));
+      frac = fmax(fmin((1.0+(spout+spin)/(scr))*0.5, 1.0), 0.0);
+    }
+    gdnv_ρ = (frac * ρ_star + (1.0-frac)*ρ_0);
+    gdnv_u = (frac * u_star + (1.0-frac)*u_0);
+    gdnv_v = (u_star > 0.0) ? left_v : right_v;
+    gdnv_p = (frac * p_star + (1.0-frac)*p_0);
+  }
+}
+
+// ****************************************************************************
+// * Compute fluxes from solution @ 7.0
+// ****************************************************************************
+cells void cmpflx(void) in (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 7.0{
+  const Real mass_density = gdnv_ρ * gdnv_u;
+  flux_ρ = mass_density;
+  flux_u = mass_density * gdnv_u + gdnv_p;
+  flux_v = mass_density * gdnv_v;
+  {
+    const Real E_kinetic = 0.5 * gdnv_ρ * (gdnv_u*gdnv_u + gdnv_v*gdnv_v);
+    const Real E_total = gdnv_p * 1.0/(γ-1.0) + E_kinetic;
+    flux_E = gdnv_u * (E_total + gdnv_p);
+  }
+}
+
+// ****************************************************************************
+// * Update fluxes from solution @ 8.0
+// ****************************************************************************
+cells void updateXYZ(xyz direction) {
+  Real dtSδx=δt/δx;
+  if (!this->isOwn()) continue;
+  if (prevCell.null()){ // Frontière prev
+    old_ρ = ρ + (flux_ρ - flux_ρ[nextCell]) * dtSδx;
+    if (isX()){
+      old_u = u + (flux_u - flux_u[nextCell]) * dtSδx;
+      old_v = v + (flux_v - flux_v[nextCell]) * dtSδx;
+    }else{
+      old_v = u + (flux_u - flux_u[nextCell]) * dtSδx;
+      old_u = v + (flux_v - flux_v[nextCell]) * dtSδx;
+    }
+    old_E = E + (flux_E - flux_E[nextCell]) * dtSδx;
+    continue;
+  }
+  if (nextCell.null()){ // Frontière next
+    old_ρ = ρ + (flux_ρ) * dtSδx;
+    if (isX()){
+      old_u = u + (flux_u - 0.000004) * dtSδx;
+      old_v = v + (flux_v) * dtSδx;
+    }else{
+      old_v = u + (flux_u - 0.000004) * dtSδx;
+      old_u = v + (flux_v) * dtSδx;
+    }
+    old_E = E + (flux_E) * dtSδx;
+    continue;
+  }
+  old_ρ = ρ + (flux_ρ-flux_ρ[nextCell]) * dtSδx;
+  if (isX()){
+    old_u = u + (flux_u-flux_u[nextCell]) * dtSδx;
+    old_v = v + (flux_v-flux_v[nextCell]) * dtSδx;
+  }else{
+    old_v = u + (flux_u-flux_u[nextCell]) * dtSδx;
+    old_u = v + (flux_v-flux_v[nextCell]) * dtSδx;
+  }
+  old_E = E + (flux_E-flux_E[nextCell]) * dtSδx;
+}
+void update(void) @ 8.0{
+  if (isX())
+    updateXYZ(MD_DirX);
+  else
+    updateXYZ(MD_DirY);
+}
+
+// ****************************************************************************
+// * recompute_δt & test for quit @ [10.0,+∞[ 
+// ****************************************************************************
+void recompute_δt(void) @ 10.0{
+  if ((GlobalIteration%4) || (GlobalIteration==1)) return;
+  δt=compute_δt();
+  dt_δx=δt/δx;
+  info() << "[7m[recompute_δt] δt="<<δt<<", dt/δx="<<dt_δx<<"[m";
+}
+void isItTimeToQuit(void) @ 11.0{
+  // On double l'objectif du nstepmax en raison des passes en X et en Y
+  if (GlobalIteration >= (nstepmax<<1)) exit;
+  if (time < time_end) return;
+  info() << "[7m[isItTimeToQuit] time="<<time<<", time_end="<<time_end<<"[m";
+  info() << "[7m[isItTimeToQuit] exit: GlobalIteration="<<GlobalIteration
+         <<", nstepmax<<1="<<(nstepmax<<1)<<"[m";
+  exit;
+}

@@ -56,16 +56,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT
 ######################################
 # NABLA TEST MACRO FOR OKINA BACKEND #
 ######################################
-function(NABLA_ADD_OKINA_TEST name nb_proc cmd)
+function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
 	info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}okina${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
    set(backend okina)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
-	add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	  COMMAND /bin/sh -c "${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
+	add_test(NAME nabla_okina_${name}_${cmd}_${parallel}_${nb_proc}_${simd} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
+	  COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)
-
+ 
 
 #####################################
 # NABLA TEST MACRO FOR CUDA BACKEND #
@@ -135,11 +135,23 @@ endif(ARCANE_TESTS_RUN)
 
 
 if(OKINA_TESTS_GEN)
-  nabla_add_okina_test(lulesh_mic 1 gen)
+  nabla_add_okina_test(lulesh_mic 1 gen std omp)
+  nabla_add_okina_test(lulesh_mic 1 gen sse omp)
+  nabla_add_okina_test(lulesh_mic 1 gen avx omp)
+  nabla_add_okina_test(lulesh_mic 1 gen avx2 omp)
+  nabla_add_okina_test(lulesh_mic 1 gen std cilk)
+  nabla_add_okina_test(lulesh_mic 1 gen sse cilk)
+  nabla_add_okina_test(lulesh_mic 1 gen avx cilk)
+  nabla_add_okina_test(lulesh_mic 1 gen avx2 cilk)
 endif(OKINA_TESTS_GEN)
 
 if(OKINA_TESTS_RUN)
-  nabla_add_okina_test(lulesh_mic 1 run)
+  nabla_add_okina_test(lulesh_mic 1 run std omp)
+  nabla_add_okina_test(lulesh_mic 1 run sse omp)
+  nabla_add_okina_test(lulesh_mic 1 run avx omp)
+  #nabla_add_okina_test(lulesh_mic 1 run avx2 omp)
+  #nabla_add_okina_test(lulesh_mic 1 run sse cilk)
+  #nabla_add_okina_test(lulesh_mic 1 run avx cilk)
 endif(OKINA_TESTS_RUN)
 
 

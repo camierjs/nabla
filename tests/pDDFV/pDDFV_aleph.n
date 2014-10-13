@@ -1,0 +1,140 @@
+
+// ****************************************************************************
+// * Initialisation de la partie Algèbre Linéaire
+// ****************************************************************************
+
+void rhsInit(void) @ 10.0{
+  alephInitialize();
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
+
+
+// ****************************************************************************
+// * RHS, coté Primal
+// ****************************************************************************
+own cells void setRhsCellValues(void) @ 11.0{
+  const Real value=cell_area*f(cell_mass_center);
+  if (option_hole) assert(value>=0.0);
+  ℵ rhs addValue(cell_θ,this, value);
+}
+
+own outer faces void setRhs𝜕ΩCellValues(void) @ 11.0{
+  const Real value=boundary_primal_d_sp;
+  if (!cell(0).isOwn()) continue;
+  assert(value>=0.0);
+  ℵ rhs addValue(cell_θ,cell(0), value);
+}
+
+// ****************************************************************************
+// * RHS, coté Dual
+// ****************************************************************************
+own nodes void setRhsAllNodeValues(void) @ 11.0{
+  Real h=node_is_on_𝜕Ω?g(coord):node_area*f(coord);
+  if (option_hole) assert(h>=0.0);
+  ℵ rhs addValue(node_θ,this, h);
+}
+
+
+// ****************************************************************************
+// * Remplissage MATRICE, coté Primal
+// ****************************************************************************
+
+// Diagonale outer: Ss𝞊𝜕Pp et 𝜕Ω
+outer faces void alephOuterCells(void) @ 12.0{
+  const Real value = boundary_primal_c_sp;
+  if (!cell(0).isOwn()) continue;
+  assert(value>0.0);
+  ℵ matrix addValue(cell_θ,cell(0), cell_θ,cell(0), value);
+}
+
+
+// ****************************************************************************
+// Diag+extra inner: Ss𝞊𝜕Pp sans 𝜕Ω
+// ****************************************************************************
+inner faces void alephInnerCells(void) @ 12.0{
+  const Real pvalue = interior_primal_c_sp;
+  const Real qvalue = interior_primal_c_sq;
+  // On laisse le >= vs > pour les cas où les bords sont à 0.0
+  assert(pvalue>=0.0 && qvalue>=0.0);
+  if (backCell.isOwn()){
+    ℵ matrix addValue(cell_θ,backCell, cell_θ,backCell,  +pvalue);
+    ℵ matrix addValue(cell_θ,backCell, cell_θ,frontCell, -qvalue);
+  }
+  if (frontCell.isOwn()){
+    ℵ matrix addValue(cell_θ,frontCell, cell_θ,frontCell, +qvalue);
+    ℵ matrix addValue(cell_θ,frontCell, cell_θ,backCell,  -pvalue);
+  }
+}
+
+
+// ****************************************************************************
+// * On reboucle pour trouver la bonne face 'tournée'
+// ****************************************************************************
+Face loopOnThisNodeToFindPositiveDualFaceCells(Node nd,
+                                               int face_uid,
+                                               Bool swap,
+                                               Cell *back, Cell *front){
+  foreach nd face{
+    if (face_uid!=fnd->uniqueId()) continue;
+    *back=swap?fnd->backCell():fnd->frontCell();
+    *front=swap?fnd->frontCell():fnd->backCell();
+    return *fnd;
+  }
+  fatal("loopOnThisNodeToFindPositiveDualFaceCells");
+}
+
+
+// ****************************************************************************
+// * Conditions de Dirichlet
+// ****************************************************************************
+own outer nodes void dirichletNodes(void) @ 17.0{
+  ℵ matrix addValue(node_θ,this, node_θ,this, +1.0);
+}
+
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 18.0{ ℵ solve; }
+
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+own cells void getCellResults(void) @ 20.0{
+  const Real cell_θ_kp1=ℵ lhs getValue(cell_θ,this);
+  assert(cell_θ_kp1>=0.0);
+  cell_θ_kp1mk=fabs(cell_θ_kp1-cell_θ);
+  if (GlobalIteration==1.0) cell_θ_1m0=cell_θ_kp1mk;
+  cell_θ=cell_θ_kp1;
+}
+own nodes void getNodeResults(void) @ 20.0{
+  const Real node_θ_kp1=ℵ lhs getValue(node_θ,this);
+  if (node_θ_kp1<0.0)
+    info()<<"\t\33[33m[getNodeResults] node_theta="<< node_θ_kp1 <<"\33[m";
+  assert(node_θ_kp1>=0.0);
+  if (GlobalIteration==1.0) node_θ_1m0=node_θ_kp1mk;
+  node_θ_kp1mk=fabs(node_θ_kp1-node_θ);
+  node_θ=node_θ_kp1;
+}
+
+// ****************************************************************************
+// * Récupération & Critère de sortie des itérations de Picard
+// ****************************************************************************
+own cells Real maxCellError(Real mx){  mx=max(mx,cell_θ_kp1mk); return mx;}
+own cells Real maxCellError0(Real mx){ mx=max(mx,cell_θ_1m0); return mx;}
+own nodes Real maxNodeError(Real mx){  mx=max(mx,node_θ_kp1mk); return mx;}
+own nodes Real maxNodeError0(Real mx){ mx=max(mx,node_θ_1m0); return mx;}
+void stopIterations(void) @ 30.0{
+  const Real mxε = mpi_reduce(ReduceMax, max(maxCellError(0.0), maxNodeError(0.0)));
+  const Real mx0 = mpi_reduce(ReduceMax, max(maxCellError0(0.0), maxNodeError0(0.0)));
+  assert(mx0!=0.0);
+  if (GlobalIteration>1.0 && mxε<(option_picard_ε*mx0)){
+    info()<<"\t\33[7m[stopIterations] mxε="<<mxε<<"\33[m";
+    if (option_dag) dagIt();
+    if (option_quit_when_finish) exit;
+    //assert(fabs(eh2-0.000715252152895967)<10.0*__DBL_EPSILON__);
+  }
+  info()<<"\t[stopIterations] Picard @ "<<mxε;
+  debug()<<"\t[stopIterations] mx0="<<mx0;
+}

@@ -38,108 +38,108 @@
 
         
 knDbg_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knDbg.h"
+	     .incbin "knDbg.h"
         .byte 0
 knMsh_c: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMsh.c"
+	     .incbin "knMsh.c"
         .byte 0
 knMth_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMth.h"
+	     .incbin "knMth.h"
         .byte 0
 
 
         
 knStdReal_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdReal.h"
+	     .incbin "knStdReal.h"
         .byte 0
 knStdReal3_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdReal3.h"
+	     .incbin "knStdReal3.h"
         .byte 0
 knStdInteger_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdInteger.h"
+	     .incbin "knStdInteger.h"
         .byte 0
 knStdTernary_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdTernary.h"
+	     .incbin "knStdTernary.h"
         .byte 0
 knStdGather_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdGather.h"
+	     .incbin "knStdGather.h"
         .byte 0
 knStdScatter_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdScatter.h"
+	     .incbin "knStdScatter.h"
         .byte 0
 knStdOStream_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knStdOStream.h"
+	     .incbin "knStdOStream.h"
         .byte 0
 
 
         
 knSseReal_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseReal.h"
+	     .incbin "knSseReal.h"
         .byte 0
 knSseReal3_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseReal3.h"
+	     .incbin "knSseReal3.h"
         .byte 0
 knSseInteger_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseInteger.h"
+	     .incbin "knSseInteger.h"
         .byte 0
 knSseTernary_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseTernary.h"
+	     .incbin "knSseTernary.h"
         .byte 0
 knSseGather_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseGather.h"
+	     .incbin "knSseGather.h"
         .byte 0
 knSseScatter_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseScatter.h"
+	     .incbin "knSseScatter.h"
         .byte 0
 knSseOStream_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knSseOStream.h"
+	     .incbin "knSseOStream.h"
         .byte 0
 
 
         
 knAvxReal_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxReal.h"
+	     .incbin "knAvxReal.h"
         .byte 0
 knAvxReal3_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxReal3.h"
+	     .incbin "knAvxReal3.h"
         .byte 0
 knAvxInteger_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxInteger.h"
+	     .incbin "knAvxInteger.h"
         .byte 0
 knAvxTernary_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxTernary.h"
+	     .incbin "knAvxTernary.h"
         .byte 0
 knAvxGather_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxGather.h"
+	     .incbin "knAvxGather.h"
         .byte 0
 knAvxScatter_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxScatter.h"
+	     .incbin "knAvxScatter.h"
         .byte 0
 knAvxOStream_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knAvxOStream.h"
+	     .incbin "knAvxOStream.h"
         .byte 0
 
 
         
 knMicReal_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicReal.h"
+	     .incbin "knMicReal.h"
         .byte 0
 knMicReal3_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicReal3.h"
+	     .incbin "knMicReal3.h"
         .byte 0
 knMicInteger_h:
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicInteger.h"
+	     .incbin "knMicInteger.h"
         .byte 0
 knMicTernary_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicTernary.h"
+	     .incbin "knMicTernary.h"
         .byte 0
 knMicGather_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicGather.h"
+	     .incbin "knMicGather.h"
         .byte 0
 knMicScatter_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicScatter.h"
+	     .incbin "knMicScatter.h"
         .byte 0
 knMicOStream_h: 
-	     .incbin "CMakeFiles/nabla.dir/backends/okina/knMicOStream.h"
+	     .incbin "knMicOStream.h"
         .byte 0
 

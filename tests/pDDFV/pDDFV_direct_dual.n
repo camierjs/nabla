@@ -1,0 +1,135 @@
+// ****************************************************************************
+// * Fonctions utilisées dans le cas du maillage dual DIRECT
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * Fonction 'qui tourne' pour trouver le bon secteur dans le cas convex
+// ****************************************************************************
+Bool convexLoopOnThisNodeToFindPositiveDualFace(Bool dbg,
+                                                Node nd, Real3x3 kappa, Real3 νs, Real3 d,
+                                                Real3 *j, Real3 *k, Real *pj, Real *pk,
+                                                Real *α, Real *β,
+                                                int *face_uid,
+                                                Bool *face_swap){
+  foreach nd face{
+    if (fnd->nbCell()==2){
+      const Node n0=fnd->node(0);
+      const Node n1=fnd->node(1);
+      const Cell bC = fnd->backCell();
+      const Cell fC = fnd->frontCell();
+      const Real3 s=½*(coord[n0]+coord[n1]);
+      const Real3 p=cell_mass_center[bC];
+      const Real3 q=cell_mass_center[fC];
+      const Bool swap=Sin(q-d,s-d)<0.0;
+      *face_swap=swap;
+      *j=swap?p:q;
+      *k=swap?q:p;
+      *pj=swap?cell_θ[bC]:cell_θ[fC];
+      *pk=swap?cell_θ[fC]:cell_θ[bC];
+    }else{
+      const Cell bC = fnd->cell(0);
+      const Real3 p=cell_mass_center[bC];
+      const Real3 q=½*(coord[fnd->node(1)]+coord[fnd->node(0)]);
+      const Real3 s=½*(p+q);
+      const Bool swap=Sin(q-d,s-d)<0.0;
+      *face_swap=swap;
+      *j=swap?p:q;
+      *k=swap?q:p;
+      *pj=swap?cell_θ[bC]:g(q);
+      *pk=swap?g(q):cell_θ[bC];
+    }   
+    *α=n(d,*k)⋅(kappa⨂νs);
+    *β=n(*j,d)⋅(kappa⨂νs);
+    if (!(*α>=0.0 && *β>=0.0)) continue;
+    *face_uid=fnd->uniqueId().asInteger();
+    return true;
+  }
+  return false;
+}
+
+
+// Pour les faces internes, tout est bien déterminé
+// Pas de swap à prévoir pour le coté dual non plus
+own inner faces void dDual(void) @ 1.0 if (!option_indirect){
+  const Integer nid0 = 1+node(0)->uniqueId().asInteger();
+  const Integer nid1 = 1+node(1)->uniqueId().asInteger();
+  const Bool dbg=option_debug_dual;
+  Real3 j,k,l,m;
+  Real pj,pk,pl,pm;
+  Real ad,bd,ae,be;
+  int tail_face_uid, head_face_uid;
+  Bool tail_face_swap, head_face_swap;
+  const Real3 d=coord[0];
+  const Real3 e=coord[1];
+  const Real3 p=cell_mass_center[backCell];
+  const Real3 q=cell_mass_center[frontCell];
+  const Real3 νs=n(q,p);
+  const Bool convexD=geomComputeTriangleAlgebraicArea(d,q,p)>0.0;
+  const Bool convexE=geomComputeTriangleAlgebraicArea(e,p,q)>0.0;
+  const Bool convex=convexD&&convexE;
+  if (!convex){
+    fatal("Direct and !convex here");
+    //info()<<"Direct and !convex here";
+  }
+  if (dbg) info()<<"\33[32m[interiorDualFluxesApproximation] Face #"<<uid<<": "<<nid0<<"-"<<nid1<<"\33[m";
+  {
+    const Bool okTail =
+      convexLoopOnThisNodeToFindPositiveDualFace(dbg,node(0),κ,νs,d,
+                                                 &j,&k,&pj,&pk,&ad,&bd,
+                                                 &tail_face_uid,
+                                                 &tail_face_swap);
+    const Bool okHead = 
+      convexLoopOnThisNodeToFindPositiveDualFace(dbg,node(1),κ,-νs,e,
+                                                 &l,&m,&pl,&pm,&ae,&be,
+                                                 &head_face_uid,
+                                                 &head_face_swap);
+    const Real Ad=geomComputeTriangleArea(d,j,k);
+    //geomComputeTriangleArea(d,j,e)+geomComputeTriangleArea(e,k,d);
+    const Real Ae=geomComputeTriangleArea(e,l,m);
+    //geomComputeTriangleArea(e,l,d)+geomComputeTriangleArea(d,m,e);
+    const Real μsd_num=ae*pl+be*pm;
+    const Real μse_num=ad*pj+bd*pk;
+    const Real μs_denum=Ae*(ad*pj+bd*pk)+Ad*(ae*pl+be*pm);
+    const Bool null=(μs_denum==0.0);
+    const Real μsd=null?½:μsd_num;
+    const Real μse=null?½:μse_num;
+    const Real μsd_denum=null?Ad:μs_denum;
+    const Real μse_denum=null?Ae:μs_denum;
+      
+    if(okHead && okTail){
+      //info()<<"\t\33[33m ok\33[m";
+      interior_dual_c_sd = ½*(ad+bd)*μsd/μsd_denum;
+      interior_dual_c_se = ½*(ae+be)*μse/μse_denum;
+      interior_dual_c_sl = interior_dual_c_sm = -∞;
+      interior_dual_c_sj = interior_dual_c_sk = -∞;
+      continue;
+    }
+      
+    if (okHead){ // Ici, c'est node[0] qui est on_𝜕Ω, μ=0.0
+      //info()<<"\t\33[33m !okTail  \33[m";
+      interior_dual_c_lm = true;
+      interior_dual_face_uid=head_face_uid;
+      interior_dual_face_swap=head_face_swap;
+      interior_dual_c_se = ½*(ae+be)/Ae;
+      interior_dual_c_sd = -∞;
+      interior_dual_c_sl = ½*ae/Ae;
+      interior_dual_c_sm = ½*be/Ae;
+      continue;
+    }
+  
+    if (okTail){ // Ici, c'est node[1] qui est on_𝜕Ω, μ=1.0
+      //info()<<"\t\33[33m !okHead  \33[m";
+      interior_dual_c_jk = true;
+      interior_dual_face_uid=tail_face_uid;
+      interior_dual_face_swap=tail_face_swap;
+      interior_dual_c_sd = ½*(ad+bd)/Ad;
+      interior_dual_c_se = -∞; 
+      interior_dual_c_sj = ½*ad/Ad;
+      interior_dual_c_sk = ½*bd/Ad;
+      continue;
+    }
+    fatal("Should not be there!");
+  }
+}
+

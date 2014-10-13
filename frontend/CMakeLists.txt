@@ -1,0 +1,5 @@
+# Nabla Frontend
+info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} gathering ${VT100_FG_YELLOW}FRONTEND${VT100_RESET}")
+set(FRONTEND_C nablaAstDfs.c nablaAstNode.c nablaAstTree.c nablaTimeTree.c nablaDebug.c nablaTools.c)
+
+add_library(NablaFrontend ${FRONTEND_C})
