@@ -31,8 +31,8 @@ set(CEA_LIB /usr/local/sr/lib/libcea_user.a)
 ##########
 # Meshes #
 ##########
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/unf/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/nabla.unf)
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/unf/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/sod_triangles.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/nabla.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/sod_triangles.unf)
 
 
 #######################################
@@ -74,34 +74,44 @@ if(CUDA_INCLUDE_DIRS)
 function(NABLA_ADD_CUDA_TEST name nb_proc)
 	info("Adding ctest ${VT100_FG_CYAN}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_CYAN}_${nb_proc}proc${VT100_RESET}")
 	add_test(NAME nabla_${name}_cuda_${nb_proc}proc
-	   		WORKING_DIRECTORY ${ARCANE_NABLA_TEST_PATH}
+	   		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
 				COMMAND ${CMAKE_MAKE_PROGRAM} -B -f Makefile.nabla.cuda g${nb_proc} ${name})
 endfunction(NABLA_ADD_CUDA_TEST)
 configure_file(${ARCANE_CEA_SOURCE_PATH}/src/arcane/nabla/tests/Makefile.nabla.cuda ${ARCANE_NABLA_TEST_PATH}/Makefile.nabla.cuda)
 endif(CUDA_INCLUDE_DIRS)
 
 
+########################################
+# Now scan tests directory to add some # 
+########################################
+execute_process(COMMAND /bin/ls -1XF 
+                COMMAND sed -e "/.*\\//!d;s/\\///g"
+                COMMAND tr \\n " "
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                RESULT_VARIABLE RESULT_NABLA_TESTS
+                OUTPUT_VARIABLE NABLA_TESTS
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (${RESULT_NABLA_TESTS})
+  message(SEND_ERROR "Error: Could not load tests directories!")
+endif (${RESULT_NABLA_TESTS})
+separate_arguments(NABLA_TESTS)
+foreach(tst IN ITEMS ${NABLA_TESTS})
+  string(REGEX MATCH ".*_aleph_index$" ALEPH_INDEX ${tst})
+  if (ALEPH_INDEX)
+    nabla_add_arcane_test_with_additional_defines(${tst} 1 gen ALEPH_INDEX)
+  else (ALEPH_INDEX)
+    nabla_add_arcane_test(${tst} 1 gen)
+  endif (ALEPH_INDEX)
+endforeach(tst)
+
 ##########################
 # NABLA TESTS FOR ARCANE #
 ##########################
-if (ARCANE_TESTS_GEN)
-  nabla_add_arcane_test(cartesian 1 gen)
-  nabla_add_arcane_test(materials 1 gen)
-  nabla_add_arcane_test(ddfv 1 gen)
-  nabla_add_arcane_test_with_additional_defines(poisson_diff 1 gen ALEPH_INDEX)
-  nabla_add_arcane_test_with_additional_defines(poisson_ddfv 1 gen ALEPH_INDEX)
-  nabla_add_arcane_test_with_additional_defines(schrodinger 1 gen ALEPH_INDEX)
-  nabla_add_arcane_test(mhydro 1 gen)
-  nabla_add_arcane_test(shydro 1 gen)
-  nabla_add_arcane_test(lulesh 1 gen)
-  nabla_add_arcane_test(comd 1 gen)
-  nabla_add_arcane_test(mc1d 1 gen)
-  nabla_add_arcane_test(mctb 1 gen)
-  nabla_add_arcane_test(sethi 1 gen)
-  nabla_add_arcane_test(glace 1 gen)
-  nabla_add_arcane_test(fermat 1 gen)
-  nabla_add_arcane_test(gad 1 gen)
-endif(ARCANE_TESTS_GEN)
+#if (ARCANE_TESTS_GEN)
+#  nabla_add_arcane_test_with_additional_defines(poisson_diff 1 gen ALEPH_INDEX)
+#  nabla_add_arcane_test_with_additional_defines(poisson_ddfv 1 gen ALEPH_INDEX)
+#  nabla_add_arcane_test_with_additional_defines(schrodinger 1 gen ALEPH_INDEX)
+#endif(ARCANE_TESTS_GEN)
 
 if (ARCANE_TESTS_RUN)
   nabla_add_arcane_test(cartesian 1 run)
