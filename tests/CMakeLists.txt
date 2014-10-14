@@ -46,7 +46,7 @@ function(get_additional_nabla_files_and_set_Makefile name)
 endfunction()
 
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_BLUE}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
   set(backend arcane)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
@@ -58,7 +58,6 @@ function(NABLA_ADD_ARCANE_TEST name nb_proc cmd)
 endfunction(NABLA_ADD_ARCANE_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane)
-
 
 
 ######################################
@@ -78,15 +77,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_
 #####################################
 # NABLA TEST MACRO FOR CUDA BACKEND #
 #####################################
-if(CUDA_INCLUDE_DIRS)
-function(NABLA_ADD_CUDA_TEST name nb_proc)
-	info("Adding ctest ${VT100_FG_CYAN}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_CYAN}_${nb_proc}proc${VT100_RESET}")
-	add_test(NAME nabla_${name}_cuda_${nb_proc}proc
-	   		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-				COMMAND ${CMAKE_MAKE_PROGRAM} -B -f Makefile.nabla.cuda g${nb_proc} ${name})
+function(NABLA_ADD_CUDA_TEST name nb_proc cmd)
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_WHITE}${VT100_RESET}")
+  set(backend cuda)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
+  add_test(NAME nabla_cuda_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
+	 COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.cuda ${cmd}${nb_proc})
 endfunction(NABLA_ADD_CUDA_TEST)
-configure_file(${ARCANE_CEA_SOURCE_PATH}/src/arcane/nabla/tests/Makefile.nabla.cuda ${ARCANE_NABLA_TEST_PATH}/Makefile.nabla.cuda)
-endif(CUDA_INCLUDE_DIRS)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.cuda)
+
 
 
 ########################################
@@ -170,6 +169,8 @@ endforeach(simd)
 ##nabla_add_okina_test(lulesh_mic 1 run sse cilk)
 ##nabla_add_okina_test(lulesh_mic 1 run avx cilk)
 
+
+nabla_add_cuda_test(mhydro 1 gen)
 
 if(CUDA_INCLUDE_DIRS)
   nabla_add_arcane_test(mhydro 1 hyoda)
