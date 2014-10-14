@@ -6,11 +6,12 @@ outer faces void applyBoundaryConditionsSymmetries(void) @ 13.1 if (option_trian
                                                                     option_hexa){
   const Real Y_MIN = option_y_min;
   const Real Y_MAX = option_y_max;
-  const Real3x3 I = math::matrix3x3Id();
+  const Real3x3 I = matrix3x3Id();
+  const Real3 normaleY={0.0,1.0,0.0};
   foreach node{
     if ((coord.y==Y_MIN)||(coord.y==Y_MAX)){
       const Real orientation = (coord.y==Y_MIN)?-1.0:1.0;
-      const Real3 normal = orientation*Real3(0.0,1.0,0.0);
+      const Real3 normal = orientation*normaleY;
       const Real3x3 nxn = normal⊗normal;
       const Real3x3 P = I-nxn;
       node_u_matrix = node_u_matrix ⊛ P; 
@@ -29,7 +30,7 @@ outer faces void applyBoundaryConditionsVelocities(void) @ 13.3 if (option_trian
   const Real X_MIN = option_x_min;
   const Real X_MAX = option_x_max;
   const Real value = option_u_ini;
-  const Real3x3 I = math::matrix3x3Id();
+  const Real3x3 I = matrix3x3Id();
   if (!(((coord[1].x==X_MIN)∧(coord[0].x==X_MIN)) ||
         ((coord[1].x==X_MAX)∧(coord[0].x==X_MAX)))) continue;
   foreach node{
@@ -48,7 +49,7 @@ inline Real rnd(Real i){
 }
 
 void pointIt(void){//@ 13.3 {
-  file(allPoints,pnt);
+  //file(allPoints,pnt);
   
   //allPoints<<"{{0.,0.,0.}";
   //allPoints<<"{{{0.,0.,0.},{0.,0.,0.}}";
@@ -70,7 +71,7 @@ outer nodes void flushBoundaryConditionsSymmetries3DCylinder(void) @ 13.09 if (o
 
 
 outer nodes void applyBoundaryConditionsSymmetries3DCylinderHardCodedNodeTangent(void) @ 13.1 if (option_cylinder){//File allPoints){//
-  const Real3x3 I = math::matrix3x3Id();
+  const Real3x3 I = matrix3x3Id();
   //foreach node{
     //const Real cx=rnd(coord.x);    const Real cy=rnd(coord.y);    const Real cz=rnd(coord.z);
     node_tangent=Real3(1.0,0.0,0.0);
@@ -102,16 +103,17 @@ outer nodes void applyBoundaryConditionsVelocities3DCylinder(void)@ 13.3 if (opt
     if (!node_x_min_max) continue;
     //const Real cx=rnd(coord.x);    const Real cy=rnd(coord.y);    const Real cz=rnd(coord.z);
     //allPoints<<",{"<<cx<<","<<cy<<","<<cz<<"}";
-    node_u_matrix = math::matrix3x3Id();
+    node_u_matrix = matrix3x3Id();
     node_u_second_member = 0.0;
     //}
 }
 
 
-outer faces void applyBoundaryConditionsSymmetries3DCylinder(File allPoints){//void) @ 13.1 if (option_cylinder){
+outer faces void applyBoundaryConditionsSymmetries3DCylinder(void) @ 13.1 if (option_cylinder){
   //const Real ε=10.0*__DBL_EPSILON__;
   //const Integer fid=uid;
-  const Real3x3 I = math::matrix3x3Id();
+  const Real3x3 I = matrix3x3Id();
+  const Real3 Xvector=Real3(1.0,0.0,0.0);
   //const Real3 center = ¼*(coord[0]+coord[1]+coord[2]+coord[3]);
   //const Real3 normale = ½*(coord[0]-center)⨯(coord[3]-center);
   const Real3 normale = ½*(coord[0]-coord[1])⨯(coord[0]-coord[3]);
@@ -141,7 +143,7 @@ outer faces void applyBoundaryConditionsSymmetries3DCylinder(File allPoints){//v
         if (norm(node_tangent⨯on)!=0.0){
           node_tangent=node_tangent⨯on;
           node_tangent*=1./norm(node_tangent);
-          node_tangent*=(node_tangent⋅Real3(1.,0.,0.)<0.)?-1.:1.;
+          node_tangent*=((node_tangent⋅Xvector)<0.)?-1.:1.;
           node_got_tgt=true;
           //info()<<"norm(on)="<<norm(on);
           //if (rnd(norm(node_tangent))!=1.0){info()<<"norm(node_tangent)!=1.0: "<<norm(node_tangent);}
@@ -168,7 +170,7 @@ outer faces void applyBoundaryConditionsSymmetries3DCylinder(File allPoints){//v
 
 outer faces void applyBoundaryConditionsSymmetries3DHexa(void) @ 13.1 if (option_hexa){
   const Real ε=10.0*__DBL_EPSILON__;
-  const Real3x3 I = math::matrix3x3Id();
+  const Real3x3 I = matrix3x3Id();
   const Real3 center = ¼*(coord[0]+coord[1]+coord[2]+coord[3]);
   const Real3 cntryz = Real3(0.0,center.y,center.z);
   const Real3 normale = ½*(coord[0]-center)⨯(coord[3]-center);

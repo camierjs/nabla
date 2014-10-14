@@ -141,13 +141,10 @@ cells void temporalSchemeReconstructVelocity(void) @ 10.0{
 }
 
 nodes void temporalSchemeIniMatricesAndSecondMember(void) @ 11.0{
-  node_u_matrix=Real3x3(Real3(0,0,0),
-                        Real3(0,0,0),
-                        // .Z à mettre à 0.0 dans le cas 3D!
-                        Real3(0,0,0));
+  node_u_matrix=Real3x3();
 //#warning 3D Real3(0,0,1));
   //Real3(0,0,1));
-  node_u_second_member=0;//Real3(0,0,0);
+  node_u_second_member=0.0;//Real3(0,0,0);
 }
 
 cells void temporalSchemeAssembleMatricesAndSecondMember(void) @ 12.0{ // 16%
@@ -165,8 +162,8 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 }
 
 nodes void temporalSchemeComputeNodesVelocity(void) @ 14.0{ // 11%
-  const Real determinent = math::matrixDeterminant(node_u_matrix);
-  node_u_matrix = math::inverseMatrix(node_u_matrix, determinent);
+  const Real determinent = matrixDeterminant(node_u_matrix);
+  node_u_matrix = inverseMatrix(node_u_matrix, determinent);
   node_u = node_u_matrix ⨂ node_u_second_member;
 //#warning 3D node_u.z=0.0;
   //node_u.z=0.0;

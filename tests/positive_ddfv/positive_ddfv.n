@@ -132,7 +132,12 @@ global{
 // ****************************************************************************
 // * Inlined functions
 // ****************************************************************************
-inline Real3 Perp(Real3 v){ return Real3(v.y,-v.x,0.0); }
+inline Real3 Perp(Real3 v){
+  const Real3 bkpx=v.x;
+  v.x=v.y;
+  v.y=-bkpx;
+  v.z=0.0;
+  return v; }
 inline Real3 computeOnLine(const Real3 s0, const Real3 s1){
   Real3 length;
   length.x =  (s1.y-s0.y);

@@ -33,5 +33,6 @@ build:
 	(mkdir -p $(BUILD_PATH) && cd $(BUILD_PATH) && $(CMAKE) ~nabla/root)
 
 cln:
-	\rm -rf $(BUILD_PATH)/*
+	(cd $(BUILD_PATH) && make clean)
+#\rm -rf $(BUILD_PATH)/*
 

@@ -1,3 +1,4 @@
 TGT=${name}
+ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
 
 include ../Makefile.nabla.${backend}

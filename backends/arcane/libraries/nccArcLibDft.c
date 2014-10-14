@@ -148,6 +148,7 @@ void nccArcLibDftIni(nablaMain *arc){
   dftInitFunction->item   = strdup("\0");
   dftInitFunction->rtntp  = strdup("void");
   dftInitFunction->name   = strdup("dftIni");
+  dftInitFunction->name_utf8 = strdup("dftIni");
   dftInitFunction->xyz    = strdup("NoXYZ");
   dftInitFunction->drctn  = strdup("NoDirection");
   sprintf(&dftInitFunction->at[0],"-huge_valf");
