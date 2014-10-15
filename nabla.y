@@ -18,7 +18,9 @@
 #include <stdlib.h>
   
 #define YYSTYPE astNode*
-
+int yylineno;
+char *nabla_input_file[1024];
+ 
 int yylex(void);
 void yyerror(astNode **root, char *s);
  
@@ -32,7 +34,6 @@ bool type_precise=false;
 /////////////////////////////////
 /* 
   %token COMMENTS SINGLE_LINE_COMMENTS
-  %token NOPINCLUDES
   %token NAMESPACE
   %token STRUCT UNION ENUM
   %token CASE DEFAULT GOTO
@@ -302,8 +303,14 @@ declaration_specifiers
 | type_qualifier declaration_specifiers{Y2($$,$1,$2)}
 ;
 declaration
-: PREPROCS {Y1($$,$1)} // On peut avoir des preprocs ici
-//| NOPINCLUDES {Y1($$,$1)}
+: PREPROCS { // On peut avoir des preprocs ici
+  int n;
+  Y1($$,$1);
+  //printf("%s",$1->token);
+  if ((n=sscanf($1->token, "# %d \"%[^\"]\"", &yylineno, &nabla_input_file))!=2)
+    error(!0,0,"declaration sscanf error!");
+  //printf("%s:%d:\n",nabla_input_file,yylineno);
+  }
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon #include
 | INCLUDES {$1->token[0]='#';Y1($$,$1)}
 | declaration_specifiers ';'{Y1($$,$1)}
@@ -486,28 +493,28 @@ postfix_expression
 | postfix_expression PTR_OP primary_expression {Y3($$,$1,$2,$3)} 
 | postfix_expression INC_OP {Y2($$,$1,$2)}
 | postfix_expression DEC_OP {Y2($$,$1,$2)}
+| postfix_expression SUPERSCRIPT_DIGIT_TWO {Ypow($$,$1,2)}
+| postfix_expression SUPERSCRIPT_DIGIT_THREE {Ypow($$,$1,3)}
 //| mathlinks
 | aleph_expression
 ;
 ///////////////////////////////////
 // Unaries (operator,expression) //
 ///////////////////////////////////
-unary_operator
+unary_prefix_operator
 : //N_ARY_CIRCLED_TIMES_OP | CENTER_DOT_OP
 //|CIRCLED_ASTERISK_OP | CIRCLED_TIMES_OP
 //| CROSS_OP | CROSS_OP_2D
  '⋅' | '*' | '+' | '-' | '~' | '!';
 unary_expression
 : postfix_expression {Y1($$,$1)}
-//!| unary_expression SUPERSCRIPT_DIGIT_TWO {Ypow($$,$1,2)}
-//!| unary_expression SUPERSCRIPT_DIGIT_THREE {Ypow($$,$1,3)}
 | SQUARE_ROOT_OP unary_expression {Y2($$,$1,$2)}
 | CUBE_ROOT_OP unary_expression {Y2($$,$1,$2)}
 | INC_OP unary_expression {Y2($$,$1,$2)}
 | DEC_OP unary_expression {Y2($$,$1,$2)}
 // Permet d'insérer pour l'instant l'adrs() 
 | '&' unary_expression {Yp2p($$,$1,$2)}
-| unary_operator cast_expression {Y2($$,$1,$2)}
+| unary_prefix_operator cast_expression {Y2($$,$1,$2)}
 | SIZEOF unary_expression {Y2($$,$1,$2)}
 | SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
 ;

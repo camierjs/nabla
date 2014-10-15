@@ -26,6 +26,6 @@ char *op2name(char *op);
 
 void nUtf8(char**);
 
-int nablaMakeTempFile(const char *, char *);
+int nablaMakeTempFile(const char *, char **);
 
 #endif // _NCC_TOOLS_H_

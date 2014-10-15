@@ -65,7 +65,7 @@ void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **vari
 void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams);
 void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams);
 
-NABLA_STATUS nccCuda(nablaMain*, astNode*, const char*, const char*);
+NABLA_STATUS nccCuda(nablaMain*, astNode*, const char*);
 
 #endif // _NABLA_CUDA_H_
  

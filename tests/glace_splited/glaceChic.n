@@ -1,11 +1,11 @@
 
-faces void spatialSchemeChicComputeFaceNormals2D(void) @ 8.9 if (option_chic && (option_quads||option_triangles)){
+/*faces void spatialSchemeChicComputeFaceNormals2D(void) @ 8.9 if (option_chic && (option_quads||option_triangles)){
   Real3 t = coord[1]-coord[0];
   Real3 nrml=Real3(-½*t.y, ½*t.x, 0.);
   face_normales[0] = nrml;
   face_normales[1] = nrml;
-}
-faces void spatialSchemeChicComputeFaceNormals3D(void) @ 8.9 if (option_chic && (option_hexa||option_cylinder)){
+  }*/
+/*faces void spatialSchemeChicComputeFaceNormals3D(void) @ 8.9 if (option_chic && (option_hexa||option_cylinder)){
   Real3 X[8];
   Real3 face_center=Real3(0.,0.,0.);
   // Recopie des coordonnées locales
@@ -24,7 +24,7 @@ faces void spatialSchemeChicComputeFaceNormals3D(void) @ 8.9 if (option_chic && 
   foreach node{
     face_normales[(#+1)%nbNode]=½*(faces_oriented_areas[#] + faces_oriented_areas[(#+1)%nbNode]);
   }
-}
+  }*/
 
 int loopOnThisFaceToFindTheNode(Face fc, int node_uid){
   int i=0;

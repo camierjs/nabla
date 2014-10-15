@@ -49,7 +49,7 @@ inline Real rnd(Real i){
 }
 
 void pointIt(void){//@ 13.3 {
-  file(allPoints,pnt);
+  //file(allPoints,pnt);
   
   //allPoints<<"{{0.,0.,0.}";
   //allPoints<<"{{{0.,0.,0.},{0.,0.,0.}}";

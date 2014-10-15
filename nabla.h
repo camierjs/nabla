@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <stdbool.h>
- 
+void nabla_error(const char *format, ...);
 
 /*****************************************************************************
  * typedefs

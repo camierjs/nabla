@@ -99,7 +99,7 @@ char* nccArcLibAlephHeader(void);
 void nccArcLibAlephIni(nablaMain*);
 
 // Main Entry Backend
-NABLA_STATUS nccArcane(nablaMain*,astNode*, const char*, const char*);
+NABLA_STATUS nccArcane(nablaMain*,astNode*, const char*);
 
 // Hooks 
 void arcaneJob(nablaMain*, astNode*);

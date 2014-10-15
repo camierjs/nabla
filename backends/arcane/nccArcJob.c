@@ -202,7 +202,12 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 
   // Dump des tokens possibles
   switch(n->tokenid){
-    
+        
+  case(PREPROCS):{
+    nprintf(arc, "/*PREPROCS*/","/*PREPROCS*/");
+    break;
+  }
+
   case(DIESE):{
     nprintf(arc, "/*DIESE*/", NULL);
     if (support=='c' && foreach!='\0') nprintf(arc, NULL, "%c.index()", foreach);

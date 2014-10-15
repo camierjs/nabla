@@ -35,14 +35,21 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SO
 #######################################
 function(get_additional_nabla_files_and_set_Makefile name)
   #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
+
   execute_process(COMMAND find . -name *.n -printf "%f "
     COMMAND sed -e "s/\\(${name}.n\\)//g"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
     OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  #separate_arguments(ADDITIONAL_NABLA_FILES)
-  #info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
+  info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
+  separate_arguments(ADDITIONAL_NABLA_FILES)
+  foreach(file ${name}.n ${ADDITIONAL_NABLA_FILES})
+    info("${VT100_FG_GREEN}file=${file}${VT100_RESET}") 
+    execute_process(COMMAND /bin/ln -fs ${CMAKE_CURRENT_SOURCE_DIR}/${name}/${file} . 
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endforeach()
 endfunction()
 
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
@@ -50,7 +57,7 @@ function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd addition
   set(backend arcane)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	 COMMAND /bin/sh -c "export TGT=${name} && export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane ${cmd}${nb_proc}")
+	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.arcane ${cmd}${nb_proc}")
 endfunction(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
 
 function(NABLA_ADD_ARCANE_TEST name nb_proc cmd)
@@ -68,7 +75,7 @@ function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
   set(backend okina)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kB -f ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
+	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)

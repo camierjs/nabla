@@ -74,7 +74,6 @@ bool isAnArcaneService(nablaMain *middlend){
  *****************************************************************************/
 NABLA_STATUS nccArcane(nablaMain *middlend,
                        astNode *root,
-                       const char *preprocessedNfile,
                        const char *nabla_entity_name){
   char cfgFileName[NABLA_MAX_FILE_NAME];
   char axlFileName[NABLA_MAX_FILE_NAME];

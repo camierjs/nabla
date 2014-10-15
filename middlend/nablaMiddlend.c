@@ -498,7 +498,7 @@ void nablaLibraries(astNode * n, nablaEntity *entity){
  *****************************************************************************/
 int nablaMiddlendSwitch(astNode *root,
                         const bool optionDumpTree,
-                        const char *input,
+                        //const char *input,
                         const char *nabla_entity_name,
                         const BACKEND_SWITCH backend,
                         const BACKEND_COLORS colors,
@@ -519,9 +519,9 @@ int nablaMiddlendSwitch(astNode *root,
   nablaMiddlendVariableGlobalAdd(nabla);
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   switch (backend){
-  case BACKEND_ARCANE: return nccArcane(nabla,root,input,nabla_entity_name);
-  case BACKEND_CUDA:   return nccCuda  (nabla,root,input,nabla_entity_name);
-  case BACKEND_OKINA:  return nccOkina (nabla,root,input,nabla_entity_name);
+  case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
+  case BACKEND_CUDA:   return nccCuda  (nabla,root,nabla_entity_name);
+  case BACKEND_OKINA:  return nccOkina (nabla,root,nabla_entity_name);
   default:
     exit(NABLA_ERROR|fprintf(stderr, "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
   }

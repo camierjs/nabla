@@ -121,7 +121,7 @@ void okinaAddNablaVariableList(nablaMain*, astNode *n, nablaVariable **variables
 void okinaAddExtraConnectivitiesParameters(nablaMain*, int*);
 void okinaAddExtraConnectivitiesArguments(nablaMain*, int*);
 
-NABLA_STATUS nccOkina(nablaMain*, astNode*, const char*, const char*);
+NABLA_STATUS nccOkina(nablaMain*, astNode*, const char*);
 
 #endif // _NABLA_OKINA_H_
  

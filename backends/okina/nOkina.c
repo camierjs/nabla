@@ -254,7 +254,6 @@ static void okinaHeaderPostfix(nablaMain *nabla){
  *****************************************************************************/
 NABLA_STATUS nccOkina(nablaMain *nabla,
                       astNode *root,
-                      const char *preprocessedNfile,
                       const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];

@@ -2,8 +2,9 @@
 execute_process(COMMAND "tput" "reset")
 
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-#set(CMAKE_MAKE_PROGRAM "/usr/bin/gmake --no-print-directory" CACHE STRING docstring)
-#set_property(CACHE CMAKE_MAKE_PROGRAM PROPERTY VALUE "/usr/bin/gmake -w")
+#set(ENV{MAKEFLAGS} "--no-print-directory")
+#set(CMAKE_MAKE_PROGRAM "gmake" CACHE FILEPATH "Allow to alias gmake to add --no-print-directory")
+#set_property(CACHE CMAKE_MAKE_PROGRAM PROPERTY VALUE "gmake")
 
 include(CMake/VT100.cmake)
 info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RESET}")

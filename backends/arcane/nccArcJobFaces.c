@@ -69,7 +69,7 @@ char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   //if (!resolve && foreach_face) return "/*fn:!rf*/";
   if (!resolve && foreach_none) return "/*fn:!r0*/[face->node";
 
-  error(!0,0,"Could not switch in faceJobNodeVar!");
+  nabla_error("Could not switch in faceJobNodeVar!");
   return NULL;
 }
 
@@ -100,8 +100,8 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   //if (!resolve && foreach_node) return "/*ff:!rn*/";
   //if (!resolve && foreach_face) return "/*ff:!rf*/";
   //if (!resolve && foreach_none) return "/*ff:!r0*/";
- 
-  error(!0,0,"Could not switch in faceJobFaceVar!");
+  
+  nabla_error("Could not switch in faceJobFaceVar!");
   return NULL;
 }
 

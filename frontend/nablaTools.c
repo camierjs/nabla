@@ -305,7 +305,12 @@ void nUtf8(char **bkp){
 // *****************************************************************************
 // * nablaMakeTempFile
 // *****************************************************************************
-int nablaMakeTempFile(const char *entity_name, char *unique_temporary_file_name){
-  sprintf(unique_temporary_file_name, "/tmp/nabla_%s_XXXXXX", entity_name);
-  return mkstemp(unique_temporary_file_name);
+int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name){
+  int n,size = NABLA_MAX_FILE_NAME;
+  if ((*unique_temporary_file_name=malloc(size))==NULL)
+    error(!0,0,"[nablaMakeTempFile] Could not malloc our unique_temporary_file_name!");
+  n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
+  if (n > -1 && n < size)
+    return mkstemp(*unique_temporary_file_name);
+  error(!0,0,"[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
 }

@@ -27,7 +27,6 @@ static void ignoreBlocComments(void);
 static void ignoreLineComments(void);
  
 /* Terminals unused in grammar
-nopIncludes		^\$\$.*
 "struct"				{ return tok(&yylval, STRUCT);}
 "case"				{ return tok(&yylval, CASE);}
 "default"			{ return tok(&yylval, DEFAULT);}
@@ -282,7 +281,7 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 .						{ /* ignore bad characters */
   printf("\nREJECTing '%s' in ",yytext);
   REJECT;}
-\n                { yylineno+=1; /*ignore*/}
+\n                { yylineno+=1;}
 %% 
 //"nand"             { return tok(&yylval, NAND_OP);}
 //"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
@@ -290,7 +289,6 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 //""					{ return tok(&yylval, XNOR_OP);}// Xnor F4A2
 //"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
 //"::"					{ return tok(&yylval, NAMESPACE);}
-//{nopIncludes}		{ return tok(&yylval, NOPINCLUDES); }
 
 // Absorbd line comments
 static void ignoreLineComments(void){

@@ -37,7 +37,7 @@ options{
 faces{
   Real3 face_normales[nodes];               // Pour Chic
   Real3 faces_oriented_areas[nodes];
-  };
+};
 
 // Déclaration des variables aux noeuds
 nodes{
