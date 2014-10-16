@@ -57,9 +57,9 @@ static char *unique_temporary_file_name=NULL;
 \tJean-Sylvain Camier (#5568) <jean-sylvain.camier@cea.fr>\n\
 [1;36mBUGS[0m\n\
 \tTest bugs are to be reported to the above address.\n"
-//\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n        \
-//\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n                     \
-//\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n    \
+//\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n
+//\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n
+//\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n
 
 
 // *****************************************************************************
@@ -77,9 +77,9 @@ static void nabla_unlink(void){
 // * int vsprintf(char *str, const char *format, va_list ap);
 // *****************************************************************************
 void nabla_error(const char *format,...){
-  int n;
-  const int size = 8192;
-  char *error_msg;
+  //int n;
+  //const int size = 8192;
+  //char *error_msg;
   va_list args;
   
   //if ((error_msg = malloc(size))==NULL)    error(!0,0,"Could not even malloc for our error message!");
@@ -165,7 +165,7 @@ int sysPreprocessor(const char *nabla_entity_name,
                     const char *list_of_nabla_files,
                     const char *unique_temporary_file_name,
                     const int unique_temporary_file_fd){
-  int n,i=0;
+  int i=0;
   const int size = NABLA_MAX_FILE_NAME;
   int cat_sed_temporary_fd=0;
   char *cat_sed_temporary_file_name=NULL;
@@ -247,7 +247,7 @@ void nablaPreprocessor(char *nabla_entity_name,
                        char *list_of_nabla_files,
                        char *unique_temporary_file_name,
                        const int unique_temporary_file_fd){
-  char *scanForSpaceToPutZero;
+  //char *scanForSpaceToPutZero;
   // Saving list of ∇ files for yyerror
   //nabla_input_file=strdup(list_of_nabla_files);
   //nabla_input_file=strdup(unique_temporary_file_name);

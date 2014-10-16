@@ -47,7 +47,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationReal3(astNode * n){
   assert(name!=NULL);
   dbg("\n\t[nablaFunctionDeclarationReal3] direct_declarator name is '%s'",name);
   // On regarde si dans notre cas on a un '='
-  astNode *egal=dfsFetchToken(n,'=');
+  astNode *egal=dfsFetchTokenId(n,'=');
   // On vérifie qu'on a bien hité
   assert(egal!=NULL);
   if (egal==NULL){
@@ -67,7 +67,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationReal3(astNode * n){
   // Et on transforme ceci en un cpy3
   dbg("\n\t[nablaFunctionDeclarationReal3] Et on transforme ceci en un cpy3");
   egal->token=strdup(cross3?";":"; cpy3(");
-  astNode *point_virgule=dfsFetchToken(n->children,';');
+  astNode *point_virgule=dfsFetchTokenId(n->children,';');
   assert(point_virgule!=NULL);
   char end_of_line[1024];
   snprintf(end_of_line, sizeof(end_of_line),(cross3==true)?";\n\t":", &%s);\n\t",name);
@@ -92,7 +92,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationDouble(astNode * n){
   astNode *nName = dfsFetchRule(n->children,rulenameToId("direct_declarator"));
   dbg("\n\t[nablaFunctionDeclarationDouble] direct_declarator name is '%s'",nName->children->token);
   // On regarde si dans notre cas on a un '='
-  astNode *egal=dfsFetchToken(n,'=');
+  astNode *egal=dfsFetchTokenId(n,'=');
   // On vérifie qu'on a bien hité
   assert(egal!=NULL);
   if (egal==NULL){
@@ -100,7 +100,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationDouble(astNode * n){
     return;
   }
   dbg("\n\t[nablaFunctionDeclarationDouble] egal id is '%d'",egal->tokenid);
-  astNode *nPointVirgule=dfsFetchToken(n,';');
+  astNode *nPointVirgule=dfsFetchTokenId(n,';');
   if (nPointVirgule==NULL){
     dbg("\n\t[nablaFunctionDeclarationDouble] NULL nPointVirgule, returning");
     return;

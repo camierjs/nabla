@@ -14,10 +14,6 @@
 #include "nabla.h"
 
 
-#warning Should cache adjancencies
-#warning Should moveAtomInBox/reBoxAll on our own by adjusting m_nabla_particles_vector
-
-
 // ****************************************************************************
 // * nccArcLibParticlesHeader
 // * Let's be careful to quote subjects containing spaces.
@@ -42,10 +38,13 @@ char* nccArcLibParticlesHeader(void){
 // ****************************************************************************
 char* nccArcLibParticlesPrivates(nablaEntity *entity){
   nablaVariable *var;
-#warning Hardcode value here (8192)
-  char privates[16384];
+  const size_t local_size=1024;
+  const size_t globl_size=8192;
+  char *type,varToCat[local_size];
+  char *privates=malloc(globl_size);
+  if (privates==NULL) nabla_error("[nccArcLibParticlesPrivates] cannot malloc!");
   privates[0]=0;
-  strcat(privates, "\nprivate:\t//Particles stuff\
+  strcat(privates,"\nprivate:\t//Particles stuff\
 \n\tvoid particlesInit();\
 \n\tvoid moveAtomInBox(int, Int64);\
 \n\tvoid moveAtomInBox(ParticleEnumerator, Int64);\
@@ -64,14 +63,12 @@ char* nccArcLibParticlesPrivates(nablaEntity *entity){
 \n\tArray<ParticleVector> m_nabla_particles_vector;\
 \n\t//VariableMultiArray2Integer m_nabla_particle_ids;");
   for(var=entity->main->variables;var!=NULL;var=var->next){
-    char *type;
-    char varToCat[8192];
     if (var->item[0]!='p') continue;
     varToCat[0]=0;
     // On transforme la premiere majuscule
     type=strdup(var->type); type[0]-=32;
     dbg("\n\t\t[nccArcLibParticlesPrivates] m_%s_%s", var->item, var->name);
-    snprintf(varToCat,8192,"\n\tVariableParticle%s m_particle_%s;", type, var->name);
+    snprintf(varToCat,local_size,"\n\tVariableParticle%s m_particle_%s;", type, var->name);
     //dbg("\n\t\t[nccArcLibParticlesPrivates] varToCat=%s", varToCat);
     strcat(privates,varToCat);
     //dbg("\n\t\t[nccArcLibParticlesPrivates] privates=%s", privates);    
@@ -85,17 +82,19 @@ char* nccArcLibParticlesPrivates(nablaEntity *entity){
 // ****************************************************************************
 char* nccArcLibParticlesConstructor(nablaEntity *entity){
   nablaVariable *var;
-#warning Hardcode value here (8192)
-  char particleVars[8192];
+  const size_t local_size=1024;
+  const size_t globl_size=8192;
+  char VariableBuildInfo[local_size];
+  char *particleVars=malloc(globl_size);
   dbg("\n\t\t[nccArcLibParticlesConstructor]");
+  if (particleVars==NULL) nabla_error("[nccArcLibParticlesConstructor] cannot malloc!");
   particleVars[0]=0;
   strcat(particleVars,
          "\n\t\t//,m_nabla_particle_ids(VariableBuildInfo(mbi.subDomain(),\"NablaParticlesIds\"))");
   for(var=entity->main->variables;var!=NULL;var=var->next){
-    char VariableBuildInfo[8192];
     if (var->item[0]!='p') continue;
     dbg("\n\t\t[nccArcLibParticlesConstructor] var->name=%s",var->name);
-    sprintf(VariableBuildInfo,
+    snprintf(VariableBuildInfo,local_size,
             "\n\t\t\t\t\t\t,m_particle_%s(VariableBuildInfo(mbi.mesh(),\"%s\",\"particles\"))",
             var->name,var->name);
     strcat(particleVars,VariableBuildInfo);

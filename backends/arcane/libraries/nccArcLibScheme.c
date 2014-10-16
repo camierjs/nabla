@@ -34,7 +34,7 @@ char* nccArcLibSchemePrivates(void){
 /******************************************************************************
  * nccArcLibSchemeInitialize
  ******************************************************************************/
-static void nccArcLibSchemeInitialize(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeInitialize(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
@@ -42,14 +42,14 @@ static void nccArcLibSchemeInitialize(nablaMain *arc){
 /******************************************************************************
  * nccArcLibSchemeMatAddValue with IVariable and Item
  ******************************************************************************/
-static void nccArcLibSchemeMatAddValueWithIVariableAndItem(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeMatAddValueWithIVariableAndItem(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
 /******************************************************************************
  * nccArcLibSchemeMatAddValue
  ******************************************************************************/
-static void nccArcLibSchemeMatAddValue(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeMatAddValue(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
   
@@ -57,14 +57,14 @@ static void nccArcLibSchemeMatAddValue(nablaMain *arc){
 /******************************************************************************
  * nccArcLibSchemeRhsSet
  ******************************************************************************/
-static void nccArcLibSchemeRhsSet(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeRhsSet(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
 /******************************************************************************
  * nccArcLibSchemeRhsAdd
  ******************************************************************************/
-static void nccArcLibSchemeRhsAdd(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeRhsAdd(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
@@ -72,7 +72,7 @@ static void nccArcLibSchemeRhsAdd(nablaMain *arc){
 /******************************************************************************
  * nccArcLibSchemeRhsSet
  ******************************************************************************/
-static void nccArcLibSchemeRhsGet(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeRhsGet(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
@@ -80,7 +80,7 @@ static void nccArcLibSchemeRhsGet(nablaMain *arc){
 /******************************************************************************
  * nccArcLibSchemeSolve
  ******************************************************************************/
-static void nccArcLibSchemeSolve(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeSolve(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 
@@ -88,7 +88,7 @@ static void nccArcLibSchemeSolve(nablaMain *arc){
 /******************************************************************************
  * nccArcLibSchemeSolveWithoutIndex
  ******************************************************************************/
-static void nccArcLibSchemeSolveWithoutIndex(nablaMain *arc){
+static __attribute__((unused)) void nccArcLibSchemeSolveWithoutIndex(nablaMain *arc){
   //fprintf(arc->entity->src, "");
 }
 

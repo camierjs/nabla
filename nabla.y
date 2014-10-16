@@ -15,11 +15,11 @@
 %{
 #include "nabla.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
   
 #define YYSTYPE astNode*
 int yylineno;
-char *nabla_input_file[1024];
+char nabla_input_file[1024];
  
 int yylex(void);
 void yyerror(astNode **root, char *s);
@@ -27,7 +27,6 @@ void yyerror(astNode **root, char *s);
 bool type_volatile=false;
 bool type_precise=false;
 %}
-
  
 /////////////////////////////////
 // Terminals unused in grammar //
@@ -78,7 +77,7 @@ bool type_precise=false;
 %token CELL CELLS FACE FACES NODE NODES
 %token FOREACH FOREACH_INI FOREACH_END FOREACH_NODE_INDEX FOREACH_CELL_INDEX
 %token PARTICLE PARTICLES PARTICLETYPE
-%token FILETYPE
+%token FILECALL FILETYPE
 
  // Nabla Cartesian
 %token XYZ NEXTCELL PREVCELL NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
@@ -159,8 +158,6 @@ type_specifier
 | REAL2x2 {Y1($$,$1)}
 | BOOL {Y1($$,$1)}
 | SIZE_T {Y1($$,$1)}
-//| REAL {Y1($$,$1)}
-//| INTEGER {Y1($$,$1)}
 | REAL { if (type_precise) preciseY1($$,GMP_REAL) else Y1($$,$1); type_precise=type_volatile=false;}
 | INTEGER {
     if (type_precise){
@@ -177,9 +174,10 @@ type_specifier
 | FACETYPE {Y1($$,$1)}
 | UIDTYPE {Y1($$,$1)}
 | FILETYPE {Y1($$,$1)} 
-//| MATERIAL {Y1($$,$1)}
-//!| struct_or_union_specifier {Y1($$,$1)}
-//!| enum_specifier {Y1($$,$1)}
+| FILECALL '(' IDENTIFIER ',' IDENTIFIER ')' {Y6($$,$1,$2,$3,$4,$5,$6)} 
+| MATERIAL {Y1($$,$1)}
+//| struct_or_union_specifier {Y1($$,$1)}
+//| enum_specifier {Y1($$,$1)}
 ; 
 storage_class_specifier
 : EXTERN {Y1($$,$1)}
@@ -270,8 +268,8 @@ nabla_system
 //////////////
 // Pointers //
 //////////////
-pointer:
-  '*' {Y1($$,$1)}
+pointer
+: '*' {Y1($$,$1)}
 | '*' type_qualifier_list{Y2($$,$1,$2)}
 | '*' RESTRICT {Y2($$,$1,$2)}
 | '*' type_qualifier_list pointer{Y2($$,$1,$2)}
@@ -280,16 +278,29 @@ pointer:
 //////////////////
 // INITIALIZERS //
 //////////////////
-initializer:
-  assignment_expression {Y1($$,$1)}
+initializer
+: assignment_expression {Y1($$,$1)}
 | '{' initializer_list '}'{Y3($$,$1,$2,$3)}
-| '{' initializer_list ',' '}'{Y4($$,$1,$2,$3,$4)}
+//| type_specifier '(' initializer_list ')'{Y4($$,$1,$2,$3,$4)}
 ;
 initializer_list
 : initializer {Y1($$,$1)}
 | initializer_list ',' initializer {Y3($$,$1,$2,$3)}
 ;
 
+//////////////////
+// PREPROCESSOR //
+//////////////////
+preproc
+: PREPROCS {
+  int n;
+  Y1($$,$1);
+  //printf("%s",$1->token);
+  if ((n=sscanf($1->token, "# %d \"%[^\"]\"", &yylineno, nabla_input_file))!=2)
+    error(!0,0,"declaration sscanf error!");
+  //printf("%s:%d:\n",nabla_input_file,yylineno);
+  }
+;
 
 //////////////////
 // DeclaraTIONS //
@@ -303,16 +314,8 @@ declaration_specifiers
 | type_qualifier declaration_specifiers{Y2($$,$1,$2)}
 ;
 declaration
-: PREPROCS { // On peut avoir des preprocs ici
-  int n;
-  Y1($$,$1);
-  //printf("%s",$1->token);
-  if ((n=sscanf($1->token, "# %d \"%[^\"]\"", &yylineno, &nabla_input_file))!=2)
-    error(!0,0,"declaration sscanf error!");
-  //printf("%s:%d:\n",nabla_input_file,yylineno);
-  }
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon #include
-| INCLUDES {$1->token[0]='#';Y1($$,$1)}
+: INCLUDES {$1->token[0]='#';Y1($$,$1)}
 | declaration_specifiers ';'{Y1($$,$1)}
 | declaration_specifiers init_declarator_list ';' {Y3($$,$1,$2,$3)}  
 ;
@@ -346,9 +349,9 @@ direct_declarator
 init_declarator
 :	declarator {Y1($$,$1)}
 // Permet de faire des appels constructeurs à-là '=Real3(0.0,0.0,0.0)'
-|	declarator '=' type_specifier initializer{Y4($$,$1,$2,$3,$4)}
+|	declarator '=' type_specifier assignment_expression{Y4($$,$1,$2,$3,$4)} // initializer
 |	declarator '=' type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
-|	declarator '=' initializer{Y3($$,$1,$2,$3)}
+|	declarator '=' initializer {Y3($$,$1,$2,$3)}
 ;
 init_declarator_list
 :	init_declarator {Y1($$,$1)}
@@ -425,11 +428,16 @@ nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};
 nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};  
 
 
+////////////////
+// NAMESPACES //
+////////////////
+//| NAMESPACE IDENTIFIER {Y2($$,$1,$2)}
+//| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
+//| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
+
+
 /////////////////
 // EXPRESSIONS //
-//  - primary
-//  - postfix
-//  - unary
 /////////////////
 primary_expression
 : BUILTIN_INFF {Y1($$,$1)}
@@ -439,9 +447,6 @@ primary_expression
 | FRACTION_ONE_EIGHTH_CST {Y1($$,$1)}
 | DIESE {Y1($$,$1)}  // Permet d'écrire un '#' à la place d'un [c|n]
 | IDENTIFIER {Y1($$,$1)}
-//!| NAMESPACE IDENTIFIER {Y2($$,$1,$2)}
-//| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
-//!| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
 | nabla_item {Y1($$,$1)} // Permet de rajouter les items Nabla au sein des corps de fonctions
 | nabla_system {Y1($$,$1)}
 | HEX_CONSTANT {Y1($$,$1)} 
@@ -461,8 +466,6 @@ postfix_expression
 | postfix_expression FOREACH_NODE_INDEX {Y2($$,$1,$2)}
 | postfix_expression FOREACH_CELL_INDEX {Y2($$,$1,$2)}
 | postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
-//| type_specifier '(' ')'  {Y3($$,$1,$2,$3)}
-//type_specifier '(' expression_list ')'  {Y4($$,$1,$2,$3,$4)}
 //| postfix_expression '[' nabla_system ']' {Y4($$,$1,$2,$3,$4)}
 //| postfix_expression '[' Z_CONSTANT ']'  {
 //  // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de ce postfix
@@ -501,11 +504,7 @@ postfix_expression
 ///////////////////////////////////
 // Unaries (operator,expression) //
 ///////////////////////////////////
-unary_prefix_operator
-: //N_ARY_CIRCLED_TIMES_OP | CENTER_DOT_OP
-//|CIRCLED_ASTERISK_OP | CIRCLED_TIMES_OP
-//| CROSS_OP | CROSS_OP_2D
- '⋅' | '*' | '+' | '-' | '~' | '!';
+unary_prefix_operator: '⋅' | '*' | '+' | '-' | '~' | '!';
 unary_expression
 : postfix_expression {Y1($$,$1)}
 | SQUARE_ROOT_OP unary_expression {Y2($$,$1,$2)}
@@ -610,7 +609,7 @@ constant_expression
 // Statements //
 ////////////////
 compound_statement
-: '{' '}'{Y2($$,$1,$2)}
+: start_scope end_scope {Y2($$,$1,$2)}
 | start_scope statement_list end_scope {Y3($$,$1,$2,$3)}
 | start_scope declaration_list end_scope {Y3($$,$1,$2,$3)}
 | start_scope declaration_list statement_list end_scope{Y4($$,$1,$2,$3,$4)}
@@ -647,9 +646,11 @@ jump_statement
 | BREAK ';'{Y2($$,$1,$2)}
 | RETURN ';'{Y2($$,$1,$2)}
 | RETURN expression ';'{Y3($$,$1,$2,$3)}
+| RETURN type_specifier expression ';' {Y4($$,$1,$2,$3,$4)}
 ;
 statement
-: compound_statement {Y1($$,$1)}
+: preproc {Y1($$,$1)}
+| compound_statement {Y1($$,$1)}
 | expression_statement {Y1($$,$1)}
 | selection_statement {Y1($$,$1)}
 | iteration_statement {Y1($$,$1)}
@@ -669,10 +670,10 @@ function_definition
 | declaration_specifiers declarator declaration_list AT at_constant compound_statement {Y6($$,$1,$2,$3,$4,$5,$6)}
 | declaration_specifiers declarator compound_statement {Y3($$,$1,$2,$3)}
 | declaration_specifiers declarator AT at_constant compound_statement {Y5($$,$1,$2,$3,$4,$5)}
-| declarator declaration_list compound_statement {Y3($$,$1,$2,$3)}
-| declarator declaration_list AT at_constant compound_statement {Y5($$,$1,$2,$3,$4,$5)}
-| declarator compound_statement {Y2($$,$1,$2)}
-| declarator AT at_constant compound_statement {Y4($$,$1,$2,$3,$4)}
+//| declarator declaration_list compound_statement {Y3($$,$1,$2,$3)}
+//| declarator declaration_list AT at_constant compound_statement {Y5($$,$1,$2,$3,$4,$5)}
+//| declarator compound_statement {Y2($$,$1,$2)}
+//| declarator AT at_constant compound_statement {Y4($$,$1,$2,$3,$4)}
 ;
 
 
@@ -683,12 +684,17 @@ nabla_item_definition
 : nabla_items '{' nabla_item_declaration_list '}' ';' {Y2($$,$1,$3)};
 nabla_item_declaration_list
 : nabla_item_declaration {Y1($$,$1)}
-| nabla_item_declaration_list nabla_item_declaration {Y2($$,$1,$2)};
+| nabla_item_declaration_list nabla_item_declaration {Y2($$,$1,$2)}
+;
 nabla_direct_declarator
 : IDENTIFIER {Y1($$,$1)}
-| IDENTIFIER '[' nabla_items ']'{Y2($$,$1,$3)};
-| IDENTIFIER '[' primary_expression ']'{Y2($$,$1,$3)};
-nabla_item_declaration: type_name nabla_direct_declarator ';' {Y2($$,$1,$2)};
+| IDENTIFIER '[' nabla_items ']'{Y2($$,$1,$3)}
+| IDENTIFIER '[' primary_expression ']'{Y2($$,$1,$3)}
+;
+nabla_item_declaration
+: type_name nabla_direct_declarator ';' {Y2($$,$1,$2)}
+| preproc {Y1($$,$1)}
+;
 
 
 //////////////////////////
@@ -702,6 +708,7 @@ nabla_option_declaration_list
 nabla_option_declaration
 : type_specifier direct_declarator ';' {Y2($$,$1,$2)}
 | type_specifier direct_declarator '=' expression ';' {Y4($$,$1,$2,$3,$4)}  
+| preproc {Y1($$,$1)}
 ;
 
 
@@ -781,8 +788,9 @@ with_library: WITH with_library_list ';'{Y3($$,$1,$2,$3)};
 // ∇ grammar //
 ///////////////
 nabla_grammar
-: declaration				        {Y1($$,$1)}
+: preproc                       {Y1($$,$1)}
 | with_library                  {Y1($$,$1)}
+| declaration				        {Y1($$,$1)}
 | nabla_options_definition      {Y1($$,$1)}
 | nabla_item_definition         {Y1($$,$1)}
 | nabla_materials_definition    {Y1($$,$1)}
@@ -814,11 +822,9 @@ aleph_expression
 ;
 
 
-///////////////////////////
-// Junk to look at later //
-///////////////////////////
-
-  
+/////////////////////////////
+// STRUCTS, ENUMS & UNIONS //
+/////////////////////////////
 
 /*
 struct_declaration
@@ -866,7 +872,6 @@ mathlinks:
 
 %%
 
-
 /*****************************************************************************
  * tokenidToRuleid
  *****************************************************************************/
@@ -903,8 +908,8 @@ inline int yyNameTranslate(int tokenid){
  * rulenameToId
  *****************************************************************************/
 int rulenameToId(const char *rulename){
-  register unsigned int i;
-  register size_t rnLength=strlen(rulename);
+  unsigned int i;
+  const size_t rnLength=strlen(rulename);
   for(i=0; yytname[i]!=NULL;i+=1){
     if (strlen(yytname[i])!=rnLength) continue;
     if (strcmp(yytname[i], rulename)!=0) continue;
@@ -919,8 +924,8 @@ int rulenameToId(const char *rulename){
  * tokenToId
  *****************************************************************************/
 int tokenToId(const char *token){
-  register unsigned int i;
-  register size_t rnLength=strlen(token);
+  unsigned int i;
+  const size_t rnLength=strlen(token);
   for(i=0; yytname[i]!=NULL;++i){
     if (strlen(yytname[i])!=rnLength) continue;
     if (strcmp(yytname[i], token)!=0) continue;

@@ -248,6 +248,29 @@ static void okinaHeaderPostfix(nablaMain *nabla){
 }
 
 
+// ****************************************************************************
+// * okinaPrimaryExpressionToReturn
+// ****************************************************************************
+static void okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+  const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  if (var!=NULL && strcmp(n->children->token,var)==0){
+    dbg("\n\t[nablaJobParse] primaryExpression hits returned argument");
+    nprintf(nabla, NULL, "%s_per_thread[tid]",var);
+  }
+}
+
+
+// ****************************************************************************
+// * okinaReturnFromArgument
+// ****************************************************************************
+static void okinaReturnFromArgument(nablaMain *nabla, nablaJob *job){
+  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP)
+    nprintf(nabla, NULL, "\
+\n\tint threads = omp_get_max_threads();\
+\n\tReal %s_per_thread[threads];", rtnVariable);
+}
+
 
 /*****************************************************************************
  * nccOkina
@@ -366,7 +389,9 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
     okinaAddArguments,
     okinaTurnTokenToOption,
     okinaEntryPointPrefix,
-    okinaDfsForCalls
+    okinaDfsForCalls,
+    okinaPrimaryExpressionToReturn,
+    okinaReturnFromArgument
   };
   nabla->hook=&okinaBackendHooks;
 

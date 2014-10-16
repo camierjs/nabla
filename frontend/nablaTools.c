@@ -313,4 +313,5 @@ int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name
   if (n > -1 && n < size)
     return mkstemp(*unique_temporary_file_name);
   error(!0,0,"[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
+  return -1;
 }

@@ -34,7 +34,8 @@ static void ignoreLineComments(void);
 "goto"				{ return tok(&yylval, GOTO);}
 "switch"				{ return tok(&yylval, SWITCH);}
 "union"				{ return tok(&yylval, UNION);}
-//"iNode"           { return tok(&yylval, INODE);}
+"iNode"           { return tok(&yylval, INODE);}
+"FILE"            { return tok(&yylval, FILETYPE);}
 */
 
 %}
@@ -115,9 +116,8 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Int32"		      { return tok(&yylval, INT32);}
 "Int64"		      { return tok(&yylval, INT64);}
 "Uid"             { return tok(&yylval, UIDTYPE);}
-"file"            { return tok(&yylval, FILETYPE);}
+"file"            { return tok(&yylval, FILECALL);}
 "File"            { return tok(&yylval, FILETYPE);}
-"FILE"            { return tok(&yylval, FILETYPE);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
@@ -290,13 +290,12 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 //"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
 //"::"					{ return tok(&yylval, NAMESPACE);}
 
-// Absorbd line comments
+// Absorbe line comments
 static void ignoreLineComments(void){
-  char c;
-  do {c = input();} while ( c != '\n');
+  while(input()!='\n');
 }
 
-// Absorbs bloc comments
+// Absorbe bloc comments
 static void ignoreBlocComments(void){
 	char c, c1;
 loop:

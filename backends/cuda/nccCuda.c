@@ -39,10 +39,10 @@ static void cudaHeaderReal3(nablaMain *nabla){
 }
 
 extern char extra_h[];
-static void cudaHeaderExtra(nablaMain *nabla){
+/*static void cudaHeaderExtra(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,extra_h);
-}
+  }*/
 
 
 /***************************************************************************** 
@@ -96,7 +96,7 @@ static void cudaHeaderIncludes(nablaMain *nabla){
  * 
  *****************************************************************************/
 extern char debug_h[];
-static void cudaHeaderDebug(nablaMain *nabla){
+static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->hdr,debug_h);
   hprintf(nabla,NULL,"\n\n// *****************************************************************************\n\
@@ -107,9 +107,8 @@ static void cudaHeaderDebug(nablaMain *nabla){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->name, "coord")==0) continue;
-    #warning continue in cudaHeaderDebug
     continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
+    /* hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
@@ -118,7 +117,7 @@ static void cudaHeaderDebug(nablaMain *nabla){
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
-            var->name);
+            var->name);*/
   }
 }
 
@@ -253,8 +252,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     //{"opMod","mod"},
     {"opTernary(cond,ifStatement,elseStatement)","(cond)?ifStatement:elseStatement"},
     {"knAt(a)",""},
-#warning fatal returns
-    {"fatal(a,b)","return"},
+    {"fatal(a,b)","error(!0,0,\"CUDA fatal to be adjusted!\")"},
     {"synchronize(a)",""},
     {"reducemin(a)","0.0"},//a
     {"mpi_reduce(how,what)","what"},//"mpi_reduce_min(global_min_array,what)"},
@@ -306,7 +304,9 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     cudaAddArguments,
     cudaTurnTokenToOption,
     cudaEntryPointPrefix,
-    cudaDfsForCalls
+    cudaDfsForCalls,
+    NULL, // primary_expression_to_return
+    NULL // returnFromArgument
   };
   nabla->simd=&nablaCudaSimdHooks;
   nabla->hook=&cudaBackendHooks;

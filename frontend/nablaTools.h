@@ -28,4 +28,6 @@ void nUtf8(char**);
 
 int nablaMakeTempFile(const char *, char **);
 
+void nUtf8SupThree(char **);
+
 #endif // _NCC_TOOLS_H_

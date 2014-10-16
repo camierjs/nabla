@@ -41,11 +41,11 @@ function(get_additional_nabla_files_and_set_Makefile name)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
     OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
+  #info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
   separate_arguments(ADDITIONAL_NABLA_FILES)
   foreach(file ${name}.n ${ADDITIONAL_NABLA_FILES})
-    info("${VT100_FG_GREEN}file=${file}${VT100_RESET}") 
+    #info("${VT100_FG_GREEN}file=${file}${VT100_RESET}") 
     execute_process(COMMAND /bin/ln -fs ${CMAKE_CURRENT_SOURCE_DIR}/${name}/${file} . 
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
       OUTPUT_STRIP_TRAILING_WHITESPACE)

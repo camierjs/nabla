@@ -253,15 +253,10 @@ void nablaJobParse(astNode *n, nablaJob *job){
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas un argument que l'on return
   if ((n->ruleid == rulenameToId("primary_expression"))
       && (n->children->token!=NULL)
-      && (job->parse.returnFromArgument)
-      && (nabla->backend == BACKEND_OKINA)){
-    #warning A faire ailleurs et différement
-    const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-    if (var!=NULL && strcmp(n->children->token,var)==0){
-      dbg("\n\t[nablaJobParse] primaryExpression hits returned argument");
-      nprintf(nabla, NULL, "%s_per_thread[tid]",var);
-      return;
-    }
+      && (job->parse.returnFromArgument)){
+    if (nabla->hook->primary_expression_to_return)
+      nabla->hook->primary_expression_to_return(nabla,job,n);
+    return;
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
@@ -407,15 +402,10 @@ void nablaJobFill(nablaMain *nabla,
   // On ferme la parenthèse des paramètres que l'on avait pas pris dans les tokens
   nprintf(nabla, NULL, "){// du job");
 
-  #warning returnFromArgument for OKINA and OMP
-  if (job->parse.returnFromArgument
-      && nabla->backend==BACKEND_OKINA
-      && ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP)){
-    const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-    nprintf(nabla, NULL, "\
-\n\tint threads = omp_get_max_threads();\
-\n\tReal %s_per_thread[threads];", rtnVariable);
-  }
+  if (job->parse.returnFromArgument)
+    if (nabla->hook->returnFromArgument)
+      nabla->hook->returnFromArgument(nabla,job);
+
   
   // On prépare le bon ENUMERATE
   dbg("\n\t[nablaJobFill] On prépare le bon ENUMERATE");

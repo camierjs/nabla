@@ -13,6 +13,7 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RES
 
 project(Nabla)
 enable_language(ASM) 
+set(CMAKE_C_FLAGS "-Wall")#-std=c99
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -30,7 +31,7 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
-bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--warnings=all,error")#--graph --report=all
+bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--report=all --warnings=all,error")#--graph 
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c)
 add_flex_bison_dependency(nScanner nParser)
 

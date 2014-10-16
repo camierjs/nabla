@@ -31,8 +31,8 @@ char *particleJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nab
   if (job->item[0] != 'p') return NULL;
   if (var->item[0] != 'g') return NULL;
   const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
-  const int scalar = var->dim==0;
-  const int resolve = job->parse.isPostfixed!=2;
+  //const int scalar = var->dim==0;
+  //const int resolve = job->parse.isPostfixed!=2;
   if (left_of_assignment_operator) return "";
   return "()";
 }

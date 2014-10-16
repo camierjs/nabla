@@ -181,6 +181,10 @@ typedef struct nablaBackendHooksStruct{
   char* (*entryPointPrefix)(struct nablaMainStruct*,nablaJob*);
   // Hook pour associer aux fonctions appelées les arguments à rajouter
   void (*dfsForCalls)(struct nablaMainStruct*,nablaJob*,astNode*,const char *,astNode *);
+  // Hook pour transformer les variables à returner
+  void (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
+  // Hook returnFromArgument for OKINA and OMP
+  void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
 } nablaBackendHooks;
 
 typedef struct nablaDefinesStruct{

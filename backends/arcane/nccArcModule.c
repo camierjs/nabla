@@ -43,16 +43,14 @@ NABLA_STATUS nccArcaneBeginNamespace(nablaMain *arc){
  *****************************************************************************/
 static nablaDefine arcaneDefines[] ={
   {"reducemin(a)","0.0"},
-  {"opScaMul(a,b)","math::scaMul(a,b)"},
-#warning opVecMul devrait tenir compte du 'with 2D'
-  {"opVecMul(a,b)","math::vecMul(a,b)"},
-  {"opProdTens(a,b)","math::prodTens(a,b)"},
-  //{"opProdTensVec(a,b)","math::multiply(a,b)"},
-  {"opProdTensVec(a,b)","math::prodTensVec(a,b)"},
-  {"opMatrixProduct(a,b)","math::matrixProduct(a,b)"},
   {"dot(a,b)","math::scaMul(a,b)"},
+  {"opScaMul(a,b)","math::scaMul(a,b)"},
+  {"opVecMul(a,b)","math::vecMul(a,b)"},
   {"cross(a,b)","math::vecMul(a,b)"},
   {"cross2D(a,b)","math::vecMul2D(a,b)"},
+  {"opProdTens(a,b)","math::prodTens(a,b)"},
+  {"opProdTensVec(a,b)","math::prodTensVec(a,b)"},
+  {"opMatrixProduct(a,b)","math::matrixProduct(a,b)"},
   {"mixteMul(a,b,c)","math::mixteMul(a,b,c)"},
   {"matrix3x3Id","math::matrix3x3Id"},
   {"norm(v)","(v).abs()"},
@@ -239,7 +237,7 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
   if ((entity->libraries&(1<<particles))!=0){
     fprintf(entity->hdr, "\n\t\tm_particle_family = mbi.mesh()->createItemFamily(IK_Particle,\"particles\");");
   }
-#warning WTF m_physic_type_code
+//#warning WTF m_physic_type_code
   fprintf(entity->hdr,
           "\n\t}\n\t~%s%s(){%s}\npublic:%s",
           entity->name,

@@ -102,14 +102,14 @@ void catTillToken(astNode * n, char *dflt){
 }
 
 
-static void actOptionsPrimaryExpression(astNode * n, void *generic_arg){
+/*static void actOptionsPrimaryExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nablaOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsPrimaryExpression] %s", n->children->token);
   option->dflt=strdup(n->children->token);
   catTillToken(n->children->next, option->dflt);
   dbg("\n\t\t[actOptionsPrimaryExpression] final option->dflt is '%s'", option->dflt);
-}
+  }*/
 
 static void actOptionsExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
@@ -127,7 +127,6 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
  * Scan pour la déclaration des options
  *****************************************************************************/
 void nablaOptions(astNode * n, int ruleid, nablaMain *nabla){
-  #warning Should not use rulenameToId but into .y
   RuleAction tokact[]={
     {rulenameToId("type_specifier"),actOptionsTypeSpecifier},
     {rulenameToId("direct_declarator"),actOptionsDirectDeclarator},

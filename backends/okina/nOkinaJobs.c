@@ -163,7 +163,7 @@ char* okinaHookDumpEnumerate(nablaJob *job){
     const char *ompOkinaLocal=job->parse.returnFromArgument?"_SHARED":"";
     //const char *ompOkinaReturnVariable=okinaReturnVariableNameForOpenMP(job);
     const char *ompOkinaReturnVariableWitoutPerThread=okinaReturnVariableNameForOpenMPWitoutPerThread(job);
-    const char *ompOkinaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
+    //const char *ompOkinaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
     //const char *ompOkinaLocalVariableName=job->parse.returnFromArgument?ompOkinaReturnVariable:"";
     if (sprintf(format,"/*1*/%s/*2*/%%s/*3*/%%s)",foreach)<=0) error(!0,0,"Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
@@ -363,11 +363,7 @@ static void okinaHookSwitchForeach(astNode *n, nablaJob *job){
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    #warning BACKEND_OKINA switch in middleware
-    if (job->entity->main->backend==BACKEND_OKINA)
-      nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_WARP_CELL(c)");
-    else
-      nprintf(job->entity->main, "/*chsf c*/", "for(int c=0;c<8;++c)");
+    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_WARP_CELL(c)");
     break;
   }
   case(NODE):{
@@ -626,13 +622,28 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
     if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP){
+      char mnx[3]="MXX";
       const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-      #warning HW tied min for returnes variable
+      astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));
+      compound_statement=compound_statement->parent;
+      assert(compound_statement!=NULL);
+      //printf("compound_statement->rule=%s",compound_statement->rule);
+      assert(compound_statement->ruleid==rulenameToId("compound_statement"));
+      /////////////////////////////////////
+      // A *little* bit too cavalier here!
+      /////////////////////////////////////
+      min=max=NULL;
+      min=dfsFetchToken(compound_statement,"min");
+      max=dfsFetchToken(compound_statement,"max");
+      assert(min!=NULL || max !=NULL);
+      if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
+      if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}
+      //printf("mnx=%s\n",mnx); fflush(stdout);
       nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\
 \n\tfor (int i=0; i<threads; i+=1){\
-\n\t\t%s=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(%s))?ReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(%s);\
+\n\t\t%s=(Reduce%sToDouble(%s_per_thread[i])<Reduce%sToDouble(%s))?Reduce%sToDouble(%s_per_thread[i]):Reduce%sToDouble(%s); \
 \n\t\t//info()<<\"%s=\"<<%s;\
-\n\t}\n\treturn ",var,var,var,var,var,var,var);
+  \n\t}\n\treturn ",var,mnx,var,mnx,var,mnx,var,mnx,var,var,var);
       job->parse.returnFromArgument=false;
     }else{
       nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");

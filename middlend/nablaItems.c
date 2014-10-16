@@ -96,7 +96,6 @@ static void actItemPrimaryExpression(astNode * n, void *generic_arg){
  * Scan pour la déclaration des variables
  *****************************************************************************/
 void nablaItems(astNode * n, int ruleid, nablaMain *arc){
-  #warning Should NOT use again here rulenameToId!
   RuleAction tokact[]={
     {rulenameToId("type_specifier"),actItemTypeSpecifier},
     {rulenameToId("nabla_direct_declarator"),actItemDirectDeclarator},

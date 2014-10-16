@@ -378,7 +378,7 @@ inline void CalcElemVelocityGradient( const Real* const xvel,
                                       const Real b[][8],
                                       const Real detJ,
                                       Real* const d ){
-  const Real inv_detJ = Real(1.0) / detJ ;
+  const Real inv_detJ = 1.0 / detJ ;
   Real dyddx, dxddy, dzddx, dxddz, dzddy, dyddz;
   const Real* const pfx = b[0];
   const Real* const pfy = b[1];

@@ -88,9 +88,7 @@ astNode *dfsFetch(astNode *n, int ruleid){
     }
   }
   // Si on a un voisin token non null, on évite de parser tout la branche pour rien
-  if (n->next!=NULL)
-    if (n->next->token!=0)
-      return NULL;
+  //if (n->next!=NULL)    if (n->next->token!=0)      return NULL;
   if (n->next != NULL){
     if ((rtn=dfsFetch(n->next, ruleid))!=NULL){
       dbg("\n\t\t[dfsFetch] return %s", rtn->rule?rtn->rule:"zNULL");
@@ -105,7 +103,7 @@ astNode *dfsFetch(astNode *n, int ruleid){
 /*****************************************************************************
  * dfsFetchToken
  *****************************************************************************/
-astNode *dfsFetchToken(astNode *n, int tokenid){
+astNode *dfsFetchTokenId(astNode *n, int tokenid){
   register astNode *rtn;
   if (n==NULL){
     dbg("\n\t\t[dfsFetchToken] return first NULL");
@@ -120,14 +118,14 @@ astNode *dfsFetchToken(astNode *n, int tokenid){
   }
 
   if (n->children != NULL){
-    if ((rtn=dfsFetchToken(n->children, tokenid))!=NULL){
+    if ((rtn=dfsFetchTokenId(n->children, tokenid))!=NULL){
       dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
       return rtn;
     }
   }
     
   if (n->next != NULL){
-    if ((rtn=dfsFetchToken(n->next, tokenid))!=NULL){
+    if ((rtn=dfsFetchTokenId(n->next, tokenid))!=NULL){
       dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
       return rtn;
     }
@@ -136,6 +134,47 @@ astNode *dfsFetchToken(astNode *n, int tokenid){
   dbg("\n\t\t[dfsFetchToken] return last NULL");
   return NULL;
 }
+
+
+/*****************************************************************************
+ * dfsFetchToken
+ *****************************************************************************/
+astNode *dfsFetchToken(astNode *n, const char *token){
+  astNode *rtn;
+  
+  dbg("\n\t\t[dfsFetchToken] looking for token '%s'", token);
+  if (n==NULL){
+    dbg("\n\t\t[dfsFetchToken] n==NULL, returning");
+    return NULL;
+  }
+
+  if (n->token!=NULL){
+    dbg("\n\t\t[dfsFetchToken] dumping token");
+    dbg("\n\t\t[dfsFetchToken] token is '%s'",n->token);
+    if (strcmp(n->token,token)==0){
+      dbg("\n\t\t[dfsFetchToken] hit what we are looking for: token '%s'",n->token);
+      return n;
+    }
+  }
+
+  if (n->children != NULL){
+    if ((rtn=dfsFetchToken(n->children, token))!=NULL){
+      dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
+      return rtn;
+    }
+  }
+    
+  if (n->next != NULL){
+    if ((rtn=dfsFetchToken(n->next, token))!=NULL){
+      dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
+      return rtn;
+    }
+  }
+  
+  dbg("\n\t\t[dfsFetchToken] return last NULL");
+  return NULL;
+}
+
 
 
 /*****************************************************************************

@@ -118,7 +118,9 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneAddArguments,
     arcaneTurnTokenToOption,
     arcaneEntryPointPrefix,
-    arcaneDfsForCalls
+    arcaneDfsForCalls,
+    NULL, // primary_expression_to_return
+    NULL // returnFromArgument
   };
   middlend->simd=&nablaArcaneSimdHooks;
   middlend->hook=&arcaneBackendHooks;

@@ -80,9 +80,9 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable]");
   assert(job->item!=NULL);
   const char cnfg=job->item[0];
-  char enum_enum=job->parse.enum_enum;
-  bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
-  int isPostfixed=job->parse.isPostfixed;
+  //char enum_enum=job->parse.enum_enum;
+  //bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
+  //int isPostfixed=job->parse.isPostfixed;
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
   nablaVariable *var=nablaVariableFind(arc->variables, n->token);
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");

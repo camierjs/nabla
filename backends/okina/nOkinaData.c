@@ -86,8 +86,7 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
     if (strcmp(var->type,"integer")==0)
       nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
     if (strcmp(var->type,"real3")==0)
-      nprintf(nabla, "/*tt2a(if+real3)*/", "%s_%s", var->item, var->name);
-    #warning if+real3 still in real3 vs double3
+      nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);
     //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
   }    
   if (strcmp(var->type,"real3")!=0){

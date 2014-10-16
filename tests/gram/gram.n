@@ -20,6 +20,14 @@ cells Real inverse(Real ε){
 }
 
 
+cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
+  const Real denom = 1.e-20+rabs(vdov);
+  const Real dtdvov = option_dvovmax / denom;
+  const Real dthdr = min(dthydro,dtdvov);
+  dthydro=(vdov!=0.0)?dthdr;
+  return dthydro;
+}
+
 void powOfTwo(void){
   const Real α = 1.0;
   const Real β = α²;

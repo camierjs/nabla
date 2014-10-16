@@ -44,7 +44,8 @@ void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc);
 char *dfsFetchFirst(astNode *n, int ruleid);
 astNode *dfsFetch(astNode *n, int ruleid);
 
-astNode *dfsFetchToken(astNode *n, int tokenid);
+astNode *dfsFetchTokenId(astNode *n, int tokenid);
+astNode *dfsFetchToken(astNode *n, const char *token);
 astNode *dfsFetchRule(astNode *n, int ruleid);
 int dfsScanJobsCalls(void *vars, void *nabla, astNode * n);
 
