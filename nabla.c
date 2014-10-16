@@ -230,7 +230,7 @@ int sysPreprocessor(const char *nabla_entity_name,
   // All comments are passed through to the output file, except for comments in processed directives,
   // which are deleted along with the directive.
   snprintf(gcc_command,size,
-           "gcc -std=c99 -E -Wall -x c %s>/proc/%d/fd/%d",
+           "gcc -std=c99 -C -E -Wall -x c %s>/proc/%d/fd/%d",
            cat_sed_temporary_file_name,
            getpid(),
            unique_temporary_file_fd);

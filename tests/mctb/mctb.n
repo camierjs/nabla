@@ -975,13 +975,77 @@ Real distanceToCellExit(Particle p, Cell c, int face_exit, Real face_exit_coord[
           s > 0 donne la distance de la particule à la sortie du cyclindre R
         */
         const Real R_2 = R*R;
+        /*
+
+
+
+
+
+
+
+
+
+
+         */
         const Real c = c_red - R_2;
         const Real fabs_c = fabs(c);
         const Real discr = b*b - 4*a*c;
+        /*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
+
+
+
+         */
         if (fabs_c < EPS_PRECIS * R_2){
           face_exit = -1;
           return -1.;
         }
+        /*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         */
         if (discr > 0. && discr < EPS_PRECIS*fabs_c*fabs_c){
           face_exit = -1;
           return -1.;

@@ -87,8 +87,8 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   const int foreach_face = job->parse.enum_enum=='f';
   const int foreach_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[faceJobFaceVar] scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",
+  dbg("\n\t\t[faceJobFaceVar] var name: %s scalar=%d, resolve=%d, foreach_none=%d,\
+ foreach_node=%d, foreach_face=%d, foreach_cell=%d",var->name,
       scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
   
   //if (resolve && foreach_cell) return "/*ff:rc*/";
@@ -99,9 +99,9 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   //if (!resolve && foreach_cell) return "/*ff:!rc*/";
   //if (!resolve && foreach_node) return "/*ff:!rn*/";
   //if (!resolve && foreach_face) return "/*ff:!rf*/";
-  //if (!resolve && foreach_none) return "/*ff:!r0*/";
+  if (!resolve && foreach_none) return "/*ff:!r0*/";
   
-  nabla_error("Could not switch in faceJobFaceVar!");
+  error(!0,0,"[faceJobFaceVar] %s: Could not switch in faceJobFaceVar!", job->name);
   return NULL;
 }
 

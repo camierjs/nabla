@@ -293,13 +293,14 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 // Absorbe line comments
 static void ignoreLineComments(void){
   while(input()!='\n');
+  yylineno+=1;
 }
 
 // Absorbe bloc comments
 static void ignoreBlocComments(void){
 	char c, c1;
 loop:
-	do {c = input();} while (c != '*' && c != 0);
+	do {c = input(); if (c=='\n') yylineno+=1; } while (c != '*' && c != 0);
 	c1 = input();
 	if (c1 != '/' && c != 0){
 		unput(c1);

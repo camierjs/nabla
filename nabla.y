@@ -121,6 +121,7 @@ bool type_precise=false;
 %token-table
 %parse-param {astNode **root}
 %right '?' ':' ','
+%right REAL REAL3 REAL3x3 '('
 
 %%
 
@@ -152,10 +153,6 @@ type_specifier
 | DOUBLE {Y1($$,$1)}
 | SIGNED {Y1($$,$1)}
 | UNSIGNED {Y1($$,$1)}
-| REAL2 {Y1($$,$1)}
-| REAL3 {Y1($$,$1)}
-| REAL3x3 {Y1($$,$1)}
-| REAL2x2 {Y1($$,$1)}
 | BOOL {Y1($$,$1)}
 | SIZE_T {Y1($$,$1)}
 | REAL { if (type_precise) preciseY1($$,GMP_REAL) else Y1($$,$1); type_precise=type_volatile=false;}
@@ -167,7 +164,11 @@ type_specifier
     type_precise=type_volatile=false;
   }
 | INT32 {Y1($$,$1)}
-| INT64 {Y1($$,$1)} 
+| INT64 {Y1($$,$1)}
+| REAL2 {Y1($$,$1)}
+| REAL3 {Y1($$,$1)}
+| REAL3x3 {Y1($$,$1)}
+| REAL2x2 {Y1($$,$1)}
 | CELLTYPE {Y1($$,$1)}
 | NODETYPE {Y1($$,$1)}
 | PARTICLETYPE {Y1($$,$1)}
@@ -178,7 +179,8 @@ type_specifier
 | MATERIAL {Y1($$,$1)}
 //| struct_or_union_specifier {Y1($$,$1)}
 //| enum_specifier {Y1($$,$1)}
-; 
+;
+
 storage_class_specifier
 : EXTERN {Y1($$,$1)}
 | STATIC {Y1($$,$1)}
@@ -316,12 +318,13 @@ declaration_specifiers
 declaration
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon #include
 : INCLUDES {$1->token[0]='#';Y1($$,$1)}
+| preproc {Y1($$,$1)}
 | declaration_specifiers ';'{Y1($$,$1)}
 | declaration_specifiers init_declarator_list ';' {Y3($$,$1,$2,$3)}  
 ;
 declaration_list
-:	declaration{Y1($$,$1)}
-|	declaration_list declaration{Y2($$,$1,$2)}
+: declaration{Y1($$,$1)}
+| declaration_list declaration{Y2($$,$1,$2)}
 ;
 
 
@@ -348,9 +351,10 @@ direct_declarator
 ;
 init_declarator
 :	declarator {Y1($$,$1)}
-// Permet de faire des appels constructeurs à-là '=Real3(0.0,0.0,0.0)'
-|	declarator '=' type_specifier assignment_expression{Y4($$,$1,$2,$3,$4)} // initializer
-|	declarator '=' type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
+// Permet de faire des appels constructeurs à-là '= Real3(0.0,0.0,0.0)' lors des déclarations
+//|	declarator '=' type_specifier assignment_expression{Y4($$,$1,$2,$3,$4)} // initializer
+// Permet de faire des appels constructeurs à-là '= Real3x3()' lors des déclarations
+//|	declarator '=' type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
 |	declarator '=' initializer {Y3($$,$1,$2,$3)}
 ;
 init_declarator_list
@@ -435,6 +439,10 @@ nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};
 //| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
 //| IDENTIFIER NAMESPACE IDENTIFIER {Y3($$,$1,$2,$3)}
 
+argument_expression_list
+: assignment_expression {Y1($$,$1)}
+| argument_expression_list ',' assignment_expression {Y3($$,$1,$2,$3)}
+;
 
 /////////////////
 // EXPRESSIONS //
@@ -457,24 +465,17 @@ primary_expression
 | STRING_LITERAL {Y1($$,$1)}
 | '(' expression ')'	{Y3($$,$1,$2,$3)}
 ;
-argument_expression_list
-: assignment_expression {Y1($$,$1)}
-| argument_expression_list ',' assignment_expression {Y3($$,$1,$2,$3)}
-;
 postfix_expression
-: primary_expression {Y1($$,$1)} 
+: primary_expression {Y1($$,$1)}
 | postfix_expression FOREACH_NODE_INDEX {Y2($$,$1,$2)}
 | postfix_expression FOREACH_CELL_INDEX {Y2($$,$1,$2)}
 | postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
-//| postfix_expression '[' nabla_system ']' {Y4($$,$1,$2,$3,$4)}
-//| postfix_expression '[' Z_CONSTANT ']'  {
-//  // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de ce postfix
-//  astNode *cstPostNode=astNewNodeToken();
-//  cstPostNode->tokenid=POSTFIX_CONSTANT;
-//  astNode *cstValueNode=astNewNodeToken();
-//  cstValueNode->tokenid=POSTFIX_CONSTANT_VALUE;
-//  Y6($$,cstPostNode,$1,$2,$3,cstValueNode,$4)
-// }
+| REAL '(' ')'{Y2($$,$1,$2)}
+| REAL '(' expression ')' {Y3($$,$1,$2,$3)}
+| REAL3 '(' ')'{Y2($$,$1,$2)}
+| REAL3 '(' expression ')' {Y3($$,$1,$2,$3)}
+| REAL3x3 '(' ')'{Y2($$,$1,$2)}
+| REAL3x3 '(' expression ')' {Y3($$,$1,$2,$3)}
 | postfix_expression '(' ')' {Y3($$,$1,$2,$3)}
 // On traite l'appel à fatal différemment qu'un CALL standard
 | FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
@@ -492,7 +493,6 @@ postfix_expression
 | postfix_expression '.' IDENTIFIER {Y3($$,$1,$2,$3)}
 | postfix_expression '.' nabla_item '(' Z_CONSTANT ')'{Y6($$,$1,$2,$3,$4,$5,$6)}
 | postfix_expression '.' nabla_system {Y3($$,$1,$2,$3)}
-//| postfix_expression PTR_OP IDENTIFIER {Y3($$,$1,$2,$3)}
 | postfix_expression PTR_OP primary_expression {Y3($$,$1,$2,$3)} 
 | postfix_expression INC_OP {Y2($$,$1,$2)}
 | postfix_expression DEC_OP {Y2($$,$1,$2)}
@@ -593,9 +593,11 @@ assignment_expression
 : conditional_expression {Y1($$,$1)}
 | unary_expression assignment_operator assignment_expression {Y3($$,$1,$2,$3)}
 | unary_expression assignment_operator logical_or_expression '?' expression {YopDuaryExpression($$,$1,$2,$3,$5)}
-| unary_expression assignment_operator type_specifier '(' initializer_list ')' {Y6($$,$1,$2,$3,$4,$5,$6)}
-| unary_expression assignment_operator type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
+// Permet de faire des appels constructeurs à-là 'Real3(0.0,0.0,0.0)' lors des expressions
+//| unary_expression assignment_operator type_specifier '(' initializer_list ')' {Y6($$,$1,$2,$3,$4,$5,$6)}
+//| unary_expression assignment_operator type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
 ;
+
 expression
 : assignment_expression {Y1($$,$1)}
 | expression ',' assignment_expression {Y3($$,$1,$2,$3)}
@@ -614,7 +616,7 @@ compound_statement
 | start_scope declaration_list end_scope {Y3($$,$1,$2,$3)}
 | start_scope declaration_list statement_list end_scope{Y4($$,$1,$2,$3,$4)}
 // Permet de rajouter des statements à la C++ avant la déclaration des variables locales
-| start_scope statement declaration_list statement_list end_scope{Y5($$,$1,$2,$3,$4,$5)}
+| start_scope statement_list declaration_list statement_list end_scope{Y5($$,$1,$2,$3,$4,$5)}
 ;
 expression_statement
 : ';'{Y1($$,$1)}
@@ -646,11 +648,10 @@ jump_statement
 | BREAK ';'{Y2($$,$1,$2)}
 | RETURN ';'{Y2($$,$1,$2)}
 | RETURN expression ';'{Y3($$,$1,$2,$3)}
-| RETURN type_specifier expression ';' {Y4($$,$1,$2,$3,$4)}
+//| RETURN type_specifier expression ';' {Y4($$,$1,$2,$3,$4)}
 ;
 statement
-: preproc {Y1($$,$1)}
-| compound_statement {Y1($$,$1)}
+: compound_statement {Y1($$,$1)}
 | expression_statement {Y1($$,$1)}
 | selection_statement {Y1($$,$1)}
 | iteration_statement {Y1($$,$1)}
@@ -788,9 +789,8 @@ with_library: WITH with_library_list ';'{Y3($$,$1,$2,$3)};
 // ∇ grammar //
 ///////////////
 nabla_grammar
-: preproc                       {Y1($$,$1)}
-| with_library                  {Y1($$,$1)}
-| declaration				        {Y1($$,$1)}
+: with_library                  {Y1($$,$1)}
+| declaration                   {Y1($$,$1)}
 | nabla_options_definition      {Y1($$,$1)}
 | nabla_item_definition         {Y1($$,$1)}
 | nabla_materials_definition    {Y1($$,$1)}

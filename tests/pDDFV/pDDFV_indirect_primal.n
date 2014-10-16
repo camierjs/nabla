@@ -79,7 +79,7 @@ own outer faces void iOuterPrimal(void) @ 1.0 if (option_indirect){
   const Real3 d=coord[0];
   const Real3 e=coord[1];
   const Real3 s=½*(d+e);
-  const Real3 p=cell_mass_center[cell(0)];
+  const Real3 p=cell_mass_center[0];
   const Real3 Nde=n(d,e);
   // Ré-orientation de la normale s'il le faut
   const Bool swap=((s-p)⋅Nde)<0.0;
