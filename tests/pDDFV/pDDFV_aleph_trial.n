@@ -3,8 +3,7 @@
 // ****************************************************************************
 // * Second membre, coté Trial
 // ****************************************************************************
-own inner faces void alephRhsTrialInnerGeneric(void) @ 13.1 if (option_trial &&
-                                                                option_indirect){
+own inner faces void alephRhsTrialInnerGeneric(void){// @ 13.1 if (option_trial && option_indirect){
   const Real3 D=coord[0];
   const Real3 E=coord[1];
   const Real3 S=½*(D+E);
@@ -40,9 +39,8 @@ own outer faces void alephRhsTrialOuterGeneric(void) @ 13.1 if (option_trial && 
 // ****************************************************************************
 // * Remplissage matriciel, coté Trial
 // ****************************************************************************
-inner faces void innerFacesOutsideGeneric(void) @ 16.4 if (option_trial &&
-                                                           option_indirect){
-  const Real svalue =
+inner faces void innerFacesOutsideGeneric(void){// @ 16.4 if (option_trial && option_indirect){
+/*  const Real svalue =
      interior_dual_non_convex_s[0]
     +interior_dual_non_convex_s[1]
     +interior_dual_non_convex_s[2]
@@ -81,14 +79,13 @@ inner faces void innerFacesOutsideGeneric(void) @ 16.4 if (option_trial &&
   ℵ matrix addValue(face_θ,this, node_θ,node(1),  -q3value);
   ℵ matrix addValue(face_θ,this, cell_θ,backCell, -e3value);
   //fatal("\33[31mUnknown QUARTER in innerFacesOutside!\33[m");
-}
+  */}
 
 
 // ****************************************************************************
 // * Conditions de Dirichlet
 // ****************************************************************************
-own outer faces void dirichletFacesGeneric(void) @ 17.0 if (option_trial &&
-                                                            option_indirect){
+own outer faces void dirichletFacesGeneric(void){// @ 17.0 if (option_trial && option_indirect){
   ℵ matrix addValue(face_θ,this, face_θ,this, +1.0);
 }
 
@@ -96,8 +93,7 @@ own outer faces void dirichletFacesGeneric(void) @ 17.0 if (option_trial &&
 // ****************************************************************************
 // * Récupération des résultats, coté Trial
 // ****************************************************************************
-own faces void getFacesResultsGeneric(void) @ 20.0 if (option_trial &&
-                                                       option_indirect){
+own faces void getFacesResultsGeneric(void){//  @ 20.0 if (option_trial && option_indirect){
   Real face_θ_kp1;
   face_θ_kp1=ℵ lhs getValue(face_θ,this);
   if (face_θ_kp1<0.0)

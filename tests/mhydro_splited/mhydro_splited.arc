@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="mhydro" xml:lang="en">
+<case codeversion="1.0" codename="mhydro_splited" xml:lang="en">
   <arcane>
 	 <title>Exemple Nabla MicroHydro</title>
-	 <timeloop>mhydroLoop</timeloop>
+	 <timeloop>mhydro_splitedLoop</timeloop>
   </arcane>
 
   <main>

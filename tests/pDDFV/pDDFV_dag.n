@@ -14,7 +14,7 @@ nodes void dagNodes(File pDDFV){
 
 void dagIt(void){
   file(pDDFV,dag);
-  pDDFV<<"#33 "<<globalNbCells<<" "<<globalNbNodes<<"\n";
+  pDDFV << "#33 "<<globalNbCells<<" "<<globalNbNodes<<"\n";
   dagCells(pDDFV);
   dagNodes(pDDFV);
 }

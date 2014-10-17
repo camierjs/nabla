@@ -28,13 +28,13 @@ char *nodeJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   const int foreach_face = job->parse.enum_enum=='f';
   const int foreach_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[nodeJobNodeVar] scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+  dbg("\n\t\t[nodeJobNodeVar] %s %s:\t\tscalar=%d, resolve=%d, foreach_none=%d,\
+ foreach_node=%d, foreach_face=%d, foreach_cell=%d, isPostfixed=%d",job->name,var->name,
+         scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell,job->parse.isPostfixed);
 
   if (scalar && !resolve) return "";
   
-  if (scalar && resolve && foreach_face) return "[node]";
+  if (scalar && resolve && foreach_face) return "/*srf*/[node]";
   if (scalar && resolve && foreach_node) return "[n]";
   if (scalar && resolve && foreach_cell) return "[node]";
   if (scalar && resolve && foreach_none) return "[node]";

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="gad" xml:lang="en">
+<case codeversion="1.0" codename="gad_adv" xml:lang="en">
   <arcane>
 	 <title>Exemple GAD</title>
-	 <timeloop>gadLoop</timeloop>
+	 <timeloop>gad_advLoop</timeloop>
   </arcane>
 
   <main>

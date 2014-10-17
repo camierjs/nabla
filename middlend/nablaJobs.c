@@ -254,9 +254,10 @@ void nablaJobParse(astNode *n, nablaJob *job){
   if ((n->ruleid == rulenameToId("primary_expression"))
       && (n->children->token!=NULL)
       && (job->parse.returnFromArgument)){
-    if (nabla->hook->primary_expression_to_return)
+    if (nabla->hook->primary_expression_to_return){
       nabla->hook->primary_expression_to_return(nabla,job,n);
-    return;
+      return;
+    }
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable

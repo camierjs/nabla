@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="sethi" xml:lang="en">
+<case codeversion="1.0" codename="sethi_splited" xml:lang="en">
   <arcane>
 	 <title>Sethi is Nabla's HYDRO (extracted from a real code RAMSES)</title>
-	 <timeloop>sethiLoop</timeloop>
+	 <timeloop>sethi_splitedLoop</timeloop>
   </arcane>
 
   <main>
@@ -37,10 +37,10 @@
     </meshgenerator>
   </mesh> 
 
-  <sethi> 
+  <sethi_splited> 
     <testcase>1</testcase>
     <uid_bubble_one>32640</uid_bubble_one>
     <uid_bubble_two>26480</uid_bubble_two>
-    <nstepmax>4096</nstepmax>
-  </sethi>
+    <nstepmax>4</nstepmax>
+  </sethi_splited>
 </case>

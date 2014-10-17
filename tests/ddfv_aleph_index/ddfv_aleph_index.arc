@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="ddfv" xml:lang="en">
+<case codeversion="1.0" codename="ddfv_aleph_index" xml:lang="en">
   <arcane>
-	 <title>Exemple ddfv</title>
-	 <timeloop>ddfvLoop</timeloop>
+	 <title>Exemple ddfv_aleph_index</title>
+	 <timeloop>ddfv_aleph_indexLoop</timeloop>
   </arcane>
 
 	<arcane-post-processing>
@@ -22,11 +22,11 @@
      <file internal-partition="true">../nabla.unf</file>
    </mesh>
 
-   <ddfv>
+   <ddfv_aleph_index>
      <option_deltat>0.00001</option_deltat>
      <option_epsilon>0.001</option_epsilon>
      <option_ini_borders>1.0</option_ini_borders>
      <option_ini_iterations>1</option_ini_iterations>
      <option_max_iterations>4</option_max_iterations>
-   </ddfv>
+   </ddfv_aleph_index>
 </case>

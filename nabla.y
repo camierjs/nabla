@@ -319,7 +319,7 @@ declaration
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon #include
 : INCLUDES {$1->token[0]='#';Y1($$,$1)}
 | preproc {Y1($$,$1)}
-| declaration_specifiers ';'{Y1($$,$1)}
+| declaration_specifiers ';' {Y2($$,$1,$2)}
 | declaration_specifiers init_declarator_list ';' {Y3($$,$1,$2,$3)}  
 ;
 declaration_list
@@ -470,12 +470,12 @@ postfix_expression
 | postfix_expression FOREACH_NODE_INDEX {Y2($$,$1,$2)}
 | postfix_expression FOREACH_CELL_INDEX {Y2($$,$1,$2)}
 | postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
-| REAL '(' ')'{Y2($$,$1,$2)}
-| REAL '(' expression ')' {Y3($$,$1,$2,$3)}
-| REAL3 '(' ')'{Y2($$,$1,$2)}
-| REAL3 '(' expression ')' {Y3($$,$1,$2,$3)}
-| REAL3x3 '(' ')'{Y2($$,$1,$2)}
-| REAL3x3 '(' expression ')' {Y3($$,$1,$2,$3)}
+| REAL '(' ')'{Y3($$,$1,$2,$3)}
+| REAL '(' expression ')' {Y4($$,$1,$2,$3,$4)}
+| REAL3 '(' ')'{Y3($$,$1,$2,$3)}
+| REAL3 '(' expression ')' {Y4($$,$1,$2,$3,$4)}
+| REAL3x3 '(' ')'{Y3($$,$1,$2,$3)}
+| REAL3x3 '(' expression ')' {Y4($$,$1,$2,$3,$4)}
 | postfix_expression '(' ')' {Y3($$,$1,$2,$3)}
 // On traite l'appel à fatal différemment qu'un CALL standard
 | FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}

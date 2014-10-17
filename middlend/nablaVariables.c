@@ -140,6 +140,12 @@ what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *nabla,
     // On récupère de nom de la variable potentielle de cette expression
     nablaVariable *var=nablaVariableFind(nabla->variables, strdup(primary_expression->token));
     if (var!=NULL){ // On a bien trouvé une variable nabla
+      if (nabla_item!=NULL && nabla_system!=NULL){
+        // Mais elle est bien postfixée mais par qq chose d'inconnu: should be smarter here!
+        // à-là: (node(0)==*this)?node(1):node(0), par exemple
+        nprintf(nabla, "/*nabla_item && nabla_system*/", NULL);
+        return postfixed_nabla_variable_with_unknown;
+      }
       if (nabla_item==NULL && nabla_system==NULL){
         // Mais elle est bien postfixée mais par qq chose d'inconnu: variable locale?
         nprintf(nabla, "/*no_item_system*/", NULL);

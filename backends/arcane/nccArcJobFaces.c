@@ -99,7 +99,7 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   //if (!resolve && foreach_cell) return "/*ff:!rc*/";
   //if (!resolve && foreach_node) return "/*ff:!rn*/";
   //if (!resolve && foreach_face) return "/*ff:!rf*/";
-  if (!resolve && foreach_none) return "/*ff:!r0*/";
+  if (!resolve && foreach_none) return "/*ff:!r0*/[face]";
   
   error(!0,0,"[faceJobFaceVar] %s: Could not switch in faceJobFaceVar!", job->name);
   return NULL;

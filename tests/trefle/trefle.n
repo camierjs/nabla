@@ -51,7 +51,7 @@ cells void iniCellVariables(void) out (cell Τ) @ -10{
 outer faces void iniCellOuterVariables(void) out (cell Τ) {//@ -9{
   if (!cell(0).isOwn()) continue;
   if (coord[0].x > 0.5) continue;
-  Τ[cell(0)]=option_initial_heat;
+  Τ[0]=option_initial_heat;
 }
 
 // Conditions initiales possibles aux mailles
@@ -75,7 +75,7 @@ void initAlgebra(void) @ -7{
   {
     const Integer row_offset=m_aleph_kernel->topology()->part()[m_aleph_kernel->rank()];
     fillCellMatrixIndex(row_offset,0);
-    Ξ.synchronize();
+    //Ξ.synchronize();
   }
 }
 
@@ -97,13 +97,13 @@ void rhsInit(void)@1.0{
 // Pour le remplir proprement
 own cells void setRhsCellValues(void) in (cell Τ) @ 1.1{
   if (coord[0].x > 0.5)
-    rhs.add(+Τ);
+    rhs.add(/*+*/Τ);
   else
     rhs.add(option_initial_heat);
 }
 
 own cells void setRhsCellStdValues(void) in (cell Τ){// @ 1.1{
-  rhs.add(+Τ);
+  rhs.add(/*+*/Τ);
 }
 
 // A lancer de façon peut-être plus élégante?!

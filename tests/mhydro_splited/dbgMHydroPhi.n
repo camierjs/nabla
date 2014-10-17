@@ -1,4 +1,4 @@
-cells void dbgCellsXCenter(void)  @ -5.9{
+/*cells void dbgCellsXCenter(void)  @ -5.9{
   dbg(DBG_INI,"\n\t[iniCells] xCenter=");dbgReal(DBG_INI,xCenter);
 }
 
@@ -53,3 +53,4 @@ cells void dbgEOSpressure(void) @ 8.1{
 cells void dbgEOSsound(void) @ 8.2{
   dbg(DBG_INI,"\ndbgEOSsound sound\t:");dbgReal(DBG_INI,σSound);
 }
+*/

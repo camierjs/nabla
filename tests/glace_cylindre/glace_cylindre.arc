@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="glace" xml:lang="en">
+<case codeversion="1.0" codename="glace_cylindre" xml:lang="en">
   <arcane>
 	 <title>GLACE module</title>
-	 <timeloop>glaceLoop</timeloop>
+	 <timeloop>glace_cylindreLoop</timeloop>
   </arcane>
 
   <main>
@@ -50,7 +50,7 @@
 		 </cartesian> 
 	  </meshgenerator-->
 	</mesh>
-   <glace>
+   <glace_cylindre>
      <option_chic>false</option_chic>
      <option_glace>true</option_glace>
 
@@ -84,6 +84,6 @@
      <option_ini_zd_rh>1.0</option_ini_zd_rh>
      <option_ini_zd_p>1.0</option_ini_zd_p>
 
-     <option_max_iterations>0</option_max_iterations>
-   </glace>
+     <option_max_iterations>1</option_max_iterations>
+   </glace_cylindre>
 </case>
