@@ -1,21 +1,21 @@
 cells void dbgCellsXCenter(void)  @ -5.9{
-  info()<<"xCenter="<<xCenter;
+  debug()<<"xCenter="<<xCenter;
 }
 
 cells void dbgCellsDensity(void)  @ -4.9{
-  info()<<"density="<<ρ;
+  debug()<<"density="<<ρ;
 }
 
 cells void dbgCellsPressure(void)  @ -4.8{
-  info()<<"pressure="<<pressure;
+  debug()<<"pressure="<<pressure;
 }
 
 cells void dbgCellsAdiabaticCst(void)  @ -4.7{
-  info()<<"adiabatic_cst="<<adiabatic_cst;
+  debug()<<"adiabatic_cst="<<adiabatic_cst;
 }
 
 nodes void dbgNodeMass(void)  @ -0.8{
-  info()<<"dbgNodeMass:"<<nMass;
+  debug()<<"dbgNodeMass:"<<nMass;
 }
 
 
@@ -25,35 +25,35 @@ nodes void dbgNodeMass(void)  @ -0.8{
 
 
 nodes void dbgForce(void) @ 0.2{
-  info()<<"dbgForce force"<<force;
+  debug()<<"dbgForce force"<<force;
 }
 
 nodes void dbgComputeVelocity(void)@1.1{
-  info()<<"velocity:"<<velocity;
+  debug()<<"velocity:"<<velocity;
 }
 
 nodes void dbgBoundaryCondition(void)@2.1{
-  info()<<"post BC velocity:"<<velocity;
+  debug()<<"post BC velocity:"<<velocity;
 }
 
 nodes void dbgMoveNodes(void)  @ 3.1{
-  info()<<"dbgMoveNodes:"<<coord;
+  debug()<<"dbgMoveNodes:"<<coord;
 }
 
 cells void dbgGeometricVolume(void) @ 5.1{
-  info()<<"dbgGeometricVolume v"<<v;
+  debug()<<"dbgGeometricVolume v"<<v;
 }
 cells void dbgDensity(void) @ 6.1{
-  info()<<"dbgDensity rho"<<ρ;
+  debug()<<"dbgDensity rho"<<ρ;
 }
 
 cells void dbgEOSpressure(void) @ 8.1{
-  info()<<"dbgEOSpressure pressure"<<pressure;
+  debug()<<"dbgEOSpressure pressure"<<pressure;
 }
 cells void dbgEOSsound(void) @ 8.2{
-  info()<<"dbgEOSsound sound"<<σSound;
+  debug()<<"dbgEOSsound sound"<<σSound;
 }
 
 cells void dbgApplyEOS(void) @ 8.1{
-  info()<<"pressure #"<<uid<<"="<<pressure;
+  debug()<<"pressure #"<<uid<<"="<<pressure;
 }

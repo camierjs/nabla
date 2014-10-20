@@ -17,20 +17,20 @@
 	</arcane-post-processing>
 
    <mesh>
-     <!--file internal-partition="true">qtd.unf</file-->
-     <meshgenerator>
+     <file internal-partition="true">../nabla.unf</file>
+     <!--meshgenerator>
  		 <cartesian>
 			<nsd>4 1 0</nsd>
 			<origine>0.0 0.0 0.0</origine>
 			<lx nx="16" prx="1.0">1.0</lx>
 			<ly ny="16" pry="1.0">1.0</ly>
 		 </cartesian> 
-     </meshgenerator>
+     </meshgenerator-->
    </mesh>
 
    <diffusion_ddfv>
-     <option_quads>true</option_quads>
-     <option_triangles>false</option_triangles>
+     <option_quads>false</option_quads>
+     <option_triangles>true</option_triangles>
 
      <option_deltat>0.001</option_deltat>
     <option_max_iterations>1</option_max_iterations>

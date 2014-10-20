@@ -36,8 +36,8 @@
   </arcane-checkpoint>
 
  	<mesh>
-     <file internal-partition="true">block_mesh.mli</file>
-     <!--file internal-partition="true">cyl.unf</file-->
+     <!--file internal-partition="true">block_mesh.mli</file-->
+     <file internal-partition="true">../thex_mesh.unf</file>
 
      <!--file internal-partition="true">cyl200.mli</file-->
 	  <!--meshgenerator>

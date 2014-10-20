@@ -11,9 +11,9 @@
 
   <arcane-post-processing>
     <save-init>1</save-init>
-	 <output-period>10</output-period>
+	 <output-period>0</output-period>
     <output-history-period>0</output-history-period>
-    <end-execution-output>1</end-execution-output>
+    <end-execution-output>0</end-execution-output>
     <output>
       <!--variable>cell_m</variable>
       <variable>cell_V</variable>
@@ -36,15 +36,7 @@
   </arcane-checkpoint>
 
  	<mesh>
-     <!--file internal-partition="true">tube_sod_1d_quad.unf</file-->
-     <!--file internal-partition="true">sqrBubble.unf</file-->
-     <!--file internal-partition="true">sod.unf</file-->
-
-     <!--file internal-partition="true">block_mesh.mli</file-->
-     <!-- NOT YET Magix3D'ed file internal-partition="true">block_mesh_refine.mli</file-->
-     <!--file internal-partition="true">thex_mesh.unf</file-->
-     <file internal-partition="true">cyl.unf</file>
-
+     <file internal-partition="true">../thex_mesh.unf</file>
      <!--file internal-partition="true">cyl200.mli</file-->
 	  <!--meshgenerator>
  		 <cartesian>

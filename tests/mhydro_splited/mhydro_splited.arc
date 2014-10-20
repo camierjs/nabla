@@ -27,9 +27,9 @@
   <mesh>
     <!--1049600 noeuds, 984064 mailles-->
     <meshgenerator><sod>
-        <x set='false' delta='0.02'>1024</x>
-        <y set='true' delta='0.02'>31</y>
-        <z set='true' delta='0.02' total='true'>31</z>
+        <x set='false' delta='0.02'>64</x>
+        <y set='true' delta='0.02'>7</y>
+        <z set='true' delta='0.02' total='true'>7</z>
       </sod></meshgenerator>
     <!--meshgenerator><sod>
         <x set='true' delta='0.25'>4</x>

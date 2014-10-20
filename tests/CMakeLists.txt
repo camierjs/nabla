@@ -27,15 +27,18 @@ set(CEA_LIB /usr/local/sr/lib/libcea_user.a)
 # Meshes #
 ##########
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/nabla.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/thex_mesh.unf ${CMAKE_CURRENT_BINARY_DIR}/thex_mesh.unf)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/sod_triangles.unf)
 
 
 #######################################
 # NABLA TEST MACRO FOR ARCANE BACKEND #
 #######################################
+
+###############################################
+# get_additional_nabla_files_and_set_Makefile #
 function(get_additional_nabla_files_and_set_Makefile name)
   #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
-
   execute_process(COMMAND find . -name *.n -printf "%f "
     COMMAND sed -e "s/\\(${name}.n\\)//g"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
@@ -52,17 +55,21 @@ function(get_additional_nabla_files_and_set_Makefile name)
   endforeach()
 endfunction()
 
+#################################################
+# nabla_add_arcane_test_with_additional_defines #
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
   info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_BLUE}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
   set(backend arcane)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
 	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.arcane ${cmd}${nb_proc}")
-endfunction(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
+endfunction()
 
-function(NABLA_ADD_ARCANE_TEST name nb_proc cmd)
+#########################
+# nabla_add_arcane_test #
+function(nabla_add_arcane_test name nb_proc cmd)
    nabla_add_arcane_test_with_additional_defines(${name} ${nb_proc} ${cmd} NO_ADDITIONAL_DEFINES)
-endfunction(NABLA_ADD_ARCANE_TEST)
+endfunction()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane)
 
@@ -109,6 +116,7 @@ if (${RESULT_NABLA_TESTS})
   message(SEND_ERROR "Error: Could not load tests directories!")
 endif (${RESULT_NABLA_TESTS})
 separate_arguments(NABLA_TESTS)
+
 foreach(tst IN ITEMS ${NABLA_TESTS})
   string(REGEX MATCH ".*_aleph_index$" ALEPH_INDEX ${tst})
   if (ALEPH_INDEX)

@@ -29,7 +29,7 @@
   <mesh nb-ghostlayer="1" ghostlayer-builder-version="3">
     <meshgenerator>
       <cartesian>
-        <nsd>4 4</nsd> 
+        <nsd>4 1</nsd> 
         <origine>0.0 0.0</origine>
         <lx nx='256'>1.0</lx>
         <ly ny='256'>1.0</ly>
