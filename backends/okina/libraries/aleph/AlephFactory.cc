@@ -1,25 +1,12 @@
-/*---------------------------------------------------------------------------*/
-/* AlephFactory.cc                                             (C) 2010-2013 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-#include "arcane/aleph/IAlephFactory.h"
-#include "arcane/ServiceBuilder.h"
+#include "IAlephFactory.h"
+//#include "arcane/ServiceBuilder.h"
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 
 /******************************************************************************
  * IAlephFactory::IAlephFactory
  *****************************************************************************/
-AlephFactory::AlephFactory(IApplication* app,
-                           ITraceMng *tm): IAlephFactory(tm){
+AlephFactory::AlephFactory(IApplication* app,ITraceMng *tm): IAlephFactory(tm){
   // Liste des implémentations possibles.
   // 0 est le choix automatique qui doit aller vers une des bibliothèques suivantes:
   m_impl_map.insert(std::make_pair(1,new FactoryImpl("Sloop")));
@@ -27,15 +14,15 @@ AlephFactory::AlephFactory(IApplication* app,
   m_impl_map.insert(std::make_pair(3,new FactoryImpl("Trilinos")));
   m_impl_map.insert(std::make_pair(4,new FactoryImpl("Cuda")));
   m_impl_map.insert(std::make_pair(5,new FactoryImpl("PETSc")));
-  ServiceBuilder<IAlephFactoryImpl> sb(app);
+  //ServiceBuilder<IAlephFactoryImpl> sb(app);
   // Pour chaque implémentation possible,
   // créé la fabrique correspondante si elle est disponible.
   for(FactoryImplMap::iterator i = m_impl_map.begin(); i!=m_impl_map.end(); ++i ){
     FactoryImpl *implementation=i->second;
     const String& name = implementation->m_name;
     debug()<<"\33[1;34m\t[AlephFactory] Adding "<<name<<" library..."<<"\33[0m";
-    IAlephFactoryImpl *factory = sb.createInstance(name+"AlephFactory",SB_AllowNull);
-    implementation->m_factory = factory;
+    //IAlephFactoryImpl *factory = sb.createInstance(name+"AlephFactory",SB_AllowNull);
+    //implementation->m_factory = factory;
   }
   debug()<<"\33[1;34m\t[AlephFactory] done"<<"\33[0m";
 }
@@ -56,15 +43,13 @@ AlephFactory::~AlephFactory(){
 IAlephFactoryImpl* AlephFactory::_getFactory(Integer solver_index){
   FactoryImplMap::const_iterator ci = m_impl_map.find(solver_index);
   if (ci==m_impl_map.end())
-    throw FatalErrorException(A_FUNCINFO,
-                              String::format("Invalid solver index '{0}' for aleph factory",
-                                             solver_index));
+    throw FatalErrorException("AlephFactory::_getFactory",
+                              "Invalid solver index for aleph factory");
   FactoryImpl *implementation=ci->second;
   IAlephFactoryImpl* factory = implementation->m_factory;
   if (!factory)
-    throw NotSupportedException(A_FUNCINFO,
-                                String::format("Implementation for '{0}' not available",
-                                               implementation->m_name));
+    throw FatalErrorException("AlephFactory::_getFactory",
+                              "Implementation not available");
   // Si la fabrique de l'implémentation considérée n'a pas
   // été initialisée, on le fait maintenant
   if (!implementation->m_initialized){
@@ -113,11 +98,3 @@ IAlephMatrix* AlephFactory::GetMatrix(AlephKernel *kernel,
                                                                index);
 };
 
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

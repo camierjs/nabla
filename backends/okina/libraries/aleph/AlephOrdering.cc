@@ -1,28 +1,14 @@
-/*---------------------------------------------------------------------------*/
-/* AlephOrdering.cc                                                 (C) 2012 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
-#include "arcane/IMesh.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+//#include "arcane/IMesh.h"
 
 
 // *****************************************************************************
 // * Minimal AlephOrdering for AlephIndexing
 // *****************************************************************************
-AlephOrdering::AlephOrdering(AlephKernel *kernel):
-  TraceAccessor(kernel->parallel()->traceMng()),
-  m_do_swap(false),
-  m_kernel(kernel),
-  m_swap(0){}
+AlephOrdering::AlephOrdering(AlephKernel *kernel):TraceAccessor(kernel->parallel()->traceMng()),
+                                                  m_do_swap(false),
+                                                  m_kernel(kernel),
+                                                  m_swap(0){}
 
 
 /******************************************************************************
@@ -30,11 +16,10 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel):
 AlephOrdering::AlephOrdering(AlephKernel *kernel,
                              Integer global_nb_row,
                              Integer local_nb_row,
-                             bool do_swap):
-  TraceAccessor(kernel->parallel()->traceMng()),
-  m_do_swap(do_swap),
-  m_kernel(kernel),
-  m_swap(0)
+                             bool do_swap):TraceAccessor(kernel->parallel()->traceMng()),
+                                           m_do_swap(do_swap),
+                                           m_kernel(kernel),
+                                           m_swap(0)
 {
   ItacFunction(AlephOrdering);
   if (!do_swap){
@@ -349,12 +334,3 @@ void AlephOrdering::initTwiceCellNodeOrder(void){
     }
   }
 }
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

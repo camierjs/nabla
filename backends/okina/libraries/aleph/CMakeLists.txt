@@ -1,19 +1,11 @@
-info("${VT100_BOLD}${VT100_FG_CYAN}ALEPH${VT100_RESET} subdirectory")
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
-INCLUDE_DIRECTORIES(${ARCANE_CEA_SOURCE_PATH}/src)
-INCLUDE_DIRECTORIES(${ARCANE_SRC_PATH})
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-INCLUDE_DIRECTORIES(${ARCANEBUILDROOT})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-ARCANE_INCLUDE_CONFIG(${ARCANE_CEA_SOURCE_PATH}/src ALEPH aleph)
+set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
+                  AlephVector.cc   AlephParams.cc
+                  AlephTopology.cc AlephOrdering.cc
+                  AlephIndexing.cc AlephFactory.cc)
 
-ADD_DEFINITIONS(-DARCANE_COMPONENT_arcane_aleph)
+info("\t${VT100_FG_YELLOW}Aleph${VT100_RESET}")
 
-ADD_LIBRARY(arcane_aleph ${ARCANE_ALEPH})
-
-target_link_libraries(arcane_aleph ${ARCANE_BASE_LIBRARIES})
-set_target_properties(arcane_aleph PROPERTIES INSTALL_RPATH_USE_LINK_PATH 1)
-set_target_properties(arcane_aleph PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
-INSTALL(TARGETS arcane_aleph DESTINATION lib)
+add_library(NablaOkinaAleph ${ALEPH_SOURCES})

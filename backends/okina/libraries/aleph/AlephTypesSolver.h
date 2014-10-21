@@ -1,27 +1,11 @@
-/*---------------------------------------------------------------------------*/
-/* AlephTypesSolver.h                                               (C) 2010 */
-/*                                                                           */
-/* Types du package Solver.                                                  */
-/*---------------------------------------------------------------------------*/
-#ifndef ARCANE_SERVICE_SOLVER_TYPESSOLVER_H
-#define ARCANE_SERVICE_SOLVER_TYPESSOLVER_H
+#ifndef ALEPH_SOLVER_TYPESSOLVER_H
+#define ALEPH_SOLVER_TYPESSOLVER_H
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 class TypesSolver{
 public:
 
-  enum ePreconditionerMethod
-  {
+  enum ePreconditionerMethod{
     DIAGONAL=0 ,
     AINV=1     ,
     AMG=2      ,
@@ -38,15 +22,13 @@ public:
   /*!
    * \brief Stratégie à adopter en cas d'erreur du solveur.
    */
-  enum eErrorStrategy
-  {
+  enum eErrorStrategy{
     ES_Continue = 0,
     ES_Stop = 1,
     ES_GoBackward = 2
   };
 
-  enum eSolverMethod
-  {
+  enum eSolverMethod{
     PCG=0 ,
     BiCGStab=1 ,
     BiCGStab2=2,
@@ -56,8 +38,7 @@ public:
     SuperLU=6
   };
 
-  enum eAmgCoarseningMethod
-  {
+  enum eAmgCoarseningMethod{
     AMG_COARSENING_AUTO     =  0 ,
     AMG_COARSENING_HYPRE_0  =  1 ,
     AMG_COARSENING_HYPRE_1  =  2 ,
@@ -74,8 +55,7 @@ public:
 
   // ordre de eAmgSmootherOption est le meme que celui de Sloop
   // attention de ne pas le modifier voir Mireille ou bien AMG.h dans Sloop
-  enum eAmgSmootherOption
-  {
+  enum eAmgSmootherOption{
     Rich_IC_smoother         =  0 ,
     Rich_ILU_smoother        =  1 ,
     Rich_AINV_smoother       =  2 ,
@@ -91,8 +71,7 @@ public:
 
     // ordre de eAmgCoarseningOption est le meme que celui de Sloop
     // attention de ne pas le modifier voir Mireille ou bien AMG.h dans Sloop
-  enum eAmgCoarseningOption
-  {
+  enum eAmgCoarseningOption{
     ParallelRugeStuben              =  0 ,
     CLJP                            =  1 ,
     Falgout                         =  2 ,
@@ -106,40 +85,30 @@ public:
 
   // ordre de eAmgCoarseSolverOption est le meme que celui de Sloop
   // attention de ne pas le modifier voir Mireille ou bien AMG.h dans Sloop
-  enum  eAmgCoarseSolverOption
-  {
+  enum  eAmgCoarseSolverOption {
 	 CG_coarse_solver			= 0 ,
-	 BiCGStab_coarse_solver		= 1 ,
+	 BiCGStab_coarse_solver	= 1 ,
 	 LU_coarse_solver			= 2 ,
-  	 Cholesky_coarse_solver		= 3 ,
-  	 Smoother_coarse_solver		= 4 ,
-  	 SuperLU_coarse_solver		= 5
+  	 Cholesky_coarse_solver	= 3 ,
+  	 Smoother_coarse_solver	= 4 ,
+  	 SuperLU_coarse_solver	= 5
   } ;
 
 
 
    // critere d'arret du solveur Sloop
-  enum eCriteriaStop
-  {
+  enum eCriteriaStop  {
     RR0		=0 ,
     RB		=1 ,
-    R		=2 ,
+    R		   =2 ,
     RCB		=3 ,
     RBinf	=4 ,
-    EpsA	=5 ,
+    EpsA	   =5 ,
     NIter	=6 ,
     RR0inf	=7 ,
     STAG    =8
   };
 };
 
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif

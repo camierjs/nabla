@@ -1,26 +1,13 @@
-/*---------------------------------------------------------------------------*/
-/* AlephVector.cc                                                   (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
-#include "arcane/IMesh.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+//#include "arcane/IMesh.h"
 
 
 /******************************************************************************
  *****************************************************************************/
-AlephVector::AlephVector(AlephKernel *kernel):TraceAccessor(kernel->parallel()->traceMng()),
-                                              m_kernel(kernel),
-                                              m_index(kernel->index()),
-                                              m_bkp_num_values(0)
+AlephVector::AlephVector(AlephKernel *kernel): TraceAccessor(kernel->parallel()->traceMng()),
+                                               m_kernel(kernel),
+                                               m_index(kernel->index()),
+                                               m_bkp_num_values(0)
 {
   ItacFunction(AlephVector);
 
@@ -102,7 +89,7 @@ void AlephVector::create(void){
 // * setLocalComponents - without global indices
 // ****************************************************************************
 void AlephVector::setLocalComponents(ConstArrayView<double> values){
-  IntegerArray indexs;
+  Array<Integer> indexs;
   if (m_bkp_num_values==0){
     Integer row_offset=0;
     if (m_kernel->isInitialized())
@@ -384,11 +371,3 @@ void AlephVector::writeToFile(const String base_file_name){
   m_implementation->writeToFile(base_file_name);
 }
 
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

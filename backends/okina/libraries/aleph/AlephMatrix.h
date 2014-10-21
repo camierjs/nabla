@@ -1,28 +1,12 @@
-/*---------------------------------------------------------------------------*/
-/* AlephMatrix.h                                                    (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 #ifndef ALEPH_MATRIX_H
 #define ALEPH_MATRIX_H
 
 #include <map>
-#include "arcane/aleph/AlephGlobal.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
+#include "AlephGlobal.h"
 
 class IAlephMatrix;
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-/*!
- * \brief Matrice d'un système linéaire.
- */
-class ARCANE_ALEPH_EXPORT AlephMatrix
-: public TraceAccessor
-{
+class AlephMatrix: public TraceAccessor{
 public:
   AlephMatrix(AlephKernel*);
   ~AlephMatrix();
@@ -62,9 +46,9 @@ private:
   IAlephMatrix* m_implementation;
 private:
   // Matrice utilisée dans le cas où nous sommes le solveur
-  MultiArray2<Int32> m_aleph_matrix_buffer_rows;
-  MultiArray2<Int32> m_aleph_matrix_buffer_cols;
-  MultiArray2<Real> m_aleph_matrix_buffer_vals;
+  MultiArray2Int32 m_aleph_matrix_buffer_rows;
+  MultiArray2Int32 m_aleph_matrix_buffer_cols;
+  MultiArray2Real m_aleph_matrix_buffer_vals;
   // Tableaux tampons des setValues
   Integer m_setValue_idx;
   Array<Int32> m_setValue_row;

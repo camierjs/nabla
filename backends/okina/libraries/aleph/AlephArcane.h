@@ -1,32 +1,22 @@
-/*---------------------------------------------------------------------------*/
-/* AlephIni.h                                                       (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 #ifndef ALEPH_ARCANE_H
 #define ALEPH_ARCANE_H
- 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+#include "AlephGlobal.h"
 
 #include "arcane/Timer.h"
-#include "arcane/IApplication.h"
-#include "arcane/IParallelSuperMng.h"
+//#include "arcane/IApplication.h"
+//#include "arcane/IParallelSuperMng.h"
+//#include "arcane/utils/TraceAccessor.h"
+//#include "arcane/utils/String.h"
+//#include "arcane/utils/StringBuilder.h"
+//#include "arcane/utils/PlatformUtils.h"
+//#include "arcane/utils/IProcessorAffinityService.h"
 
-#include "arcane/utils/TraceAccessor.h"
-#include "arcane/utils/String.h"
-#include "arcane/utils/StringBuilder.h"
-#include "arcane/utils/PlatformUtils.h"
-#include "arcane/utils/IProcessorAffinityService.h"
+#include "AlephTypesSolver.h" 
+#include "AlephParams.h"
 
-#include "arcane/aleph/AlephGlobal.h"
-#include "arcane/aleph/AlephTypesSolver.h" 
-#include "arcane/aleph/AlephParams.h"
-
-#include "arcane/aleph/Aleph.h"
-#include "arcane/aleph/IAlephFactory.h"
+#include "Aleph.h"
+#include "IAlephFactory.h"
 
 #undef ARCANE_HAS_PACKAGE_ITAC
 #ifdef ARCANE_HAS_PACKAGE_ITAC

@@ -1,35 +1,15 @@
-/*---------------------------------------------------------------------------*/
-/* AlephParams.h                                                    (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 #ifndef ALEPH_PARAMS_H
 #define ALEPH_PARAMS_H
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
-#include "arcane/aleph/AlephGlobal.h"
+#include "AlephGlobal.h"
+#include "AlephTypesSolver.h" 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+class ITraceMng;
 
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-/*!
- * \brief Paramètres d'un système linéraire.
- */
-class ARCANE_ALEPH_EXPORT AlephParams
-: public TraceAccessor
-{
+class AlephParams{
  public:
   AlephParams();
-  AlephParams(ITraceMng*, Real, Integer,
+  AlephParams(Real, Integer,
 				  Integer,
 				  Integer,
 				  Integer, Real, bool, bool, bool, bool, Real, bool, bool, bool,
@@ -81,7 +61,6 @@ class ARCANE_ALEPH_EXPORT AlephParams
   void setKeepSolverStructure(const bool keep_solver_structure);
   void setSequentialSolver(const bool sequential_solver);
   void setCriteriaStop(const TypesSolver::eCriteriaStop criteria_stop);
-
 
   // get
   Real epsilon()const;
@@ -145,16 +124,6 @@ class ARCANE_ALEPH_EXPORT AlephParams
   bool m_param_sequential_solver;
   TypesSolver::eCriteriaStop m_param_criteria_stop;
 };
-
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif  
 

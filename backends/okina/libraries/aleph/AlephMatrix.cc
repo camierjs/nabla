@@ -1,18 +1,5 @@
-/*---------------------------------------------------------------------------*/
-/* AlephMatrix.cc                                             (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
-#include "arcane/MeshVariableScalarRef.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+//#include "arcane/MeshVariableScalarRef.h"
 
 /******************************************************************************
  *****************************************************************************/                           
@@ -62,7 +49,7 @@ AlephMatrix::~AlephMatrix(){
  * BaseForm[Hash["AlephMatrix::create(void)", "CRC32"], 16] = fff06e2
  *****************************************************************************/
 void AlephMatrix::create(void){
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::create");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::create");
   debug()<<"\33[1;32m[AlephMatrix::create(void)]\33[0m";
   // Si le kernel n'est pas initialisé, on a rien à faire
   if (!m_kernel->isInitialized()) return;
@@ -91,7 +78,7 @@ void AlephMatrix::create(IntegerConstArrayView row_nb_element,
  * \brief reset pour flusher les tableaux des [set&add]Value
  */
 void AlephMatrix::reset(void){
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reset");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reset");
   debug()<<"\33[1;32m[AlephMatrix::reset]\33[0m";
   m_setValue_val.fill(0.0);
   m_addValue_val.fill(0.0);
@@ -276,7 +263,7 @@ void AlephMatrix::reAddValuesIn(AlephMatrix *thisMatrix,
  */
 void AlephMatrix::assemble(void){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::assemble");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::assemble");
   // Si le kernel n'est pas initialisé, on ne fait toujours rien
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;32m[AlephMatrix::assemble] Trying to assemble a matrix"
@@ -292,7 +279,7 @@ void AlephMatrix::assemble(void){
     debug()<<"\33[1;32m[AlephMatrix::assemble] m_addValue_idx!=0\33[0m";
     // On flush notre index des setValues
     m_setValue_idx=0;
-    Timer::Action ta(m_kernel->subDomain(),"Flatenning addValues");
+    //Timer::Action ta(m_kernel->subDomain(),"Flatenning addValues");
     debug()<<"\t\33[32m[AlephMatrix::assemble] Flatenning addValues size="<<m_addValue_row.size()<<"\33[0m";
     for(Integer k=0,kMx=m_addValue_row.size();k<kMx;++k){
       m_setValue_row[k]=m_addValue_row[k];
@@ -380,7 +367,7 @@ void AlephMatrix::assemble(void){
 		}
 	 }
   }
-  // Si je suis un rang Arcane qui a des données à envoyer, je le fais
+  // Si je suis un rang qui a des données à envoyer, je le fais
   if ((m_kernel->rank()!=m_ranks[m_kernel->rank()])&&(!m_kernel->isAnOther())){
     ItacRegion(iSend,AlephMatrix);
 	 debug() << "\33[1;32m[AlephMatrix::assemble]"
@@ -403,7 +390,7 @@ void AlephMatrix::assemble(void){
  */
 void AlephMatrix::create_really(void){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::create_really");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::create_really");
   debug()<<"\33[1;32m[AlephMatrix::create_really]"<<"\33[0m";
   // Il nous faut alors dans tous les cas une matrice de travail  
   debug() << "\33[1;32m[AlephMatrix::create_really] new MATRIX"<<"\33[0m";
@@ -418,7 +405,7 @@ void AlephMatrix::create_really(void){
  */
 void AlephMatrix::assemble_waitAndFill(void){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::assemble_waitAndFill");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::assemble_waitAndFill");
   debug()<<"\33[1;32m[AlephMatrix::assemble_waitAndFill]"<<"\33[0m";
   if (m_kernel->isParallel()){
 	 ItacRegion(Wait,AlephMatrix);
@@ -451,17 +438,17 @@ void AlephMatrix::assemble_waitAndFill(void){
  	 for( int iCpu=0;iCpu<m_kernel->size();++iCpu){
       if (m_kernel->rank()!=m_ranks[iCpu]) continue;  
       if (iCpu==m_kernel->rank()) {
-        bfr_row_implem  = reinterpret_cast<int*>(m_setValue_row.unguardedBasePointer());
-        bfr_col_implem  = reinterpret_cast<int*>(m_setValue_col.unguardedBasePointer());
-        bfr_val_implem  = reinterpret_cast<double*>(m_setValue_val.unguardedBasePointer());
+        bfr_row_implem  = reinterpret_cast<int*>(m_setValue_row.unguardedBasePointers());
+        bfr_col_implem  = reinterpret_cast<int*>(m_setValue_col.unguardedBasePointers());
+        bfr_val_implem  = reinterpret_cast<double*>(m_setValue_val.unguardedBasePointers());
         m_implementation->AlephMatrixFill(m_setValue_val.size(),
                                           bfr_row_implem,
                                           bfr_col_implem,
                                           bfr_val_implem);
       }else{
-        bfr_row_implem  = reinterpret_cast<int*>(m_aleph_matrix_buffer_rows[iCpu].unguardedBasePointer());
-        bfr_col_implem  = reinterpret_cast<int*>(m_aleph_matrix_buffer_cols[iCpu].unguardedBasePointer());
-        bfr_val_implem  = reinterpret_cast<double*>(m_aleph_matrix_buffer_vals[iCpu].unguardedBasePointer());
+        bfr_row_implem  = reinterpret_cast<int*>(m_aleph_matrix_buffer_rows[iCpu].unguardedBasePointers());
+        bfr_col_implem  = reinterpret_cast<int*>(m_aleph_matrix_buffer_cols[iCpu].unguardedBasePointers());
+        bfr_val_implem  = reinterpret_cast<double*>(m_aleph_matrix_buffer_vals[iCpu].unguardedBasePointers());
         m_implementation->AlephMatrixFill(m_aleph_matrix_buffer_vals[iCpu].size(),
                                           bfr_row_implem,
                                           bfr_col_implem,
@@ -494,7 +481,7 @@ void AlephMatrix::solve(AlephVector* x,
                         AlephParams* solver_param,
                         bool async){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::solve");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::solve");
   debug() << "\33[1;32m[AlephMatrix::solve] Queuing solver "<<m_index<<"\33[0m";
   m_kernel->postSolver(solver_param,this,x,b);
   // Si on nous a spécifié le post, on ne déclenche pas le mode synchrone
@@ -520,7 +507,7 @@ void AlephMatrix::solveNow(AlephVector* x,
                            Integer& nb_iteration,
                            Real* residual_norm,
                            AlephParams* params){
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::solveNow");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::solveNow");
   const bool dump_to_compare=
     (m_index==0) &&                                 // Si on est à la première résolution
     (m_kernel->rank()==0) &&                        // et qu'on est le 'master'
@@ -535,8 +522,10 @@ void AlephMatrix::solveNow(AlephVector* x,
   debug()<<"\33[1;32m[AlephMatrix::solveNow]"<<"\33[0m";
   if (dump_to_compare){
     const Integer globalIteration = m_kernel->subDomain()->commonVariables().globalIteration();
-    String mtxFilename = String("m_aleph_matrix_A_") + globalIteration;
-    String rhsFilename = String("m_aleph_vector_b_") + globalIteration;
+    String mtxFilename = String("m_aleph_matrix_A_");// + globalIteration;
+    String rhsFilename = String("m_aleph_vector_b_");// + globalIteration;
+    mtxFilename+=globalIteration;
+    rhsFilename+=globalIteration;
     warning()<<"[AlephMatrix::solveNow] mtxFileName rhsFileName write_to_file";
     writeToFile(mtxFilename.localstr());
     b->writeToFile(rhsFilename.localstr());
@@ -548,7 +537,8 @@ void AlephMatrix::solveNow(AlephVector* x,
                                      params);
   if (dump_to_compare){
     const Integer globalIteration = m_kernel->subDomain()->commonVariables().globalIteration();
-    String lhsFilename = String("m_aleph_vector_x_") + globalIteration;
+    String lhsFilename = String("m_aleph_vector_x_");
+    lhsFilename += globalIteration;
     x->writeToFile(lhsFilename.localstr());
   }
   if (m_kernel->isCellOrdering())
@@ -567,7 +557,7 @@ void AlephMatrix::solveNow(AlephVector* x,
 void AlephMatrix::reassemble(Integer& nb_iteration,
                              Real* residual_norm){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reassemble");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reassemble");
    // Si on est pas en mode parallèle, on en a finit pour le solve
   if (!m_kernel->isParallel()) return;
   m_aleph_matrix_buffer_n_iteration.resize(1);
@@ -606,7 +596,7 @@ void AlephMatrix::reassemble(Integer& nb_iteration,
  */
 void AlephMatrix::reassemble_waitAndFill(Integer& nb_iteration, Real* residual_norm){
   ItacFunction(AlephMatrix);
-  Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reassemble_waitAndFill");
+  //Timer::Action ta(m_kernel->subDomain(),"AlephMatrix::reassemble_waitAndFill");
   if (!m_kernel->isParallel()) return;
   debug() << "\33[1;32m[AlephMatrix::REassemble_waitAndFill]"<<"\33[0m";
   //if (m_kernel->isAnOther()) return;
@@ -642,12 +632,3 @@ void AlephMatrix::writeToFile(const String file_name){
   debug()<<"\33[1;32m[AlephMatrix::writeToFile] Dumping matrix to "<<file_name<<"\33[0m";
   m_implementation->writeToFile(file_name);
 }
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

@@ -1,32 +1,13 @@
-/*---------------------------------------------------------------------------*/
-/* AlephVector.h                                                    (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 #ifndef ALEPH_VECTOR_H
 #define ALEPH_VECTOR_H
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
-#include "arcane/aleph/AlephGlobal.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+#include "AlephGlobal.h"
 
 class IAlephVector;
 class AlephTopology;
 class AlephKernel;
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-/*!
- * \brief Vecteur d'un système linéaire.
- */
-class ARCANE_ALEPH_EXPORT AlephVector: public TraceAccessor{
+class AlephVector: public TraceAccessor{
  public:
   AlephVector(AlephKernel*);
   ~AlephVector();
@@ -43,7 +24,7 @@ class ARCANE_ALEPH_EXPORT AlephVector: public TraceAccessor{
   void getLocalComponents(Integer vector_size,
                           ConstArrayView<int> global_indice,
                           ArrayView<double>   vector_values);  
-  void getLocalComponents(Array<double> &values);  
+  void getLocalComponents(Array<Real> &values);  
   void startFilling(void);
   void assemble(void);
   void assemble_waitAndFill(void);
@@ -73,14 +54,6 @@ class ARCANE_ALEPH_EXPORT AlephVector: public TraceAccessor{
   Array<int> m_bkp_indexs;
   Array<double> m_bkp_values;
 };
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif  
 

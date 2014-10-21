@@ -1,24 +1,6 @@
-/*---------------------------------------------------------------------------*/
-/* AlephParams.cc                                                   (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
 AlephParams::AlephParams():
-  TraceAccessor(traceMng()),
   m_param_epsilon(1.0e-10),
   m_param_max_iteration(1024),
   m_param_preconditioner_method(TypesSolver::DIAGONAL),
@@ -52,8 +34,8 @@ AlephParams::AlephParams():
   //debug() << "\33[1;4;33m\t[AlephParams] New"<<"\33[0m";
 }
 
-AlephParams::AlephParams(ITraceMng* tm,
-								 Real epsilon, // epsilon de convergence
+AlephParams::AlephParams(ITraceMng *tm,
+                         Real epsilon, // epsilon de convergence
 								 Integer max_iteration, // nb max iterations
 								 TypesSolver::ePreconditionerMethod preconditioner_method, //  préconditionnement utilisé (defaut DIAG)
 								 TypesSolver::eSolverMethod solver_method, // méthode de résolution par defaut PCG
@@ -82,7 +64,6 @@ AlephParams::AlephParams(ITraceMng* tm,
 								 bool keep_solver_structure,
 								 bool sequential_solver,
                          TypesSolver::eCriteriaStop param_criteria_stop):
-  TraceAccessor(tm),
   m_param_epsilon(epsilon),
   m_param_max_iteration(max_iteration),
   m_param_preconditioner_method(preconditioner_method),
@@ -198,12 +179,4 @@ TypesSolver::eAmgCoarseSolverOption AlephParams::getAmgCoarseSolverOption()const
 bool AlephParams::getKeepSolverStructure()const{return m_param_keep_solver_structure;}
 bool AlephParams::getSequentialSolver()const{return m_param_sequential_solver;}
 TypesSolver::eCriteriaStop AlephParams::getCriteriaStop()const{return m_param_criteria_stop;}
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 

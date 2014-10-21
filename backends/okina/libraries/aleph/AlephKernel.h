@@ -1,25 +1,12 @@
-/*---------------------------------------------------------------------------*/
-/* AlephKernel.h                                                    (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-#ifndef ARCANE_ALEPH_KERNEL_H
-#define ARCANE_ALEPH_KERNEL_H 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+#ifndef _ALEPH_KERNEL_H_
+#define _ALEPH_KERNEL_H_
 
-#include "arcane/utils/TraceAccessor.h"
-#include "arcane/utils/Array.h"
-#include "arcane/utils/FatalErrorException.h"
+//#include "arcane/utils/ITraceMng.h"
+//#include "arcane/utils/TraceAccessor.h"
+//#include "arcane/utils/Array.h"
+//#include "arcane/utils/FatalErrorException.h"
 
-#include "arcane/aleph/AlephGlobal.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+#include "AlephGlobal.h"
 
 class IAlephFactory;
 class IAlephTopology;
@@ -32,8 +19,6 @@ class IParallelMng;
 class ISubDomain;
 class AlephParams;
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 /******************************************************************************
  *****************************************************************************/
@@ -46,7 +31,7 @@ class AlephKernelResults{
 
 /******************************************************************************
  *****************************************************************************/
-class ARCANE_ALEPH_EXPORT AlephKernelArguments: public TraceAccessor{
+class AlephKernelArguments: public TraceAccessor{
 public:
   AlephKernelArguments(ITraceMng* tm,
                        AlephVector *x_vector,
@@ -73,9 +58,7 @@ public:
 
 /******************************************************************************
  *****************************************************************************/
-class ARCANE_ALEPH_EXPORT AlephKernel
-: public TraceAccessor
-{
+class AlephKernel: public TraceAccessor{
  public:
   AlephKernel(IParallelMng*, Integer, IAlephFactory*, Integer=0, Integer=0, bool=false);
   AlephKernel(ITraceMng*, ISubDomain*, IAlephFactory*, Integer=0, Integer=0, bool=false);
@@ -115,7 +98,7 @@ public:
   void mapranks(Array<Integer>&);
   bool hitranks(Integer, ArrayView<Integer>);
   Integer nbRanksPerSolver(void){return m_solver_size;}
-  ArrayView<Integer> solverRanks(Integer i){return m_solver_ranks.at(i).view();}
+  ArrayView<Integer> solverRanks(Integer i){return m_solver_ranks.at(i);}//.view();}
   IParallelMng* subParallelMng(Integer i){return m_sub_parallel_mng_queue.at(i);}
   IAlephTopology* getTopologyImplementation(Integer i){
     return m_arguments_queue.at(i)->m_topology_implementation;
@@ -153,14 +136,6 @@ private:
   Array<AlephKernelArguments*> m_arguments_queue;
   Array<AlephKernelResults*> m_results_queue;
 };
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif  
 

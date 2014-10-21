@@ -1,29 +1,16 @@
-/*---------------------------------------------------------------------------*/
-/* AlephIndexing.cc                                              (C) 2012~13 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
 
 #include <map>
-#include "arcane/IMesh.h"
-#include "arcane/VariableInfo.h"
-#include "arcane/ArcaneTypes.h"
-#include "arcane/utils/String.h"
-#include <arcane/IVariable.h>
-#include <arcane/IVariableMng.h>
+//#include <arcane/IMesh.h>
+//#include <arcane/VariableInfo.h>
+//#include <arcane/ArcaneTypes.h>
+//#include <arcane/utils/String.h>
+//#include <arcane/IVariable.h>
+//#include <arcane/IVariableMng.h>
 #include <arcane/utils/ArcaneGlobal.h>
-#include <arcane/utils/ArcanePrecomp.h>
+//#include <arcane/utils/ArcanePrecomp.h>
 
 #define ALEPH_INDEX_NOT_USED (-1)
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 // ****************************************************************************
 // * AlephIndexing
@@ -75,7 +62,7 @@ Int32 AlephIndexing::findWhichLidFromMapMap(IVariable *var,
     //debug()<<"\t\33[33m[findWhichLidFromMapMap] Unknown variable "<<var->name()<<"\33[m";
     traceMng()->flush();
     String var_idx_name(var->name());
-    var_idx_name=var_idx_name+String("_idx");
+    var_idx_name+="_idx";
     VariableItemInt32 *var_idx=
       new VariableItemInt32(VariableBuildInfo(var->mesh(),
                                               var_idx_name),
@@ -221,11 +208,3 @@ AlephIndexing::~AlephIndexing(){
   traceMng()->flush();
 }
 
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

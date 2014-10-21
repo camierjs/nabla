@@ -1,16 +1,4 @@
-/*---------------------------------------------------------------------------*/
-/* AlephParallelScheduler.cc                                        (C) 2010 */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 #include "AlephArcane.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 // ****************************************************************************
 // * AlephKernel utilisé par Kappa où l'on met le m_sub_domain à NULL
@@ -172,7 +160,7 @@ void AlephKernel::setup(void){
     cfg.add((m_reorder==true)?1:0);
     cfg.add(m_size);
     debug()<<"\33[1;31m[AlephKernel] Sending to others configuration: "<<cfg<<"\33[0m";
-    m_world_parallel->broadcast(cfg.view(),0);
+    m_world_parallel->broadcast(cfg,0);//.view(),0);
   }
 }
 
@@ -312,7 +300,7 @@ IParallelMng *AlephKernel::createUnderlyingParallelMng(Integer nb_wanted_sites){
   Array<Integer> kept_ranks(0);
   for(Integer rnk=0; rnk<m_world_size; rnk+=1){
     if (hitranks(rnk,m_solver_ranks[m_solver_index])){
-      kept_ranks.add(rnk);
+      kept_ranks.push_back(rnk);
       debug()<<"\33[1;31m[createUnderlyingParallelMng] keeping "<<rnk<<"\33[0m";
     }else{
       debug()<<"\33[1;31m[createUnderlyingParallelMng] avoiding "<<rnk<<"\33[0m";
@@ -587,12 +575,3 @@ void AlephKernel::workSolver(void){
 }
 
 
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

@@ -63,3 +63,8 @@ configure_file(outputs/knMicScatter.h ${CMAKE_CURRENT_BINARY_DIR}/knMicScatter.h
 configure_file(outputs/knMicOStream.h ${CMAKE_CURRENT_BINARY_DIR}/knMicOStream.h)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
+
+
+info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}OKINA${VT100_RESET} libraries:${VT100_RESET}")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libraries/arcane)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libraries/aleph)
