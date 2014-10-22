@@ -4,7 +4,8 @@ options{
 };
 
 cells{
-  Real alpha[4];
+  Real α;
+  Real αs[4];
   Real theta[nodes];
 };
 
@@ -14,22 +15,27 @@ global{
 };
 
 
-cells Real inverse(Real ε){
-  ε=(ε!=0.0)?1.0/ε:ε;
+cells Real inverse(Real ε) in (cell α){
+  ε=(ε!=0.0)?1.0/α:ε;
   return ε;
 }
 
 
-cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
+/*cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
   const Real denom = 1.e-20+rabs(vdov);
   const Real dtdvov = option_dvovmax / denom;
   const Real dthdr = min(dthydro,dtdvov);
   dthydro=(vdov!=0.0)?dthdr;
   return dthydro;
-}
+  }*/
 
+/*
 void powOfTwo(void){
   const Real α = 1.0;
   const Real β = α²;
   const Real γ = β³;
+  const Real ε = 0;
+  ε?=1.0;
+  ε<?=1.0;
 }
+*/

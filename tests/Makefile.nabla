@@ -1,4 +1,5 @@
 TGT=${name}
+#export LOG=-t -v $(TGT).log
 ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
 
 include ../Makefile.nabla.${backend}

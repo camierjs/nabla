@@ -42,15 +42,15 @@ add_flex_bison_dependency(nScanner nParser)
 set(CUDA_TOOLKIT_ROOT_DIR opt/cuda/5.0)
 find_package(CUDA)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/frontend)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/middlend)
 
 ####################################
 # Executable, librairie et install #
 ####################################
-add_executable(nabla nabla.c)
+add_executable(nabla nabla.c)# nablaAst.c)
 add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/frontend)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/middlend)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)

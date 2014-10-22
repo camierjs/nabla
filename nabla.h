@@ -102,7 +102,7 @@ typedef enum{
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
 
 #include "frontend/nablaDebug.h"
-#include "frontend/nablaAst.h" 
+#include "frontend/nablaAst.h"
 
 #include "middlend/nablaMiddlend.h"
 
