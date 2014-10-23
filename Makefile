@@ -1,5 +1,6 @@
 export CC=/usr/local/opendev1/gcc/gcc/4.9.0/bin/gcc
 export CXX=/usr/local/opendev1/gcc/gcc/4.9.0/bin/g++
+#export C_FLAGS = -std=c99
 
 CMAKE_PATH = /usr/local/opendev1/gcc/cmake/3.0.0
 CMAKE = $(CMAKE_PATH)/bin/cmake

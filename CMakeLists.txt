@@ -13,7 +13,8 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RES
 
 project(Nabla)
 enable_language(ASM) 
-set(CMAKE_C_FLAGS "-Wall")#-std=c99
+#set(C_FLAGS "-Wall -std=c99" CACHE STRING "My flags used by the compiler during all build types" FORCE)
+set(CMAKE_C_FLAGS "-Wall -std=c99")#CACHE STRING "My flags used by the compiler during all build types" FORCE)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -31,14 +32,16 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
-bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLAGS "--report=all --warnings=all,error")#--graph 
-flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c)
+bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c 
+  COMPILE_FLAGS "--report=all --warnings=all,error")#--graph 
+#set(BISON_nParser_COMPILE_FLAGS "-td=c99")
+flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
 add_flex_bison_dependency(nScanner nParser)
 
 
 ########
 # CUDA #
-########
+######## 
 set(CUDA_TOOLKIT_ROOT_DIR opt/cuda/5.0)
 find_package(CUDA)
 

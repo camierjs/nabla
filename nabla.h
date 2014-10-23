@@ -23,7 +23,11 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <stdbool.h>
+int fileno(FILE *stream);
+char *strdup(const char *s);
+int mkstemp(char *template);
 void nabla_error(const char *format, ...);
+
 
 /*****************************************************************************
  * typedefs

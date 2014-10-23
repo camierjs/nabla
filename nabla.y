@@ -14,7 +14,7 @@
  *****************************************************************************/
 %{
 #include "nabla.h"
-#include "nablaY.h" 
+#include "nabla.y.h" 
 #include <stdio.h>
 #include <string.h>
 
@@ -262,7 +262,7 @@ nabla_system
 | NEXTLEFT {rhs}
 | NEXTRIGHT {rhs}
 | TIME {rhs}
-| TIME REMAIN {remainY1($$)}
+| TIME REMAIN {remainY1()}
 | TIME LIMIT {limitY1($$)}
 | EXIT {rhs}
 | ITERATION {rhs}
@@ -286,7 +286,7 @@ pointer
 initializer
 : assignment_expression {rhs}
 | '{' initializer_list '}'{rhs}
-//| type_specifier '(' initializer_list ')'{Y4($$,$1,$2,$3,$4)}
+//| type_specifier '(' initializer_list ')'{rhs}
 ;
 initializer_list
 : initializer {rhs}
@@ -346,18 +346,18 @@ identifier_list
 direct_declarator
 : IDENTIFIER {rhs}
 | '(' declarator ')'{rhs}
-| direct_declarator '[' constant_expression ']'{Y4($$,$1,$2,$3,$4)}
+| direct_declarator '[' constant_expression ']'{rhs}
 | direct_declarator '[' ']'{rhs}
-| direct_declarator '(' parameter_type_list ')'{Y4($$,$1,$2,$3,$4)}
-| direct_declarator '(' identifier_list ')'{Y4($$,$1,$2,$3,$4)}
+| direct_declarator '(' parameter_type_list ')'{rhs}
+| direct_declarator '(' identifier_list ')'{rhs}
 | direct_declarator '(' ')'{rhs}
 ;
 init_declarator
 :	declarator {rhs}
 // Permet de faire des appels constructeurs à-là '= Real3(0.0,0.0,0.0)' lors des déclarations
-//|	declarator '=' type_specifier assignment_expression{Y4($$,$1,$2,$3,$4)} // initializer
+//|	declarator '=' type_specifier assignment_expression{rhs} // initializer
 // Permet de faire des appels constructeurs à-là '= Real3x3()' lors des déclarations
-//|	declarator '=' type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
+//|	declarator '=' type_specifier '(' ')' {rhs}
 |	declarator '=' initializer {rhs}
 ;
 init_declarator_list
@@ -374,11 +374,11 @@ direct_abstract_declarator
 | '[' ']'{rhs}
 | '[' constant_expression ']'{rhs}
 | direct_abstract_declarator '[' ']'{rhs}
-| direct_abstract_declarator '[' constant_expression ']'{Y4($$,$1,$2,$3,$4)}
+| direct_abstract_declarator '[' constant_expression ']'{rhs}
 | '(' ')'{rhs}
 | '(' parameter_type_list ')'{rhs}
 | direct_abstract_declarator '(' ')'{rhs}
-| direct_abstract_declarator '(' parameter_type_list ')'{Y4($$,$1,$2,$3,$4)}
+| direct_abstract_declarator '(' parameter_type_list ')'{rhs}
 ;
 
 
@@ -416,7 +416,7 @@ nabla_parameter_declaration
 : nabla_item direct_declarator {rhs};
 nabla_parameter_list
 : nabla_parameter_declaration {rhs}
-| nabla_parameter_list ',' nabla_parameter_declaration {Y2($$,$1,$3)};
+| nabla_parameter_list ',' nabla_parameter_declaration {Y($$,$1,$3)};
 
 // !? WTF between these two 'nabla_parameter_list' ?!
 
@@ -430,16 +430,16 @@ nabla_parameter
 nabla_parameter_list
 : nabla_parameter {rhs}
 | nabla_parameter_list nabla_parameter{rhs};
-nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {Y2($$,$1,$3)}; 
-nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};  
-nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {Y2($$,$1,$3)};  
+nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {Y($$,$1,$3)}; 
+nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {Y($$,$1,$3)};  
+nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {Y($$,$1,$3)};  
 
 
 ////////////////
 // NAMESPACES //
 ////////////////
 //| NAMESPACE IDENTIFIER {rhs}
-//| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y1($$,$6)}
+//| IDENTIFIER '<' REAL '>' NAMESPACE IDENTIFIER {Y($$,$6)}
 //| IDENTIFIER NAMESPACE IDENTIFIER {rhs}
 
 argument_expression_list
@@ -472,16 +472,16 @@ postfix_expression
 : primary_expression {rhs}
 | postfix_expression FOREACH_NODE_INDEX {rhs}
 | postfix_expression FOREACH_CELL_INDEX {rhs}
-| postfix_expression '[' expression ']' {Y4($$,$1,$2,$3,$4)}
+| postfix_expression '[' expression ']' {rhs}
 | REAL '(' ')'{rhs}
-| REAL '(' expression ')' {Y4($$,$1,$2,$3,$4)}
+| REAL '(' expression ')' {rhs}
 | REAL3 '(' ')'{rhs}
-| REAL3 '(' expression ')' {Y4($$,$1,$2,$3,$4)}
+| REAL3 '(' expression ')' {rhs}
 | REAL3x3 '(' ')'{rhs}
-| REAL3x3 '(' expression ')' {Y4($$,$1,$2,$3,$4)}
+| REAL3x3 '(' expression ')' {rhs}
 | postfix_expression '(' ')' {rhs}
 // On traite l'appel à fatal différemment qu'un CALL standard
-| FATAL '(' argument_expression_list ')' {Y4($$,$1,$2,$3,$4)}
+| FATAL '(' argument_expression_list ')' {rhs}
 | postfix_expression '(' argument_expression_list ')'{
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
   astNode *callNode=astNewNodeToken();
@@ -491,7 +491,7 @@ postfix_expression
   astNode *argsNode=astNewNodeToken();
   argsNode->token=strdup("");///*args*/");
   argsNode->tokenid=ARGS;
-  Y6($$,callNode,$1,$2,$3,argsNode,$4)
+  Y($$,callNode,$1,$2,$3,argsNode,$4)
     }
 | postfix_expression '.' IDENTIFIER {rhs}
 | postfix_expression '.' nabla_item '(' Z_CONSTANT ')'{rhs}
@@ -518,11 +518,11 @@ unary_expression
 | '&' unary_expression {Yp2p($$,$1,$2)}
 | unary_prefix_operator cast_expression {rhs}
 | SIZEOF unary_expression {rhs}
-| SIZEOF '(' type_name ')'{Y4($$,$1,$2,$3,$4)}
+| SIZEOF '(' type_name ')'{rhs}
 ;
 cast_expression
 : unary_expression {rhs}
-| '(' type_name ')' cast_expression {Y4($$,$1,$2,$3,$4)}
+| '(' type_name ')' cast_expression {rhs}
 ;
 multiplicative_expression
 : cast_expression {rhs}
@@ -601,7 +601,7 @@ assignment_expression
 | unary_expression assignment_operator logical_or_expression '?' expression {YopDuaryExpression($$,$1,$2,$3,$5)}
 // Permet de faire des appels constructeurs à-là 'Real3(0.0,0.0,0.0)' lors des expressions
 //| unary_expression assignment_operator type_specifier '(' initializer_list ')' {rhs}
-//| unary_expression assignment_operator type_specifier '(' ')' {Y5($$,$1,$2,$3,$4,$5)}
+//| unary_expression assignment_operator type_specifier '(' ')' {rhs}
 ;
 
 expression
@@ -620,41 +620,41 @@ compound_statement
 : start_scope end_scope {rhs}
 | start_scope statement_list end_scope {rhs}
 | start_scope declaration_list end_scope {rhs}
-| start_scope declaration_list statement_list end_scope{Y4($$,$1,$2,$3,$4)}
+| start_scope declaration_list statement_list end_scope{rhs}
 // Permet de rajouter des statements à la C++ avant la déclaration des variables locales
-| start_scope statement_list declaration_list statement_list end_scope{Y5($$,$1,$2,$3,$4,$5)}
+| start_scope statement_list declaration_list statement_list end_scope{rhs}
 ;
 expression_statement
 : ';'{rhs}
 | expression ';'{rhs}
-| expression AT at_constant';' {Y4($$,$1,$2,$3,$4)}
+| expression AT at_constant';' {rhs}
 ;
 selection_statement
-: IF '(' expression ')' statement %prec REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY {Y5($$,$1,$2,$3,$4,$5)}
-| IF '(' expression ')' statement ELSE statement {Y7($$,$1,$2,$3,$4,$5,$6,$7)}
+: IF '(' expression ')' statement %prec REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY {rhs}
+| IF '(' expression ')' statement ELSE statement {rhs}
 ;
 iteration_statement
-: FOREACH nabla_item statement {Y3_foreach($$,$1,$2,$3)}
-| FOREACH nabla_item AT at_constant statement {Y5_foreach($$,$1,$2,$3,$4,$5)}
-| FOREACH nabla_matenv statement {Y3_foreach($$,$1,$2,$3)}
-| FOREACH nabla_matenv AT at_constant statement {Y5_foreach($$,$1,$2,$3,$4,$5)}
-| FOREACH IDENTIFIER CELL statement {Y4_foreach_cell_cell($$,$1,$2,$3,$4)}
-| FOREACH IDENTIFIER NODE statement {Y4_foreach_cell_node($$,$1,$2,$3,$4)}
-| FOREACH IDENTIFIER FACE statement {Y4_foreach_cell_face($$,$1,$2,$3,$4)}
-| FOREACH IDENTIFIER PARTICLE statement {Y4_foreach_cell_particle($$,$1,$2,$3,$4)}
-| WHILE '(' expression ')' statement {Y5($$,$1,$2,$3,$4,$5)}
-| DO statement WHILE '(' expression ')' ';' {Y7($$,$1,$2,$3,$4,$5,$6,$7)}
+: FOREACH nabla_item statement {foreach($$,$1,$2,$3)}
+| FOREACH nabla_item AT at_constant statement {foreach($$,$1,$2,$3,$4,$5)}
+| FOREACH nabla_matenv statement {foreach($$,$1,$2,$3)}
+| FOREACH nabla_matenv AT at_constant statement {foreach($$,$1,$2,$3,$4,$5)}
+| FOREACH IDENTIFIER CELL statement {foreach($$,$1,$2,$3,$4)}
+| FOREACH IDENTIFIER NODE statement {foreach($$,$1,$2,$3,$4)}
+| FOREACH IDENTIFIER FACE statement {foreach($$,$1,$2,$3,$4)}
+| FOREACH IDENTIFIER PARTICLE statement {foreach($$,$1,$2,$3,$4)}
+| WHILE '(' expression ')' statement {rhs}
+| DO statement WHILE '(' expression ')' ';' {rhs}
 | FOR '(' expression_statement expression_statement ')' statement {rhs}
-| FOR '(' expression_statement expression_statement expression ')' statement {Y7($$,$1,$2,$3,$4,$5,$6,$7)}
-| FOR '(' type_specifier expression_statement expression_statement ')' statement {Y7($$,$1,$2,$3,$4,$5,$6,$7)}
-| FOR '(' type_specifier expression_statement expression_statement expression ')' statement {Y8($$,$1,$2,$3,$4,$5,$6,$7,$8)}
+| FOR '(' expression_statement expression_statement expression ')' statement {rhs}
+| FOR '(' type_specifier expression_statement expression_statement ')' statement {rhs}
+| FOR '(' type_specifier expression_statement expression_statement expression ')' statement {rhs}
 ;
 jump_statement
 : CONTINUE ';'{rhs}
 | BREAK ';'{rhs}
 | RETURN ';'{rhs}
 | RETURN expression ';'{rhs}
-//| RETURN type_specifier expression ';' {Y4($$,$1,$2,$3,$4)}
+//| RETURN type_specifier expression ';' {rhs}
 ;
 statement
 : compound_statement {rhs}
@@ -673,14 +673,14 @@ statement_list
 // ∇ functions //
 /////////////////
 function_definition
-: declaration_specifiers declarator declaration_list compound_statement {Y4($$,$1,$2,$3,$4)}
+: declaration_specifiers declarator declaration_list compound_statement {rhs}
 | declaration_specifiers declarator declaration_list AT at_constant compound_statement {rhs}
 | declaration_specifiers declarator compound_statement {rhs}
-| declaration_specifiers declarator AT at_constant compound_statement {Y5($$,$1,$2,$3,$4,$5)}
+| declaration_specifiers declarator AT at_constant compound_statement {rhs}
 //| declarator declaration_list compound_statement {rhs}
-//| declarator declaration_list AT at_constant compound_statement {Y5($$,$1,$2,$3,$4,$5)}
+//| declarator declaration_list AT at_constant compound_statement {rhs}
 //| declarator compound_statement {rhs}
-//| declarator AT at_constant compound_statement {Y4($$,$1,$2,$3,$4)}
+//| declarator AT at_constant compound_statement {rhs}
 ;
 
 
@@ -688,15 +688,15 @@ function_definition
 // ∇ items definitions //
 /////////////////////////
 nabla_item_definition
-: nabla_items '{' nabla_item_declaration_list '}' ';' {Y2($$,$1,$3)};
+: nabla_items '{' nabla_item_declaration_list '}' ';' {Y($$,$1,$3)};
 nabla_item_declaration_list
 : nabla_item_declaration {rhs}
 | nabla_item_declaration_list nabla_item_declaration {rhs}
 ;
 nabla_direct_declarator
 : IDENTIFIER {rhs}
-| IDENTIFIER '[' nabla_items ']'{Y2($$,$1,$3)}
-| IDENTIFIER '[' primary_expression ']'{Y2($$,$1,$3)}
+| IDENTIFIER '[' nabla_items ']'{Y($$,$1,$3)}
+| IDENTIFIER '[' primary_expression ']'{Y($$,$1,$3)}
 ;
 nabla_item_declaration
 : type_name nabla_direct_declarator ';' {rhs}
@@ -708,13 +708,13 @@ nabla_item_declaration
 // ∇ options definition //
 //////////////////////////
 nabla_options_definition
-: OPTIONS '{' nabla_option_declaration_list '}' ';' {Y1($$,$3)};
+: OPTIONS '{' nabla_option_declaration_list '}' ';' {Y($$,$3)};
 nabla_option_declaration_list
 : nabla_option_declaration {rhs}
 | nabla_option_declaration_list nabla_option_declaration {rhs};
 nabla_option_declaration
 : type_specifier direct_declarator ';' {rhs}
-| type_specifier direct_declarator '=' expression ';' {Y4($$,$1,$2,$3,$4)}  
+| type_specifier direct_declarator '=' expression ';' {rhs}  
 | preproc {rhs}
 ;
 
@@ -722,19 +722,19 @@ nabla_option_declaration
 ////////////////////////////
 // ∇ materials definition //
 ////////////////////////////
-nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {Y2($$,$1,$3)};
+nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {Y($$,$1,$3)};
 
 
 ///////////////////////////////
 // ∇ environments definition //
 ///////////////////////////////
 nabla_environment_declaration
-: IDENTIFIER '{' identifier_list '}' ';' {Y2($$,$1,$3)};
+: IDENTIFIER '{' identifier_list '}' ';' {Y($$,$1,$3)};
 nabla_environments_declaration_list
 : nabla_environment_declaration {rhs}
 | nabla_environments_declaration_list nabla_environment_declaration {rhs}
 ;
-nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {Y2($$,$1,$3)};
+nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {Y($$,$1,$3)};
 
 
 ///////////////////////
@@ -757,17 +757,17 @@ at_constant
 ////////////////////////
 nabla_job_definition
 : nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' compound_statement
-  {Y5_compound_job($$,$1,$2,$3,$5,$7)}
+   {compound_job($$,$1,$2,$3,$5,$7)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list compound_statement
-  {Y6_compound_job($$,$1,$2,$3,$5,$7,$8)}
+   {compound_job($$,$1,$2,$3,$5,$7,$8)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant compound_statement
-  {Y7_compound_job($$,$1,$2,$3,$5,$7,$8,$9)}
+   {compound_job($$,$1,$2,$3,$5,$7,$8,$9)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant IF '(' constant_expression ')' compound_statement
-  {Y11_compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13)}
+  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant compound_statement
-  {Y8_compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10)}
+  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement
-  {Y12_compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13,$14)}
+  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13,$14)}
 ;
 
 
@@ -787,7 +787,7 @@ single_library:
 | LIB_MATHEMATICA {rhs}
 ;
 with_library_list: single_library
-| with_library_list ',' single_library{Y2($$,$1,$3)};
+| with_library_list ',' single_library{Y($$,$1,$3)};
 with_library: WITH with_library_list ';'{rhs};
 
 
@@ -851,8 +851,8 @@ enumerator_list
 | enumerator_list ',' enumerator{rhs}
 ;
 enum_specifier
-: ENUM '{' enumerator_list '}'{Y4($$,$1,$2,$3,$4)}
-| ENUM IDENTIFIER '{' enumerator_list '}'{Y5($$,$1,$2,$3,$4,$5)}
+: ENUM '{' enumerator_list '}'{rhs}
+| ENUM IDENTIFIER '{' enumerator_list '}'{rhs}
 | ENUM IDENTIFIER{rhs}
 ;
 
@@ -864,8 +864,8 @@ struct_or_union
 
 // Structs or Unions
 struct_or_union_specifier
-: struct_or_union IDENTIFIER '{' struct_declaration_list '}'{Y5($$,$1,$2,$3,$4,$5)}
-| struct_or_union '{' struct_declaration_list '}'{Y4($$,$1,$2,$3,$4)}
+: struct_or_union IDENTIFIER '{' struct_declaration_list '}'{rhs}
+| struct_or_union '{' struct_declaration_list '}'{rhs}
 | struct_or_union IDENTIFIER{rhs}
 ;
 
@@ -944,29 +944,83 @@ int tokenToId(const char *token){
 
 
 // *****************************************************************************
-// * Z_CALL
-// * YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX
-// * YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-// * YYTOKNUM[YYLEX-NUM] -- Internal token number corresponding to token YYLEX-NUM
-// * YYR1[YYN] -- Symbol number of symbol that rule YYN derives
-// * YYR2[YYN] -- Number of symbols composing right hand side of rule YYN
-// * YYSTYPE lhs=yyval;
+// * rhsTailSandwich
 // *****************************************************************************
-inline void rhsLinear(int yyn, astNode **yyval, astNode* *yyvsp){
-  int yyi;
+inline void rhsTailSandwich(astNode **lhs,int yyn,int yynrhs,
+                            int left_token, int right_token, ...){
+  va_list args;
+  va_start(args, right_token);
+  //("[1;33m[rhsTailSandwich] yynrhs=%d\n[m",yynrhs);
+  // Le first est le nouveau noeud que l'on va insérer
+  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  // Le next pointe pour l'instant sur le premier noeud en argument
+  astNode *next=va_arg(args,astNode*);
+  // On prépare les 2 tokens à rajouter
+  astNode *left=astNewNodeToken();
+  left->token=strdup(yytname[YYTRANSLATE(left_token)]);
+  left->tokenid=left_token;
+  astNode *right=astNewNodeToken();
+  right->token=strdup(yytname[YYTRANSLATE(right_token)]);
+  right->tokenid=right_token;
+  // Dans le cas où il n'y en a qu'un, le sandwich est différent:
+  if (yynrhs==1){
+    astAddChild(first,left);
+    astAddNext(left,next);
+    astAddNext(next,right);
+    va_end(args);
+    return;
+  }
+  // S'il y en a plus qu'un. on déroule les boucles
+  astAddChild(first,next);
+  // On saute le premier et s'arrète avant le dernier
+  for(int i=1;i<yynrhs-1;i+=1){
+    //printf("[1;33m[rhsTailSandwich] \t for\n[m");
+    first=next;
+    next=va_arg(args,astNode*);
+    astAddNext(first,next);
+  }
+  // On récupère le dernier
+  astNode *tail=va_arg(args,astNode*);
+  // Et on sandwich
+  astAddNext(next,left);
+  astAddNext(left,tail);
+  astAddNext(tail,right);
+  va_end(args);
+  //("[1;33m[rhsTailSandwich] done[m\n");
+}
+
+inline void rhsAddGeneric(astNode **lhs,int yyn,int yynrhs,...){
+  va_list args;
+  assert(yynrhs>0);
+  va_start(args, yynrhs);
+  //"[rhsAddGeneric] On accroche le nouveau noeud au lhs\n");
+  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  astNode *next=va_arg(args,astNode*);
+  assert(next);
+  //("[rhsAddGeneric] On commence par rajouter le premier comme fils\n");
+  astAddChild(first,next);
+  for(int i=1;i<yynrhs;i+=1){
+    first=next;
+    next=va_arg(args,astNode*);
+    astAddNext(first,next);
+  }
+  va_end(args);
+}
+  
+inline void rhsAddChildAndNexts(astNode **lhs,int yyn, astNode* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
-  // On accroche le nouveau noeud
-  astNode *first=*yyval=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  // On accroche le nouveau noeud au lhs
+  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On va scruter tous les éléments
   // On commence par rajouter le premier comme fils
   astNode *next=yyvsp[(0+1)-(yynrhs)];
   astAddChild(first,next);
-  first=next;
-  // Et les autres comme frères
-  for(yyi=1; yyi<yynrhs; yyi++){
+  // Et on rajoute des 'next' comme frères
+  for(int yyi=1; yyi<yynrhs; yyi++){
+    // On swap pour les frères
+    first=next;
     next=yyvsp[(yyi+1)-(yynrhs)];
     astAddNext(first,next);
-    first=next;
   }
 }
