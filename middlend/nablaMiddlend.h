@@ -308,7 +308,7 @@ void nablaFctFill(nablaMain *,
 
 // JOBS
 void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc);
-void scanForNablaJobAtConstant(astNode * n, int ruleid, nablaMain *arc);
+void scanForNablaJobAtConstant(astNode * n, nablaMain *arc);
 char scanForNablaJobForeachItem(astNode*);
 nablaJob *nablaJobNew(nablaEntity *);
 nablaJob *nablaJobAdd(nablaEntity*, nablaJob*);

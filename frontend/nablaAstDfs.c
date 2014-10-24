@@ -51,7 +51,7 @@ char *dfsFetchFirst(astNode *n, int ruleid){
   char *rtn;
   //if (n->ruleid!=0) dbg("\n\t[dfsFetchFirst] n->rule=%s",n->rule);
   if (n->ruleid==ruleid) {
-    //dbg("\n\t[dfsFetchFirst] returning token %s",n->children->token);
+    //dbg("\n\t\t[dfsFetchFirst] returning token '%s'",n->children->token);
     return strdup(n->children->token);
   }
   if (n->children != NULL){
@@ -61,9 +61,9 @@ char *dfsFetchFirst(astNode *n, int ruleid){
     }
   }
   // Si on a un voisin token non null, on évite de parser tout la branche pour rien
-  if (n->next!=NULL)
-    if (n->next->token!=0)
-      return NULL;
+  // Ou pas, car on a mtn des ','
+  //if (n->next!=NULL) if (n->next->token!=0) return NULL;
+  
   if (n->next != NULL){
     if ((rtn=dfsFetchFirst(n->next, ruleid))!=NULL){
       //dbg("\n\t[dfsFetchFirst] return");
@@ -81,9 +81,10 @@ astNode *dfsFetch(astNode *n, int ruleid){
   //if (n==NULL) return;
   //if (n->ruleid!=0) dbg("\n\t\t[dfsFetch] n->rule=%s",n->rule?rtn->rule:"xNULL");
   if (n->ruleid==ruleid) return n->children;
+  
   if (n->children != NULL){
     if ((rtn=dfsFetch(n->children, ruleid))!=NULL){
-      dbg("\n\t\t[dfsFetch] return %s",rtn->rule?rtn->rule:"yNULL");
+      //dbg("\n\t\t[dfsFetch] return %s",rtn->rule?rtn->rule:"yNULL");
       return rtn;
     }
   }
@@ -91,7 +92,7 @@ astNode *dfsFetch(astNode *n, int ruleid){
   //if (n->next!=NULL)    if (n->next->token!=0)      return NULL;
   if (n->next != NULL){
     if ((rtn=dfsFetch(n->next, ruleid))!=NULL){
-      dbg("\n\t\t[dfsFetch] return %s", rtn->rule?rtn->rule:"zNULL");
+      //dbg("\n\t\t[dfsFetch] return %s", rtn->rule?rtn->rule:"zNULL");
       return rtn;
     }
   }
@@ -106,32 +107,32 @@ astNode *dfsFetch(astNode *n, int ruleid){
 astNode *dfsFetchTokenId(astNode *n, int tokenid){
   register astNode *rtn;
   if (n==NULL){
-    dbg("\n\t\t[dfsFetchToken] return first NULL");
+    //dbg("\n\t\t[dfsFetchToken] return first NULL");
     return NULL;
   }
   
-  if (n->tokenid!=0) dbg("\n\t\t[dfsFetchToken] token is '%s'",n->token);
+  //if (n->tokenid!=0) dbg("\n\t\t[dfsFetchToken] token is '%s'",n->token);
   
   if (n->tokenid==tokenid){
-    dbg("\n\t\t[dfsFetchToken] hit what we are looking for: token '%s'",n->token);
+    //dbg("\n\t\t[dfsFetchToken] hit what we are looking for: token '%s'",n->token);
     return n;
   }
 
   if (n->children != NULL){
     if ((rtn=dfsFetchTokenId(n->children, tokenid))!=NULL){
-      dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
+      //dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
       return rtn;
     }
   }
     
   if (n->next != NULL){
     if ((rtn=dfsFetchTokenId(n->next, tokenid))!=NULL){
-      dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
+      //dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
       return rtn;
     }
   }
   
-  dbg("\n\t\t[dfsFetchToken] return last NULL");
+  //dbg("\n\t\t[dfsFetchToken] return last NULL");
   return NULL;
 }
 

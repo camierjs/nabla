@@ -14,6 +14,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+extern bool adrs_it;
 
 //***************************************************************************** 
 // * Traitement des tokens SYSTEM
@@ -86,20 +87,25 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
   nablaVariable *var=nablaVariableFind(arc->variables, n->token);
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");
-  
-  // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
-  if (job->parse.alephKeepExpression==true){
-    if (var == NULL) return NULL;
-    nprintf(arc, NULL, "m_%s_%s", var->item, var->name);
-    return var;
-  }
-    
+      
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL){
     //dbg("\n\t\t[arcaneHookTurnTokenToVariable] Pas une variable!");
     //nprintf(arc,NULL,"/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
+    // Si on est dans une zone 'adrs_it' et que ce n'est PAS une variable, on rajoute l''&'
+    if (adrs_it==true) nprintf(arc, NULL, "&");
     return NULL;
   }
+
+  // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
+  if (job->parse.alephKeepExpression==true){
+    nprintf(arc, NULL, "m_%s_%s", var->item, var->name);
+    return var;
+  }
+
+  // Si on est dans une zone 'adrs_it' et que c'est une variable, on rajoute l''adrs('
+  if (adrs_it==true) nprintf(arc, NULL, "adrs(");
+    
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] m_%s_%s token=%s", var->item, var->name, n->token);
 
   //nprintf(arc, NULL, "/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
@@ -140,6 +146,8 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
 
 // Lancement de tous les transformations connues au sein des fonctions
   nprintf(arc,NULL,functionGlobalVar(arc,job,var),NULL);
+  
+  if (adrs_it==true) nprintf(arc, NULL, ")");
 
   return var;
 }

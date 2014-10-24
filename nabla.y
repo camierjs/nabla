@@ -26,8 +26,9 @@ char nabla_input_file[1024];
 int yylex(void);
 void yyerror(astNode **root, char *s);
  
-bool type_volatile=false;
-bool type_precise=false;
+ bool type_volatile=false;
+ bool type_precise=false;
+ bool adrs_it=false;
 %}
  
 /////////////////////////////////
@@ -57,7 +58,7 @@ bool type_precise=false;
 %token IF ELSE WHILE DO FOR CONTINUE BREAK RETURN
 %token INLINE GLOBAL
 %token HEX_CONSTANT OCT_CONSTANT Z_CONSTANT R_CONSTANT
-%token CALL ARGS POSTFIX_CONSTANT POSTFIX_CONSTANT_VALUE
+%token CALL END_OF_CALL ADRS_IN ADRS_OUT POSTFIX_CONSTANT POSTFIX_CONSTANT_VALUE
 %token PREFIX_PRIMARY_CONSTANT POSTFIX_PRIMARY_CONSTANT
 
  // MATHS tokens
@@ -416,7 +417,7 @@ nabla_parameter_declaration
 : nabla_item direct_declarator {rhs};
 nabla_parameter_list
 : nabla_parameter_declaration {rhs}
-| nabla_parameter_list ',' nabla_parameter_declaration {Y($$,$1,$3)};
+| nabla_parameter_list ',' nabla_parameter_declaration {Y($$,$1,$2,$3)};//{Y($$,$1,$3)}; 
 
 // !? WTF between these two 'nabla_parameter_list' ?!
 
@@ -486,11 +487,11 @@ postfix_expression
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
   astNode *callNode=astNewNodeToken();
   // On DOIT laisser un token != NULL!
-  callNode->token=strdup("");///*call*/");
+  callNode->token=strdup("/*call*/");
   callNode->tokenid=CALL;
   astNode *argsNode=astNewNodeToken();
-  argsNode->token=strdup("");///*args*/");
-  argsNode->tokenid=ARGS;
+  argsNode->token=strdup("/*args*/");
+  argsNode->tokenid=END_OF_CALL;
   Y($$,callNode,$1,$2,$3,argsNode,$4)
     }
 | postfix_expression '.' IDENTIFIER {rhs}
@@ -514,8 +515,8 @@ unary_expression
 | CUBE_ROOT_OP unary_expression {rhs}
 | INC_OP unary_expression {rhs}
 | DEC_OP unary_expression {rhs}
-// Permet d'insérer pour l'instant l'adrs() 
-| '&' unary_expression {Yp2p($$,$1,$2)}
+// Permet d'insérer pour l'instant l'adrs() {YadrsPrefix($$)}
+| '&' unary_expression {Yadrs($$,$1,$2)}
 | unary_prefix_operator cast_expression {rhs}
 | SIZEOF unary_expression {rhs}
 | SIZEOF '(' type_name ')'{rhs}
@@ -688,15 +689,16 @@ function_definition
 // ∇ items definitions //
 /////////////////////////
 nabla_item_definition
-: nabla_items '{' nabla_item_declaration_list '}' ';' {Y($$,$1,$3)};
+: nabla_items '{' nabla_item_declaration_list '}' ';' {rhs}//{Y($$,$1,$3)};
+;
 nabla_item_declaration_list
 : nabla_item_declaration {rhs}
 | nabla_item_declaration_list nabla_item_declaration {rhs}
 ;
 nabla_direct_declarator
 : IDENTIFIER {rhs}
-| IDENTIFIER '[' nabla_items ']'{Y($$,$1,$3)}
-| IDENTIFIER '[' primary_expression ']'{Y($$,$1,$3)}
+| IDENTIFIER '[' nabla_items ']'{rhs}//{Y($$,$1,$3)}
+| IDENTIFIER '[' primary_expression ']'{rhs}//{Y($$,$1,$3)}
 ;
 nabla_item_declaration
 : type_name nabla_direct_declarator ';' {rhs}
@@ -708,7 +710,7 @@ nabla_item_declaration
 // ∇ options definition //
 //////////////////////////
 nabla_options_definition
-: OPTIONS '{' nabla_option_declaration_list '}' ';' {Y($$,$3)};
+: OPTIONS '{' nabla_option_declaration_list '}' ';' {rhs}//{Y($$,$3)};
 nabla_option_declaration_list
 : nabla_option_declaration {rhs}
 | nabla_option_declaration_list nabla_option_declaration {rhs};
@@ -722,19 +724,19 @@ nabla_option_declaration
 ////////////////////////////
 // ∇ materials definition //
 ////////////////////////////
-nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {Y($$,$1,$3)};
+nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {rhs}//{Y($$,$1,$3)};
 
 
 ///////////////////////////////
 // ∇ environments definition //
 ///////////////////////////////
 nabla_environment_declaration
-: IDENTIFIER '{' identifier_list '}' ';' {Y($$,$1,$3)};
+: IDENTIFIER '{' identifier_list '}' ';' {rhs}//{Y($$,$1,$3)};
 nabla_environments_declaration_list
 : nabla_environment_declaration {rhs}
 | nabla_environments_declaration_list nabla_environment_declaration {rhs}
 ;
-nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {Y($$,$1,$3)};
+nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {rhs}//{Y($$,$1,$3)};
 
 
 ///////////////////////
@@ -757,17 +759,23 @@ at_constant
 ////////////////////////
 nabla_job_definition
 : nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' compound_statement
-   {compound_job($$,$1,$2,$3,$5,$7)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7)}
+//{compound_job($$,$1,$2,$3,$5,$7)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list compound_statement
-   {compound_job($$,$1,$2,$3,$5,$7,$8)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8)}
+//{compound_job($$,$1,$2,$3,$5,$7,$8)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant compound_statement
-   {compound_job($$,$1,$2,$3,$5,$7,$8,$9)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9)}
+//{compound_job($$,$1,$2,$3,$5,$7,$8,$9)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant IF '(' constant_expression ')' compound_statement
-  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)}
+//{compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant compound_statement
-  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10)}
+//{compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10)}
 | nabla_family declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement
-  {compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13,$14)}
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)}
+//{compound_job($$,$1,$2,$3,$5,$7,$8,$9,$10,$11,$12,$13,$14)}
 ;
 
 
@@ -787,7 +795,7 @@ single_library:
 | LIB_MATHEMATICA {rhs}
 ;
 with_library_list: single_library
-| with_library_list ',' single_library{Y($$,$1,$3)};
+| with_library_list ',' single_library{rhs}//{Y($$,$1,$3)};
 with_library: WITH with_library_list ';'{rhs};
 
 
@@ -957,10 +965,10 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,int yynrhs,
   astNode *next=va_arg(args,astNode*);
   // On prépare les 2 tokens à rajouter
   astNode *left=astNewNodeToken();
-  left->token=strdup(yytname[YYTRANSLATE(left_token)]);
+  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
   left->tokenid=left_token;
   astNode *right=astNewNodeToken();
-  right->token=strdup(yytname[YYTRANSLATE(right_token)]);
+  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
   right->tokenid=right_token;
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){

@@ -118,7 +118,11 @@ void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
   if(n->next != NULL) scanForNablaJobParameter(n->next, ruleid, arc);
 }
 
-void scanForNablaJobAtConstant(astNode * n, int ruleid, nablaMain *arc){
+
+// ****************************************************************************
+// * scanForNablaJobAtConstant
+// ****************************************************************************
+void scanForNablaJobAtConstant(astNode *n, nablaMain *arc){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=AT) continue;
     dbg("\n\t[scanForNablaJobAtConstant] %s ", n->token);
@@ -130,6 +134,7 @@ void scanForNablaJobAtConstant(astNode * n, int ruleid, nablaMain *arc){
     return;
   }
 }
+
 
 void scanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
@@ -324,29 +329,34 @@ void nablaJobFill(nablaMain *nabla,
                   astNode *n,
                   const char *namespace){
   int numParams;
+  astNode *nd;
   job->is_a_function=false;
   assert(job != NULL);
-  /*if (nabla->optionDumpTree==true)
-    fprintf(nabla->dot, "\n\t%sJob_%s;", job->item, job->name);
-  */
   job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
   job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
   job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
   // Si on a pas trouvé avec les items, cela doit être un matenvs
   if (job->item==NULL)
     job->item = dfsFetchFirst(n->children,rulenameToId("nabla_matenvs"));
-  assert(job->item!=NULL);
+  assert(job->item);
   job->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
-  assert(n->children->next->next->token!=NULL);
-  job->name   = strdup(n->children->next->next->token);
-  job->name_utf8   = strdup(n->children->next->next->token_utf8);
+  
+  // On va chercher le premier identifiant qui est le nom du job
+  nd=dfsFetchTokenId(n->children,IDENTIFIER);
+  assert(nd);
+  job->name=strdup(nd->token);
+  //assert(n->children->next->next->token!=NULL);
+  //job->name   = strdup(n->children->next->next->token);
+  job->name_utf8   = strdup(nd->token_utf8);
   //nprintf(nabla, NULL, "/*name=%s*/", job->name);
-  assert(n->children->next->next->next->children!=NULL);
   dbg("\n\n\t[nablaJobFill] named '%s'", job->name);
-  job->xyz    = dfsFetchFirst(n->children->next->next->next->children,
-                              rulenameToId("nabla_xyz_declaration"));
+
+  // On va chercher s'il y a des xyz dans les parameter_type_list
+  //assert(n->children->next->next->next->children!=NULL);
+  nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  job->xyz = dfsFetchFirst(nd,rulenameToId("nabla_xyz_declaration"));
   //nprintf(nabla, NULL, "/*xyz=%s*/", job->xyz);
-  job->drctn  = dfsFetchFirst(n->children->next->next->next->children,
+  job->drctn = dfsFetchFirst(n->children,//n->children->next->next->next->children,
                               rulenameToId("nabla_xyz_direction"));
   // Vérification si l'on a des 'directions' dans les paramètres
   if (job->xyz!=NULL){
@@ -358,15 +368,15 @@ void nablaJobFill(nablaMain *nabla,
   // Récupération du type de retour
   assert(n->children->next->children->ruleid==rulenameToId("type_specifier"));
   job->returnTypeNode=n->children->next->children;
-  //dbg("\n\t[nablaJobFill] Type de retour: %s", job->returnTypeNode->token);
   // Récupération de la liste des paramètres
-  assert(n->children->next->next->next->ruleid==rulenameToId("parameter_type_list"));
-  job->stdParamsNode=n->children->next->next->next->children;
+  nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->rtntp, job->name);
+  // Remplissage des 
   scanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
-  scanForNablaJobAtConstant(n->children, rulenameToId("at_constant"), nabla);
+  scanForNablaJobAtConstant(n->children, nabla);
   scanForIfAfterAt(n->children, job, nabla);
   // On remplit la ligne du fichier SRC
   nprintf(nabla, NULL, "\n\n\n\
@@ -382,7 +392,11 @@ void nablaJobFill(nablaMain *nabla,
   // On va chercher les paramètres standards
   numParams=dumpParameterTypeList(nabla->entity->src, job->stdParamsNode);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
-  job->nblParamsNode=n->children->next->next->next->next;
+  
+  // On va chercher les paramètres nabla in/out/inout
+  //nd=dfsFetch(n->children,rulenameToId("nabla_parameter"));
+  job->nblParamsNode=n->children->next->next->next->next->next->next;
+  //job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_parameter"));
 
   // Si on a un type de retour et des arguments
   if (numParams!=0 && strncmp(job->rtntp,"void",4)!=0){
@@ -441,7 +455,6 @@ void nablaJobFill(nablaMain *nabla,
 
   if (!job->parse.got_a_return)
     nprintf(nabla, NULL, "}// de l'ENUMERATE");
-  //if (nabla->backend==BACKEND_CUDA)    nprintf(nabla, NULL, "\n}// du tid test");
   nprintf(nabla, NULL, "\n}// du job");
   dbg("\n\t[nablaJobFill] done");
 }

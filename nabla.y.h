@@ -38,28 +38,30 @@ void rhsTailSandwich(astNode**,int,int,int,int,...);
 // * because some of the rules are not comsuming all tokens
 // * Perhaps they should not
 // * compound_job_without__NB_ARGS__ is better
+// * printf("[1;33mYp2p=%d[m\n",yyr2[yyn]);
 // *****************************************************************************
 #define tailSandwich(leftToken,rightToken,n, ...)                     \
   rhsTailSandwich(&yyval,yyn,n,leftToken,rightToken, __VA_ARGS__)
 
 #define Yp1p(lhs, n1)                                                 \
-  tailSandwich(YYTRANSLATE('('), YYTRANSLATE(')'),1,n1)
+  tailSandwich('(', ')',1,n1)
 
-#define Yp2p(lhs, n1, n2)                                             \
-  assert(2==yyr2[yyn]);                                               \
-  printf("[1;33mYp2p=%d[m\n",yyr2[yyn]);                          \
-  tailSandwich(YYTRANSLATE('('), YYTRANSLATE(')'),yyr2[yyn],n1,n2)
+#define Yadrs(lhs,and,expr)                                           \
+  astNode *i=astNewNodeToken();                                       \
+  i->tokenid=ADRS_IN;                                                 \
+  astNode *o=astNewNodeToken();                                       \
+  o->tokenid=ADRS_OUT;                                                \
+  Y(lhs,i,and,expr,o)
+
+//tailSandwich(ADRS_IN, ADRS_IN,1,n1)
 
 #define Yp3p(lhs, n1, n2, n3)                                         \
-  assert(3==yyr2[yyn]);                                               \
-  printf("[1;33mYp3p=%d[m\n",yyr2[yyn]);                          \
-  tailSandwich(YYTRANSLATE('('), YYTRANSLATE(')'),yyr2[yyn],n1,n2,n3)
+  tailSandwich('(', ')',yyr2[yyn],n1,n2,n3)
 
-#define Yp4p(lhs, n1, n2, n3,n4)                                        \
-  assert(4==yyr2[yyn]);                                                 \
-  printf("[1;33mYp3p=%d[m\n",yyr2[yyn]);                            \
-  tailSandwich(YYTRANSLATE('('), YYTRANSLATE(')'),yyr2[yyn],n1,n2,n3,n4)
-
+/*#define Yp4p(lhs, n1, n2, n3,n4)                                    \
+  assert(4==yyr2[yyn]);                                               \
+  tailSandwich('(', ')',yyr2[yyn],n1,n2,n3,n4)
+*/
 #define compound_job(lhs,...)                                           \
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 

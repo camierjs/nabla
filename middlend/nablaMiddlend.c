@@ -367,12 +367,12 @@ void nablaInsertSpace( nablaMain *nabla, astNode * n){
 }
 
 
-/*****************************************************************************
- * nablaAtConstantParse
- *****************************************************************************/
+// ****************************************************************************
+// * nablaAtConstantParse
+// ****************************************************************************
 void nablaAtConstantParse(astNode * n, nablaMain *nabla, char *at){
-  if (n->tokenid == tokenidToRuleid('(')) goto skip;
-  if (n->tokenid == tokenidToRuleid(')')) goto skip;
+  if (n->tokenid == '(') goto skip;
+  if (n->tokenid == ')') goto skip;
   // Vérification que l'on ne déborde pas
   if (yyTranslate(n->tokenid)!=yyUndefTok()){
     // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point

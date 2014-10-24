@@ -1,22 +1,25 @@
-options{
+/*options{
   Real wtf = -1.0e-15;
   Bool option_a = true;
 };
-
+*/
 cells{
   Real α;
-  Real αs[4];
-  Real theta[nodes];
+  //Real αs[4];
+  //Real theta[nodes];
 };
 
-global{
+/*global{
   Int64 mc_vars_seed_cur;
   Int64 array[4];
 };
+*/
+void ini(void) @ -10.0{
+  inverse(1.0);
+}
 
-
-cells Real inverse(Real ε) in (cell α){
-  ε=(ε!=0.0)?1.0/α:ε;
+cells Real inverse(xyz direction, Real ε) in (cell α) {
+  //ε=(ε!=0.0)?1.0/α:ε;
   return ε;
 }
 

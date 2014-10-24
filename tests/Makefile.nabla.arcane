@@ -3,6 +3,7 @@ MPI_RUN = $(MPI_PATH)/bin/mpirun
 
 ARCANE_ROOT = ${ARCANE_ROOT}
 ARCANE_PKG_PATH = $(ARCANE_ROOT)/lib/pkgconfig
+HYODA = $(ARCANE_ROOT)/bin/hyoda
 
 NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE  = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
@@ -97,6 +98,13 @@ run4:$(TGT)
 	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) $(ARC_FILE)
 runc4:$(TGT)
 	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) -arcane_opt continue $(ARC_FILE)
+
+
+#########
+# HYODA #
+#########
+h1:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 $(HYODA) ./$(TGT) $(ARC_FILE)
 
 
 cln:

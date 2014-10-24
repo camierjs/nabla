@@ -224,7 +224,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
     
-    if (n->tokenid == ARGS){
+    if (n->tokenid == END_OF_CALL){
       nabla->hook->addArguments(nabla,fct);
       break;
     }
@@ -307,18 +307,19 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   int numParams;
   astNode *nFctName;
   astNode *nParams;
+  //astNode *nd;
   fct->called_variables=NULL;
   fct->in_out_variables=NULL;
-  dbg("\n\t[nablaFctFill] ");
+  dbg("\n\n\t[nablaFctFill] ");
   fct->is_a_function=true;
   assert(fct != NULL);
   if (fct->xyz!=NULL)
     dbg("\n\t[nablaFctFill] direction=%s, xyz=%s",
         fct->drctn?fct->drctn:"NULL", fct->xyz?fct->xyz:"NULL");
-  //if (nabla->optionDumpTree==true) fprintf(nabla->dot, "\n\t%sFct_%s;", fct->item, fct->name);
   fct->scope  = strdup("NoGroup");
   fct->region = strdup("NoRegion");
-  fct->item   = strdup("\0function\0");fct->item[0]=0;
+  fct->item   = strdup("\0function\0");fct->item[0]=0; 
+  dbg("\n\t[nablaFctFill] Looking for fct->rtntp:");
   fct->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->rtntp);
   //assert(n->children->next->children->children->children->token!=NULL);
@@ -326,10 +327,12 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   //assert(n->children->next->next->next->children!=NULL);
   fct->xyz    = strdup("NoXYZ");
   fct->drctn  = strdup("NoDirection");
-  dbg("\n\t[nablaFctFill] On va chercher le type de retour");
+  
+  dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
   //assert(n->children->children->ruleid==rulenameToId("type_specifier"));
   //fct->returnTypeNode=n->children->children->children;
   fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
+  
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");
   nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
   assert(nFctName->children->tokenid==IDENTIFIER);
@@ -337,21 +340,21 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   fct->name=strdup(nFctName->children->token);
   dbg("\n\t[nablaFctFill] Coté UTF-8, on a: '%s'", nFctName->children->token_utf8);
   fct->name_utf8=strdup(nFctName->children->token_utf8);
-  dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
+  //dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
-  assert(n->children->next->children->children->next->next->children->ruleid==rulenameToId("parameter_list"));
-  nParams=n->children->next->children->children->next->next->children;
+  nParams=dfsFetch(n->children,rulenameToId("parameter_list"));
+  //assert(n->children->next->children->children->next->next->children->ruleid ==rulenameToId("parameter_list"));
+  //nParams=n->children->next->children->children->next->next->children;
   fct->stdParamsNode=n;
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
       (fct->scope!=NULL)?fct->scope:"Null",
       (fct->region!=NULL)?fct->region:"Null",
-      2+fct->item,
+      fct->item,//2+
       fct->rtntp, fct->name);
-  //scanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
-  scanForNablaJobAtConstant(n->children, rulenameToId("at_constant"), nabla);
-  dbg("\n\t[nablaFctFill] scan'ed ForNablaJobAtConstant");
   
-  dbg("\n\t[nablaFctFill] On remplit la ligne du fichier SRC");
+  scanForNablaJobAtConstant(n->children, nabla);
+  
+  dbg("\n\t[nablaFctFill] Now fillinf SRC file");
   nprintf(nabla, NULL, "\n\n\
 // ********************************************************\n\
 // * %s fct\n\
@@ -381,9 +384,9 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   for(n=n->children->next;
       n->ruleid!=rulenameToId("compound_statement");
       n=n->next) {
-    dbg("\n\t[nabla_fct_definition] n rule is '%s'", n->rule);
+    //dbg("\n\t[nablaFctFill] n rule is '%s'", n->rule);
   }
-  dbg("\n\t[nabla_fct_definition] n rule is finally '%s'", n->rule);
+  //dbg("\n\t[nablaFctFill] n rule is finally '%s'", n->rule);
   // On saute le premier '{'
   n=n->children->next;
   nprintf(nabla, NULL, "){\n");

@@ -17,32 +17,21 @@
  * Creat a new TOKEN node, initialize its contents
  */
 astNode *astNewNodeToken(void) {
-	astNode *n;
-	n = (astNode *)malloc(sizeof(astNode));
-	assert(n != NULL);
-   // token & tokenid are set by the LEXER: //static int tok(YYSTYPE *yylval, int tokenid)
-   n->rule=NULL;
-   n->ruleid=0;
-   n->next=n->children=n->parent=NULL;
-  	return n; 
+  astNode *n = (astNode*)calloc(1,sizeof(astNode));
+  assert(n != NULL);
+  return n; 
 }
 
 
 /* 
  * Creat a new RULE node, initialize its contents
  */
-astNode * astNewNodeRule(const char *rule, unsigned int yyn) {
-	astNode * n;
-	//dbg("\n\t[astNewNodeRule] %s %d", rule, yyn);
-	n = (astNode *)malloc(sizeof(astNode));
-	assert(n != NULL);
-   n->token=NULL;
-   n->tokenid=0;
-   n->next=n->children=n->parent=NULL;
-	assert(rule != NULL);
-	n->rule = rule; 
-	n->ruleid = yyn;   
-	return n;
+astNode *astNewNodeRule(const char *rule, unsigned int yyn) {
+  astNode *n=astNewNodeToken();
+  assert(rule != NULL);
+  n->rule = rule; 
+  n->ruleid = yyn;   
+  return n;
 }
 
 /* astAddChild:

@@ -243,7 +243,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     }
     break;
   }
-  case(ARGS):{
+  case(END_OF_CALL):{
     nprintf(nabla, "/*ARGS*/", NULL);
     nprintf(nabla, "/*got_args*/", NULL);
     break;

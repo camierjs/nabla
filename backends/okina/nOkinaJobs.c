@@ -446,7 +446,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     }
     break;
   }
-  case(ARGS):{
+  case(END_OF_CALL):{
     nprintf(nabla, "/*ARGS*/", NULL);
     nprintf(nabla, "/*got_args*/", NULL);
     break;
@@ -733,6 +733,8 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
                                      astNode *n,
                                      int *numParams){
   dbg("\n\t[okinaHookDumpNablaParameterList]");
+  // S'il n'y a pas de in ni de out, on a rien à faire
+  if (n==NULL) return;
   // Aux premier COMPOUND_JOB_INI ou '@', on a terminé
   if (n->tokenid==COMPOUND_JOB_INI) return;
   if (n->tokenid=='@') return;
@@ -744,6 +746,7 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
   if (n->ruleid==rulenameToId("direct_declarator")){
     // On la récupère
     nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
+    dbg("\n\t[okinaHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
     // Si elle n'existe pas, c'est pas normal à ce stade: c'est une erreur de nom
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr,

@@ -22,6 +22,8 @@ char *toolStrDownCase(const char *);
 
 char *toolStrUpCase(const char *);
 
+char *trQuote(const char * str);
+
 char *op2name(char *op);
 
 void nUtf8(char**);

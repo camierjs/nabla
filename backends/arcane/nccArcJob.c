@@ -13,6 +13,7 @@
  *****************************************************************************/
 #include "nabla.h"
 #include "nabla.tab.h"
+extern bool adrs_it;
 
 
 /*****************************************************************************
@@ -520,11 +521,13 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     job->parse.got_a_return_and_the_semi_colon=false;
     break;
   }
+    
   case ('{'):{nprintf(arc, NULL, "{\n\t\t"); break; }
     
-  case (')'):{
-    nprintf(arc, "/*function_call_arguments@false*/", ")");
-    job->parse.function_call_arguments=false;      
+  case (')'):{ nprintf(arc, NULL, ")"); break; }
+
+  case(END_OF_CALL):{
+    job->parse.function_call_arguments=false;          
     break;
   }
     
@@ -537,9 +540,12 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
+  case (ADRS_IN):{adrs_it=true;break;}
+  case (ADRS_OUT):{adrs_it=false;break;}
+    
   case ('&'):{
-    if (job->parse.function_call_arguments==true){
-      nprintf(arc, "/*&+call*/", "adrs");
+    if (adrs_it==true){
+      nprintf(arc, "/*&+adrs_it*/", NULL);
     }else{
       nprintf(arc, "/*& std*/", "&");
     }
