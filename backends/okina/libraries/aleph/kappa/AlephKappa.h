@@ -5,22 +5,13 @@
 #ifndef ALEPH_KAPPA_H
 #define ALEPH_KAPPA_H 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 class AlephKernel;
 class AlephFactory;
 
 class AlephKappaService
-: public AbstractService
-, public IDirectExecution
-{
+: public TraceAccessor{
  public:
-  AlephKappaService(const ServiceBuildInfo& sbi);
+  AlephKappaService(ITraceMng*);
   ~AlephKappaService();
   virtual void build(void){}
  public:
@@ -31,7 +22,6 @@ class AlephKappaService
   virtual void setParallelMng(IParallelMng *wpm){ m_world_parallel = wpm; }
 
  private:
-
   AlephKernel *m_kernel;
   IApplication* m_application;
   IParallelMng* m_world_parallel;
@@ -43,15 +33,6 @@ class AlephKappaService
   Integer m_solver_size;
   bool m_reorder;
 };
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif  
 

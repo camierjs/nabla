@@ -1,12 +1,11 @@
 #include "IAlephFactory.h"
-//#include "arcane/ServiceBuilder.h"
 
 
 
 /******************************************************************************
  * IAlephFactory::IAlephFactory
  *****************************************************************************/
-AlephFactory::AlephFactory(IApplication* app,ITraceMng *tm): IAlephFactory(tm){
+AlephFactory::AlephFactory(ITraceMng *tm): IAlephFactory(tm){
   // Liste des implémentations possibles.
   // 0 est le choix automatique qui doit aller vers une des bibliothèques suivantes:
   m_impl_map.insert(std::make_pair(1,new FactoryImpl("Sloop")));

@@ -1,5 +1,5 @@
-#ifndef _OKINA_FAKE_ARCANE_
-#define _OKINA_FAKE_ARCANE_
+#ifndef _ALEPH_STD_CPP_
+#define _ALEPH_STD_CPP_
 
 #include <assert.h>
 #include <string>
@@ -47,6 +47,9 @@ public:
 };
 
 
+// *****************************************************************************
+// * Std Array
+// *****************************************************************************
 template <typename T>
 class Array:public std::vector<T>{
 public:
@@ -62,6 +65,7 @@ public:
   void resize(Integer size){}
   void resize(std::vector<int>& sizes){m_sizes=sizes;}
   const T* unguardedBasePointer() const { return this->const_pointer; }
+  T* begin() { return unguardedBasePointer();}
   T* unguardedBasePointer() { return &this->at(0); }
   std::vector<int>* unguardedBasePointers() { return &m_sizes; }
   void copy(Array<T> elems){}
@@ -344,6 +348,6 @@ class CommonVariables{
 };
 
 
-#define ARCANE_ASSERT(a,b) assert(a)
+#define ALEPH_ASSERT(a,b) assert(a)
 
 #endif  

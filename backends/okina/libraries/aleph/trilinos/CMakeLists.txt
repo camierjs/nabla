@@ -1,22 +1,8 @@
-info("${VT100_FG_CYAN}ALEPH_${VT100_BOLD}TRILINOS${VT100_RESET} subdirectory")
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+include(${NABLA_SOURCE_DIR}/CMakeTPL.txt)
 
-INCLUDE_DIRECTORIES(${ARCANE_SRC_PATH})
-INCLUDE_DIRECTORIES(${ARCANEBUILDROOT})
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-INCLUDE_DIRECTORIES(${ARCANE_CEA_SOURCE_PATH}/src)
+info("\t${VT100_FG_YELLOW}Aleph::Trilinos${VT100_RESET}")
 
-ARCANE_INCLUDE_CONFIG(${ARCANE_CEA_SOURCE_PATH}/src ALEPH_TRILINOS aleph/trilinos)
-
-ADD_DEFINITIONS(-DARCANE_COMPONENT_arcane_aleph_trilinos)
-
-INCLUDE_DIRECTORIES(${MPI_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${TRILINOS_INCLUDE_DIRS})
-
-ADD_LIBRARY(arcane_aleph_trilinos ${ARCANE_ALEPH_TRILINOS})
-
-target_link_libraries(arcane_aleph_trilinos ${ARCANE_BASE_LIBRARIES})
-set_target_properties(arcane_aleph_trilinos PROPERTIES INSTALL_RPATH_USE_LINK_PATH 1)
-set_target_properties(arcane_aleph_trilinos PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
-INSTALL(TARGETS arcane_aleph_trilinos DESTINATION lib)
+include_directories(${MPI_PATH}/include)
+include_directories(${TRILINOS_PATH}/include)
+include_directories(${OKINA_SOURCE_DIR})
+add_library(NablaOkinaAlephTrilinos IAlephTrilinos.cc)

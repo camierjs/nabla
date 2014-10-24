@@ -3,65 +3,32 @@
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-#include "arcane_packages.h"
+#include "AlephStd.h"
+#include "Aleph.h"
+#include "AlephInterface.h"
+#include "IAlephFactory.h"
 
-#include "arcane/IParallelMng.h"
-#include "arcane/IDirectExecution.h"
-#include "arcane/BasicService.h"
-#include "arcane/ArcaneVersion.h"
-#include "arcane/FactoryService.h"
-#include "arcane/utils/ScopedPtr.h"
-#include "arcane/utils/ITraceMng.h"
-#include "arcane/utils/MultiArray2.h"
-#include "arcane/utils/ArgumentException.h"
-
-#include "arcane/Timer.h"
-#include "arcane/utils/TraceAccessor.h"
-#include "arcane/utils/String.h"
-#include "arcane/utils/StringBuilder.h"
-#include "arcane/aleph/AlephTypesSolver.h" 
-#include "arcane/aleph/AlephParams.h"
-
-#include "arcane/utils/PlatformUtils.h"
-#include "arcane/utils/IProcessorAffinityService.h"
-#include "arcane/IParallelSuperMng.h"
-#include "arcane/IApplication.h"
-
-#include "arcane/aleph/Aleph.h"
-#include "arcane/aleph/IAleph.h"
-#include "arcane/aleph/IAlephFactory.h"
-
-#include "arcane/aleph/kappa/AlephKappa.h"
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_REGISTER_APPLICATION_FACTORY(AlephKappaService,IDirectExecution,AlephKappa);
+#include "AlephKappa.h"
 
 AlephKappaService::
-AlephKappaService(const ServiceBuildInfo& sbi):AbstractService(sbi),
-                                               m_kernel(NULL),
-                                               m_world_parallel(NULL),
-                                               m_world_rank(-1),
-                                               m_size(-1),
-                                               m_world_size(-1),
-                                               m_factory(NULL),
-                                               m_underlying_solver(-1),
-                                               m_solver_size(-1),
-                                               m_reorder(false)
+AlephKappaService(ITraceMng *tm):TraceAccessor(tm),
+                                 m_kernel(NULL),
+                                 m_world_parallel(NULL),
+                                 m_world_rank(-1),
+                                 m_size(-1),
+                                 m_world_size(-1),
+                                 m_factory(NULL),
+                                 m_underlying_solver(-1),
+  m_solver_size(-1),
+                                 m_reorder(false)
 {
    debug() << "[AlephKappaService] NEW"; traceMng()->flush();
-   m_application = sbi.application();
+   //m_application = sbi.application();
 }
 
 AlephKappaService::~AlephKappaService(){
   if (m_kernel) delete m_kernel;
-  if (m_factory) delete m_factory;
+  //if (m_factory) delete m_factory;
 }
 
 
@@ -85,7 +52,7 @@ void AlephKappaService::execute(void){
   }
 
   debug() << "[AlephKappaService] factory";
-  m_factory=new AlephFactory(m_application,m_world_parallel->traceMng());
+  m_factory=new AlephFactory(m_world_parallel->traceMng());
   debug() << "[AlephKappaService] kernel";
   m_kernel=new AlephKernel(m_world_parallel,
                            m_size=cfg.at(3),
@@ -305,7 +272,7 @@ void AlephKappaService::execute(void){
     }
       
       /************************************************************************
-       * ArcaneMainBatch::SessionExec::executeRank
+       * SessionExec::executeRank
        ************************************************************************/
     case (0xdfeb699fl):{
       debug() << "[AlephKappaService] AlephKernel::finalize!";
@@ -326,11 +293,3 @@ void AlephKappaService::execute(void){
   }
   throw FatalErrorException("execute", "Should never be there!");
 }
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

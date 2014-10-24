@@ -2,7 +2,7 @@
 #define ALEPH_MATRIX_H
 
 #include <map>
-#include "AlephGlobal.h"
+#include "Aleph.h"
 
 class IAlephMatrix;
 

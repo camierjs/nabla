@@ -16,6 +16,5 @@
 
 #include "AlephParams.h"
 
-#include "IAlephFactory.h"
 
 #endif

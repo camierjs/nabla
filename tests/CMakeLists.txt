@@ -2,26 +2,7 @@
 # Now testing #
 ###############
 enable_testing()
-
-
-#########################
-# Third Party Libraries #
-#########################
-set(MPI_PATH /usr/local/openmpi-1.5.3/gnu)
-set(ARCANE_ROOT /usr/local/arcane/gcc47-mpi/1.22.4)
-set(ARCANE_CXX /usr/local/opendev1/gcc/gcc/4.8.1/bin/g++)
-
-set(SLOOP_INC /usr/local/nec/share/include/sloop-5.5.4)
-set(HYPRE_INC /usr/local/opendev1/gcc/hypre/2.9.0b-ompi15)
-set(SUPERLU_DIR /usr/local/opendev1/icc/superlu/superlu_DIST_3.2-ompi15)
-set(SUPERLU_LIB "-L${SUPERLU_DIR}/lib -lsuperlu_dist_3.2 -Wl,-rpath,${SUPERLU_DIR}/lib")
-set(GMP_DIR /usr/local/opendev1/gcc/gmp/5.0.5)
-set(GMP_LIB "-L${GMP_DIR}/lib -lgmp -Wl,-rpath,${GMP_DIR}/lib")
-set(CEA_LIB /usr/local/sr/lib/libcea_user.a)
-#set(ICET_DIR /usr/local/opendev1/gcc/iceT/2.1.1-ompi15)
-#set(OSMESA_DIR /usr/local/opendev1/gcc/mesa/7.10.3)
-#set(TBB_DIR /usr/local/opendev1/gcc/tbb/4.0.1)
-
+include(${NABLA_SOURCE_DIR}/CMakeTPL.txt)
 
 ##########
 # Meshes #

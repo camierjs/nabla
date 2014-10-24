@@ -18,7 +18,7 @@
  * Traitement des transformations '[', '(' & ''
  *****************************************************************************/
 void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
-  dbg("\n\t[actJobItemParse] primaryExpression hits Arcane variable");
+  dbg("\n\t[actJobItemParse] primaryExpression hits variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
       ||(cnfg=='n' && var->item[0]!='n')            
@@ -186,7 +186,7 @@ static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;      // GLOBAL variable
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job turnTokenToArcaneVariable\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job okinaHookTurnTokenToVariableForCellJob\n"));
   }
 }
 
@@ -235,7 +235,7 @@ static void okinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] NODES job turnTokenToArcaneVariable\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] NODES job okinaHookTurnTokenToVariableForNodeJob\n"));
   }
 }
 
@@ -278,7 +278,7 @@ static void okinaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job turnTokenToArcaneVariable\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job okinaHookTurnTokenToVariableForFaceJob\n"));
   }
 }
 
@@ -313,7 +313,7 @@ static void okinaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob turnTokenToArcaneVariable\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob okinaHookTurnTokenToVariableForStdFunction\n"));
   }
 }
 
@@ -327,7 +327,7 @@ nablaVariable *okinaHookTurnTokenToVariable(astNode * n,
   nablaVariable *var=nablaVariableFind(arc->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
-  dbg("\n\t[turnTokenToArcaneVariable] %s_%s token=%s", var->item, var->name, n->token);
+  dbg("\n\t[okinaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
 
   // Set good isDotXYZ
   if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){

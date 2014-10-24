@@ -4,14 +4,6 @@
 #ifndef _ALEPH_INTERFACE_PETSC_H_
 #define _ALEPH_INTERFACE_PETSC_H_
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_BEGIN_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
 class AlephTopologyPETSc: public IAlephTopology{
 public:
   AlephTopologyPETSc(ITraceMng* tm,
@@ -77,11 +69,11 @@ private:
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-class PETScAlephFactoryImpl: public AbstractService,
+class PETScAlephFactoryImpl: public TraceAccessor,
                              public IAlephFactoryImpl{
 public:
-  PETScAlephFactoryImpl(const ServiceBuildInfo& sbi):
-    AbstractService(sbi),
+  PETScAlephFactoryImpl(ITraceMng *tm):
+    TraceAccessor(tm),
     m_IAlephVectors(0),
     m_IAlephMatrixs(0),
     m_IAlephTopologys(0){}
@@ -126,12 +118,5 @@ private:
 };
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_END_NAMESPACE
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 #endif // _ALEPH_INTERFACE_PETSC_H_

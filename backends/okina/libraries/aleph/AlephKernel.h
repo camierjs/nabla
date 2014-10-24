@@ -1,12 +1,7 @@
 #ifndef _ALEPH_KERNEL_H_
 #define _ALEPH_KERNEL_H_
 
-//#include "arcane/utils/ITraceMng.h"
-//#include "arcane/utils/TraceAccessor.h"
-//#include "arcane/utils/Array.h"
-//#include "arcane/utils/FatalErrorException.h"
-
-#include "AlephGlobal.h"
+#include "Aleph.h"
 
 class IAlephFactory;
 class IAlephTopology;

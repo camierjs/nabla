@@ -1,4 +1,5 @@
 #include "Aleph.h"
+#include "IAlephFactory.h"
 
 // ****************************************************************************
 // * AlephKernel utilisé par Kappa où l'on met le m_sub_domain à NULL
@@ -42,8 +43,7 @@ AlephKernel::AlephKernel(IParallelMng* wpm,
 
 // ****************************************************************************
 // * Kernel standard dont la factory est passé en argument
-// * Cela correspond à l'ancienne API utilisée encore dans certains
-// * tests Arcane et surtout encore dans le code
+// * Cela correspond à l'ancienne API utilisée encore dans certains tests
 // ****************************************************************************
 AlephKernel::AlephKernel(ITraceMng* tm,
                          ISubDomain* sd,
@@ -102,7 +102,8 @@ AlephKernel::AlephKernel(ISubDomain* sd,
   m_parallel(sd->parallelMng()),
   m_world_parallel(sd->parallelMng()->worldParallelMng()),
   m_configured(false),
-  m_factory(new AlephFactory(sd->application(),sd->parallelMng()->traceMng())),
+//m_factory(new AlephFactory(sd->application(),sd->parallelMng()->traceMng())),
+  m_factory(new AlephFactory(sd->parallelMng()->traceMng())),
   m_topology(new AlephTopology(this)),
   m_ordering(new AlephOrdering(this)),
   m_indexing(new AlephIndexing(this)),
@@ -169,34 +170,34 @@ void AlephKernel::setup(void){
 AlephKernel::~AlephKernel(void){ 
   debug()<<"\33[1;5;31m[~AlephKernel]"<<"\33[0m";
   //delete m_factory;
-  ARCANE_ASSERT((m_topology),("m_topology is NULL")); delete m_topology; m_topology=NULL;
-  ARCANE_ASSERT((m_ordering),("m_ordering is NULL")); delete m_ordering; m_ordering=NULL;
-  //ARCANE_ASSERT((m_indexing),("m_indexing is NULL")); delete m_indexing; m_indexing=NULL;
+  ALEPH_ASSERT((m_topology),("m_topology is NULL")); delete m_topology; m_topology=NULL;
+  ALEPH_ASSERT((m_ordering),("m_ordering is NULL")); delete m_ordering; m_ordering=NULL;
+  //ALEPH_ASSERT((m_indexing),("m_indexing is NULL")); delete m_indexing; m_indexing=NULL;
   for(Integer i=0,iMax=m_results_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] results (iters,norms) #"<<i<<"\33[0m";
-    ARCANE_ASSERT((m_results_queue.at(i)),("m_results_queue.at(i) is NULL"));
+    ALEPH_ASSERT((m_results_queue.at(i)),("m_results_queue.at(i) is NULL"));
     delete m_results_queue.at(i);
     m_results_queue.setAt(i,NULL); 
   }
   for(Integer i=0,iMax=m_matrix_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] matrix #"<<i<<"\33[0m";
-    ARCANE_ASSERT((m_matrix_queue.at(i)),("m_matrix_queue.at(i) is NULL"));
+    ALEPH_ASSERT((m_matrix_queue.at(i)),("m_matrix_queue.at(i) is NULL"));
     delete m_matrix_queue.at(i);
     m_matrix_queue.setAt(i,NULL);
   }
   for(Integer i=0,iMax=m_arguments_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_x_vector\33[0m";
-    ARCANE_ASSERT((m_arguments_queue.at(i)->m_x_vector),("m_arguments_queue.at(i)->m_x_vector is NULL"));
+    ALEPH_ASSERT((m_arguments_queue.at(i)->m_x_vector),("m_arguments_queue.at(i)->m_x_vector is NULL"));
     delete m_arguments_queue.at(i)->m_x_vector;
     m_arguments_queue.at(i)->m_x_vector=NULL;
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_b_vector\33[0m";
-    ARCANE_ASSERT((m_arguments_queue.at(i)->m_b_vector),("m_arguments_queue.at(i)->m_b_vector is NULL"));
+    ALEPH_ASSERT((m_arguments_queue.at(i)->m_b_vector),("m_arguments_queue.at(i)->m_b_vector is NULL"));
     delete m_arguments_queue.at(i)->m_b_vector;
     m_arguments_queue.at(i)->m_b_vector=NULL;
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_tmp_vector\33[0m";
-    ARCANE_ASSERT((m_arguments_queue.at(i)->m_tmp_vector),("m_arguments_queue.at(i)->m_tmp_vector is NULL"));
+    ALEPH_ASSERT((m_arguments_queue.at(i)->m_tmp_vector),("m_arguments_queue.at(i)->m_tmp_vector is NULL"));
     delete m_arguments_queue.at(i)->m_tmp_vector;
     m_arguments_queue.at(i)->m_tmp_vector=NULL;
     
@@ -209,12 +210,12 @@ AlephKernel::~AlephKernel(void){
     // les m_params sont passés via le postSolver
     // On laisse le soin à l'appelent de deleter ce m_params
     /*debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_params\33[0m";
-    ARCANE_ASSERT((m_arguments_queue.at(i)->m_params),("m_arguments_queue.at(i)->m_params is NULL"));
+    ALEPH_ASSERT((m_arguments_queue.at(i)->m_params),("m_arguments_queue.at(i)->m_params is NULL"));
     delete m_arguments_queue.at(i)->m_params;
     m_arguments_queue.at(i)->m_params=NULL;*/
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"\33[0m";
-    ARCANE_ASSERT((m_arguments_queue.at(i)),("m_arguments_queue.at(i) is NULL"));
+    ALEPH_ASSERT((m_arguments_queue.at(i)),("m_arguments_queue.at(i) is NULL"));
     delete m_arguments_queue.at(i);
     m_arguments_queue.setAt(i,NULL);
   }

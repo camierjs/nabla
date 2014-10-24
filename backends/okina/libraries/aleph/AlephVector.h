@@ -1,7 +1,7 @@
 #ifndef ALEPH_VECTOR_H
 #define ALEPH_VECTOR_H
 
-#include "AlephGlobal.h"
+#include "Aleph.h"
 
 class IAlephVector;
 class AlephTopology;

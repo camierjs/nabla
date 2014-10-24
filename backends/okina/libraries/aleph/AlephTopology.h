@@ -1,7 +1,7 @@
 #ifndef ALEPH_TOPOLOGY_H
 #define ALEPH_TOPOLOGY_H 
 
-#include "AlephGlobal.h"
+#include "Aleph.h"
 
 class IAlephTopology;
 

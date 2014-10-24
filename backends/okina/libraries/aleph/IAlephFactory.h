@@ -4,13 +4,12 @@
 
 #include "AlephStd.h"
 
-#include "AlephGlobal.h"
+#include "Aleph.h"
+#include "IAlephFactory.h"
 #include "AlephInterface.h"
 
 #include <map>
 #include <string>
-
-class IApplication;
 
 class AlephFactory: public IAlephFactory{
  private:
@@ -25,7 +24,7 @@ class AlephFactory: public IAlephFactory{
     Bool m_initialized;
   };
  public:
-  AlephFactory(IApplication* app,ITraceMng *tm);
+  AlephFactory(ITraceMng *tm);
   ~AlephFactory();
  public:
   IAlephTopology* GetTopology(AlephKernel *kernel, Integer index, Integer nb_row_size);
