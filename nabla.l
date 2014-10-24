@@ -321,7 +321,7 @@ static int tok(YYSTYPE *yylval, int tokenid){
     //dbg("\n[astNewNode] preprocs: line_jump=%d and yylineno=%d", line_jump, yylineno);
     yylineno=line_jump-1;
   }
-  (*yylval) = astNewNodeToken();
+  (*yylval) = astNewNode();
   (*yylval)->token=strdup(yytext);
   (*yylval)->tokenid=tokenid;
   return tokenid;

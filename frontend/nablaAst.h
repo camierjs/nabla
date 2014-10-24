@@ -29,10 +29,10 @@ typedef struct RuleActionStruct{
   void (*action)(astNode*,void*);
 } RuleAction;
 
-astNode *astNewNodeToken(void);
-astNode *astNewNodeRule(const char *, unsigned int);
-astNode *astAddChild(astNode *parent, astNode *child);
-astNode *astAddNext(astNode *node, astNode *next);
+astNode *astNewNode(void);
+astNode *astNewNodeRule(const char*, unsigned int);
+astNode *astAddChild(astNode*, astNode*);
+astNode *astAddNext(astNode*, astNode*);
 
 NABLA_STATUS astTreeSave(const char *treeFileName, astNode *root);
 void getInOutPutsNodes(FILE *fOut, astNode *n, char *color);

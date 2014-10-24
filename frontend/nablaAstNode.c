@@ -13,64 +13,59 @@
  *****************************************************************************/
 #include "nabla.h"
 
-/*
- * Creat a new TOKEN node, initialize its contents
- */
-astNode *astNewNodeToken(void) {
+// ****************************************************************************
+// * astNewNode
+// ****************************************************************************
+astNode *astNewNode(void) {
   astNode *n = (astNode*)calloc(1,sizeof(astNode));
   assert(n != NULL);
   return n; 
 }
 
 
-/* 
- * Creat a new RULE node, initialize its contents
- */
+
+// ****************************************************************************
+// * astNewNodeRule
+// ****************************************************************************
 astNode *astNewNodeRule(const char *rule, unsigned int yyn) {
-  astNode *n=astNewNodeToken();
+  astNode *n=astNewNode();
   assert(rule != NULL);
   n->rule = rule; 
   n->ruleid = yyn;   
   return n;
 }
 
-/* astAddChild:
- *
- * Add a child to a parent node. If the child is linked to something else, keep the link.
- * Append the child as the last of the parents children.
- * Returns a pointer to the parent. Parameters are pointers to the parent node and the
- * child node to add.
- */
-astNode *astAddChild(astNode *parent, astNode *child) {
-	astNode *iterator = NULL;
-	assert(parent != NULL && child != NULL);
-   child->parent=parent;
-	iterator = parent->children;
-	if(iterator == NULL)
-		parent->children = child;
-   else{
-		while(iterator->next != NULL)
-			iterator = iterator->next;
-		iterator->next = child;
-	}
-	return parent;
+
+// ****************************************************************************
+// * astAddChild
+// ****************************************************************************
+astNode *astAddChild(astNode *root, astNode *child) {
+  assert(root != NULL && child != NULL);
+  astNode *next=root->children;
+  // On set le parent du nouvel enfant
+  child->parent=root;
+  // S'il n'y a pas de fils, on le crée
+  if (root->children==NULL) return root->children = child;
+  // Sinon, on scrute jusqu'au dernier enfant
+  for(;next->next!=NULL;next=next->next);
+  // Et on l'append
+  return next->next=child;
 }
 
 
-/* astAddNext:
- *
- * Add a sibling-to-be node to a node, appending it as the last sibling (recursively).
- * Parameters are pointers to the node and to the sibling-to-be. Return value is a pointer
- * to the node. The return value does not need to be checked.
- */
-astNode *astAddNext(astNode *node, astNode *next) {
-	assert(node != NULL && next != NULL);
-	if(node->next != NULL)
-		astAddNext(node->next, next);
-	else{
-		node->next = next;
-      next->parent=node->parent;
-   }
-	return node;
+// ****************************************************************************
+// * astAddNext
+// ****************************************************************************
+astNode *astAddNext(astNode *root, astNode *node) {
+  assert(root != NULL && node != NULL);
+  astNode *next=root;
+  // On set le parent du nouvel enfant
+  node->parent=root->parent;
+  // S'il n'y a pas de frère, on le crée
+  if(root->next == NULL) return root->next = node;
+  // Sinon, on scrute jusqu'au dernier enfant
+  for(;next->next!=NULL;next=next->next);
+  // Et on l'append
+  return next->next=node;
 }
 
