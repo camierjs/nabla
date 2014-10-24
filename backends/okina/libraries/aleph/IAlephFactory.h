@@ -2,11 +2,7 @@
 #define ALEPH_IALEPHFACTORY_H
 
 
-#include "arcane/utils/ArcaneGlobal.h"
-#include "arcane/utils/TraceInfo.h"
-//#include "arcane/utils/String.h"
-//#include "arcane/NotSupportedException.h"
-//#include "arcane/NotImplementedException.h"
+#include "AlephStd.h"
 
 #include "AlephGlobal.h"
 #include "AlephInterface.h"

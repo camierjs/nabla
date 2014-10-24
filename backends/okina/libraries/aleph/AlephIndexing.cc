@@ -1,14 +1,5 @@
-#include "AlephArcane.h"
-
 #include <map>
-//#include <arcane/IMesh.h>
-//#include <arcane/VariableInfo.h>
-//#include <arcane/ArcaneTypes.h>
-//#include <arcane/utils/String.h>
-//#include <arcane/IVariable.h>
-//#include <arcane/IVariableMng.h>
-#include <arcane/utils/ArcaneGlobal.h>
-//#include <arcane/utils/ArcanePrecomp.h>
+#include "Aleph.h"
 
 #define ALEPH_INDEX_NOT_USED (-1)
 

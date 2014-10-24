@@ -1,4 +1,4 @@
-#include "AlephArcane.h"
+#include "Aleph.h"
 
 // ****************************************************************************
 // * AlephKernel utilisé par Kappa où l'on met le m_sub_domain à NULL
@@ -127,7 +127,6 @@ AlephKernel::AlephKernel(ISubDomain* sd,
 // * Setup: configuration générale
 // *****************************************************************************
 void AlephKernel::setup(void){
-  ItacFunction(AlephKernel);
   if (m_sub_domain){
     debug()<<"\33[1;31m[AlephKernel] thisParallelMng's size="<<m_size<<"\33[0m";
     debug()<<"\33[1;31m[AlephKernel] worldParallelMng's size="<<m_world_size<<"\33[0m";
@@ -235,7 +234,6 @@ AlephKernel::~AlephKernel(void){
 *****************************************************************************/
 void AlephKernel::initialize(Integer global_nb_row,
                              Integer local_nb_row){
-  ItacFunction(AlephKernel);
   //Timer::Action ta(subDomain(),"AlephKernel::initialize");
   if (m_there_are_idles && !m_i_am_an_other){
     m_world_parallel->broadcast(Array<unsigned long>(1,0xd80dee82l).view(),0);
@@ -323,8 +321,6 @@ IParallelMng *AlephKernel::createUnderlyingParallelMng(Integer nb_wanted_sites){
  * BaseForm[Hash["createSolverMatrix", "CRC32"], 16] = ef162166
  *****************************************************************************/
 AlephMatrix* AlephKernel::createSolverMatrix(void){
-  ItacFunction(AlephService);
-  
   if (isInitialized()==false){
     debug()<<"\33[1;31m[createSolverMatrix] has_NOT_been_initialized!\33[0m"<<"\33[0m";
     return new AlephMatrix(this);
@@ -394,7 +390,6 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
  * c4b28f2
  *****************************************************************************/
 AlephVector* AlephKernel::createSolverVector(void){
-  ItacFunction(AlephKernel);
   if (m_has_been_initialized==false){
     debug()<<"\33[1;31m[createSolverVector] has_NOT_been_initialized!\33[0m";
     return new AlephVector(this);
@@ -419,9 +414,7 @@ AlephVector* AlephKernel::createSolverVector(void){
 void AlephKernel::postSolver(AlephParams *params,
                              AlephMatrix *fromThisMatrix,
                              AlephVector *fromeThisX,
-                             AlephVector *fromThisB){
-  ItacFunction(AlephKernel);
-  
+                             AlephVector *fromThisB){  
   if (!isInitialized()){
     debug()<<"\33[1;31m[postSolver] Trying to post a solver to an uninitialized kernel!\33[0m";
     debug()<<"\33[1;31m[postSolver] Now telling Indexer to do its job!\33[0m";
@@ -487,8 +480,6 @@ void AlephKernel::postSolver(AlephParams *params,
  * bf8d3adf
  *****************************************************************************/
 AlephVector* AlephKernel::syncSolver(Integer gid, Integer& nb_iteration, Real* residual_norm){
-  ItacFunction(AlephKernel);
-
   if (m_there_are_idles && !m_i_am_an_other){
     m_world_parallel->broadcast(Array<unsigned long>(1,0xbf8d3adfl).view(),0);
     m_world_parallel->broadcast(Array<Integer>(1,gid).view(),0);
@@ -525,11 +516,8 @@ AlephVector* AlephKernel::syncSolver(Integer gid, Integer& nb_iteration, Real* r
 /******************************************************************************
  *****************************************************************************/
 void AlephKernel::workSolver(void){
-  ItacFunction(AlephKernel);
-
   debug()<<"\33[1;31m[workSolver] Now working"<<"\33[0m";
   for( int gid=0;gid<m_solver_index;++gid){
-    ItacRegion(gidAssembleWaitAndFill,AlephKernel);
 	 debug()<<"\33[1;31m[workSolver] Waiting for assembling "<< gid<<"\33[0m";
 	 AlephVector* aleph_vector_x = m_arguments_queue.at(gid)->m_x_vector;
 	 AlephVector* aleph_vector_b = m_arguments_queue.at(gid)->m_b_vector;
@@ -547,7 +535,6 @@ void AlephKernel::workSolver(void){
   }
 
   for( int gid=0;gid<m_solver_index;++gid){
-    ItacRegion(gidSolving,AlephKernel);
 	 debug()<<"\33[1;31m[workSolver] Solving "<< gid <<" ?"<<"\33[0m";
     if (getTopologyImplementation(gid)!=NULL)
       getTopologyImplementation(gid)->backupAndInitialize();
@@ -563,7 +550,6 @@ void AlephKernel::workSolver(void){
   }
     
   for( int gid=0;gid<m_solver_index;++gid){
-    ItacRegion(gidReAssemble,AlephKernel);
 	 debug()<<"\33[1;31m[workSolver] Posting re-assembling "<<gid<<"\33[0m";
 	 m_arguments_queue.at(gid)->m_x_vector->reassemble();
 	 m_matrix_queue.at(gid)->reassemble(m_results_queue.at(gid)->m_nb_iteration,

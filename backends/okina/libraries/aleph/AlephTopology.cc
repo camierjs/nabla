@@ -1,4 +1,4 @@
-#include "AlephArcane.h"
+#include "Aleph.h"
 
 // *****************************************************************************
 // * Minimal AlephTopology for AlephIndexing
@@ -29,7 +29,6 @@ AlephTopology::AlephTopology(ITraceMng *tm,
                                                    m_created(false),
                                                    m_has_set_row_nb_elements(false),
                                                    m_has_been_initialized(true){
-  ItacFunction(AlephTopology);
   debug()<<"\33[1;32m\t[AlephTopology::AlephTopology] Loading AlephTopology"<<"\33[0m";
   
   m_gathered_nb_setValued.resize(m_kernel->size());
@@ -77,8 +76,6 @@ AlephTopology::~AlephTopology(){
  * b1e13efe
  *****************************************************************************/
 void AlephTopology::create(Integer setValue_idx){
-  ItacFunction(AlephTopology);
-    
   if (m_created) return;
   m_created=true;
   

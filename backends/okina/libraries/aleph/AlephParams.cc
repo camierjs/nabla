@@ -1,4 +1,4 @@
-#include "AlephArcane.h"
+#include "Aleph.h"
 
 AlephParams::AlephParams():
   m_param_epsilon(1.0e-10),

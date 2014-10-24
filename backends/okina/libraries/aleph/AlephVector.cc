@@ -1,5 +1,4 @@
-#include "AlephArcane.h"
-//#include "arcane/IMesh.h"
+#include "Aleph.h"
 
 
 /******************************************************************************
@@ -9,8 +8,6 @@ AlephVector::AlephVector(AlephKernel *kernel): TraceAccessor(kernel->parallel()-
                                                m_index(kernel->index()),
                                                m_bkp_num_values(0)
 {
-  ItacFunction(AlephVector);
-
   if (kernel->isInitialized()==false){
     debug()<<"\33[1;36m[AlephVector::AlephVector] New Aleph vector, but kernel is not initialized!\33[0m";
     return;
@@ -33,7 +30,6 @@ AlephVector::AlephVector(AlephKernel *kernel): TraceAccessor(kernel->parallel()-
 /******************************************************************************
  *****************************************************************************/
 AlephVector::~AlephVector(){
-  ItacFunction(AlephVector);
   debug()<<"\33[1;36m\t\t[~AlephVector]\33[0m";
 }
 
@@ -42,7 +38,6 @@ AlephVector::~AlephVector(){
  * 6bdba30a
  *****************************************************************************/
 void AlephVector::create(void){
-  ItacFunction(AlephVector);
   if (m_kernel->isInitialized()==false) return;
   if (m_kernel->configured()){
     debug()<<"\33[1;36m[AlephVector::create] kernel is configured, returning"<<"\33[0m";
@@ -121,7 +116,6 @@ void AlephVector::reSetLocalComponents(AlephVector *from){
 void AlephVector::setLocalComponents(Integer num_values,
 												 ConstArrayView<int> indexs,
 												 ConstArrayView<double> values){
-  ItacFunction(AlephVector);
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;36m[AlephVector::setLocalComponents] Trying to setLocalComponents from an uninitialized kernel!\33[0m";
     m_bkp_num_values=num_values;
@@ -160,7 +154,6 @@ void AlephVector::setLocalComponents(Integer num_values,
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::create_really(void){
-  ItacFunction(AlephVector);
   debug()<<"\33[1;36m[AlephVector::create_really] New UNconfigured vector"<<"\33[0m";
   m_implementation->AlephVectorCreate();
 }
@@ -169,9 +162,7 @@ void AlephVector::create_really(void){
 /******************************************************************************
  * ec7a979f
  *****************************************************************************/
-void AlephVector::assemble(void){
-  ItacFunction(AlephVector);
-  
+void AlephVector::assemble(void){  
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;36m[AlephVector::AlephVector] Trying to assemble a vector from an uninitialized kernel!\33[0m";
     return;
@@ -216,7 +207,6 @@ void AlephVector::assemble(void){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::assemble_waitAndFill(void){
-  ItacFunction(AlephVector);
   if (!m_kernel->isParallel()) return;
   debug() << "\33[1;36m[AlephVector::assemble_waitAndFill] wait for "
           << m_parallel_requests.size()
@@ -241,7 +231,6 @@ void AlephVector::assemble_waitAndFill(void){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::reassemble(void){
-  ItacFunction(AlephVector);
   if (!m_kernel->isParallel()) return;
   // Cas où le site de résolution n'est pas le notre, on pousse les données dans le 'val'
   if (m_kernel->rank()!=m_ranks[m_kernel->rank()] && !m_kernel->isAnOther()){
@@ -279,7 +268,6 @@ void AlephVector::reassemble(void){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::reassemble_waitAndFill(void){
-  ItacFunction(AlephVector);
   if (!m_kernel->isParallel()) return;
   m_kernel->world()->waitAllRequests(m_parallel_reassemble_requests);
   m_parallel_reassemble_requests.clear();
@@ -292,7 +280,6 @@ void AlephVector::reassemble_waitAndFill(void){
 void AlephVector::getLocalComponents(Integer vector_size,
 												 ConstArrayView<int> global_indice,
 												 ArrayView<double>   vector_values ){
-  ItacFunction(AlephVector);
   debug() << "\33[1;36m[AlephVector::getLocalComponents] vector_size="<<vector_size<<"\33[0m";
   if (!m_kernel->isParallel()){
     // En séquentiel, on va piocher les résultats directement
@@ -328,7 +315,6 @@ void AlephVector::getLocalComponents(Array<double> &vector_values){
   const Integer vector_size=m_kernel->topology()->nb_row_rank();
   vector_values.resize(vector_size);
   m_aleph_vector_buffer_idx.resize(vector_size);
-  ItacFunction(AlephVector);
   debug() << "\33[1;36m[getLocalComponents(vector_values)] vector_size="<<vector_size<<"\33[0m";
   if (!m_kernel->isParallel()){
     for(Integer i=0;i<vector_size;i+=1){
@@ -358,7 +344,6 @@ void AlephVector::getLocalComponents(Array<double> &vector_values){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::startFilling(){
-  ItacFunction(AlephVector);
   debug()<<"\33[1;36m[AlephVector::startFilling]"<<"\33[0m";
 }
 
@@ -366,7 +351,6 @@ void AlephVector::startFilling(){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::writeToFile(const String base_file_name){
-  ItacFunction(AlephVector);
   debug()<<"\33[1;36m[AlephVector::writeToFile]"<<"\33[0m";
   m_implementation->writeToFile(base_file_name);
 }

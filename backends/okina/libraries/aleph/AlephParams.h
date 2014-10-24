@@ -1,8 +1,7 @@
 #ifndef ALEPH_PARAMS_H
 #define ALEPH_PARAMS_H
 
-#include "AlephGlobal.h"
-#include "AlephTypesSolver.h" 
+#include "Aleph.h"
 
 class ITraceMng;
 

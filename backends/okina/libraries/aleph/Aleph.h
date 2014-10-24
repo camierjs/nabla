@@ -1,16 +1,10 @@
 #ifndef ALEPH_LIBRARY_H
 #define ALEPH_LIBRARY_H
 
-//#include "arcane_packages.h"
+#include "AlephStd.h"
 
-//#include "arcane/IParallelMng.h"
-//#include "arcane/BasicService.h"
-//#include "arcane/ArcaneVersion.h"
-//#include "arcane/FactoryService.h"
-//#include "arcane/utils/ScopedPtr.h"
-//#include "arcane/utils/ITraceMng.h"
-//#include "arcane/utils/MultiArray2.h"
-//#include "arcane/utils/ArgumentException.h"
+#include "AlephTypesSolver.h"
+
 #include "AlephParams.h"
 #include "AlephVector.h"
 #include "AlephMatrix.h"
@@ -20,5 +14,8 @@
 #include "AlephTopology.h"
 #include "AlephInterface.h"
 
+#include "AlephParams.h"
+
+#include "IAlephFactory.h"
 
 #endif

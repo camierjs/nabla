@@ -1,7 +1,6 @@
 #ifndef _ALEPH_INTERFACE_H_
 #define _ALEPH_INTERFACE_H_
 
-#include "arcane/utils/TraceAccessor.h"
 #include "AlephKernel.h"
 
 

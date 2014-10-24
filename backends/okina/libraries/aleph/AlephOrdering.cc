@@ -1,5 +1,4 @@
-#include "AlephArcane.h"
-//#include "arcane/IMesh.h"
+#include "Aleph.h"
 
 
 // *****************************************************************************
@@ -21,7 +20,6 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel,
                                            m_kernel(kernel),
                                            m_swap(0)
 {
-  ItacFunction(AlephOrdering);
   if (!do_swap){
     debug()<<"\t[AlephOrdering::AlephOrdering] No ordering!";
     return;
@@ -92,7 +90,6 @@ AlephOrdering::~AlephOrdering(){
  * initCellOrder
  *****************************************************************************/
 void AlephOrdering::initCellOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::InitializeCellOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
   Array<Int64> all;
@@ -111,7 +108,6 @@ void AlephOrdering::initCellOrder(void){
  * Pour le mode Complexe
  *****************************************************************************/
 void AlephOrdering::initTwiceCellOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::InitializeTwiceCellOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
   Array<Int64> all;
@@ -131,7 +127,6 @@ void AlephOrdering::initTwiceCellOrder(void){
  * initFaceOrder
  *****************************************************************************/
 void AlephOrdering::initFaceOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::InitializeFaceOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
   Array<Int64> all;
@@ -149,7 +144,6 @@ void AlephOrdering::initFaceOrder(void){
  * initCellFaceOrder
  *****************************************************************************/
 void AlephOrdering::initCellFaceOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
   Array<Integer> all_cells;
@@ -235,7 +229,6 @@ void AlephOrdering::initCellFaceOrder(void){
  * initCellNodeOrder
  *****************************************************************************/
 void AlephOrdering::initCellNodeOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::InitializeCellNodeOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
   Array<Integer> all_cells;
@@ -285,7 +278,6 @@ void AlephOrdering::initCellNodeOrder(void){
 
 
 void AlephOrdering::initTwiceCellNodeOrder(void){
-  ItacFunction(AlephOrdering);
   debug()<<"\t[AlephOrdering::initTwiceCellNodeOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
   Array<Integer> all_cells;

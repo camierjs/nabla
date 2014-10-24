@@ -1,7 +1,4 @@
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
-
-set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
+Set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
                   AlephVector.cc   AlephParams.cc
                   AlephTopology.cc AlephOrdering.cc
                   AlephIndexing.cc AlephFactory.cc)
