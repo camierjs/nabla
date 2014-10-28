@@ -394,7 +394,10 @@ static void okinaHookSwitchForeach(astNode *n, nablaJob *job){
 void okinaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
-
+  
+  if (n->token)
+    dbg("\n\t[okinaHookSwitchToken] token: '%s'?", n->token);
+ 
   okinaHookSwitchForeach(n,job);
   
   switch(n->tokenid){

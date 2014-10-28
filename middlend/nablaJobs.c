@@ -181,6 +181,9 @@ char scanForNablaJobForeachItem(astNode * n){
 void nablaJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
+  
+  if (n->token)
+    dbg("\n[nablaJobParse] token: '%s'?", n->token);
 
   if (job->parse.got_a_return && job->parse.got_a_return_and_the_semi_colon) return;
   
@@ -188,7 +191,8 @@ void nablaJobParse(astNode *n, nablaJob *job){
     nabla->hook->diffractStatement(nabla,job,&n);
  
   // On regarde si on a un appel de fonction avec l'argument_expression_list
-  if ((n->ruleid == rulenameToId("argument_expression_list")) && (job->parse.function_call_arguments==false)){
+  if ((n->ruleid == rulenameToId("argument_expression_list"))
+      && (job->parse.function_call_arguments==false)){
     nprintf(nabla, "/*function_call_arguments*/", NULL);
     job->parse.function_call_arguments=true;
   }
@@ -255,14 +259,19 @@ void nablaJobParse(astNode *n, nablaJob *job){
     }
   }
 
-  // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas un argument que l'on return
+  // Dés qu'on a une primary_expression,
+  // on teste pour voir si ce n'est pas un argument que l'on return
   if ((n->ruleid == rulenameToId("primary_expression"))
       && (n->children->token!=NULL)
       && (job->parse.returnFromArgument)){
+    dbg("\n\t[nablaJobParse] primary_expression test for return");
     if (nabla->hook->primary_expression_to_return){
-      nabla->hook->primary_expression_to_return(nabla,job,n);
-      return;
-    }
+      dbg("\n\t\t[nablaJobParse] primary_expression_to_return");
+      if (nabla->hook->primary_expression_to_return(nabla,job,n)==true)
+        return;
+    }else{
+       dbg("\n\t\t[nablaJobParse] ELSE primary_expression_to_return");
+   }
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable

@@ -105,7 +105,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("with_library")){
     dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
     nablaLibraries(n,nabla->entity);
-    dbg("done");
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
   
   ///////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
     nablaItems(n->children->next,
                rulenameToId("nabla_item_declaration"),
                nabla);
-    dbg("done");
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
 
   ////////////////////////////////////
@@ -139,7 +139,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nablaOptions(n->children,
                  rulenameToId("nabla_option_declaration"), nabla);
-    dbg("done");
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
 
   /////////////////////////////////////////////////
@@ -148,7 +148,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("function_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nabla->hook->function(nabla,n);
-    dbg("done");
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
   
   ////////////////////////////////////////
@@ -157,7 +157,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("nabla_job_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nabla->hook->job(nabla,n);
-    dbg("done");
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
 
   //////////////////

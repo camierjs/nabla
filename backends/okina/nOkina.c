@@ -252,12 +252,18 @@ static void okinaHeaderPostfix(nablaMain *nabla){
 // ****************************************************************************
 // * okinaPrimaryExpressionToReturn
 // ****************************************************************************
-static void okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+static bool okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
   const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  dbg("\n\t[okinaPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
-    dbg("\n\t[nablaJobParse] primaryExpression hits returned argument");
+    dbg("\n\t[okinaPrimaryExpressionToReturn] primaryExpression hits returned argument");
     nprintf(nabla, NULL, "%s_per_thread[tid]",var);
+    return true;
+  }else{
+    dbg("\n\t[okinaPrimaryExpressionToReturn] ELSE");
+    //nprintf(nabla, NULL, "%s",n->children->token);
   }
+  return false;
 }
 
 

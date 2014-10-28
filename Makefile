@@ -14,12 +14,14 @@ all:
 
 tst:
 	(cd $(BUILD_PATH)/tests && ctest)
+tstn:
+	(cd $(BUILD_PATH)/tests && ctest -N)
 tstg:
 	(cd $(BUILD_PATH)/tests && ctest -R gen)
 tstga2:
 	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_gen_1)
 tstra2:
-	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_run_1_avx2)
+	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_run_1)
 tstro:
 	(cd $(BUILD_PATH)/tests && ctest -V -R run_omp)
 tstrc:

@@ -106,7 +106,7 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   case(1): {nprintf(nabla, "/*setDotX+flush*/", ""); break;}
   case(2): {nprintf(nabla, "/*setDotY+flush*/", ""); break;}
   case(3): {nprintf(nabla, "/*setDotZ+flush*/", ""); break;}
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[nvar] Switch isDotXYZ error\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[setDotXYZ] Switch isDotXYZ error\n"));
   }
   // Flush isDotXYZ
   job->parse.isDotXYZ=0;
@@ -140,7 +140,7 @@ static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
   // Preliminary pertinence test
   if (cnfg != 'c') return;
   
-  nprintf(arc, "/*CellJob*/",NULL);
+  nprintf(arc, "/*CellJob*/","/*CellJob*/");
   
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if ((job->parse.function_call_arguments==true)&&(var->dim==1)){

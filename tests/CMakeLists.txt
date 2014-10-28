@@ -39,7 +39,7 @@ endfunction()
 #################################################
 # nabla_add_arcane_test_with_additional_defines #
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_BLUE}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_CYAN}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
   set(backend arcane)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
@@ -59,7 +59,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT
 # NABLA TEST MACRO FOR OKINA BACKEND #
 ######################################
 function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}okina${VT100_FG_WHITE}_${nb_proc}proc_${cmd}_${simd}_${parallel}${VT100_RESET}")
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}okina${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${simd}_${parallel}${VT100_RESET}")
   set(backend okina)
   get_additional_nabla_files_and_set_Makefile(${name})
   add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
@@ -161,22 +161,20 @@ nabla_add_arcane_test(shydro 4 run)
 
 
 
-foreach(simd std sse avx avx2 mic)
-  foreach(parallel omp cilk)
-    #info("Adding ctest ${VT100_FG_WHITE}nabla_${simd}_${parallel}${VT100_RESET}")
+foreach(parallel omp cilk)
+  foreach(simd std sse avx avx2 mic)
+    #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_gen_${parallel}_${simd}${VT100_RESET}")
     nabla_add_okina_test(lulesh_mic 1 gen ${simd} ${parallel})
-  endforeach(parallel)
-endforeach(simd)
+  endforeach()
+endforeach()
 
+foreach(parallel omp)#cilk
+  foreach(simd std sse avx)#avx2 mic
+    #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_run_${parallel}_${simd}${VT100_RESET}")
+    nabla_add_okina_test(lulesh_mic 1 run ${simd} ${parallel})
+  endforeach()
+endforeach()
 
-#nabla_add_okina_test(lulesh_mic 1 gen std omp)
-#nabla_add_okina_test(lulesh_mic 1 gen sse omp)
-#nabla_add_okina_test(lulesh_mic 1 gen avx omp)
-#nabla_add_okina_test(lulesh_mic 1 gen avx2 omp)
-#nabla_add_okina_test(lulesh_mic 1 gen std cilk)
-#nabla_add_okina_test(lulesh_mic 1 gen sse cilk)
-#nabla_add_okina_test(lulesh_mic 1 gen avx cilk)
-#nabla_add_okina_test(lulesh_mic 1 gen avx2 cilk)
 
 #nabla_add_okina_test(lulesh_mic 1 run std omp)
 #nabla_add_okina_test(lulesh_mic 1 run sse omp)
