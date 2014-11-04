@@ -167,6 +167,7 @@ extern char knAvxReal_h[];
 extern char knAvxReal3_h[];
 extern char knAvxInteger_h[];
 extern char knAvxGather_h[];
+extern char knAvx2Gather_h[];
 extern char knAvxScatter_h[];
 extern char knAvxOStream_h[];
 extern char knAvxTernary_h[];
@@ -184,7 +185,7 @@ static void okinaHeaderSimd(nablaMain *nabla){
     fprintf(nabla->entity->hdr,knMicInteger_h);
     fprintf(nabla->entity->hdr,knMicReal_h);
     //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-      fprintf(nabla->entity->hdr,knMicReal3_h);
+    fprintf(nabla->entity->hdr,knMicReal3_h);
     fprintf(nabla->entity->hdr,knMicTernary_h);
     fprintf(nabla->entity->hdr,knMicGather_h);
     fprintf(nabla->entity->hdr,knMicScatter_h);
@@ -193,17 +194,19 @@ static void okinaHeaderSimd(nablaMain *nabla){
             ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)){
     fprintf(nabla->entity->hdr,knAvxInteger_h);
     fprintf(nabla->entity->hdr,knAvxReal_h);
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-      fprintf(nabla->entity->hdr,knAvxReal3_h);
+    fprintf(nabla->entity->hdr,knAvxReal3_h);
     fprintf(nabla->entity->hdr,knAvxTernary_h);
-    fprintf(nabla->entity->hdr,knAvxGather_h);
+    if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
+      fprintf(nabla->entity->hdr,knAvxGather_h);
+    else
+      fprintf(nabla->entity->hdr,knAvx2Gather_h);
     fprintf(nabla->entity->hdr,knAvxScatter_h);
     fprintf(nabla->entity->hdr,knAvxOStream_h);
   }else if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
     fprintf(nabla->entity->hdr,knSseInteger_h);
     fprintf(nabla->entity->hdr,knSseReal_h);
     //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-      fprintf(nabla->entity->hdr,knSseReal3_h);
+    fprintf(nabla->entity->hdr,knSseReal3_h);
     fprintf(nabla->entity->hdr,knSseTernary_h);
     fprintf(nabla->entity->hdr,knSseGather_h);
     fprintf(nabla->entity->hdr,knSseScatter_h);
@@ -212,7 +215,7 @@ static void okinaHeaderSimd(nablaMain *nabla){
     fprintf(nabla->entity->hdr,knStdInteger_h);
     fprintf(nabla->entity->hdr,knStdReal_h);
     //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-      fprintf(nabla->entity->hdr,knStdReal3_h);
+    fprintf(nabla->entity->hdr,knStdReal3_h);
     fprintf(nabla->entity->hdr,knStdTernary_h);
     fprintf(nabla->entity->hdr,knStdGather_h);
     fprintf(nabla->entity->hdr,knStdScatter_h);
@@ -425,7 +428,7 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
   nablaTypedefs(nabla,nabla->simd->typedefs);
   nablaForwards(nabla,nabla->simd->forwards);
 
-  // On inclue les fichiers knAvx.h||knMic.h
+  // On inclue les fichiers kn'SIMD'
   okinaHeaderSimd(nabla);
   okinaHeaderDbg(nabla);
   okinaHeaderMth(nabla);

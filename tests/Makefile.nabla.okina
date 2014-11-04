@@ -7,14 +7,32 @@ MESH = 16
 COLORS = aos
 #PARALLEL = omp
 
-CXX=/usr/local/intel/Compiler/14.0/144/bin/icc
+############
+# STATIONS #
+CXX_RedHat-6-x86_64=/usr/local/intel/Compiler/14.0/144/bin/icc
+
+###########
+# GERMAIN #
+# module load KNC
+# export LD_LIBRARY_PATH=/usr/local/intel/Compiler/14.0/0.080/lib/mic/:$LD_LIBRARY_PATH
+# OMP_NUM_THREADS=1  ./lulesh_mic_16_omp_mic
+CXX_BullEL_6__x86_64=/usr/local/intel/Compiler/14.0/0.080/bin/icc
+
+CXX=$(CXX_$(shell cea_os))
+#CXX=/usr/local/intel-14.0.3.174/bin/icc
+
+CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(ADDITIONAL_CFLAGS) $(MESH_FLAGS)
 ADDITIONAL_CFLAGS = -finline -inline-forceinline -fno-alias -alias-const -no-ipo
+
+#CXX=/usr/local/opendev1/gcc/gcc/4.9.0/bin/g++
+#CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(ADDITIONAL_CFLAGS) $(MESH_FLAGS)
+#ADDITIONAL_CFLAGS = -finline
+
 SIMD_std_FLAGS  = -DWARP_BIT=0 -march=pentium3 
 SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse #4.2 #-mno-avx
 SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx 
 SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
 SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic
-CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(ADDITIONAL_CFLAGS) $(MESH_FLAGS)
 
 
 
@@ -37,12 +55,13 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) -fopenmp -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o
+	$(CXX) -fopenmp $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
+	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 time ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
 run4:$(TGT) $(NABLA) 

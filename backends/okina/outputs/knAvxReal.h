@@ -1,6 +1,7 @@
 #ifndef _KN_AVX_REAL_H_
 #define _KN_AVX_REAL_H_
  
+#pragma pack(push,32)
 
 // ****************************************************************************
 // * real

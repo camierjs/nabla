@@ -10,9 +10,9 @@ set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
 set(OKINA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/kappa)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hypre)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sloop)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/petsc)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/trilinos)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hypre)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sloop)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/petsc)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/trilinos)
 
 add_library(NablaOkinaAleph ${ALEPH_SOURCES})

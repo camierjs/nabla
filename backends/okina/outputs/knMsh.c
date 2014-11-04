@@ -62,7 +62,7 @@ static void nabla_ini_node_coords(void){
         dy5=((double)(iY+5))*NABLA_NB_NODES_Y_TICK;
         dy6=((double)(iY+6))*NABLA_NB_NODES_Y_TICK;
         dy7=((double)(iY+7))*NABLA_NB_NODES_Y_TICK;
-#elif __AVX__
+#elif __AVX__||__AVX2__
         dy0=((double)(iY+0))*NABLA_NB_NODES_Y_TICK;
         dy1=((double)(iY+1))*NABLA_NB_NODES_Y_TICK;
         dy2=((double)(iY+2))*NABLA_NB_NODES_Y_TICK;
@@ -79,7 +79,7 @@ static void nabla_ini_node_coords(void){
         x=set(dx,   dx,  dx,  dx,  dx,  dx,  dx,  dx);
         y=set(dy7, dy6, dy5, dy4, dy3, dy2, dy1, dy0);
         z=set(dz,   dz,  dz,  dz,  dz,  dz,  dz,  dz);
-#elif __AVX__
+#elif __AVX__||__AVX2__
         x=set(dx,   dx,  dx,  dx);
         y=set(dy3, dy2, dy1, dy0);
         z=set(dz,   dz,  dz,  dz);

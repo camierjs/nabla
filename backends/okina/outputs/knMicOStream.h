@@ -15,13 +15,15 @@ std::ostream& operator<<(std::ostream &os, const integer &a){
 // * REALS
 // ****************************************************************************
 std::ostream& operator<<(std::ostream &os, const __m512d v){
-  double *fp = (double*)&v;
-  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)<<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
+  const double *fp = (double*)&v;
+  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)
+            <<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
 }
 
 std::ostream& operator<<(std::ostream &os, const real &a){
-  double *fp = (double*)&a;
-  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)<<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
+  const double *fp = (double*)&a;
+  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)
+            <<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
 }
 
 

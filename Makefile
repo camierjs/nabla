@@ -40,3 +40,6 @@ cln:
 	(cd $(BUILD_PATH) && make clean)
 #\rm -rf $(BUILD_PATH)/*
 
+rs:
+	rsync -v /tmp/camierjs/nabla/tests/lulesh_mic/lulesh_mic_16_omp_avx* ~/tmp/
+	@echo "OMP_NUM_THREADS=1 ./lulesh_mic_16_omp_avx2|more"

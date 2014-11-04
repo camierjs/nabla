@@ -221,9 +221,9 @@ cells void calcElemVolume(void)
 
 cells void iniCellVolume(void) in (cell calc_volume)
   out (cell volo, cell elemMass) @ -7.0{
-  //debug()<<"[iniVolume] volume="<<volume;
+  //info()<<"[iniVolume] volume="<<volo;
   volo=elemMass=calc_volume;
-  //debug()<< "[iniVolume] volo #"<<lid<<"="<<volo;
+  //debug()<< "[iniVolume] volo #"<<uid<<"="<<volo;
   //foreach node nodalMass += volo / 8.0;
 }
 nodes void iniNodeVolume(void) in (cell calc_volume) out (node nodalMass) @ -6.9{
@@ -678,12 +678,14 @@ cells void calcMonotonicQForElemsByDirectionX(xyz direction)
   const Real monoq_limiter_mult = option_monoq_limiter_mult;
   const Real monoq_max_slope = option_monoq_max_slope;
   Integer bcSwitch;
-  Real register delvm=0.0;
-  Real register delvp=0.0;
+  Real delvm=0.0;
+  Real delvp=0.0;
   const Real ptiny = 1.e-36;
   const Real nrm = 1./(delv_xi+ptiny);
+  //debug()<<"[1;31m"<<"[calcMonotonicQForElemsByDirectionX] local'ed"<<"[m\n";
   {
     bcSwitch = elemBC & XI_M;
+    //debug()<<"[1;31m"<<"\t[calcMonotonicQForElemsByDirectionX] bcSwitch'ed"<<"[m\n";
     //debug()<<"[CalcMonotonicQRegionForElems] elemBC="<<elemBC;
     //debug()<<"[CalcMonotonicQRegionForElems] XI_M="<<XI_M;
     //debug()<<"[CalcMonotonicQRegionForElems] bcSwitch="<<bcSwitch;
@@ -691,10 +693,12 @@ cells void calcMonotonicQForElemsByDirectionX(xyz direction)
     //info()<<"[CalcMonotonicQRegionForElems] delv_xi[nextCell]="<<delv_xi[nextCell];
     //if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_xi[prevCell];
     delvm = (bcSwitch == 0)?delv_xi[prevCell];//lxim
+    //debug()<<"[1;31m"<<"\t[calcMonotonicQForElemsByDirectionX] delvm == 0'ed"<<"[m";
     delvm = (bcSwitch == XI_M_SYMM)?delv_xi;
     delvm = (bcSwitch == XI_M_FREE)?0.0;
     delvm = delvm * nrm ;
   }
+  //debug()<<"[1;31m"<<"[calcMonotonicQForElemsByDirectionX] XI_M'ed"<<"[m";
   {
     bcSwitch = elemBC & XI_P;
     //info()<<"[CalcMonotonicQRegionForElems] re bcSwitch="<<bcSwitch;
@@ -1122,8 +1126,8 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
   const Real adtfp = arealg/dtfp;
   //info()<<"[calcCourantConstraintForElems] adtfp="<<adtfp;
   //info()<<"[calcCourantConstraintForElems] vdov="<<vdov;
-  //info()<<"[calcCourantConstraintForElems] dtcourant="<<dtcourant;
   dtcourant=(vdov!=0.0)?min(dtcourant,adtfp);
+  //info()<<"[calcCourantConstraintForElems] dtcourant="<<dtcourant;
   return dtcourant;
 }          
 
@@ -1143,8 +1147,8 @@ cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
   //info()<<"\t[calcHydroConstraintForElems] denom="<<denom;
   //info()<<"\t[calcHydroConstraintForElems] dtdvov="<<dtdvov;
   //info()<<"\t[calcHydroConstraintForElems] dthdr="<<dthdr;
-  //info()<<"\t[calcHydroConstraintForElems] dthydro="<<dthydro;
   dthydro=(vdov!=0.0)?dthdr;
+  //info()<<"\t[calcHydroConstraintForElems] dthydro="<<dthydro;
   return dthydro;
 }
 

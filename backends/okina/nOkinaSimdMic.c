@@ -50,20 +50,24 @@ cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* okinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* okinaMicGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
+  // Phase de déclaration
   if (phase==enum_phase_declaration)
-    return strdup("register int cw=(c<<WARP_BIT);\n\t\t\tregister int ia,ib,ic,id,ie,iff,ig,ih;");
+    return strdup("int cw,ia,ib,ic,id,ie,iff,ig,ih;");
+  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t__declspec(align(64)) %s gathered_%s_%s=inlined_gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
-         ib=cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
-         ic=cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
-         id=cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
-         ie=cell_node[n*NABLA_NB_CELLS+cw+4],\n\t\t\t\
+  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+cw=(c<<WARP_BIT);\n\t\t\t\
+gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
+          ib=cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
+          ic=cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
+          id=cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
+          ie=cell_node[n*NABLA_NB_CELLS+cw+4],\n\t\t\t\
          iff=cell_node[n*NABLA_NB_CELLS+cw+5],\n\t\t\t\
-         ig=cell_node[n*NABLA_NB_CELLS+cw+6],\n\t\t\t\
-         ih=cell_node[n*NABLA_NB_CELLS+cw+7],\n\t\t\t\
-         %s_%s%s);\n\t\t\t\
-         //gathered_%s_%s);\n\t\t\t",
+          ig=cell_node[n*NABLA_NB_CELLS+cw+6],\n\t\t\t\
+          ih=cell_node[n*NABLA_NB_CELLS+cw+7],\n\t\t\t\
+          %s_%s%s,\n\t\t\t\
+          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
            var->item, var->name,
            strcmp(var->type,"real")==0?"":"3",
@@ -71,6 +75,62 @@ char* okinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
            strcmp(var->type,"real")==0?"":"",
            var->item, var->name);
   return strdup(gather);
+}
+
+// ****************************************************************************
+// * Gather pour un job sur les nodes
+// ****************************************************************************
+static char* okinaMicGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+  // Phase de déclaration
+  if (phase==enum_phase_declaration){
+    return strdup("int nw;");
+  }
+  // Phase function call
+  char gather[1024];
+  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+nw=(n<<WARP_BIT);\n\t\t\t\
+gatherFromNode_%sk%s(\
+node_cell[8*(nw+0)+c],\n\t\t\t\%s\
+node_cell[8*(nw+1)+c],\n\t\t\t\%s\
+node_cell[8*(nw+2)+c],\n\t\t\t\%s\
+node_cell[8*(nw+3)+c],\n\t\t\t\%s\
+node_cell[8*(nw+4)+c],\n\t\t\t\%s\
+node_cell[8*(nw+5)+c],\n\t\t\t\%s\
+node_cell[8*(nw+6)+c],\n\t\t\t\%s\
+node_cell[8*(nw+7)+c],\n\t\t\t\%s\
+         %s_%s%s,\n\t\t\t\
+         &gathered_%s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"real":"real3",
+           var->item,
+           var->name,
+           strcmp(var->type,"real")==0?"":"3",
+           var->dim==0?"":"Array8",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+0)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+1)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+2)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+3)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+4)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+5)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+6)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+7)+c],\n\t\t\t",
+           var->item,
+           var->name,
+           strcmp(var->type,"real")==0?"":"",
+           var->item,
+           var->name);
+  return strdup(gather);
+}
+
+
+// ****************************************************************************
+// * Gather switch
+// ****************************************************************************
+char* okinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  if (itm=='c') return okinaMicGatherCells(job,var,phase);
+  if (itm=='n') return okinaMicGatherNodes(job,var,phase);
+  error(!0,0,"Could not distinguish job item in okinaMicGather!");
+  return NULL;
 }
 
 
@@ -148,10 +208,10 @@ nablaDefine okinaMicDefines[]={
   {"opScaMul(u,v)","dot3(u,v)"},
   {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
-  {"knAt(a)","{}"},
+  {"knAt(a)",""},
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)",""},
-  {"mpi_reduce(how,what)","what"},
+  {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration"},
   {"MD_DirX","0"},
@@ -165,14 +225,15 @@ nablaDefine okinaMicDefines[]={
 // * MIC FORWARDS
 // ****************************************************************************
 char* okinaMicForwards[]={
+  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
   "static void nabla_ini_node_coords(void);",
-  "static void verifCoords(void);",
-  "static void micTestReal(void);",
-  "static void micTestReal3(void);",
+  //"static void verifCoords(void);",
+  //"static void micTestReal(void);",
+  //"static void micTestReal3(void);",
   NULL
 };
   

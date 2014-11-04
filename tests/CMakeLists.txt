@@ -161,15 +161,15 @@ nabla_add_arcane_test(shydro 4 run)
 
 
 
-foreach(parallel omp cilk)
-  foreach(simd std sse avx avx2 mic)
+foreach(parallel omp)#cilk
+  foreach(simd mic)#std sse avx avx2 mic)
     #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_gen_${parallel}_${simd}${VT100_RESET}")
     nabla_add_okina_test(lulesh_mic 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
 
 foreach(parallel omp)#cilk
-  foreach(simd std sse avx)#avx2 mic
+  foreach(simd std sse avx avx2 mic)
     #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_run_${parallel}_${simd}${VT100_RESET}")
     nabla_add_okina_test(lulesh_mic 1 run ${simd} ${parallel})
   endforeach()

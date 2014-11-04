@@ -1,34 +1,34 @@
 
 nodes void dbgnMass(void) {//@ -6.8{
-  debug()<<"[dbgNodalMass] #"<<uid<<", nodalMass="<<nodalMass;
+  info()<<"[dbgNodalMass] #"<<uid<<", nodalMass="<<nodalMass;
 }
 
 
 nodes void dbgCoords(void) {//@ -11.0,4.39{
-  debug()<<"[dbgCoords] #"<<uid<<" @"<<coord;
+  info()<<"[dbgCoords] #"<<uid<<" @"<<coord;
 }
 
-cells void dbgCellSig(void) {//@ 0.31{
-  debug()<<"sig="<<sig;
+cells void dbgCellSig(void){// @ 0.31{
+  info()<<"sig="<<sig;
 }
 
 
 nodes void dbgnForce(void) {//@ 1.41{//,2.71{
   //if (true);
   // Ne marche pas pour le Real3
-  //debug()<<"[dbgCoords] #"<<uid<<" @"<<coord;
-  debug()<<"[dbgnForce] nForce="<<nForce;
+  //info()<<"[dbgCoords] #"<<uid<<" @"<<coord;
+  info()<<"[dbgnForce] nForce="<<nForce;
 }
 
 /*
 
 
 cells void dbgCellState(void) @ -1.99{
-  debug()<<"v="<<v;
+  info()<<"v="<<v;
 }
 
 cells void dbgCellDepositEnergy(void) @ -1.98{
-  debug()<<"e="<<e;
+  info()<<"e="<<e;
 }
 
 

@@ -24,6 +24,7 @@
         .global knAvxInteger_h
         .global knAvxTernary_h
         .global knAvxGather_h
+        .global knAvx2Gather_h
         .global knAvxScatter_h
         .global knAvxOStream_h
         
@@ -35,111 +36,112 @@
         .global knMicScatter_h
         .global knMicOStream_h
         
-
-        
 knDbg_h:
-	     .incbin "knDbg.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knDbg.h"
         .byte 0
 knMsh_c: 
-	     .incbin "knMsh.c"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMsh.c"
         .byte 0
 knMth_h: 
-	     .incbin "knMth.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMth.h"
         .byte 0
 
 
         
 knStdReal_h:
-	     .incbin "knStdReal.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdReal.h"
         .byte 0
 knStdReal3_h:
-	     .incbin "knStdReal3.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdReal3.h"
         .byte 0
 knStdInteger_h:
-	     .incbin "knStdInteger.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdInteger.h"
         .byte 0
 knStdTernary_h: 
-	     .incbin "knStdTernary.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdTernary.h"
         .byte 0
 knStdGather_h: 
-	     .incbin "knStdGather.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdGather.h"
         .byte 0
 knStdScatter_h: 
-	     .incbin "knStdScatter.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdScatter.h"
         .byte 0
 knStdOStream_h: 
-	     .incbin "knStdOStream.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdOStream.h"
         .byte 0
 
 
         
 knSseReal_h:
-	     .incbin "knSseReal.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseReal.h"
         .byte 0
 knSseReal3_h:
-	     .incbin "knSseReal3.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseReal3.h"
         .byte 0
 knSseInteger_h:
-	     .incbin "knSseInteger.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseInteger.h"
         .byte 0
 knSseTernary_h: 
-	     .incbin "knSseTernary.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseTernary.h"
         .byte 0
 knSseGather_h: 
-	     .incbin "knSseGather.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseGather.h"
         .byte 0
 knSseScatter_h: 
-	     .incbin "knSseScatter.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseScatter.h"
         .byte 0
 knSseOStream_h: 
-	     .incbin "knSseOStream.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knSseOStream.h"
         .byte 0
 
 
         
 knAvxReal_h:
-	     .incbin "knAvxReal.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxReal.h"
         .byte 0
 knAvxReal3_h:
-	     .incbin "knAvxReal3.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxReal3.h"
         .byte 0
 knAvxInteger_h:
-	     .incbin "knAvxInteger.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxInteger.h"
         .byte 0
 knAvxTernary_h: 
-	     .incbin "knAvxTernary.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxTernary.h"
         .byte 0
 knAvxGather_h: 
-	     .incbin "knAvxGather.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxGather.h"
+        .byte 0
+knAvx2Gather_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvx2Gather.h"
         .byte 0
 knAvxScatter_h: 
-	     .incbin "knAvxScatter.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxScatter.h"
         .byte 0
 knAvxOStream_h: 
-	     .incbin "knAvxOStream.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knAvxOStream.h"
         .byte 0
 
 
         
 knMicReal_h:
-	     .incbin "knMicReal.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicReal.h"
         .byte 0
 knMicReal3_h:
-	     .incbin "knMicReal3.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicReal3.h"
         .byte 0
 knMicInteger_h:
-	     .incbin "knMicInteger.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicInteger.h"
         .byte 0
 knMicTernary_h: 
-	     .incbin "knMicTernary.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicTernary.h"
         .byte 0
 knMicGather_h: 
-	     .incbin "knMicGather.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicGather.h"
         .byte 0
 knMicScatter_h: 
-	     .incbin "knMicScatter.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicScatter.h"
         .byte 0
 knMicOStream_h: 
-	     .incbin "knMicOStream.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMicOStream.h"
         .byte 0
 
