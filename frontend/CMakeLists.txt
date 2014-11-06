@@ -3,3 +3,4 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} gathering ${VT100_FG_YELL
 set(FRONTEND_C nablaAstDfs.c nablaAstNode.c nablaAstTree.c nablaTimeTree.c nablaDebug.c nablaTools.c)
 
 add_library(NablaFrontend ${FRONTEND_C})
+add_dependencies(NablaFrontend Nabla)

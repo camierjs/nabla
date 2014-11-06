@@ -4,3 +4,4 @@ set(MIDDLEND_C nablaMiddlend.c nablaItems.c nablaVariables.c
                nablaOptions.c nablaModules.c nablaJobs.c nablaFunctions.c)
 
 add_library(NablaMiddlend ${MIDDLEND_C})
+add_dependencies(NablaMiddlend Nabla)

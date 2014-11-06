@@ -51,7 +51,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/middlend)
 ####################################
 # Executable, librairie et install #
 ####################################
-add_executable(nabla nabla.c)# nablaAst.c)
+add_executable(nabla nabla.c)
 add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
 

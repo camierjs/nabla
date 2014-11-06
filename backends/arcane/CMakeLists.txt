@@ -34,3 +34,4 @@ set(LIBRARIES_ARCANE_C 	libraries/nccArcLibAleph.c
 								libraries/nccArcLibMail.c)
 
 add_library(NablaArcane ${BACKEND_ARCANE_C} ${LIBRARIES_ARCANE_C})
+add_dependencies(NablaArcane Nabla)

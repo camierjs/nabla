@@ -30,7 +30,7 @@ set_property(SOURCE nOkinaDump.S
 configure_file(nOkinaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
-
+add_dependencies(NablaOkina Nabla)
 
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}OKINA${VT100_RESET} libraries:${VT100_RESET}")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libraries/aleph)

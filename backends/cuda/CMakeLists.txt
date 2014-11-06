@@ -23,3 +23,4 @@ configure_file(outputs/extra.h ${CMAKE_CURRENT_BINARY_DIR}/extra.h)
 
 
 add_library(NablaCuda ${BACKEND_CUDA_C})
+add_dependencies(NablaCuda Nabla)
