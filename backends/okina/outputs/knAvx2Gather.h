@@ -1,6 +1,8 @@
 #ifndef _KN_AVX2_GATHER_H_
 #define _KN_AVX2_GATHER_H_
 
+std::ostream& operator<<(std::ostream &os, const __m256d v);
+
 // *****************************************************************************
 // * Gather: (X is the data @ offset x)       a            b       c   d
 // * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      
@@ -11,7 +13,14 @@ inline void gatherk(const int a, const int b,
                     const real *data,
                     real *gather){
   const __m128i index= _mm_set_epi32(d,c,b,a);
-  *gather = _mm256_i32gather_pd((double*)data, index, _MM_SCALE_4);
+  *gather = _mm256_i32gather_pd((double*)data, index, _MM_SCALE_8);
+}
+
+inline __m256d returned_gatherk(const int a, const int b,
+                                const int c, const int d,
+                                const double *data){
+  const __m128i index= _mm_set_epi32(d,c,b,a);
+  return _mm256_i32gather_pd(data, index, _MM_SCALE_8);
 }
 
 
@@ -19,13 +28,20 @@ inline __m256d gatherk_and_zero_neg_ones(const int a, const int b,
                                          const int c, const int d,
                                          real *data){
   const double *p=(double*)data;
-  const __m256d zero256=_mm256_set1_pd(0.0);
-  const __m128d bData=_mm_movedup_pd(_mm_load_sd(&p[(b<0)?0:b])); 
-  const __m256d ba=_mm256_castpd128_pd256(_mm_loadl_pd(bData,&p[(a<0)?0:a]));
-  const __m128d dData=_mm_movedup_pd(_mm_load_sd(&p[(d<0)?0:d]));
-  const __m128d dc=_mm_loadl_pd(dData,&p[(c<0)?0:c]);
-  const __m256d dcba=_mm256_insertf128_pd(ba,dc,0x01);
-  const __m256d dcbat=opTernary(_mm256_cmp_pd(_mm256_set_pd(d,c,b,a), zero256, _CMP_GE_OQ), dcba, zero256);
+  const __m256d zero256=_mm256_setzero_pd();
+  //const __m128d bData=_mm_movedup_pd(_mm_load_sd(&p[(b<0)?0:b])); 
+  //const __m256d ba=_mm256_castpd128_pd256(_mm_loadl_pd(bData,&p[(a<0)?0:a]));
+  //const __m128d dData=_mm_movedup_pd(_mm_load_sd(&p[(d<0)?0:d]));
+  //const __m128d dc=_mm_loadl_pd(dData,&p[(c<0)?0:c]);
+  //const __m256d dcba_old=_mm256_insertf128_pd(ba,dc,0x01);
+
+  const __m256d dcba=returned_gatherk((a<0)?0:a,(b<0)?0:b,(c<0)?0:c,(d<0)?0:d,p);
+  //info()<<"["<<a<<","<<b<<","<<c<<","<<d<<"]: "<<dcba_old<<" vs "<< dcba;
+  const __m256d dcbat=opTernary(_mm256_cmp_pd(_mm256_set_pd(d,c,b,a),
+                                              zero256,
+                                              _CMP_GE_OQ),
+                                dcba,
+                                zero256);
   return dcbat;
 }
 

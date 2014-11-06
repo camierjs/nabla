@@ -42,25 +42,25 @@ all:
 # TEST Commands #
 #################
 tst:
-	(cd $(BUILD_PATH)/tests && ctest)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS))
+tst1:
+	(cd $(BUILD_PATH)/tests && $(CTEST))
 tstn:
-	(cd $(BUILD_PATH)/tests && ctest -N)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
-	(cd $(BUILD_PATH)/tests && ctest -R gen)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
 tstga2:
-	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_gen_1)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_gen_1)
 tstra2:
-	(cd $(BUILD_PATH)/tests && ctest -V -R nabla_okina_lulesh_mic_run_1)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_run_1)
 tstro:
-	(cd $(BUILD_PATH)/tests && ctest -V -R run_omp)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
 tstrc:
-	(cd $(BUILD_PATH)/tests && ctest -V -R run_cilk)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tstr:
-	(cd $(BUILD_PATH)/tests && ctest -R run)
-tst4:
-	(cd $(BUILD_PATH)/tests && ctest -j 4)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
 tstv:
-	(cd $(BUILD_PATH)/tests && ctest -V)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V)
 
 ############
 # CLEANING #

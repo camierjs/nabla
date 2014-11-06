@@ -61,7 +61,7 @@ cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
-	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
+#	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 time ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
 run4:$(TGT) $(NABLA) 
