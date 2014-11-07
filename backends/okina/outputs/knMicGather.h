@@ -2,35 +2,21 @@
 #define _KN_MIC_GATHER_H_
 
 std::ostream& operator<<(std::ostream &os, const __m512d v);
-//std::ostream& operator<<(std::ostream &os, const Real &a);
 
 /******************************************************************************
  * Gather: (X is the data @ offset x)       a            b       c   d
  * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      
  * gather: |ABCD|
  ******************************************************************************/
-inline void gatherk(const int a,
-                    const int b,
-                    const int c,
-                    const int d,
-                    const int e,
-                    const int f,
-                    const int g,
-                    const int h,
-                    const real* addr,
-                    real *gather){
+inline void gatherk(const int a, const int b, const int c, const int d,
+                    const int e, const int f, const int g, const int h,
+                    const real* addr, real *gather){
   __m512i index= _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
   *gather = _mm512_i32logather_pd(index, addr, _MM_SCALE_8);
 }
 
-inline real inlined_gatherk(const int a,
-                            const int b,
-                            const int c,
-                            const int d,
-                            const int e,
-                            const int f,
-                            const int g,
-                            const int h,
+inline real inlined_gatherk(const int a, const int b, const int c, const int d,
+                            const int e, const int f, const int g, const int h,
                             const real* addr){
   const __m512i index= _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
   return _mm512_i32logather_pd(index, addr, _MM_SCALE_8);
@@ -64,7 +50,6 @@ inline void gatherFromNode_k(const int a, const int b,
                              real *data, real *gthr){
   *gthr=gatherk_and_zero_neg_ones(a,b,c,d,e,f,g,h,data);
 }
-
 
 /******************************************************************************
  * Gather avec des real3
