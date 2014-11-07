@@ -18,31 +18,38 @@ inline void gatherk(const int a, const int b,
 
 inline __m256d returned_gatherk(const int a, const int b,
                                 const int c, const int d,
-                                const double *data){
-  const __m128i index= _mm_set_epi32(d,c,b,a);
-  return _mm256_i32gather_pd(data, index, _MM_SCALE_8);
+                                const double *base){
+  const __m128i vindex= _mm_set_epi32(d,c,b,a);
+  return _mm256_i32gather_pd(base, vindex, _MM_SCALE_8);
 }
 
+
+// *****************************************************************************
+// * We are going to use this one:
+// * extern __m256d _mm256_mask_i32gather_pd(__m256d def_vals, double const * base, __m128i vindex __m256d vmask, const int scale);
+// *****************************************************************************
+inline __m256d masked_gather_pd(const int a, const int b,
+                                const int c, const int d,
+                                const double *base, const int s){
+  // base: address used to reference the loaded FP elements
+  // the vector of double-precision FP values copied to the destination when the corresponding element of the double-precision FP mask is '0'
+  const __m256d def_vals =_mm256_setzero_pd();
+  // the vector of dword indices used to reference the loaded FP elements.
+  const __m128i vindex = _mm_set_epi32(d,c,b,a);
+  // the vector of FP elements used as a vector mask; only the most significant bit of each data element is used as a mask.
+  const __m256d vmask = _mm256_cmp_pd(_mm256_set_pd(d,c,b,a), _mm256_setzero_pd(), _CMP_GE_OQ);
+  // 32-bit scale used to address the loaded FP elements.
+  const int scale = s;
+  // Gathers 4 packed double-precision floating point values from memory referenced by the given base address,
+  // dword indices and scale, and using the given double-precision FP mask values. 
+  const __m256d mdcbat = _mm256_mask_i32gather_pd(def_vals, base, vindex, vmask, scale);
+  return mdcbat;
+}
 
 inline __m256d gatherk_and_zero_neg_ones(const int a, const int b,
                                          const int c, const int d,
                                          real *data){
-  const double *p=(double*)data;
-  const __m256d zero256=_mm256_setzero_pd();
-  //const __m128d bData=_mm_movedup_pd(_mm_load_sd(&p[(b<0)?0:b])); 
-  //const __m256d ba=_mm256_castpd128_pd256(_mm_loadl_pd(bData,&p[(a<0)?0:a]));
-  //const __m128d dData=_mm_movedup_pd(_mm_load_sd(&p[(d<0)?0:d]));
-  //const __m128d dc=_mm_loadl_pd(dData,&p[(c<0)?0:c]);
-  //const __m256d dcba_old=_mm256_insertf128_pd(ba,dc,0x01);
-
-  const __m256d dcba=returned_gatherk((a<0)?0:a,(b<0)?0:b,(c<0)?0:c,(d<0)?0:d,p);
-  //info()<<"["<<a<<","<<b<<","<<c<<","<<d<<"]: "<<dcba_old<<" vs "<< dcba;
-  const __m256d dcbat=opTernary(_mm256_cmp_pd(_mm256_set_pd(d,c,b,a),
-                                              zero256,
-                                              _CMP_GE_OQ),
-                                dcba,
-                                zero256);
-  return dcbat;
+  return masked_gather_pd(a,b,c,d,(double *)data,_MM_SCALE_8);
 }
 
 inline void gatherFromNode_k(const int a, const int b,
@@ -51,24 +58,23 @@ inline void gatherFromNode_k(const int a, const int b,
   *gthr=gatherk_and_zero_neg_ones(a,b,c,d,data);
 }
 
+
 // ******************************************************************************
 // * Gather avec des real3
 // ******************************************************************************
 inline void gather3ki(const int a, const int b,
                       const int c, const int d,
                       real3 *data, real3 *gthr,
-                      int i){
-  double *p=(double *)data;
-  __m256d aData=_mm256_broadcast_sd(&(p[4*(3*WARP_BASE(a)+i)+WARP_OFFSET(a)]));
-  __m256d bData=_mm256_broadcast_sd(&(p[4*(3*WARP_BASE(b)+i)+WARP_OFFSET(b)]));
-  __m256d cData=_mm256_broadcast_sd(&(p[4*(3*WARP_BASE(c)+i)+WARP_OFFSET(c)]));
-  __m256d dData=_mm256_broadcast_sd(&(p[4*(3*WARP_BASE(d)+i)+WARP_OFFSET(d)]));
-  __m256d ba=_mm256_blend_pd(aData,bData,0xA);
-  __m256d dc=_mm256_blend_pd(cData,dData,0xA);
-  __m256d dcba=_mm256_blend_pd(ba,dc,0xC);
-  if (i==0) (*gthr).x=dcba;
-  if (i==1) (*gthr).y=dcba;
-  if (i==2) (*gthr).z=dcba;
+                      const int i){
+  const double *base=(double *)data;
+  const int ia = ((3*WARP_BASE(a)+i)<<2)+WARP_OFFSET(a);
+  const int ib = ((3*WARP_BASE(b)+i)<<2)+WARP_OFFSET(b);
+  const int ic = ((3*WARP_BASE(c)+i)<<2)+WARP_OFFSET(c);
+  const int id = ((3*WARP_BASE(d)+i)<<2)+WARP_OFFSET(d);
+  const __m256d dcbag = returned_gatherk(ia,ib,ic,id,base);
+  if (i==0) gthr->x=dcbag;
+  if (i==1) gthr->y=dcbag;
+  if (i==2) gthr->z=dcbag;
 }
 
 inline void gather3k(const int a, const int b,
@@ -87,19 +93,16 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
                                      const int b, const int b_corner,
                                      const int c, const int c_corner,
                                      const int d, const int d_corner,
-                                     real3 *data, real3 *gthr, int i){
-  const __m256d zero256=_mm256_set1_pd(0.0);
-  double *p=(double *)data;
-  __m256d aData=a<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a)]));
-  __m256d bData=b<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b)]));
-  __m256d cData=c<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(c)+3*c_corner+i)+WARP_OFFSET(c)]));
-  __m256d dData=d<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(d)+3*d_corner+i)+WARP_OFFSET(d)]));
-  __m256d ba=_mm256_blend_pd(aData,bData,0xA);
-  __m256d dc=_mm256_blend_pd(cData,dData,0xA);
-  __m256d dcba=_mm256_blend_pd(ba,dc,0xC);
-  if (i==0) (*gthr).x=dcba;
-  if (i==1) (*gthr).y=dcba;
-  if (i==2) (*gthr).z=dcba;
+                                     real3 *data, real3 *gthr, int i){  
+  const double *base=(double *)data;
+  const int ia = a<0?a:(((3*WARP_BASE(a)<<3)+3*a_corner+i)<<2)+WARP_OFFSET(a);
+  const int ib = b<0?b:(((3*WARP_BASE(b)<<3)+3*b_corner+i)<<2)+WARP_OFFSET(b);
+  const int ic = c<0?c:(((3*WARP_BASE(c)<<3)+3*c_corner+i)<<2)+WARP_OFFSET(c);
+  const int id = d<0?d:(((3*WARP_BASE(d)<<3)+3*d_corner+i)<<2)+WARP_OFFSET(d);
+  const __m256d dcbag = masked_gather_pd(ia,ib,ic,id,base,_MM_SCALE_8);
+  if (i==0) gthr->x=dcbag;
+  if (i==1) gthr->y=dcbag;
+  if (i==2) gthr->z=dcbag;
 }
 
 inline void gatherFromNode_3kArray8(const int a, const int a_corner,
