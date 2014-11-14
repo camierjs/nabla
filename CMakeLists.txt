@@ -1,7 +1,8 @@
 #/usr/local/opendev1/gcc/cmake/2.8.6/doc/cmake-2.8/cmake.txt 
 execute_process(COMMAND "tput" "reset")
 
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+#cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 #set(ENV{MAKEFLAGS} "--no-print-directory")
 #set(CMAKE_MAKE_PROGRAM "gmake" CACHE FILEPATH "Allow to alias gmake to add --no-print-directory")
 #set_property(CACHE CMAKE_MAKE_PROGRAM PROPERTY VALUE "gmake")

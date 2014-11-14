@@ -1,14 +1,19 @@
 #############
 # COMPILERS #
 #############
-export CC=/usr/local/opendev1/gcc/gcc/4.9.0/bin/gcc
-export CXX=/usr/local/opendev1/gcc/gcc/4.9.0/bin/g++
+#export CC=/usr/bin/gcc
+#export CXX=/usr/bin/g++
+
+export CC=/usr/local/bin/gcc
+export CXX=/usr/local/bin/g++
+
 export C_FLAGS = -std=c99
 
 #################
 # CMAKE OPTIONS #
 #################
-CMAKE_PATH = /usr/local/opendev1/gcc/cmake/3.0.0
+CMAKE_PATH = /usr
+#/local/opendev1/gcc/cmake/3.0.0
 CMAKE = $(CMAKE_PATH)/bin/cmake
 CTEST = $(CMAKE_PATH)/bin/ctest
 
@@ -35,7 +40,7 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 ##################
 .PHONY: all
 all:
-	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR)&&$(BUILD_CMAKE)) || exit 0
+	[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
 #################

@@ -34,7 +34,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // ****************************************************************************
 // * RHS
 // ****************************************************************************
-#define rhs rhsAdd(&yyval,yyn,yyvsp);
+#define rhs rhsAdd(&yyval,yyn,yyvsp)
 #define RHS(lhs, ...) rhsAddVariadic(&yyval,yyn,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
 
