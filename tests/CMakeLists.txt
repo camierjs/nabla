@@ -172,7 +172,7 @@ endforeach()
 set(OKINA_RUN_TEST 1)
 if (OKINA_RUN_TEST)
   foreach(parallel omp) #cilk
-    foreach(simd avx2)#std sse avx avx2) #mic
+    foreach(simd std)#std sse avx avx2) #mic
       #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_run_${parallel}_${simd}${VT100_RESET}")
       nabla_add_okina_test(lulesh_mic 1 run ${simd} ${parallel})
     endforeach()

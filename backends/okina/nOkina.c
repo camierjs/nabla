@@ -371,8 +371,21 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
     nabla->parallel=&okinaCilkHooks;
   if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP)
     nabla->parallel=&okinaOpenMPHooks;
-  
 
+  
+  nablaBackendPragmaHooks okinaPragmaICCHooks ={
+    nccOkinaPragmaIccIvdep,
+    nccOkinaPragmaIccAlign
+  };
+  nablaBackendPragmaHooks okinaPragmaGCCHooks={
+    nccOkinaPragmaGccIvdep,
+    nccOkinaPragmaGccAlign
+  };
+  // Par defaut, on met GCC
+  nabla->pragma=&okinaPragmaGCCHooks;
+  if ((nabla->colors&BACKEND_COLOR_OKINA_ICC)==BACKEND_COLOR_OKINA_ICC)
+    nabla->pragma=&okinaPragmaICCHooks;
+  
   static nablaBackendHooks okinaBackendHooks={
     // Jobs stuff
     okinaHookPrefixEnumerate,

@@ -309,6 +309,8 @@ int main(int argc, char * argv[]){
        {"seq",no_argument,NULL,BACKEND_COLOR_OKINA_SEQ},
        {"soa",no_argument,NULL,BACKEND_COLOR_OKINA_SOA},
        {"aos",no_argument,NULL,BACKEND_COLOR_OKINA_AOS},
+       {"gcc",no_argument,NULL,BACKEND_COLOR_OKINA_GCC},
+       {"icc",no_argument,NULL,BACKEND_COLOR_OKINA_ICC},
     {NULL,0,NULL,0}
   };
 
@@ -452,6 +454,14 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_OKINA_SOA:
       backend_color|=BACKEND_COLOR_OKINA_SOA;
       dbg("\n[nabla] Command line specifies OKINA's SoA option");
+      break;
+    case BACKEND_COLOR_OKINA_GCC:
+      backend_color|=BACKEND_COLOR_OKINA_GCC;
+      dbg("\n[nabla] Command line specifies OKINA's GCC option");
+      break;
+    case BACKEND_COLOR_OKINA_ICC:
+      backend_color|=BACKEND_COLOR_OKINA_ICC;
+      dbg("\n[nabla] Command line specifies OKINA's ICC option");
       break;
 
       // ************************************************************

@@ -1167,7 +1167,7 @@ void calcTimeConstraintsForElems(void) @ 12.1{
   //info()<<"\t\tcrnt  ="<<crnt;
   δt_courant=mpi_reduce(ReduceMin, crnt);
   δt_hydro=mpi_reduce(ReduceMin, hdr);
-  info()<<"\t\tδt_courant="<<ReduceMinToDouble(δt_courant);
-  info()<<"\t\tδt_hydro  ="<<ReduceMinToDouble(δt_hydro);
+  //info()<<"\t\tδt_courant="<<ReduceMinToDouble(δt_courant);
+  //info()<<"\t\tδt_hydro  ="<<ReduceMinToDouble(δt_hydro);
 }
 

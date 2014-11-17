@@ -64,20 +64,26 @@ char* okinaMicNextCell(void);
 // Cilk+ parallel color
 char *nccOkinaParallelCilkSync(void);
 char *nccOkinaParallelCilkSpawn(void);
-char *nccOkinaParallelCilkLoop(void);
+char *nccOkinaParallelCilkLoop(nablaMain *);
 char *nccOkinaParallelCilkIncludes(void);
 
 // OpenMP parallel color
 char *nccOkinaParallelOpenMPSync(void);
 char *nccOkinaParallelOpenMPSpawn(void);
-char *nccOkinaParallelOpenMPLoop(void);
+char *nccOkinaParallelOpenMPLoop(nablaMain *);
 char *nccOkinaParallelOpenMPIncludes(void);
 
 // Void parallel color
 char *nccOkinaParallelVoidSync(void);
 char *nccOkinaParallelVoidSpawn(void);
-char *nccOkinaParallelVoidLoop(void);
+char *nccOkinaParallelVoidLoop(nablaMain *);
 char *nccOkinaParallelVoidIncludes(void);
+
+// Pragmas: Ivdep, Align
+char *nccOkinaPragmaIccIvdep(void);
+char *nccOkinaPragmaGccIvdep(void);
+char *nccOkinaPragmaIccAlign(void);
+char *nccOkinaPragmaGccAlign(void);
 
 NABLA_STATUS nccOkinaMainPrefix(nablaMain*);
 NABLA_STATUS nccOkinaMainPreInit(nablaMain*);

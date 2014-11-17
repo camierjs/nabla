@@ -212,13 +212,22 @@ typedef struct nablaBackendSimdHooksStruct{
 } nablaBackendSimdHooks;
 
 
+struct nablaMainStruct;
+
 // Structure des hooks que l'on va utiliser afin de générer avec ou sans parallel color
 typedef struct nablaBackendParallelHooksStruct{
   char* (*sync)(void);
   char* (*spawn)(void);
-  char* (*loop)(void);
+  char* (*loop)(struct nablaMainStruct*);
   char* (*includes)(void);
 } nablaBackendParallelHooks;
+
+
+// Structure des hooks que l'on va utiliser afin de générer les pragmas
+typedef struct nablaBackendPragmaHooksStruct{
+  char* (*ivdep)(void);
+  char* (*align)(void);
+} nablaBackendPragmaHooks;
 
 
 // Middlend TOP 
@@ -238,6 +247,7 @@ typedef struct nablaMainStruct{
   struct nablaBackendHooksStruct *hook;
   struct nablaBackendSimdHooksStruct *simd;
   struct nablaBackendParallelHooksStruct *parallel;
+  struct nablaBackendPragmaHooksStruct *pragma;
 } nablaMain;
 
 

@@ -33,8 +33,8 @@ void nabla_error(const char *format, ...);
  * typedefs
  *****************************************************************************/
 typedef enum {
-  NABLA_OK=0,
-  NABLA_ERROR=~NABLA_OK
+  NABLA_OK    = 0,
+  NABLA_ERROR = ~NABLA_OK
 } NABLA_STATUS;
 
 
@@ -65,7 +65,9 @@ typedef enum {
   BACKEND_COLOR_OKINA_OpenMP   = 1<<(13),
   BACKEND_COLOR_OKINA_CILK     = 1<<(14),
   BACKEND_COLOR_OKINA_SOA      = 1<<(15),
-  BACKEND_COLOR_OKINA_AOS      = 1<<(16)
+  BACKEND_COLOR_OKINA_AOS      = 1<<(16),
+  BACKEND_COLOR_OKINA_GCC      = 1<<(17),
+  BACKEND_COLOR_OKINA_ICC      = 1<<(18)
 } BACKEND_COLORS;
 
 

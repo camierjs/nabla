@@ -403,7 +403,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   switch(n->tokenid){
     
   case(CONST):{
-    nprintf(nabla, "/*CONST*/", "__declspec(align(64)) const ");
+    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->pragma->align());
     break;
   }
   case(ALIGNED):{

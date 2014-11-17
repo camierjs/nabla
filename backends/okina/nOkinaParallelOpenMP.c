@@ -1,3 +1,5 @@
+#include "nabla.h"
+
 // ****************************************************************************
 // * OpenMP Sync
 // ****************************************************************************
@@ -17,8 +19,9 @@ char *nccOkinaParallelOpenMPSpawn(void){
 // ****************************************************************************
 // * OpenMP for loop
 // ****************************************************************************
-char *nccOkinaParallelOpenMPLoop(void){
-  return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WRAP,NABLA_NB_NODES)\")\\\n";
+char *nccOkinaParallelOpenMPLoop(struct nablaMainStruct *n){
+  return "\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WRAP,NABLA_NB_NODES)\")\\\n";
+  //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WRAP,NABLA_NB_NODES)\")\\\n";
 }
 
 
