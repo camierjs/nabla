@@ -111,6 +111,7 @@ endforeach(tst)
 ##########################
 # NABLA TESTS FOR ARCANE #
 ##########################
+#set(ARCANE_RUN_TEST 1)
 if (ARCANE_RUN_TEST)
   nabla_add_arcane_test(cartesian 1 run)
   nabla_add_arcane_test(comd 1 run)

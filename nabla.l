@@ -35,7 +35,6 @@ static void ignoreLineComments(void);
 "switch"				{ return tok(&yylval, SWITCH);}
 "union"				{ return tok(&yylval, UNION);}
 "iNode"           { return tok(&yylval, INODE);}
-"FILE"            { return tok(&yylval, FILETYPE);}
 */
 
 %}
@@ -117,7 +116,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Int64"		      { return tok(&yylval, INT64);}
 "Uid"             { return tok(&yylval, UIDTYPE);}
 "file"            { return tok(&yylval, FILECALL);}
-"File"            { return tok(&yylval, FILETYPE);}
+"FILE"            { return tok(&yylval, FILETYPE);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}

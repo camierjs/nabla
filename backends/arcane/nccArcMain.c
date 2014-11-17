@@ -17,7 +17,7 @@
 /*****************************************************************************
  * Backend ARCANE - Génération du fichier 'main.cc'
  *****************************************************************************/
-#define ARC_MAIN "#include <iostream>\n#include <mpi.h>\n#include <arcane/impl/ArcaneMain.h>\n\
+#define ARC_MAIN "#include <iostream>\n//#include <mpi.h>\n#include <arcane/impl/ArcaneMain.h>\n\
 using namespace Arcane;\n\
 int main(int argc,char* argv[]){\n\
   int r = 0;\n\

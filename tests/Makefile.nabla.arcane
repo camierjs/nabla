@@ -19,22 +19,22 @@ ARCANE_PKG_LIBS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --libs a
 ARCANE_PKG_CFLAGS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --cflags arcane)
 ARCANE_LIBS = -L$(ARCANE_ROOT)/lib\
  -larcane_std\
- -larcane_mpithread\
  -larcane_mpi\
- -larcane_thread\
  -larcane_impl\
  -larcane_mesh\
  -larcane_core\
  -larcane_utils\
  -larcane_driverlib\
  -larcane_ios\
- -larcane_cea\
- -larcane_aleph\
- -larcane_aleph_sloop\
- -larcane_aleph_hypre\
+ -larcane_hyoda\
  $(ARCANE_PKG_LIBS)\
  -Wl,-rpath,$(ARCANE_ROOT)/lib
-# -larcane_hyoda
+# -larcane_thread\
+# -larcane_mpithread\
+# -larcane_aleph\
+# -larcane_cea\
+# -larcane_aleph_sloop\
+# -larcane_aleph_hypre\
 # -larcane_aleph_trilinos
 
 
@@ -45,10 +45,11 @@ CXX=${ARCANE_CXX}
 CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
 			-I$(MPI_PATH)/include\
 			-I$(ARCANE_ROOT)/include\
-			-I${SLOOP_INC}\
-			-I${GMP_DIR}/include\
-			-I${HYPRE_INC}/include\
 			$(ARCANE_CFLAGS)
+
+#			-I${GMP_DIR}/include\
+#			-I${HYPRE_INC}/include\
+#			-I${SLOOP_INC}
 
 
 #######
@@ -83,7 +84,7 @@ main.o:$(TGT)Module.o
 
 
 $(TGT):main.o
-	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB}
+	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIB}
 
 
 #####################

@@ -49,7 +49,7 @@ all:
 tst:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS))
 tst1:
-	(cd $(BUILD_PATH)/tests && $(CTEST))
+	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1) #V -I 45,45)
 tstn:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
@@ -64,6 +64,8 @@ tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tstr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
+tstrv:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V)
 
