@@ -4,8 +4,8 @@
 #export CC=/usr/bin/gcc
 #export CXX=/usr/bin/g++
 
-export CC=/usr/local/bin/gcc
-export CXX=/usr/local/bin/g++
+export CC  = /usr/local/gcc/4.9.2/bin/gcc
+export CXX = /usr/local/gcc/4.9.2/bin/g++
 
 export C_FLAGS = -std=c99
 
@@ -40,7 +40,7 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 ##################
 .PHONY: all
 all:
-	[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
+	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
 #################
