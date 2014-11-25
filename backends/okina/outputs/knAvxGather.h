@@ -54,7 +54,9 @@ inline __m256d gatherk_and_zero_neg_ones(const int a, const int b,
   const __m128d dData=_mm_movedup_pd(_mm_load_sd(&p[(d<0)?0:d]));
   const __m128d dc=_mm_loadl_pd(dData,&p[(c<0)?0:c]);
   const __m256d dcba=_mm256_insertf128_pd(ba,dc,0x01);
-  const __m256d dcbat=opTernary(_mm256_cmp_pd(_mm256_set_pd(d,c,b,a), zero256, _CMP_GE_OQ), dcba, zero256);
+  //const __m256d dcbat=opTernary(_mm256_cmp_pd(_mm256_set_pd(d,c,b,a), zero256, _CMP_GE_OQ), dcba, zero256);
+  const __m256d mask = _mm256_cmp_pd(_mm256_set_pd(d,c,b,a), zero256, _CMP_GE_OQ);
+  const __m256d dcbat=opTernary(mask,dcba,zero256);
   //info()<<"a="<<a<<", b="<<b<<", c="<<c<<", d="<<d<<", dcba="<<dcba<<", dcbat="<<dcbat;
   //debug()<<"_mm256_set_pd(d,c,b,a)="<<_mm256_set_pd(d,c,b,a);
   return dcbat;

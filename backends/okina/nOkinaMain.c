@@ -248,22 +248,25 @@ static char *okinaSourceMeshAoS_vs_SoA(nablaMain *nabla){
 node_coordx[iNode]=x;\n\
 node_coordy[iNode]=y;\n\
 node_coordz[iNode]=z;\n";
-  return "node_coord[iNode]=Real3(x,y,z);";
+  return "node_coord[iNode]=Real3(x,y,z);"; 
 }
 
 extern char knMsh_c[];
 static void okinaSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->src,knMsh_c,okinaSourceMeshAoS_vs_SoA(nabla));
+  //fprintf(nabla->entity->src,knMsh_c);
 }
 
 /*****************************************************************************
  * nccOkinaMainPostfix
  *****************************************************************************/
 NABLA_STATUS nccOkinaMainPostfix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPostfix]");
+  dbg("\n[nccOkinaMainPostfix] OKINA_MAIN_POSTFIX");
   fprintf(nabla->entity->src, OKINA_MAIN_POSTFIX);
+  dbg("\n[nccOkinaMainPostfix] okinaSourceMesh");
   okinaSourceMesh(nabla);
+  dbg("\n[nccOkinaMainPostfix] NABLA_OK");
   return NABLA_OK;
 }
 

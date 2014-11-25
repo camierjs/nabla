@@ -5,12 +5,12 @@ static void nabla_ini_node_coords(void){
   dbgFuncIn();
   dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= WARP_SIZE...");
   assert((NABLA_NB_NODES_Y_AXIS >= WARP_SIZE));
-  //dbg(DBG_INI,"\nasserting (NABLA_NB_NODES_Y_AXIS % WARP_SIZE)==0...");
-  //assert((NABLA_NB_NODES_Y_AXIS % WARP_SIZE)==0);
-  dbg(DBG_INI,"\nasserting (NABLA_NB_NODES % WARP_SIZE)==0...");
-  assert((NABLA_NB_NODES % WARP_SIZE)==0);
-  dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS % WARP_SIZE)==0...");
-  assert((NABLA_NB_CELLS % WARP_SIZE)==0);
+  //dbg(DBG_INI,"\nasserting (NABLA_NB_NODES_Y_AXIS %% WARP_SIZE)==0...");
+  //assert((NABLA_NB_NODES_Y_AXIS %% WARP_SIZE)==0);
+  dbg(DBG_INI,"\nasserting (NABLA_NB_NODES %% WARP_SIZE)==0...");
+  assert((NABLA_NB_NODES %% WARP_SIZE)==0);
+  dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% WARP_SIZE)==0...");
+  assert((NABLA_NB_CELLS %% WARP_SIZE)==0);
   
   dbg(DBG_INI,"\nOn flush le nombre de mailles attachées à ce noeud");
   FOR_EACH_NODE(n){
@@ -94,6 +94,7 @@ static void nabla_ini_node_coords(void){
 #endif
         // Là où l'on poke le retour de okinaSourceMeshAoS_vs_SoA
         %s
+           //node_coord[iNode]=Real3(x,y,z);
         //dbg(DBG_INI,"\nSetting nodes-vector #%%d @", iNode);
         //dbgReal3(DBG_INI,node_coord[iNode]);
       }
@@ -137,8 +138,6 @@ static void nabla_ini_node_coords(void){
   dbg(DBG_INI,"\nOn associe à chaque maille ses next et prev");
 
 
-
-  
   // Pour mimer ARCANE
   // On met des valeurs négatives afin qu le gatherk_and_zero_neg_ones puisse les reconaitre
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
@@ -146,7 +145,7 @@ static void nabla_ini_node_coords(void){
     cell_next[MD_DirY*NABLA_NB_CELLS+i] = i+1 ;
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%NABLA_NB_CELLS_Y_AXIS)==0){
+    if ((i%%NABLA_NB_CELLS_Y_AXIS)==0){
       cell_prev[MD_DirY*NABLA_NB_CELLS+i] = -33333333 ;
       cell_next[MD_DirY*NABLA_NB_CELLS+i+NABLA_NB_CELLS_Y_AXIS-1] = -44444444 ;
     }
@@ -158,7 +157,7 @@ static void nabla_ini_node_coords(void){
     cell_next[MD_DirZ*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_Y_AXIS ;
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%(NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS))<NABLA_NB_CELLS_Y_AXIS){
+    if ((i%%(NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS))<NABLA_NB_CELLS_Y_AXIS){
       cell_prev[MD_DirZ*NABLA_NB_CELLS+i] = -55555555 ;
       cell_next[MD_DirZ*NABLA_NB_CELLS+i+(NABLA_NB_CELLS_Y_AXIS-1)*NABLA_NB_CELLS_Z_AXIS] = -66666666 ;
     }
@@ -197,22 +196,22 @@ static void nabla_ini_node_coords(void){
       node_cell_corner[8*iNode+n]=n;
    }
   }
-
-  /*dbg(DBG_INI,"\nVérification des connectivité des noeuds");
-  FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
-    FOR_EACH_NODE_CELL(c){
-      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
-    }
-  }
-  dbg(DBG_INI,"\nVérification des coins des noeuds");
-  FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
-    FOR_EACH_NODE_CELL(c){
-      if (node_cell_corner[nc]!=-1)
-        dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
-    }
-    }*/
+  
+//  dbg(DBG_INI,"\nVérification des connectivité des noeuds");
+//  FOR_EACH_NODE(n){
+//    dbg(DBG_INI,"\nFocusing on node %%d",n);
+//    FOR_EACH_NODE_CELL(c){
+//      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
+//    }
+//  }
+//  dbg(DBG_INI,"\nVérification des coins des noeuds");
+//  FOR_EACH_NODE(n){
+//    dbg(DBG_INI,"\nFocusing on node %%d",n);
+//    FOR_EACH_NODE_CELL(c){
+//      if (node_cell_corner[nc]!=-1)
+//        dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
+//    }
+//  }
   dbg(DBG_INI,"\nIni done");
   dbgFuncOut();
 }

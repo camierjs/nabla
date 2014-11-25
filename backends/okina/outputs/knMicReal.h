@@ -92,16 +92,16 @@ struct __attribute__ ((aligned(64))) real {
   friend inline __mmask8 cmp_neq(const real &a, const real &b)  { return _mm512_cmpneq_pd_mask(a,b); }
   friend inline __mmask8 cmp_nlt(const real &a, const real &b)  { return _mm512_cmpnlt_pd_mask(a,b); }
   friend inline __mmask8 cmp_nle(const real &a, const real &b)  { return _mm512_cmpnle_pd_mask(a,b); }
-  friend inline __mmask8 cmp_ngt(const real &a, const real &b)  { return _mm512_cmple_pd_mask(a,b); }
-  friend inline __mmask8 cmp_nge(const real &a, const real &b)  { return _mm512_cmplt_pd_mask(a,b); }
+  friend inline __mmask8 cmp_ngt(const real &a, const real &b)  { return _mm512_cmp_pd_mask(a,b,_CMP_LE_OS); }
+  friend inline __mmask8 cmp_nge(const real &a, const real &b)  { return _mm512_cmp_pd_mask(a,b,_CMP_LT_OS); }
 
   friend inline __mmask8 operator<(const real &a, const real& b) { return _mm512_cmplt_pd_mask(a,b); }
   friend inline __mmask8 operator<(const real &a, double d) { return _mm512_cmplt_pd_mask(a, _mm512_set1_pd(d)); }
 
 
-  friend inline __mmask8 operator>(const real &a, real& r) { return _mm512_cmpnlt_pd_mask(a,r); }
-  friend inline __mmask8 operator>(const real &a, const real& r) { return _mm512_cmpnlt_pd_mask(a,r); }
-  friend inline __mmask8 operator>(const real &a, double d) { return _mm512_cmpnlt_pd_mask(a, _mm512_set1_pd(d)); }
+  friend inline __mmask8 operator>(const real &a, real& r) { return _mm512_cmpnle_pd_mask(a,r); }
+  friend inline __mmask8 operator>(const real &a, const real& r) { return _mm512_cmpnle_pd_mask(a,r); }
+  friend inline __mmask8 operator>(const real &a, double d) { return _mm512_cmpnle_pd_mask(a, _mm512_set1_pd(d)); }
 
   friend inline __mmask8 operator>=(const real &a, real& r) { return _mm512_cmpnlt_pd_mask(a,r); }
   friend inline __mmask8 operator>=(const real &a, double d) { return _mm512_cmpnlt_pd_mask(a, _mm512_set1_pd(d)); }

@@ -9,7 +9,7 @@
 inline integer opTernary(const __mmask8 cond,
                          const int ifStatement,
                          const int elseStatement){
-  return _mm512_mask_mov_epi32((integer)ifStatement, cond, (integer)elseStatement);
+  return _mm512_mask_blend_epi64(cond, integer(elseStatement), integer(ifStatement));
 }
 
 inline real opTernary(const __mmask8 cond,

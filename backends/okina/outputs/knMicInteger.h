@@ -16,12 +16,12 @@ public:
   inline operator __m512i() const { return vec; }
       
   /* Logical Operations */
-  inline integer& operator&=(const integer &a) { return *this = (integer) _mm512_and_si512(vec,a); }
-  inline integer& operator|=(const integer &a) { return *this = (integer) _mm512_or_si512(vec,a); }
-  inline integer& operator^=(const integer &a) { return *this = (integer) _mm512_xor_si512(vec,a); }
+  inline integer& operator&=(const integer &a) { return *this = (integer) _mm512_and_epi64(vec,a); }
+  inline integer& operator|=(const integer &a) { return *this = (integer) _mm512_or_epi64(vec,a); }
+  inline integer& operator^=(const integer &a) { return *this = (integer) _mm512_xor_epi64(vec,a); }
 
-  inline integer& operator +=(const integer &a) { return *this = (integer)_mm512_add_epi32(vec,a); }
-  inline integer& operator -=(const integer &a) { return *this = (integer)_mm512_sub_epi32(vec,a); }   
+  inline integer& operator +=(const integer &a) { return *this = (integer)_mm512_add_epi64(vec,a); }
+  inline integer& operator -=(const integer &a) { return *this = (integer)_mm512_sub_epi64(vec,a); }   
   
   friend inline __mmask8 operator==(const integer &a, const int i);
 
@@ -29,26 +29,13 @@ public:
   
 };
 // Logicals
-inline integer operator&(const integer &a, const integer &b) { return _mm512_and_si512(a,b); }
-inline integer operator|(const integer &a, const integer &b) { return _mm512_or_si512(a,b); }
-inline integer operator^(const integer &a, const integer &b) { return _mm512_xor_si512(a,b); }
+inline integer operator&(const integer &a, const integer &b) { return _mm512_and_epi64(a,b); }
+inline integer operator|(const integer &a, const integer &b) { return _mm512_or_epi64(a,b); }
+inline integer operator^(const integer &a, const integer &b) { return _mm512_xor_epi64(a,b); }
 
 
 inline __mmask8 operator==(const integer &a, const int i){
-/*  const __m512d zero = _mm512_set1_pd(0.0);
-  const __mmask true_ =_mm512_cmpeq_epi32_mask(zero, zero);
-  int *v=(int*)&a.vec;
-  int *t=(int*)&true_;
-  //debug()<<"== with "<<v[3]<<" "<<v[2]<<" "<<v[1]<<" "<<v[0]<<" vs "<<i<<", t[3]="<<t[3];
-  return _mm512_set_pd((v[7]==i)?t[7]:0.0,
-                       (v[6]==i)?t[6]:0.0,
-                       (v[5]==i)?t[5]:0.0,
-                       (v[4]==i)?t[4]:0.0,
-                       (v[3]==i)?t[3]:0.0,
-                       (v[2]==i)?t[2]:0.0,
-                       (v[1]==i)?t[1]:0.0,
-                       (v[0]==i)?t[0]:0.0);*/
-  return (__mmask8)0xFF;
+  return _mm512_cmp_epi64_mask(a.vec,_mm512_set_epi64(i,i,i,i,i,i,i,i),_MM_CMPINT_EQ);
 }
 
 #endif // _KN_MIC_INTEGER_H_

@@ -13,7 +13,7 @@ export C_FLAGS = -std=c99
 # CMAKE OPTIONS #
 #################
 CMAKE_PATH = /usr
-#/local/opendev1/gcc/cmake/3.0.0
+#/local/cmake-2.8.9
 CMAKE = $(CMAKE_PATH)/bin/cmake
 CTEST = $(CMAKE_PATH)/bin/ctest
 
@@ -25,7 +25,7 @@ MAKEFLAGS = --no-print-directory
 #########
 # PATHS #
 #########
-NABLA_PATH = ~nabla/root
+NABLA_PATH = /home/$(USER)/root
 BUILD_PATH = /tmp/$(USER)/nabla
 
 ############

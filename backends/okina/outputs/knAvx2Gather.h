@@ -26,17 +26,20 @@ inline __m256d returned_gatherk(const int a, const int b,
 
 // *****************************************************************************
 // * We are going to use this one:
-// * extern __m256d _mm256_mask_i32gather_pd(__m256d def_vals, double const * base, __m128i vindex __m256d vmask, const int scale);
+// * extern __m256d _mm256_mask_i32gather_pd(__m256d def_vals,
+// * double const * base, __m128i vindex __m256d vmask, const int scale);
 // *****************************************************************************
 inline __m256d masked_gather_pd(const int a, const int b,
                                 const int c, const int d,
                                 const double *base, const int s){
   // base: address used to reference the loaded FP elements
-  // the vector of double-precision FP values copied to the destination when the corresponding element of the double-precision FP mask is '0'
+  // the vector of double-precision FP values copied to the destination
+  // when the corresponding element of the double-precision FP mask is '0'
   const __m256d def_vals =_mm256_setzero_pd();
   // the vector of dword indices used to reference the loaded FP elements.
   const __m128i vindex = _mm_set_epi32(d,c,b,a);
-  // the vector of FP elements used as a vector mask; only the most significant bit of each data element is used as a mask.
+  // the vector of FP elements used as a vector mask;
+  // only the most significant bit of each data element is used as a mask.
   const __m256d vmask = _mm256_cmp_pd(_mm256_set_pd(d,c,b,a), _mm256_setzero_pd(), _CMP_GE_OQ);
   // 32-bit scale used to address the loaded FP elements.
   const int scale = s;
