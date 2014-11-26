@@ -75,7 +75,7 @@ static void okinaAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNod
 static void okinaAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   // En Okina, par contre il faut les y mettre
   if (fct->parse.function_call_name!=NULL){
-    nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
+    //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
     int numParams=1;
     nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
     okinaAddExtraArguments(nabla, called, &numParams);

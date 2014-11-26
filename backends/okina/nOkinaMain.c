@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){\n\
 #ifdef __AVX__\n\
 \t//avxTest();\n\
 #endif\n\
-#ifdef __MIC__\n\
+#if defined(__MIC__)||defined(__AVX512F__)\n\
 \t//micTestReal();\n\
 \t//micTestReal3();\n\
 #endif\n\

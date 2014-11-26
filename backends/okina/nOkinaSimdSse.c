@@ -22,8 +22,8 @@ char *okinaSseBits(void){return "128";}
 // ****************************************************************************
 char* okinaSsePrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
 }
 
 
@@ -32,8 +32,8 @@ cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
 // ****************************************************************************
 char* okinaSseNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
 }
 
 

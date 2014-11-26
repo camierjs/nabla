@@ -22,14 +22,14 @@ char *okinaMicBits(void){return "512";}
 // ****************************************************************************
 char* okinaMicPrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
 }
 
 // ****************************************************************************
@@ -37,14 +37,14 @@ cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
 // ****************************************************************************
 char* okinaMicNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
 }
 
 // ****************************************************************************
@@ -89,15 +89,14 @@ static char* okinaMicGatherNodes(nablaJob *job,nablaVariable* var, enum_phase ph
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
-gatherFromNode_%sk%s(\
-node_cell[8*(nw+0)+c],\n\t\t\t\%s\
-node_cell[8*(nw+1)+c],\n\t\t\t\%s\
-node_cell[8*(nw+2)+c],\n\t\t\t\%s\
-node_cell[8*(nw+3)+c],\n\t\t\t\%s\
-node_cell[8*(nw+4)+c],\n\t\t\t\%s\
-node_cell[8*(nw+5)+c],\n\t\t\t\%s\
-node_cell[8*(nw+6)+c],\n\t\t\t\%s\
-node_cell[8*(nw+7)+c],\n\t\t\t\%s\
+gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+1)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+2)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+3)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+4)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+5)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+6)+c],%s\n\
+\t\t\t\t\t\tnode_cell[8*(nw+7)+c],%s\n\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
@@ -105,14 +104,14 @@ node_cell[8*(nw+7)+c],\n\t\t\t\%s\
            var->name,
            strcmp(var->type,"real")==0?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+0)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+1)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+2)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+3)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+4)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+5)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+6)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+7)+c],\n\t\t\t",
+           var->dim==0?"":"node_cell_corner[8*(nw+0)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+1)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+2)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+3)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+4)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+5)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+6)+c],",
+           var->dim==0?"":"node_cell_corner[8*(nw+7)+c],",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"":"",

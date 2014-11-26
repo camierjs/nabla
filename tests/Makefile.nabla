@@ -1,7 +1,7 @@
 TGT=${name}
 #export SIMD=std
 #export PARALLEL=omp
-export LOG=-t -v $(TGT).log
+#export LOG=-t -v $(TGT).log
 ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
 
 include ../Makefile.nabla.${backend}

@@ -23,10 +23,10 @@ char *okinaAvxBits(void){return "256";}
 // ****************************************************************************
 char* okinaAvxPrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
 }
 
 // ****************************************************************************
@@ -34,10 +34,10 @@ cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
 // ****************************************************************************
 char* okinaAvxNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
 }
 
 
@@ -81,11 +81,10 @@ static char* okinaAvxGatherNodes(nablaJob *job,nablaVariable* var, enum_phase ph
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
-gatherFromNode_%sk%s(\
-node_cell[8*(nw+0)+c],\n\t\t\t\%s\
-node_cell[8*(nw+1)+c],\n\t\t\t\%s\
-node_cell[8*(nw+2)+c],\n\t\t\t\%s\
-node_cell[8*(nw+3)+c],\n\t\t\t\%s\
+gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
+			node_cell[8*(nw+1)+c],\n\t\t\t\%s\
+			node_cell[8*(nw+2)+c],\n\t\t\t\%s\
+			node_cell[8*(nw+3)+c],\n\t\t\t\%s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",

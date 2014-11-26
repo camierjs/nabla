@@ -26,10 +26,12 @@ void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVa
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
-    if (!job->parse.selection_statement_in_compound_statement)
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
-    else
-      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "/*%c %c*/cell_node[", cnfg, var->item[0]);      
+    if (!job->parse.selection_statement_in_compound_statement){
+      //nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
+      nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
+    }else{
+      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
+    }
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -122,7 +124,7 @@ static bool okinaHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                  nablaJob *job){
   //nprintf(arc, NULL, "/*gathered variable?*/");
   if (!var->is_gathered) return false;
-  nprintf(arc, NULL, "/*gathered variable!*/gathered_%s_%s",var->item,var->name);
+  nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
   return true;
 }
 
@@ -140,7 +142,7 @@ static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
   // Preliminary pertinence test
   if (cnfg != 'c') return;
   
-  nprintf(arc, "/*CellJob*/","/*CellJob*/");
+  //nprintf(arc, "/*CellJob*/","/*CellJob*/");
   
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if ((job->parse.function_call_arguments==true)&&(var->dim==1)){
@@ -152,8 +154,8 @@ static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
     nprintf(arc, "/*CellVar*/",
             "%s",
             ((var->dim==0)? (isPostfixed==2)?"":"[c":
-             (enum_enum!='\0')?"/*ee*/[n+8*c":
-             (var->dim==1)?"/*c1*/[8*c":"[c"));
+             (enum_enum!='\0')?"[n+8*c":
+             (var->dim==1)?"[8*c":"[c"));
     job->parse.variableIsArray=(var->dim==1)?true:false;
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true)
@@ -218,12 +220,12 @@ static void okinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     break;
   }
   case ('n'):{
-    if ((isPostfixed!=2) && enum_enum=='f')  nprintf(arc, "/*NodeVar !2f*/", "/*!2f*/[n]");
+    if ((isPostfixed!=2) && enum_enum=='f')  nprintf(arc, "/*NodeVar !2f*/", "[n]");
     if ((isPostfixed==2) && enum_enum=='f')  ;//nprintf(arc, NULL);
     if ((isPostfixed==2) && enum_enum=='\0') nprintf(arc, "/*NodeVar 20*/", NULL);
-    if ((isPostfixed!=2) && enum_enum=='n')  nprintf(arc, "/*NodeVar !2n*/", "/*!2n*/[n]");
-    if ((isPostfixed!=2) && enum_enum=='c')  nprintf(arc, "/*NodeVar !2c*/", "/*!2c*/[n]");
-    if ((isPostfixed!=2) && enum_enum=='\0') nprintf(arc, "/*NodeVar !20*/", "/*!20*/[n]");
+    if ((isPostfixed!=2) && enum_enum=='n')  nprintf(arc, "/*NodeVar !2n*/", "[n]");
+    if ((isPostfixed!=2) && enum_enum=='c')  nprintf(arc, "/*NodeVar !2c*/", "[n]");
+    if ((isPostfixed!=2) && enum_enum=='\0') nprintf(arc, "/*NodeVar !20*/", "[n]");
     break;
   }
   case ('f'):{

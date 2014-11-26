@@ -45,7 +45,7 @@ void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n)
     job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
     (*n)=job->parse.statementToDiffract;
     nprintf(nabla, NULL, ";\n\t");
-    nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
+    //nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
   }
 
   // On flush la diffraction 
@@ -91,8 +91,8 @@ char* okinaHookPrefixEnumerate(nablaJob *job){
  * Fonction produisant l'ENUMERATE_* avec XYZ
  *****************************************************************************/
 char* okinaHookDumpEnumerateXYZ(nablaJob *job){
-  char *xyz=job->xyz;// Direction
-  nprintf(job->entity->main, "\n\t/*okinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
+  //char *xyz=job->xyz;// Direction
+  //nprintf(job->entity->main, "\n\t/*okinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
   return "// okinaHookDumpEnumerateXYZ has xyz drctn";
 }
 
@@ -126,7 +126,7 @@ static char* okinaSelectEnumerate(nablaJob *job){
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   //if (job->xyz!=NULL) return okinaHookDumpEnumerateXYZ(job);
-  if (itm=='\0') return "// function okinaHookDumpEnumerate\n";
+  if (itm=='\0') return "\n";// function okinaHookDumpEnumerate\n";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
@@ -165,7 +165,7 @@ char* okinaHookDumpEnumerate(nablaJob *job){
     const char *ompOkinaReturnVariableWitoutPerThread=okinaReturnVariableNameForOpenMPWitoutPerThread(job);
     //const char *ompOkinaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
     //const char *ompOkinaLocalVariableName=job->parse.returnFromArgument?ompOkinaReturnVariable:"";
-    if (sprintf(format,"/*1*/%s/*2*/%%s/*3*/%%s)",foreach)<=0) error(!0,0,"Could not patch format!");
+    if (sprintf(format,"%s%%s%%s)",foreach)<=0) error(!0,0,"Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
                 warping,       // _WARP or not
                 ompOkinaLocal, // _SHARED or not
@@ -175,13 +175,13 @@ char* okinaHookDumpEnumerate(nablaJob *job){
     dbg("\n\t[okinaHookDumpEnumerate] No returnFromArgument");
     if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
                 foreach,
-                job->is_a_function?"/*function*/":"/*not_a_function*/)")<=0)
+                job->is_a_function?"":")")<=0)
       error(!0,0,"Could not patch format!");
     dbg("\n[okinaHookDumpEnumerate] format=%s",format);
     if (sprintf(str,format,
                 warping,
-                "/*6*/",
-                "/*7*/")<=0)
+                "",
+                "")<=0)
       error(!0,0,"Could not patch warping within ENUMERATE!");
   }
   return strdup(str);
@@ -466,13 +466,13 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(FOREACH_INI):{
-    nprintf(nabla, "/*FOREACH_INI*/", "{//FOREACH_INI\n\t\t\t");
-    nprintf(nabla, "/*okinaGather*/", "/*okinaGather?*/%s",okinaGather(job));
+    nprintf(nabla, "/*FOREACH_INI*/", "{\n\t\t\t");//FOREACH_INI
+    nprintf(nabla, "/*okinaGather*/", "%s",okinaGather(job));
     break;
   }
   case(FOREACH_END):{
     nprintf(nabla, "/*okinaScatter*/", okinaScatter(job));
-    nprintf(nabla, "/*FOREACH_END*/", "\n\t\t}//FOREACH_END\n\t");
+    nprintf(nabla, "/*FOREACH_END*/", "\n\t\t}\n\t");//FOREACH_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
     break;
@@ -482,12 +482,12 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.returnFromArgument &&
         ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP))
       nprintf(nabla, NULL, "int tid = omp_get_thread_num();");
-    nprintf(nabla, NULL, "/*COMPOUND_JOB_INI:*/");
+    //nprintf(nabla, NULL, "/*COMPOUND_JOB_INI:*/");
     break;
   }
     
   case(COMPOUND_JOB_END):{
-    nprintf(nabla, NULL, "/*:COMPOUND_JOB_END*/");
+    //nprintf(nabla, NULL, "/*:COMPOUND_JOB_END*/");
     break;
   }
      
@@ -514,7 +514,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     }else{
       nprintf(nabla, NULL, "]");
     }
-    nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
+    //nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
     //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, "[c]]/*]+FlushingIsPostfixed*/");
                                         //"[((c>>WARP_BIT)*((1+1+1)<<WARP_BIT))+(c&((1<<WARP_BIT)-1))]]/*]+FlushingIsPostfixed*/");
     if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, NULL);
@@ -656,7 +656,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case ('{'):{nprintf(nabla, NULL, "{\n\t\t"); break; }    
-  case ('&'):{nprintf(nabla, NULL, "/*adrs*/&"); break; }    
+  case ('&'):{nprintf(nabla, NULL, "&"); break; }    
   case (';'):{
     job->parse.variableIsArray=false;
     job->parse.turnBracketsToParentheses=false;
@@ -757,7 +757,7 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
                                       n->children->token));
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
-      nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
+      //nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
       // Création d'une nouvelle in_out_variable
       nablaVariable *new = nablaVariableNew(NULL);
       new->name=strdup(var->name);
@@ -792,7 +792,7 @@ void okinaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
   * Dump dans le src des arguments nabla en in comme en out
  *****************************************************************************/
 void okinaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
-  nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/","/*in/out args*/");
+  nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
 }
 
 

@@ -234,7 +234,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
                 (n->children->next->next->token[0] == 'z')
                 ){
               //nprintf(nabla, NULL, "/*.%c*/", n->children->next->next->token[0]);
-              nprintf(nabla, "/*SettingIsDotXYZ*/", NULL);
+              //nprintf(nabla, "/*SettingIsDotXYZ*/", NULL);
               job->parse.isDotXYZ=n->children->next->next->token[0]-'w';
               // On flush cette postfix_expression pour la masquer de la génération
 //#warning Should be a hook, but let it be for now
@@ -424,7 +424,7 @@ void nablaJobFill(nablaMain *nabla,
     nabla->hook->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
 
   // On ferme la parenthèse des paramètres que l'on avait pas pris dans les tokens
-  nprintf(nabla, NULL, "){// du job");
+  nprintf(nabla, NULL, "){");// du job
 
   if (job->parse.returnFromArgument)
     if (nabla->hook->returnFromArgument)
@@ -452,7 +452,7 @@ void nablaJobFill(nablaMain *nabla,
   nprintf(nabla, NULL, "\n\t%s", nabla->hook->prefixEnumerate(job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
-  nprintf(nabla, NULL, "\n\t%s{// de l'ENUMERATE_", nabla->hook->dumpEnumerate(job));
+  nprintf(nabla, NULL, "\n\t%s{", nabla->hook->dumpEnumerate(job));// de l'ENUMERATE_
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
   nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->postfixEnumerate(job));
@@ -463,8 +463,8 @@ void nablaJobFill(nablaMain *nabla,
   nablaJobParse(n,job);
 
   if (!job->parse.got_a_return)
-    nprintf(nabla, NULL, "}// de l'ENUMERATE");
-  nprintf(nabla, NULL, "\n}// du job");
+    nprintf(nabla, NULL, "}");// de l'ENUMERATE
+  nprintf(nabla, NULL, "\n}");// du job
   dbg("\n\t[nablaJobFill] done");
 }
 

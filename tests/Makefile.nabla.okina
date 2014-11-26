@@ -16,10 +16,20 @@ CFLAGS_RedHat-6-x86_64=-finline -inline-forceinline -fno-alias -alias-const -no-
 # Linux #
 # export LD_LIBRARY_PATH=/opt/intel/lib/intel64:$LD_LIBRARY_PATH
 # export LD_LIBRARY_PATH=/usr/local/intel-14.0.2.144/14.0.2.144/compiler/lib/mic:$LD_LIBRARY_PATH
-CXX_Linux=/usr/local/intel-14.0.2.144/14.0.2.144/bin/intel64/icc
-CFLAGS_Linux=-finline -inline-forceinline -fno-alias -alias-const -no-ipo -I/usr/include/x86_64-linux-gnu
-#CXX_Linux=/usr/local/gcc-4.9.0/bin/g++
-#CFLAGS_Linux=-finline #-I/usr/include/x86_64-linux-gnu
+#CXX_Linux_Cirrus=/usr/local/intel-14.0.2.144/14.0.2.144/bin/intel64/icc
+# -I/usr/include 	-I/usr/include/x86_64-linux-gnu 	-I/usr/local/gcc/4.9.2/include/c++/4.9.2 	-I/usr/local/gcc/4.9.2/include/c++/4.9.2/x86_64-unknown-linux-gnu
+#
+CXX_Linux= /opt/intel/bin/icc
+CFLAGS_Linux=-finline -inline-forceinline -fno-alias -alias-const -no-ipo
+#
+# export LD_LIBRARY_PATH=/home/local/gcc/4.9.2/lib64:$LD_LIBRARY_PATH
+#CXX_Linux=/usr/local/gcc/4.9.2/bin/g++
+#CFLAGS_Linux=-finline -I/usr/include/x86_64-linux-gnu
+#SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -mno-sse2 -malign-double
+#SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse #4.2 #-mno-avx
+#SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx 
+#SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
+#SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #mic mavx512f
 
 ###########
 # GERMAIN #
@@ -33,11 +43,11 @@ CFLAGS_BullEL_6__x86_64=-finline -inline-forceinline -fno-alias -alias-const -no
 CXX=$(CXX_$(shell uname))
 CFLAGS = -g -O2 -fopenmp -Wall $(SIMD_$(SIMD)_FLAGS) $(CFLAGS_$(shell uname)) $(MESH_FLAGS)
 
-SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -mno-sse2 -malign-double
-SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse #4.2 #-mno-avx
-SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx 
-SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
-SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic
+SIMD_std_FLAGS  = -DWARP_BIT=0 -march=pentium3
+SIMD_sse_FLAGS  = -DWARP_BIT=1 -xSSE4.2
+SIMD_avx_FLAGS  = -DWARP_BIT=2 -xAVX 
+SIMD_avx2_FLAGS = -DWARP_BIT=2 -xCORE-AVX2
+SIMD_mic_FLAGS  = -DWARP_BIT=3 -xMIC-AVX512
 
 
 

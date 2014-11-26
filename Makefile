@@ -56,7 +56,9 @@ tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
 tstga2:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_gen_1)
-tstra2:
+tststd:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_run_1_std_omp)
+tstra:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_run_1)
 tstro:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)

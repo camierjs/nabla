@@ -1,8 +1,7 @@
 #ifndef _KN_MIC_REAL_H_
 #define _KN_MIC_REAL_H_
 
-#pragma pack(push,64)
-//#warning 76543210 vs 01234567
+#pragma pack(push,8)
 
 // ****************************************************************************
 // * real

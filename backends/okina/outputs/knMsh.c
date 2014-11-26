@@ -27,11 +27,11 @@ static void nabla_ini_node_coords(void){
 
    int iNode=0;
    double dx;
-#ifdef __MIC__
-#warning __MIC__
+#if defined(__MIC__)||defined(__AVX512F__)
+#warning __MIC__||__AVX512F__
   __m512d x,y,z;
   double dy0,dy1,dy2,dy3,dy4,dy5,dy6,dy7;
-#elif __AVX__||__AVX2__
+#elif defined(__AVX__) || defined(__AVX2__)
    #ifdef __AVX2__
       #warning __AVX2__
    #elif __AVX__
@@ -53,7 +53,7 @@ static void nabla_ini_node_coords(void){
   for(int iZ=0;iZ<NABLA_NB_NODES_Z_AXIS;iZ++){
       for(int iY=0;iY<NABLA_NB_NODES_Y_AXIS;iY+=WARP_SIZE,iNode+=1){
         dx=((double)iX)*NABLA_NB_NODES_X_TICK;
-#ifdef __MIC__
+#if defined(__MIC__)||defined(__AVX512F__)
         dy0=((double)(iY+0))*NABLA_NB_NODES_Y_TICK;
         dy1=((double)(iY+1))*NABLA_NB_NODES_Y_TICK;
         dy2=((double)(iY+2))*NABLA_NB_NODES_Y_TICK;
@@ -75,11 +75,11 @@ static void nabla_ini_node_coords(void){
 #endif
         dz=((double)iZ)*NABLA_NB_NODES_Z_TICK;
         // On calcule les coordonnées du vecteur de points
-#ifdef __MIC__
+#if defined(__MIC__)||defined(__AVX512F__)
         x=set(dx,   dx,  dx,  dx,  dx,  dx,  dx,  dx);
         y=set(dy7, dy6, dy5, dy4, dy3, dy2, dy1, dy0);
         z=set(dz,   dz,  dz,  dz,  dz,  dz,  dz,  dz);
-#elif __AVX__||__AVX2__
+#elif __AVX__ || __AVX2__
         x=set(dx,   dx,  dx,  dx);
         y=set(dy3, dy2, dy1, dy0);
         z=set(dz,   dz,  dz,  dz);
