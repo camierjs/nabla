@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){\n\
 \n\tdumpFinalEnergy();\
 \tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s.)\\33[m\\n\", global_iteration, cputime/1000.0);\n\
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
 \n}\n"
 
 

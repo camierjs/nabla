@@ -111,14 +111,14 @@ static void nabla_ini_node_coords(void){
   }
   //verifCoords();
 
-  //dbg(DBG_INI,"\nOn associe à chaque maille ses noeuds");
+  dbg(DBG_INI,"\nOn associe à chaque maille ses noeuds");
   int node_bid,cell_uid,iCell=0;
   for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
     for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
       for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
         cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
         node_bid=iX + iY*NABLA_NB_NODES_X_AXIS + iZ*NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
-        //dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d", iCell,iX,iY,iZ,cell_uid,node_bid);
+        dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d", iCell,iX,iY,iZ,cell_uid,node_bid);
         cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
         cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
         cell_node[2*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS + 1;
@@ -127,7 +127,7 @@ static void nabla_ini_node_coords(void){
         cell_node[5*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS +1 ;
         cell_node[6*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS+1;
         cell_node[7*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS;
-        /*dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
+        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
             cell_node[0*NABLA_NB_CELLS+iCell],
             cell_node[1*NABLA_NB_CELLS+iCell],
             cell_node[2*NABLA_NB_CELLS+iCell],
@@ -135,7 +135,7 @@ static void nabla_ini_node_coords(void){
             cell_node[4*NABLA_NB_CELLS+iCell],
             cell_node[5*NABLA_NB_CELLS+iCell],
             cell_node[6*NABLA_NB_CELLS+iCell],
-            cell_node[7*NABLA_NB_CELLS+iCell]);*/
+            cell_node[7*NABLA_NB_CELLS+iCell]);
       }
     }
   }

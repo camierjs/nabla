@@ -181,7 +181,7 @@ nablaDefine okinaStdDefines[]={
   {"opMul(u,v)", "(u*v)"},
   {"opMod(u,v)", "(u%v)"},
   {"opScaMul(u,v)","dot3(u,v)"},
-  //{"opVecMul(u,v)","cross(u,v)"},    
+  {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
   {"knAt(a)",""},
   //#warning fatal returns
@@ -189,6 +189,7 @@ nablaDefine okinaStdDefines[]={
   {"synchronize(a)","_Pragma(\"omp barrier\")"},
   //{"mpi_reduce(how,what)","mpi_reduce_min(tid,global_min_array,what)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
+  {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration"},
   {"MD_DirX","0"},
