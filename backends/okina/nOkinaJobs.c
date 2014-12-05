@@ -129,11 +129,11 @@ static char* okinaSelectEnumerate(nablaJob *job){
   if (itm=='\0') return "\n";// function okinaHookDumpEnumerate\n";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE%s%s(n";
@@ -407,7 +407,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case(ALIGNED):{
-    nprintf(nabla, "/*ALIGNED*/", "__declspec(align(64)) ");
+    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->pragma->align());
     break;
   }
     
@@ -461,7 +461,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(UIDTYPE):{
-    nprintf(nabla, "UIDTYPE", "int64");
+    nprintf(nabla, "UIDTYPE", "int ");
     break;
   }
     

@@ -47,7 +47,7 @@ SIMD_std_FLAGS  = -DWARP_BIT=0 -march=pentium3
 SIMD_sse_FLAGS  = -DWARP_BIT=1 -xSSE4.2
 SIMD_avx_FLAGS  = -DWARP_BIT=2 -xAVX 
 SIMD_avx2_FLAGS = -DWARP_BIT=2 -xCORE-AVX2
-SIMD_mic_FLAGS  = -DWARP_BIT=3 -xMIC-AVX512
+SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #MIC-AVX512mmic #mic mavx512f
 
 
 

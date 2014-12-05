@@ -1,12 +1,13 @@
 #ifndef _KN_STD_REAL_H_
 #define _KN_STD_REAL_H_
- 
+
+#pragma pack(push,8)
 
 // ****************************************************************************
 // * real
 // ****************************************************************************
-class real {
- public:
+class __attribute__ ((aligned(8))) real {
+ protected:
   double vec;
  public:
   // Constructors
@@ -14,9 +15,7 @@ class real {
   inline real(int i):vec((double)i){}
   inline real(long i):vec((double)i){}
   inline real(double d):vec(d){}
-  //inline real(double x):vec(x){}
   inline real(double *x):vec(*x){}
-  //inline real(double d3, double d2, double d1, double d0):vec(_mm256_set_pd(d0,d1,d2,d3)){}
 
   // Convertors
   inline operator double() const { return vec; }
@@ -31,7 +30,6 @@ class real {
   //friend inline real operator -(const real &a, const real &b) { return (a-b); }
   //friend inline real operator *(const real &a, const real &b) { return (a*b); }
   //friend inline real operator /(const real &a, const real &b) { return (a/b); }
-
   
   inline real& operator +=(const real &a) { return *this = (vec+a); }
   inline real& operator -=(const real &a) { return *this = (vec-a); }
@@ -71,19 +69,18 @@ class real {
   friend inline real rcbrt(const real &a){
     return real(::cbrt(a));
   }
-  friend inline real norm(real u){ return u;}
+  friend inline real norm(real u){ return ::fabs(u);}
 
-
-  /* Element Access Only, no modifications to elements */
+  // Element Access Only, no modifications to elements
   inline const double& operator[](int i) const  {
-    /* Assert enabled only during debug /DDEBUG */
+  // Assert enabled only during debug
     assert((0 <= i));
     double *dp = (double*)&vec;
     return *(dp+i);
   }
-  /* Element Access and Modification*/
+  // Element Access and Modification
   inline double& operator[](int i) {
-    /* Assert enabled only during debug /DDEBUG */
+  // Assert enabled only during debug
     assert((0 <= i));
     double *dp = (double*)&vec;
     return *(dp+i);
@@ -95,5 +92,7 @@ inline double ReduceMinToDouble(Real r){ return r; }
 
 inline double ReduceMaxToDouble(Real r){ return r; }
 
+//inline real min(const double r, const double s){ return ::fmin(r,s);}
+//inline real max(const double r, const double s){ return ::fmax(r,s);}
 
 #endif //  _KN_STD_REAL_H_

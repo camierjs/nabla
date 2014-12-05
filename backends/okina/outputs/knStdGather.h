@@ -55,8 +55,7 @@ inline void gatherFromNode_3kiArray8(const int a, const int corner,
                                      real3 *data, real3 *gthr, int i){
   //debug()<<"gather3ki, i="<<i;
   double *p=(double *)data;
-#warning Fetch operation to introduce its zero
-  double value=(a>=0)?p[3*8*a+3*corner+i]:0.0;
+  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
   if (i==0) (*gthr).x=value;
   if (i==1) (*gthr).y=value;
   if (i==2) (*gthr).z=value;

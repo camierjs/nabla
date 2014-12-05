@@ -37,6 +37,12 @@ inline real opTernary(const bool cond,
   if (cond) return ifStatement;
   return real(elseStatement);
 }
+inline real3 opTernary(const bool cond,
+                      const real3& ifStatement,
+                      const double elseStatement){
+  if (cond) return ifStatement;
+  return real3(elseStatement);
+}
 
 inline real opTernary(const bool cond,
                       const real& ifStatement,

@@ -76,6 +76,8 @@ static char* okinaStdGatherNodes(nablaJob *job, nablaVariable* var, enum_phase p
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
+//#warning continue node_cell_corner\n                                  \
+if (node_cell_corner[8*nw+c]==-1) continue;\n\
 gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 %s\
          %s_%s%s,\n\t\t\t\
@@ -127,6 +129,7 @@ char* okinaStdScatter(nablaVariable* var){
 // * Std or Mic TYPEDEFS
 // ****************************************************************************
 nablaTypedef okinaStdTypedef[]={
+  //{"double", "real"},
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -143,22 +146,17 @@ nablaDefine okinaStdDefines[]={
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
   {"NABLA_NB_GLOBAL","WARP_SIZE"},
   {"reducemin(a)","0.0"},
-  {"rabs(a)","(opTernary(((a)<0.0),(-a),(a)))"},
-  {"add(u,v)", "(u+v)"},
-  //{"and(u,v)", "(u&v)"},
-  //{"sub(u,v)", "(u-v)"},
-  //{"div(u,v)", "(u/v)"},
-  //{"mul(u,v)", "(u*v)"},
+  {"rabs(a)","fabs(a)"},//(opTernary(((a)<0.0),(-a),(a)))"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
-  {"rsqrt(u)", "::sqrt(u)"},
-  //{"shuffle(u,v,k)", "_mm256_shuffle_pd(u,v,k)"},
+  {"rsqrt(u)", "sqrt(u)"},
+  //{"rcbrt(u)", "cbrt(u)"},
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
   // DEBUG STUFFS
   {"DBG_MODE", "(false)"},
-  {"DBG_LVL", "(DBG_ALL)"},
+  {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
   {"DBG_CELL_VOLUME", "0x0001ul"},
   {"DBG_CELL_CQS", "0x0002ul"},
@@ -181,8 +179,9 @@ nablaDefine okinaStdDefines[]={
   {"opSub(u,v)", "(u-v)"},
   {"opDiv(u,v)", "(u/v)"},
   {"opMul(u,v)", "(u*v)"},
+  {"opMod(u,v)", "(u%v)"},
   {"opScaMul(u,v)","dot3(u,v)"},
-  {"opVecMul(u,v)","cross(u,v)"},    
+  //{"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
   {"knAt(a)",""},
   //#warning fatal returns

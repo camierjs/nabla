@@ -14,9 +14,10 @@
 #include "nabla.h"
 
 
-/*****************************************************************************
- * Backend OKINA PREFIX - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * Backend OKINA PREFIX - Génération du 'main'
+// * look at c++/4.7/bits/ios_base.h for cout options
+// ****************************************************************************
 #define OKINA_MAIN_PREFIX "\n\n\n\
 // ******************************************************************************\n\
 // * Main d'Okina\n\
@@ -24,7 +25,7 @@
 int main(int argc, char *argv[]){\n\
 \tfloat cputime=0.0;\n\
 \tstruct timeval st, et;\n\
-\tint iteration=1;\n\
+\t//int iteration=1;\n\
 #ifdef __AVX__\n\
 \t//avxTest();\n\
 #endif\n\
@@ -36,9 +37,9 @@ int main(int argc, char *argv[]){\n\
 \tnabla_ini_variables();\n\
 \tnabla_ini_node_coords();\n\
 \t// Initialisation de la précision du cout\n\
-\tstd::cout.precision(15);\n\
-\tstd::cout.setf(std::ios::floatfield);\n\
-\t//std::cout.setf(std::ios::fixed, std::ios::floatfield);\n\
+\tstd::cout.precision(21);\n\
+\t//std::cout.setf(std::ios::floatfield);\n\
+\tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
 \t// Initialisation du temps et du deltaT\n\
 \tglobal_time=0.0;\n\
 \tglobal_iteration=1;\n\
@@ -65,8 +66,10 @@ int main(int argc, char *argv[]){\n\
 #define OKINA_MAIN_POSTFIX "\n//OKINA_MAIN_POSTFIX\
 \n\tglobal_time+=*(double*)&global_deltat[0];\
 \n\tglobal_iteration+=1;\
-\n\tprintf(\"\\n\\t\\33[7mcycle %%d\\33[m, time=%%e, dt=%%e\", iteration+=1, global_time, *(double*)&global_deltat[0]);\
+\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
 \n\t}\n\
+ #warning dumpFinalEnergy\
+\n\tdumpFinalEnergy();\
 \tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s.)\\33[m\\n\", global_iteration, cputime/1000.0);\n\

@@ -1,17 +1,18 @@
 #ifndef _KN_STD_REAL3_H_
 #define _KN_STD_REAL3_H_
 
+#pragma pack(push,8)
 
 // ****************************************************************************
 // * real3
 // ****************************************************************************
-class real3 {
+class __attribute__ ((aligned(8))) real3 {
  public:
   // Les formules 4*(3*WARP_BASE(a)+0)+WARP_OFFSET(a) fonctionnent grâce au fait
   // que real3 est bien une struct avec les x,y et z en positions [0],[1] et [2]
-  real x;
-  real y;
-  real z;
+  __attribute__ ((aligned(8))) real x;
+  __attribute__ ((aligned(8))) real y;
+  __attribute__ ((aligned(8))) real z;
  public:
   // Constructors
   inline real3(): x(0.0), y(0.0), z(0.0){}
@@ -23,7 +24,7 @@ class real3 {
 
   // Logicals
   friend inline real3 operator&(const real3 &a, const real3 &b) { return real3((a.x&b.x), (a.y&b.y), (a.z&b.z)); }
-  friend inline real3 operator|(const real3 &a, const real3 &b) { return real3( (a.x|b.x),  (a.y|b.y),  (a.z|b.z)); }
+  friend inline real3 operator|(const real3 &a, const real3 &b) { return real3((a.x|b.x), (a.y|b.y), (a.z|b.z)); }
   friend inline real3 operator^(const real3 &a, const real3 &b) { return real3((a.x^b.x), (a.y^b.y), (a.z^b.z)); }
 
   // Arithmetic operators
@@ -51,9 +52,10 @@ class real3 {
   inline real3& operator-=(double f){return *this=real3(x-f,y-f,z-f);}
   inline real3& operator*=(double f){return *this=real3(x*f,y*f,z*f);}
   inline real3& operator/=(double f){return *this=real3(x/f,y/f,z/f);}
-  
+      
   friend inline real dot3(real3 u, real3 v){ return real(u.x*v.x+u.y*v.y+u.z*v.z);}
   friend inline real norm(real3 u){ return real(rsqrt(dot3(u,u)));}
+
   friend inline real3 cross(real3 u, real3 v){
     return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));
   }

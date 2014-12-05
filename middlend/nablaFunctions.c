@@ -133,10 +133,10 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
   for(;n->token != NULL;){
     //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
  
-    //if(n->tokenid==CONST){
-    //  nprintf(nabla, "/*CONST*/", "__declspec(align(WARP_ALIGN)) const ");
-    //break;
-    //}
+    if(n->tokenid==CONST){
+      nprintf(nabla, "/*CONST*/", "%sconst ", fct->entity->main->pragma->align());
+    break;
+    }
 
     if(n->tokenid==FOREACH_END){
       nprintf(nabla, "/*FOREACH_END*/",NULL);

@@ -292,6 +292,7 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 //""					{ return tok(&yylval, XNOR_OP);}// Xnor F4A2
 //"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
 //"::"					{ return tok(&yylval, NAMESPACE);}
+//∀ ∈ ∃
 
 // Absorbe line comments
 static void ignoreLineComments(void){
