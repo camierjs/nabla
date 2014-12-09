@@ -65,7 +65,7 @@ bool adrs_it=false;
 %token BOOL INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
 %token CELLTYPE NODETYPE FACETYPE
 %token CELL CELLS FACE FACES NODE NODES
-%token FOREACH FOREACH_INI FOREACH_END FOREACH_NODE_INDEX FOREACH_CELL_INDEX
+%token FOREACH FOREACH_INI FOREACH_END FOREACH_NODE_INDEX FOREACH_CELL_INDEX FOREACH_MTRL_INDEX
 %token PARTICLE PARTICLES PARTICLETYPE
 %token FILECALL FILETYPE
 
@@ -448,6 +448,7 @@ postfix_expression
 : primary_expression {rhs;}
 | postfix_expression FOREACH_NODE_INDEX {rhs;}
 | postfix_expression FOREACH_CELL_INDEX {rhs;}
+| postfix_expression FOREACH_MTRL_INDEX 
 | postfix_expression '[' expression ']' {rhs;}
 | REAL '(' ')'{rhs;}
 | REAL '(' expression ')' {rhs;}

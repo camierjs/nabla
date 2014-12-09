@@ -282,6 +282,9 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
     
+    if (n->tokenid==MIN_ASSIGN){fprintf(nabla->entity->src, "/*MIN_ASSIGN*/=ReduceMinToDouble"); break; }
+    if (n->tokenid==MAX_ASSIGN){fprintf(nabla->entity->src,  "/*MAX_ASSIGN*/=ReduceMaxToDouble"); break; }
+    
     // Dernière action possible: on dump
     //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;

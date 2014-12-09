@@ -212,9 +212,9 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "\&\="		    	{ return tok(&yylval, AND_ASSIGN);}
 "^="					{ return tok(&yylval, XOR_ASSIGN);}
 "\|="					{ return tok(&yylval, IOR_ASSIGN);}
-"?="					{ return tok(&yylval, NULL_ASSIGN);}
 "<?="					{ return tok(&yylval, MIN_ASSIGN);}
 ">?="					{ return tok(&yylval, MAX_ASSIGN);}
+"?="					{ return tok(&yylval, NULL_ASSIGN);}
 
 
 ">>"					{ return tok(&yylval, RSH_OP);}
@@ -268,6 +268,7 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 
 "[n]"             { return tok(&yylval, FOREACH_NODE_INDEX);}
 "[c]"             { return tok(&yylval, FOREACH_CELL_INDEX);}
+"[m]"             { return tok(&yylval, FOREACH_MTRL_INDEX);}
 
 
 "⋅"					{ return tok(&yylval, CENTER_DOT_OP);} // MIDDLE DOT 858be2

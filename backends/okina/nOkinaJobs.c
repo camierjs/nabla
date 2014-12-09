@@ -402,6 +402,22 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
     
+  case (MATERIAL):{
+    nprintf(nabla, "/*MATERIAL*/", "/*MATERIAL*/");
+    break;
+  }
+
+  case (MIN_ASSIGN):{
+    job->parse.left_of_assignment_operator=false;
+    nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/=ReduceMinToDouble");
+    break;
+  }
+  case (MAX_ASSIGN):{
+    job->parse.left_of_assignment_operator=false;
+    nprintf(nabla, "/*MAX_ASSIGN*/", "/*MAX_ASSIGN*/=ReduceMaxToDouble");
+    break;
+  }
+
   case(CONST):{
     nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->pragma->align());
     break;
@@ -630,6 +646,8 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   case (AND_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "&="); break; }
   case (XOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "^="); break; }
   case (IOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "|="); break; }
+
+    
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
     if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP){
