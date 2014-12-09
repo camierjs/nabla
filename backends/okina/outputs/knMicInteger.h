@@ -9,8 +9,8 @@ public:
   inline integer():vec(_mm512_set_epi64(0,0,0,0,0,0,0,0)){}
   inline	integer(__m512i mm):vec(mm){}
   inline integer(int i):vec(_mm512_set_epi64(i,i,i,i,i,i,i,i)){}
-  inline integer(int i7, int i6, int i5, int i4,
-                 int i3, int i2, int i1, int i0){vec=_mm512_set_epi64(i7,i6,i5,i4,i3,i2,i1,i0);}
+  inline integer(int i0, int i1, int i2, int i3,
+                 int i4, int i5, int i6, int i7){vec=_mm512_set_epi64(i7,i6,i5,i4,i3,i2,i1,i0);}
   
   // Convertors
   inline operator __m512i() const { return vec; }

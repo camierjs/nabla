@@ -60,13 +60,6 @@ struct __attribute__ ((aligned(16))) real3 {
             _mm_sub_pd( _mm_mul_pd(u.z,v.x) , _mm_mul_pd(u.x,v.z) ),
             _mm_sub_pd( _mm_mul_pd(u.x,v.y) , _mm_mul_pd(u.y,v.x) ));
   }
-  
-  /* inline real3& operator[](Integer i)const{
-    return real3(real(x[i[0]],x[i[1]]),
-                 real(y[i[0]],y[i[1]]),
-                 real(z[i[0]],z[i[1]]));
-                 }*/
-
 };
 
 

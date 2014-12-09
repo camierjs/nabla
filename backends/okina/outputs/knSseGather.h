@@ -46,9 +46,9 @@ inline void gather3ki(const int a, const int b,
   double *p=(double*)data;
   const real ba=real(p[2*(3*WARP_BASE(a)+i)+WARP_OFFSET(a)],
                      p[2*(3*WARP_BASE(b)+i)+WARP_OFFSET(b)]);
-  if (i==0) (*gthr).x=ba;
-  if (i==1) (*gthr).y=ba;
-  if (i==2) (*gthr).z=ba;
+  if (i==0) gthr->x=ba;
+  if (i==1) gthr->y=ba;
+  if (i==2) gthr->z=ba;
 }
 
 inline void gather3k(const int a, const int b,
@@ -68,9 +68,9 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
   double *p=(double*)data;
   const real ba=real((a>=0)?p[2*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a)]:0.0,
                      (b>=0)?p[2*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b)]:0.0);
-  if (i==0) (*gthr).x=ba;
-  if (i==1) (*gthr).y=ba;
-  if (i==2) (*gthr).z=ba;
+  if (i==0) gthr->x=ba;
+  if (i==1) gthr->y=ba;
+  if (i==2) gthr->z=ba;
 }
 
 inline void gatherFromNode_3kArray8(const int a, const int a_corner,

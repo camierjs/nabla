@@ -76,7 +76,7 @@ static char* okinaStdGatherNodes(nablaJob *job, nablaVariable* var, enum_phase p
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
 //#warning continue node_cell_corner\n\
-if (node_cell_corner[8*nw+c]==-1) continue;\n\
+//if (node_cell_corner[8*nw+c]==-1) continue;\n\
 gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 %s\
          %s_%s%s,\n\t\t\t\
@@ -128,7 +128,6 @@ char* okinaStdScatter(nablaVariable* var){
 // * Std or Mic TYPEDEFS
 // ****************************************************************************
 nablaTypedef okinaStdTypedef[]={
-  //{"double", "real"},
   {"struct real3","Real3"},
   {NULL,NULL}
 };

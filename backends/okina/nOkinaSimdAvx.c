@@ -162,7 +162,6 @@ nablaDefine okinaAvxDefines[]={
   {"store(u,_u)", "_mm256_store_pd(u,_u)"},
   {"load(u)", "_mm256_load_pd(u)"},
   {"zero", "_mm256_setzero_pd"},
-  // DEBUG STUFFS
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_ALL)"},
   {"DBG_OFF", "0x0000ul"},
@@ -191,10 +190,8 @@ nablaDefine okinaAvxDefines[]={
   {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
   {"knAt(a)",""},
-  //#warning fatal returns
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)",""},
-  //{"mpi_reduce(how,what)","mpi_reduce_min(tid,global_min_array,what)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration"},

@@ -13,7 +13,7 @@ public:
   inline integer():vec(_mm_set_epi32(0,0,0,0)){}
   inline	integer(__m128i mm):vec(mm){}
   inline integer(int i):vec(_mm_set_epi32(i,i,i,i)){}
-  inline integer(int i3, int i2, int i1, int i0){vec=_mm_set_epi32(i3, i2, i1, i0);}
+  inline integer(int i0, int i1, int i2, int i3){vec=_mm_set_epi32(i3, i2, i1, i0);}
   
   // Convertors
   inline operator __m128i() const { return vec; }

@@ -15,7 +15,7 @@ struct __attribute__ ((aligned(32))) real {
   inline real(double d):vec(_mm256_set1_pd(d)){}
   inline real(__m256d x):vec(x){}
   inline real(double *x):vec(_mm256_load_pd(x)){}
-  inline real(double d3, double d2, double d1, double d0):vec(_mm256_set_pd(d0,d1,d2,d3)){}
+  inline real(double d0, double d1, double d2, double d3):vec(_mm256_set_pd(d3,d2,d1,d0)){}
 
   // Convertors
   inline operator __m256d() const { return vec; }
@@ -161,20 +161,13 @@ struct __attribute__ ((aligned(32))) real {
   }
 
    
-
-  /* Element Access Only, no modifications to elements */
   inline const double& operator[](int i) const  {
-    /* Assert enabled only during debug /DDEBUG */
-    assert((0 <= i) && (i <= 3));
-    double *dp = (double*)&vec;
-    return *(dp+i);
+    double *d = (double*)&vec;
+    return *(d+i);
   }
-  /* Element Access and Modification*/
   inline double& operator[](int i) {
-    /* Assert enabled only during debug /DDEBUG */
-    assert((0 <= i) && (i <= 3));
-    double *dp = (double*)&vec;
-    return *(dp+i);
+    double *d = (double*)&vec;
+    return *(d+i);
   }
 
 };
