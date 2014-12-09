@@ -28,8 +28,10 @@ public:
   
   friend inline __m256d operator==(const integer &a, const int i);
 
-
-  
+  inline const int& operator[](int i) const  {
+    int *a=(int*)&vec;
+    return a[i];
+  }  
 };
 // Logicals
 inline integer operator&(const integer &a, const integer &b) { return _mm_and_si128(a,b); }

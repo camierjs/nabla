@@ -16,7 +16,7 @@ struct __attribute__ ((aligned(16))) real {
   inline real(double d):vec(_mm_set1_pd(d)){}
   inline real(__m128d x):vec(x){}
   inline real(double *x):vec(_mm_load_pd(x)){}
-  inline real(double d1, double d0):vec(_mm_set_pd(d0,d1)){}
+  inline real(double d0, double d1):vec(_mm_set_pd(d1,d0)){}
 
   // Convertors
   inline operator __m128d() const { return vec; }
@@ -64,18 +64,19 @@ struct __attribute__ ((aligned(16))) real {
   //friend inline real ceil(const real &a)   { return _mm_round_pd((a), _MM_FROUND_CEIL); }
   //friend inline real floor(const real &a)  { return _mm_round_pd((a), _MM_FROUND_FLOOR); }
   //friend inline real trunc(const real &a)  { return _mm_round_pd((a), _MM_FROUND_TO_ZERO); }
-  
+    //friend real round(const real &a)  { return _mm_svml_round_pd(a); }
+
   friend inline real min(const real &r, const real &s){ return _mm_min_pd(r,s);}
   friend inline real max(const real &r, const real &s){ return _mm_max_pd(r,s);}
 
-  /* Round */
-  //friend real round(const real &a)  { return _mm_svml_round_pd(a); }
   
   friend inline real rcbrt(const real &a){
     return real(::cbrt(a[0]),::cbrt(a[1]));
   }
   
-  friend inline real norm(real u){ return u;}
+  friend inline real norm(const real &u){
+    return real(::fabs(u[0]),::fabs(u[1]));
+  }
 
   /* Compares: Mask is returned  */
   friend inline real cmp_eq(const real &a, const real &b)  { return _mm_cmpeq_pd(a, b); }
@@ -118,21 +119,14 @@ struct __attribute__ ((aligned(16))) real {
     return _mm_and_pd(a, __f64vec4_abs_mask.m);
   }
 
-   
-
-  /* Element Access Only, no modifications to elements */
   inline const double& operator[](int i) const  {
-    /* Assert enabled only during debug /DDEBUG */
-    assert((0 <= i) && (i <= 1));
-    double *dp = (double*)&vec;
-    return *(dp+i);
+    double *d= (double*)&vec;
+    return d[i];
   }
-  /* Element Access and Modification*/
+  
   inline double& operator[](int i) {
-    /* Assert enabled only during debug /DDEBUG */
-    assert((0 <= i) && (i <= 1));
-    double *dp = (double*)&vec;
-    return *(dp+i);
+    double *d = (double*)&vec;
+    return d[i];
   }
 
 };

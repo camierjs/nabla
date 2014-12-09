@@ -53,7 +53,7 @@ char* okinaMicNextCell(void){
 char* okinaMicGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration)
-    return strdup("int cw,ia,ib,ic,id,ie,iff,ig,ih;");
+    return strdup("register int __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;");
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
@@ -165,7 +165,7 @@ nablaDefine okinaMicDefines[]={
   //{"norm","rabs"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
   {"reducemin(a)","0.0"},
   {"rabs(a)","(opTernary(((a)<0.0),(-a),(a)))"},
   {"add(u,v)", "_mm512_add_pd(u,v)"},

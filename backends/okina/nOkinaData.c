@@ -420,11 +420,11 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
                                               char *depth){  
   nprintf(nabla,"\n\t// okinaGenerateSingleVariable",NULL);
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s/WARP_SIZE] __attribute__ ((aligned(WARP_ALIGN)));",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s/WARP_SIZE] __attribute__ ((aligned(WARP_ALIGN)));;",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));;",
             postfix?"real":var->type,
             var->item,var->name,
             postfix?postfix:"",

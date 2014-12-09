@@ -1,7 +1,5 @@
 #ifndef _KN_AVX_REAL_H_
 #define _KN_AVX_REAL_H_
- 
-#pragma pack(push,32)
 
 // ****************************************************************************
 // * real
@@ -77,7 +75,9 @@ struct __attribute__ ((aligned(32))) real {
     //return _mm256_cbrt_pd(a);
   }
   
-  friend inline real norm(real u){ return u;}
+  friend inline real norm(real a){
+    return real(::fabs(a[0]),::fabs(a[1]),::fabs(a[2]),::fabs(a[3]));
+  }
 
   /* Compares: Mask is returned  */
   friend inline real cmp_eq(const real &a, const real &b)  { return _mm256_cmp_pd(a, b, _CMP_EQ_OS); }

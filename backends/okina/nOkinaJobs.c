@@ -592,16 +592,24 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   }
   case (UID):{
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_STD)==BACKEND_COLOR_OKINA_STD)
-      nprintf(nabla, "/*uniqueId c*/", "/*uid*/(WARP_SIZE*c)");
+      nprintf(nabla, "/*uniqueId c*/", "(WARP_SIZE*c)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-      nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1)");
-    if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "/*uid*/(n)");
+      nprintf(nabla, "/*uniqueId c*/", "integer(WARP_SIZE*c+0,WARP_SIZE*c+1)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-      nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
+      nprintf(nabla, "/*uniqueId c*/", "integer(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-      nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
+      nprintf(nabla, "/*uniqueId c*/", "integer(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)");
     if (cnfgem=='c' && (nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-      nprintf(nabla, "/*uniqueId c*/", "/*uid*/real(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3,WARP_SIZE*c+4,WARP_SIZE*c+5,WARP_SIZE*c+6,WARP_SIZE*c+7)");
+      nprintf(nabla, "/*uniqueId c*/", "integer(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3,WARP_SIZE*c+4,WARP_SIZE*c+5,WARP_SIZE*c+6,WARP_SIZE*c+7)");
+    
+    if (cnfgem=='n'&& (nabla->colors&BACKEND_COLOR_OKINA_STD)==BACKEND_COLOR_OKINA_STD)
+      nprintf(nabla, "/*uniqueId n*/", "(n)");
+    if (cnfgem=='n'&& (nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
+      nprintf(nabla, "/*uniqueId n*/", "integer(WARP_SIZE*n+0,WARP_SIZE*n+1)");
+    if (cnfgem=='n'&& (nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
+      nprintf(nabla, "/*uniqueId n*/", "integer(WARP_SIZE*n+0,WARP_SIZE*n+1,WARP_SIZE*n+2,WARP_SIZE*n+3)");
+    if (cnfgem=='n'&& (nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
+      nprintf(nabla, "/*uniqueId n*/", "integer(WARP_SIZE*n+0,WARP_SIZE*n+1,WARP_SIZE*n+2,WARP_SIZE*n+3,WARP_SIZE*n+4,WARP_SIZE*n+5,WARP_SIZE*n+6,WARP_SIZE*n+7)");
     break;
   }
   case (AT):{ nprintf(nabla, "/*knAt*/", "; knAt"); break; }

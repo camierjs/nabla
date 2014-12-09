@@ -39,9 +39,8 @@ char* okinaStdNextCell(void){
 // ****************************************************************************
 static char* okinaStdGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
+  if (phase==enum_phase_declaration)
     return strdup("register int __attribute__((unused)) cw,ia;");
-  }
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
@@ -76,7 +75,7 @@ static char* okinaStdGatherNodes(nablaJob *job, nablaVariable* var, enum_phase p
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
-//#warning continue node_cell_corner\n                                  \
+//#warning continue node_cell_corner\n\
 if (node_cell_corner[8*nw+c]==-1) continue;\n\
 gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 %s\
@@ -144,17 +143,15 @@ nablaDefine okinaStdDefines[]={
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
   {"reducemin(a)","0.0"},
-  {"rabs(a)","fabs(a)"},//(opTernary(((a)<0.0),(-a),(a)))"},
+  {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
   {"rsqrt(u)", "sqrt(u)"},
-  //{"rcbrt(u)", "cbrt(u)"},
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  // DEBUG STUFFS
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
@@ -184,10 +181,8 @@ nablaDefine okinaStdDefines[]={
   {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
   {"knAt(a)",""},
-  //#warning fatal returns
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)","_Pragma(\"omp barrier\")"},
-  //{"mpi_reduce(how,what)","mpi_reduce_min(tid,global_min_array,what)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},

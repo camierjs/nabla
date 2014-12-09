@@ -42,9 +42,8 @@ char* okinaSseNextCell(void){
 // ****************************************************************************
 static char* okinaSseGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){ 
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
-    return strdup("int cw,ia,ib;");
-  }
+  if (phase==enum_phase_declaration)
+    return strdup("register int __attribute__((unused)) cw,ia,ib;");
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
@@ -142,17 +141,15 @@ nablaDefine okinaSseDefines[]={
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
   {"reducemin(a)","0.0"},
   {"rabs(a)","(opTernary(((a)<0.0),(-a),(a)))"},
   {"set(a,b)", "_mm_set_pd(a,b)"},
   {"set1(cst)", "_mm_set1_pd(cst)"},
   {"rsqrt(u)", "_mm_sqrt_pd(u)"},
-  //{"shuffle(u,v,k)", "_mm256_shuffle_pd(u,v,k)"},
   {"store(u,_u)", "_mm_store_pd(u,_u)"},
   {"load(u)", "_mm_load_pd(u)"},
   {"zero", "_mm_setzero_pd"},
-  // DEBUG STUFFS
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
@@ -177,14 +174,13 @@ nablaDefine okinaSseDefines[]={
   {"opSub(u,v)", "(u-v)"},
   {"opDiv(u,v)", "(u/v)"},
   {"opMul(u,v)", "(u*v)"},
+  {"opMod(u,v)", "(u%v)"},
   {"opScaMul(u,v)","dot3(u,v)"},
   {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
   {"knAt(a)",""},
-  //#warning fatal returns
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)",""},
-  //{"mpi_reduce(how,what)","mpi_reduce_min(tid,global_min_array,what)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration"},

@@ -80,7 +80,10 @@ struct __attribute__ ((aligned(64))) real {
     //return _mm512_cbrt_pd(a);
   }
   
-  friend inline real norm(real u){ return u;}
+  friend inline real norm(real u){
+    return real(::fabs(a[0]),::fabs(a[1]),::fabs(a[2]),::fabs(a[3]),
+                ::fabs(a[4]),::fabs(a[5]),::fabs(a[6]),::fabs(a[7]));
+  }
 
   /* Compares: Mask is returned  */
   friend inline __mmask8 cmp_eq(const real &a, const real &b)  { return _mm512_cmpeq_pd_mask(a,b); }

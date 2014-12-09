@@ -19,8 +19,30 @@ inline integer opTernary(const __m128d cond,
   return _mm_set_epi32(((mask&8)==8)?ifStatement:elseStatement,
                        ((mask&4)==4)?ifStatement:elseStatement,
                        ((mask&2)==2)?ifStatement:elseStatement,
-                       ((mask&1)==1)?ifStatement:elseStatement
-                       );
+                       ((mask&1)==1)?ifStatement:elseStatement);
+}
+
+inline integer opTernary(const __m128d cond,
+                         const int ifStatement,
+                         const Integer &elseStatement){
+  const int mask = _mm_movemask_pd(cond);
+  return _mm_set_epi32(((mask&8)==8)?ifStatement:elseStatement[3],
+                       ((mask&4)==4)?ifStatement:elseStatement[2],
+                       ((mask&2)==2)?ifStatement:elseStatement[1],
+                       ((mask&1)==1)?ifStatement:elseStatement[0]);
+}
+
+
+inline integer opTernary(const Integer cond,
+                         const Integer ifStatement,
+                         const Integer &elseStatement){
+  //int *ip = (int*)&cond;
+  const int mask = _mm_movemask_epi8(cond);
+  //debug()<<"opTernary int, cond="<< "["<<*(ip+0)<<","<<*(ip+1)<<","<<*(ip+2)<<","<<*(ip+3) <<"], if="<<ifStatement<<", else="<<elseStatement<<", mask="<<mask;
+  return _mm_set_epi32(((mask&8)==8)?ifStatement[3]:elseStatement[3],
+                       ((mask&4)==4)?ifStatement[2]:elseStatement[2],
+                       ((mask&2)==2)?ifStatement[1]:elseStatement[1],
+                       ((mask&1)==1)?ifStatement[0]:elseStatement[0]);
 }
 
 inline real opTernary(const __m128d cond,

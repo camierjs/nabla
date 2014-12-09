@@ -2,6 +2,7 @@
 #define _KN_AVX2_GATHER_H_
 
 std::ostream& operator<<(std::ostream &os, const __m256d v);
+#define _MM_SCALE_8 8
 
 // *****************************************************************************
 // * Gather: (X is the data @ offset x)       a            b       c   d

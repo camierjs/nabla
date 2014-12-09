@@ -23,6 +23,17 @@ inline integer opTernary(const __m256d cond,
                        );
 }
 
+inline integer opTernary(const __m256d cond,
+                         const int ifStatement,
+                         const Integer &elseStatement){
+  const int mask = _mm256_movemask_pd(cond);
+  return _mm_set_epi32(((mask&8)==8)?ifStatement:elseStatement[3],
+                       ((mask&4)==4)?ifStatement:elseStatement[2],
+                       ((mask&2)==2)?ifStatement:elseStatement[1],
+                       ((mask&1)==1)?ifStatement:elseStatement[0]);
+}
+
+
 inline real opTernary(const __m256d cond,
                       const __m256d ifStatement,
                       const __m256d elseStatement){
