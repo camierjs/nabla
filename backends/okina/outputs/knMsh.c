@@ -33,9 +33,7 @@ static void nabla_ini_node_coords(void){
 
   dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% WARP_SIZE)==0...");
   assert((NABLA_NB_CELLS %% WARP_SIZE)==0);
-  
-//#undef __SSE2__
-  
+    
   for(int iNode=0; iNode<NABLA_NB_NODES_WARP; iNode+=1){
     const int n=WARP_SIZE*iNode;
     Real x,y,z;

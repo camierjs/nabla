@@ -35,6 +35,7 @@ static void okinaMeshConnectivity(nablaMain *nabla){
 
 // ****************************************************************************
 // * okinaMesh
+// * Adding padding for simd too 
 // ****************************************************************************
 void okinaMesh(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
@@ -54,8 +55,7 @@ const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
 const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\
 \n\
 const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\
-#warning 1+NABLA_NB_NODES\n\
-const int NABLA_NB_NODES_WARP   = (0+NABLA_NB_NODES/WARP_SIZE);\n\
+const int NABLA_NB_NODES_WARP   = (1+NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
   okinaMeshConnectivity(nabla);
