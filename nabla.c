@@ -1,3 +1,21 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
 #include "nabla.h"
 
 extern int yylineno;
@@ -45,9 +63,8 @@ static char *unique_temporary_file_name=NULL;
 \t\t[36m--mic[0m\t\tMIC 8=2^(WARP_BIT=3) vector depth\n\
 \t\t[36m--cilk[0m\t\tCilk+ parallel implementation\n\
 \t\t[36m--omp[0m\t\tOpenMP parallel implementation\n\
-\t\t[36m--seq[0m\t\tNo parallel implementation\n\
 [1;36mEMACS MODE[0m\n\
-\t(setq load-path (cons \"/cea/BS/home/s3/camierjs/.emacs.d\" load-path))\n\
+\t(setq load-path (cons \"~/.emacs.d\" load-path))\n\
 \t(autoload 'nabla-mode \"nabla-mode\" \"Nabla Mode\" t)\n\
 \t(setq auto-mode-alist (cons '(\"\\.n\\'\" . nabla-mode) auto-mode-alist))\n\
 \t(set-selection-coding-system 'utf-8)\n\
@@ -57,6 +74,7 @@ static char *unique_temporary_file_name=NULL;
 \tJean-Sylvain Camier (#5568) <jean-sylvain.camier@cea.fr>\n\
 [1;36mBUGS[0m\n\
 \tTest bugs are to be reported to the above address.\n"
+//\t\t[36m--seq[0m\t\tNo parallel implementation\n                \
 //\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n
 //\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n
 //\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n

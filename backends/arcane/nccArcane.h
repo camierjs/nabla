@@ -1,19 +1,23 @@
-/*****************************************************************************
- * CEA - DAM/DSSI/SNEC/LECM                                                  *
- *****************************************************************************
- * File     : nccArc.h      																  *
- * Author   : Camier Jean-Sylvain														  *
- * Created  : 18.01.2010																	  *
- * Updated  : 18.01.2010																	  *
- *****************************************************************************
- * Description: 																				  *
- *****************************************************************************
- * Date			Author	Description														  *
- * 18.01.2010	jscamier	Creation															  *
- *****************************************************************************/
-#ifndef _NCC_ARC_H_
-#define _NCC_ARC_H_
+// NABLA - a Numerical Analysis Based LAnguage
 
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+#ifndef _NABLA_ARCANE_H_
+#define _NABLA_ARCANE_H_
 
 char *nccArcBits(void);
 char* nccArcGather(nablaJob*,nablaVariable* var, enum_phase phase);
@@ -74,12 +78,9 @@ char *nccArcLibParticlesDelete(void);
 char* nccArcLibParticlesConstructor(nablaEntity*);
 
 
-
 NABLA_STATUS nccArcMain(nablaMain*);
 NABLA_STATUS nccArcConfigHeader(nablaMain*);
 NABLA_STATUS nccArcConfigFooter(nablaMain*);
-
-
 
 NABLA_STATUS nccAxlGenerateHeader(nablaMain*);
 

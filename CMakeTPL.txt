@@ -2,11 +2,10 @@
 # WHEEZY Third Party Libraries #
 ################################
 set(MPI_PATH /usr)
-set(ARCANE_ROOT /usr/local/arcane/testing)
+set(ARCANE_ROOT /usr/local/arcane)
 set(ARCANE_CXX /usr/local/bin/g++)
 set(ICET_DIR /usr/local/iceT/2.1.1-ompi)
 set(ICET_LIB "-L${ICET_DIR}/lib -lIceTCore -lIceTMPI -lIceTGL -Wl,-rpath,${ICET_DIR}/lib")
-
 
 
 ################################

@@ -1,5 +1,4 @@
-#/usr/local/opendev1/gcc/cmake/2.8.6/doc/cmake-2.8/cmake.txt 
-execute_process(COMMAND "tput" "reset")
+execute_process(COMMAND "tput" "clear")
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 #cmake_minimum_required(VERSION 3.0 FATAL_ERROR)

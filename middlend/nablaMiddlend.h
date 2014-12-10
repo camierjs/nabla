@@ -1,18 +1,23 @@
-/*****************************************************************************
- * CEA - DAM/DSSI/SNEC/LECM                                                  *
- *****************************************************************************
- * File     : nccMiddlend.h     															  *
- * Author   : Camier Jean-Sylvain														  *
- * Created  : 2012.12.13																	  *
- * Updated  : 2013.09.12																	  *
- *****************************************************************************
- * Description: 																				  *
- *****************************************************************************
- * Date			Author	Description														  *
- * 2012.12.13	camierjs	Creation															  *
- *****************************************************************************/
-#ifndef _NCC_MIDDLEND_H_
-#define _NCC_MIDDLEND_H_
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+#ifndef _NABLA_MIDDLEND_H_
+#define _NABLA_MIDDLEND_H_
 
 // Enumération des libraries possible depuis Arcane
 typedef enum {
@@ -28,14 +33,12 @@ typedef enum {
   mathematica,
 } library;
 
-
 // Enumération des possibilités des variables en in/out/inout
 typedef enum {
   enum_in_variable=0,
   enum_out_variable,
   enum_inout_variable
 } inout_mode;
-
 
 // Middlend VARIABLE 
 typedef struct nablaVariableStruct{
@@ -54,7 +57,6 @@ typedef struct nablaVariableStruct{
   struct nablaVariableStruct *next;
 }nablaVariable;
 
-
 // Backend OPTION 
 typedef struct nablaOptionStruct{
   bool axl_it;
@@ -64,7 +66,6 @@ typedef struct nablaOptionStruct{
   struct nablaMainStruct *main;
   struct nablaOptionStruct *next;
 }nablaOption;
-
 
 // Middlend JOB 
 typedef struct nablaJobStruct{
@@ -120,7 +121,6 @@ typedef struct nablaJobStruct{
   struct nablaEntityStruct *entity;
   struct nablaJobStruct *next;
 }nablaJob;
- 
 
 // Middlend ENTITY 
 typedef struct nablaEntityStruct{
@@ -132,7 +132,6 @@ typedef struct nablaEntityStruct{
   struct nablaMainStruct *main; 
   struct nablaEntityStruct *next;
 } nablaEntity;
-
 
 // Backend HOOKS
 typedef struct nablaBackendHooksStruct{
@@ -197,7 +196,6 @@ typedef struct nablaTypedefStruct{
   char *with;
 }nablaTypedef;
 
-
 // Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
 typedef struct nablaBackendSimdHooksStruct{
   char* (*bits)(void);
@@ -211,7 +209,6 @@ typedef struct nablaBackendSimdHooksStruct{
   char* (*includes)(void);
 } nablaBackendSimdHooks;
 
-
 struct nablaMainStruct;
 
 // Structure des hooks que l'on va utiliser afin de générer avec ou sans parallel color
@@ -222,13 +219,11 @@ typedef struct nablaBackendParallelHooksStruct{
   char* (*includes)(void);
 } nablaBackendParallelHooks;
 
-
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
 typedef struct nablaBackendPragmaHooksStruct{
   char* (*ivdep)(void);
   char* (*align)(void);
 } nablaBackendPragmaHooks;
-
 
 // Middlend TOP 
 typedef struct nablaMainStruct{
@@ -249,7 +244,6 @@ typedef struct nablaMainStruct{
   struct nablaBackendParallelHooksStruct *parallel;
   struct nablaBackendPragmaHooksStruct *pragma;
 } nablaMain;
-
 
 NABLA_STATUS nablaInclude(nablaMain*,char*);
 NABLA_STATUS nablaDefines(nablaMain*,nablaDefine*);
@@ -329,10 +323,8 @@ void nablaJobFill(nablaMain*, nablaJob*, astNode *, const char *);
 void scanForIfAfterAt(astNode *, nablaJob *, nablaMain *);
 void dumpIfAfterAt(astNode *, nablaMain *);
 
-
 // LIBRARIES
 void nablaLibraries(astNode *, nablaEntity *);
-
 
 // Time tree dump
 NABLA_STATUS timeTreeSave(nablaMain*, nablaJob*, int);
