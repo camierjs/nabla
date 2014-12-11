@@ -30,7 +30,7 @@
 
 #include "Epetra_config.h"
 #include "Epetra_Vector.h"
-#include "Epetra_MpiComm.h"
+//#include "Epetra_MpiComm.h"
 #include "Epetra_Map.h"
 #include "Epetra_CrsMatrix.h"
 #include "Epetra_LinearProblem.h"

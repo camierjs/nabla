@@ -30,7 +30,8 @@ BUILD_PATH = /tmp/$(USER)/nabla
 # COMMANDS #
 ############
 BUILD_MKDIR = mkdir --parent $(BUILD_PATH) && sync && sync
-BUILD_CMAKE = cd $(BUILD_PATH) && $(CMAKE) $(NABLA_PATH)
+CMAKE_FLAGS = --warn-uninitialized
+BUILD_CMAKE = cd $(BUILD_PATH) && $(CMAKE) $(CMAKE_FLAGS) $(NABLA_PATH)
 NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 
 ##################
@@ -68,7 +69,7 @@ tstro:
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tstrv:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 

@@ -40,21 +40,19 @@ add_flex_bison_dependency(nScanner nParser)
 # CUDA #
 ######## 
 find_package(CUDA)
-info("\t${VT100_FG_MAGENTA}CUDA${VT100_RESET} version is ${VT100_BOLD}${CUDA_VERSION_STRING}${VT100_RESET}")
-#info("${VT100_FG_MAGENTA}CUDA${VT100_RESET} root dir is ${CUDA_TOOLKIT_ROOT_DIR}${VT100_RESET}")
-#info("${VT100_FG_MAGENTA}CUDA${VT100_RESET} toolkit dir is ${CUDA_TOOLKIT_ROOT_DIR}${VT100_RESET}")
-#info("${VT100_FG_MAGENTA}CUDA${VT100_RESET} includes are in ${CUDA_INCLUDE_DIRS}${VT100_RESET}")
-#info("${VT100_FG_MAGENTA}CUDA${VT100_RESET} libs are ${CUDA_LIBRARIES}${VT100_RESET}")
+if (CUDA_FOUND)
+  info("\t${VT100_FG_MAGENTA}CUDA${VT100_RESET} version is ${VT100_BOLD}${CUDA_VERSION_STRING}${VT100_RESET}")
+endif()
 
 
 ##########
 # ARCANE #
 ##########
-include(CMake/FindARCANE.cmake)
 find_package(MPI)
-find_package(ARCANE)
-info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} libs are in ${VT100_BOLD}${ARCANE_LIBRARY_DIR}${VT100_RESET}")
-info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} includes are in ${VT100_BOLD}${ARCANE_INCLUDE_DIR}${VT100_RESET}")
+include(CMake/FindARCANE.cmake)
+if(ARCANE_FOUND)
+  info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
+endif()
 
 
 #######################
@@ -77,7 +75,14 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
 target_link_libraries(nabla Nabla ${FLEX_LIBRARIES} NablaMiddlend NablaArcane NablaCuda NablaOkina NablaMiddlend NablaFrontend)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nabla DESTINATION bin)
+
+
+###########
+# INSTALL #
+###########
+set(CMAKE_BUILD_TYPE "Release")
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nabla DESTINATION bin CONFIGURATIONS Release)
+
 
 #########
 # TESTS #

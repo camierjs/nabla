@@ -656,7 +656,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
     if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP){
-      char mnx[3]="MXX";
+      char mnx[4]={'M','x','x','\0'};
       const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
       astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));
       compound_statement=compound_statement->parent;
@@ -672,12 +672,13 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
       assert(min!=NULL || max !=NULL);
       if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
       if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}
-      //printf("mnx=%s\n",mnx); fflush(stdout);
+      printf("mnx=%s\n",mnx); fflush(stdout);
       nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\
-\n\tfor (int i=0; i<threads; i+=1){\
-\n\t\t%s=(Reduce%sToDouble(%s_per_thread[i])<Reduce%sToDouble(%s))?Reduce%sToDouble(%s_per_thread[i]):Reduce%sToDouble(%s); \
+\n\tfor (int i=0; i<threads; i+=1){\n\
+//var=%s, mnx=%s\n\
+\t\t%s=(Reduce%sToDouble(%s_per_thread[i])<Reduce%sToDouble(%s))?Reduce%sToDouble(%s_per_thread[i]):Reduce%sToDouble(%s); \
 \n\t\t//info()<<\"%s=\"<<%s;\
-  \n\t}\n\treturn ",var,mnx,var,mnx,var,mnx,var,mnx,var,var,var);
+  \n\t}\n\treturn ",var,mnx,var,mnx,var,mnx,var,mnx,var,mnx,var,var,var);
       job->parse.returnFromArgument=false;
     }else{
       nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");

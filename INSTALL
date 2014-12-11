@@ -13,6 +13,9 @@ The standard steps for installation are:
     6. You can rerun make cln/cfg/all as you wish
     7. Run 'make bin' to try to push the nabla binary to /usr/loca/bin
 
+    8. To try it by yourself, go for example to: /tmp/nabla/nabla/tests/lulesh/okina/1/run/avx2/omp,
+       and launch: PARALLEL=omp SIMD=avx2 make -kBf Makefile.okina run1
+
 For troubleshooting of some common installation problems, mail me at:
 
 Jean-Sylvain.Camier@cea.fr
