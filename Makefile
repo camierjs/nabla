@@ -73,7 +73,7 @@ tstrv:
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 tstcu:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R cuda)
 
 ############
 # CLEANING #

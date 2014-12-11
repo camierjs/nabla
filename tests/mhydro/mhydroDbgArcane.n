@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
-cells void dbgCellsXCenter(void)  @ -5.9{
+/*cells void dbgCellsXCenter(void)  @ -5.9{
   debug()<<"xCenter="<<xCenter;
 }
 
@@ -75,3 +75,4 @@ cells void dbgEOSsound(void) @ 8.2{
 cells void dbgApplyEOS(void) @ 8.1{
   debug()<<"pressure #"<<uid<<"="<<pressure;
 }
+*/

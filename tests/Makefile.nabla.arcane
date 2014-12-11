@@ -91,6 +91,9 @@ run1:$(TGT)
 runc1:$(TGT)
 	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 ./$(TGT) -arcane_opt continue $(ARC_FILE)
 
+run3:$(TGT)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 3 ./$(TGT) $(ARC_FILE)
+
 run4:$(TGT)
 	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 4 ./$(TGT) $(ARC_FILE)
 runc4:$(TGT)

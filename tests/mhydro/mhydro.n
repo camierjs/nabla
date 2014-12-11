@@ -29,15 +29,15 @@ options{
   Real ZD_INI_ADIABATIC_CST = 1.4;
 
   Real option_cfl           = 0.3;
-  Real option_δt_ini        = 1e-4;
+  Real option_δt_initial    = 1e-4;
   Real option_δt_min        = 1e-4;
   Real option_δt_max        = 1e-4;
   Real option_time_end      = 0.01;
 
   Integer option_yz_ticks   = 0.02;
   Integer option_size_y     = 32;
-  Integer option_size_z     = 32; 
-
+  Integer option_size_z     = 32;
+  Integer option_max_iterations = 8;
 };
 
 // ****************************************************************************
@@ -72,7 +72,7 @@ cells{
 // ****************************************************************************
 
 void ini(void) @ -6.0{
-  δt = option_δt_ini;
+  δt = option_δt_initial;
 }
 
 // ****************************************************************************

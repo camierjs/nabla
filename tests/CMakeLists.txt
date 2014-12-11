@@ -45,9 +45,10 @@ endfunction()
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
   info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_CYAN}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
   set(backend arcane)
-  get_additional_nabla_files_and_set_Makefile(${name} ${backend} .)
-  add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}
-	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/Makefile.arcane ${cmd}${nb_proc}")
+  set(subpath ${nb_proc})
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
+  add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
+	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile.arcane ${cmd}${nb_proc}")
 endfunction()
 
 #########################
@@ -118,20 +119,22 @@ endforeach(tst)
 # NABLA TESTS FOR ARCANE #
 ##########################
 if (ARCANE_FOUND)
-  nabla_add_arcane_test(comd 1 run)
   nabla_add_arcane_test(gad 1 run)
+  nabla_add_arcane_test(comd 1 run)
+  nabla_add_arcane_test(mhydro 1 run)
+  nabla_add_arcane_test(mhydro 3 run)
+  nabla_add_arcane_test(mhydro 4 run)
   #mesh nabla_add_arcane_test(glace 1 run)
   #mesh nabla_add_arcane_test(lulesh 1 run)
-  nabla_add_arcane_test(mhydro 1 run)
-  #nabla_add_arcane_test(mhydro 4 run)
   #nabla_add_arcane_test_with_additional_defines(pDDFV 1 run ALEPH_INDEX)
   #nabla_add_arcane_test_with_additional_defines(pDDFV 4 run ALEPH_INDEX)
   #nabla_add_arcane_test_with_additional_defines(schrodinger 1 run ALEPH_INDEX)
   #nabla_add_arcane_test_with_additional_defines(schrodinger 4 run ALEPH_INDEX)
   nabla_add_arcane_test(sethi 1 run)
-  #nabla_add_arcane_test(sethi 4 run)
+  nabla_add_arcane_test(sethi 4 run)
   nabla_add_arcane_test(shydro 1 run)
-  #nabla_add_arcane_test(shydro 4 run)
+  nabla_add_arcane_test(shydro 3 run)
+  nabla_add_arcane_test(shydro 4 run)
 endif()
 
 
@@ -147,6 +150,7 @@ endforeach()
 foreach(parallel omp) #cilk
   foreach(simd std sse avx avx2) #mic
     nabla_add_okina_test(lulesh 1 run ${simd} ${parallel})
+    nabla_add_okina_test(lulesh 4 run ${simd} ${parallel})
   endforeach()
 endforeach()
 
@@ -155,8 +159,10 @@ endforeach()
 # NABLA TESTS FOR CUDA #
 ########################
 nabla_add_cuda_test(lulesh 1 gen)
+nabla_add_cuda_test(mhydro 1 gen)
 if(CUDA_FOUND)
 ##  nabla_add_arcane_test(mhydro 1 hyoda)
 ##  nabla_add_arcane_test(mhydro 4 hyoda)
+  nabla_add_cuda_test(mhydro 1 run)
   nabla_add_cuda_test(lulesh 1 run)
 endif()
