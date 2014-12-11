@@ -1,0 +1,14 @@
+To compile NABLA you will simply need:
+   - a C & C++ compiler
+   - bison, the parser generator
+   - flex, the lexical analyser generator
+   - cmake, the Cross-Platform Makefile Generator
+
+The standard steps for installation are:
+    1. Make sure you have a C/C++ compiler
+    2. Make sure your LD_LIBRARY_PATH match the compiler's path
+    3. Make sure you have cmake (at least 2.8) on your system
+
+For troubleshooting of some common installation problems, mail me at:
+
+Jean-Sylvain.Camier@cea.fr

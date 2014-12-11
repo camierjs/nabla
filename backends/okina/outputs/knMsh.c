@@ -193,7 +193,8 @@ static void nabla_ini_node_coords(void){
 __attribute__((unused)) static void verifCoords(void){
   dbg(DBG_INI,"\nVérification des coordonnés des noeuds");
   FOR_EACH_NODE_WARP(n){
-    //dbg(DBG_INI,"\nFocusing on nodes-vector %%d",n);
+    // dbg(DBG_INI,"\nFocusing on nodes-vector %%d",n);
+    // _OKINA_SOA_ is defined or not depending on nabla's colors
 #ifdef _OKINA_SOA_
     dbgReal(DBG_INI,node_coordx[n]);
     dbgReal(DBG_INI,node_coordy[n]);

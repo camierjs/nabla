@@ -2,14 +2,18 @@
 # Now testing #
 ###############
 enable_testing()
-include(${NABLA_SOURCE_DIR}/CMakeTPL.txt)
+info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} gathering ${VT100_FG_YELLOW}TESTS${VT100_RESET}")
+include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
 
 ##########
 # Meshes #
 ##########
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/nabla.unf)
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/thex_mesh.unf ${CMAKE_CURRENT_BINARY_DIR}/thex_mesh.unf)
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/sod_triangles.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+  ${CMAKE_CURRENT_SOURCE_DIR}/mesh/nabla.unf ${CMAKE_CURRENT_BINARY_DIR}/mesh/nabla.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  ${CMAKE_CURRENT_SOURCE_DIR}/mesh/thex_mesh.unf ${CMAKE_CURRENT_BINARY_DIR}/mesh/thex_mesh.unf)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+  ${CMAKE_CURRENT_SOURCE_DIR}/mesh/sod_triangles.unf ${CMAKE_CURRENT_BINARY_DIR}/mesh/sod_triangles.unf)
 
 
 #######################################
@@ -18,20 +22,20 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SO
 
 ###############################################
 # get_additional_nabla_files_and_set_Makefile #
-function(get_additional_nabla_files_and_set_Makefile name)
+function(get_additional_nabla_files_and_set_Makefile name backend path)
   #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
-  execute_process(COMMAND find . -name *.n -printf "%f "
-    COMMAND sed -e "s/\\(${name}.n\\)//g"
+  execute_process(COMMAND find . -name "*.n" -printf "%f "
+    COMMAND sed -e "s/\\(${name}\\.n\\)//g"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
     OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   #info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${path}/Makefile.${backend})
   separate_arguments(ADDITIONAL_NABLA_FILES)
   foreach(file ${name}.n ${ADDITIONAL_NABLA_FILES})
     #info("${VT100_FG_GREEN}file=${file}${VT100_RESET}") 
     execute_process(COMMAND /bin/ln -fs ${CMAKE_CURRENT_SOURCE_DIR}/${name}/${file} . 
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${path}
       OUTPUT_STRIP_TRAILING_WHITESPACE)
   endforeach()
 endfunction()
@@ -41,9 +45,9 @@ endfunction()
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
   info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_CYAN}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
   set(backend arcane)
-  get_additional_nabla_files_and_set_Makefile(${name})
-  add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.arcane ${cmd}${nb_proc}")
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} .)
+  add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}
+	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/Makefile.arcane ${cmd}${nb_proc}")
 endfunction()
 
 #########################
@@ -61,9 +65,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT
 function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
   info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}okina${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${simd}_${parallel}${VT100_RESET}")
   set(backend okina)
-  get_additional_nabla_files_and_set_Makefile(${name})
-  add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.okina ${cmd}${nb_proc}")
+  set(subpath ${nb_proc}/${cmd}/${simd}/${parallel})
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
+  add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
+	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile.okina ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)
@@ -73,11 +78,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_
 # NABLA TEST MACRO FOR CUDA BACKEND #
 #####################################
 function(NABLA_ADD_CUDA_TEST name nb_proc cmd)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_WHITE}${VT100_RESET}")
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_WHITE}_${VT100_FG_YELLOW}${cmd}${VT100_RESET}")
   set(backend cuda)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.${backend})
-  add_test(NAME nabla_cuda_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}
-	 COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/Makefile.cuda ${cmd}${nb_proc})
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} .)
+  add_test(NAME nabla_cuda_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}
+	 COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/Makefile.cuda ${cmd}${nb_proc})
 endfunction(NABLA_ADD_CUDA_TEST)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.cuda)
 
@@ -86,7 +91,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_B
 ########################################
 # Now scan tests directory to add some # 
 ########################################
-execute_process(COMMAND /bin/ls -1XF 
+execute_process(COMMAND /bin/ls -1XF
+                COMMAND grep -v mesh
                 COMMAND sed -e "/.*\\//!d;s/\\///g"
                 COMMAND tr \\n " "
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -111,8 +117,7 @@ endforeach(tst)
 ##########################
 # NABLA TESTS FOR ARCANE #
 ##########################
-#set(ARCANE_RUN_TEST 1)
-if (ARCANE_RUN_TEST)
+if (ARCANE_FOUND)
   nabla_add_arcane_test(cartesian 1 run)
   nabla_add_arcane_test(comd 1 run)
   nabla_add_arcane_test(ddfv_aleph_index 1 run)
@@ -163,36 +168,28 @@ if (ARCANE_RUN_TEST)
 endif()
 
 
+#########################
+# NABLA TESTS FOR OKINA #
+#########################
 foreach(parallel omp cilk)
   foreach(simd std sse avx avx2 mic)
-    #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_gen_${parallel}_${simd}${VT100_RESET}")
-    nabla_add_okina_test(lulesh_mic 1 gen ${simd} ${parallel})
+    nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
 
-set(OKINA_RUN_TEST 1)
-if (OKINA_RUN_TEST)
-  foreach(parallel omp) #cilk
-    foreach(simd mic)#std sse avx avx2) #mic
-      #info("Adding ctest ${VT100_FG_WHITE}lulesh_mic_run_${parallel}_${simd}${VT100_RESET}")
-      nabla_add_okina_test(lulesh_mic 1 run ${simd} ${parallel})
-    endforeach()
+foreach(parallel omp) #cilk
+  foreach(simd std sse avx avx2) #mic
+    nabla_add_okina_test(lulesh 1 run ${simd} ${parallel})
   endforeach()
+endforeach()
+
+
+########################
+# NABLA TESTS FOR CUDA #
+########################
+nabla_add_cuda_test(lulesh 1 gen)
+if(CUDA_FOUND)
+##  nabla_add_arcane_test(mhydro 1 hyoda)
+##  nabla_add_arcane_test(mhydro 4 hyoda)
+#  nabla_add_cuda_test(lulesh 1 run)
 endif()
-
-
-#nabla_add_okina_test(lulesh_mic 1 run std omp)
-#nabla_add_okina_test(lulesh_mic 1 run sse omp)
-#nabla_add_okina_test(lulesh_mic 1 run avx omp)
-##nabla_add_okina_test(lulesh_mic 1 run avx2 omp)
-##nabla_add_okina_test(lulesh_mic 1 run sse cilk)
-##nabla_add_okina_test(lulesh_mic 1 run avx cilk)
-
-
-nabla_add_cuda_test(mhydro 1 gen)
-
-if(CUDA_INCLUDE_DIRS)
-  nabla_add_arcane_test(mhydro 1 hyoda)
-  nabla_add_arcane_test(mhydro 4 hyoda)
-  nabla_add_cuda_test(mhydro 1 run)
-endif(CUDA_INCLUDE_DIRS)

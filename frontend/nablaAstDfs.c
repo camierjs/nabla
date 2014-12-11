@@ -224,27 +224,29 @@ astNode *dfsFetchRule(astNode *n, int ruleid){
 // ****************************************************************************
 //#warning Seules les fonctions @ées peuvent lancer des jobs!
 int dfsScanJobsCalls(void *vars, void *main, astNode * n){
-  //int numParams=1;
   nablaMain *nabla=(nablaMain*)main;
   nablaVariable **variables=(nablaVariable**)vars;
-  register int nb_called=0;
-  //register astNode *rtn;
+  int nb_called=0;
   if (n==NULL){
     //dbg("\n\t\t[dfsScanJobsCalls] return first NULL");
     return 0;
   }
-  //if (n->tokenid!=0) dbg("\n\t\t[dfsScanJobsCalls] token is '%s'",n->token);
+  if (n->tokenid!=0) dbg("\n\t\t[dfsScanJobsCalls] token is '%s'",n->token);
   if (n->tokenid==CALL){
     nablaJob *foundJob;
     char *callName=n->next->children->children->token;
-    dbg("\n\t\t[dfsScanJobsCalls] hit what we are looking for: token '%s', name is %s",n->token, callName);
+    dbg("\n\t\t[dfsScanJobsCalls] hit what we are looking for: token '%s', calling '%s'",
+        n->token, callName);
     if ((foundJob=nablaJobFind(nabla->entity->jobs,callName))!=NULL){
       if (foundJob->is_a_function!=true){
         dbg("\n\t\t[dfsScanJobsCalls] which is a job!");
         nb_called+=1;
         // On va maintenant rajouter à notre liste de variables celles du job trouvé
-        if (foundJob->nblParamsNode!=NULL)
+        if (foundJob->nblParamsNode!=NULL){
+          dbg("\n\t\t[dfsScanJobsCalls] Looking its Nabla Variables List:");
           cudaAddNablaVariableList(nabla,foundJob->nblParamsNode,variables);
+          dbg("\n\t\t[dfsScanJobsCalls] done!");
+        }
       }else{
         dbg("\n\t\t[dfsScanJobsCalls] which is a function!");
       }

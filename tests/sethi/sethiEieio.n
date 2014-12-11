@@ -1,0 +1,129 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+void eieio_init(void) @ -9.0 {
+  eieio();
+  //dump_info_ρuvE();
+}
+
+
+void eieio_init_dt(void) @ -4.1 {eieio();}
+
+
+//void infoXY(void)@ 0.01{
+//  if (isX()) info()<<"[36m[XYZ] is MD_DirX[m";
+//  else info()<<"[36m[XYZ] is MD_DirY[m";
+//}
+
+
+void eieio_gather(void) @ 0.6 {
+  eieio();
+  //dump_info_ρuvE();
+}
+
+
+void eieio_eos(void) @ 3.1 {
+  eieio();
+  //dump_info_prim_ρuvEpc();
+}
+
+void eieio_slope(void) @ 4.1 {
+  eieio();
+  //dump_slopes();
+}
+
+void eieio_flux(void) @ 5.01 {
+  eieio();
+  //dump_flux();
+}
+
+
+void eieio_qleftright(void) @ 5.6 {
+  eieio();
+  //dump_qleftright();
+}
+
+void eieio_riemann(void) @ 6.01 {
+  eieio();
+  //dump_riemann();
+}
+void eieio_cmpflx(void) @ 7.01 {
+  eieio();
+  //dump_cmpflx();
+}
+
+/*
+cells void updateXYZ(xyz direction) {
+  Real dtSdx=δt/dx;
+  if (!this->isOwn()) continue;
+  if (prevCell.null()){ // Frontière prev
+    //info()<<"[update] no-prev cell #"<<lid;
+    //printf("*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, dtSdx=%12.12f", v,old_v,flux_v,dtSdx);
+    #warning Should find v=0.315214452951 depuis un qleft à 0.011443611907
+    old_ρ = ρ + (flux_ρ - flux_ρ[nextCell]) * dtSdx;
+    if (isX()){
+      old_u = u + (flux_u - flux_u[nextCell]) * dtSdx;
+      old_v = v + (flux_v - flux_v[nextCell]) * dtSdx;
+    }else{
+      old_v = u + (flux_u - flux_u[nextCell]) * dtSdx;
+      old_u = v + (flux_v - flux_v[nextCell]) * dtSdx;
+    }
+    old_E = E + (flux_E - flux_E[nextCell]) * dtSdx;
+    //printf(", vnew_=%12.12f, flux_v[nextCell]=%12.12f\n", old_v, flux_v[nextCell]);
+    continue;
+  }
+  #warning updateXYZ for nextCell
+// On a besoin de mailles fictives pour les conditions en 'next'
+  if (nextCell.null()){ // Frontière next
+    //if (isX())
+    //info()<<"[update] X no-next cell #"<<lid;
+    //else
+    // info()<<"[update] Y no-next cell #"<<lid;
+    //info()<<"[update] dtSdx="<<dtSdx;
+    //printf("*I-sethi      [update] u=%12.12f, old_u=%12.12f, flux_u=%12.12f, flux_u[prevCell]=%12.12f", u, old_u, flux_u, flux_u[prevCell]);
+    //printf("\n*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, flux_v[prevCell]=%12.12f", v, old_v,flux_v, flux_v[prevCell]);
+    old_ρ = ρ + (flux_ρ) * dtSdx;
+    if (isX()){
+      old_u = u + (flux_u - 0.000004) * dtSdx;//0.000004 
+      old_v = v + (flux_v) * dtSdx;
+    }else{
+      old_v = u + (flux_u - 0.000004) * dtSdx;//0.000004
+      old_u = v + (flux_v) * dtSdx;
+    }
+    old_E = E + (flux_E) * dtSdx;
+    //printf(", unew=%12.12f", old_u);
+    //printf(", vnew=%12.12f\n", old_v);
+    continue;
+  }
+  //info()<<"[update] std cell #"<<lid;
+  //printf("*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, dtSdx=%12.12f", v,old_v,flux_v,dtSdx);
+  old_ρ = ρ + (flux_ρ-flux_ρ[nextCell]) * dtSdx;
+  if (isX()){
+    old_u = u + (flux_u-flux_u[nextCell]) * dtSdx;
+    old_v = v + (flux_v-flux_v[nextCell]) * dtSdx;
+  }else{
+    old_v = u + (flux_u-flux_u[nextCell]) * dtSdx;
+    old_u = v + (flux_v-flux_v[nextCell]) * dtSdx;
+  }
+  old_E = E + (flux_E-flux_E[nextCell]) * dtSdx;
+  //printf(", vnew_=%12.12f, flux_v[nextCell]=%12.12f\n", old_v, flux_v[nextCell]);
+}
+*/
+void eieio_update(void) @ 8.01 {
+  eieio();
+}

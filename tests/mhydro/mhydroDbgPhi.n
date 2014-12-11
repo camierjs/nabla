@@ -1,0 +1,75 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+
+/*cells void dbgCellsXCenter(void)  @ -5.9{
+  dbg(DBG_INI,"\n\t[iniCells] xCenter=");dbgReal(DBG_INI,xCenter);
+}
+
+cells void dbgCellsDensity(void)  @ -4.9{
+  dbg(DBG_INI,"\n\t[iniCells] density=");dbgReal(DBG_INI,ρ);
+}
+
+cells void dbgCellsPressure(void)  @ -4.8{
+  dbg(DBG_INI,"\n\t[iniCells] pressure=");dbgReal(DBG_INI,pressure);
+}
+
+cells void dbgCellsAdiabaticCst(void)  @ -4.7{
+  dbg(DBG_INI,"\n\t[iniCells] adiabatic_cst=");dbgReal(DBG_INI,adiabatic_cst);
+}
+
+nodes void dbgNodeMass(void)  @ -0.8{
+  dbg(DBG_INI,"\n\t");dbgReal(DBG_INI,nMass);
+}
+
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+
+nodes void dbgForce(void) @ 0.2{
+  dbg(DBG_INI,"\ndbgForce force\t:");dbgReal3(DBG_INI,force);
+}
+
+nodes void dbgComputeVelocity(void)@1.1{
+  dbg(DBG_INI,"\nvelocity:\t");dbgReal3(DBG_INI,velocity);
+}
+
+nodes void dbgBoundaryCondition(void)@2.1{
+  dbg(DBG_INI,"\npost BC velocity:\t");dbgReal3(DBG_INI,velocity);
+}
+
+nodes void dbgMoveNodes(void)  @ 3.1{
+  dbg(DBG_INI,"\ndbgMoveNodes:\t");dbgReal3(DBG_INI,coord);
+}
+
+cells void dbgGeometricVolume(void) @ 5.1{
+  dbg(DBG_INI,"\ndbgGeometricVolume v\t:");dbgReal(DBG_INI,v);
+}
+cells void dbgDensity(void) @ 6.1{
+  dbg(DBG_INI,"\ndbgDensity rho\t:");dbgReal(DBG_INI,ρ);
+}
+
+cells void dbgEOSpressure(void) @ 8.1{
+  dbg(DBG_INI,"\ndbgEOSpressure pressure\t:");dbgReal(DBG_INI,pressure);
+}
+cells void dbgEOSsound(void) @ 8.2{
+  dbg(DBG_INI,"\ndbgEOSsound sound\t:");dbgReal(DBG_INI,σSound);
+}
+*/

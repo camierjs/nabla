@@ -1,31 +1,43 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+
 // ****************************************************************************
 // * OPTIONS
 // ****************************************************************************
 options{
+  Real ZG_INI_DENSITY       = 1.0;
+  Real ZG_INI_PRESSURE      = 1.0;
+  Real ZG_INI_ADIABATIC_CST = 1.4;
+  Real ZD_INI_DENSITY       = 0.125;
+  Real ZD_INI_PRESSURE      = 0.1;
+  Real ZD_INI_ADIABATIC_CST = 1.4;
 
-  Real ZG_INI_DENSITY=1.0;
-  Real ZG_INI_PRESSURE=1.0;
-  Real ZG_INI_ADIABATIC_CST=1.4;
-  Real ZD_INI_DENSITY=0.125;
-  Real ZD_INI_PRESSURE=0.1;
-  Real ZD_INI_ADIABATIC_CST=1.4;
-  Real XMIN_INI_VALUE=0.0;
-  Real YMIN_INI_VALUE=0.0;
-  Real ZMIN_INI_VALUE=0.0;
- 
-  Real OPTION_CFL=0.3;
-  Real option_δt_initial= 1.0e-7;
-  Real OPTION_DELTAT_INI=1e-4;
-  Real OPTION_DELTAT_MIN=1e-4;
-  Real OPTION_DELTAT_MAX=1e-4;
-  Real OPTION_TIME_INI=1e-3;
-  Real OPTION_TIME_END=0.01;
+  Real option_cfl           = 0.3;
+  Real option_δt_ini        = 1e-4;
+  Real option_δt_min        = 1e-4;
+  Real option_δt_max        = 1e-4;
+  Real option_time_end      = 0.01;
 
-  Integer yzTick = 0.02;
-  Integer sizeX = 1024; // X,Y,Z extent of this block
-  Integer sizeY = 32;
-  Integer sizeZ = 32;
-  Integer option_max_iterations  = 4;
+  Integer option_yz_ticks   = 0.02;
+  Integer option_size_y     = 32;
+  Integer option_size_z     = 32; 
+
 };
 
 // ****************************************************************************
@@ -52,43 +64,45 @@ cells{
   Real3 cqs[nodes];
   Real adiabatic_cst;
   Real internal_Ξ;
+  Real xCenter;
 };
 
-
-// ****************************************************************************
+// ****************************************************************************
 // * Partie d'initialisation ]-∞,-0] 
 // ****************************************************************************
 
-// ****************************************************************************
-// * Code d'initialisation propre à la simulation
-// ****************************************************************************
-void ini(void) @ -6{
-  δt = OPTION_DELTAT_INI;
+void ini(void) @ -6.0{
+  δt = option_δt_ini;
 }
 
 // ****************************************************************************
 // * Conditions initiales pour les mailles
 // ****************************************************************************
-cells void iniCells(void)
-  out(cell ρ, cell pressure, cell adiabatic_cst) @ -5{  
-  // On regarde si le noeud '0' de la maille est à la frontière ZG/ZD
-  if (coord[0].x < 0.5){
-    ρ=ZG_INI_DENSITY;
-    pressure=ZG_INI_PRESSURE;
-    adiabatic_cst=ZG_INI_ADIABATIC_CST;
-  }else{
-    ρ=ZD_INI_DENSITY;
-    pressure=ZD_INI_PRESSURE;
-    adiabatic_cst=ZD_INI_ADIABATIC_CST;
-  }
+cells void iniCellsCenter(void) in (node coord) out (cell xCenter) @ -6.0{
+  xCenter=0.0;
+  foreach node xCenter+=coord.x;
+  xCenter*=⅛;
 }
 
-// ****************************************************************************
+cells void iniRhoPressureAdiabaticCst(void) in (cell xCenter)
+  out(cell ρ,
+      cell pressure,
+      cell adiabatic_cst) @ -5.0{
+  const Real middle = ½;
+  ρ = (xCenter<middle)?ZG_INI_DENSITY:ZD_INI_DENSITY;
+  pressure = (xCenter<middle)?ZG_INI_PRESSURE:ZD_INI_PRESSURE;
+  adiabatic_cst = (xCenter<middle)?ZG_INI_ADIABATIC_CST:ZD_INI_ADIABATIC_CST;
+}
+
+
+// ****************************************************************************
 // * Conditions initiales pour les noeuds
 // ****************************************************************************
-nodes void iniNodes(void) out (node nMass, node force, node velocity) @ -5{
+nodes void iniNodes(void) out (node nMass,
+                               node force,
+                               node velocity) @ -6.0{
   nMass=0.0;
-  force=velocity=0.0;//velocity.x = velocity.y = velocity.z = 0.0;
+  force=velocity=0.0;
 }
 
 // ****************************************************************************
@@ -97,32 +111,28 @@ nodes void iniNodes(void) out (node nMass, node force, node velocity) @ -5{
 // ****************************************************************************
 cells void initEOS(void)
   in (cell pressure, cell adiabatic_cst, cell ρ)
-  out (cell internal_Ξ, cell σSound) @ -3{
+  out (cell internal_Ξ, cell σSound) @ -3.0{
   internal_Ξ = pressure / ((adiabatic_cst - 1.0) * ρ);
-  σSound = sqrt(adiabatic_cst * pressure / ρ);
+  σSound = √(adiabatic_cst * pressure / ρ);
 }
 
 // ****************************************************************************
 // * Calcul de la masse d'une maille
 // ****************************************************************************
-cells void iniCellMass(void) in (cell ρ, cell v) out (cell m) @ -2{
-  m = ρ * v;
+cells void iniCellMass(void) in (cell ρ, cell v) out (cell m) @ -2.0{
+  m = ρ*v;
 }
 
 // ****************************************************************************
 // * Calcul de la masse d'un noeud
 // ****************************************************************************
-//nodes void iniNodeMass_n(void) in (cell m) out (node nMass) @ -1{
-//  foreach cell
-//    nMass += 0.125 * m;
-//}
-cells void iniNodeMass_c(void) in (cell m) out (node nMass) @ -1{
-  foreach node nMass += 0.125 * m;
+cells void iniNodeMass_c(void) in (cell m) out (node nMass) @ -1.0{
+  foreach node nMass += ⅛ * m;
 }
 
 
-// ****************************************************************************
-// * Partie de calcul ]+0,+oo[ 
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
 
 
@@ -144,38 +154,40 @@ cells void computePressureForce(void)
 // * Calcule l'impulsion aux noeuds
 // ****************************************************************************
 nodes void computeVelocity(void)
-  in (node nMass, node force) inout (node velocity) @ 1{
+  in (node nMass, node force) inout (node velocity) @ 1.0{
   velocity+=(δt/nMass)*force;
 }
 
-// ****************************************************************************
+
+// ****************************************************************************
 // * Applique les conditions aux bords
 // ****************************************************************************
-outer nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
-  Real maxBoundaryX = 1.0;
-  Real maxBoundaryY = yzTick*(sizeY-1);
-  Real maxBoundaryZ = yzTick*(sizeZ-1);
+outer nodes void applyBoundaryCondition(void) in (node coord)
+  out (node velocity) @ 2.0{
+  const Real maxBoundaryX = 1.0;
+  const Real maxBoundaryY = option_yz_ticks*(option_size_y-1);
+  const Real maxBoundaryZ = option_yz_ticks*(option_size_z-1);
   // MIN boundaries
-  if (coord.x==0.0) {velocity.x=0.0;}
-  if (coord.y==0.0) {velocity.y=0.0;}
-  if (coord.z==0.0) {velocity.z=0.0;}
+  velocity.x=(coord.x==0.0)?0.0:velocity.x;
+  velocity.y=(coord.y==0.0)?0.0:velocity.y;
+  velocity.z=(coord.z==0.0)?0.0:velocity.z;
   // MAX boundaries
-  if (coord.x==maxBoundaryX) {velocity.x=0.0;}
-  if (coord.y==maxBoundaryY) {velocity.y=0.0;}
-  if (coord.z==maxBoundaryZ) {velocity.z=0.0;}
+  velocity.x=(coord.x==maxBoundaryX)?0.0:velocity.x;
+  velocity.y=(coord.y==maxBoundaryY)?0.0:velocity.y;
+  velocity.z=(coord.z==maxBoundaryZ)?0.0:velocity.z;
 }
 
 // ****************************************************************************
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
-nodes void moveNodes(void) in (node velocity) @ 3{
+nodes void moveNodes(void) in (node velocity) out (node coord)@ 3.0{
   coord += δt * velocity;
 }
 
 // ****************************************************************************
 // * Calcule la longueur caractéristique d'une maille héxahédrique
 // ****************************************************************************
-cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ -4,4{
+cells void computeGeometricKlength(void) in (node coord) out (cell kLength, cell cqs) @ -4.0,4.0{
   Real3 Χ[8];            // Copie locale des coordonnées des sommets d'une maille
   Real3 face_coord[6];   // Coordonnées des centres des faces
 
@@ -183,22 +195,22 @@ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ -4,4{
   foreach node Χ[n] = coord;
   
   { // Calcul les coordonnées des centres des faces
-    face_coord[0] = 0.25*(Χ[0]+Χ[3]+Χ[2]+Χ[1]);
-    face_coord[1] = 0.25*(Χ[0]+Χ[4]+Χ[7]+Χ[3]);
-    face_coord[2] = 0.25*(Χ[0]+Χ[1]+Χ[5]+Χ[4]);
-    face_coord[3] = 0.25*(Χ[4]+Χ[5]+Χ[6]+Χ[7]);
-    face_coord[4] = 0.25*(Χ[1]+Χ[2]+Χ[6]+Χ[5]);
-    face_coord[5] = 0.25*(Χ[2]+Χ[3]+Χ[7]+Χ[6]);
+    face_coord[0] = ¼*(Χ[0]+Χ[3]+Χ[2]+Χ[1]);
+    face_coord[1] = ¼*(Χ[0]+Χ[4]+Χ[7]+Χ[3]);
+    face_coord[2] = ¼*(Χ[0]+Χ[1]+Χ[5]+Χ[4]);
+    face_coord[3] = ¼*(Χ[4]+Χ[5]+Χ[6]+Χ[7]);
+    face_coord[4] = ¼*(Χ[1]+Χ[2]+Χ[6]+Χ[5]);
+    face_coord[5] = ¼*(Χ[2]+Χ[3]+Χ[7]+Χ[6]);
   };
   { // Calcule la longueur caractéristique de la maille
-    Real3 median1 = face_coord[0] - face_coord[3];
-    Real3 median2 = face_coord[2] - face_coord[5];
-    Real3 median3 = face_coord[1] - face_coord[4];
-    Real κ1 = norm(median1);
-    Real κ2 = norm(median2);
-    Real κ3 = norm(median3);
-    Real δxNumerator = κ1*κ2*κ3;
-    Real δxDenominator = κ1*κ2 + κ1*κ3 + κ2*κ3;
+    const Real3 median1 = face_coord[0] - face_coord[3];
+    const Real3 median2 = face_coord[2] - face_coord[5];
+    const Real3 median3 = face_coord[1] - face_coord[4];
+    const Real κ1 = norm(median1);
+    const Real κ2 = norm(median2);
+    const Real κ3 = norm(median3);
+    const Real δxNumerator = κ1*κ2*κ3;
+    const Real δxDenominator = κ1*κ2 + κ1*κ3 + κ2*κ3;
     kLength = δxNumerator/δxDenominator;
   };
   // Calcule les résultantes aux sommets
@@ -208,11 +220,11 @@ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ -4,4{
 // ****************************************************************************
 // * computeVolume: Calcule le volume de la maille
 // ****************************************************************************
-cells void computeGeometricVolume(void) in (cell cqs)
-  out (cell oldVolume) inout(cell v) @ -3.9,5{
+cells void computeGeometricVolume(void) in (cell cqs, node coord)
+  out (cell oldVolume) inout(cell v) @ -3.9,5.0{
   Real τVolume = 0.0;
   oldVolume = v;
-  foreach node τVolume += dot(coord, cqs);
+  foreach node τVolume += coord⋅cqs;
   τVolume/=3.0;
   v=τVolume;
 }
@@ -220,8 +232,7 @@ cells void computeGeometricVolume(void) in (cell cqs)
 // ****************************************************************************
 // * updateDensity
 // ****************************************************************************
-cells void updateDensity(void)
-  in (cell m, cell v) out (cell ρ) @ 6{
+cells void updateDensity(void) in (cell m, cell v) out (cell ρ) @ 6.0{
   ρ = m/v;
 }
 
@@ -230,11 +241,11 @@ cells void updateDensity(void)
 // ****************************************************************************
 cells void computeInternalEnergy(void)
   in (cell v, cell oldVolume, cell adiabatic_cst)
-  out (cell internal_Ξ) @ 7{
-  Real γVolume = v/oldVolume;
-  Real x = 0.5*(adiabatic_cst-1.0);
-  Real numer_accrois_Ξ = 1.0+x*(1.0-γVolume);
-  Real denom_accrois_Ξ = 1.0+x*(1.0-1.0/γVolume);
+  out (cell internal_Ξ) @ 6.0{
+  const Real γVolume = v/oldVolume;
+  const Real x = ½*(adiabatic_cst-1.0);
+  const Real numer_accrois_Ξ = 1.0+x*(1.0-γVolume);
+  const Real denom_accrois_Ξ = 1.0+x*(1.0-1.0/γVolume);
   internal_Ξ *= numer_accrois_Ξ/denom_accrois_Ξ;
 }
 
@@ -244,7 +255,7 @@ cells void computeInternalEnergy(void)
 // ****************************************************************************
 cells void applyEOS(void)
   in (cell ρ, cell adiabatic_cst, cell internal_Ξ)
-  out (cell σSound) inout (cell pressure) @ 8{
+  out (cell σSound) inout (cell pressure) @ 8.0{
   // On calcule en premier la pression
   pressure = (adiabatic_cst-1.0)*ρ*internal_Ξ @ 0;
   // Que l'on va utiliser pour le calcule de la vitesse du son
@@ -256,7 +267,7 @@ cells void applyEOS(void)
 // ****************************************************************************
 cells void computeDxSound(void)
   in (cell kLength, cell σSound)
-  out(cell δxSound) @ 9{
+  out(cell δxSound) @ 9.0{
   δxSound = kLength/σSound;
 }
 cells Real computeMinDxSound(Real minimum_aux)
@@ -264,73 +275,73 @@ cells Real computeMinDxSound(Real minimum_aux)
   minimum_aux = min(minimum_aux, δxSound);
   return minimum_aux;
 }
-void computeDeltaT(void) @ 10{
-  Real minimum_aux = reducemin(δxSound);//computeMinDxSound(HUGE_VALL);
-  Real new_δt = OPTION_CFL * minimum_aux;
+void computeDeltaT(void) @ 10.0{
+  // Pour les tests vs Cuda & Okina, on le désactive
+  Real minimum_aux = 0.0;//mpi_reduce(ReduceMin, computeMinDxSound(+∞));
+  Real new_δt = option_cfl * minimum_aux;
   // Respect des valeurs min et max imposées par les options
-  new_δt = min(new_δt, OPTION_DELTAT_MAX);
-  new_δt = max(new_δt, OPTION_DELTAT_MIN);
+  new_δt = min(new_δt, option_δt_max);
+  new_δt = max(new_δt, option_δt_min);
   δt=new_δt;
-  if (time >= OPTION_TIME_END) exit;
+  if (time >= option_time_end) exit;
 }
 
 // ****************************************************************************
 // * computeCQs
 // ****************************************************************************
-inline void computeCQs(Real3* Χ, Real3* face_coord, Real3 *cell_cqs){
-  Real3 c0 = face_coord[0];  
-  Real3 c1 = face_coord[1];
-  Real3 c2 = face_coord[2];
-  Real3 c3 = face_coord[3];
-  Real3 c4 = face_coord[4];
-  Real3 c5 = face_coord[5];
-  double demi = 0.5;
-  double five = 5.0;
+void computeCQs(Real3* Χ, Real3* face_coord, Real3* cell_cqs){
+  const Real3 c0 = face_coord[0];  
+  const Real3 c1 = face_coord[1];
+  const Real3 c2 = face_coord[2];
+  const Real3 c3 = face_coord[3];
+  const Real3 c4 = face_coord[4];
+  const Real3 c5 = face_coord[5];
+  const double five = 5.0;
+  const double one_twelfth = 1./12.;
   // Calcul des normales face 1 :
-  Real3 n1a04 = demi * cross(Χ[0]-c0, Χ[3]-c0);
-  Real3 n1a03 = demi * cross(Χ[3]-c0, Χ[2]-c0);
-  Real3 n1a02 = demi * cross(Χ[2]-c0, Χ[1]-c0);
-  Real3 n1a01 = demi * cross(Χ[1]-c0, Χ[0]-c0);
+  const Real3 n1a04 = ½*(Χ[0]-c0)⨯(Χ[3]-c0);
+  const Real3 n1a03 = ½*(Χ[3]-c0)⨯(Χ[2]-c0);
+  const Real3 n1a02 = ½*(Χ[2]-c0)⨯(Χ[1]-c0);
+  const Real3 n1a01 = ½*(Χ[1]-c0)⨯(Χ[0]-c0);
   // Calcul des normales face 2 :
-  Real3 n2a05 = demi * cross(Χ[0]-c1, Χ[4]-c1);
-  Real3 n2a12 = demi * cross(Χ[4]-c1, Χ[7]-c1);
-  Real3 n2a08 = demi * cross(Χ[7]-c1, Χ[3]-c1);
-  Real3 n2a04 = demi * cross(Χ[3]-c1, Χ[0]-c1);
+  const Real3 n2a05 = ½*(Χ[0]-c1)⨯(Χ[4]-c1);
+  const Real3 n2a12 = ½*(Χ[4]-c1)⨯(Χ[7]-c1);
+  const Real3 n2a08 = ½*(Χ[7]-c1)⨯(Χ[3]-c1);
+  const Real3 n2a04 = ½*(Χ[3]-c1)⨯(Χ[0]-c1);
   // Calcul des normales face 3 :
-  Real3 n3a01 = demi * cross(Χ[0]-c2, Χ[1]-c2);
-  Real3 n3a06 = demi * cross(Χ[1]-c2, Χ[5]-c2);
-  Real3 n3a09 = demi * cross(Χ[5]-c2, Χ[4]-c2);
-  Real3 n3a05 = demi * cross(Χ[4]-c2, Χ[0]-c2);
+  const Real3 n3a01 = ½*(Χ[0]-c2)⨯(Χ[1]-c2);
+  const Real3 n3a06 = ½*(Χ[1]-c2)⨯(Χ[5]-c2);
+  const Real3 n3a09 = ½*(Χ[5]-c2)⨯(Χ[4]-c2);
+  const Real3 n3a05 = ½*(Χ[4]-c2)⨯(Χ[0]-c2);
   // Calcul des normales face 4 :
-  Real3 n4a09 = demi * cross(Χ[4]-c3, Χ[5]-c3);
-  Real3 n4a10 = demi * cross(Χ[5]-c3, Χ[6]-c3);
-  Real3 n4a11 = demi * cross(Χ[6]-c3, Χ[7]-c3);
-  Real3 n4a12 = demi * cross(Χ[7]-c3, Χ[4]-c3);
+  const Real3 n4a09 = ½*(Χ[4]-c3)⨯(Χ[5]-c3);
+  const Real3 n4a10 = ½*(Χ[5]-c3)⨯(Χ[6]-c3);
+  const Real3 n4a11 = ½*(Χ[6]-c3)⨯(Χ[7]-c3);
+  const Real3 n4a12 = ½*(Χ[7]-c3)⨯(Χ[4]-c3);
   // Calcul des normales face 5 :
-  Real3 n5a02 = demi * cross(Χ[1]-c4, Χ[2]-c4);
-  Real3 n5a07 = demi * cross(Χ[2]-c4, Χ[6]-c4);
-  Real3 n5a10 = demi * cross(Χ[6]-c4, Χ[5]-c4);
-  Real3 n5a06 = demi * cross(Χ[5]-c4, Χ[1]-c4);
+  const Real3 n5a02 = ½*(Χ[1]-c4)⨯(Χ[2]-c4);
+  const Real3 n5a07 = ½*(Χ[2]-c4)⨯(Χ[6]-c4);
+  const Real3 n5a10 = ½*(Χ[6]-c4)⨯(Χ[5]-c4);
+  const Real3 n5a06 = ½*(Χ[5]-c4)⨯(Χ[1]-c4);
   // Calcul des normales face 6 :
-  Real3 n6a03 = demi * cross(Χ[2]-c5, Χ[3]-c5);
-  Real3 n6a08 = demi * cross(Χ[3]-c5, Χ[7]-c5);
-  Real3 n6a11 = demi * cross(Χ[7]-c5, Χ[6]-c5);
-  Real3 n6a07 = demi * cross(Χ[6]-c5, Χ[2]-c5);
-  double real_1div12 = 1./12.;
+  const Real3 n6a03 = ½*(Χ[2]-c5)⨯(Χ[3]-c5);
+  const Real3 n6a08 = ½*(Χ[3]-c5)⨯(Χ[7]-c5);
+  const Real3 n6a11 = ½*(Χ[7]-c5)⨯(Χ[6]-c5);
+  const Real3 n6a07 = ½*(Χ[6]-c5)⨯(Χ[2]-c5);
   cell_cqs[0] = (five*(n1a01 + n1a04 + n2a04 + n2a05 + n3a05 + n3a01) +
-                 (n1a02 + n1a03 + n2a08 + n2a12 + n3a06 + n3a09))*real_1div12;
+                 (n1a02 + n1a03 + n2a08 + n2a12 + n3a06 + n3a09))*one_twelfth;
   cell_cqs[1] = (five*(n1a01 + n1a02 + n3a01 + n3a06 + n5a06 + n5a02) +
-                 (n1a04 + n1a03 + n3a09 + n3a05 + n5a10 + n5a07))*real_1div12;
+                 (n1a04 + n1a03 + n3a09 + n3a05 + n5a10 + n5a07))*one_twelfth;
   cell_cqs[2] = (five*(n1a02 + n1a03 + n5a07 + n5a02 + n6a07 + n6a03) +
-                 (n1a01 + n1a04 + n5a06 + n5a10 + n6a11 + n6a08))*real_1div12;
+                 (n1a01 + n1a04 + n5a06 + n5a10 + n6a11 + n6a08))*one_twelfth;
   cell_cqs[3] = (five*(n1a03 + n1a04 + n2a08 + n2a04 + n6a08 + n6a03) +
-                 (n1a01 + n1a02 + n2a05 + n2a12 + n6a07 + n6a11))*real_1div12;  
+                 (n1a01 + n1a02 + n2a05 + n2a12 + n6a07 + n6a11))*one_twelfth;  
   cell_cqs[4] = (five*(n2a05 + n2a12 + n3a05 + n3a09 + n4a09 + n4a12) +
-                 (n2a08 + n2a04 + n3a01 + n3a06 + n4a10 + n4a11))*real_1div12;
+                 (n2a08 + n2a04 + n3a01 + n3a06 + n4a10 + n4a11))*one_twelfth;
   cell_cqs[5] = (five*(n3a06 + n3a09 + n4a09 + n4a10 + n5a10 + n5a06) +                 
-                 (n3a01 + n3a05 + n4a12 + n4a11 + n5a07 + n5a02))*real_1div12;  
+                 (n3a01 + n3a05 + n4a12 + n4a11 + n5a07 + n5a02))*one_twelfth;  
   cell_cqs[6] = (five*(n4a11 + n4a10 + n5a10 + n5a07 + n6a07 + n6a11) +
-                 (n4a12 + n4a09 + n5a06 + n5a02 + n6a03 + n6a08))*real_1div12;  
+                 (n4a12 + n4a09 + n5a06 + n5a02 + n6a03 + n6a08))*one_twelfth;  
   cell_cqs[7] = (five*(n2a08 + n2a12 + n4a12 + n4a11 + n6a11 + n6a08) +
-                 (n2a04 + n2a05 + n4a09 + n4a10 + n6a07 + n6a03))*real_1div12;
+                 (n2a04 + n2a05 + n4a09 + n4a10 + n6a07 + n6a03))*one_twelfth;
 }

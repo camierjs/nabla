@@ -32,7 +32,7 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       //&& job->parse.statementToDiffract==NULL
       //&& job->parse.diffractingXYZ==0
       ){
-      dbg("\n[nablaJobParse] amorce la diffraction");
+      dbg("\n[cudaHookJobDiffractStatement] amorce la diffraction");
 //#warning Diffracting is turned OFF
       job->parse.statementToDiffract=NULL;//*n;
       // We're juste READY, not diffracting yet!
@@ -46,7 +46,7 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ<3){
-    dbg("\n[nablaJobParse] avance dans la diffraction");
+    dbg("\n[cudaHookJobDiffractStatement] avance dans la diffraction");
     job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
     (*n)=job->parse.statementToDiffract;
     nprintf(nabla, NULL, ";\n\t");
@@ -59,13 +59,13 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ==3){
-    dbg("\n[nablaJobParse] Flush de la diffraction");
+    dbg("\n[cudaHookJobDiffractStatement] Flush de la diffraction");
     job->parse.diffracting=false;
     job->parse.statementToDiffract=NULL;
     job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
     nprintf(nabla, "/*<end of diffracting>*/",NULL);
   }
-  dbg("\n[nablaJobParse] return from token %s", (*n)->token?(*n)->token:"Null");
+  //dbg("\n[cudaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }
 
 
@@ -555,10 +555,11 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
   
   if (n->ruleid==rulenameToId("direct_declarator")){
     nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
-    //nprintf(nabla, NULL, "\n\t\t/*[cudaHookDumpNablaParameterList] looking for %s*/", n->children->token);
+    dbg("\n\t\t[cudaHookDumpNablaParameterList] looking for %s", n->children->token);
     *numParams+=1;
     // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable error\n"));
+    if (var == NULL)
+      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable error\n"));
     if (strcmp(var->type, "real3")!=0){
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
       }else{
@@ -587,22 +588,32 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
 // * Ajout des variables d'un job trouvé depuis une fonction @ée
 // *****************************************************************************
 void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-  //dbg("\n\t[cudaAddNablaVariableList]");
   if (n==NULL) return;
-  
+  if (n->tokenid!=0) dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
+
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
+  if (n->ruleid==rulenameToId("compound_statement")) {
+    dbg("\n\t\t\t[cudaAddNablaVariableList] '{', returning");
+    return;
+  }
   
-  if (n->tokenid=='@') return;
+  if (n->tokenid=='@'){
+    return;
+    dbg("\n\t\t\t[cudaAddNablaVariableList] '@', returning");
+  }
     
   if (n->ruleid==rulenameToId("direct_declarator")){
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
     nablaVariable *hit=nablaVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t[cudaAddNablaVariableList] direct_declarator %s %s", hit->item, hit->name);
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
     // Si on ne trouve pas de variable, c'est pas normal
-    if (hit == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaAddNablaVariableList] Variable error\n"));
+    if (hit == NULL)
+      return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
     nablaVariable *allready_here=nablaVariableFind(*variables, hit->name);
     if (allready_here!=NULL){
-      dbg("\n\t[cudaAddNablaVariableList] allready_here!");
+      dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
     }else{
       // Création d'une nouvelle called_variable
       nablaVariable *new = nablaVariableNew(NULL);
@@ -613,10 +624,10 @@ void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **vari
       new->size=hit->size;
       // Rajout à notre liste
       if (*variables==NULL){
-        dbg("\n\t[cudaAddNablaVariableList] first hit");
+        dbg("\n\t\t\t[cudaAddNablaVariableList] first hit");
         *variables=new;
       }else{
-        dbg("\n\t[cudaAddNablaVariableList] last hit");
+        dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
         nablaVariableLast(*variables)->next=new;
       }
     }

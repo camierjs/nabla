@@ -1,12 +1,8 @@
-MPI_PATH = ${MPI_PATH}
-MPI_RUN = $(MPI_PATH)/bin/mpirun
-
-ARCANE_ROOT = ${ARCANE_ROOT}
-ARCANE_PKG_PATH = $(ARCANE_ROOT)/lib/pkgconfig
-HYODA = $(ARCANE_ROOT)/bin/hyoda
+ARCANE_PKG_PATH = ${ARCANE_ROOT}/lib/pkgconfig
+HYODA = ${ARCANE_ROOT}/bin/hyoda
 
 NABLA = ${NABLA_BINARY_DIR}/nabla
-TGT_FILE  = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
+TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 
@@ -14,37 +10,37 @@ ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 ########################## 
 # ARCANE_LIBS and CFLAGS #
 ##########################
-ARCANE_AXL_EXE  = $(ARCANE_ROOT)/bin/axl2cc
+ARCANE_AXL_EXE  = ${ARCANE_ROOT}/bin/axl2cc
 ARCANE_PKG_LIBS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --libs arcane)
 ARCANE_PKG_CFLAGS = $(shell PKG_CONFIG_PATH=$(ARCANE_PKG_PATH) pkg-config --cflags arcane)
-ARCANE_LIBS = -L$(ARCANE_ROOT)/lib\
+ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_std\
+ -larcane_mpithread\
  -larcane_mpi\
+ -larcane_thread\
  -larcane_impl\
  -larcane_mesh\
  -larcane_core\
  -larcane_utils\
  -larcane_driverlib\
+ -larcane_cea\
+ -larcane_aleph\
  -larcane_ios\
- -larcane_hyoda\
  $(ARCANE_PKG_LIBS)\
- -Wl,-rpath,$(ARCANE_ROOT)/lib
-# -larcane_thread\
-# -larcane_mpithread\
-# -larcane_aleph\
-# -larcane_cea\
+ -Wl,-rpath,${ARCANE_ROOT}/lib
+# -larcane_hyoda\
 # -larcane_aleph_sloop\
 # -larcane_aleph_hypre\
-# -larcane_aleph_trilinos
+# -larcane_aleph_trilinos\
 
 
 #############
 # COMPILERS #
 #############
-CXX=${ARCANE_CXX}
+CXX=${CMAKE_CXX_COMPILER}
 CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
 			-I$(MPI_PATH)/include\
-			-I$(ARCANE_ROOT)/include\
+			-I${ARCANE_ROOT}/include\
 			$(ARCANE_CFLAGS)
 
 #			-I${GMP_DIR}/include\
@@ -91,21 +87,21 @@ $(TGT):main.o
 # STANDARD LAUNCHES #
 #####################
 run1:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 ./$(TGT) $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 $(TGT) $(ARC_FILE)
 runc1:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 ./$(TGT) -arcane_opt continue $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 ./$(TGT) -arcane_opt continue $(ARC_FILE)
 
 run4:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 4 ./$(TGT) $(ARC_FILE)
 runc4:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 4 ./$(TGT) -arcane_opt continue $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 4 ./$(TGT) -arcane_opt continue $(ARC_FILE)
 
 
 #########
 # HYODA #
 #########
 h1:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi $(MPI_RUN) -n 1 $(HYODA) ./$(TGT) $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 $(HYODA) ./$(TGT) $(ARC_FILE)
 
 
 cln:

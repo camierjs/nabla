@@ -1,3 +1,21 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
 with cartesian;
 
 #define ZERO 0.0
@@ -84,27 +102,22 @@ void initTables(void) @ -10.0{
 
 cells void initCellsTableUpr(void) out (cell p, cell r) @ -10.0{
   u = 0.0;
-  if (coord[0].x<0.5){
-    p = 1.0;
-    r = 1.0;
-  }else{
-    p = 0.1;
-    r = 0.125;
-  }
+  p=(coord[0].x<0.5)?1.0:0.1;
+  r=(coord[0].x<0.5)?1.0:0.125;
   x = ((double)uid)*option_L/((double)(option_n+1));
-  if (uid==option_n-1) x=option_L;
+  x=(uid==option_n-1)?option_L;
 }
 void syncUprx(void)@-9.9{eieio();}
 
 cells void initCellsTableE(void) @ -9.0{
-  register const Real invR=1./r;
-  register const Real pDr=p*invR;
+  const Real invR=1./r;
+  const Real pDr=p*invR;
   E = e = pDr/(option_gamma-1.);
 }
 
 cells void initCellsTableC(void) @ -9.0{
-  register const Real invR=1./r;
-  register const Real pDr=p*invR;
+  const Real invR=1./r;
+  const Real pDr=p*invR;
   c = sqrt(option_gamma*pDr);
 }
 void syncEc(void)@-8.9{eieio();}
@@ -114,14 +127,13 @@ void syncEc(void)@-8.9{eieio();}
 // * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
 
-
 cells Real minCellsCfl(xyz direction, Real δt_final){ // [0,n[
   if (nextCell.null()) continue;
   δt_final = min(δt_final, option_cfl*(x[nextCell]-x)/c);
   return δt_final;
 }
 void timeStepControlAndCFLCondition(void) @ 1.0{
-  Real δt_final=minCellsCfl(MD_DirX,1.e99);
+  const Real δt_final=minCellsCfl(MD_DirX,1.e99);
   δt = min(δt_final, option_δt_inc_max*δt);
 }
 
@@ -146,11 +158,11 @@ cells void secondOrderNumericalFluxXYZ(xyz dir) {// [1,n[
   if (prevCell.null()) continue;
   if (nextCell.null()) continue;
   {
-    Real sigmac = δt * 0.5*(c[prevCell]+c) / (0.5*(x[prevCell]+x[nextCell]));
-    Real phipu = limiter((u[prevCell]-usgod[prevCell]) / ((u-usgod)+defined_eps));
-    Real phipp = limiter((p[prevCell]-psgod[prevCell]) / ((p-psgod)+defined_eps));
-    Real phimu = limiter((usgod[nextCell]-u) / ((usgod-u[prevCell])+defined_eps));
-    Real phimp = limiter((psgod[nextCell]-p) / ((psgod-p[prevCell])+defined_eps));
+    const Real sigmac = δt * 0.5*(c[prevCell]+c) / (0.5*(x[prevCell]+x[nextCell]));
+    const Real phipu = limiter((u[prevCell]-usgod[prevCell]) / ((u-usgod)+defined_eps));
+    const Real phipp = limiter((p[prevCell]-psgod[prevCell]) / ((p-psgod)+defined_eps));
+    const Real phimu = limiter((usgod[nextCell]-u) / ((usgod-u[prevCell])+defined_eps));
+    const Real phimp = limiter((psgod[nextCell]-p) / ((psgod-p[prevCell])+defined_eps));
     // GAD flux
     us += (1.-sigmac)/2. * (phipu*(u-usgod) - phimu*(usgod-u[prevCell]));
     ps += (1.-sigmac)/2. * (phipp*(p-psgod) - phimp*(psgod-p[prevCell]));
@@ -163,16 +175,13 @@ void syncSecondOrderFlux(void)@3.1{eieio();}
 
 
 cells void boundaryConditionsXYZ(xyz dir){
-  if (uid==0){
-    u = 0.0;
-    ps = p;
-  }
-  if (uid==option_n-1-1){
-    us[nextCell] = 0.0;
-    ps[nextCell] = p[prevCell];
-    us = 0.0;
-    ps = p[prevCell];
-  }
+  const Bool hit = (uid==option_n-1-1);
+  u=(uid==0)?0.0;
+  ps=(uid==0)?p;
+  us[nextCell] = (hit)?0.0;
+  ps[nextCell] = (hit)?p[prevCell];
+  us = (hit)?0.0;
+  ps = (hit)?p[prevCell];
 }
 void boundaryConditions(void) @ 4.0{
   boundaryConditionsXYZ(MD_DirX);
@@ -183,9 +192,9 @@ void syncBC(void)@4.1{eieio();}
 cells void fluxBalanceAndEosClosureEquationXYZ(xyz dir) { // [0,n[
   if (nextCell.null()) continue;
   {
-    const register Real dxa = x[nextCell] - x;
-    const register Real dx  =  dxa + δt*( us[nextCell] - us );
-    const register Real dm = r * (x[nextCell]-x);
+    const Real dxa = x[nextCell] - x;
+    const Real dx  =  dxa + δt*( us[nextCell] - us );
+    const Real dm = r * (x[nextCell]-x);
     r = r*dxa/dx;
     u += δt / dm * ( ps - ps[nextCell]);
     E += δt / dm * ( us*ps - us[nextCell]*ps[nextCell]);
@@ -201,7 +210,7 @@ void syncBalance(void)@5.1{eieio();}
 
 
 cells void movePositions(void) @ 6.0{ //[0,n]
-  x += us * δt ;
+  x += us*δt ;
 }
 void syncPositions(void)@6.1{eieio();}
 

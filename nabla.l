@@ -1,3 +1,4 @@
+%{
 // NABLA - a Numerical Analysis Based LAnguage
 
 // Copyright (C) 2014 CEA/DAM/DIF
@@ -16,7 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
-%{
 #include "nabla.h"
 #include <stdio.h>
 //#define YY_SKIP_YYWRAP
@@ -118,7 +118,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Int64"		      { return tok(&yylval, INT64);}
 "Uid"             { return tok(&yylval, UIDTYPE);}
 "file"            { return tok(&yylval, FILECALL);}
-"FILE"            { return tok(&yylval, FILETYPE);}
+"File"            { return tok(&yylval, FILETYPE);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}

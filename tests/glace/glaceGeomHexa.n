@@ -1,0 +1,132 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+//inline Real mixteMul(const Real3 _a, const Real3 _b, const Real3 _c){ return _a⋅(_b⨯_c); }
+
+// Calcul des aires orientées des faces
+cells void geom_computeSurface_Hexa(void){// @ -20.0,23.0 if (option_hexa||option_cylinder){
+  const Real ratio = 1./12.;
+  const Real3 a1 = coord[6]-coord[1];
+  const Real3 a2 = coord[6]-coord[3];
+  const Real3 a3 = coord[6]-coord[4];
+  const Real3 b1 = coord[7]-coord[0];
+  const Real3 b2 = coord[5]-coord[0];
+  const Real3 b3 = coord[2]-coord[0];
+  const Real resultat = (a1+b1)⋅(a2⨯b3) + b1⋅((a2+b2)⨯a3) + a1⋅(b2⨯(a3+b3));
+  /*S=*/ V = resultat*ratio;
+  //info()<<"Cell #"<<uid<<" V="<<V;
+  assert(V>0.);
+}
+
+
+// Calcul des résultantes aux sommets des mailles
+cells void geom_computeNormal_Hexa(void) @ -21.0,24.0 if (option_hexa||option_cylinder){
+  Real3 Χ[8];                 // Copie locale des coordonnées des sommets d'une maille
+  Real3 face_coord[6];        // Coordonnées des centres des faces
+  foreach node Χ[n] = coord;  // Recopie des coordonnées locales
+  face_coord[0] = ¼*(Χ[0]+Χ[3]+Χ[2]+Χ[1]);
+  face_coord[1] = ¼*(Χ[0]+Χ[4]+Χ[7]+Χ[3]);
+  face_coord[2] = ¼*(Χ[0]+Χ[1]+Χ[5]+Χ[4]);
+  face_coord[3] = ¼*(Χ[4]+Χ[5]+Χ[6]+Χ[7]);
+  face_coord[4] = ¼*(Χ[1]+Χ[2]+Χ[6]+Χ[5]);
+  face_coord[5] = ¼*(Χ[2]+Χ[3]+Χ[7]+Χ[6]);
+  computeCQs(Χ, face_coord, &CQs); // Calcule les résultantes aux sommets
+  absCQs[0]=CQs[0].abs();
+  absCQs[1]=CQs[1].abs();
+  absCQs[2]=CQs[2].abs();
+  absCQs[3]=CQs[3].abs();
+  absCQs[4]=CQs[4].abs();
+  absCQs[5]=CQs[5].abs();
+  absCQs[6]=CQs[6].abs();
+  absCQs[7]=CQs[7].abs();
+}
+
+
+cells void geom_assertNbNodes(void) {//@ -20.0 if (option_hexa||option_cylinder){
+  if (nbNode!=8) fatal("nbNode!=8");
+  info()<<"nbNode="<<nbNode;
+}
+
+cells void geom_computeVolumeHexa(void) @ -20.0,25.0 if (option_hexa||option_cylinder){
+  V=0.0;
+  foreach node
+    V += coord⋅CQs;
+  V *= 1./3.;
+ }
+
+
+// ****************************************************************************
+// * computeCQs
+// ****************************************************************************
+inline void computeCQs(Real3* Χ, Real3* face_coord, Real3* cell_cqs){
+  const Real3 c0 = face_coord[0];  
+  const Real3 c1 = face_coord[1];
+  const Real3 c2 = face_coord[2];
+  const Real3 c3 = face_coord[3];
+  const Real3 c4 = face_coord[4];
+  const Real3 c5 = face_coord[5];
+  const double five = 5.0;
+  const double one_twelfth = 1./12.;
+  // Calcul des normales face 1 :
+  const Real3 n1a04 = ½*(Χ[0]-c0)⨯(Χ[3]-c0);
+  const Real3 n1a03 = ½*(Χ[3]-c0)⨯(Χ[2]-c0);
+  const Real3 n1a02 = ½*(Χ[2]-c0)⨯(Χ[1]-c0);
+  const Real3 n1a01 = ½*(Χ[1]-c0)⨯(Χ[0]-c0);
+  // Calcul des normales face 2 :
+  const Real3 n2a05 = ½*(Χ[0]-c1)⨯(Χ[4]-c1);
+  const Real3 n2a12 = ½*(Χ[4]-c1)⨯(Χ[7]-c1);
+  const Real3 n2a08 = ½*(Χ[7]-c1)⨯(Χ[3]-c1);
+  const Real3 n2a04 = ½*(Χ[3]-c1)⨯(Χ[0]-c1);
+  // Calcul des normales face 3 :
+  const Real3 n3a01 = ½*(Χ[0]-c2)⨯(Χ[1]-c2);
+  const Real3 n3a06 = ½*(Χ[1]-c2)⨯(Χ[5]-c2);
+  const Real3 n3a09 = ½*(Χ[5]-c2)⨯(Χ[4]-c2);
+  const Real3 n3a05 = ½*(Χ[4]-c2)⨯(Χ[0]-c2);
+  // Calcul des normales face 4 :
+  const Real3 n4a09 = ½*(Χ[4]-c3)⨯(Χ[5]-c3);
+  const Real3 n4a10 = ½*(Χ[5]-c3)⨯(Χ[6]-c3);
+  const Real3 n4a11 = ½*(Χ[6]-c3)⨯(Χ[7]-c3);
+  const Real3 n4a12 = ½*(Χ[7]-c3)⨯(Χ[4]-c3);
+  // Calcul des normales face 5 :
+  const Real3 n5a02 = ½*(Χ[1]-c4)⨯(Χ[2]-c4);
+  const Real3 n5a07 = ½*(Χ[2]-c4)⨯(Χ[6]-c4);
+  const Real3 n5a10 = ½*(Χ[6]-c4)⨯(Χ[5]-c4);
+  const Real3 n5a06 = ½*(Χ[5]-c4)⨯(Χ[1]-c4);
+  // Calcul des normales face 6 :
+  const Real3 n6a03 = ½*(Χ[2]-c5)⨯(Χ[3]-c5);
+  const Real3 n6a08 = ½*(Χ[3]-c5)⨯(Χ[7]-c5);
+  const Real3 n6a11 = ½*(Χ[7]-c5)⨯(Χ[6]-c5);
+  const Real3 n6a07 = ½*(Χ[6]-c5)⨯(Χ[2]-c5);
+  cell_cqs[0] = (five*(n1a01 + n1a04 + n2a04 + n2a05 + n3a05 + n3a01) +
+                 (n1a02 + n1a03 + n2a08 + n2a12 + n3a06 + n3a09))*one_twelfth;
+  cell_cqs[1] = (five*(n1a01 + n1a02 + n3a01 + n3a06 + n5a06 + n5a02) +
+                 (n1a04 + n1a03 + n3a09 + n3a05 + n5a10 + n5a07))*one_twelfth;
+  cell_cqs[2] = (five*(n1a02 + n1a03 + n5a07 + n5a02 + n6a07 + n6a03) +
+                 (n1a01 + n1a04 + n5a06 + n5a10 + n6a11 + n6a08))*one_twelfth;
+  cell_cqs[3] = (five*(n1a03 + n1a04 + n2a08 + n2a04 + n6a08 + n6a03) +
+                 (n1a01 + n1a02 + n2a05 + n2a12 + n6a07 + n6a11))*one_twelfth;  
+  cell_cqs[4] = (five*(n2a05 + n2a12 + n3a05 + n3a09 + n4a09 + n4a12) +
+                 (n2a08 + n2a04 + n3a01 + n3a06 + n4a10 + n4a11))*one_twelfth;
+  cell_cqs[5] = (five*(n3a06 + n3a09 + n4a09 + n4a10 + n5a10 + n5a06) +                 
+                 (n3a01 + n3a05 + n4a12 + n4a11 + n5a07 + n5a02))*one_twelfth;  
+  cell_cqs[6] = (five*(n4a11 + n4a10 + n5a10 + n5a07 + n6a07 + n6a11) +
+                 (n4a12 + n4a09 + n5a06 + n5a02 + n6a03 + n6a08))*one_twelfth;  
+  cell_cqs[7] = (five*(n2a08 + n2a12 + n4a12 + n4a11 + n6a11 + n6a08) +
+                 (n2a04 + n2a05 + n4a09 + n4a10 + n6a07 + n6a03))*one_twelfth;
+}
+

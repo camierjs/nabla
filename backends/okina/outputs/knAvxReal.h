@@ -167,7 +167,7 @@ struct __attribute__ ((aligned(32))) real {
     return _mm256_and_pd(a, __f64vec4_abs_mask.m);
     }*/
 
-  friend real unglitch(const real &a)  {
+  /*friend real unglitch(const real &a)  {
     const union{
       unsigned long long i[4];
       __m256d m;
@@ -176,7 +176,7 @@ struct __attribute__ ((aligned(32))) real {
                              0xffffffffffff0000ull,
                              0xffffffffffff0000ull};
     return _mm256_and_pd(a, __f64vec4_abs_mask.m);
-  }
+    }*/
 
    
   inline const double& operator[](int i) const  {

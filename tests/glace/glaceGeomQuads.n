@@ -1,0 +1,55 @@
+// NABLA - a Numerical Analysis Based LAnguage
+
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+// Calcul des aires orientées des faces
+cells void geom_computeSurfaceAndVolume_Quad(void) @ -20.0,23.0 if (option_quads){
+  const Real3 fst_edge = coord[2]-coord[0];
+  const Real3 snd_edge = coord[3]-coord[1];
+  V=½*cross2D(fst_edge,snd_edge);
+}
+
+
+// Calcul des résultantes aux sommets des mailles
+cells void geom_computeNormal_Quad(void) @ -20.0,24.0 if (option_quads){
+  const Real3 s0=coord[0];
+  const Real3 s1=coord[1];
+  const Real3 s2=coord[2];
+  const Real3 s3=coord[3];
+  const Real3 c0 = ½*(s0+s1);
+  const Real3 c1 = ½*(s1+s2);
+  const Real3 c2 = ½*(s2+s3);
+  const Real3 c3 = ½*(s3+s0);
+  const Real3 length20 = ½*(c2-c0);
+  const Real3 length31 = ½*(c3-c1);
+  CQs[0].x = -(length31.y+length20.y);
+  CQs[0].y =  (length31.x+length20.x); 
+  CQs[0].z = 0.0;
+  absCQs[0]=CQs[0].abs();
+  CQs[1].x = -(length31.y-length20.y);
+  CQs[1].y =  (length31.x-length20.x);
+  CQs[1].z = 0.0;
+  absCQs[1]=CQs[1].abs();
+  CQs[2].x = -(-length31.y-length20.y);
+  CQs[2].y =  (-length31.x-length20.x); 
+  CQs[2].z = 0.0;
+  absCQs[2]=CQs[2].abs();
+  CQs[3].x = -(-length31.y+length20.y);
+  CQs[3].y =  (-length31.x+length20.x); 
+  CQs[3].z = 0.0;
+  absCQs[3]=CQs[3].abs();
+}

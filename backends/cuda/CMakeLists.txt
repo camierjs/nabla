@@ -1,6 +1,6 @@
-#info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
+info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}# NABLA BACKEND CUDA #${VT100_RESET}")
-#info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
+info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
 
 
 # BACKEND CUDA

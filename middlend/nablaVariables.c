@@ -101,17 +101,18 @@ bool nablaVariableGmpDumpRank(nablaVariable *variables, int k) {
  */
 nablaVariable *nablaVariableFind(nablaVariable *variables, char *name) {
   nablaVariable *variable=variables;
-  //dbg("\n\t[findVariableName] %s", name);
-  assert(variable != NULL && name != NULL);
+  dbg("\n\t[nablaVariableFind] looking for '%s'", name);
+  // Some backends use the fact it will return NULL
+  //assert(variable != NULL);  assert(name != NULL);
   while(variable != NULL) {
-    //dbg(" ?%s", variable->name);
+    dbg(" ?%s", variable->name);
     if(strcmp(variable->name, name) == 0){
-      //dbg(" Yes!");
+      dbg(" Yes!");
       return variable;
     }
     variable = variable->next;
   }
-  //dbg(" Nope!");
+  dbg(" Nope!");
   return NULL;
 }
 

@@ -136,11 +136,11 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
 
   // On ne traite qu'un TOKEN ici, on break systématiquement
   for(;n->token != NULL;){
-    //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
+    dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
  
     if(n->tokenid==CONST){
       nprintf(nabla, "/*CONST*/", "%sconst ", fct->entity->main->pragma->align());
-    break;
+      break;
     }
 
     if(n->tokenid==FOREACH_END){
@@ -384,7 +384,7 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   if (nabla->hook->addExtraParameters!=NULL && fct->is_an_entry_point)
     nabla->hook->addExtraParameters(nabla, fct, &numParams);
 
-  dbg("\n\t[nablaFctFill] dfsForCalls");
+  dbg("\n\t[nablaFctFill] launching dfsForCalls");
   nabla->hook->dfsForCalls(nabla,fct,n,namespace,nParams);
   
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres

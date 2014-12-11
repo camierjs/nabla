@@ -73,6 +73,8 @@ bool isAnArcaneService(nablaMain *middlend){
   if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE) return true;
   return false;
 }
+char *nArcanePragmaGccIvdep(void){ return ""; }
+char *nArcanePragmaGccAlign(void){ return ""; }
 
 /*****************************************************************************
  * ncc
@@ -130,6 +132,12 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   middlend->simd=&nablaArcaneSimdHooks;
   middlend->hook=&arcaneBackendHooks;
   
+  nablaBackendPragmaHooks arcanePragmaGCCHooks={
+    nArcanePragmaGccIvdep,
+    nArcanePragmaGccAlign
+  };
+  middlend->pragma=&arcanePragmaGCCHooks;
+    
   dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
   if (isAnArcaneModule(middlend)==true)
     nccArcMain(middlend);

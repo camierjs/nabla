@@ -1,20 +1,19 @@
-MESH_FLAGS = -DX_EDGE_ELEMS=32 -DY_EDGE_ELEMS=31 -DZ_EDGE_ELEMS=31 -DX_EDGE_TICK=.031000 -DY_EDGE_TICK=.032000 -DZ_EDGE_TICK=.032000 -DLENGTH=.992000
+MESH_FLAGS = -DX_EDGE_ELEMS=16 -DY_EDGE_ELEMS=16 -DZ_EDGE_ELEMS=16 -DX_EDGE_TICK=.070312 -DY_EDGE_TICK=.070312 -DZ_EDGE_TICK=.070312 -DLENGTH=1.125
 
+
+###################
+# NABLA ARGUMENTS #
+###################
 NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE  = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
+
 ####################
 # CUDA COMPILATION #
 ####################
-PATH_BullEL_6__x86_64=${CUDA_TOOLKIT_ROOT_DIR}
-ARCH_BullEL_6__x86_64=sm_21
-
-PATH_RHEL_5__x86_64=/usr/local/opendev1/gcc/cuda/2.3
-ARCH_RHEL_5__x86_64=sm_13
-
-NV_PATH = $(PATH_$(shell cea_os))
-NV_ARCH = $(ARCH_$(shell cea_os))
+NV_PATH = ${CUDA_TOOLKIT_ROOT_DIR}
+NV_ARCH = sm_13
 
 # ${CUDA_TOOLKIT_ROOT_DIR} ${CUDA_NVCC_EXECUTABLE} ${CUDA_INCLUDE_DIRS} ${CUDA_CUDART_LIBRARY}
 NV = $(NV_PATH)/bin/nvcc
@@ -22,8 +21,7 @@ NVFLAGS = -O2 -shared -arch=$(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
 NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
 NV_INCLUDE = -I. -I$(NV_PATH)/include
 
-CC_PATH = /usr/local/opendev1/gcc/gcc/4.7.2/bin
-CC = $(CC_PATH)/gcc
+CC = ${CMAKE_C_COMPILER}
 CCFLAGS = -Wall -O2 -malign-double -fPIC
 
 #######
@@ -63,5 +61,5 @@ e:
 cln:
 	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT)Entity.* $(TGT).E.* *.log *.dot *.svg main.cc $(TGT).config
 
-g1:$(TGT)
+run1:$(TGT) $(TGT).cuda
 	./$(TGT).cuda

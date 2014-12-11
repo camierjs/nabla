@@ -10,7 +10,7 @@
   </main>
 
   <arcane-post-processing>
-    <save-init>1</save-init>
+    <save-init>0</save-init>
 	 <output-period>0</output-period>
     <output-history-period>0</output-history-period>
     <end-execution-output>0</end-execution-output>
@@ -25,7 +25,17 @@
   </arcane-checkpoint>
 
   <mesh>
-    <meshgenerator><sod><x>64</x><y>8</y><z>8</z></sod></meshgenerator>
+    <!--1049600 noeuds, 984064 mailles-->
+    <meshgenerator><sod>
+        <x set='false' delta='0.02'>64</x>
+        <y set='true' delta='0.02'>7</y>
+        <z set='true' delta='0.02' total='true'>7</z>
+      </sod></meshgenerator>
+    <!--meshgenerator><sod>
+        <x set='true' delta='0.25'>4</x>
+        <y set='true' delta='0.02'>3</y>
+        <z set='true' delta='0.02' total='true'>3</z>
+      </sod></meshgenerator-->
 	 <initialisation>
 		<variable nom="cell_rh" valeur="1." groupe="ZG" />
 		<variable nom="cell_pressure" valeur="1." groupe="ZG" />
@@ -35,7 +45,4 @@
 		<variable nom="cell_adiabatic_cst" valeur="1.4" groupe="ZD" />
 	 </initialisation>
   </mesh>
-
-  <module-main></module-main>
-
 </case>

@@ -1,57 +1,21 @@
+// NABLA - a Numerical Analysis Based LAnguage
 
-/*                          time (s)
-  #       nth    prime len  gmp   dft
-  #01       1        2
-  #02       2        3
-  #03       3        5
-  #04       4        7
-  #05       6       13
-  #06       7       17
-  #07       8       19
-  #08      11       31
-  #09      18       61
-  #10      24       89
-  #11      28      107
-  #12      31      127
-  #13      98      521
-  #14     111      607
-  #15     207     1279
-  #16     328     2203
-  #17     339     2281
-  #18     455     3217    X
-  #19     583     4253    2
-  #20     602     4423    2
-  #21    1196     9689    2
-  #22    1226     9941    2
-  #23    1357    11213    2
-  #24    2254    19937    2
-  #25    2435    21701    2
-  #26    2591    23209    2
-  #27    4624    44497    2
-  #28    8384    86243    4  225   8
-  #29   10489   110503    6  337  20
-  #30   12331   132049    7  455  34
-  #31   19292   216091   11 1236 106  97@2-threads
-  #32   60745   756839   40    ? 985 471@4-threads
-  #33   68301   859433   44    ? 664@2-threads
-  #34   97017  1257787   64    Could not make it
-  #35  106991  1398269   72     1360@2-threads
-  #36  215208  2976221  160     3991@4-threads
-  #37  218239  3021377  160     4079@4-threads
-  #38  475544  6982593  352
-  #39  877615 13466917  704
-  #40 1329726 20996011 1152
-  #41 1509263 24036583 1280
-  #42 1622441 25964951 1408
-  #43 1881339 30402457 1664
-  #44 2007537 32582657 1792
-  #45 2270720 37156667 2048
-  #46 2584328 42643801 2304
-  #47 2610944 43112609 2304
-  #48 3443958 57885161 3072 0.02s/iter => 13 jours @4-threads
-*/
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
 with mail;
 with gmp, dft, slurm;
 //with mathematica;

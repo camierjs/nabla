@@ -1,7 +1,6 @@
-#info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
+info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}# NABLA BACKEND OKINA #${VT100_RESET}")
-#info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
-
+info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
 
 # BACKEND OKINA
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}OKINA${VT100_RESET}")

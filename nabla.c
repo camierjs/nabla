@@ -31,10 +31,10 @@ static char *unique_temporary_file_name=NULL;
 // * NABLA_MAN
 // *****************************************************************************
 #define NABLA_MAN "[1;36mNAME[0m\n\
-\t[1;36mnabla[0m - Numerical Analysis Based LAnguage's\n\
-\t        Optimized Code Generator for Specific Architectures\n\
+\t[1;36mnabla[0m - Numerical Analysis Based LAnguage\n\
+\t        Optimized Code Generator for Specific Compilers/Architectures\n\
 [1;36mSYNOPSIS[0m\n\
-\t[1;36mnabla[0m [-t] [-v [4mlogfile[0m] [options] [4mpossible_target[0m -i [4minput file list[0m\n\
+\t[1;36mnabla[0m [-t] [-v [4mlogfile[0m] [options] [1;4;35mTARGET[0m -i [4minput file list[0m\n\
 [1;36mWARNING[0m\n\
 \tThe [1;36mnabla[0m generator is still under heavy development and\n\
 \tdistributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;\n\
@@ -45,36 +45,41 @@ static char *unique_temporary_file_name=NULL;
 [1;36mOPTIONS[0m\n\
 \t[1;36m-t[0m\t\tGenerate the intermediate AST dot files\n\
 \t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
-[4mpossible_target[0m is:\n\
-\t[1;36m--arcane [4mname[0m\tCode generation for the target ARCANE\n\
+[1;4;35mTARGET[0m can be:\n\
+\t[1;36m--okina [4mname[0m\tCode generation for native C/C++ stand-alone target\n\
+\t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
+\t\t[36m--sse[0m\t\tExplicit code generation with SSE intrinsics\n\
+\t\t[36m--avx[0m\t\tExplicit code generation with AVX intrinsics\n\
+\t\t[36m--avx2[0m\t\tExplicit code generation with AVX2 intrinsics\n\
+\t\t[36m--mic[0m\t\tExplicit code generation with MIC intrinsics\n\
+\n\t\t[36m--seq[0m\t\tSequential code generation (default)\n\
+\t\t[36m--omp[0m\t\tOpenMP parallel implementation\n\
+\t\t[36m--cilk[0m\t\tCilk+ parallel implementation\n\
+\t\t\t\t(still experimental with latest GNU GCC)\n\
+\t\t[36m--gcc[0m\t\tGNU GCC pragma generation (default)\n\
+\t\t[36m--icc[0m\t\tIntel® ICC pragma generation\n\
+\t[1;36m--cuda [4mname[0m\tCode generation for the target CUDA\n\
+\t\t\tCUDA does not yet support all of nabla's system libraries\n\
+\t[1;36m--arcane [4mname[0m\tCode generation for the middleware ARCANE\n\
 \t\t[36m--alone[0m\t\tGenerate a [4mstand-alone[0m application\n\
 \t\t[36m--module[0m\tGenerate a [4mmodule[0m\n\
 \t\t[36m--service[0m\tGenerate a [4mservice[0m\n\
 \t\t\t[36m-I [4mname[0m\t\tInterface name to use\n\
 \t\t\t[36m-p [4mpath[0m\t\tPath of the interface file\n\
-\t\t\t[36m-n [4mname[0m\t\tService name that'll be generate\n\
-\t[1;36m--cuda [4mname[0m\tCode generation for the target CUDA\n\
-\t\t\tCUDA does not yet support all of the libraries you would like\n\
-\t[1;36m--okina [4mname[0m\tCode generation for the target XeonPhi\n\
-\t\t[36m--std[0m\t\tSTD 1=2^(WARP_BIT=0) vector depth\n\
-\t\t[36m--sse[0m\t\tSSE 2=2^(WARP_BIT=1) vector depth\n\
-\t\t[36m--avx[0m\t\tAVX 4=2^(WARP_BIT=2) vector depth\n\
-\t\t[36m--avx2[0m\t\tAVX 4=2^(WARP_BIT=2) vector depth + gather & FMA\n\
-\t\t[36m--mic[0m\t\tMIC 8=2^(WARP_BIT=3) vector depth\n\
-\t\t[36m--cilk[0m\t\tCilk+ parallel implementation\n\
-\t\t[36m--omp[0m\t\tOpenMP parallel implementation\n\
+\t\t\t[36m-n [4mname[0m\t\tService name that will be generate\n\
 [1;36mEMACS MODE[0m\n\
-\t(setq load-path (cons \"~/.emacs.d\" load-path))\n\
-\t(autoload 'nabla-mode \"nabla-mode\" \"Nabla Mode\" t)\n\
-\t(setq auto-mode-alist (cons '(\"\\.n\\'\" . nabla-mode) auto-mode-alist))\n\
-\t(set-selection-coding-system 'utf-8)\n\
-\t(setq locale-coding-system 'utf-8)\n\
-\t(set-language-environment 'utf-8)\n\
+\tYou can find a nabla-mode.el file within the distribution.\n\
+\tLoading emacs utf-8 locale coding system could be a good idea:\n\
+\t\t(setq load-path (cons \"~/.emacs.d\" load-path))\n\
+\t\t(autoload 'nabla-mode \"nabla-mode\" \"Nabla Mode\" t)\n\
+\t\t(setq auto-mode-alist (cons '(\"\\.n\\'\" . nabla-mode) auto-mode-alist))\n\
+\t\t(set-selection-coding-system 'utf-8)\n\
+\t\t(setq locale-coding-system 'utf-8)\n\
+\t\t(set-language-environment 'utf-8)\n\
 [1;36mAUTHOR[0m\n\
-\tJean-Sylvain Camier (#5568) <jean-sylvain.camier@cea.fr>\n\
+\tJean-Sylvain Camier <jean-sylvain.camier@cea.fr>\n\
 [1;36mBUGS[0m\n\
-\tTest bugs are to be reported to the above address.\n"
-//\t\t[36m--seq[0m\t\tNo parallel implementation\n                \
+\tBugs are to be reported to the above address.\n"
 //\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n
 //\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n
 //\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n
@@ -95,26 +100,10 @@ static void nabla_unlink(void){
 // * int vsprintf(char *str, const char *format, va_list ap);
 // *****************************************************************************
 void nabla_error(const char *format,...){
-  //int n;
-  //const int size = 8192;
-  //char *error_msg;
   va_list args;
-  
-  //if ((error_msg = malloc(size))==NULL)    error(!0,0,"Could not even malloc for our error message!");
-
   va_start(args, format);
-  //assert(error_msg);
   error_at_line(!0,0,nabla_input_file, yylineno-1, format,args);
-
-  //n=vsnprintf(error_msg,size,format,args);
   va_end(args);
-
-  // We do not want to unlink yet
-  // nabla_unlink();
-  //assert(nabla_input_file!=NULL);
-  //printf("nabla_input_file=%s\n",nabla_input_file);
-  //if (n > -1 && n < size)    error_at_line(!0,0,"strdup(nabla_input_file)", yylineno, error_msg);
-  //free(error_msg);
 }
 
 
@@ -265,24 +254,7 @@ void nablaPreprocessor(char *nabla_entity_name,
                        char *list_of_nabla_files,
                        char *unique_temporary_file_name,
                        const int unique_temporary_file_fd){
-  //char *scanForSpaceToPutZero;
-  // Saving list of ∇ files for yyerror
-  //nabla_input_file=strdup(list_of_nabla_files);
-  //nabla_input_file=strdup(unique_temporary_file_name);
   printf("%s:1: is our temporary file\n",unique_temporary_file_name);
-  //printf("%s:1: is our nabla_input_file\n",nabla_input_file);
-
-  // Scanning list_of_nabla_files to fetch only the first filename
-  // It allows emacs to go to this file+line when a syntax error is discovered
-  /*scanForSpaceToPutZero=nabla_input_file;
-  while(*scanForSpaceToPutZero!=32){
-    scanForSpaceToPutZero+=1;
-    if (*scanForSpaceToPutZero==0) break;
-  }
-  if (*scanForSpaceToPutZero==32) *scanForSpaceToPutZero=0;
-  dbg("\n[nablaPreprocessor] But giving nabla_input_file = %s, unique_temporary_file = %s",
-  list_of_nabla_files, unique_temporary_file_name);*/
-  
   if (sysPreprocessor(nabla_entity_name,
                       list_of_nabla_files,
                       unique_temporary_file_name,

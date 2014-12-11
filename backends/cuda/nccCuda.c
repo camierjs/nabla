@@ -33,6 +33,12 @@ void cudaInlines(nablaMain *nabla){
   fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
 }
 
+// ****************************************************************************
+// * cudaPragmas
+// ****************************************************************************
+char *nCudaPragmaGccIvdep(void){ return ""; }
+char *nCudaPragmaGccAlign(void){ return ""; }
+
 
 /***************************************************************************** 
  * 
@@ -146,15 +152,15 @@ static void cudaDfsForCalls(struct nablaMainStruct *nabla,
   int nb_called;
   nablaVariable *var;
   // On scan en dfs pour chercher ce que cette fonction va appeler
-  dbg("\n\t[nablaFctFill] On scan en dfs pour chercher ce que cette fonction va appeler");
+  dbg("\n\t[cudaDfsForCalls] On scan en DFS pour chercher ce que cette fonction va appeler");
   nb_called=dfsScanJobsCalls(&fct->called_variables,nabla,n);
-  dbg("\n\t[nablaFctFill] nb_called = %d", nb_called);
+  dbg("\n\t[cudaDfsForCalls] nb_called = %d", nb_called);
   if (nb_called!=0){
     int numParams=1;
     cudaAddExtraConnectivitiesParameters(nabla,&numParams);
-    dbg("\n\t[nablaFctFill] dumping variables found:");
+    dbg("\n\t[cudaDfsForCalls] dumping variables found:");
     for(var=fct->called_variables;var!=NULL;var=var->next){
-      dbg("\n\t\t[nablaFctFill] variable %s %s %s", var->type, var->item, var->name);
+      dbg("\n\t\t[cudaDfsForCalls] variable %s %s %s", var->type, var->item, var->name);
       nprintf(nabla, NULL, ",\n\t\t/*used_called_variable*/%s *%s_%s",var->type, var->item, var->name);
     }
   }
@@ -315,6 +321,12 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   };
   nabla->simd=&nablaCudaSimdHooks;
   nabla->hook=&cudaBackendHooks;
+  
+  nablaBackendPragmaHooks cudaPragmaGCCHooks={
+    nCudaPragmaGccIvdep,
+    nCudaPragmaGccAlign
+  };
+  nabla->pragma=&cudaPragmaGCCHooks;
 
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nablaVariableNew(nabla);

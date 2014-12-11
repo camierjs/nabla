@@ -128,14 +128,14 @@ struct __attribute__ ((aligned(16))) real {
   friend inline real operator!=(const real &a, const real& r) { return _mm_cmpneq_pd(a, r); }
   friend inline real operator!=(const real &a, double d) { return _mm_cmpneq_pd(a, _mm_set1_pd(d)); }
 
-  friend real unglitch(const real &a)  {
+  /*friend real unglitch(const real &a)  {
     const union{
       unsigned long long i[4];
       __m128d m;
     } __f64vec4_abs_mask = { 0xffffffffffff0000ull,
                              0xffffffffffff0000ull};
     return _mm_and_pd(a, __f64vec4_abs_mask.m);
-  }
+    }*/
 
   inline const double& operator[](int i) const  {
     double *d= (double*)&vec;

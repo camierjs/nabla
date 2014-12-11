@@ -4,4 +4,4 @@ TGT=${name}
 #export LOG=-t -v $(TGT).log
 ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
 
-include ../Makefile.nabla.${backend}
+include ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.${backend}

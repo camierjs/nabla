@@ -1,34 +1,45 @@
-// On a besoin de mailles fictives pour les conditions en 'next'
-with mpi,cartesian; // donne accès aux 'xyz' comme arguments des points d'entrée
+// NABLA - a Numerical Analysis Based LAnguage
 
+// Copyright (C) 2014 CEA/DAM/DIF
+// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See the LICENSE file for details.
+with cartesian;
 
 // ****************************************************************************
 // * OPTIONS
 // ****************************************************************************
 options{
-  // default_values
-  Integer global_nx      = 4;
-  Integer global_ny      = 4;
-  Real    dx             = 0.05;
-  Real    t              = 0.0;
-  Integer step           = 0;
-  Real    tend           = 50.0;
+  Real    δx             = 0.00390625;
+  Real    time_end       = 50.0;
   Real    courant_number = 0.8; 
-  Integer iorder         = 2;
   Real    slope_type     = 1.0;
-  Integer scheme         = 1;
   Integer nstepmax       = 2;
   Integer testcase       = 0;
+  Int64   uid_bubble_one = 0;
+  Int64   uid_bubble_two = 0;
   // static constants
-  Real    GAMMA          = 1.4;
+  Real    γ              = 1.4;
   Real    SMALLC         = 1e-10;
   Real    SMALLR         = 1e-10;
-  Real    PRECISION      = 1e-6;
+  Real    ε              = 1e-8;
   Integer NITER_RIEMANN  = 10;
 };
 
 
-// ****************************************************************************
+// ****************************************************************************
 // * Déclaration des variables aux mailles
 // ****************************************************************************
 cells{
@@ -86,60 +97,46 @@ cells{
 // * Déclaration des variables globales
 // ****************************************************************************
 global{
-  Real    dt_dx;
-  Integer decomp0;
-  Integer decomp1;
-  Real    inv_slope_type;
-  Real    GAMMA6;
-  Real    SMALLP;
-  Real    SMALLPP;
-  Real    ZEROL;
-  Real    ZEROR;
-  Real    PROJECT;
+  Real dt_δx;
+  Real inv_slope_type;
+  Real γ6;
+  Real SMALLP;
+  Real SMALLPP;
+  Real ZEROL;
+  Real ZEROR;
+  Real PROJECT;
 };
 
 
-// ****************************************************************************
+// ****************************************************************************
 // * Partie d'initialisation ]-∞,-0] 
 // ****************************************************************************
 
 void print_params(void) @ -10.0{
-  info()<< "NX                  =" << global_nx;
-  info()<< "NY                  =" << global_ny;
   info()<< "TESTCASE            =" << testcase;
-  info()<< "SCHEME              =" << scheme;
   info()<< "NSTEPMAX            =" << nstepmax;
-  info()<< "IORDER              =" << iorder;
   info()<< "COURANT_NUMBER      =" << courant_number;
-  info()<< "DX                  =" << dx;
-  info()<< "TEND                =" << tend;
+  info()<< "DX                  =" << δx;
+  info()<< "TEND                =" << time_end;
 }
 
-
 void ini(void) @ -10.0{
-  GAMMA6 = (GAMMA + 1.0) / (2.0 * GAMMA);
-  SMALLP = SMALLC * SMALLC / GAMMA;
+  γ6 = (γ + 1.0) / (2.0 * γ);
+  SMALLP = SMALLC * SMALLC / γ;
   SMALLPP = SMALLR * SMALLP;
   inv_slope_type=1.0/slope_type;
 }
-
 
 cells void init_hydro(void)
   out (cell ρ, cell u, cell v, cell E, cell p, cell c) @ -9.1{
   old_ρ=ρ=1.0;
   old_u=u=old_v=v=0.0;
   old_E=E=1.0e-5;
-  if (testcase==0 && lid==0) old_E=E=1.0/dx/dx;
+  if (testcase==0 && uid==0) old_E=E=1.0/δx/δx;
+  if (testcase==1 && uid==uid_bubble_one) old_E=E=0.5/δx/δx;
+  if (testcase==1 && uid==uid_bubble_two) old_E=E=0.25/δx/δx;
   old_p=p=old_c=c=0.0;
 }
-void eieio_init(void) @ -9.0 {
-  eieio();
-  //dump_info_ρuvE();
-}
-
-
-
-
 
 own cells Real courant(Real courantv)
   in (cell prim_u, cell prim_v, cell prim_c){
@@ -152,36 +149,25 @@ Real compute_δt(void) {
   conservative_to_primitive();eieio();
   equation_of_state();eieio();
   speed_of_sound();eieio();
-  //dump_info_prim_ρuvEpc();
   crt=courant(SMALLC);
-  //info() << "[7m[compute_δt] courant(SMALLC)="<<crt<<"[m";
   courantv=mpi_reduce(ReduceMax,crt);
-  //info() << "[7m[compute_δt] courantv="<<courantv<<"[m";
-  return courant_number * dx / courantv;
+  return courant_number * δx / courantv;
 }
-
-void eieio_init_dt(void) @ -4.1 {eieio();}
 
 void init_δt(void) @ -4.0{
   δt=compute_δt()/2.0;
-  dt_dx=δt/dx;
-  ZEROL   = -100.0/dt_dx;
-  ZEROR   =  100.0/dt_dx;
+  dt_δx=δt/δx;
+  ZEROL   = -100.0/dt_δx;
+  ZEROR   =  100.0/dt_δx;
   PROJECT =  1.0;
-  info() << "[7m[init_δt] δt="<<δt<<", dt/dx="<<dt_dx<<"[m";
+  info() << "[7m[init_δt] δt="<<δt<<", dt/δx="<<dt_δx<<"[m";
 }
 
 
-// ****************************************************************************
+// ****************************************************************************
 // * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
-//void infoXY(void)@ 0.01{
-//  if (isX()) info()<<"[36m[XYZ] is MD_DirX[m";
-//  else info()<<"[36m[XYZ] is MD_DirY[m";
-//}
 
-
-// @ 0.5 gatherConservativeVariables
 cells void gatherConservativeVariables(void) @ 0.5{
   ρ=old_ρ;
   if (isX()){
@@ -193,12 +179,7 @@ cells void gatherConservativeVariables(void) @ 0.5{
   }
   E=old_E;
 }
-void eieio_gather(void) @ 0.6 {
-  eieio();
-  //dump_info_ρuvE();
-}
 
-// @ 1.0 conservative_to_primitive
 cells void conservative_to_primitive(void)
   in (cell old_ρ, cell old_u, cell old_v, cell old_E)
   out (cell prim_ρ, cell inv_prim_ρ, cell prim_u,
@@ -213,22 +194,16 @@ cells void conservative_to_primitive(void)
   }
 }
 
-// @ 2.0 equation_of_state
 cells void equation_of_state(void)
   in (cell prim_ρ, cell E_internal)
   out (cell prim_p) @ 2.0{
-  prim_p = max((GAMMA - 1.0) * prim_ρ * E_internal, SMALLP);
+  prim_p = max((γ - 1.0) * prim_ρ * E_internal, SMALLP);
 }
 
-// @ 3.0 speed_of_sound
 cells void speed_of_sound(void)
   in (cell prim_inv_ρ, cell prim_p)
   out (cell prim_c) @ 3.0{
-  prim_c = sqrt(GAMMA * prim_p * inv_prim_ρ);
-}
-void eieio_eos(void) @ 3.1 {
-  eieio();
-  //dump_info_prim_ρuvEpc();
+  prim_c = sqrt(γ * prim_p * inv_prim_ρ);
 }
 
 
@@ -243,17 +218,12 @@ Real slope(const Real nbv_m, const Real nbv_0, const Real nbv_p){
   const Real sign = (center > 0.0) ? 1.0 : -1.0;
   const Real llftrgt = (left * right) <= 0.0;
   const Real t1 = fmin(fabs(left), fabs(right));
-  //info()<<"[slope] minus="<<nbv_m<<", this="<<nbv_0<<", plus="<<nbv_p;
-  //info()<<"[slope] left="<<left<<", right="<<right;
-  //info()<<"[slope] center="<<center<<", t1="<<t1;
   rtn = sign * fmin((1.0-llftrgt)*t1, fabs(center));
-  //info()<<"[slope] slope="<<rtn;
   return rtn;
 }
 inner cells void compute_inner_slopes_xyz(xyz direction)
   in (cell ρ, cell u, cell v, cell p)
   out (cell slope_ρ, cell slope_u, cell slope_v, cell slope_p){
-  //info()<<"[32m[compute_inner_slopes_xyz] inner cell #"<<lid<<"[m";
   slope_ρ=slope(prim_ρ[prevCell],prim_ρ,prim_ρ[nextCell]);
   slope_u=slope(prim_u[prevCell],prim_u,prim_u[nextCell]);
   slope_v=slope(prim_v[prevCell],prim_v,prim_v[nextCell]);
@@ -265,19 +235,16 @@ outer cells void compute_outer_slopes_xyz(xyz direction)
   if (prevCell.null()){ // Frontière gauche
     slope_ρ=slope(prim_ρ,prim_ρ,prim_ρ[nextCell]);
     slope_u=slope(-prim_u[nextCell],-prim_u,prim_u);
-    slope_v=slope(prim_v,prim_v,prim_v[nextCell]);//slope(-prim_v[nextCell],-prim_v,prim_v);
+    slope_v=slope(prim_v,prim_v,prim_v[nextCell]);
     slope_p=slope(prim_p,prim_p,prim_p[nextCell]);
-    /*info()<<"[32m[compute_outer_slopes_xyz] outer noprev cell #"<<lid
-          << "\n\t\tprim_v="<<prim_v<<", prim_v[nextCell]="<<prim_v[nextCell]
-          <<", slope_v="<<slope_v<<"[m";*/
+
     continue;
   }
   if (nextCell.null()){ // Frontière droite
     slope_ρ=slope(prim_ρ[prevCell],prim_ρ,prim_ρ);
     slope_u=slope(prim_u,-prim_u,-prim_u[prevCell]);
-    slope_v=slope(prim_v[prevCell],prim_v,prim_v);//slope(prim_v,-prim_v,-prim_v[prevCell]);
+    slope_v=slope(prim_v[prevCell],prim_v,prim_v);
     slope_p=slope(prim_p[prevCell],prim_p,prim_p);
-    //info()<<"[32m[compute_outer_slopes_xyz] outer nonext cell #"<<lid<<", slope_v="<<slope_v<<"[m";
     continue;
   }
 }
@@ -290,25 +257,19 @@ void compute_slopes(void) @ 4.0{
     compute_outer_slopes_xyz(MD_DirY) @ 0.0;
   }
 }
-void eieio_slope(void) @ 4.1 {
-  eieio();
-  //dump_slopes();
-}
 
-
-// ****************************************************************************
+// ****************************************************************************
 // * Compute fluxes
 // ****************************************************************************
-// @ 5.0 compute_flux
 cells void compute_right_flux(void) @ 5.0{
   const Real inv_c = 1.0/prim_c;
   const Real alpha_m = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) - slope_u)*prim_ρ*inv_c;
   const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
   const Real alpha_0r = slope_ρ - slope_p * (inv_c*inv_c);
   const Real alpha_0v = slope_v;
-  const Real sp_m = ((prim_u - prim_c) >= ZEROR) ? PROJECT : (prim_u - prim_c) * dt_dx + 1.0;
-  const Real sp_p = ((prim_u + prim_c) >= ZEROR) ? PROJECT : (prim_u + prim_c) * dt_dx + 1.0;
-  const Real sp_0 = (prim_u >= ZEROR) ? PROJECT : prim_u * dt_dx + 1.0;
+  const Real sp_m = ((prim_u - prim_c) >= ZEROR) ? PROJECT : (prim_u - prim_c) * dt_δx + 1.0;
+  const Real sp_p = ((prim_u + prim_c) >= ZEROR) ? PROJECT : (prim_u + prim_c) * dt_δx + 1.0;
+  const Real sp_0 = (prim_u >= ZEROR) ? PROJECT : prim_u * dt_δx + 1.0;
   const Real a_p = -0.5 * sp_p * alpha_p;
   const Real a_m = -0.5 * sp_m * alpha_m;
   const Real a_0r = -0.5 * sp_0 * alpha_0r;
@@ -324,9 +285,9 @@ cells void compute_left_flux(void) @ 5.0{
   const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
   const Real alpha_0r = slope_ρ - slope_p * (inv_c*inv_c);
   const Real alpha_0v = slope_v;
-  const Real sp_m = ((prim_u - prim_c) <= ZEROL) ? -PROJECT : (prim_u - prim_c) * dt_dx - 1.0;
-  const Real sp_p = ((prim_u + prim_c) <= ZEROL) ? -PROJECT : (prim_u + prim_c) * dt_dx - 1.0;
-  const Real sp_0 = (prim_u <= ZEROL) ? -PROJECT : prim_u * dt_dx - 1.0;
+  const Real sp_m = ((prim_u - prim_c) <= ZEROL) ? -PROJECT : (prim_u - prim_c) * dt_δx - 1.0;
+  const Real sp_p = ((prim_u + prim_c) <= ZEROL) ? -PROJECT : (prim_u + prim_c) * dt_δx - 1.0;
+  const Real sp_0 = (prim_u <= ZEROL) ? -PROJECT : prim_u * dt_δx - 1.0;
   const Real a_p = -0.5 * sp_p * alpha_p;
   const Real a_m = -0.5 * sp_m * alpha_m;
   const Real a_0r = -0.5 * sp_0 * alpha_0r;
@@ -336,17 +297,11 @@ cells void compute_left_flux(void) @ 5.0{
   q_v_left = flux_v_left = prim_v + a_0v;
   q_p_left = flux_p_left = prim_p + (a_p + a_m) * prim_c * prim_c;
 }
-void eieio_flux(void) @ 5.01 {
-  eieio();
-  //dump_flux();
-}
 
-
-// ****************************************************************************
+// ****************************************************************************
 // * Compute qleftright
 // ****************************************************************************
 inner cells void inner_qleftright_std(xyz direction){
-  //info()<<"[32m[inner_qleftright] cell #"<<lid<<"[m";
   q_ρ_left = flux_ρ_left[prevCell];
   q_u_left = flux_u_left[prevCell];
   q_v_left = flux_v_left[prevCell];
@@ -374,57 +329,44 @@ void do_qleftright(void) @ 5.5{
     outer_qleftright(MD_DirY);
   }
 }
-void eieio_qleftright(void) @ 5.6 {
-  eieio();
-  //dump_qleftright();
-}
 
 
-// ****************************************************************************
+// ****************************************************************************
 // * Compute Riemann @ 6.0
 // ****************************************************************************
 cells void riemann(void)
   in (face q_ρ_left, face q_u_left, face q_v_left, face q_p_left,
       face q_ρ_right, face q_u_right, face q_v_right, face q_p_right)
   out (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 6.0{
- 
   const Real in_left_ρ=q_ρ_left;
   const Real in_left_u=q_u_left;
   const Real in_left_v=q_v_left;
   const Real in_left_p=q_p_left;
-  
   const Real in_right_ρ=q_ρ_right;
   const Real in_right_u=q_u_right;
   const Real in_right_v=q_v_right;
   const Real in_right_p=q_p_right;
-  
   const Real left_ρ = fmax(in_left_ρ, SMALLR);
   const Real left_u = in_left_u;
   const Real left_v = in_left_v;
   const Real left_p = fmax(in_left_p, left_ρ * SMALLP);
-  const Real left_c = GAMMA * left_p * left_ρ;
-
+  const Real left_c = γ * left_p * left_ρ;
   const Real right_ρ = fmax(in_right_ρ, SMALLR);
   const Real right_u = in_right_u;
   const Real right_v = in_right_v;
   const Real right_p = fmax(in_right_p, right_ρ * SMALLP);
-  const Real right_c = GAMMA * right_p * right_ρ;
-
-  Real p_star;
-  Bool goon = true;
-	
+  const Real right_c = γ * right_p * right_ρ;
   const Real left_w = sqrt(left_c);
   const Real right_w = sqrt(right_c);
+  Real p_star;
+  Bool goon = true;
   p_star = fmax((right_w*left_p + left_w*right_p + left_w*right_w*(left_u-right_u))
                 /(left_w+right_w), 0.0);
-
   for(int i = 0; i < NITER_RIEMANN; ++i){
     if(goon){
-      //const Real left_ww2 = left_ρ*0.5*(GAMMA+1.0)*p_star+(GAMMA-1.0)*left_p;
-      const Real left_ww2 = left_c*(1.0+GAMMA6*(p_star-left_p)/left_p);
+      const Real left_ww2 = left_c*(1.0+γ6*(p_star-left_p)/left_p);
       const Real left_ww = sqrt(left_ww2);
-      //const Real right_ww2 =right_ρ*0.5*(GAMMA+1.0)*p_star+(GAMMA-1.0)*right_p;
-      const Real right_ww2 =right_c*(1.0+GAMMA6*(p_star-right_p)/right_p);
+      const Real right_ww2 =right_c*(1.0+γ6*(p_star-right_p)/right_p);
       const Real right_ww = sqrt(right_ww2);
       const Real tmp_num = 2.0*left_ww2*right_ww2*(left_ww*right_ww*(left_u-right_u)
                                                    -left_ww*(p_star-right_p)
@@ -435,17 +377,14 @@ cells void riemann(void)
       p_star+= deleft_p;
       {
         const Real uo = fabs(deleft_p/(p_star + SMALLPP));
-        goon = uo > PRECISION;
+        goon = uo > ε;
       }
     }
   }
-
   {
-    //const Real left_w2 = left_ρ * 0.5 * ((GAMMA + 1.0) * p_star + (GAMMA - 1.0) * left_p);
-    const Real left_w2 = left_c*(1.0+GAMMA6*(p_star-left_p)/left_p);
+    const Real left_w2 = left_c*(1.0+γ6*(p_star-left_p)/left_p);
     const Real left_w = sqrt(left_w2);
-    //const Real right_w2 = right_ρ * 0.5 * ((GAMMA + 1.0) * p_star + (GAMMA - 1.0) * right_p);
-    const Real right_w2 = right_c*(1.0+GAMMA6*(p_star-right_p)/right_p);
+    const Real right_w2 = right_c*(1.0+γ6*(p_star-right_p)/right_p);
     const Real right_w = sqrt(right_w2);
     const Real u_star = 0.5 * (left_u+(left_p-p_star)/left_w + right_u-(right_p-p_star)/right_w);
     const Real sgnm = (u_star > 0.0) ? 1.0 : -1.0;
@@ -453,17 +392,13 @@ cells void riemann(void)
     const Real u_0 = (u_star > 0.0) ? left_u : right_u;
     const Real p_0 = (u_star > 0.0) ? left_p : right_p;
     const Real w_0 = (u_star > 0.0) ? left_w : right_w;
-    //const Real w2_0 = (u_star > 0.0) ? left_w2 : right_w2;
     const Real inv_ρ_0 = 1.0/(ρ_0);
-    const Real c_0 = fmax(sqrt(fabs(GAMMA * p_0 * inv_ρ_0)), SMALLC);
-    //const Real ρ_star = fmax(w2_0*ρ_0 * (1.0/(w2_0 + ρ_0 * (p_0 - p_star))), SMALLR);
+    const Real c_0 = fmax(sqrt(fabs(γ * p_0 * inv_ρ_0)), SMALLC);
     const Real ρ_star = fmax(ρ_0/(1.0+ρ_0*(p_0-p_star)/(w_0*w_0)), SMALLR);
-    const Real c_star = fmax(sqrt(fabs(GAMMA*p_star/ρ_star)), SMALLC);
-    
+    const Real c_star = fmax(sqrt(fabs(γ*p_star/ρ_star)), SMALLC);
     const Real ushock = w_0 * inv_ρ_0 - sgnm * u_0;
     const Real spout = (p_star >= p_0) ? ushock : c_0 - sgnm * u_0;
     const Real spin = (p_star >= p_0) ? ushock : c_star - sgnm * u_star;
-    
     Real frac;
     if(spout < 0.0) frac = 0.0;
     else if(spin > 0.0) frac = 1.0;
@@ -475,15 +410,8 @@ cells void riemann(void)
     gdnv_u = (frac * u_star + (1.0-frac)*u_0);
     gdnv_v = (u_star > 0.0) ? left_v : right_v;
     gdnv_p = (frac * p_star + (1.0-frac)*p_0);
-    //info()<<"[riemann] cell #"<<lid<<", gdnv_ρ="<<gdnv_ρ<<", p_star_ini="<<p_star_ini<<", p_star="<<p_star;
   }
-  // todo: handle passive
 }
-void eieio_riemann(void) @ 6.01 {
-  eieio();
-  //dump_riemann();
-}
-
 
 // ****************************************************************************
 // * Compute fluxes from solution @ 7.0
@@ -495,74 +423,50 @@ cells void cmpflx(void) in (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p)
   flux_v = mass_density * gdnv_v;
   {
     const Real E_kinetic = 0.5 * gdnv_ρ * (gdnv_u*gdnv_u + gdnv_v*gdnv_v);
-    const Real E_total = gdnv_p * 1.0/(GAMMA-1.0) + E_kinetic;
+    const Real E_total = gdnv_p * 1.0/(γ-1.0) + E_kinetic;
     flux_E = gdnv_u * (E_total + gdnv_p);
   }
-  // todo: handle passive other advected quantities
 }
-void eieio_cmpflx(void) @ 7.01 {
-  eieio();
-  //dump_cmpflx();
-}
-
-
 
 // ****************************************************************************
 // * Update fluxes from solution @ 8.0
 // ****************************************************************************
 cells void updateXYZ(xyz direction) {
-  Real dtSdx=δt/dx;
+  Real dtSδx=δt/δx;
   if (!this->isOwn()) continue;
   if (prevCell.null()){ // Frontière prev
-    //info()<<"[update] no-prev cell #"<<lid;
-    //printf("*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, dtSdx=%12.12f", v,old_v,flux_v,dtSdx);
-    #warning Should find v=0.315214452951 depuis un qleft à 0.011443611907
-    old_ρ = ρ + (flux_ρ - flux_ρ[nextCell]) * dtSdx;
+    old_ρ = ρ + (flux_ρ - flux_ρ[nextCell]) * dtSδx;
     if (isX()){
-      old_u = u + (flux_u - flux_u[nextCell]) * dtSdx;
-      old_v = v + (flux_v - flux_v[nextCell]) * dtSdx;
+      old_u = u + (flux_u - flux_u[nextCell]) * dtSδx;
+      old_v = v + (flux_v - flux_v[nextCell]) * dtSδx;
     }else{
-      old_v = u + (flux_u - flux_u[nextCell]) * dtSdx;
-      old_u = v + (flux_v - flux_v[nextCell]) * dtSdx;
+      old_v = u + (flux_u - flux_u[nextCell]) * dtSδx;
+      old_u = v + (flux_v - flux_v[nextCell]) * dtSδx;
     }
-    old_E = E + (flux_E - flux_E[nextCell]) * dtSdx;
-    //printf(", vnew_=%12.12f, flux_v[nextCell]=%12.12f\n", old_v, flux_v[nextCell]);
+    old_E = E + (flux_E - flux_E[nextCell]) * dtSδx;
     continue;
   }
-  #warning updateXYZ for nextCell
   if (nextCell.null()){ // Frontière next
-    //if (isX())
-    //info()<<"[update] X no-next cell #"<<lid;
-    //else
-    // info()<<"[update] Y no-next cell #"<<lid;
-    //info()<<"[update] dtSdx="<<dtSdx;
-    //printf("*I-sethi      [update] u=%12.12f, old_u=%12.12f, flux_u=%12.12f, flux_u[prevCell]=%12.12f", u, old_u, flux_u, flux_u[prevCell]);
-    //printf("\n*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, flux_v[prevCell]=%12.12f", v, old_v,flux_v, flux_v[prevCell]);
-    old_ρ = ρ + (flux_ρ) * dtSdx;
+    old_ρ = ρ + (flux_ρ) * dtSδx;
     if (isX()){
-      old_u = u + (flux_u - 0.000004) * dtSdx;//0.000004 
-      old_v = v + (flux_v) * dtSdx;
+      old_u = u + (flux_u - 0.000004) * dtSδx;
+      old_v = v + (flux_v) * dtSδx;
     }else{
-      old_v = u + (flux_u - 0.000004) * dtSdx;//0.000004
-      old_u = v + (flux_v) * dtSdx;
+      old_v = u + (flux_u - 0.000004) * dtSδx;
+      old_u = v + (flux_v) * dtSδx;
     }
-    old_E = E + (flux_E) * dtSdx;
-    //printf(", unew=%12.12f", old_u);
-    //printf(", vnew=%12.12f\n", old_v);
+    old_E = E + (flux_E) * dtSδx;
     continue;
   }
-  //info()<<"[update] std cell #"<<lid;
-  //printf("*I-sethi      [update] v=%12.12f, old_v=%12.12f, flux_v=%12.12f, dtSdx=%12.12f", v,old_v,flux_v,dtSdx);
-  old_ρ = ρ + (flux_ρ-flux_ρ[nextCell]) * dtSdx;
+  old_ρ = ρ + (flux_ρ-flux_ρ[nextCell]) * dtSδx;
   if (isX()){
-    old_u = u + (flux_u-flux_u[nextCell]) * dtSdx;
-    old_v = v + (flux_v-flux_v[nextCell]) * dtSdx;
+    old_u = u + (flux_u-flux_u[nextCell]) * dtSδx;
+    old_v = v + (flux_v-flux_v[nextCell]) * dtSδx;
   }else{
-    old_v = u + (flux_u-flux_u[nextCell]) * dtSdx;
-    old_u = v + (flux_v-flux_v[nextCell]) * dtSdx;
+    old_v = u + (flux_u-flux_u[nextCell]) * dtSδx;
+    old_u = v + (flux_v-flux_v[nextCell]) * dtSδx;
   }
-  old_E = E + (flux_E-flux_E[nextCell]) * dtSdx;
-  //printf(", vnew_=%12.12f, flux_v[nextCell]=%12.12f\n", old_v, flux_v[nextCell]);
+  old_E = E + (flux_E-flux_E[nextCell]) * dtSδx;
 }
 void update(void) @ 8.0{
   if (isX())
@@ -570,11 +474,6 @@ void update(void) @ 8.0{
   else
     updateXYZ(MD_DirY);
 }
-void eieio_update(void) @ 8.01 {
-  eieio();
-}
-
-
 
 // ****************************************************************************
 // * recompute_δt & test for quit @ [10.0,+∞[ 
@@ -582,382 +481,15 @@ void eieio_update(void) @ 8.01 {
 void recompute_δt(void) @ 10.0{
   if ((GlobalIteration%4) || (GlobalIteration==1)) return;
   δt=compute_δt();
-  dt_dx=δt/dx;
-  info() << "[7m[recompute_δt] δt="<<δt<<", dt/dx="<<dt_dx<<"[m";
+  dt_δx=δt/δx;
+  info() << "[7m[recompute_δt] δt="<<δt<<", dt/δx="<<dt_δx<<"[m";
 }
 void isItTimeToQuit(void) @ 11.0{
+  // On double l'objectif du nstepmax en raison des passes en X et en Y
   if (GlobalIteration >= (nstepmax<<1)) exit;
-  if (time < tend) return;
-  info() << "[7m[isItTimeToQuit] time="<<time<<", tend="<<tend<<"[m";
-  info() << "[7m[isItTimeToQuit] exit: GlobalIteration="<<GlobalIteration<<", nstepmax<<1="<<(nstepmax<<1)<<"[m";
+  if (time < time_end) return;
+  info() << "[7m[isItTimeToQuit] time="<<time<<", time_end="<<time_end<<"[m";
+  info() << "[7m[isItTimeToQuit] exit: GlobalIteration="<<GlobalIteration
+         <<", nstepmax<<1="<<(nstepmax<<1)<<"[m";
   exit;
-}
-
-
-
-
-
-
-
-// ****************************************************************************
-// * Other tools
-// ****************************************************************************
-
-int isX(void){
-  return ((((GlobalIteration-1)%4)==0) || ((GlobalIteration-1)%4)==3);
-}
-
-
-void eieio(void){
-  synchronize(old_ρ);
-  synchronize(old_u); // Normal momentum
-  synchronize(old_v); // Transverse momentum
-  synchronize(old_E);
-}
-
-
-// ****************************************************************************
-// * Dump old_*
-// ****************************************************************************
-cells void dump_old_ρ(void){
-  if (lid==0) printf("\n[dump] old_ID");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", old_ρ);
-}
-cells void dump_old_u(void){
-  if (lid==0) printf("\n[dump] old_IU");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", old_u);
-}
-cells void dump_old_v(void){
-  if (lid==0) printf("\n[dump] old_IV");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", old_v);
-}
-cells void dump_old_E(void){
-  if (lid==0) printf("\n[dump] old_IP");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", old_E);
-}
-void dump_old_ρuvE(void){
-  dump_old_ρ();
-  dump_old_u();
-  dump_old_v();
-  dump_old_E();
-}
-
-
-// ****************************************************************************
-// * Dump ρ,u,v,E
-// ****************************************************************************
-cells void dump_ρ(void){
-  if (lid==0) printf("\n[dump] ID");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", ρ);
-}
-cells void dump_info_ρ(void){
-  info()<< "[dump_info_ρ] #"<<uid<<" ρ="<<ρ;
-}
-cells void dump_u(void){
-  if (lid==0) printf("\n[dump] IU");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", u);
-}
-cells void dump_info_u(void){
-  info()<< "[dump_info_ρ] #"<<uid<<" u="<<u;
-}
-cells void dump_v(void){
-  if (lid==0) printf("\n[dump] IV");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", v);
-}
-cells void dump_info_v(void){
-  info()<< "[dump_info_ρ] #"<<uid<<" v="<<v;
-}
-cells void dump_E(void){
-  if (lid==0) printf("\n[dump] IP");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", E);
-}
-cells void dump_info_E(void){
-  info()<< "[dump_info_ρ] #"<<uid<<" E="<<E;
-}
-void dump_ρuvE(void){
-  dump_ρ();
-  dump_u();
-  dump_v();
-  dump_E();
-}
-void dump_info_ρuvE(void){
-  dump_info_ρ();
-  dump_info_u();
-  dump_info_v();
-  dump_info_E();
-}
-
-
-// ****************************************************************************
-// * Dump primitives
-// ****************************************************************************
-cells void dump_prim_ρ(void){
-  if (lid==0) printf("\n[dump] prim_ID");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", prim_ρ);
-}
-cells void dump_prim_u(void){
-  if (lid==0) printf("\n[dump] prim_IU");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", prim_u);
-}
-cells void dump_prim_v(void){
-  if (lid==0) printf("\n[dump] prim_IV");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", prim_v);
-}
-cells void dump_prim_E(void){
-  if (lid==0) printf("\n[dump] prim_IP");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", E_internal);
-}
-cells void dump_prim_p(void){
-  if (lid==0) printf("\n[dump] prim_p");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", prim_p);
-}
-cells void dump_prim_c(void){
-  if (lid==0) printf("\n[dump] prim_c");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", prim_c);
-}
-cells void dump_info_prim_ρ(void){
-  info()<< "[dump_info_prim_ρ] #"<<uid<<" prim_ρ="<<prim_ρ;
-}
-cells void dump_info_prim_u(void){
-  info()<< "[dump_info_prim_u] #"<<uid<<" prim_u="<<prim_u;
-}
-cells void dump_info_prim_v(void){
-  info()<< "[dump_info_prim_v] #"<<uid<<" prim_v="<<prim_v;
-}
-cells void dump_info_prim_E(void){
-  info()<< "[dump_info_prim_E] #"<<uid<<" prim_E="<<E_internal;
-}
-cells void dump_info_prim_p(void){
-  info()<< "[dump_info_prim_p] #"<<uid<<" prim_p="<<prim_p;
-}
-cells void dump_info_prim_c(void){
-  info()<< "[dump_info_prim_c] #"<<uid<<" prim_c="<<prim_c;
-}
-void dump_info_prim_ρuvEpc(void){
-  dump_info_prim_ρ();
-  dump_info_prim_u();
-  dump_info_prim_v();
-  dump_info_prim_E();
-  dump_info_prim_p();
-  dump_info_prim_c();
-}
-
-
-// ****************************************************************************
-// * Dump slopes
-// ****************************************************************************
-cells void dump_dρ(void){
-  if (lid==0) printf("\n[dump] slope_ρ");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", slope_ρ);
-}
-cells void dump_du(void){
-  if (lid==0) printf("\n[dump] slope_u");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", slope_u);
-}
-cells void dump_dv(void){
-  if (lid==0) printf("\n[dump] slope_v");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", slope_v);
-}
-cells void dump_dp(void){
-  if (lid==0) printf("\n[dump] slope_p");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", slope_p);
-}
-void dump_slopes(void){
-  dump_dρ();
-  dump_du();
-  dump_dv();
-  dump_dp();
-}
-
-
-
-// ****************************************************************************
-// * Dump flux
-// ****************************************************************************
-cells void dump_flux_ρ_left(void){
-  if (lid==0) printf("\n[dump] flux_ρ_left");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_ρ_left);
-}
-cells void dump_flux_u_left(void){
-  if (lid==0) printf("\n[dump] flux_u_left");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_u_left);
-}
-cells void dump_flux_v_left(void){
-  if (lid==0) printf("\n[dump] flux_v_left");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_v_left);
-}
-cells void dump_flux_p_left(void){
-  if (lid==0) printf("\n[dump] flux_p_left");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_p_left);
-}
-
-cells void dump_flux_ρ_right(void){
-  if (lid==0) printf("\n[dump] flux_ρ_right");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_ρ_right);
-}
-cells void dump_flux_u_right(void){
-  if (lid==0) printf("\n[dump] flux_u_right");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_u_right);
-}
-cells void dump_flux_v_right(void){
-  if (lid==0) printf("\n[dump] flux_v_right");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_v_right);
-}
-cells void dump_flux_p_right(void){
-  if (lid==0) printf("\n[dump] flux_p_right");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_p_right);
-}
-void dump_flux(void){
-  dump_flux_ρ_left();
-  dump_flux_u_left();
-  dump_flux_v_left();
-  dump_flux_p_left();
-  
-  dump_flux_ρ_right();
-  dump_flux_u_right();
-  dump_flux_v_right();
-  dump_flux_p_right();
-}
-
-
-// ****************************************************************************
-// * Dump left/right flux
-// ****************************************************************************
-cells void dump_qflux_ρ_left(void){
-  if (lid==0) printf("\n[dump] [33mq_ρ_left[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_ρ_left);
-}
-cells void dump_qflux_u_left(void){
-  if (lid==0) printf("\n[dump] [33mq_u_left[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_u_left);
-}
-cells void dump_qflux_v_left(void){
-  if (lid==0) printf("\n[dump] [33mq_v_left[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_v_left);
-}
-cells void dump_qflux_p_left(void){
-  if (lid==0) printf("\n[dump] [33mq_p_left[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_p_left);
-}
-cells void dump_qflux_ρ_right(void){
-  if (lid==0) printf("\n\n[dump] [36mq_ρ_right[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_ρ_right);
-}
-cells void dump_qflux_u_right(void){
-  if (lid==0) printf("\n[dump] [36mq_u_right[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_u_right);
-}
-cells void dump_qflux_v_right(void){
-  if (lid==0) printf("\n[dump] [36mq_v_right[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_v_right);
-}
-cells void dump_qflux_p_right(void){
-  if (lid==0) printf("\n[dump] [36mq_p_right[m");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", q_p_right);
-}
-void dump_qleftright(void){
-  dump_qflux_ρ_left();
-  dump_qflux_u_left();
-  dump_qflux_v_left();
-  dump_qflux_p_left();
-  dump_qflux_ρ_right();
-  dump_qflux_u_right();
-  dump_qflux_v_right();
-  dump_qflux_p_right();
-}
-
-
-// ****************************************************************************
-// * Dump Riemann solutions
-// ****************************************************************************
-cells void dump_gdnv_ρ(void){
-  if (lid==0) printf("\n[dump] gdnv_ρ");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", gdnv_ρ);
-}
-cells void dump_gdnv_u(void){
-  if (lid==0) printf("\n[dump] gdnv_u");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", gdnv_u);
-}
-cells void dump_gdnv_v(void){
-  if (lid==0) printf("\n[dump] gdnv_v");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", gdnv_v);
-}
-cells void dump_gdnv_p(void){
-  if (lid==0) printf("\n[dump] gdnv_p");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", gdnv_p);
-}
-void dump_riemann(void){
-  dump_gdnv_ρ();
-  dump_gdnv_u();
-  dump_gdnv_v();
-  dump_gdnv_p();
-}
-
-
-// ****************************************************************************
-// * Dump computed fluxes from solution
-// ****************************************************************************
-cells void dump_flux_ρ(void){
-  if (lid==0) printf("\n[dump] flux_ρ");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_ρ);
-}
-cells void dump_flux_u(void){
-  if (lid==0) printf("\n[dump] flux_u");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_u);
-}
-cells void dump_flux_v(void){
-  if (lid==0) printf("\n[dump] flux_v");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_v);
-}
-cells void dump_flux_E(void){ 
-  if (lid==0) printf("\n[dump] flux_E");
-  if ((lid%4)==0) printf("\n\t");
-  printf("%12.12f ", flux_E);
-}
-void dump_cmpflx(void){
-  dump_flux_ρ();
-  dump_flux_u();
-  dump_flux_v();
-  dump_flux_E();
 }
