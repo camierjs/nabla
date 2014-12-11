@@ -1,8 +1,8 @@
 ##############
 # ROOT_PATHS #
 ##############
-#COMPILER_ROOT_PATH=/usr
-COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2
+COMPILER_ROOT_PATH=/usr
+#COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2
 CMAKE_ROOT_PATH = /usr
 
 ####################
@@ -72,6 +72,8 @@ tstrv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
+tstcu:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
 
 ############
 # CLEANING #

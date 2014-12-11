@@ -3,6 +3,7 @@ To compile NABLA you will simply need:
    - bison, the parser generator
    - flex, the lexical analyser generator
    - cmake, the Cross-Platform Makefile Generator
+   - a nvcc compiler linked to the above compiler
 
 The standard steps for installation are:
     1. Make sure you have a C/C++ compiler

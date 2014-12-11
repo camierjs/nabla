@@ -244,7 +244,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
               // On flush cette postfix_expression pour la masquer de la génération
 //#warning Should be a hook, but let it be for now
               if (nabla->backend==BACKEND_CUDA) n->children->next=NULL;
-              //nprintf(nabla, NULL, "/*isDotXYZ=%d*/", job->parse.isDotXYZ);
+              //nprintf(nabla, NULL, "/*nJob:isDotXYZ=%d*/", job->parse.isDotXYZ);
             }
           }
   
@@ -310,18 +310,31 @@ void nablaJobParse(astNode *n, nablaJob *job){
  *****************************************************************************/
 int dumpParameterTypeList(FILE *file, astNode * n){
   int number_of_parameters_here=0;
+  if (n->token != NULL) fprintf(file, "/*dumpParameterTypeList %s:%d*/",n->token,number_of_parameters_here);
+  
+  if ((n->token != NULL )&&(strncmp(n->token,"xyz",3)==0)){// hit 'xyz'
+    fprintf(file, "/*xyz here!*/");
+    number_of_parameters_here+=1;
+  }
+
+  if ((n->token != NULL )&&(strncmp(n->token,"void",4)==0)){
+    number_of_parameters_here-=1;
+  }
+  
   if ((n->token != NULL )&&(strncmp(n->token,"void",4)!=0)){// avoid 'void'
     if (strncmp(n->token,"restrict",8)==0){
       fprintf(file, "__restrict__ ");
     }else if (strncmp(n->token,"aligned",7)==0){
       fprintf(file, "/*aligned*/");
     }else{
+      fprintf(file, "/*%s*/", n->token);
       fprintf(file, "%s ", n->token);
       dbg("\n\t\t[dumpParameterTypeList] %s", n->token);
     }
   }
   // A chaque parameter_declaration, on incrémente le compteur de paramètre
   if (n->ruleid==rulenameToId("parameter_declaration")){
+      fprintf(file, "/*number_of_parameters_here+=1*/");
     dbg("\n\t\t[dumpParameterTypeList] number_of_parameters_here+=1");
     number_of_parameters_here+=1;
   }
@@ -329,6 +342,8 @@ int dumpParameterTypeList(FILE *file, astNode * n){
     number_of_parameters_here+=dumpParameterTypeList(file, n->children);
   if (n->next != NULL)
     number_of_parameters_here+=dumpParameterTypeList(file, n->next);
+  
+  fprintf(file, "/*return %d*/",number_of_parameters_here);
   return number_of_parameters_here;
 }
 
@@ -369,15 +384,14 @@ void nablaJobFill(nablaMain *nabla,
   //assert(n->children->next->next->next->children!=NULL);
   nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
   job->xyz = dfsFetchFirst(nd,rulenameToId("nabla_xyz_declaration"));
-  //nprintf(nabla, NULL, "/*xyz=%s*/", job->xyz);
-  job->drctn = dfsFetchFirst(n->children,//n->children->next->next->next->children,
+  job->drctn = dfsFetchFirst(n->children,
                               rulenameToId("nabla_xyz_direction"));
   // Vérification si l'on a des 'directions' dans les paramètres
   if (job->xyz!=NULL){
     dbg("\n\t[nablaJobFill] direction=%s, xyz=%s",
         job->drctn?job->drctn:"NULL",
         job->xyz?job->xyz:"NULL");
-    nprintf(nabla, NULL, "/*xyz=%s*/", job->xyz);
+    nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
   // Récupération du type de retour
   assert(n->children->next->children->ruleid==rulenameToId("type_specifier"));
@@ -405,6 +419,7 @@ void nablaJobFill(nablaMain *nabla,
           job->name);
   // On va chercher les paramètres standards
   numParams=dumpParameterTypeList(nabla->entity->src, job->stdParamsNode);
+  //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
   
   // On va chercher les paramètres nabla in/out/inout

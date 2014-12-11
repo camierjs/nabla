@@ -217,10 +217,11 @@ static void cudaAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode
 static void cudaAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   // En Cuda, par contre il faut les y mettre
   if (fct->parse.function_call_name!=NULL){
-    nprintf(nabla, "/*ShouldDumpParamsInCuda*/", NULL);
+    nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments*/");
     int numParams=1;
     nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
     cudaAddExtraArguments(nabla, called, &numParams);
+    nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments done*/");
     if (called->nblParamsNode != NULL)
       cudaDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
   }
@@ -263,7 +264,8 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     //{"opMod","mod"},
     {"opTernary(cond,ifStatement,elseStatement)","(cond)?ifStatement:elseStatement"},
     {"knAt(a)",""},
-    {"fatal(a,b)","error(!0,0,\"CUDA fatal to be adjusted!\")"},
+    //{"fatal(a,b)","cuda_error(!0,0,\"CUDA fatal to be adjusted!\")"},
+    {"fatal(a,b)","cudaThreadExit()"},
     {"synchronize(a)",""},
     {"reducemin(a)","0.0"},//a
     {"mpi_reduce(how,what)","what"},//"mpi_reduce_min(global_min_array,what)"},
@@ -271,11 +273,13 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     {"GlobalIteration", "*global_iteration"},
     {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
     //{"exit", "cuda_exit(global_deltat)"},
+    //{"info()",""},
+    //{"debug()",""},
     {NULL,NULL}
   };
   static char* cudaForwards[] ={
-    "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-    "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+    "inline void info(){}",
+    "inline void debug(){}",
     "void gpuEnum(void);",
     NULL
   };

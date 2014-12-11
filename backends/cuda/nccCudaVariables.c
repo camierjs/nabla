@@ -34,12 +34,14 @@ void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVar
     nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
     job->parse.turnBracketsToParentheses=true;
   }else{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) return;
+    //nprintf(nabla, NULL, "/*.xyz?*/");
+    if (job->parse.postfix_constant==true && job->parse.variableIsArray==true) return;
+    //if (job->parse.postfix_constant==true) return;
     if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_X*/", ".x");
     if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Y*/", ".y");
     if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Z*/", ".z");
-    job->parse.isDotXYZ=0;
+    //nprintf(nabla, NULL, "/*.xyz flushing isDotXYZ*/");
+    //job->parse.isDotXYZ=0;
     job->parse.turnBracketsToParentheses=false;
   }
 }
@@ -89,9 +91,10 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 
 
 /*****************************************************************************
- * Postfix d'un .x|y|z slon le isDotXYZ
+ * Postfix d'un .x|y|z selon le isDotXYZ
  *****************************************************************************/
 static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
+  //nprintf(nabla,NULL,"/*setDotXYZ*/");
   switch (job->parse.isDotXYZ){
   case(0): break;
   case(1): {nprintf(nabla, "/*setDotX+flush*/", ".x"); break;}
@@ -99,7 +102,7 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   case(3): {nprintf(nabla, "/*setDotZ+flush*/", ".z"); break;}
   default:exit(NABLA_ERROR|fprintf(stderr, "\n[nvar] Switch isDotXYZ error\n"));
   }
-  // Flush isDotXYZ
+  //nprintf(nabla,NULL,"/*setDotXYZ: Flushing isDotXYZ*/");
   job->parse.isDotXYZ=0;
   job->parse.turnBracketsToParentheses=false;
 }
@@ -182,18 +185,18 @@ static void cudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 
   // Preliminary pertinence test
   if (cnfg != 'n') return;
-  nprintf(arc, "/*NodeJob*/",NULL);
+  nprintf(arc, "/*NodeJob*/", NULL);
 
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if (var->item[0]!='g') nvar(arc,var,job);
 
   switch (var->item[0]){
   case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[tcid][c");
-    if (enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
-    if (enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[tcid]");
-    if (enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
+    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[8*tnid+i]");//tcid][c");
+    if (var->dim==0 && enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
+    if (var->dim==0 && enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
+    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[8*tnid+i]");
+    if (var->dim==0 && enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
     break;
   }
   case ('n'):{
@@ -316,7 +319,7 @@ nablaVariable *cudaHookTurnTokenToVariable(astNode * n,
     //job->parse.diffracting=true;
     //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
   }
-  //nprintf(arc, NULL, "\n\t/*cudaHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
+  //nprintf(arc, NULL, "\n\t/*cudaHookTurnTokenToVariable::isDotXYZ=%d*/", job->parse.isDotXYZ);
  
   // Check whether there's job for a cell job
   cudaHookTurnTokenToVariableForCellJob(arc,var,job);

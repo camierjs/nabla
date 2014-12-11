@@ -194,6 +194,7 @@ __global__ void nabla_ini_node_variables(");
 // ******************************************************************************\n\
   __global__ void nabla_ini_cell_variables(");
   // Variables aux mailles
+  #warning Formal parameter space overflowed (256 bytes max)
   for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='c') continue;
     if (var->dim==0){
@@ -209,11 +210,12 @@ __global__ void nabla_ini_node_variables(");
        if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"/*[8]*/");
     }
     iVar+=1;
+    if (iVar==16)break;
   }
   nprintf(nabla,NULL,"){\n\tCUDA_INI_CELL_THREAD(tcid);");
   // Variables aux mailles real
   nprintf(nabla,NULL,"\n{");
-  for(var=nabla->variables;var!=NULL;var=var->next){
+  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='c') continue;
     if (var->dim==0){
       nprintf(nabla,NULL,"\n\t\t%s_%s[tcid]=",var->item,var->name);
@@ -228,6 +230,8 @@ __global__ void nabla_ini_node_variables(");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"Real3(0.0);");
       if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0.0;");
     }
+    iVar+=1;
+    if (iVar==16)break;
   }
   nprintf(nabla,NULL,"\n\t}");
   nprintf(nabla,NULL,"\n}");
@@ -252,11 +256,13 @@ NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
   }
   nprintf(nabla,NULL,");");
   // Variables aux mailles
+#warning Formal parameter space overflowed (256 bytes max)
   nprintf(nabla,NULL,"\n\t\tnabla_ini_cell_variables<<<dimCellGrid,dimJobBlock>>>(");
   for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='c') continue;
     nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
     iVar+=1;
+    if (iVar==16) break;
   }
   nprintf(nabla,NULL,");");
   
@@ -325,6 +331,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
     if (entry_points[i].stdParamsNode != NULL)
       numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
     else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
+    
+    nprintf(n,NULL,"/*numParams=%d*/",numParams);
     
     // On s'autorise un endroit pour insérer des arguments
     cudaAddExtraArguments(n, &entry_points[i], &numParams);

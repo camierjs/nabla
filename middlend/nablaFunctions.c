@@ -330,17 +330,10 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   dbg("\n\t[nablaFctFill] Looking for fct->rtntp:");
   fct->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->rtntp);
-  //assert(n->children->next->children->children->children->token!=NULL);
-  //fct->name   = n->children->next->children->children->children->token;
-  //assert(n->children->next->next->next->children!=NULL);
   fct->xyz    = strdup("NoXYZ");
   fct->drctn  = strdup("NoDirection");
-  
   dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
-  //assert(n->children->children->ruleid==rulenameToId("type_specifier"));
-  //fct->returnTypeNode=n->children->children->children;
   fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
-  
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");
   nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
   assert(nFctName->children->tokenid==IDENTIFIER);
@@ -351,8 +344,6 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   //dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
   nParams=dfsFetch(n->children,rulenameToId("parameter_list"));
-  //assert(n->children->next->children->children->next->next->children->ruleid ==rulenameToId("parameter_list"));
-  //nParams=n->children->next->children->children->next->next->children;
   fct->stdParamsNode=n;
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
       (fct->scope!=NULL)?fct->scope:"Null",
@@ -376,8 +367,7 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
 
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
   numParams=dumpParameterTypeList(nabla->entity->src, nParams);
-  //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-  //assert(n->children->next->next->next->next->ruleid==rulenameToId("nabla_parameter_list"));
+  nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
 
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaFctFill] adding ExtraParameters");

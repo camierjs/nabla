@@ -412,6 +412,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   case ('{'):{nprintf(nabla, NULL, "{\n\t\t"); break; }    
   case ('&'):{nprintf(nabla, NULL, "/*adrs*/&"); break; }    
   case (';'):{
+    job->parse.isDotXYZ=0;
     job->parse.variableIsArray=false;
     job->parse.turnBracketsToParentheses=false;
     nprintf(nabla, NULL, ";\n\t\t");
@@ -436,7 +437,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
  *****************************************************************************/
 void cudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   nablaVariable *var;
-  if (*numParams!=0) nprintf(nabla, NULL, ",");
+  if (*numParams!=0) nprintf(nabla, NULL, "/*cudaHookAddExtraParameters*/,");
   if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA){
     nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
     *numParams+=1;
@@ -471,29 +472,11 @@ void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
   const char* tabs="\t\t\t\t\t\t\t";
   nprintf(nabla, NULL, ",\n%scell_node",tabs);
   *numParams+=1;
-  //nprintf(nabla, NULL, ",\n%scell_node_0",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_1",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_2",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_3",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_4",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_5",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_6",tabs);
-  //nprintf(nabla, NULL, ",\n%scell_node_7",tabs);
-  //*numParams+=8;
 }
 
 void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   nprintf(nabla, NULL, ",\n\t\tint *cell_node");
   *numParams+=1;
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_0");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_1");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_2");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_3");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_4");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_5");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_6");
-  //nprintf(nabla, NULL, ",\n\t\tint *cell_node_7");
-  //*numParams+=8;
 }
 
 
@@ -505,7 +488,7 @@ void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
   
   { // Rajout pour l'instant systématiquement des node_coords et du global_deltat
     nablaVariable *var;
-    if (*numParams!=0) nprintf(nabla, NULL, ",");
+    if (*numParams!=0) nprintf(nabla, NULL, "/*cudaAddExtraArguments*/,");
     if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA){
       nprintf(nabla, NULL, "\n%snode_coord",tabs);
       *numParams+=1;

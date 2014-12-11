@@ -145,9 +145,9 @@ void ini(void) @ -10.0{
   δt=0.0;
   δt_hydro=option_δt_hydro;
   δt_courant=option_δt_courant;
-  if (option_eosvmax==0.) fatal("ini", "option_eosvmax==0.");
-  if (option_eosvmin==0.) fatal("ini", "option_eosvmin==0.");
-  atexit(dumpFinalEnergy);
+//  if (option_eosvmax==0.) fatal("ini", "option_eosvmax==0.");
+//  if (option_eosvmin==0.) fatal("ini", "option_eosvmin==0.");
+//  atexit(dumpFinalEnergy);
 }
 
 
@@ -240,10 +240,10 @@ void timeIncrement(void) @ 0.1 {
   const Real scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const Real scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = mpi_reduce(ReduceMin, scaled_δt);
-  info()<<"ITERATION "<<GlobalIteration;
+//info()<<"ITERATION "<<GlobalIteration;
   if (GlobalIteration > option_max_iterations) exit;
-  info()<< "\t\t\33[7mTimeIncrement δt="<<δt[0]<<"\33[m";
-  //if (ReduceMinToDouble(δt) == 0.) exit;
+//info()<< "\t\t\33[7mTimeIncrement δt="<<δt/*[0]*/<<"\33[m";
+  if (ReduceMinToDouble(δt) == 0.) exit;
 }
 
 
@@ -575,7 +575,7 @@ cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) @ 4.8
   // Don't allow excessive artificial viscosity
   if (q>=option_qstop){
     //debug()<<"calcQForElemsExcessiveArtificialViscosityTest!";
-    fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
+//    fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
   }
 }
 
@@ -613,7 +613,7 @@ cells void applyMaterialPropertiesForElems(void)
 cells void evalEOSForElems0(void)
   in (cell e, cell delv, cell p, cell q, cell vnewc)
   out(cell e_old, cell delvc, cell p_old, cell q_old,
-      cell compression, cell compHalfStep) @ 6.0{
+      cell compression, cell compHalfStep,cell work) @ 6.0{
   const Real vchalf = vnewc - ( ½*delv);
   work = 0.0; 
   e_old = e;
@@ -853,8 +853,8 @@ void calcTimeConstraintsForElems(void) @ 12.1{
   const Real hdr=calcHydroConstraintForElems(1.0e+20);
   δt_courant <?= (crnt);  // MIN_ASSIGN
   δt_hydro <?= (hdr);
-  debug()<<"\tdomain.dtcourant()="<<δt_courant[0];
-  debug()<<"\tdomain.dthydro()  ="<<δt_hydro[0];
+//  debug()<<"\tdomain.dtcourant()="<<δt_courant/*[0]*/;
+//  debug()<<"\tdomain.dthydro()  ="<<δt_hydro/*[0]*/;
 }
 
 
@@ -866,10 +866,10 @@ void dumpFinalEnergy(void){
   //Real TotalAbsDiff = 0.0;
   //Real MaxRelDiff = 0.0;
   int edgeElems=X_EDGE_ELEMS;
-  debug()<<"   Problem size = "<<edgeElems;
-  debug()<<"   Iteration count = "<<GlobalIteration-1;
-  debug()<<"   Final Origin Energy = "<<e[0][0];
-  debug()<<"";
+//  debug()<<"   Problem size = "<<edgeElems;
+//  debug()<<"   Iteration count = "<<GlobalIteration-1;
+//  debug()<<"   Final Origin Energy = "<<e[0]/*[0]*/;
+//  debug()<<"";
   /*for(int j=0; j < edgeElems; ++j){
     for(int k=j+1; k < edgeElems; ++k){
       Real RelDiff,AbsDiff = fabs(e[j*edgeElems+k]-e[k*edgeElems+j]);

@@ -103,11 +103,11 @@ __device__ inline void cross3(Real3 u, Real3 v, Real3 *r){ *r=cross(u,v);}
 // ****************************************************************************
 // * REALS_3
 // ****************************************************************************
-__global__ void operator<<(std::ostream os, const Real3 r){
+/*__global__ void operator<<(std::ostream os, const Real3 r){
+  //return os;// << "[("<<r.x<<","<<r.y<<","<<r.z<< ")]";
+  }*/
+
+/*__device__ void operator<<(std::ostream &os, const Real3 &r){
   //return os;// << "[("<<r.x<<","<<r.y<<","<<r.z<< ")]";
 }
-
-__device__ void operator<<(std::ostream &os, const Real3 &r){
-  //return os;// << "[("<<r.x<<","<<r.y<<","<<r.z<< ")]";
-}
-
+*/

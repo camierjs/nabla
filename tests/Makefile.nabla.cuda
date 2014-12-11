@@ -14,8 +14,6 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ####################
 NV_PATH = ${CUDA_TOOLKIT_ROOT_DIR}
 NV_ARCH = sm_13
-
-# ${CUDA_TOOLKIT_ROOT_DIR} ${CUDA_NVCC_EXECUTABLE} ${CUDA_INCLUDE_DIRS} ${CUDA_CUDART_LIBRARY}
 NV = $(NV_PATH)/bin/nvcc
 NVFLAGS = -O2 -shared -arch=$(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
 NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
@@ -27,7 +25,7 @@ CCFLAGS = -Wall -O2 -malign-double -fPIC
 #######
 # ALL #
 #######
-all:$(TGT) $(NABLA) 
+all:$(TGT).cuda $(NABLA) 
 
 
 ##############
@@ -61,5 +59,5 @@ e:
 cln:
 	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT)Entity.* $(TGT).E.* *.log *.dot *.svg main.cc $(TGT).config
 
-run1:$(TGT) $(TGT).cuda
+run1:$(TGT).cuda
 	./$(TGT).cuda
