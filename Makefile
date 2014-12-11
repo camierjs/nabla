@@ -1,31 +1,29 @@
-#############
-# COMPILERS #
-#############
-#export CC=/usr/bin/gcc
-#export CXX=/usr/bin/g++
+##############
+# ROOT_PATHS #
+##############
+#COMPILER_ROOT_PATH=/usr
+COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2
+CMAKE_ROOT_PATH = /usr
 
-export CC  = /usr/local/gcc/4.9.2/bin/gcc
-export CXX = /usr/local/gcc/4.9.2/bin/g++
-
-export C_FLAGS = -std=c99
+####################
+# COMPILER OPTIONS #
+####################
+C_FLAGS = -std=c99
+MAKEFLAGS = --no-print-directory
+export CC  = $(COMPILER_ROOT_PATH)/bin/gcc
+export CXX = $(COMPILER_ROOT_PATH)/bin/g++
+export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/lib64
 
 #################
 # CMAKE OPTIONS #
 #################
-CMAKE_PATH = /usr
-#/local/cmake-2.8.9
-CMAKE = $(CMAKE_PATH)/bin/cmake
-CTEST = $(CMAKE_PATH)/bin/ctest
-
-####################
-# MAKEFILE OPTIONS #
-####################
-MAKEFLAGS = --no-print-directory
+CMAKE = $(CMAKE_ROOT_PATH)/bin/cmake
+CTEST = $(CMAKE_ROOT_PATH)/bin/ctest
 
 #########
 # PATHS #
 #########
-NABLA_PATH = /home/$(USER)/root
+NABLA_PATH = $(shell pwd)
 BUILD_PATH = /tmp/$(USER)/nabla
 
 ############
@@ -41,10 +39,16 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 .PHONY: all
 all:
 	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
-	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS) install
+	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
+##################
+# CONFIG Command #
+##################
 cfg:
 	$(BUILD_CMAKE)
+
+bin:
+	@cd $(BUILD_PATH) && make install
 
 #################
 # TEST Commands #
@@ -52,33 +56,23 @@ cfg:
 tst:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS))
 tst1:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1) #V -I 45,45)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1)
 tstn:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
-
-tstra:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_mic_run_1)
+tstr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
 tstro:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
-tstr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
 tstrv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run)
 tstv:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 
 ############
 # CLEANING #
 ############
 cln:;(cd $(BUILD_PATH) && make clean)
-
-############
-# RSYNCing #
-############
-rs:
-	rsync -v /tmp/camierjs/nabla/tests/lulesh_mic/lulesh_mic_16_omp_avx* ~/tmp/
-	@echo "OMP_NUM_THREADS=1 ./lulesh_mic_16_omp_avx2|more"

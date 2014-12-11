@@ -6,8 +6,12 @@ To compile NABLA you will simply need:
 
 The standard steps for installation are:
     1. Make sure you have a C/C++ compiler
-    2. Make sure your LD_LIBRARY_PATH match the compiler's path
-    3. Make sure you have cmake (at least 2.8) on your system
+    2. Make sure you have cmake (at least 2.8) on your system
+    3. Look at the top Makefile and patch the right paths (compiler and cmake)
+    4. Launch 'make' in here
+    5. Test the distribution by typing 'make tst'
+    6. You can rerun make cln/cfg/all as you wish
+    7. Run 'make bin' to try to push the nabla binary to /usr/loca/bin
 
 For troubleshooting of some common installation problems, mail me at:
 
