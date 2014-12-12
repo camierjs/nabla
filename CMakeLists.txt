@@ -13,10 +13,8 @@ enable_language(ASM)
 set(CMAKE_C_FLAGS "-Wall -std=c99")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 set(NABLA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(NABLA_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
 
 ###############
 # FLEX, BISON #
@@ -35,7 +33,6 @@ bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
 add_flex_bison_dependency(nScanner nParser)
 
-
 ########
 # CUDA #
 ######## 
@@ -44,24 +41,20 @@ if (CUDA_FOUND)
   info("\t${VT100_FG_MAGENTA}CUDA${VT100_RESET} version is ${VT100_BOLD}${CUDA_VERSION_STRING}${VT100_RESET}")
 endif()
 
-
 ##########
 # ARCANE #
-# Should not be usable, canceling search
 ##########
 find_package(MPI)
-#include(CMake/FindARCANE.cmake)
+include(CMake/FindARCANE.cmake)
 if(ARCANE_FOUND)
   info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
 endif()
-
 
 #######################
 # Frontend & Middlend #
 #######################
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/frontend)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/middlend)
-
 
 ####################################
 # Executable, librairie et install #
@@ -77,13 +70,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
 target_link_libraries(nabla Nabla ${FLEX_LIBRARIES} NablaMiddlend NablaArcane NablaCuda NablaOkina NablaMiddlend NablaFrontend)
 
-
 ###########
 # INSTALL #
 ###########
 set(CMAKE_BUILD_TYPE "Release")
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nabla DESTINATION bin CONFIGURATIONS Release)
-
 
 #########
 # TESTS #

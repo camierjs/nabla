@@ -3,18 +3,19 @@ To compile NABLA you will simply need:
    - bison, the parser generator
    - flex, the lexical analyser generator
    - cmake, the Cross-Platform Makefile Generator
-   - a nvcc compiler linked to the above compiler
+   - a nvcc compiler glibc-compatible to the above compiler
 
 The standard steps for installation are:
     1. Make sure you have a C/C++ compiler
     2. Make sure you have cmake (at least 2.8) on your system
     3. Look at the top Makefile and patch the paths (compiler and cmake)
-    4. Launch 'make' in here
-    5. Test the distribution by typing 'make tst'
-    6. You can rerun make cln/cfg/bin to clean/configure/install as you wish
-    7. Run 'make bin' to try to push the nabla binary to /usr/loca/bin
+    4. Look at the top CMake/CMakeTPL.txt and patch the paths ((Arcane) and Trilinos)
+    5. Launch 'make' in here
+    6. Test the distribution by typing 'make tst'
+    7. You can rerun make cln/cfg/bin to clean/configure/install as you wish
+    8. Run 'make bin' to try to push the nabla binary to /usr/loca/bin
 
-    8. To try it by yourself, go for example to: /tmp/nabla/tests/lulesh/okina/1/run/avx2/omp,
+    9. To try it by yourself, go for example to: /tmp/nabla/tests/lulesh/okina/1/run/avx2/omp,
        and launch: PARALLEL=omp SIMD=avx2 make -kBf Makefile.okina run1
 
 For troubleshooting of some common installation problems, mail me at:

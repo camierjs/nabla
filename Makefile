@@ -1,24 +1,24 @@
 ##############
 # ROOT_PATHS #
 ##############
-COMPILER_ROOT_PATH=/usr
-#COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2
-CMAKE_ROOT_PATH = /usr
+CMAKE_ROOT_PATH = /usr/bin
+COMPILER_ROOT_PATH=/usr/bin
+#COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
 
 ####################
 # COMPILER OPTIONS #
 ####################
 C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
-export CC  = $(COMPILER_ROOT_PATH)/bin/gcc
-export CXX = $(COMPILER_ROOT_PATH)/bin/g++
-export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/lib64
+export CC  = $(COMPILER_ROOT_PATH)/gcc
+export CXX = $(COMPILER_ROOT_PATH)/g++
+export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64
 
 #################
 # CMAKE OPTIONS #
 #################
-CMAKE = $(CMAKE_ROOT_PATH)/bin/cmake
-CTEST = $(CMAKE_ROOT_PATH)/bin/ctest
+CMAKE = $(CMAKE_ROOT_PATH)/cmake
+CTEST = $(CMAKE_ROOT_PATH)/ctest
 
 #########
 # PATHS #
@@ -37,7 +37,6 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 ##################
 # BUILD Commands #
 ##################
-.PHONY: all
 all:
 	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
@@ -47,15 +46,17 @@ all:
 ##################
 cfg:
 	$(BUILD_CMAKE)
+config:cfg
 
 bin:
 	@cd $(BUILD_PATH) && make install
 
-#################
-# TEST Commands #
-#################
+##################
+# TESTs Commands #
+##################
 tst:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS))
+test:tst
 tst1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1)
 tstn:
@@ -79,3 +80,9 @@ tstcu:
 # CLEANING #
 ############
 cln:;(cd $(BUILD_PATH) && make clean)
+clean:cln
+
+###########
+# PHONIES #
+###########
+.PHONY: all cfg config bin tst cln clean
