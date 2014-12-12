@@ -24,7 +24,7 @@ CTEST = $(CMAKE_ROOT_PATH)/bin/ctest
 # PATHS #
 #########
 NABLA_PATH = $(shell pwd)
-BUILD_PATH = /tmp/$(USER)/nabla
+BUILD_PATH = /tmp/nabla
 
 ############
 # COMMANDS #

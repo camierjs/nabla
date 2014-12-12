@@ -244,62 +244,18 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
                    const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  static nablaTypedef cudaTypedef[] ={
-    //{"double","real"},
-    //{"double","real"},
-    {"int","integer"},
-    //{"struct real3","Real3"},
-    {NULL,NULL}
-  };
-  static nablaDefine cudaDefines[] ={
-    {"real3","Real3"},
-    {"Real","double"},
-    {"real","double"},
-    {"ReduceMinToDouble(what)","what"},
-    {"cuda_exit(what)","*global_deltat=-1.0"},
-    {"norm","fabs"},
-    {"rabs","fabs"},
-    {"rsqrt","sqrt"},
-    {"opAdd(u,v)", "(u+v)"},
-    {"opSub(u,v)", "(u-v)"},
-    {"opDiv(u,v)", "(u/v)"},
-    {"opMul(u,v)", "(u*v)"},
-    {"opScaMul(a,b)","dot(a,b)"},
-    {"opVecMul(a,b)","cross(a,b)"},
-    //{"opMod","mod"},
-    {"opTernary(cond,ifStatement,elseStatement)","(cond)?ifStatement:elseStatement"},
-    {"knAt(a)",""},
-    //{"fatal(a,b)","cuda_error(!0,0,\"CUDA fatal to be adjusted!\")"},
-    {"fatal(a,b)","cudaThreadExit()"},
-    {"synchronize(a)",""},
-    {"reducemin(a)","0.0"},//a
-    {"mpi_reduce(how,what)","what"},//"mpi_reduce_min(global_min_array,what)"},
-    {"xyz","int"},
-    {"GlobalIteration", "*global_iteration"},
-    {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
-    //{"exit", "cuda_exit(global_deltat)"},
-    //{"info()",""},
-    //{"debug()",""},
-    {NULL,NULL}
-  };
-  static char* cudaForwards[] ={
-    "inline void info(){}",
-    "inline void debug(){}",
-    "void gpuEnum(void);",
-    NULL
-  };
   nablaBackendSimdHooks nablaCudaSimdHooks={
     nccCudaBits,
     nccCudaGather,
     nccCudaScatter,
-    NULL,//Typedefs
-    NULL,//Defines
-    NULL,//Forwards
+    cudaTypedef,
+    cudaDefines,
+    cudaForwards,
     nccCudaPrevCell,
     nccCudaNextCell,
     nccCudaIncludes
   };
-  static nablaBackendHooks cudaBackendHooks={
+  nablaBackendHooks cudaBackendHooks={
     // Jobs stuff
     cudaHookPrefixEnumerate,
     cudaHookDumpEnumerateXYZ,

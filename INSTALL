@@ -8,13 +8,13 @@ To compile NABLA you will simply need:
 The standard steps for installation are:
     1. Make sure you have a C/C++ compiler
     2. Make sure you have cmake (at least 2.8) on your system
-    3. Look at the top Makefile and patch the right paths (compiler and cmake)
+    3. Look at the top Makefile and patch the paths (compiler and cmake)
     4. Launch 'make' in here
     5. Test the distribution by typing 'make tst'
-    6. You can rerun make cln/cfg/all as you wish
+    6. You can rerun make cln/cfg/bin to clean/configure/install as you wish
     7. Run 'make bin' to try to push the nabla binary to /usr/loca/bin
 
-    8. To try it by yourself, go for example to: /tmp/nabla/nabla/tests/lulesh/okina/1/run/avx2/omp,
+    8. To try it by yourself, go for example to: /tmp/nabla/tests/lulesh/okina/1/run/avx2/omp,
        and launch: PARALLEL=omp SIMD=avx2 make -kBf Makefile.okina run1
 
 For troubleshooting of some common installation problems, mail me at:

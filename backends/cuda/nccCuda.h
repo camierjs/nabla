@@ -26,6 +26,10 @@ char* nccCudaPrevCell(void);
 char* nccCudaNextCell(void);
 char* nccCudaIncludes(void);
 
+extern nablaTypedef cudaTypedef[];
+extern nablaDefine cudaDefines[];
+extern char* cudaForwards[];
+
 NABLA_STATUS nccCudaMainPrefix(nablaMain *);
 NABLA_STATUS nccCudaMainPreInit(nablaMain *);
 NABLA_STATUS nccCudaMainVarInitKernel(nablaMain *);

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 include(CMake/VT100.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
-info("${VT100_BOLD}CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}${VT100_RESET}")
+#info("${VT100_BOLD}CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}${VT100_RESET}")
 
 info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}# Welcome to the NABLA Project! #${VT100_RESET}")
@@ -47,9 +47,10 @@ endif()
 
 ##########
 # ARCANE #
+# Should not be usable, canceling search
 ##########
 find_package(MPI)
-include(CMake/FindARCANE.cmake)
+#include(CMake/FindARCANE.cmake)
 if(ARCANE_FOUND)
   info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
 endif()

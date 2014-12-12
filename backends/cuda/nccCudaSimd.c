@@ -19,7 +19,7 @@
 #include "nabla.h"
 
 
-char *nccCudaBits(void){return "";}
+char *nccCudaBits(void){return "Not relevant here";}
 
 
 // ****************************************************************************
@@ -53,3 +53,56 @@ char* nccCudaNextCell(void){
 }
 
 char* nccCudaIncludes(void){return "";}
+
+
+// ****************************************************************************
+// * CUDA TYPEDEFS
+// ****************************************************************************
+nablaTypedef cudaTypedef[]={
+  {"int","integer"},
+  {NULL,NULL}
+};
+
+
+
+// ****************************************************************************
+// * CUDA DEFINES
+// ****************************************************************************
+nablaDefine cudaDefines[]={
+  {"real3","Real3"},
+  {"Real","double"},
+  {"real","double"},
+  {"ReduceMinToDouble(what)","what"},
+  // That's for now the way we talk to the host
+  {"cuda_exit(what)","*global_deltat=-1.0"},
+  {"norm","fabs"},
+  {"rabs","fabs"},
+  {"rsqrt","sqrt"},
+  {"opAdd(u,v)", "(u+v)"},
+  {"opSub(u,v)", "(u-v)"},
+  {"opDiv(u,v)", "(u/v)"},
+  {"opMul(u,v)", "(u*v)"},
+  {"opScaMul(a,b)","dot(a,b)"},
+  {"opVecMul(a,b)","cross(a,b)"},
+  {"opTernary(cond,ifStatement,elseStatement)","(cond)?ifStatement:elseStatement"},
+  {"knAt(a)",""},
+  {"fatal(a,b)","cudaThreadExit()"},
+  {"synchronize(a)",""},
+  {"reducemin(a)","0.0"},
+  {"mpi_reduce(how,what)","what"},//"mpi_reduce_min(global_min_array,what)"},
+  {"xyz","int"},
+  {"GlobalIteration", "*global_iteration"},
+  {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
+  //{"exit", "cuda_exit(global_deltat)"},
+  {NULL,NULL}
+};
+
+// ****************************************************************************
+// * Std or Mic FORWARDS
+// ****************************************************************************
+char* cudaForwards[]={
+  "inline void info(){}",
+  "inline void debug(){}",
+  "void gpuEnum(void);",
+  NULL
+};

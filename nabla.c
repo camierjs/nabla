@@ -227,7 +227,7 @@ int sysPreprocessor(const char *nabla_entity_name,
 
   // On lance la commande de cat précédemment créée
   if (system(cat_command)<0)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[nablaPreprocessor] Error in system cat command!\n"));
+    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error in system cat command!\n"));
 
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
@@ -242,7 +242,11 @@ int sysPreprocessor(const char *nabla_entity_name,
            getpid(),
            unique_temporary_file_fd);
   dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
-  return system(gcc_command);
+  if (system(gcc_command)<0)
+    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while preprocessing!\n"));
+  if (unlink(cat_sed_temporary_file_name)<0)
+    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while unlinking sed file!\n"));    
+  return NABLA_OK;
 }
  
 

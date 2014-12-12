@@ -672,7 +672,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
       assert(min!=NULL || max !=NULL);
       if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
       if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}
-      printf("mnx=%s\n",mnx); fflush(stdout);
+      //printf("mnx=%s\n",mnx); fflush(stdout);
       nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\
 \n\tfor (int i=0; i<threads; i+=1){\n\
 //var=%s, mnx=%s\n\
