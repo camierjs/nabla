@@ -185,7 +185,7 @@ extern char knMicScatter_h[];
 extern char knMicOStream_h[];
 extern char knMicTernary_h[];
 static char *dumpExternalFile(char *file){
-  return file+813;
+  return file+NABLA_GPL_HEADER;
 }
 static void okinaHeaderSimd(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);

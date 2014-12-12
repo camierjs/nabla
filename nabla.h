@@ -111,6 +111,7 @@ typedef enum{
 // ****************************************************************************
 // * NABLA STR & HARDCODED DEFINES
 // ****************************************************************************
+#define NABLA_GPL_HEADER 813
 #define NABLA_MAX_FILE_NAME 8192
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
 

@@ -865,7 +865,7 @@ void dumpFinalEnergy(void){
   //Real MaxAbsDiff = 0.0;
   //Real TotalAbsDiff = 0.0;
   //Real MaxRelDiff = 0.0;
-  int edgeElems=X_EDGE_ELEMS;
+  //int edgeElems=X_EDGE_ELEMS;
 //  debug()<<"   Problem size = "<<edgeElems;
 //  debug()<<"   Iteration count = "<<GlobalIteration-1;
 //  debug()<<"   Final Origin Energy = "<<e[0]/*[0]*/;

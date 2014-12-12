@@ -17,6 +17,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
 
+#define cudaCalloc(devPtr,size)                                         \
+  do{                                                                   \
+    if (cudaSuccess==cudaMalloc(devPtr,size))                           \
+      cudaMemset(*devPtr,0,size);                                       \
+  }while(0)
+
 
 // *****************************************************************************
 // * EXTRA

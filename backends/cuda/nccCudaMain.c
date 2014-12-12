@@ -153,9 +153,13 @@ NABLA_STATUS nccCudaMainPreInit(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nccCudaMainVarInitKernel
- *****************************************************************************/
+// *****************************************************************************
+// * nccCudaMainVarInitKernel
+// * We now calloc things, so this init is now anymore usefull
+// * #warning Formal parameter space overflowed (256 bytes max)
+// *****************************************************************************/
+NABLA_STATUS nccCudaMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
+/*
 NABLA_STATUS nccCudaMainVarInitKernel(nablaMain *nabla){
   int i,iVar;
   nablaVariable *var;
@@ -187,14 +191,16 @@ __global__ void nabla_ini_node_variables(");
     if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0.0;");
   }
   nprintf(nabla,NULL,"\n\t}");  
-  nprintf(nabla,NULL,"\n}");  
+  nprintf(nabla,NULL,"\n}");
+
+ 
   nprintf(nabla,NULL,"\n\n\
 // ******************************************************************************\n\
 // * Kernel d'initialisation des variables aux MAILLES\n\
 // ******************************************************************************\n\
   __global__ void nabla_ini_cell_variables(");
   // Variables aux mailles
-  #warning Formal parameter space overflowed (256 bytes max)
+//  #warning Formal parameter space overflowed (256 bytes max)
   for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='c') continue;
     if (var->dim==0){
@@ -207,10 +213,9 @@ __global__ void nabla_ini_node_variables(");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"%sReal3 *",(iVar!=0)?", ":"");
       if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"%sinteger *",(iVar!=0)?", ":"");
       nprintf(nabla,NULL,"%s_%s",var->item,var->name);
-       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"/*[8]*/");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,NULL);
     }
     iVar+=1;
-    if (iVar==16)break;
   }
   nprintf(nabla,NULL,"){\n\tCUDA_INI_CELL_THREAD(tcid);");
   // Variables aux mailles real
@@ -236,35 +241,39 @@ __global__ void nabla_ini_node_variables(");
   nprintf(nabla,NULL,"\n\t}");
   nprintf(nabla,NULL,"\n}");
   return NABLA_OK;
-}
+}*/
 
 
 /*****************************************************************************
- * nccCudaMainVarInitKernel
+ * nccCudaMainVarInitCall
  *****************************************************************************/
 NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
-  int iVar;
   nablaVariable *var;
   dbg("\n[nccCudaMainVarInitCall]");
-  // Variables aux noeuds
-  nprintf(nabla,NULL,"\n\t\tnabla_ini_node_variables<<<dimNodeGrid,dimJobBlock>>>(");
-  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='n') continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
-    iVar+=1;
-  }
-  nprintf(nabla,NULL,");");
-  // Variables aux mailles
-#warning Formal parameter space overflowed (256 bytes max)
-  nprintf(nabla,NULL,"\n\t\tnabla_ini_cell_variables<<<dimCellGrid,dimJobBlock>>>(");
-  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='c') continue;
-    nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
-    iVar+=1;
-    if (iVar==16) break;
-  }
-  nprintf(nabla,NULL,");");
+
+  // We now use memset 0 to calloc things
+  /*{
+    int iVar;
+    // Variables aux noeuds
+    nprintf(nabla,NULL,"\n\t\tnabla_ini_node_variables<<<dimNodeGrid,dimJobBlock>>>(");
+    for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
+      if (var->item[0]!='n') continue;
+      if (strcmp(var->name, "coord")==0) continue;
+      nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
+      iVar+=1;
+    }
+    nprintf(nabla,NULL,");");
+  
+    // Variables aux mailles
+    nprintf(nabla,NULL,"\n\t\tnabla_ini_cell_variables<<<dimCellGrid,dimJobBlock>>>(");
+    for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
+      if (var->item[0]!='c') continue;
+      nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
+      iVar+=1;
+      //if (iVar==16) break;
+    }
+    nprintf(nabla,NULL,");");
+  }*/
   
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;

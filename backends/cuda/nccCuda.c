@@ -46,7 +46,7 @@ char *nCudaPragmaGccAlign(void){ return ""; }
 extern char real3_h[];
 static void cudaHeaderReal3(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,real3_h);
+  fprintf(nabla->entity->hdr,real3_h+NABLA_GPL_HEADER);
 }
 
 extern char extra_h[];
@@ -92,7 +92,12 @@ static void cudaHeaderIncludes(nablaMain *nabla){
 #include <math.h>\n\
 #include <assert.h>\n\
 #include <stdarg.h>\n\
-#include <cuda.h>\n");
+#include <cuda.h>\n\
+cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
+   if (cudaSuccess==cudaMalloc(devPtr,size))\n\
+      return cudaMemset(*devPtr,0,size);\n\
+   return cudaErrorMemoryAllocation;\n\
+}\n");
 //  #warning CUDA Cartesian here
   fprintf(nabla->entity->hdr,"\n\n// *****************************************************************************\n\
 // * Cartesian stuffs\n\

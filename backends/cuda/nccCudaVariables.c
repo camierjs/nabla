@@ -365,15 +365,16 @@ typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *pos
  * Dump d'un MALLOC d'une variables dans le fichier source
  *****************************************************************************/
 static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){
-  if (var->dim==0)
-    fprintf(nabla->entity->src,"\n\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
+  if (var->dim==0){
+    fprintf(nabla->entity->src,"\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
             var->item, var->name, postfix?postfix:"", depth?depth:"",
             itemUPCASE(var->item), postfix?"real":var->type);
-  else
+  }else{
     fprintf(nabla->entity->src,
-            "\n\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&%s_%s, NABLA_NB_%s*8*sizeof(%s)));",
+            "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s, NABLA_NB_%s*8*sizeof(%s)));",
             var->item, var->name, 
             itemUPCASE(var->item), postfix?"real":var->type);
+  }
   return NABLA_OK;
 }
 
