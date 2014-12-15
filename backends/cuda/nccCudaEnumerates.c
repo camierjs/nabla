@@ -59,8 +59,7 @@ void cudaDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_NODE_WARP(n) \n\
 \n\
-#warning CUDA_INI_FUNCTION_THREAD is tied to CUDA_INI_CELL_THREAD\n\
-#define CUDA_INI_FUNCTION_THREAD(tid) CUDA_INI_CELL_THREAD(tid)\\\n\
-//  const register int # tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
-//  if (tid!=0) return;\n");
+#define CUDA_INI_FUNCTION_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid!=0) return;\n");
 }

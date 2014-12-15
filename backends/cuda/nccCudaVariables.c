@@ -399,12 +399,12 @@ static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla, nablaVariab
  *****************************************************************************/
 static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){  
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s%s; //%s host_%s_%s%s%s[NABLA_NB_%s];",
+    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s%s; %s host_%s_%s%s%s[NABLA_NB_%s];",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s; //%s host_%s_%s%s[NABLA_NB_%s][%ld];",
+    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s; %s host_%s_%s%s[NABLA_NB_%s][%ld];",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"",
             itemUPCASE(var->item),
@@ -497,10 +497,10 @@ static void cudaGlobals(nablaMain *nabla){
 // ********************************************************\n\
 // * Globals, coté CUDA\n\
 // ********************************************************\n\
-double *global_deltat;\n\
-int *global_iteration;\n\
-double *global_time; double host_time;\n\
-double *global_min_array; //double host_min_array[CUDA_NB_BLOCKS_PER_GRID];\n");
+__builtin_align__(8) double *global_deltat;\n\
+__builtin_align__(8) int *global_iteration;\n\
+__builtin_align__(8) double *global_time; double host_time;\n\
+__builtin_align__(8) double *global_min_array; //double host_min_array[CUDA_NB_THREADS_PER_BLOCK];\n");
 }
 
 

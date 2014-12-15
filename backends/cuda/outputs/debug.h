@@ -104,7 +104,7 @@ void dbg(const unsigned int flag, const char *format,...){
 // *****************************************************************************
 // * MACRO CELL functions
 // *****************************************************************************
-void dbgCellNodes(void){
+/*void dbgCellNodes(void){
   if (!DBG_MODE) return; 
   printf("\ndbgCellNodes:");
   CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_node_0, cell_node_0, NABLA_NB_CELLS*sizeof(int), cudaMemcpyDeviceToHost));
@@ -126,12 +126,12 @@ void dbgCellNodes(void){
            host_cell_node_6[i],
            host_cell_node_7[i]);
   }
-}
+  }*/
 
 #define dbgCellVariableXYZDim0(Variable)                              \
   void dbgCellVariableXYZDim0_##Variable(void){                       \
     if (!DBG_MODE) return;                                            \
-    CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,                    \
+    CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,               \
                             cell_##Variable,                          \
                             NABLA_NB_CELLS*sizeof(Real3),             \
                             cudaMemcpyDeviceToHost));                 \
@@ -147,7 +147,7 @@ void dbgCellNodes(void){
   void dbgCellVariableXYZDim1_##Variable(void){                       \
     if (!DBG_MODE) return;                                            \
     for(int i=0;i<NABLA_NB_CELLS;i+=1)                                \
-      CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],               \
+      CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],          \
                               &cell_##Variable[i*8],                  \
                               8*sizeof(Real3),                        \
                               cudaMemcpyDeviceToHost));               \
@@ -166,7 +166,7 @@ void dbgCellNodes(void){
 #define dbgCellVariableDim0(Variable)                                   \
   void dbgCellVariableDim0_##Variable(void){                            \
     if (!DBG_MODE) return;                                              \
-    CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,                      \
+    CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,                 \
                             cell_##Variable,                            \
                             NABLA_NB_CELLS*sizeof(Real),                \
                             cudaMemcpyDeviceToHost));                   \
@@ -179,7 +179,7 @@ void dbgCellNodes(void){
   void dbgCellVariableDim1_##Variable(void){                          \
     if (!DBG_MODE) return;                                            \
     for(int i=0;i<NABLA_NB_CELLS;i+=1)                                \
-      CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],               \
+      CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],          \
                               &cell_##Variable[i*8],                  \
                               8*sizeof(Real),                         \
                               cudaMemcpyDeviceToHost));               \

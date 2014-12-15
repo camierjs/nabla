@@ -1,4 +1,15 @@
-MESH_FLAGS = -DX_EDGE_ELEMS=16 -DY_EDGE_ELEMS=16 -DZ_EDGE_ELEMS=16 -DX_EDGE_TICK=.070312 -DY_EDGE_TICK=.070312 -DZ_EDGE_TICK=.070312 -DLENGTH=1.125
+
+
+MESH = 4
+export X_EDGE_ELEMS = $(MESH)
+export Y_EDGE_ELEMS = $(MESH)
+export Z_EDGE_ELEMS = $(MESH)
+export X_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export Y_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export Z_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export LENGTH = $(shell echo 1.125)
+export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
+
 
 
 ###################
@@ -13,9 +24,12 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 # CUDA COMPILATION #
 ####################
 NV_PATH = ${CUDA_TOOLKIT_ROOT_DIR}
-NV_ARCH = sm_13
+#NV_ARCH = -gencode arch=compute_13,code=sm_13
+#NV_ARCH = -gencode arch=compute_20,code=sm_20
+NV_ARCH = -gencode arch=compute_30,code=sm_30
+#NV_ARCH = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_37,code=sm_37 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_50,code=compute_50
 NV = $(NV_PATH)/bin/nvcc
-NVFLAGS = -O2 -shared -arch=$(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
+NVFLAGS = -ccbin g++ -m64 $(MESH_FLAGS) #-shared $(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
 NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
 NV_INCLUDE = -I. -I$(NV_PATH)/include
 
@@ -39,7 +53,7 @@ gen1:$(TGT)Entity.cu $(NABLA)
 ###############
 $(TGT)Entity.cu : $(TGT_FILE) $(NABLA)
 	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
-	$(NABLA) --cuda $(TGT) -i $(TGT_FILE) && sync
+	$(NABLA) $(LOG) --cuda $(TGT) -i $(TGT_FILE) && sync
 
 $(TGT)Entity.o : $(TGT)Entity.cu
 	@echo NVIDIA-CC
@@ -47,7 +61,8 @@ $(TGT)Entity.o : $(TGT)Entity.cu
 
 $(TGT).cuda: $(TGT)Entity.o
 	@echo GCC-LINKING
-	$(CC) -o $@ $^ $(NV_LIBRARY)
+	$(NV) -ccbin g++ -m64 -gencode arch=compute_30,code=sm_30 -o $@ $^ 
+#$(NV_LIBRARY)
 
 e:
 	$(CC) -E -xc $(TGT).cu -o $(TGT).E.cu

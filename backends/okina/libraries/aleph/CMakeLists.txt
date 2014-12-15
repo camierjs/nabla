@@ -16,11 +16,14 @@ if(PETSc_FOUND)
 endif()
 
 # Looking for TRILINOS
-include(${Trilinos_ROOT_PATH}/lib/cmake/Trilinos/TrilinosConfig.cmake)
-if(Trilinos_VERSION)
-  # If we have it, add Kappa library
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/trilinos)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/kappa)
+find_path(Trilinos_CONFIG_PATH TrilinosConfig.cmake ${Trilinos_ROOT_PATH}/lib/cmake/Trilinos)
+if (${Trilinos_CONFIG_PATH})
+  include(${Trilinos_ROOT_PATH}/lib/cmake/Trilinos/TrilinosConfig.cmake)
+  if(Trilinos_VERSION)
+    # If we have it, add Kappa library
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/trilinos)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/kappa)
+  endif()
 endif()
 
 

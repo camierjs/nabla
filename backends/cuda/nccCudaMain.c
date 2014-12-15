@@ -22,11 +22,12 @@
 /*****************************************************************************
  * Backend CUDA PREFIX - Génération du 'main'
  *****************************************************************************/
-#define CUDA_MAIN_PREFIX "\n\n\n\n/*****************************************************************************\n\
+#define CUDA_MAIN_PREFIX "\n\n\n\n\
+/*****************************************************************************\n\
  * Backend CUDA - 'main'\n\
  *****************************************************************************/\n\
 int main(void){\n\
-\tint iteration=1;\n\
+\t__align__(8)int iteration=1;\n\
 \tfloat gputime=0.0;\n\
 \tstruct timeval st, et;\n\
 \n\
@@ -34,7 +35,7 @@ int main(void){\n\
 \tconst dim3 dimNodeGrid=dim3(PAD_DIV(NABLA_NB_NODES,dimJobBlock.x),1,1);\n\
 \tconst dim3 dimCellGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
 \n\
-#warning dimFuncBlock set for dimJobBlock\n\
+//#warning dimFuncBlock set for dimJobBlock\n\
 \tconst dim3 dimFuncBlock=dim3(BLOCKSIZE,1,1);\n\
 \tconst dim3 dimFuncGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
 \tgpuEnum();\n\
@@ -47,7 +48,7 @@ int main(void){\n\
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_deltat, sizeof(double)));\n\
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_iteration, sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_time, sizeof(double)));\n\
-\t//CUDA_HANDLE_ERROR(cudaMalloc((void**)&global_min_array, sizeof(double)*CUDA_NB_BLOCKS_PER_GRID));\n"
+\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_min_array, sizeof(double)*CUDA_NB_THREADS_PER_BLOCK));\n"
 
 
 /*****************************************************************************
@@ -91,11 +92,13 @@ int main(void){\n\
  * Backend CUDA - 'gpuEnum'\n\
  *****************************************************************************/\n\
 void gpuEnum(void){\n\
-  int count;\n\
+  int count=0;\n\
   cudaDeviceProp  prop;\n\
-  CUDA_HANDLE_ERROR_WITH_SUCCESS( cudaGetDeviceCount( &count ) );\n\
-  for (int i=0; i< count; i++) {\n\
-    CUDA_HANDLE_ERROR( cudaGetDeviceProperties( &prop, i ) );\n\
+  cudaGetDeviceCount(&count);\n\
+  CUDA_HANDLE_ERROR(cudaGetDeviceCount(&count));\n\
+  //CUDA_HANDLE_ERROR_WITH_SUCCESS(cudaGetDeviceCount(&count));\n\
+  for (int i=0; i<count; i++) {\n\
+    CUDA_HANDLE_ERROR( cudaGetDeviceProperties(&prop,i));\n\
     printf( \"--- General Information for device #%%d ---\\n\", i );\n\
     printf( \"\tName:  %%s\\n\", prop.name );\n\
     printf( \"\tCompute capability:  %%d.%%d\\n\", prop.major, prop.minor );\n\
@@ -125,6 +128,7 @@ void gpuEnum(void){\n\
             prop.maxGridSize[2] );\n\
     printf(\"\\n\");\n\
   }\n\
+  CUDA_HANDLE_ERROR(cudaDeviceReset());\
   CUDA_HANDLE_ERROR(cudaSetDevice(0));\n\
 }\n\
 "
@@ -275,11 +279,19 @@ NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
     nprintf(nabla,NULL,");");
   }*/
   
+  nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t\t//printf(\"\\ndbgsVariable %s\"); //dbg%sVariable%sDim%s_%s();",
+    if (strcmp(var->name, "min_array")==0) continue;
+    if (strcmp(var->name, "iteration")==0) continue;
+    if (strcmp(var->name, "dtt_courant")==0) continue;
+    if (strcmp(var->name, "dtt_hydro")==0) continue;
+    if (strcmp(var->name, "elemBC")==0) continue;
+    #warning continue dbgsVariable
+    continue;
+    nprintf(nabla,NULL,"\n\t\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
             var->name,
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
@@ -324,11 +336,14 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\
-\n\t\t\tReal new_delta_t=0.0;\
+\n\t\t__align__(8) double *new_delta_t=(double*)malloc(sizeof(double));\
+\n\t\t*new_delta_t=0.0;\
 \n\t\t//cudaFuncSetCacheConfig(integrateStressForElems,cudaFuncCachePreferL1);\
-\n\tgettimeofday(&st, NULL);\
-\n\t\twhile (new_delta_t>=0. && iteration!=option_max_iterations){//host_time<=OPTION_TIME_END){\
-\n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(global_iteration, &iteration, sizeof(int), cudaMemcpyHostToDevice)); ");
+\n\t\tgettimeofday(&st, NULL);\
+\n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
+\n\t\twhile (*new_delta_t>=0. && iteration!=option_max_iterations){//host_time<=OPTION_TIME_END){\
+\n\t\t\tprintf(\"\\nITERATION %%d\", iteration);\
+\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_iteration, &iteration, sizeof(int), cudaMemcpyHostToDevice));");
     }
     nprintf(n, NULL, "\n%s%s<<<dim%sGrid,dim%sBlock>>>( // @ %f",
             is_into_compute_loop?"\t\t\t":"\t\t",
@@ -364,18 +379,21 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
     
     nprintf(n, NULL, ");");
     cudaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
-    nprintf(n, NULL, "\n");
+    
+    nprintf(n, NULL, "\n\t\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaCheck_%s\");\
+\n\t\t\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\n",entry_points[i].name);
  }
   nprintf(n, NULL,"\
-\n\t\t\t// Pour sync\
+\n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
 \n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
-\n\t\t\tnew_delta_t=option_dtt_initial;\
-\n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.6f\", iteration, new_delta_t);\
-\n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(&host_min_array, global_min_array, CUDA_NB_BLOCKS_PER_GRID*sizeof(double), cudaMemcpyDeviceToHost));\
-\n\t\t\t//for(int i=0;i<CUDA_NB_BLOCKS_PER_GRID;i+=1){printf(\" host_min_array[%%d]=%%f\",i,host_min_array[i]);}\
-\n\t\t\thost_time+=new_delta_t;\
+\n\t\t\t//*new_delta_t=option_dtt_initial;\
+\n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.21e\", iteration, *new_delta_t); \
+\n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(&host_min_array, global_min_array, CUDA_NB_THREADS_PER_BLOCK*sizeof(double), cudaMemcpyDeviceToHost));\
+\n\t\t\t//for(int i=0;i<CUDA_NB_THREADS_PER_BLOCK;i+=1){printf(\" host_min_array[%%d]=%%f\",i,host_min_array[i]);}\
+\n\t\t\thost_time+=*new_delta_t;\
 \n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
-\n\t\t\tif (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.6f, delta_t=%%.6f\\r\", iteration+=1, host_time, new_delta_t); \
+\n\t\t\tif (*new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, *new_delta_t);\
+\n\t\t\titeration+=1;\
 \n\t\t}");
   return NABLA_OK;
 }

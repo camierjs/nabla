@@ -50,10 +50,10 @@ static void cudaHeaderReal3(nablaMain *nabla){
 }
 
 extern char extra_h[];
-/*static void cudaHeaderExtra(nablaMain *nabla){
+static void cudaHeaderExtra(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,extra_h);
-  }*/
+  fprintf(nabla->entity->hdr,extra_h+NABLA_GPL_HEADER);
+}
 
 
 /***************************************************************************** 
@@ -84,15 +84,18 @@ static void cudaHeaderIncludes(nablaMain *nabla){
 // *         sm_35\n\
 // *****************************************************************************\n\
 #include <iostream>\n\
+#include <cstdio>\n\
+#include <cstdlib>\n\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
+#include <assert.h>\n\
 #include <string.h>\n\
 #include <vector>\n\
 #include <math.h>\n\
 #include <assert.h>\n\
 #include <stdarg.h>\n\
-#include <cuda.h>\n\
+#include <cuda_runtime.h>\n\
 cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
    if (cudaSuccess==cudaMalloc(devPtr,size))\n\
       return cudaMemset(*devPtr,0,size);\n\
@@ -123,17 +126,18 @@ static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->name, "coord")==0) continue;
-    continue;
-    /* hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
+    //continue;
+    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
             var->name);
+    continue;
     hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
-            var->name);*/
+            var->name);
   }
 }
 
@@ -195,7 +199,7 @@ static void cudaIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "cuda_iteration()");
 }
 static void cudaExit(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*EXIT*/", "cuda_exit(global_deltat)");
+  nprintf(nabla, "/*EXIT*/", "cudaExit(global_deltat)");
 }
 static void cudaTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "*global_time");
@@ -340,7 +344,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
 
   // Rajout de la classe Real3 et des extras
   cudaHeaderReal3(nabla);
-  //cudaHeaderExtra(nabla);
+  cudaHeaderExtra(nabla);
 
   // Dump dans le fichier source
   cudaInlines(nabla);
@@ -364,7 +368,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   nccCudaMain(nabla);
 
   // Partie Post Init
-  //cudaHeaderDebug(nabla);
+  cudaHeaderDebug(nabla);
   nccCudaMainPostInit(nabla);
   
   // Partie POSTFIX
