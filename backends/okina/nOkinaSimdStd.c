@@ -156,7 +156,7 @@ nablaDefine okinaStdDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  {"DBG_MODE", "(true)"},
+  {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
   {"DBG_CELL_VOLUME", "0x0001ul"},

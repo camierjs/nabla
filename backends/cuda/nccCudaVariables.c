@@ -63,8 +63,8 @@ void cudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[%s->backCell().uniqueId()]",itm);
   if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
   if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[%s->frontCell().uniqueId()]",itm);
-  if (n->tokenid == NEXTCELL)      nprintf(arc, "/*chs NEXTCELL*/", "[nextCell]");
-  if (n->tokenid == PREVCELL)      nprintf(arc, "/*chs PREVCELL*/", "[prevCell]");
+  if (n->tokenid == NEXTCELL)      nprintf(arc, "/*chs NEXTCELL*/", ")");
+  if (n->tokenid == PREVCELL)      nprintf(arc, "/*chs PREVCELL*/", ")");
   if (n->tokenid == NEXTNODE)      nprintf(arc, "/*chs NEXTNODE*/", "[nextNode]");
   if (n->tokenid == PREVNODE)      nprintf(arc, "/*chs PREVNODE*/", "[prevNode]");
   if (n->tokenid == PREVLEFT)      nprintf(arc, "/*chs PREVLEFT*/", "[cn.previousLeft()]");

@@ -142,3 +142,22 @@ __device__ inline real gatherk_and_zero_neg_ones(const int a, real *data){
 __device__ inline void gatherFromNode_k(const int a, real *data, real *gthr){
   *gthr=gatherk_and_zero_neg_ones(a,data);
 }
+
+__device__ inline void gatherFromNode_3kiArray8(const int a, const int corner,
+                                                real3 *data, real3 *gthr, int i){
+  //debug()<<"gather3ki, i="<<i;
+  double *p=(double *)data;
+  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
+  if (i==0) (*gthr).x=value;
+  if (i==1) (*gthr).y=value;
+  if (i==2) (*gthr).z=value;
+}
+
+__device__ inline void gatherFromNode_3kArray8(const int a, const int corner,
+                                               real3 *data, real3 *gthr){
+  //debug()<<"gather3k";
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 0);
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 1);
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 2);
+  //debug()<<"gather3k done";
+}

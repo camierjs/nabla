@@ -264,9 +264,8 @@ char* cudaHookPostfixEnumerate(nablaJob *job){
   if (job->item[0]=='\0') return "// functioncudaHookPostfixEnumerate\n";
   if (job->xyz==NULL) return "";//// void ENUMERATE postfix\n\t";
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
-#warning Wrong nextCell prevCell\n\
-\t\tint prevCell=tcid-1;\n\
-\t\tint nextCell=tcid+1;\n";
+\t\t//int prevCell=tcid-1;\n\
+\t\t//int nextCell=tcid+1;\n";
   error(!0,0,"Could not switch in cudaHookPostfixEnumerate!");
   return NULL;
 }
@@ -613,12 +612,24 @@ void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
   *numParams+=1;
   nprintf(nabla, NULL, ",\n%snode_cell",tabs);
   *numParams+=1;
+  nprintf(nabla, NULL, ",\n%snode_cell_corner",tabs);
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n%scell_prev",tabs);
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n%scell_next",tabs);
+  *numParams+=1;
 }
 
 void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   nprintf(nabla, NULL, ",\n\t\tint *cell_node");
   *numParams+=1;
   nprintf(nabla, NULL, ",\n\t\tint *node_cell");
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *node_cell_corner");
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *cell_prev");
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *cell_next");
   *numParams+=1;
 }
 

@@ -339,13 +339,12 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\
-\n\t\t__align__(8) double *new_delta_t=(double*)malloc(sizeof(double));\
-\n\t\t*new_delta_t=0.0;\
+\n\t\t__align__(8) double new_delta_t=0.0;\
 \n\t\t//cudaFuncSetCacheConfig(integrateStressForElems,cudaFuncCachePreferL1);\
 \n\t\tgettimeofday(&st, NULL);\
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
-\n\t\twhile (*new_delta_t>=0. && iteration!=option_max_iterations){//host_time<=OPTION_TIME_END){\
-\n\t\t\tprintf(\"\\nITERATION %%d\", iteration);\
+\n\t\twhile (new_delta_t>=0. && iteration<option_max_iterations){//host_time<=OPTION_TIME_END){\
+\n\t\t\t//printf(\"\\nITERATION %%d\", iteration);\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_iteration, &iteration, sizeof(int), cudaMemcpyHostToDevice));");
     }
     nprintf(n, NULL, "\n%s%s<<<dim%sGrid,dim%sBlock>>>( // @ %f",
@@ -388,14 +387,14 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
  }
   nprintf(n, NULL,"\
 \n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
-\n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
-\n\t\t\t//*new_delta_t=option_dtt_initial;\
-\n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.21e\", iteration, *new_delta_t); \
+\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
+\n\t\t\t//new_delta_t=option_dtt_initial;\
+\n\t\t\tprintf(\"\\n\\t[#%%d] got new_delta_t=%%.21e\", iteration, new_delta_t); \
 \n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(&host_min_array, global_min_array, CUDA_NB_THREADS_PER_BLOCK*sizeof(double), cudaMemcpyDeviceToHost));\
 \n\t\t\t//for(int i=0;i<CUDA_NB_THREADS_PER_BLOCK;i+=1){printf(\" host_min_array[%%d]=%%f\",i,host_min_array[i]);}\
-\n\t\t\thost_time+=*new_delta_t;\
-\n\t\t\t//CUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
-\n\t\t\tif (*new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, *new_delta_t);\
+\n\t\t\thost_time+=new_delta_t;\
+\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
+\n\t\t\tif (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, new_delta_t);\
 \n\t\t\titeration+=1;\
 \n\t\t}");
   return NABLA_OK;

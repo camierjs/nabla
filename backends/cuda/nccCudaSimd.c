@@ -27,14 +27,14 @@ char *nccCudaBits(void){return "Not relevant here";}
 // * Prev Cell
 // ****************************************************************************
 char* nccCudaPrevCell(void){
-  return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+c],";
+  return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }
 
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
 char* nccCudaNextCell(void){
-  return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+c],";
+  return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
 }
 
 
@@ -151,7 +151,7 @@ nablaDefine cudaDefines[]={
   {"knAt(a)",""},
   {"fatal(a,b)","cudaThreadExit()"},
   {"synchronize(a)",""},
-  {"mpi_reduce(how,what)","cuda_reduce_min(global_min_array,what)"},
+  {"mpi_reduce(how,what)","what"},//"cuda_reduce_min(global_min_array,what)"},
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
