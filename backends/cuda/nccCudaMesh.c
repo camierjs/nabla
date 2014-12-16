@@ -32,10 +32,7 @@ void cudaMesh(nablaMain *nabla){
 #define NABLA_NB_CELLS_Y_AXIS    Y_EDGE_ELEMS\n\
 #define NABLA_NB_CELLS_Z_AXIS    Z_EDGE_ELEMS\n\
 \n\
-//#define BLOCKSIZE                  256\n\
-//#define CUDA_NB_THREADS_PER_BLOCK  256\n\
-#warning BLOCKSIZE and CUDA_NB_THREADS_PER_BLOCK\n\
-#define BLOCKSIZE                  1\n\
+#define BLOCKSIZE                  256\n\
 #define CUDA_NB_THREADS_PER_BLOCK  256\n\
 \n\
 #define NABLA_NB_NODES_X_TICK LENGTH/(NABLA_NB_CELLS_X_AXIS)\n\

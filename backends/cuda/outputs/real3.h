@@ -47,7 +47,7 @@ public:
 
   // op= operators
   __device__ inline Real3& operator+=(const Real3& v){ x+=v.x; y+=v.y; z+=v.z; return *this;}
-  __device__ inline Real3& operator-=(const Real3& v){ x-=v.x; y-=v.y; z-=v.x; return *this;}
+  __device__ inline Real3& operator-=(const Real3& v){ x-=v.x; y-=v.y; z-=v.z; return *this;}
   __device__ inline Real3& operator*=(const Real3& v){ x*=v.x; y*=v.y; z*=v.z; return *this;}
   __device__ inline Real3& operator/=(const Real3& v){ x/=v.x; y/=v.y; z/=v.z; return *this;}
 
@@ -118,20 +118,17 @@ __device__ inline void cross3(Real3 u, Real3 v, Real3 *r){ *r=cross(u,v);}
  * Gather avec des real3
  ******************************************************************************/
 __device__ inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
-  //debug()<<"gather3ki, i="<<i;
-  double *p=(double *)data;
-  double value=p[3*a+i];
-  if (i==0) (*gthr).x=value;
-  if (i==1) (*gthr).y=value;
-  if (i==2) (*gthr).z=value;
+  const double *p=(double *)data;
+  const double value=p[3*a+i];
+  if (i==0) gthr->x=value;
+  if (i==1) gthr->y=value;
+  if (i==2) gthr->z=value;
 }
 
 __device__ inline void gather3k(const int a, real3 *data, real3 *gthr){
-  //debug()<<"gather3k";
   gather3ki(a, data, gthr, 0);
   gather3ki(a, data, gthr, 1);
   gather3ki(a, data, gthr, 2);
-  //debug()<<"gather3k done";
 }
 
 __device__ inline real gatherk_and_zero_neg_ones(const int a, real *data){
@@ -145,19 +142,16 @@ __device__ inline void gatherFromNode_k(const int a, real *data, real *gthr){
 
 __device__ inline void gatherFromNode_3kiArray8(const int a, const int corner,
                                                 real3 *data, real3 *gthr, int i){
-  //debug()<<"gather3ki, i="<<i;
-  double *p=(double *)data;
-  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
-  if (i==0) (*gthr).x=value;
-  if (i==1) (*gthr).y=value;
-  if (i==2) (*gthr).z=value;
+  const double *p=(double *)data;
+  const double value=(a<0)?0.0:p[3*8*a+3*corner+i];
+  if (i==0) gthr->x=value;
+  if (i==1) gthr->y=value;
+  if (i==2) gthr->z=value;
 }
 
 __device__ inline void gatherFromNode_3kArray8(const int a, const int corner,
                                                real3 *data, real3 *gthr){
-  //debug()<<"gather3k";
   gatherFromNode_3kiArray8(a,corner, data, gthr, 0);
   gatherFromNode_3kiArray8(a,corner, data, gthr, 1);
   gatherFromNode_3kiArray8(a,corner, data, gthr, 2);
-  //debug()<<"gather3k done";
 }

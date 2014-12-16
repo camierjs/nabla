@@ -391,7 +391,10 @@ parameter_declaration
 // ∇ xyz/mat/env parameters //
 //////////////////////////////
 nabla_xyz_direction:IDENTIFIER {rhs;};
-nabla_xyz_declaration: XYZ nabla_xyz_direction {rhs;};
+nabla_xyz_declaration
+: XYZ nabla_xyz_direction {rhs;}
+| XYZ nabla_xyz_direction '=' unary_expression{rhs;}
+;
 nabla_mat_material:IDENTIFIER {rhs;};
 nabla_mat_declaration: MAT nabla_mat_material {rhs;};
 nabla_env_environment:IDENTIFIER {rhs;};

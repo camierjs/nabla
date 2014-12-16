@@ -315,7 +315,6 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   int numParams;
   astNode *nFctName;
   astNode *nParams;
-  //astNode *nd;
   fct->called_variables=NULL;
   fct->in_out_variables=NULL;
   dbg("\n\n\t[nablaFctFill] ");
@@ -400,9 +399,6 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nablaFunctionParse(n,fct);
-  
-  //if (nabla->backend==BACKEND_CUDA)    nprintf(nabla, NULL, "// du tid test\n}");
-
   dbg("\n\t[nablaFctFill] done");
 }
 

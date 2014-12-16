@@ -31,7 +31,7 @@ void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVar
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
-    nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
+    //nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -143,9 +143,8 @@ static void cudaHookTurnTokenToVariableForCellJob(nablaMain *arc,
     nprintf(arc, "/*CellVar*/",
             "%s",
             ((var->dim==0)? (isPostfixed==2)?"":"[tcid":
-             //(enum_enum!='\0')?"[n+8*(tcid)"://"[n*NABLA_NB_CELLS+tcid+c]":
-             (enum_enum!='\0')?"[tcid+n*NABLA_NB_CELLS"://"[n*NABLA_NB_CELLS+tcid+c]":
-             (var->dim==1)?"[8*(tcid)":"[tcid")); // [(cell_xs_node[n])[tcid+c]] [n.index()]
+             (enum_enum!='\0')?"[n+8*(tcid)":
+             (var->dim==1)?"[8*(tcid)":"[tcid"));
     job->parse.variableIsArray=(var->dim==1)?true:false;
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true)

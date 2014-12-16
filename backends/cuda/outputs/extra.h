@@ -20,111 +20,49 @@
 // *****************************************************************************
 // * EXTRA
 // *****************************************************************************
-#define MINEQ(a,b) (a)=(((a)<(b))?(a):(b))
- 
-__device__ void reduceMin(Real *sresult, const int threadID){
-    /* If number of threads is not a power of two, first add the ones
-       after the last power of two into the beginning. At most one of
-       these conditionals will be true for a given NPOT block size. */
-  if (CUDA_NB_THREADS_PER_BLOCK > 512 && CUDA_NB_THREADS_PER_BLOCK <= 1024){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-512)
-      MINEQ(sresult[threadID],sresult[threadID + 512]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 256 && CUDA_NB_THREADS_PER_BLOCK < 512){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-256)
-      MINEQ(sresult[threadID],sresult[threadID + 256]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 128 && CUDA_NB_THREADS_PER_BLOCK < 256){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-128)
-      MINEQ(sresult[threadID],sresult[threadID + 128]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 64 && CUDA_NB_THREADS_PER_BLOCK < 128){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-64)
-      MINEQ(sresult[threadID],sresult[threadID + 64]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 32 && CUDA_NB_THREADS_PER_BLOCK < 64){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-32)
-      MINEQ(sresult[threadID],sresult[threadID + 32]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 16 && CUDA_NB_THREADS_PER_BLOCK < 32){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-16)
-      MINEQ(sresult[threadID],sresult[threadID + 16]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 8 && CUDA_NB_THREADS_PER_BLOCK < 16){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-8)
-      MINEQ(sresult[threadID],sresult[threadID + 8]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 4 && CUDA_NB_THREADS_PER_BLOCK < 8){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-4)
-      MINEQ(sresult[threadID],sresult[threadID + 4]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK > 2 && CUDA_NB_THREADS_PER_BLOCK < 4){
-    __syncthreads();
-    if (threadID < CUDA_NB_THREADS_PER_BLOCK-2)
-      MINEQ(sresult[threadID],sresult[threadID + 2]);
-  }
-  if (CUDA_NB_THREADS_PER_BLOCK >= 512){
-    __syncthreads();
-    if (threadID < 256)
-      MINEQ(sresult[threadID],sresult[threadID + 256]);
-  }
-    if (CUDA_NB_THREADS_PER_BLOCK >= 256){
-        __syncthreads();
-        if (threadID < 128)
-          MINEQ(sresult[threadID],sresult[threadID + 128]);
-    }
-    if (CUDA_NB_THREADS_PER_BLOCK >= 128){
-      __syncthreads();
-      if (threadID < 64)
-        MINEQ(sresult[threadID],sresult[threadID + 64]);
-    }
-    __syncthreads();
-    if (threadID < 32) {
-      volatile Real *vol = sresult;
-      if (CUDA_NB_THREADS_PER_BLOCK >= 64) MINEQ(vol[threadID],vol[threadID + 32]);
-      if (CUDA_NB_THREADS_PER_BLOCK >= 32) MINEQ(vol[threadID],vol[threadID + 16]);
-      if (CUDA_NB_THREADS_PER_BLOCK >= 16) MINEQ(vol[threadID],vol[threadID + 8]);
-      if (CUDA_NB_THREADS_PER_BLOCK >= 8)  MINEQ(vol[threadID],vol[threadID + 4]);
-      if (CUDA_NB_THREADS_PER_BLOCK >= 4)  MINEQ(vol[threadID],vol[threadID + 2]);
-      if (CUDA_NB_THREADS_PER_BLOCK >= 2)  MINEQ(vol[threadID],vol[threadID + 1]);
-    }
-    __syncthreads();
+
+__device__ inline int NearestPowerOf2(int n){
+  int x = 1;
+  if (!n) return n;
+  while(x < n)
+    x <<= 1;
+  return x;
 }
 
 // Tableau en shared memory pour contenir la reduction locale
 __shared__ double local_min[CUDA_NB_THREADS_PER_BLOCK];
 
-// *****************************************************************************
-__device__ void cuda_reduce_min_local(Real *min_array, const Real what){
+__device__ Real cuda_reduce_min(const Real what){
+  double temp;
+  int  thread2;
+  int nTotalThreads = min(NearestPowerOf2(blockDim.x),NABLA_NB_CELLS);
   local_min[threadIdx.x]=what;
   __syncthreads();
-  reduceMin(local_min,threadIdx.x);
-  if (threadIdx.x==0)
-    min_array[blockIdx.x]=local_min[0];
+  while(nTotalThreads > 1){
+    const int halfPoint = (nTotalThreads >> 1);
+    if (threadIdx.x < halfPoint){
+     thread2 = threadIdx.x + halfPoint;
+     //printf("\ntid=%%d, nTotalThreads=%%d, halfPoint=%%d, thread2=%%d, blockDim.x=%%d", threadIdx.x, nTotalThreads, halfPoint, thread2, blockDim.x);
+      // Skipping the fictious threads blockDim.x ... blockDim_2-1
+      if (thread2 < blockDim.x){
+        temp = local_min[thread2];
+        //printf("\n\t%%.21e vs %%.21e",local_min[threadIdx.x],local_min[thread2]);
+        if (temp < local_min[threadIdx.x]){
+          local_min[threadIdx.x] = temp;
+          //printf("\n\t new local_min=%%.21e",local_min[threadIdx.x]);
+        }
+      }
+    }
+    __syncthreads();
+    nTotalThreads = halfPoint;
+  }
+  return local_min[0];
 }
+
 
 // *****************************************************************************
-__device__ Real cuda_reduce_min(Real *min_array, const Real what){
-  double minimum=min_array[0];
-  // First reduce at thread level  
-  cuda_reduce_min_local(min_array,what);
-  // Tous les threads font le boulot pour l'instant
-  // car on ne retourne pas coté host pour le min des blocs
-  for (int i=1; i<blockIdx.x; i++)
-    MINEQ(minimum,min_array[i]);
-  return minimum;
-}
-
-
-// Pour l'exit, on force le global_deltat à une valeure négative
+// * Pour l'exit, on force le global_deltat à une valeure négative
+// *****************************************************************************
 __device__ void cudaExit(Real *global_deltat){
   *global_deltat=-1.0;
 }

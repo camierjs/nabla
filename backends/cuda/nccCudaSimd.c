@@ -137,7 +137,7 @@ nablaDefine cudaDefines[]={
   {"real3","Real3"},
   {"Real","double"},
   {"real","double"},
-  {"ReduceMinToDouble(what)","what"},
+  {"ReduceMinToDouble(what)","cuda_reduce_min(what)"},
   {"norm","fabs"},
   {"rabs","fabs"},
   {"rsqrt","sqrt"},

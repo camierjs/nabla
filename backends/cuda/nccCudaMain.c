@@ -358,7 +358,7 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
       numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
     else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
-    nprintf(n,NULL,"/*numParams=%d*/",numParams);
+    //nprintf(n,NULL,"/*numParams=%d*/",numParams);
     
     // On s'autorise un endroit pour insérer des arguments
     cudaAddExtraArguments(n, &entry_points[i], &numParams);

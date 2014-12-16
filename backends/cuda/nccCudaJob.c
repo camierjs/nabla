@@ -79,6 +79,10 @@ char* cudaHookPrefixEnumerate(nablaJob *job){
   if (itm=='c'  && strcmp(job->rtntp,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
   if (itm=='c'  && strcmp(job->rtntp,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
   if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
+  if (itm=='\0' && job->is_an_entry_point
+      && job->called_variables!=NULL) return "CUDA_LAUNCHER_FUNCTION_THREAD(tid);";
+  if (itm=='\0' && job->is_an_entry_point
+      && job->called_variables==NULL) return "CUDA_INI_FUNCTION_THREAD(tid);";
   if (itm=='\0' && job->is_an_entry_point) return "CUDA_INI_FUNCTION_THREAD(tid);";
   if (itm=='\0' && !job->is_an_entry_point) return "/*std function*/";
   error(!0,0,"Could not distinguish PREFIX Enumerate!");
@@ -91,7 +95,7 @@ char* cudaHookPrefixEnumerate(nablaJob *job){
  *****************************************************************************/
 char* cudaHookDumpEnumerateXYZ(nablaJob *job){
   char *xyz=job->xyz;// Direction
-  nprintf(job->entity->main, "\n\t/*cudaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
+  nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
   return "// cudaHookDumpEnumerateXYZ has xyz drctn";
 }
 
@@ -156,7 +160,7 @@ static char* cudaGather(nablaJob *job){
   // On récupère le nombre de variables potentielles à gatherer
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
     nbToGather+=1;
-  nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
+  //nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
   
   // S'il y en a pas, on a rien d'autre à faire
   if (nbToGather==0) return "";
@@ -406,11 +410,11 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case(FOREACH_INI):{
     nprintf(nabla, "/*FOREACH_INI*/","{\n\t\t\t");
-    nprintf(nabla, "/*cudaGather*/", "/*cudaGather*/ %s",cudaGather(job));
+    nprintf(nabla, "/*cudaGather*/", "%s",cudaGather(job));
     break;
   }
   case(FOREACH_END):{
-    nprintf(nabla, "/*cudaScatter*/", "/*cudaScatter*/ %s",cudaScatter(job));
+    nprintf(nabla, "/*cudaScatter*/", "%s",cudaScatter(job));
     nprintf(nabla, "/*FOREACH_END*/","\n\t\t}\n\t");
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
@@ -575,7 +579,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
  *****************************************************************************/
 void cudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   nablaVariable *var;
-  if (*numParams!=0) nprintf(nabla, NULL, "/*cudaHookAddExtraParameters*/,");
+  if (*numParams!=0) nprintf(nabla, NULL, ",");
   if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA){
     nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
     *numParams+=1;
