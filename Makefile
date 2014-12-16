@@ -70,7 +70,7 @@ tstro:
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tstrv:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_shydro_run_1)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 tstcu:

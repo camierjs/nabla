@@ -37,7 +37,7 @@
 
 
 void cudaDefineEnumerates(nablaMain *nabla){
-  fprintf(nabla->entity->src,"\n\n\
+  fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
  * Forward enumerates\n\
  *********************************************************/\n\

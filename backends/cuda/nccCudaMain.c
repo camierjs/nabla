@@ -55,14 +55,16 @@ int main(void){\n\
  * Backend CUDA INIT - Génération du 'main'
  *****************************************************************************/
 #define CUDA_MAIN_PREINIT "\n\
-\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,%s);\n\
+\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,%s);\n\
 \tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node);\n\
+\tnabla_rescan_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node,cell_prev,cell_next,node_cell,node_cell_corner);\n\
 \t//dbgCoords();\n\
 \t//Initialisation du temps et du deltaT\n\
 \tprintf(\"\\nInitialisation du temps et du deltaT\");\n\
 \thost_time=0.0;\n\n\
 \tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\n\
 \t{// Initialisation et boucle de calcul"
+
 
 /*****************************************************************************
  * Backend CUDA POSTFIX - Génération du 'main'
@@ -72,7 +74,6 @@ int main(void){\n\
 \tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);\n\
 "
-
 
 /*****************************************************************************
  * Backend CUDA POSTFIX - Génération du 'main'
@@ -279,18 +280,20 @@ NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
     nprintf(nabla,NULL,");");
   }*/
   
-  nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
+  //nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->name, "coord")==0) continue;
-    if (strcmp(var->name, "min_array")==0) continue;
-    if (strcmp(var->name, "iteration")==0) continue;
-    if (strcmp(var->name, "dtt_courant")==0) continue;
-    if (strcmp(var->name, "dtt_hydro")==0) continue;
-    if (strcmp(var->name, "elemBC")==0) continue;
-    #warning continue dbgsVariable
-    continue;
+    // Si les variables sont globales, on ne les debug pas
+    if (var->item[0]=='g') continue;
+    //if (strcmp(var->name, "min_array")==0) continue;
+    //if (strcmp(var->name, "iteration")==0) continue;
+    //if (strcmp(var->name, "dtt_courant")==0) continue;
+    //if (strcmp(var->name, "dtt_hydro")==0) continue;
+    //if (strcmp(var->name, "elemBC")==0) continue;
+    //#warning continue dbgsVariable
+    //continue;
     nprintf(nabla,NULL,"\n\t\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
             var->name,
             (var->item[0]=='n')?"Node":"Cell",

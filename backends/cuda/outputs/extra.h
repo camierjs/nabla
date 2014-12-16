@@ -103,7 +103,7 @@ __device__ void reduceMin(Real *sresult, const int threadID){
 __shared__ double local_min[CUDA_NB_THREADS_PER_BLOCK];
 
 // *****************************************************************************
-__device__ void cuda_reduce_min_local(Real *min_array, Real what){
+__device__ void cuda_reduce_min_local(Real *min_array, const Real what){
   local_min[threadIdx.x]=what;
   __syncthreads();
   reduceMin(local_min,threadIdx.x);
@@ -112,7 +112,7 @@ __device__ void cuda_reduce_min_local(Real *min_array, Real what){
 }
 
 // *****************************************************************************
-__device__ Real cuda_reduce_min(Real *min_array, Real what){
+__device__ Real cuda_reduce_min(Real *min_array, const Real what){
   double minimum=min_array[0];
   // First reduce at thread level  
   cuda_reduce_min_local(min_array,what);

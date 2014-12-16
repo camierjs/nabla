@@ -187,6 +187,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
+  //if (n->token) nprintf(nabla, NULL, "\n/*[nablaJobParse] token: '%s'*/", n->token);
   if (n->token)
     dbg("\n[nablaJobParse] token: '%s'?", n->token);
 
@@ -243,7 +244,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
               job->parse.isDotXYZ=n->children->next->next->token[0]-'w';
               // On flush cette postfix_expression pour la masquer de la génération
 //#warning Should be a hook, but let it be for now
-              if (nabla->backend==BACKEND_CUDA) n->children->next=NULL;
+//              if (nabla->backend==BACKEND_CUDA) n->children->next=NULL;
               //nprintf(nabla, NULL, "/*nJob:isDotXYZ=%d*/", job->parse.isDotXYZ);
             }
           }

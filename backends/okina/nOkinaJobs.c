@@ -400,6 +400,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
+  //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
   if (n->token)
     dbg("\n\t[okinaHookSwitchToken] token: '%s'?", n->token);
  
@@ -538,9 +539,9 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     //nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
     //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, "[c]]/*]+FlushingIsPostfixed*/");
                                         //"[((c>>WARP_BIT)*((1+1+1)<<WARP_BIT))+(c&((1<<WARP_BIT)-1))]]/*]+FlushingIsPostfixed*/");
-    if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, NULL);
+    //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, NULL);
+    //if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, NULL);
+    //if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, NULL);
     job->parse.isPostfixed=0;
     // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
@@ -703,6 +704,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   }
   default:{
     if (n->token!=NULL) nprintf(nabla, NULL, "%s ", n->token);
+    //if (n->token!=NULL) nprintf(nabla, NULL, "/*default*/%s ", n->token);
     break;
   }
   }
@@ -803,7 +805,7 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
         job->variables_to_gather_scatter=new;
       else
         nablaVariableLast(job->variables_to_gather_scatter)->next=new;
-    }    
+    }
   }
   if (n->children != NULL) okinaHookDumpNablaParameterList(nabla,job,n->children,numParams);
   if (n->next != NULL) okinaHookDumpNablaParameterList(nabla,job,n->next, numParams);

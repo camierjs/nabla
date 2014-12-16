@@ -55,6 +55,12 @@ static void cudaHeaderExtra(nablaMain *nabla){
   fprintf(nabla->entity->hdr,extra_h+NABLA_GPL_HEADER);
 }
 
+extern char cuMsh_h[];
+static void cudaHeaderMesh(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,cuMsh_h+NABLA_GPL_HEADER);
+}
+
 
 /***************************************************************************** 
  * 
@@ -117,7 +123,7 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
 extern char debug_h[];
 static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
   nablaVariable *var;
-  fprintf(nabla->entity->hdr,debug_h);
+  fprintf(nabla->entity->hdr,debug_h+NABLA_GPL_HEADER);
   hprintf(nabla,NULL,"\n\n// *****************************************************************************\n\
 // * Debug macro functions\n\
 // *****************************************************************************");
@@ -337,18 +343,20 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   cudaHeaderHandleErrors(nabla);
   nablaDefines(nabla,cudaDefines);
   nablaForwards(nabla,cudaForwards);
+  cudaDefineEnumerates(nabla);
    
   // Génération du maillage
   cudaMesh(nabla);
   cudaMeshConnectivity(nabla);
 
   // Rajout de la classe Real3 et des extras
+  cudaHeaderDebug(nabla);
   cudaHeaderReal3(nabla);
   cudaHeaderExtra(nabla);
+  cudaHeaderMesh(nabla);
 
   // Dump dans le fichier source
   cudaInlines(nabla);
-  cudaDefineEnumerates(nabla);
   nccCudaMainMeshConnectivity(nabla);
   
   // Parse du code préprocessé et lance les hooks associés
@@ -368,7 +376,6 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   nccCudaMain(nabla);
 
   // Partie Post Init
-  cudaHeaderDebug(nabla);
   nccCudaMainPostInit(nabla);
   
   // Partie POSTFIX

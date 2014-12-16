@@ -55,7 +55,7 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 32768;
+  Integer option_max_iterations  = 8;
 };
 
 
@@ -207,8 +207,16 @@ cells void iniCells(void) in (node coord)
 }
 
 nodes void iniNodalMass(void) in (cell calc_volume) out (node nodalMass) @ -6.9{
+  const int nid=uid;
   nodalMass=0.0;
-  foreach cell nodalMass+=calc_volume/8.0;
+  //if (nid==0) printf("\n[iniNodalMass] tnid=%d, Node #%d, nodalMass=%.21e",tnid,nid,nodalMass);
+  foreach cell{
+    //int cid=node_cell[8*tnid+i];
+    //if (cid<0) continue;
+    //if (nid==0) printf("\n\tprefix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
+    nodalMass+=calc_volume/8.0;
+    //if (nid==0) printf("\n\tpostfix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
+  }
   //debug()<<uid<<": nodalMass="<<nodalMass;
   printf("\n#%d nodalMass=%.21e",uid,nodalMass);
 }

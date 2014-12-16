@@ -127,6 +127,136 @@ char* cudaHookDumpEnumerate(nablaJob *job){
 }
 
 
+
+
+// ****************************************************************************
+// * Filtrage du GATHER
+// * Une passe devrait être faite à priori afin de déterminer les contextes
+// * d'utilisation: au sein d'un foreach, postfixed ou pas, etc.
+// * Et non pas que sur leurs déclarations en in et out
+// ****************************************************************************
+static char* cudaGather(nablaJob *job){
+  int i;
+  char gathers[1024];
+  nablaVariable *var;
+  gathers[0]='\0';
+  int nbToGather=0;
+  int filteredNbToGather=0;
+
+  // Si l'on a trouvé un 'selection_statement_in_compound_statement'
+  // dans le corps du kernel, on débraye les gathers
+  // *ou pas*
+  if (job->parse.selection_statement_in_compound_statement){
+    //nprintf(job->entity->main,
+    //"/*selection_statement_in_compound_statement, nothing to do*/",
+    //"/*if=>!cudaGather*/");
+    //return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à gatherer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToGather+=1;
+  nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
+  
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToGather==0) return "";
+
+  // On filtre suivant s'il y a des foreach
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToGather+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToGather=%d*/", filteredNbToGather);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToGather==0) return "";
+  
+  strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_declaration));
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le gather de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iGather) continue;
+    strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_function_call));
+    // On informe la suite que cette variable est en train d'être gatherée
+    nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+    if (real_variable==NULL)
+      error(!0,0,"Could not find real variable from gathered variables!");
+    real_variable->is_gathered=true;
+  }
+  job->parse.iGather+=1;
+  return strdup(gathers);
+}
+
+
+
+// ****************************************************************************
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// ****************************************************************************
+static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+  if (real_variable==NULL)
+    error(!0,0,"Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+}
+
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+static char* cudaScatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!cudaScatter*/");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
+
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    cudaFlushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,job->entity->main->simd->scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
+}
+
+
+
+
+
+
 /*****************************************************************************
  * Fonction postfix à l'ENUMERATE_*
  *****************************************************************************/
@@ -203,6 +333,8 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
 
+  //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/", n->token);
+
   //nprintf(nabla, "/*cudaHookSwitchToken*/", NULL);
   cudaHookSwitchForeach(n,job);
   
@@ -273,9 +405,14 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
 
-  case(FOREACH_INI):{ break; }
+  case(FOREACH_INI):{
+    nprintf(nabla, "/*FOREACH_INI*/","{\n\t\t\t");
+    nprintf(nabla, "/*cudaGather*/", "/*cudaGather*/ %s",cudaGather(job));
+    break;
+  }
   case(FOREACH_END):{
-    nprintf(nabla, "/*FOREACH_END*/",NULL);
+    nprintf(nabla, "/*cudaScatter*/", "/*cudaScatter*/ %s",cudaScatter(job));
+    nprintf(nabla, "/*FOREACH_END*/","\n\t\t}\n\t");
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
     break;
@@ -305,9 +442,9 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
       nprintf(nabla, NULL, "]");
     }
     //nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*]+FlushingIsPostfixed*/", ".x");
-    if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, ".y");
-    if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, ".z");
+    //if (job->parse.isDotXYZ==1) nprintf(nabla, "/*]+FlushingIsPostfixed*/", ".x");
+    //if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, ".y");
+    //if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, ".z");
     job->parse.isPostfixed=0;
     // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
@@ -401,8 +538,10 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   case (AND_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "&="); break; }
   case (XOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "^="); break; }
   case (IOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "|="); break; }
+
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
+    #warning return reduce
     nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");
     //nprintf(nabla, NULL, "};\n\t return ");
     job->parse.got_a_return=true;
@@ -412,7 +551,6 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   case ('{'):{nprintf(nabla, NULL, "{\n\t\t"); break; }    
   case ('&'):{nprintf(nabla, NULL, "/*adrs*/&"); break; }    
   case (';'):{
-    job->parse.isDotXYZ=0;
     job->parse.variableIsArray=false;
     job->parse.turnBracketsToParentheses=false;
     nprintf(nabla, NULL, ";\n\t\t");
@@ -426,6 +564,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   }
   default:{
     if (n->token!=NULL) nprintf(nabla, NULL, "%s ", n->token);
+    //if (n->token!=NULL) nprintf(nabla, NULL, "/*default*/%s ", n->token);
     break;
   }
   }
@@ -459,7 +598,7 @@ void cudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams)
     *numParams+=1;
   }
   // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c')
+  if (job->item[0]=='c' || job->item[0]=='n')
     cudaAddExtraConnectivitiesParameters(nabla, numParams);
 }
 
@@ -472,10 +611,14 @@ void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
   const char* tabs="\t\t\t\t\t\t\t";
   nprintf(nabla, NULL, ",\n%scell_node",tabs);
   *numParams+=1;
+  nprintf(nabla, NULL, ",\n%snode_cell",tabs);
+  *numParams+=1;
 }
 
 void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   nprintf(nabla, NULL, ",\n\t\tint *cell_node");
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *node_cell");
   *numParams+=1;
 }
 
@@ -510,7 +653,7 @@ void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
   }
   
   // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c')
+  if (job->item[0]=='c'||job->item[0]=='n')
     cudaAddExtraConnectivitiesArguments(nabla, numParams);
 }
 
@@ -559,6 +702,22 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
           nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
         }
       }
+    }
+    // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
+    if (var->item[0] != job->item[0]){
+      // Création d'une nouvelle in_out_variable
+      nablaVariable *new = nablaVariableNew(NULL);
+      new->name=strdup(var->name);
+      new->item=strdup(var->item);
+      new->type=strdup(var->type);
+      new->dim=var->dim;
+      new->size=var->size;
+      new->inout=job->parse.inout;
+      // Rajout à notre liste
+      if (job->variables_to_gather_scatter==NULL)
+        job->variables_to_gather_scatter=new;
+      else
+        nablaVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
   if (n->children != NULL) cudaHookDumpNablaParameterList(nabla, job, n->children, numParams);

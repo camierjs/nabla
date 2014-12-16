@@ -184,7 +184,7 @@ static void nabla_ini_node_coords(void){
       cell_next[MD_DirZ*NABLA_NB_CELLS+i+(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)*(NABLA_NB_CELLS_Z_AXIS-1)] = -88888888 ;
     }
   }
-  //verifNextPrev(); 
+  verifNextPrev(); 
   dbg(DBG_INI,"\nIni done");
   dbgFuncOut();
 }

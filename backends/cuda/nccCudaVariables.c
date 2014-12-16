@@ -24,7 +24,7 @@
  *****************************************************************************/
 void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits Cuda variable");
-  if ((cnfg=='c' && var->item[0]=='n')
+  if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
       ||(cnfg=='n' && var->item[0]!='n')            
       ||(cnfg=='f' && var->item[0]!='f')
@@ -34,14 +34,12 @@ void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVar
     nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
     job->parse.turnBracketsToParentheses=true;
   }else{
-    //nprintf(nabla, NULL, "/*.xyz?*/");
-    if (job->parse.postfix_constant==true && job->parse.variableIsArray==true) return;
-    //if (job->parse.postfix_constant==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_X*/", ".x");
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Y*/", ".y");
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Z*/", ".z");
-    //nprintf(nabla, NULL, "/*.xyz flushing isDotXYZ*/");
-    //job->parse.isDotXYZ=0;
+    if (job->parse.postfix_constant==true
+        && job->parse.variableIsArray==true) return;
+    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_X*/", NULL);
+    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Y*/", NULL);
+    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Z*/", NULL);
+    job->parse.isDotXYZ=0;
     job->parse.turnBracketsToParentheses=false;
   }
 }
@@ -94,12 +92,11 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
  * Postfix d'un .x|y|z selon le isDotXYZ
  *****************************************************************************/
 static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  //nprintf(nabla,NULL,"/*setDotXYZ*/");
   switch (job->parse.isDotXYZ){
   case(0): break;
-  case(1): {nprintf(nabla, "/*setDotX+flush*/", ".x"); break;}
-  case(2): {nprintf(nabla, "/*setDotY+flush*/", ".y"); break;}
-  case(3): {nprintf(nabla, "/*setDotZ+flush*/", ".z"); break;}
+  case(1): {nprintf(nabla, "/*setDotX+flush*/", ""); break;}
+  case(2): {nprintf(nabla, "/*setDotY+flush*/", ""); break;}
+  case(3): {nprintf(nabla, "/*setDotZ+flush*/", ""); break;}
   default:exit(NABLA_ERROR|fprintf(stderr, "\n[nvar] Switch isDotXYZ error\n"));
   }
   //nprintf(nabla,NULL,"/*setDotXYZ: Flushing isDotXYZ*/");
@@ -107,6 +104,19 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   job->parse.turnBracketsToParentheses=false;
 }
 
+
+
+/*****************************************************************************
+ * Tokens to gathered  variables
+ *****************************************************************************/
+static bool cudaHookTurnTokenToGatheredVariable(nablaMain *arc,
+                                                nablaVariable *var,
+                                                nablaJob *job){
+  //nprintf(arc, NULL, "/*gathered variable?*/");
+  if (!var->is_gathered) return false;
+  nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
+  return true;
+}
 
 /*****************************************************************************
  * Tokens to variables 'CELL Job' switch
@@ -192,11 +202,11 @@ static void cudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 
   switch (var->item[0]){
   case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[8*tnid+i]");//tcid][c");
+    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[node_cell[8*tnid+i]]");//tcid][c");
     if (var->dim==0 && enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (var->dim==0 && enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[8*tnid+i]");
-    if (var->dim==0 && enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
+    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[node_cell[8*tnid+i]]");//[8*tnid+i]");
+    if (var->dim==0 && enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[node_cell");
     break;
   }
   case ('n'):{
@@ -320,7 +330,11 @@ nablaVariable *cudaHookTurnTokenToVariable(astNode * n,
     //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
   }
   //nprintf(arc, NULL, "\n\t/*cudaHookTurnTokenToVariable::isDotXYZ=%d*/", job->parse.isDotXYZ);
- 
+  
+   // Check whether this variable is being gathered
+  if (cudaHookTurnTokenToGatheredVariable(arc,var,job)){
+    return var;
+  }
   // Check whether there's job for a cell job
   cudaHookTurnTokenToVariableForCellJob(arc,var,job);
   // Check whether there's job for a node job

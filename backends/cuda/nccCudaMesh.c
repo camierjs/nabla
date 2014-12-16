@@ -76,17 +76,26 @@ void nccCudaMainMeshConnectivity(nablaMain *nabla){
  * Kernel d'initialisation du maillage à-la-SOD\n\
  ******************************************************************************/\n\
 __global__ void nabla_ini_node_coords(int *node_cell,\n\
+                                      int *node_cell_corner,\n\
                                       %s){\n\
 \tCUDA_INI_NODE_THREAD(tnid);\n\
-\tnode_cell[tnid+0*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+1*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+2*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+3*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+4*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+5*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+6*NABLA_NB_NODES]=0;\n\
-\tnode_cell[tnid+7*NABLA_NB_NODES]=0;\n\
 \tconst int n=tnid;\n\
+\tnode_cell[n+0*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+1*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+2*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+3*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+4*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+5*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+6*NABLA_NB_NODES]=-1;\n\
+\tnode_cell[n+7*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+0*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+1*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+2*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+3*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+4*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+5*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+6*NABLA_NB_NODES]=-1;\n\
+\tnode_cell_corner[n+7*NABLA_NB_NODES]=-1;\n\
 \tconst double dx=((double)(n%%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;\n\
 \tconst double dy=((double)((n/NABLA_NB_NODES_X_AXIS)%%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;\n\
 \tconst double dz=((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;\n%s\n\
@@ -115,7 +124,7 @@ __global__ void nabla_ini_cell_connectivity(int *cell_node){\n\
 \tnode_coordx[tnid]=dx;\n\
 \tnode_coordy[tnid]=dy;\n\
 \tnode_coordz[tnid]=dz;\n":"\tnode_coord[tnid]=Real3(dx,dy,dz);");
-} 
+}
 
 
 
@@ -132,7 +141,7 @@ void nccCudaMainMeshPrefix(nablaMain *nabla){
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell_corner, 8*NABLA_NB_NODES*sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&cell_next, 3*NABLA_NB_CELLS*sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaMalloc((void**)&cell_prev, 3*NABLA_NB_CELLS*sizeof(int)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell_and_corner, 2*8*NABLA_NB_NODES*sizeof(int)));\n\
+\t//CUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell_and_corner, 2*8*NABLA_NB_NODES*sizeof(int)));\n\
 \n\
 ");
 }

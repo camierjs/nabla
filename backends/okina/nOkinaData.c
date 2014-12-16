@@ -32,7 +32,7 @@ void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVa
       ||(cnfg=='m' && var->item[0]!='m')
       ){
     if (!job->parse.selection_statement_in_compound_statement){
-      //nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
+      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
     }else{
       nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);

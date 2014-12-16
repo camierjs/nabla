@@ -111,3 +111,34 @@ __device__ inline void cross3(Real3 u, Real3 v, Real3 *r){ *r=cross(u,v);}
   //return os;// << "[("<<r.x<<","<<r.y<<","<<r.z<< ")]";
 }
 */
+
+
+
+/******************************************************************************
+ * Gather avec des real3
+ ******************************************************************************/
+__device__ inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
+  //debug()<<"gather3ki, i="<<i;
+  double *p=(double *)data;
+  double value=p[3*a+i];
+  if (i==0) (*gthr).x=value;
+  if (i==1) (*gthr).y=value;
+  if (i==2) (*gthr).z=value;
+}
+
+__device__ inline void gather3k(const int a, real3 *data, real3 *gthr){
+  //debug()<<"gather3k";
+  gather3ki(a, data, gthr, 0);
+  gather3ki(a, data, gthr, 1);
+  gather3ki(a, data, gthr, 2);
+  //debug()<<"gather3k done";
+}
+
+__device__ inline real gatherk_and_zero_neg_ones(const int a, real *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+
+__device__ inline void gatherFromNode_k(const int a, real *data, real *gthr){
+  *gthr=gatherk_and_zero_neg_ones(a,data);
+}

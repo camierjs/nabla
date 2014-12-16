@@ -21,6 +21,7 @@
         .global debug_h
         .global error_h
         .global extra_h
+        .global cuMsh_h
 real3_h:
 	     .incbin "real3.h"
         .byte 0
@@ -32,5 +33,8 @@ error_h:
         .byte 0
 extra_h: 
 	     .incbin "extra.h"
+        .byte 0   
+cuMsh_h: 
+	     .incbin "cuMsh.h"
         .byte 0   
          

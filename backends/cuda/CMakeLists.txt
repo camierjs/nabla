@@ -20,6 +20,7 @@ configure_file(outputs/real3.h ${CMAKE_CURRENT_BINARY_DIR}/real3.h)
 configure_file(outputs/debug.h ${CMAKE_CURRENT_BINARY_DIR}/debug.h)
 configure_file(outputs/error.h ${CMAKE_CURRENT_BINARY_DIR}/error.h)
 configure_file(outputs/extra.h ${CMAKE_CURRENT_BINARY_DIR}/extra.h)
+configure_file(outputs/cuMsh.h ${CMAKE_CURRENT_BINARY_DIR}/cuMsh.h)
 
 
 add_library(NablaCuda ${BACKEND_CUDA_C})
