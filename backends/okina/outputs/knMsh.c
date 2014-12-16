@@ -147,7 +147,7 @@ static void nabla_ini_node_coords(void){
       node_cell_corner[8*n+c]=node_cell_and_corner[2*(8*n+c)+1];
 
   //verifConnectivity();
-  //verifCorners();
+  verifCorners();
   
   dbg(DBG_INI,"\nOn associe à chaque maille ses next et prev");
   // On met des valeurs négatives afin que le gatherk_and_zero_neg_ones puisse les reconaitre
@@ -223,9 +223,9 @@ __attribute__((unused)) static void verifCorners(void){
   FOR_EACH_NODE(n){
     dbg(DBG_INI,"\nFocusing on node %%d",n);
     FOR_EACH_NODE_CELL(c){
-      if (node_cell_corner[nc]!=-1)
+      if (node_cell_corner[nc]==-1) continue;
       dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
-      dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
+      //dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
     }
   }
 }

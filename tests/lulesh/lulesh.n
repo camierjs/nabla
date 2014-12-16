@@ -150,6 +150,13 @@ void ini(void) @ -10.0{
 //  atexit(dumpFinalEnergy);
 }
 
+/*nodes void dumpCorners(void)@-12.0{
+  foreach cell{
+    const int corner = node_cell_corner[8*tnid+i];
+    if (corner==-1) continue;
+    if (uid==31) printf("\nnode_#%d is corner %d of cell %d",uid,node_cell_corner[8*tnid+i],node_cell[8*tnid+i]);
+  }
+  }*/
 
 // ****************************************************************************
 // * Set up boundary condition information
@@ -196,11 +203,13 @@ cells void iniCellBC(void) in (node coord) out (cell elemBC) @ -9.5{
 // * Cells initialization
 // ****************************************************************************
 cells void iniCells(void) in (node coord)
-  out (cell v, cell e, cell volo, cell elemMass, cell calc_volume) @ -8.0{
+  out (cell v, cell e, cell p, cell q, cell volo, cell elemMass, cell calc_volume) @ -8.0{
   Real3 X[8];
   v=1.0;
   foreach node X[n]=coord;
-  e=(uid==0)?option_initial_energy:0.0;
+  //e=(uid==0)?option_initial_energy:0.0;
+  #warning e 1234567890123456789
+  p=q=e=(uid+1.0)*1.1234567890123456789;
   volo=elemMass=calc_volume=computeElemVolume(X);
   //debug()<<": e["<<uid<<"]="<<e<<", volume="<<calc_volume;
   //printf("\ne[%02d]=%.21e, volume=%.21e",uid,e,calc_volume);
@@ -255,7 +264,7 @@ void timeIncrement(void) @ 0.1 {
   if (GlobalIteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//[0]
   printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);
-  //if (ReduceMinToDouble(δt) == 0.) exit;
+  //if (δt == 0.) exit;
 }
 
 
@@ -271,8 +280,9 @@ void timeIncrement(void) @ 0.1 {
 cells void initStressTermsForElems(void)
   in (node coord, cell p, cell q)
   out (cell ε, cell cForce) @ 0.3 {
-  #warning sig
-  Real sig = uid+1.0;//-p-q;
+  //Real sig = -p-q;
+  #warning sig 1234567890123456789
+  Real sig = (uid+1.0)*1.1234567890123456789;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
   foreach node x[n]=coord;
@@ -295,7 +305,7 @@ nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   foreach cell Σ+=cForce;
   nForce=Σ;
   //debug()<<"@0.3 nForce="<<nForce;
-  //printf("\n@0.3 nForce[%d]=(%.21e,%.21e,%.21e)",uid,nForce.x,nForce.y,nForce.z);
+  printf("\n@0.3 nForce[%d]=(%.21e,%.21e,%.21e)",uid,nForce.x,nForce.y,nForce.z);
 }
 
 // ****************************************************************************
@@ -423,6 +433,7 @@ cells void calcElemVolume(void)
   Real DetJ,volume,ρVolume;
   foreach node X[n]=coord;
   foreach node Xd[n]=𝜕x;
+  //printf("\n[#%d] Xd[1]=(%.21e,%.21e,%.21e)",uid, Xd[1].x, Xd[1].y, Xd[1].z);
   volume = calc_volume = computeElemVolume(X);  
   vnew = ρVolume = volume/volo;
   delv = ρVolume - v;
@@ -449,8 +460,22 @@ cells void calcElemVolume(void)
   }
   foreach node X[n] -= dt2*Xd[n];
   DetJ=calcElemShapeFunctionDerivatives(X,B);
-  printf("\n[#%d] DetJ=%.21e",uid, DetJ);
+  //printf("\n[#%d] DetJ=%.21e",uid, DetJ);
+  //printf("\n[#%d] B[0]=(%.21e,%.21e,%.21e)",uid, B[0].x, B[0].y, B[0].z);
+  //printf("\n[#%d] B[1]=(%.21e,%.21e,%.21e)",uid, B[1].x, B[1].y, B[1].z);
+  //printf("\n[#%d] B[2]=(%.21e,%.21e,%.21e)",uid, B[2].x, B[2].y, B[2].z);
+  //printf("\n[#%d] B[3]=(%.21e,%.21e,%.21e)",uid, B[3].x, B[3].y, B[3].z);
+  
+  //printf("\n[#%d] Xd[0]=(%.21e,%.21e,%.21e)",uid, Xd[0].x, Xd[0].y, Xd[0].z);
+  //printf("\n[#%d] Xd[1]=(%.21e,%.21e,%.21e)",uid, Xd[1].x, Xd[1].y, Xd[1].z);
+  //printf("\n[#%d] Xd[2]=(%.21e,%.21e,%.21e)",uid, Xd[2].x, Xd[2].y, Xd[2].z);
+  //printf("\n[#%d] Xd[3]=(%.21e,%.21e,%.21e)",uid, Xd[3].x, Xd[3].y, Xd[3].z);
+  //printf("\n[#%d] Xd[4]=(%.21e,%.21e,%.21e)",uid, Xd[4].x, Xd[4].y, Xd[4].z);
+  //printf("\n[#%d] Xd[5]=(%.21e,%.21e,%.21e)",uid, Xd[5].x, Xd[5].y, Xd[5].z);
+  //printf("\n[#%d] Xd[6]=(%.21e,%.21e,%.21e)",uid, Xd[6].x, Xd[6].y, Xd[6].z);
+  //printf("\n[#%d] Xd[7]=(%.21e,%.21e,%.21e)",uid, Xd[7].x, Xd[7].y, Xd[7].z);
   ε=calcElemVelocityGradient(Xd,B,DetJ);
+  //printf("\n[#%d] Epsilon=%.21e",uid, ε);
   //calc strain rate and apply as constraint
   vdov = ε.x+ε.y+ε.z;
   //printf("\n[#%d] vdov=%.21e",uid, vdov);
@@ -844,6 +869,7 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
     const Real δf = sound_speed[m] * sound_speed[m];
     const Real δfp = √(δf+((vdov[m]<0.0)?qqc2*arealg[m]*arealg[m]*vdov[m]*vdov[m]:0.0));
     const Real aδfp = arealg[m]/δfp;
+    //printf("\n[#%d] vdov=%.21e, arealg=%.21e, sound_speed=%.21e,",uid,vdov,arealg,sound_speed);
     dtcourant=(vdov!=0.0)?min(dtcourant,aδfp);
     //debug()<<"dtcourant="<<dtcourant;
     //printf("\n[#%d] dtcourant=%.21e",uid,dtcourant);
@@ -864,7 +890,7 @@ cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
     const Real δdvov = option_dvovmax/(rabs(vdov[m])+1.e-20);
     const Real δhdr = min(dthydro,δdvov);
     //debug()<<"vdov="<<vdov<<" dtdvov="<<dtdvov<<" dvovmax="<<option_dvovmax;
-    printf("\n[#%d] vdov=%.21e, dtdvov=%.21e, dvovmax=%.21e,",uid,vdov,dtdvov,option_dvovmax);
+    //printf("\n[#%d] vdov=%.21e, dtdvov=%.21e, dvovmax=%.21e,",uid,vdov,dtdvov,option_dvovmax);
     dthydro=(vdov!=0.0)?δhdr;
     //debug()<<"dthydro="<<dthydro;
     //printf("\n[#%d] dthydro=%.21e",uid,dthydro);
