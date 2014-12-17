@@ -304,7 +304,7 @@ static void cudaHookSwitchForeach(astNode *n, nablaJob *job){
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "for(int i=0;i<8;++i)");
+    nprintf(job->entity->main, "/*chsf c*/", "for(int i=0;i<8;i+=1)");
     break;
   }
   case(NODE):{

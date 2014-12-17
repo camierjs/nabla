@@ -154,7 +154,7 @@ void ini(void) @ -10.0{
   foreach cell{
     const int corner = node_cell_corner[8*tnid+i];
     if (corner==-1) continue;
-    if (uid==31) printf("\nnode_#%d is corner %d of cell %d",uid,node_cell_corner[8*tnid+i],node_cell[8*tnid+i]);
+    if (uid==31) printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,node_cell_corner[8*tnid+i],node_cell[8*tnid+i]);
   }
   }*/
 
@@ -282,7 +282,7 @@ cells void initStressTermsForElems(void)
   out (cell ε, cell cForce) @ 0.3 {
   //Real sig = -p-q;
   #warning sig 1234567890123456789
-  Real sig = (uid+1.0)*1.1234567890123456789;
+  Real sig = (uid+1.0)*1.123456789;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
   foreach node x[n]=coord;
@@ -302,10 +302,15 @@ cells void initStressTermsForElems(void)
 
 nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   Real3 Σ=0.0;
-  foreach cell Σ+=cForce;
+  foreach cell{
+    //const int corner = node_cell_corner[8*tnid+i];
+    //if (corner==-1) continue;
+    //printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,corner,node_cell[8*tnid+i]);
+    Σ+=cForce;
+  }
   nForce=Σ;
   //debug()<<"@0.3 nForce="<<nForce;
-  printf("\n@0.3 nForce[%d]=(%.21e,%.21e,%.21e)",uid,nForce.x,nForce.y,nForce.z);
+  //printf("\n@0.3 nForce[%d]=(%.21e,%.21e,%.21e)",uid,nForce.x,nForce.y,nForce.z);
 }
 
 // ****************************************************************************
@@ -416,7 +421,7 @@ nodes void 𝜕ForNodes(void) in (node 𝜕𝜕x) inout (node 𝜕x) @ 3.0{
 nodes void coordForNodes(void) in (node 𝜕x) @ 3.1{
   coord += 𝜕x*δt;
   //debug()<<"coords= "<<coord;
-  //printf("\ncoords[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
+  printf("\ncoords[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
 }
 
 

@@ -57,6 +57,7 @@ void cudaMeshConnectivity(nablaMain *nabla){
 __builtin_align__(8) int *cell_node;\n\
 __builtin_align__(8) int *node_cell;\n\
 __builtin_align__(8) int *node_cell_corner;\n\
+__builtin_align__(8) int *node_cell_corner_idx;\n\
 __builtin_align__(8) int *cell_next;\n\
 __builtin_align__(8) int *cell_prev;\n\
 __builtin_align__(8) int *node_cell_and_corner;\n\
@@ -74,6 +75,7 @@ void nccCudaMainMeshConnectivity(nablaMain *nabla){
  ******************************************************************************/\n\
 __global__ void nabla_ini_node_coords(int *node_cell,\n\
                                       int *node_cell_corner,\n\
+                                      int *node_cell_corner_idx,\n\
                                       %s){\n\
 \tCUDA_INI_NODE_THREAD(tnid);\n\
 \tconst int n=tnid;\n\
@@ -132,13 +134,14 @@ void nccCudaMainMeshPrefix(nablaMain *nabla){
   dbg("\n[nccCudaMainMeshPrefix]");
   fprintf(nabla->entity->src,"\n\n\
 \t// Allocation coté CUDA des connectivités aux mailles\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&cell_node, 8*NABLA_NB_CELLS*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&cell_node, 8*NABLA_NB_CELLS*sizeof(int)));\n\
 \t// Allocation coté CUDA des connectivités aux noeuds\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell, 8*NABLA_NB_NODES*sizeof(int)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell_corner, 8*NABLA_NB_NODES*sizeof(int)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&cell_next, 3*NABLA_NB_CELLS*sizeof(int)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&cell_prev, 3*NABLA_NB_CELLS*sizeof(int)));\n\
-\t//CUDA_HANDLE_ERROR(cudaMalloc((void**)&node_cell_and_corner, 2*8*NABLA_NB_NODES*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell, 8*NABLA_NB_NODES*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell_corner, 8*NABLA_NB_NODES*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell_corner_idx, NABLA_NB_NODES*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&cell_next, 3*NABLA_NB_CELLS*sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&cell_prev, 3*NABLA_NB_CELLS*sizeof(int)));\n\
+\t//CUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell_and_corner, 2*8*NABLA_NB_NODES*sizeof(int)));\n\
 \n\
 ");
 }
@@ -150,6 +153,7 @@ void nccCudaMainMeshPostfix(nablaMain *nabla){
 \tCUDA_HANDLE_ERROR(cudaFree(cell_node));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(node_cell));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner_idx));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(cell_next));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(cell_prev));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(node_cell_and_corner));\n\

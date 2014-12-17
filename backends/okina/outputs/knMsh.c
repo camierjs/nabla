@@ -122,10 +122,10 @@ static void nabla_ini_node_coords(void){
   }
   
   for(int c=0;c<NABLA_NB_CELLS;c+=1){
-    //dbg(DBG_INI,"\nFocusing on cells %%d",c);
+    dbg(DBG_INI,"\nFocusing on cells %%d",c);
     for(int n=0;n<8;n++){
       const int iNode = cell_node[n*NABLA_NB_CELLS+c];
-      //dbg(DBG_INI,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
+      dbg(DBG_INI,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
       // les 8 emplacements donnent l'offset jusqu'aux mailles
       // node_corner a une structure en 8*NABLA_NB_NODES
       node_cell[8*iNode+n]=c;

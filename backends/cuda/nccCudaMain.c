@@ -45,19 +45,22 @@ int main(void){\n\
 \tprintf(\"NABLA_NB_NODES=%%d,NABLA_NB_CELLS=%%d\",\n\
 \t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\n\
 \t// Allocation coté CUDA des variables globales\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_deltat, sizeof(double)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_iteration, sizeof(int)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_time, sizeof(double)));\n\
-\tCUDA_HANDLE_ERROR(cudaMalloc((void**)&global_min_array, sizeof(double)*CUDA_NB_THREADS_PER_BLOCK));\n"
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_min_array, sizeof(double)*CUDA_NB_THREADS_PER_BLOCK));\n"
 
 
 /*****************************************************************************
  * Backend CUDA INIT - Génération du 'main'
  *****************************************************************************/
 #define CUDA_MAIN_PREINIT "\n\
-\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,%s);\n\
+\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,node_cell_corner_idx,%s);\n\
 \tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node);\n\
-\tnabla_rescan_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node,cell_prev,cell_next,node_cell,node_cell_corner);\n\
+\tnabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(cell_node,cell_prev,cell_next,node_cell,node_cell_corner,node_cell_corner_idx);\n\
+\thost_set_corners();\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(node_cell, &host_node_cell, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(node_cell_corner, &host_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
 \t//dbgCoords();\n\
 \t//Initialisation du temps et du deltaT\n\
 \tprintf(\"\\nInitialisation du temps et du deltaT\");\n\
