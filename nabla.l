@@ -37,6 +37,8 @@ static void ignoreLineComments(void);
 "switch"				{ return tok(&yylval, SWITCH);}
 "union"				{ return tok(&yylval, UNION);}
 "iNode"           { return tok(&yylval, INODE);}
+"mpi"             { return tok(&yylval, LIB_MPI);}
+"reduce"          { return tok(&yylval, MPI_REDUCE);}
 */
 
 %}
@@ -150,9 +152,6 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "precise"         { return tok(&yylval, GMP_PRECISE);}
 
 "dft"             { return tok(&yylval, LIB_DFT);}
-
-"mpi"             { return tok(&yylval, LIB_MPI);}
-"reduce"          { return tok(&yylval, MPI_REDUCE);}
 
 "slurm"           { return tok(&yylval, LIB_SLURM);}
 

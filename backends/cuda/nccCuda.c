@@ -72,22 +72,15 @@ static void cudaHeaderPrefix(nablaMain *nabla){
           nabla->entity->name,nabla->entity->name);
 }
 
+
 /***************************************************************************** 
  * 
  *****************************************************************************/
 static void cudaHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,"\n\n\n// *****************************************************************************\n\
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// *****************************************************************************\n\
 // * Includes\n\
-// * Tesla:  sm_10: ISA_1, Basic features\n\
-// *         sm_11: + atomic memory operations on global memory\n\
-// *         sm_12: + atomic memory operations on shared memory\n\
-// *                + vote instructions\n\
-// *         sm_13: + double precision floating point support\n\
-// * Fermi:  sm_20: + Fermi support\n\
-// *         sm_21\n\
-// * Kepler: sm_30: + Kepler support\n\
-// *         sm_35\n\
 // *****************************************************************************\n\
 #include <iostream>\n\
 #include <cstdio>\n\
@@ -108,7 +101,8 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
    return cudaErrorMemoryAllocation;\n\
 }\n");
 //  #warning CUDA Cartesian here
-  fprintf(nabla->entity->hdr,"\n\n// *****************************************************************************\n\
+  fprintf(nabla->entity->hdr,"\n\n\
+// *****************************************************************************\n\
 // * Cartesian stuffs\n\
 // *****************************************************************************\n\
 #define MD_DirX 0\n#define MD_DirY 1\n#define MD_DirZ 2\n\
@@ -124,7 +118,8 @@ extern char debug_h[];
 static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->hdr,debug_h+NABLA_GPL_HEADER);
-  hprintf(nabla,NULL,"\n\n// *****************************************************************************\n\
+  hprintf(nabla,NULL,"\n\n\
+// *****************************************************************************\n \
 // * Debug macro functions\n\
 // *****************************************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next){
@@ -321,12 +316,12 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   
   // Rajout de la variable globale 'min_array'
   // Pour la réduction aux blocs
-  nablaVariable *global_min_array = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, global_min_array);
-  global_min_array->axl_it=false;
-  global_min_array->item=strdup("global");
-  global_min_array->type=strdup("real");
-  global_min_array->name=strdup("min_array");
+  nablaVariable *device_shared_reduce_results = nablaVariableNew(nabla);
+  nablaVariableAdd(nabla, device_shared_reduce_results);
+  device_shared_reduce_results->axl_it=false;
+  device_shared_reduce_results->item=strdup("global");
+  device_shared_reduce_results->type=strdup("real");
+  device_shared_reduce_results->name=strdup("device_shared_reduce_results");
 
   // Ouverture du fichier source du entity
   sprintf(srcFileName, "%sEntity.cu", nabla->name);

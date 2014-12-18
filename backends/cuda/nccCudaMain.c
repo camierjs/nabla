@@ -30,6 +30,7 @@ int main(void){\n\
 \t__align__(8)int iteration=1;\n\
 \tfloat gputime=0.0;\n\
 \tstruct timeval st, et;\n\
+\tdouble host_reduce_results[SHARED_REDUCED_BLOCS_SIZE];\n\
 \n\
 \tconst dim3 dimJobBlock=dim3(BLOCKSIZE,1,1);\n\
 \tconst dim3 dimNodeGrid=dim3(PAD_DIV(NABLA_NB_NODES,dimJobBlock.x),1,1);\n\
@@ -48,7 +49,7 @@ int main(void){\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_min_array, sizeof(double)*CUDA_NB_THREADS_PER_BLOCK));\n"
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*SHARED_REDUCED_BLOCS_SIZE));\n"
 
 
 /*****************************************************************************
@@ -343,7 +344,7 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\
 \n\t\t__align__(8) double new_delta_t=0.0;\
-\n\t\t//cudaFuncSetCacheConfig(integrateStressForElems,cudaFuncCachePreferL1);\
+\n\t\t//cudaFuncSetCacheConfig(...); \
 \n\t\tgettimeofday(&st, NULL);\
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
 \n\t\t//while (new_delta_t>=0. && iteration<option_max_iterations){//host_time<=OPTION_TIME_END){\
@@ -392,11 +393,14 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
   nprintf(n, NULL,"\
 \n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
-\n\t\t\t//new_delta_t=option_dtt_initial;\
-\n\t\t\tprintf(\"\\n\\t[#%%d] got new_delta_t=%%.21e\", iteration, new_delta_t); \
+\n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.21e, reduced blocs=%%d\", iteration, new_delta_t, SHARED_REDUCED_BLOCS_SIZE);\
+\n\t\t\t//blockLevel<<<1,dimJobBlock>>>(global_device_shared_reduce_results);\
+\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&host_reduce_results, global_device_shared_reduce_results,SHARED_REDUCED_BLOCS_SIZE*sizeof(double), cudaMemcpyDeviceToHost));\
+\n\t\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
+\n\t\t\tfor(int i=0;i<SHARED_REDUCED_BLOCS_SIZE;i+=1){printf(\"\\n\\thost_reduce_results[%%d]=%%.16e\",i,host_reduce_results[i]);}\
 \n\t\t\thost_time+=new_delta_t;\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
-\n\t\t\tif (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, new_delta_t);\
+\n\t\t\t//if (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, new_delta_t);\
 \n\t\t\titeration+=1;\
 \n\t\t}");
   return NABLA_OK;

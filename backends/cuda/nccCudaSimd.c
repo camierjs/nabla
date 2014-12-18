@@ -134,10 +134,12 @@ nablaTypedef cudaTypedef[]={
 // * CUDA DEFINES
 // ****************************************************************************
 nablaDefine cudaDefines[]={
+  //{"SHARED_REDUCED_BLOCS_SIZE", "1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK"},
+  {"SHARED_REDUCED_BLOCS_SIZE", "4"},
   {"real3","Real3"},
   {"Real","double"},
   {"real","double"},
-  {"ReduceMinToDouble(what)","cuda_reduce_min(what)"},
+  {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
   {"norm","fabs"},
   {"rabs","fabs"},
   {"rsqrt","sqrt"},
@@ -151,7 +153,7 @@ nablaDefine cudaDefines[]={
   {"knAt(a)",""},
   {"fatal(a,b)","cudaThreadExit()"},
   {"synchronize(a)",""},
-  {"mpi_reduce(how,what)","what"},//"cuda_reduce_min(global_min_array,what)"},
+  {"reduce(how,what)","what"},
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},

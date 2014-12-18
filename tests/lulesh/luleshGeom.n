@@ -63,6 +63,21 @@ Real3 calcElemVelocityGradient(const Real3* restrict υ,
   const Real3 υ17=υ[1]-υ[7];
   const Real3 υ24=υ[2]-υ[4];
   const Real3 υ35=υ[3]-υ[5];
+  
+  //const Real3 B06=B[0]*υ06;
+  //const Real3 B17=B[1]*υ17;
+  //const Real3 B24=B[2]*υ24;
+  //const Real3 B35=B[3]*υ35;
+  //const Real3 B0617=B06+B17;
+  //const Real3 B2435=B24+B35;
+  //printf("\ninv_detJ=%.21e",inv_detJ);
+  //printf("\nυ06=(%.21e,%.21e,%.21e)",υ06.x,υ06.y,υ06.z);
+  //printf("\nυ17=(%.21e,%.21e,%.21e)",υ17.x,υ17.y,υ17.z);
+  //printf("\nυ24=(%.21e,%.21e,%.21e)",υ24.x,υ24.y,υ24.z);
+  //printf("\nυ35=(%.21e,%.21e,%.21e)",υ35.x,υ35.y,υ35.z);
+  //const Real3 rtn = (B06+B17)+(B24+B35);
+  //printf("\n(%.21e,%.21e,%.21e)",rtn.x,rtn.y,rtn.z);
+  //return inv_detJ*rtn;
   return inv_detJ*(B[0]*υ06+B[1]*υ17+B[2]*υ24+B[3]*υ35);
 }
 
@@ -87,6 +102,9 @@ Real computeElemVolume(const Real3* restrict X){
   const Real tp1 = (d31+d72)⋅(d63⨯d20);
   const Real tp2 = (d43+d57)⋅(d64⨯d70);  
   const Real tp3 = (d14+d25)⋅(d61⨯d50);
+  //const Real tp12 = tp1+tp2;
+  //const Real tp123 = tp12+tp3;
+  //return twelveth*(tp123);//+tp2+tp3);
   return twelveth*(tp1+tp2+tp3);
 }
 
@@ -176,18 +194,10 @@ void calcElemFBHourglassForce(const Real3* restrict xd,
                               const Real* restrict h4, const Real* restrict h5,
                               const Real* restrict h6, const Real* restrict h7,
                               const Real θ, Real3* restrict η){
-  const Real3 h00 =
-    h0[0]*xd[0]+h1[0]*xd[1]+h2[0]*xd[2]+h3[0]*xd[3]+
-    h4[0]*xd[4]+h5[0]*xd[5]+h6[0]*xd[6]+h7[0]*xd[7];
-  const Real3 h01=
-    h0[1]*xd[0]+h1[1]*xd[1]+h2[1]*xd[2]+h3[1]*xd[3]+
-    h4[1]*xd[4]+h5[1]*xd[5]+h6[1]*xd[6]+h7[1]*xd[7];
-  const Real3 h02=
-    h0[2]*xd[0]+h1[2]*xd[1]+h2[2]*xd[2]+h3[2]*xd[3]+
-    h4[2]*xd[4]+h5[2]*xd[5]+h6[2]*xd[6]+h7[2]*xd[7];
-  const Real3 h03=
-    h0[3]*xd[0]+h1[3]*xd[1]+h2[3]*xd[2]+h3[3]*xd[3]+
-    h4[3]*xd[4]+h5[3]*xd[5]+h6[3]*xd[6]+h7[3]*xd[7];
+  const Real3 h00=h0[0]*xd[0]+h1[0]*xd[1]+h2[0]*xd[2]+h3[0]*xd[3]+h4[0]*xd[4]+h5[0]*xd[5]+h6[0]*xd[6]+h7[0]*xd[7];
+  const Real3 h01=h0[1]*xd[0]+h1[1]*xd[1]+h2[1]*xd[2]+h3[1]*xd[3]+h4[1]*xd[4]+h5[1]*xd[5]+h6[1]*xd[6]+h7[1]*xd[7];
+  const Real3 h02=h0[2]*xd[0]+h1[2]*xd[1]+h2[2]*xd[2]+h3[2]*xd[3]+h4[2]*xd[4]+h5[2]*xd[5]+h6[2]*xd[6]+h7[2]*xd[7];
+  const Real3 h03=h0[3]*xd[0]+h1[3]*xd[1]+h2[3]*xd[2]+h3[3]*xd[3]+h4[3]*xd[4]+h5[3]*xd[5]+h6[3]*xd[6]+h7[3]*xd[7];
   η[0]=θ*(h0[0]*h00+h0[1]*h01+h0[2]*h02+h0[3]*h03);
   η[1]=θ*(h1[0]*h00+h1[1]*h01+h1[2]*h02+h1[3]*h03);
   η[2]=θ*(h2[0]*h00+h2[1]*h01+h2[2]*h02+h2[3]*h03);

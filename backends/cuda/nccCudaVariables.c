@@ -508,12 +508,18 @@ static void cudaOptions(nablaMain *nabla){
 static void cudaGlobals(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * Globals, coté CUDA\n\
+// * Globals, coté DEVICE\n\
 // ********************************************************\n\
+__builtin_align__(8) double *global_time;\n\
 __builtin_align__(8) double *global_deltat;\n\
 __builtin_align__(8) int *global_iteration;\n\
-__builtin_align__(8) double *global_time; double host_time;\n\
-__builtin_align__(8) double *global_min_array; //double host_min_array[CUDA_NB_THREADS_PER_BLOCK];\n");
+__builtin_align__(8) double *global_device_shared_reduce_results;\n\
+\n\
+\n\
+// ********************************************************\n\
+// * Globals, coté HOST\n\
+// ********************************************************\n\
+double host_time;\n");
 }
 
 

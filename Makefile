@@ -2,8 +2,8 @@
 # ROOT_PATHS #
 ##############
 CMAKE_ROOT_PATH = /usr/bin
-COMPILER_ROOT_PATH=/usr/bin
-#COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
+#COMPILER_ROOT_PATH=/usr/bin
+COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
 
 ####################
 # COMPILER OPTIONS #
@@ -71,6 +71,8 @@ tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tstrv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
+tstrv2:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx2_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 tstcu:
