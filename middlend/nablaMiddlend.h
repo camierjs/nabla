@@ -91,6 +91,8 @@ typedef struct nablaJobStruct{
   nablaVariable *in_out_variables;
   nablaVariable *variables_to_gather_scatter;
   char foreach_item;
+  // Bool pour savoir si le job en cours va faire une reduction (utile qu'en CUDA)
+  bool min_assignment;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;
@@ -116,7 +118,7 @@ typedef struct nablaJobStruct{
     int iScatter; // Indice de la variable qui est à scatterer
     // Bool pour savoir si l'on est en train de travailler pour returner depuis
     // un argument du job courant
-    bool returnFromArgument; 
+    bool returnFromArgument;
   } parse;
   struct nablaEntityStruct *entity;
   struct nablaJobStruct *next;

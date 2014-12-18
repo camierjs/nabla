@@ -346,6 +346,12 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   // Dump des tokens possibles
   switch(n->tokenid){
     
+  case (MIN_ASSIGN):{
+    nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/");
+   job->min_assignment=true;
+    break;
+  }
+    
   case(INTEGER):{
     nprintf(nabla, "/*INTEGER*/", "int ");
     break;

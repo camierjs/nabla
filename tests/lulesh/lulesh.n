@@ -55,7 +55,7 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 4;
+  Integer option_max_iterations  = 32768;
 };
 
 
@@ -917,18 +917,19 @@ cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
 // * is the minimum over all element values.
 // * The constraints are applied during the computation of δt for the next time step.
 // ****************************************************************************
-void calcTimeConstraintsForElems(void) @ 12.1{
+void calcCourantConstraints(void) @ 12.1{
   const Real crnt=calcCourantConstraintForElems(1.0e+20);
-  const Real hdr=calcHydroConstraintForElems(1.0e+20);
   δt_courant <?= (crnt);  // MIN_ASSIGN
-  #warning δt_hydro
-  //δt_hydro <?= (hdr);
+}
+void calcHydroTimeConstraints(void) @ 12.2{
+  const Real hdr=calcHydroConstraintForElems(1.0e+20);
+  δt_hydro <?= (hdr); // MIN_ASSIGN
 }
 void dumpTimeConstraintsForElems(void) @ 12.3{
   //debug()<<"\tdomain.dtcourant()="<<δt_courant;
   //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
-  //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
-  //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
+  printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
+  printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
 
 

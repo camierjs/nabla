@@ -1,7 +1,6 @@
 ###################
 # MESH MANAGEMENT #
 ###################
-MESH = 7
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
 export Z_EDGE_ELEMS = $(MESH)

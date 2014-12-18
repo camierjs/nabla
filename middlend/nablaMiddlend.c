@@ -334,6 +334,7 @@ nablaJob* nablaEntryPointsSort(nablaMain *nabla){
       entry_points[i].stdParamsNode=job->stdParamsNode;
       entry_points[i].nblParamsNode=job->nblParamsNode;
       entry_points[i].called_variables=job->called_variables;
+      entry_points[i].min_assignment=job->min_assignment;
       ++i;
     }
   }

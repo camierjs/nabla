@@ -2,7 +2,6 @@ NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
-MESH = 8
 #SIMD = avx
 COLORS = aos
 #PARALLEL = omp

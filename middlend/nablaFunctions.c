@@ -137,7 +137,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
   // On ne traite qu'un TOKEN ici, on break systématiquement
   for(;n->token != NULL;){
     dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
- 
+    
     if(n->tokenid==CONST){
       nprintf(nabla, "/*CONST*/", "%sconst ", fct->entity->main->pragma->align());
       break;
@@ -287,8 +287,15 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
     
-    if (n->tokenid==MIN_ASSIGN){fprintf(nabla->entity->src, "/*MIN_ASSIGN*/=ReduceMinToDouble"); break; }
-    if (n->tokenid==MAX_ASSIGN){fprintf(nabla->entity->src,  "/*MAX_ASSIGN*/=ReduceMaxToDouble"); break; }
+    if (n->tokenid==MIN_ASSIGN){
+      fct->min_assignment=true;
+      fprintf(nabla->entity->src, "/*MIN_ASSIGN*/=ReduceMinToDouble");
+      break;
+    }
+    if (n->tokenid==MAX_ASSIGN){
+      fprintf(nabla->entity->src,  "/*MAX_ASSIGN*/=ReduceMaxToDouble");
+      break;
+    }
     
     // Dernière action possible: on dump
     //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);

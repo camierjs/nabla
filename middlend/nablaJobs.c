@@ -43,7 +43,8 @@ nablaJob *nablaJobNew(nablaEntity *entity){
   job->in_out_variables=NULL;
   job->variables_to_gather_scatter=NULL;
   job->foreach_item='\0';
-  {// Outils de parsing
+  job->min_assignment=false;
+   {// Outils de parsing
     job->parse.left_of_assignment_operator=false;
     job->parse.turnBracketsToParentheses=false;
     job->parse.enum_enum='\0';

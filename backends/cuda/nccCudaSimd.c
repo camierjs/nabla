@@ -134,8 +134,6 @@ nablaTypedef cudaTypedef[]={
 // * CUDA DEFINES
 // ****************************************************************************
 nablaDefine cudaDefines[]={
-  //{"SHARED_REDUCED_BLOCS_SIZE", "1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK"},
-  {"SHARED_REDUCED_BLOCS_SIZE", "4"},
   {"real3","Real3"},
   {"Real","double"},
   {"real","double"},

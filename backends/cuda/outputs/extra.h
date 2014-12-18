@@ -24,8 +24,7 @@
 
 
 // Tableau en shared memory pour contenir la reduction locale
-__shared__ double sdata[CUDA_NB_THREADS_PER_BLOCK];
-//__shared__ double global_device_shared_reduce_results[SHARED_REDUCED_BLOCS_SIZE];
+__shared__ double shared_array[CUDA_NB_THREADS_PER_BLOCK];
 
 
 
@@ -35,62 +34,48 @@ __shared__ double sdata[CUDA_NB_THREADS_PER_BLOCK];
 __device__ double reduce_min_kernel(double *results, const Real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
-  //const unsigned int i = bid*blockDim.x + tid;
-  //int dualTid;
+  const unsigned int i = bid*blockDim.x+tid;
+  int dualTid;
    
   // Le bloc dépose la valeure qu'il a
-  sdata[tid]=what;
+  shared_array[tid]=what;
   __syncthreads();
 
-  for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
-    if (tid < s) {
-      if (sdata[tid+s]<sdata[tid])
-        sdata[tid] = sdata[tid+s];
-    }
-    __syncthreads();
-  }
-  // write result for this block to global mem
-  if (tid==0){
-    results[bid] = (bid+1.0)+0.0;//sdata[0];
-    printf("\nBloc #%%d returned %%.21e", bid, results[bid]);
-  }
-
-/*
-  for(int workers=CUDA_NB_THREADS_PER_BLOCK>>1; workers>1; workers>>=1){
+  for(int workers=blockDim.x>>1; workers>1; workers>>=1){
     // Seule la premiere moitié travaille
     if (tid >= workers) continue;
     dualTid = tid + workers;
     // On évite de piocher trop loin
     if (i >= NABLA_NB_CELLS) continue;
     if (dualTid >= NABLA_NB_CELLS) continue;
-    if ((blockDim.x*blockIdx.x + dualTid) >= NABLA_NB_CELLS) continue;
+    if ((blockDim.x*bid + dualTid) >= NABLA_NB_CELLS) continue;
     // Voici ceux qui travaillent
     //printf("\n#%%03d/%%d of bloc #%%d <?= with #%%d", tid, workers, blockIdx.x, dualTid);
     // On évite de taper dans d'autres blocs
     if (dualTid >= blockDim.x) continue;
     // ALORS on peut réduire:
     {
-      const double tmp = shared_min[blockIdx.x][dualTid];
-      //printf("\n#%%03d/%%d of bloc #%%d <?= with #%%d: %%.21e vs %%.21e",tid, workers, blockIdx.x, dualTid,shared_min[tid],shared_min[dualTid]);
-      if (tmp < shared_min[blockIdx.x][tid])
-        shared_min[blockIdx.x][tid] = tmp;
+      const double tmp = shared_array[dualTid];
+      //printf("\n#%%03d/%%d of bloc #%%d <?= with #%%d: %%.21e vs %%.21e",tid, workers, blockIdx.x, dualTid,shared_array[tid],shared_array[dualTid]);
+      if (tmp < shared_array[tid])
+        shared_array[tid] = tmp;
     }
     __syncthreads();
   }
   __syncthreads();
   if (tid==0){
-    results[blockIdx.x]=(blockIdx.x+1.0)+0.123456789;//shared_min[blockIdx.x][0];
-    printf("\nBloc #%%d returned %%.21e", blockIdx.x, results[blockIdx.x]);
+    results[bid]=shared_array[0];
+    //printf("\nBloc #%%d returned %%.21e", bid, results[bid]);
     __syncthreads();
-  }*/
-#warning fake return for now
+  }
+#warning Fake return for now
   // There is still a reduction to do
-  return results[blockIdx.x];
+  return results[bid];
 }
 
 
 __global__ void blockLevel(Real *results){
-  const unsigned int bid = blockIdx.x;
+  //const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   //const unsigned int i = bid*blockDim.x + tid;
   if (tid==0){
