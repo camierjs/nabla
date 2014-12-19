@@ -38,10 +38,11 @@ __device__ double reduce_min_kernel(double *results, const Real what){
   int dualTid;
    
   // Le bloc dépose la valeure qu'il a
+  //__syncthreads();
   shared_array[tid]=what;
   __syncthreads();
 
-  for(int workers=blockDim.x>>1; workers>1; workers>>=1){
+  for(int workers=blockDim.x>>1; workers>0; workers>>=1){
     // Seule la premiere moitié travaille
     if (tid >= workers) continue;
     dualTid = tid + workers;
@@ -52,7 +53,7 @@ __device__ double reduce_min_kernel(double *results, const Real what){
     // Voici ceux qui travaillent
     //printf("\n#%%03d/%%d of bloc #%%d <?= with #%%d", tid, workers, blockIdx.x, dualTid);
     // On évite de taper dans d'autres blocs
-    if (dualTid >= blockDim.x) continue;
+    //if (dualTid >= blockDim.x) continue;
     // ALORS on peut réduire:
     {
       const double tmp = shared_array[dualTid];

@@ -64,22 +64,6 @@ Real3 calcElemVelocityGradient(const int id,
   const Real3 υ17=υ[1]-υ[7];
   const Real3 υ24=υ[2]-υ[4];
   const Real3 υ35=υ[3]-υ[5];
-  //printf("\n[#%02d] υ06=(%.21e,%.21e,%.21e)",id,υ06.x,υ06.y,υ06.z);
-  //printf("\n[#%02d] υ17=(%.21e,%.21e,%.21e)",id,υ17.x,υ17.y,υ17.z);
-  //printf("\n[#%02d] υ24=(%.21e,%.21e,%.21e)",id,υ24.x,υ24.y,υ24.z);
-  //printf("\n[#%02d] υ35=(%.21e,%.21e,%.21e)",id,υ35.x,υ35.y,υ35.z);
-  //const Real3 Bυ06 = B[0]*υ06;
-  //const Real3 Bυ17 = B[1]*υ17;
-  //const Real3 Bυ24 = B[2]*υ24;
-  //const Real3 Bυ35 = B[3]*υ35;
-  //printf("\n[#%02d] (%.21e,%.21e,%.21e)",id,Bυ06.x,Bυ06.y,Bυ06.z);
-  // This next line does not produce the same result in CUDA
-  //const Real3 rtn = (Bυ06+Bυ17);//+Bυ24+Bυ35);
-  //const volatile Real3 Bυ0617 = Bυ06+Bυ17;
-  //const volatile Real3 Bυ2435 = Bυ24+Bυ35;
-  //const volatile Real3 rtn = Bυ0617+Bυ2435;
-  //printf("\n[#%02d] (%.21e,%.21e,%.21e)",id,rtn.x,rtn.y,rtn.z);
-  //return inv_detJ*rtn;
   return inv_detJ*(B[0]*υ06+B[1]*υ17+B[2]*υ24+B[3]*υ35);
 }
 

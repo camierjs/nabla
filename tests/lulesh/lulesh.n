@@ -58,7 +58,7 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 2;
+  Integer option_max_iterations  = 4;
 };
 
 
@@ -495,7 +495,7 @@ cells void calcElemVolume(void)
   //printf("\n[#%d] Xd[6]=(%.21e,%.21e,%.21e)",uid, Xd[6].x, Xd[6].y, Xd[6].z);
   //printf("\n[#%d] Xd[7]=(%.21e,%.21e,%.21e)",uid, Xd[7].x, Xd[7].y, Xd[7].z);
   ε=calcElemVelocityGradient(uid,Xd,B,DetJ);
-  printf("\n[#%d] Epsilon=(%.21e,%.21e,%.21e)",uid, ε.x, ε.y, ε.z);
+  //printf("\n[#%d] Epsilon=(%.21e,%.21e,%.21e)",uid, ε.x, ε.y, ε.z);
   //calc strain rate and apply as constraint
   vdov = ε.x+ε.y+ε.z;
   //printf("\n[#%d] vdov=%.21e",uid, vdov);
@@ -629,7 +629,7 @@ cells void calcMonotonicQForElemsQQQL(void)
   //debug()<<"phixi="<<phixi<<" phieta="<<phieta<<" phizeta="<<phizeta;
   //printf("\nphixi=%.21e phieta=%.21e phizeta=%.21e",phixi,phieta,phizeta);
   //debug()<<"ql="<<ql<<", qq="<<qq;
-  //printf("\nql=%.21e, qq=%.21e",ql,qq);
+  //ok printf("\n[#%02d] ql=%.21e, qq=%.21e",uid, ql,qq);
 }
 
 
@@ -724,7 +724,7 @@ cells void calcEnergyForElems1(void)
   e_new = (e_new < option_emin)?option_emin;
   //debug()<<"vchalf="<<(vnewc-(½*delv));
   //debug()<<"e_old="<<e_old<<", delvc="<< delvc <<", work="<< work<<", e_new="<<e_new;
-  //printf("\n[#%d] e_old=%.21e, delvc=%.21e, work=%.21e, e_new=%.21e",uid,e_old, delvc, work, e_new);
+  //ok printf("\n[#%d] e_old=%.21e, delvc=%.21e, work=%.21e, e_new=%.21e",uid,e_old, delvc, work, e_new);
 }
 
 
@@ -750,16 +750,46 @@ cells void calcPressureForElemspHalfStepcompHalfStep(void)
   //debug()<<"compHalfStep="<<compHalfStep<<", vnewc="<<vnewc<<", pmin="<<option_pmin<<", p_cut="<<option_p_cut;
 }
 
+// What a shame to do all these volatiles...
+inline Real computeSoundSpeed(const Real c,//pbvc
+                              const Real energy,
+                              const Real volume,
+                              const Real b,//bvc
+                              const Real pressure,
+                              const Real rho,
+                              const Real _ql,
+                              const Real _qq){
+  const volatile Real pe = c*energy;
+  const volatile Real vvbp=volume*volume*b*pressure;
+  const volatile Real ssc = (pe + vvbp)/rho;
+  const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  const volatile Real sscq = ssct*_ql;
+  const volatile Real sscqt = sscq+_qq;
+  return sscqt;
+}
+inline Real computeSoundSpeed(const Real c,//pbvc
+                              const Real energy,
+                              const Real volume,
+                              const Real b,//bvc
+                              const Real pressure,
+                              const Real rho){
+  const volatile Real pe = c*energy;
+  const volatile Real vvbp=volume*volume*b*pressure;
+  const volatile Real ssc = (pe + vvbp)/rho;
+  const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  return ssct;
+}
+
 cells void calcEnergyForElems3(void)
   in (cell compHalfStep, cell delvc, cell pbvc, cell ql, cell qq,
       cell bvc, cell pHalfStep, cell p_old, cell q_old)
   out (cell q_new)
   inout (cell e_new) @ 7.3 {
   const Real vhalf = 1.0/(1.0+compHalfStep);
-  const Real ssc = ( pbvc*e_new + vhalf*vhalf*bvc*pHalfStep)/option_refdens ;
-  const Real ssct = (ssc<=0.111111e-36)?0.333333e-18:√(ssc);
-  q_new = (delvc>0.0)?0.0:(ssct*ql + qq);
+  const Real ssc = computeSoundSpeed(pbvc,e_new,vhalf,bvc,pHalfStep,option_refdens,ql,qq);
+  q_new = (delvc>0.0)?0.0:ssc;//(ssct*ql + qq);
   e_new = e_new + ½*delvc*(3.0*(p_old+q_old)-4.0*(pHalfStep+q_new)) ;
+  //ok printf("\n[#%02d] q_new=%.21e, e_new=%.21e",uid,q_new,e_new);
 }
 
 cells void calcEnergyForElems4(void) in (cell work)
@@ -768,7 +798,7 @@ cells void calcEnergyForElems4(void) in (cell work)
   e_new = (rabs(e_new) < option_e_cut)?0.0;
   e_new = (e_new<option_emin)?option_emin;
   //debug()<<"q_new="<<q_new<<", e_new="<<e_new;
-  //printf("\ne_new=%.21e",e_new);
+  //printf("\n[#%02d] e_new=%.21e",uid,e_new);
 }
 
 cells void calcPressureForElemsPNewCompression(void)
@@ -790,9 +820,10 @@ cells void calcEnergyForElems6(void)
       cell qq, cell p_old, cell q_old, cell pHalfStep, cell q_new)
   inout(cell e_new)@ 7.6{
   const Real sixth = 1.0/6.0;
-  const Real ssc = ( pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
-  const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
-  const Real q_tilde = (delvc > 0.)?0.0:(ssct*ql + qq);
+  //const Real ssc = ( pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
+  //const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  const Real ssc = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens,ql,qq);
+  const Real q_tilde = (delvc > 0.)?0.0:ssc;//(ssct*ql + qq);
   //debug()<<"ssc="<<ssct;
   //debug()<<"pbvc="<<pbvc<<" e_new="<<e_new<<" vnewc="<<vnewc
   //<<" bvc="<<bvc<<" p_new="<<p_new <<" rho0="<<option_refdens;
@@ -803,24 +834,32 @@ cells void calcEnergyForElems6(void)
   e_new = (rabs(e_new) < option_e_cut)?0.0;
   e_new = (e_new < option_emin)?option_emin;
   //debug()<<"e_new="<<e_new;
-  //printf("\ne_new=%.21e",e_new);
+  //ok printf("\n[#%02d] e_new=%.21e",uid,e_new);
 }
 
 cells void calcEnergyForElems8(void)
   in (cell delvc, cell bvc, cell pbvc, cell e_new,
       cell vnewc, cell p_new, cell ql, cell qq)
   inout(cell q_new)@ 7.8{
-  const Real ssc = (pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
-  const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
-  const Real qnw = (ssct*ql+qq);
+  // These volatiles and this construction is necessary for CUDA *sic*
+  //const volatile Real pe = pbvc*e_new;
+  //const volatile Real vvbp=vnewc*vnewc*bvc*p_new;
+  //const volatile Real ssc = (pe + vvbp)/option_refdens;
+  //const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  const Real qnw = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens,ql,qq);
+  //const Real sq = (ssct*ql);
+  //const Real qnw = (sq+qq);
   const Real qnwt = (rabs(qnw) < option_q_cut)?0.0:qnw;
+  //printf("\n[#%02d] pe=%.21e, vvbp=%.21e, ss=%.21e",uid,pe,vvbp,ss);
+  //printf("\n[#%02d] ssc=%.21e, ssct=%.21e, sq=%.21e, qnw=%.21e, qnwt=%.21e",uid,ssc,ssct,sq,qnw,qnwt);
   //debug()<<"pbvc="<<pbvc<<" e_new="<<e_new<<" vnewc="<<vnewc
   //<<" bvc="<<bvc<<" p_new="<<p_new <<" rho0="<<option_refdens;
   //debug()<<"8 delvc="<<delvc;
   //debug()<<"8 ssc="<<ssct;
   q_new = (delvc <= 0.)?qnwt;
   //debug()<<"8 q_new="<<q_new;
-  //printf("\nq_new=%.21e",q_new);
+  //printf("\n[#%02d] pe=%.21e, vvbp=%.21e, ssc=%.21e, ssct=%.21e, qnw=%.21e, qnwt=%.21e",uid,pe,vvbp,ssc,ssct,qnw,qnwt);
+  //printf("\n[#%02d] q_new=%.21e",uid,q_new);
 }
 
 cells void evalEOSForElems8(void)
@@ -830,7 +869,7 @@ cells void evalEOSForElems8(void)
   e = e_new;
   q = q_new;
   //debug()<<"p_new="<<p_new<<" e_new="<< e_new <<" q_new="<< q_new;
-  //printf("\np_new=%.21e, e_new=%.21e, q_new=%.21e",p_new, e_new, q_new);
+  //printf("\n[#%02d] p_new=%.21e, e_new=%.21e, q_new=%.21e",uid,p_new, e_new, q_new);
 }
 
 
@@ -845,11 +884,12 @@ cells void calcSoundSpeedForElems(void)
   out (cell sound_speed) @ 9.0{
   foreach material{
     //debug()<<"pbvc="<<pbvc<<" e_new="<<e_new<<" vnewc="<<vnewc<<" bvc="<<bvc<<" p_new="<<p_new <<" rho0="<<option_refdens;
-    const Real ssTmp = (pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
-    const Real ssTmpt = (ssTmp <= 0.111111e-36)?0.333333e-18:√(ssTmp);
+    //const Real ssTmp = (pbvc*e_new + vnewc*vnewc*bvc*p_new)/option_refdens;
+    //const Real ssTmpt = (ssTmp <= 0.111111e-36)?0.333333e-18:√(ssTmp);
+    const Real ssTmpt = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens);
     sound_speed = ssTmpt;
     //debug()<<"calcSoundSpeedForElems sound_speed="<<sound_speed;
-    //printf("\n[#%d] sound_speed=%.21e",uid,sound_speed);
+    //ok printf("\n[#%d] sound_speed=%.21e",uid,sound_speed);
   }
 }
 
@@ -872,6 +912,7 @@ cells void updateVolumesForElems(void)
   const Real νt = (rabs(ν-1.0)<option_v_cut)?1.0:ν;
   v = νt;
   //debug()<<"updateVolumesForElems v="<<v;
+  //ok printf("\n[#%d] v=%.21e",uid,v);
 }
 
 
@@ -885,14 +926,16 @@ cells void updateVolumesForElems(void)
 cells Real calcCourantConstraintForElems(Real dtcourant)
   in (cell sound_speed, cell arealg, cell vdov) {
   foreach material{
-    const Real qqc2 = 64.0 * option_qqc * option_qqc ;
-    const Real δf = sound_speed[m] * sound_speed[m];
-    const Real δfp = √(δf+((vdov[m]<0.0)?qqc2*arealg[m]*arealg[m]*vdov[m]*vdov[m]:0.0));
+    const volatile Real qqc2 = 64.0 * option_qqc * option_qqc ;
+    const volatile Real δf = sound_speed[m] * sound_speed[m];
+    const Real δft=(vdov[m]<0.0)?qqc2*arealg[m]*arealg[m]*vdov[m]*vdov[m]:0.0;
+    const Real δfpp = δf+δft;
+    const Real δfp = √(δfpp);
     const Real aδfp = arealg[m]/δfp;
-    //printf("\n[#%d] vdov=%.21e, arealg=%.21e, sound_speed=%.21e, aδfp=%.21e",uid,vdov,arealg,sound_speed,aδfp);
+    //ok printf("\n[#%d] vdov=%.21e, arealg=%.21e, sound_speed=%.21e, aδfp=%.21e",uid,vdov,arealg,sound_speed,aδfp);
     dtcourant=(vdov!=0.0)?min(dtcourant,aδfp);
     //debug()<<"dtcourant="<<dtcourant;
-    //printf("\n[#%d] dtcourant=%.21e",uid,dtcourant);
+    //ok printf("\n[#%d] dtcourant=%.21e",uid,dtcourant);
   }
   return dtcourant;
 } 
@@ -907,12 +950,15 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
 // ****************************************************************************
 cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
   foreach material{
-    const Real δdvov = option_dvovmax/(rabs(vdov[m])+1.e-20);
+    const volatile Real δdv = rabs(vdov[m]);
+    const volatile Real δdve = δdv+1.e-20;
+    const Real δdvov = option_dvovmax/δdve;
     const Real δhdr = min(dthydro,δdvov);
     //debug()<<"vdov="<<vdov<<" dtdvov="<<dtdvov<<" dvovmax="<<option_dvovmax;
     //printf("\n[#%d] vdov=%.21e, dtdvov=%.21e, dvovmax=%.21e,",uid,vdov,dtdvov,option_dvovmax);
     dthydro=(vdov!=0.0)?δhdr;
     //debug()<<"dthydro="<<dthydro;
+    //printf("\n[#%d] δdvov=%.21e, δhdr=%.21e, dthydro=%.21e",uid,δdvov,δhdr,dthydro);
     //printf("\n[#%d] dthydro=%.21e",uid,dthydro);
   }
   return dthydro;
