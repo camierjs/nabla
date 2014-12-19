@@ -62,19 +62,44 @@ public:
     const volatile double y=a.y/b.y;
     const volatile double z=a.z/b.z;
     return real3(x,y,z);
-    //return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));
+    return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));
   }
 
   // volatile Arithmetic still seem required
   //friend __device__ inline real3 operator+(const volatile real3 &a, const volatile real3& b){return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
 
   // op= operators
-  __device__ inline real3& operator+=(const real3& b) {return *this=real3((x+b.x),(y+b.y),(z+b.z));}
-  __device__ inline real3& operator-=(const real3& b) {return *this=real3((x-b.x),(y-b.y),(z-b.z));}
-  __device__ inline real3& operator*=(const real3& b) {return *this=real3((x*b.x),(y*b.y),(z*b.z));}
-  __device__ inline real3& operator/=(const real3& b) {return *this=real3((x/b.x),(y/b.y),(z/b.z));}
+  __device__ inline real3& operator+=(const real3& b) {
+    /*const volatile double x=x+b.x;
+    const volatile double y=y+b.y;
+    const volatile double z=z+b.z;
+    return *this=real3(x,y,z);*/
+    return *this=real3((x+b.x),(y+b.y),(z+b.z));
+  }
+  __device__ inline real3& operator-=(const real3& b) {
+    /*const volatile double x=x-b.x;
+    const volatile double y=y-b.y;
+    const volatile double z=z-b.z;
+    return *this=real3(x,y,z);*/
+    return *this=real3((x-b.x),(y-b.y),(z-b.z));
+  }
+  __device__ inline real3& operator*=(const real3& b) {
+    /*const volatile double x=x*b.x;
+    const volatile double y=y*b.y;
+    const volatile double z=z*b.z;
+    return *this=real3(x,y,z);*/
+    return *this=real3((x*b.x),(y*b.y),(z*b.z));
+  }
+  __device__ inline real3& operator/=(const real3& b) {
+    /*const volatile double x=x/b.x;
+    const volatile double y=y/b.y;
+    const volatile double z=z/b.z;
+    return *this=real3(x,y,z);*/
+    return *this=real3((x/b.x),(y/b.y),(z/b.z));
+  }
 
   __device__ inline real3 operator-()const {return real3(-x, -y, -z);}
+  
   // Volatiles are necessary for reproductibility issues here!
   __device__ friend inline real dot3(const real3 u, const real3 v){
     const volatile Real x=u.x*v.x;

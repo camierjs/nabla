@@ -153,9 +153,10 @@ void ini(void) @ -10.0{
 //  atexit(dumpFinalEnergy);
 }
 
-nodes void choasNodes(void) out (node coord) @ -12.0 if (option_chaos){
-  //const Real3 chaos = (uid+1.0)*option_chaos_seed*Real3(1.0,2.0,0.0);
-  coord *= option_chaos_seed;
+nodes void choasNodes(void) out (node coord) @ -12.0{
+  coord *= (option_chaos)?option_chaos_seed:1.0;
+  // const Real chaos = (uid+1.0)*option_chaos_seed;
+  //coord = (option_chaos)?chaos:1.0;
   //debug()<<"coord="<<coord;
   //printf("\ncoord[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
 }
@@ -165,7 +166,7 @@ nodes void choasNodes(void) out (node coord) @ -12.0 if (option_chaos){
     if (corner==-1) continue;
     if (uid==31) printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,node_cell_corner[8*tnid+i],node_cell[8*tnid+i]);
   }
-  }*/
+}*/
 
 // ****************************************************************************
 // * Set up boundary condition information
@@ -212,13 +213,14 @@ cells void iniCellBC(void) in (node coord) out (cell elemBC) @ -9.5{
 // * Cells initialization
 // ****************************************************************************
 cells void iniCells(void) in (node coord)
-  out (cell v, cell e, cell p, cell q, cell volo, cell elemMass, cell calc_volume) @ -8.0{
+  out (cell v, cell e, cell volo, cell elemMass, cell calc_volume,
+       cell p, cell q, cell sound_speed) @ -8.0{
   Real3 X[8];
   const Real chaos = (uid+1.0)*option_chaos_seed;
   v=1.0;
   foreach node X[n]=coord;
   e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
-  p=q=(option_chaos)?chaos;
+  sound_speed=p=q=(option_chaos)?chaos;
   volo=elemMass=calc_volume=computeElemVolume(X);
   //debug()<<": e["<<uid<<"]="<<e<<", volume="<<calc_volume;
   //printf("\ne[%02d]=%.21e, volume=%.21e",uid,e,calc_volume);
@@ -289,12 +291,11 @@ void timeIncrement(void) @ 0.1 {
 cells void initStressTermsForElems(void)
   in (node coord, cell p, cell q)
   out (cell ε, cell cForce) @ 0.3 {
-  const Real sig = -p-q;
-//#warning sig 1234567890123456789
-  //const Real sig = (uid+1.0)*1.1234567890123456789;
+  const Real chaos = (uid+1.0)*option_chaos_seed;
+  const Real sig = (option_chaos)?chaos:-p-q;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
-  foreach node x[n]=coord;
+  foreach node x[n] = coord;
   ε = dj = -¼*((x[0]+x[1]+x[5]+x[4])-(x[3]+x[2]+x[6]+x[7]));
   calcElemShapeFunctionDerivatives(x,B);
   foreach node B[n]=0.0;
@@ -366,7 +367,7 @@ cells void ΣElemStressesToNodeForces(void)
 //#warning cForce chaos
     //foreach node cForce += η[n];
   //foreach node cForce = (n+1.0)*1.1234567890123456789;
-  //printf("\n@1.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
+  printf("\n@1.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
 }
 
 nodes void ΣCellNodeForce(void) in (cell cForce) out (node nForce)@ 1.4 {
