@@ -50,6 +50,7 @@ class __attribute__ ((aligned(8))) real3 {
   friend inline real3 operator-(const real3 &a, const real3& b) { return real3((a.x-b.x), (a.y-b.y), (a.z-b.z));}
   friend inline real3 operator*(const real3 &a, const real3& b) { return real3((a.x*b.x), (a.y*b.y), (a.z*b.z));}
   friend inline real3 operator/(const real3 &a, const real3& b) { return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));}
+  friend inline real3 operator+(const volatile real3 &a, const volatile real3& b) { return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
 
   // op= operators
   inline real3& operator+=(const real3& b) { return *this=real3((x+b.x),(y+b.y),(z+b.z));}
@@ -69,7 +70,9 @@ class __attribute__ ((aligned(8))) real3 {
   inline real3& operator-=(double f){return *this=real3(x-f,y-f,z-f);}
   inline real3& operator*=(double f){return *this=real3(x*f,y*f,z*f);}
   inline real3& operator/=(double f){return *this=real3(x/f,y/f,z/f);}
-  friend inline real dot3(real3 u, real3 v){ return real(u.x*v.x+u.y*v.y+u.z*v.z);}
+  friend inline real dot3(real3 u, real3 v){
+    return real(u.x*v.x+u.y*v.y+u.z*v.z);
+  }
   friend inline real norm(real3 u){ return real(rsqrt(dot3(u,u)));}
 
   friend inline real3 cross(real3 u, real3 v){

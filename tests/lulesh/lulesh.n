@@ -11,7 +11,7 @@
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU General Public License for more details.4
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -28,6 +28,9 @@ with cartesian;
 // * Options
 // ****************************************************************************
 options{
+  Bool option_chaos              = true;
+  Real option_chaos_seed         = 1.1234567890123456789;
+  
   Real option_dtfixed            = -1.0e-7;  // fixed time increment
   Real option_δt_initial         = 1.0e-7;   // variable time increment
   Real option_δt_courant         = 1.0e+20;
@@ -55,7 +58,7 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 32768;
+  Integer option_max_iterations  = 2;
 };
 
 
@@ -150,6 +153,12 @@ void ini(void) @ -10.0{
 //  atexit(dumpFinalEnergy);
 }
 
+nodes void choasNodes(void) out (node coord) @ -12.0 if (option_chaos){
+  //const Real3 chaos = (uid+1.0)*option_chaos_seed*Real3(1.0,2.0,0.0);
+  coord *= option_chaos_seed;
+  //debug()<<"coord="<<coord;
+  //printf("\ncoord[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
+}
 /*nodes void dumpCorners(void)@-12.0{
   foreach cell{
     const int corner = node_cell_corner[8*tnid+i];
@@ -205,11 +214,11 @@ cells void iniCellBC(void) in (node coord) out (cell elemBC) @ -9.5{
 cells void iniCells(void) in (node coord)
   out (cell v, cell e, cell p, cell q, cell volo, cell elemMass, cell calc_volume) @ -8.0{
   Real3 X[8];
+  const Real chaos = (uid+1.0)*option_chaos_seed;
   v=1.0;
   foreach node X[n]=coord;
-  e=(uid==0)?option_initial_energy:0.0;
-//#warning e 1234567890123456789
-  //p=q=e=(uid+1.0)*1.1234567890123456789;
+  e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
+  p=q=(option_chaos)?chaos;
   volo=elemMass=calc_volume=computeElemVolume(X);
   //debug()<<": e["<<uid<<"]="<<e<<", volume="<<calc_volume;
   //printf("\ne[%02d]=%.21e, volume=%.21e",uid,e,calc_volume);
@@ -485,8 +494,8 @@ cells void calcElemVolume(void)
   //printf("\n[#%d] Xd[5]=(%.21e,%.21e,%.21e)",uid, Xd[5].x, Xd[5].y, Xd[5].z);
   //printf("\n[#%d] Xd[6]=(%.21e,%.21e,%.21e)",uid, Xd[6].x, Xd[6].y, Xd[6].z);
   //printf("\n[#%d] Xd[7]=(%.21e,%.21e,%.21e)",uid, Xd[7].x, Xd[7].y, Xd[7].z);
-  ε=calcElemVelocityGradient(Xd,B,DetJ);
-  //printf("\n[#%d] Epsilon=(%.21e,%.21e,%.21e)",uid, ε.x, ε.y, ε.z);
+  ε=calcElemVelocityGradient(uid,Xd,B,DetJ);
+  printf("\n[#%d] Epsilon=(%.21e,%.21e,%.21e)",uid, ε.x, ε.y, ε.z);
   //calc strain rate and apply as constraint
   vdov = ε.x+ε.y+ε.z;
   //printf("\n[#%d] vdov=%.21e",uid, vdov);

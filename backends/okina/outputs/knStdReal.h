@@ -36,6 +36,7 @@ class __attribute__ ((aligned(8))) real {
   inline real(double *x):vec(*x){}
 
   // Convertors
+  inline operator double() const volatile { return vec; }
   inline operator double() const { return vec; }
   
   // Logicals

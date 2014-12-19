@@ -55,7 +55,8 @@ Real calcElemShapeFunctionDerivatives(const Real3* restrict X, Real3* restrict �
 // ****************************************************************************
 // * calcElemVelocityGradient
 // ****************************************************************************
-Real3 calcElemVelocityGradient(const Real3* restrict υ,
+Real3 calcElemVelocityGradient(const int id,
+                               const Real3* restrict υ,
                                const Real3* restrict B,
                                const Real detJ){
   const Real inv_detJ=1.0/detJ;
@@ -63,20 +64,21 @@ Real3 calcElemVelocityGradient(const Real3* restrict υ,
   const Real3 υ17=υ[1]-υ[7];
   const Real3 υ24=υ[2]-υ[4];
   const Real3 υ35=υ[3]-υ[5];
-  
-  //const Real3 B06=B[0]*υ06;
-  //const Real3 B17=B[1]*υ17;
-  //const Real3 B24=B[2]*υ24;
-  //const Real3 B35=B[3]*υ35;
-  //const Real3 B0617=B06+B17;
-  //const Real3 B2435=B24+B35;
-  //printf("\ninv_detJ=%.21e",inv_detJ);
-  //printf("\nυ06=(%.21e,%.21e,%.21e)",υ06.x,υ06.y,υ06.z);
-  //printf("\nυ17=(%.21e,%.21e,%.21e)",υ17.x,υ17.y,υ17.z);
-  //printf("\nυ24=(%.21e,%.21e,%.21e)",υ24.x,υ24.y,υ24.z);
-  //printf("\nυ35=(%.21e,%.21e,%.21e)",υ35.x,υ35.y,υ35.z);
-  //const Real3 rtn = (B06+B17)+(B24+B35);
-  //printf("\n(%.21e,%.21e,%.21e)",rtn.x,rtn.y,rtn.z);
+  //printf("\n[#%02d] υ06=(%.21e,%.21e,%.21e)",id,υ06.x,υ06.y,υ06.z);
+  //printf("\n[#%02d] υ17=(%.21e,%.21e,%.21e)",id,υ17.x,υ17.y,υ17.z);
+  //printf("\n[#%02d] υ24=(%.21e,%.21e,%.21e)",id,υ24.x,υ24.y,υ24.z);
+  //printf("\n[#%02d] υ35=(%.21e,%.21e,%.21e)",id,υ35.x,υ35.y,υ35.z);
+  //const Real3 Bυ06 = B[0]*υ06;
+  //const Real3 Bυ17 = B[1]*υ17;
+  //const Real3 Bυ24 = B[2]*υ24;
+  //const Real3 Bυ35 = B[3]*υ35;
+  //printf("\n[#%02d] (%.21e,%.21e,%.21e)",id,Bυ06.x,Bυ06.y,Bυ06.z);
+  // This next line does not produce the same result in CUDA
+  //const Real3 rtn = (Bυ06+Bυ17);//+Bυ24+Bυ35);
+  //const volatile Real3 Bυ0617 = Bυ06+Bυ17;
+  //const volatile Real3 Bυ2435 = Bυ24+Bυ35;
+  //const volatile Real3 rtn = Bυ0617+Bυ2435;
+  //printf("\n[#%02d] (%.21e,%.21e,%.21e)",id,rtn.x,rtn.y,rtn.z);
   //return inv_detJ*rtn;
   return inv_detJ*(B[0]*υ06+B[1]*υ17+B[2]*υ24+B[3]*υ35);
 }
@@ -95,16 +97,15 @@ Real computeElemVolume(const Real3* restrict X){
   const Real3 d57=X[5]-X[7];
   const Real3 d64=X[6]-X[4];
   const Real3 d70=X[7]-X[0];
+  
   const Real3 d14=X[1]-X[4];
   const Real3 d25=X[2]-X[5];
   const Real3 d61=X[6]-X[1];
   const Real3 d50=X[5]-X[0];
+
   const Real tp1 = (d31+d72)⋅(d63⨯d20);
-  const Real tp2 = (d43+d57)⋅(d64⨯d70);  
+  const Real tp2 = (d43+d57)⋅(d64⨯d70);
   const Real tp3 = (d14+d25)⋅(d61⨯d50);
-  //const Real tp12 = tp1+tp2;
-  //const Real tp123 = tp12+tp3;
-  //return twelveth*(tp123);//+tp2+tp3);
   return twelveth*(tp1+tp2+tp3);
 }
 

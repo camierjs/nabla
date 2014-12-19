@@ -17,16 +17,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
 
-#pragma pack(push,8)
+//#pragma pack(push,8)
 
 // ****************************************************************************
 // * REAL3 DEFINITION
+// * __attribute__ ((aligned(8)))
 // ****************************************************************************
 class __attribute__ ((aligned(8))) Real3 {
 public:
-  __attribute__ ((aligned(8))) double x;
-  __attribute__ ((aligned(8))) double y;
-  __attribute__ ((aligned(8))) double z;
+  double x;
+  double y;
+  double z;
 
   // Constructors
   __device__ inline Real3(): x(0.0), y(0.0), z(0.0){}
@@ -35,20 +36,60 @@ public:
   __device__ inline Real3(double *_x, double *_y, double *_z):x(*_x), y(*_y), z(*_z){}
 
   // Arithmetic operators
-  friend __device__ inline real3 operator+(const real3 &a, const real3& b) { return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
-  friend __device__ inline real3 operator-(const real3 &a, const real3& b) { return real3((a.x-b.x), (a.y-b.y), (a.z-b.z));}
-  friend __device__ inline real3 operator*(const real3 &a, const real3& b) { return real3((a.x*b.x), (a.y*b.y), (a.z*b.z));}
-  friend __device__ inline real3 operator/(const real3 &a, const real3& b) { return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));}
+  friend __device__ inline real3 operator+(const real3 &a, const real3& b) {
+    const volatile double x=a.x+b.x;
+    const volatile double y=a.y+b.y;
+    const volatile double z=a.z+b.z;
+    return real3(x,y,z);
+    //return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));
+  }
+  friend __device__ inline real3 operator-(const real3 &a, const real3& b) {
+    const volatile double x=a.x-b.x;
+    const volatile double y=a.y-b.y;
+    const volatile double z=a.z-b.z;
+    return real3(x,y,z);
+    //return real3((a.x-b.x), (a.y-b.y), (a.z-b.z));
+  }
+  friend __device__ inline real3 operator*(const real3 &a, const real3& b) {
+    const volatile double x=a.x*b.x;
+    const volatile double y=a.y*b.y;
+    const volatile double z=a.z*b.z;
+    return real3(x,y,z);
+    //return real3((a.x*b.x), (a.y*b.y), (a.z*b.z));
+  }
+  friend __device__ inline real3 operator/(const real3 &a, const real3& b) {
+    const volatile double x=a.x/b.x;
+    const volatile double y=a.y/b.y;
+    const volatile double z=a.z/b.z;
+    return real3(x,y,z);
+    //return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));
+  }
+
+  // volatile Arithmetic still seem required
+  //friend __device__ inline real3 operator+(const volatile real3 &a, const volatile real3& b){return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
 
   // op= operators
   __device__ inline real3& operator+=(const real3& b) {return *this=real3((x+b.x),(y+b.y),(z+b.z));}
   __device__ inline real3& operator-=(const real3& b) {return *this=real3((x-b.x),(y-b.y),(z-b.z));}
+  __device__ inline real3& operator*=(const real3& b) {return *this=real3((x*b.x),(y*b.y),(z*b.z));}
+  __device__ inline real3& operator/=(const real3& b) {return *this=real3((x/b.x),(y/b.y),(z/b.z));}
 
   __device__ inline real3 operator-()const {return real3(-x, -y, -z);}
-  __device__ friend inline real dot(real3 u, real3 v){return real(u.x*v.x+u.y*v.y+u.z*v.z);}
-  
-  __device__ friend inline real3 cross(real3 u, real3 v){
-    return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));
+  // Volatiles are necessary for reproductibility issues here!
+  __device__ friend inline real dot3(const real3 u, const real3 v){
+    const volatile Real x=u.x*v.x;
+    const volatile Real y=u.y*v.y;
+    const volatile Real z=u.z*v.z;
+    const volatile Real xy=x+y;
+    const volatile Real result=xy+z;
+    return result;
+    //return real(u.x*v.x+(u.y*v.y+u.z*v.z));
+  }  
+  __device__ friend inline real3 cross3(real3 u, real3 v){
+    const volatile Real x=(u.y*v.z)-(u.z*v.y);
+    const volatile Real y=((u.z*v.x)-(u.x*v.z));
+    const volatile Real z=((u.x*v.y)-(u.y*v.x));
+    return real3(x,y,z);
   }
 };
 

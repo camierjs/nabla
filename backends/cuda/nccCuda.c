@@ -37,7 +37,7 @@ void cudaInlines(nablaMain *nabla){
 // * cudaPragmas
 // ****************************************************************************
 char *nCudaPragmaGccIvdep(void){ return ""; }
-char *nCudaPragmaGccAlign(void){ return ""; }
+char *nCudaPragmaGccAlign(void){ return "__align__(8)"; }
 
 
 /***************************************************************************** 

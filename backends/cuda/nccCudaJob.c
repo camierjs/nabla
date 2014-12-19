@@ -357,6 +357,11 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
+  case(ALIGNED):{
+    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->pragma->align());
+    break;
+  }
+
   case(POSTFIX_CONSTANT):{
      nprintf(nabla, "/*postfix_constant@true*/", NULL);
      job->parse.postfix_constant=true;
