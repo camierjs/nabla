@@ -62,7 +62,7 @@ public:
     const volatile double y=a.y/b.y;
     const volatile double z=a.z/b.z;
     return real3(x,y,z);
-    return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));
+    //return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));
   }
 
   // volatile Arithmetic still seem required

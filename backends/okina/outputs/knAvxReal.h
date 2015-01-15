@@ -29,6 +29,7 @@ struct __attribute__ ((aligned(32))) real {
   // Constructors
   inline real(): vec(_mm256_setzero_pd()){}
   inline real(int i):vec(_mm256_set1_pd((double)i)){}
+  inline real(Integer i):vec(_mm256_set_pd(i[3],i[2],i[1],i[0])){}
   inline real(long i):vec(_mm256_set1_pd((double)i)){}
   inline real(double d):vec(_mm256_set1_pd(d)){}
   inline real(__m256d x):vec(x){}

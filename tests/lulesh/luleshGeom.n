@@ -55,8 +55,7 @@ Real calcElemShapeFunctionDerivatives(const Real3* restrict X, Real3* restrict �
 // ****************************************************************************
 // * calcElemVelocityGradient
 // ****************************************************************************
-Real3 calcElemVelocityGradient(const int id,
-                               const Real3* restrict υ,
+Real3 calcElemVelocityGradient(const Real3* restrict υ,
                                const Real3* restrict B,
                                const Real detJ){
   const Real inv_detJ=1.0/detJ;

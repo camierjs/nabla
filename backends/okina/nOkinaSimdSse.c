@@ -187,6 +187,7 @@ nablaDefine okinaSseDefines[]={
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)",""},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
+  {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration"},
   {"MD_DirX","0"},

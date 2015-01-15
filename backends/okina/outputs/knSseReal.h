@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
-#ifndef _KN_AVX_REAL_H_
+#ifndef _KN_SSE_REAL_H_
 #define _KN_SSE_REAL_H_
  
 
@@ -30,6 +30,7 @@ struct __attribute__ ((aligned(16))) real {
   // Constructors
   inline real(): vec(_mm_setzero_pd()){}
   inline real(int i):vec(_mm_set1_pd((double)i)){}
+  inline real(Integer i):vec(_mm_set_pd(i[1],i[0])){}
   inline real(long i):vec(_mm_set1_pd((double)i)){}
   inline real(double d):vec(_mm_set1_pd(d)){}
   inline real(__m128d x):vec(x){}

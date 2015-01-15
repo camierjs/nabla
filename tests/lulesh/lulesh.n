@@ -155,7 +155,7 @@ void ini(void) @ -10.0{
 
 nodes void choasNodes(void) out (node coord) @ -12.0{
   coord *= (option_chaos)?option_chaos_seed:1.0;
-  // const Real chaos = (uid+1.0)*option_chaos_seed;
+  //const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   //coord = (option_chaos)?chaos:1.0;
   //debug()<<"coord="<<coord;
   //printf("\ncoord[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
@@ -212,12 +212,11 @@ cells void iniCellBC(void) in (node coord) out (cell elemBC) @ -9.5{
 // ****************************************************************************
 // * Cells initialization
 // ****************************************************************************
-//cells void iniCells(void) in (node coord)
 ∀ cells void iniCells(void) in (node coord)
   out (cell v, cell e, cell volo, cell elemMass, cell calc_volume,
        cell p, cell q, cell sound_speed) @ -8.0{
   Real3 X[8];
-  const Real chaos = (uid+1.0)*option_chaos_seed;
+  const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   v=1.0;
   ∀ node X[n]=coord;
   e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
@@ -232,7 +231,6 @@ nodes void iniNodalMass(void) in (cell calc_volume) out (node nodalMass) @ -6.9{
   nodalMass=0.0;
   //if (nid==0) printf("\n[iniNodalMass] tnid=%d, Node #%d, nodalMass=%.21e",tnid,nid,nodalMass);
   ∀ cell{
-  //foreach cell{
     //int cid=node_cell[8*tnid+i];
     //if (cid<0) continue;
     //if (nid==0) printf("\n\tprefix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
@@ -272,6 +270,7 @@ void timeIncrement(void) @ 0.1 {
   const Real scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const Real scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = reduce(ReduceMin, scaled_δt);
+  //δt <?= (scaled_δt);
   //info()<<"ITERATION "<<GlobalIteration;
   printf("\nITERATION %d",GlobalIteration);
   if (GlobalIteration >= option_max_iterations) exit;
@@ -293,7 +292,7 @@ void timeIncrement(void) @ 0.1 {
 ∀ cells void initStressTermsForElems(void)
   in (node coord, cell p, cell q)
   out (cell ε, cell cForce) @ 0.3 {
-  const Real chaos = (uid+1.0)*option_chaos_seed;
+  const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   const Real sig = (option_chaos)?chaos:-p-q;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
@@ -313,7 +312,7 @@ void timeIncrement(void) @ 0.1 {
 
 nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   Real3 Σ=0.0;
-  foreach cell{
+  ∀ cell{
     //const int corner = node_cell_corner[8*tnid+i];
     //if (corner==-1) continue;
     //printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,corner,node_cell[8*tnid+i]);
@@ -368,7 +367,7 @@ cells void ΣElemStressesToNodeForces(void)
 //#warning cForce chaos
     //foreach node cForce += η[n];
   //foreach node cForce = (n+1.0)*1.1234567890123456789;
-  printf("\n@1.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
+  //printf("\n@1.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
 }
 
 nodes void ΣCellNodeForce(void) in (cell cForce) out (node nForce)@ 1.4 {
@@ -496,7 +495,7 @@ cells void calcElemVolume(void)
   //printf("\n[#%d] Xd[5]=(%.21e,%.21e,%.21e)",uid, Xd[5].x, Xd[5].y, Xd[5].z);
   //printf("\n[#%d] Xd[6]=(%.21e,%.21e,%.21e)",uid, Xd[6].x, Xd[6].y, Xd[6].z);
   //printf("\n[#%d] Xd[7]=(%.21e,%.21e,%.21e)",uid, Xd[7].x, Xd[7].y, Xd[7].z);
-  ε=calcElemVelocityGradient(uid,Xd,B,DetJ);
+  ε=calcElemVelocityGradient(Xd,B,DetJ);
   //printf("\n[#%d] Epsilon=(%.21e,%.21e,%.21e)",uid, ε.x, ε.y, ε.z);
   //calc strain rate and apply as constraint
   vdov = ε.x+ε.y+ε.z;
@@ -752,7 +751,6 @@ cells void calcPressureForElemspHalfStepcompHalfStep(void)
   //debug()<<"compHalfStep="<<compHalfStep<<", vnewc="<<vnewc<<", pmin="<<option_pmin<<", p_cut="<<option_p_cut;
 }
 
-// What a shame to do all these volatiles...
 inline Real computeSoundSpeed(const Real c,//pbvc
                               const Real energy,
                               const Real volume,
@@ -761,12 +759,12 @@ inline Real computeSoundSpeed(const Real c,//pbvc
                               const Real rho,
                               const Real _ql,
                               const Real _qq){
-  const volatile Real pe = c*energy;
-  const volatile Real vvbp=volume*volume*b*pressure;
-  const volatile Real ssc = (pe + vvbp)/rho;
+  const Real pe = c*energy;
+  const Real vvbp=volume*volume*b*pressure;
+  const Real ssc = (pe + vvbp)/rho;
   const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
-  const volatile Real sscq = ssct*_ql;
-  const volatile Real sscqt = sscq+_qq;
+  const Real sscq = ssct*_ql;
+  const Real sscqt = sscq+_qq;
   return sscqt;
 }
 inline Real computeSoundSpeed(const Real c,//pbvc
@@ -775,9 +773,9 @@ inline Real computeSoundSpeed(const Real c,//pbvc
                               const Real b,//bvc
                               const Real pressure,
                               const Real rho){
-  const volatile Real pe = c*energy;
-  const volatile Real vvbp=volume*volume*b*pressure;
-  const volatile Real ssc = (pe + vvbp)/rho;
+  const Real pe = c*energy;
+  const Real vvbp=volume*volume*b*pressure;
+  const Real ssc = (pe + vvbp)/rho;
   const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
   return ssct;
 }
@@ -843,14 +841,7 @@ cells void calcEnergyForElems8(void)
   in (cell delvc, cell bvc, cell pbvc, cell e_new,
       cell vnewc, cell p_new, cell ql, cell qq)
   inout(cell q_new)@ 7.8{
-  // These volatiles and this construction is necessary for CUDA *sic*
-  //const volatile Real pe = pbvc*e_new;
-  //const volatile Real vvbp=vnewc*vnewc*bvc*p_new;
-  //const volatile Real ssc = (pe + vvbp)/option_refdens;
-  //const Real ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
   const Real qnw = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens,ql,qq);
-  //const Real sq = (ssct*ql);
-  //const Real qnw = (sq+qq);
   const Real qnwt = (rabs(qnw) < option_q_cut)?0.0:qnw;
   //printf("\n[#%02d] pe=%.21e, vvbp=%.21e, ss=%.21e",uid,pe,vvbp,ss);
   //printf("\n[#%02d] ssc=%.21e, ssct=%.21e, sq=%.21e, qnw=%.21e, qnwt=%.21e",uid,ssc,ssct,sq,qnw,qnwt);
@@ -928,8 +919,8 @@ cells void updateVolumesForElems(void)
 cells Real calcCourantConstraintForElems(Real dtcourant)
   in (cell sound_speed, cell arealg, cell vdov) {
   foreach material{
-    const volatile Real qqc2 = 64.0 * option_qqc * option_qqc ;
-    const volatile Real δf = sound_speed[m] * sound_speed[m];
+    const Real qqc2 = 64.0 * option_qqc * option_qqc ;
+    const Real δf = sound_speed[m] * sound_speed[m];
     const Real δft=(vdov[m]<0.0)?qqc2*arealg[m]*arealg[m]*vdov[m]*vdov[m]:0.0;
     const Real δfpp = δf+δft;
     const Real δfp = √(δfpp);
@@ -952,8 +943,8 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
 // ****************************************************************************
 cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
   foreach material{
-    const volatile Real δdv = rabs(vdov[m]);
-    const volatile Real δdve = δdv+1.e-20;
+    const Real δdv = rabs(vdov[m]);
+    const Real δdve = δdv+1.e-20;
     const Real δdvov = option_dvovmax/δdve;
     const Real δhdr = min(dthydro,δdvov);
     //debug()<<"vdov="<<vdov<<" dtdvov="<<dtdvov<<" dvovmax="<<option_dvovmax;
