@@ -85,7 +85,9 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 
 "#"			      { return tok(&yylval, DIESE);}
 "@"			      { return tok(&yylval, AT);}
-"foreach"			{ return tok(&yylval, FOREACH);}
+"∀"               { return tok(&yylval, FORALL);}
+"forall"	   		{ return tok(&yylval, FORALL);}
+"foreach"			{ return tok(&yylval, FORALL);}
 "all"					{ return tok(&yylval, ALL);}
 "own"					{ return tok(&yylval, OWN);}
 "outer"				{ return tok(&yylval, OUTER);}
@@ -267,9 +269,9 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 
 "∞"               { return tok(&yylval, BUILTIN_INFF);}//9e88e2
 
-"[n]"             { return tok(&yylval, FOREACH_NODE_INDEX);}
-"[c]"             { return tok(&yylval, FOREACH_CELL_INDEX);}
-"[m]"             { return tok(&yylval, FOREACH_MTRL_INDEX);}
+"[n]"             { return tok(&yylval, FORALL_NODE_INDEX);}
+"[c]"             { return tok(&yylval, FORALL_CELL_INDEX);}
+"[m]"             { return tok(&yylval, FORALL_MTRL_INDEX);}
 
 
 "⋅"					{ return tok(&yylval, CENTER_DOT_OP);} // MIDDLE DOT 858be2

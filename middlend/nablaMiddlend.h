@@ -90,7 +90,7 @@ typedef struct nablaJobStruct{
   nablaVariable *called_variables;
   nablaVariable *in_out_variables;
   nablaVariable *variables_to_gather_scatter;
-  char foreach_item;
+  char forall_item;
   // Bool pour savoir si le job en cours va faire une reduction (utile qu'en CUDA)
   bool min_assignment;
   struct{
@@ -315,7 +315,7 @@ void nablaFctFill(nablaMain *,
 // JOBS
 void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc);
 void scanForNablaJobAtConstant(astNode * n, nablaMain *arc);
-char scanForNablaJobForeachItem(astNode*);
+char scanForNablaJobForallItem(astNode*);
 nablaJob *nablaJobNew(nablaEntity *);
 nablaJob *nablaJobAdd(nablaEntity*, nablaJob*);
 nablaJob *nablaJobLast(nablaJob *);

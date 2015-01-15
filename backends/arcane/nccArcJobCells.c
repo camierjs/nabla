@@ -27,21 +27,21 @@ char *cellJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'c') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
 
   dbg("\n\t\t[cellJobCellVar] scalar=%d, resolve=%d, \
-foreach_none=%d, foreach_node=%d, foreach_face=%d, foreach_cell=%d",
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+forall_none=%d, forall_node=%d, forall_face=%d, forall_cell=%d",
+      scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   
   if (scalar && !resolve) return "";
   if (scalar) return "[cell]";
 
   if (!scalar && !resolve) return "[cell]";
-  if (!scalar && foreach_node) return "[cell][n.index()]";
-  if (!scalar && foreach_face) return "[cell][f.index()]";
+  if (!scalar && forall_node) return "[cell][n.index()]";
+  if (!scalar && forall_face) return "[cell][f.index()]";
   if (!scalar) return "[cell]";
 
   error(!0,0,"Could not switch in cellJobCellVar!");
@@ -58,24 +58,24 @@ char *cellJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'n') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
   
   dbg("\n\t\t[cellJobNodeVar] scalar=%d, resolve=%d, \
-foreach_none=%d, foreach_node=%d, foreach_face=%d, \
-foreach_cell=%d isPostfixed=%d",
-      scalar,resolve,foreach_none,foreach_node,\
-      foreach_face,foreach_cell,job->parse.isPostfixed);
+forall_none=%d, forall_node=%d, forall_face=%d, \
+forall_cell=%d isPostfixed=%d",
+      scalar,resolve,forall_none,forall_node,\
+      forall_face,forall_cell,job->parse.isPostfixed);
 
-  if (resolve && foreach_none) return "[cell->node";
-  if (resolve && foreach_face) return "[f->node";
-  if (resolve && foreach_node) return "[n]";
+  if (resolve && forall_none) return "[cell->node";
+  if (resolve && forall_face) return "[f->node";
+  if (resolve && forall_node) return "[n]";
 
-  if (!resolve && foreach_none) return "[cell->node";
-  if (!resolve && foreach_face) return "[";
-  if (!resolve && foreach_node) return "[cell->node";
+  if (!resolve && forall_none) return "[cell->node";
+  if (!resolve && forall_face) return "[";
+  if (!resolve && forall_node) return "[cell->node";
   
   error(!0,0,"Could not switch in cellJobNodeVar!");
   return NULL;
@@ -90,15 +90,15 @@ char *cellJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'f') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[cellJobFaceVar] scalar=%d, resolve=%d, foreach_none=%d, foreach_node=%d, foreach_face=%d, foreach_cell=%d isPostfixed=%d", scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell,job->parse.isPostfixed);
+  dbg("\n\t\t[cellJobFaceVar] scalar=%d, resolve=%d, forall_none=%d, forall_node=%d, forall_face=%d, forall_cell=%d isPostfixed=%d", scalar,resolve,forall_none,forall_node,forall_face,forall_cell,job->parse.isPostfixed);
   //nprintf(arc, "/*FaceVar*/", NULL); // FACE variable
-  if (foreach_face) return "[f]";
-  if (foreach_none) return "[cell->face";
+  if (forall_face) return "[f]";
+  if (forall_none) return "[cell->face";
   
   error(!0,0,"Could not switch in cellJobFaceVar!");
   return NULL;
@@ -113,16 +113,16 @@ char *cellJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nabla
   if (var->item[0] != 'p') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
-  const int foreach_particle = job->parse.enum_enum=='p';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
+  const int forall_particle = job->parse.enum_enum=='p';
   
-  dbg("\n\t\t[cellJobParticleVar] scalar=%d, resolve=%d, foreach_none=%d, foreach_node=%d, foreach_face=%d, foreach_cell=%d isPostfixed=%d", scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell,job->parse.isPostfixed);
+  dbg("\n\t\t[cellJobParticleVar] scalar=%d, resolve=%d, forall_none=%d, forall_node=%d, forall_face=%d, forall_cell=%d isPostfixed=%d", scalar,resolve,forall_none,forall_node,forall_face,forall_cell,job->parse.isPostfixed);
   
-  if (foreach_particle) return "[p]";
-  if (foreach_none) return "[cell->particle";
+  if (forall_particle) return "[p]";
+  if (forall_none) return "[cell->particle";
 
   error(!0,0,"Could not switch in cellJobParticleVar!");
   return NULL;

@@ -42,7 +42,7 @@ nablaJob *nablaJobNew(nablaEntity *entity){
   job->called_variables=NULL;
   job->in_out_variables=NULL;
   job->variables_to_gather_scatter=NULL;
-  job->foreach_item='\0';
+  job->forall_item='\0';
   job->min_assignment=false;
    {// Outils de parsing
     job->parse.left_of_assignment_operator=false;
@@ -169,12 +169,12 @@ void dumpIfAfterAt(astNode *n, nablaMain *nabla){
 }
 
 
-char scanForNablaJobForeachItem(astNode * n){
+char scanForNablaJobForallItem(astNode * n){
   char it;
-  if (n->tokenid==FOREACH)
+  if (n->tokenid==FORALL)
     return n->next->children->token[0];
-  if(n->children != NULL) if ((it=scanForNablaJobForeachItem(n->children))!='\0') return it;
-  if(n->next != NULL) if ((it=scanForNablaJobForeachItem(n->next))!='\0') return it;
+  if(n->children != NULL) if ((it=scanForNablaJobForallItem(n->children))!='\0') return it;
+  if(n->next != NULL) if ((it=scanForNablaJobForallItem(n->next))!='\0') return it;
   return '\0';
 }
 
@@ -366,19 +366,20 @@ void nablaJobFill(nablaMain *nabla,
   job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
   job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
   job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
+    
   // Si on a pas trouvé avec les items, cela doit être un matenvs
   if (job->item==NULL)
     job->item = dfsFetchFirst(n->children,rulenameToId("nabla_matenvs"));
   assert(job->item);
-  job->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
+  job->rtntp = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   
   // On va chercher le premier identifiant qui est le nom du job
   nd=dfsFetchTokenId(n->children,IDENTIFIER);
   assert(nd);
   job->name=strdup(nd->token);
   //assert(n->children->next->next->token!=NULL);
-  //job->name   = strdup(n->children->next->next->token);
-  job->name_utf8   = strdup(nd->token_utf8);
+  //job->name = strdup(n->children->next->next->token);
+  job->name_utf8 = strdup(nd->token_utf8);
   //nprintf(nabla, NULL, "/*name=%s*/", job->name);
   dbg("\n\n\t[nablaJobFill] named '%s'", job->name);
 
@@ -452,17 +453,17 @@ void nablaJobFill(nablaMain *nabla,
     if (nabla->hook->returnFromArgument)
       nabla->hook->returnFromArgument(nabla,job);
 
-  
-  // On prépare le bon ENUMERATE
+  // On prépare le bon ENUMERATE suivant le forall interne
+  // On saute l'éventuel forall du début
   dbg("\n\t[nablaJobFill] On prépare le bon ENUMERATE");
-  if ((job->foreach_item=scanForNablaJobForeachItem(n))!='\0')
-    dbg("\n\t[nablaJobFill] scanForNablaJobForeachItem found '%c'", job->foreach_item);
+  if ((job->forall_item=scanForNablaJobForallItem(n->children->next))!='\0')
+    dbg("\n\t[nablaJobFill] scanForNablaJobForallItem found '%c'", job->forall_item);
 
-  // On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramètres
+  dbg("\n\t[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramètres");
   for(n=n->children->next; n->tokenid!=COMPOUND_JOB_INI; n=n->next);
   //n=n->next; // On saute le COMPOUND_JOB_INI *ou pas*
   
-  // On cherche s'il y a un selection statement
+  dbg("\n\t[nablaJobFill] On cherche s'il y a un selection statement");
   if (dfsFetch(n,rulenameToId("selection_statement"))!=NULL){
     dbg("\n\t[nablaJobFill] Found a selection statement in this job!");
     job->parse.selection_statement_in_compound_statement=true;

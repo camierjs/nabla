@@ -143,16 +143,16 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
 
-    if(n->tokenid==FOREACH_END){
-      nprintf(nabla, "/*FOREACH_END*/",NULL);
+    if(n->tokenid==FORALL_END){
+      nprintf(nabla, "/*FORALL_END*/",NULL);
       fct->parse.enum_enum='\0';
       break;
     }
 
     
-    if (n->tokenid==FOREACH_INI){ break;}
+    if (n->tokenid==FORALL_INI){ break;}
     
-    if (n->tokenid==FOREACH){
+    if (n->tokenid==FORALL){
       int tokenid;
       char *support=NULL;
       if (n->next->tokenid==IDENTIFIER){
@@ -165,49 +165,49 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       }
       switch(tokenid){
       case(CELL):{
-        nprintf(nabla, NULL, "/*FOREACH CELL*/");
-        // On annonce que l'on va travailler sur un foreach cell
+        nprintf(nabla, NULL, "/*FORALL CELL*/");
+        // On annonce que l'on va travailler sur un forall cell
         fct->parse.enum_enum='c';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FOREACH!");
+          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(CellEnumerator c%s(%s->cells()); c%s.hasNext(); ++c%s)",
                   support,support,support,support);
         break;
       }
       case(FACE):{
-        nprintf(nabla, NULL, "/*FOREACH FACE*/");
+        nprintf(nabla, NULL, "/*FORALL FACE*/");
         fct->parse.enum_enum='f';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FOREACH!");
+          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(FaceEnumerator f%s(%s->faces()); f%s.hasNext(); ++f%s)",
                   support,support,support,support);
         break;
       }
       case(NODE):{
-        nprintf(nabla, NULL, "/*FOREACH NODE*/");
-        // On annonce que l'on va travailler sur un foreach node
+        nprintf(nabla, NULL, "/*FORALL NODE*/");
+        // On annonce que l'on va travailler sur un forall node
         fct->parse.enum_enum='n';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FOREACH!");
+          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(NodeEnumerator n%s(%s->nodes()); n%s.hasNext(); ++n%s)",
                   support,support,support,support);
         break;
       }
       case(PARTICLE):{
-        nprintf(nabla, NULL, "/*FOREACH PARTICLE*/");
+        nprintf(nabla, NULL, "/*FORALL PARTICLE*/");
         fct->parse.enum_enum='p';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FOREACH!");
+          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",support,support,support,support);
         break;
       }
-      default: error(!0,0,"[nablaFunctionParse] Could not distinguish FOREACH!");
+      default: error(!0,0,"[nablaFunctionParse] Could not distinguish FORALL!");
       }
-      // On skip le 'nabla_item' qui nous a renseigné sur le type de foreach
+      // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
       *n=*n->next->next;
       break;
     }

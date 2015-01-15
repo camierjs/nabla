@@ -33,7 +33,7 @@ nablaVariable *nablaVariableNew(nablaMain *arc){
    variable->next=NULL;
    variable->gmpRank=-1;
    variable->dump=true;
-   //variable->used_in_a_foreach=false;
+   //variable->used_in_a_forall=false;
    variable->is_gathered=false;
   	return variable; 
 }

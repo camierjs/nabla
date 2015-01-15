@@ -28,7 +28,7 @@ with cartesian;
 // * Options
 // ****************************************************************************
 options{
-  Bool option_chaos              = true;
+  Bool option_chaos              = false;
   Real option_chaos_seed         = 1.1234567890123456789;
   
   Real option_dtfixed            = -1.0e-7;  // fixed time increment
@@ -212,13 +212,14 @@ cells void iniCellBC(void) in (node coord) out (cell elemBC) @ -9.5{
 // ****************************************************************************
 // * Cells initialization
 // ****************************************************************************
-cells void iniCells(void) in (node coord)
+//cells void iniCells(void) in (node coord)
+∀ cells void iniCells(void) in (node coord)
   out (cell v, cell e, cell volo, cell elemMass, cell calc_volume,
        cell p, cell q, cell sound_speed) @ -8.0{
   Real3 X[8];
   const Real chaos = (uid+1.0)*option_chaos_seed;
   v=1.0;
-  foreach node X[n]=coord;
+  ∀ node X[n]=coord;
   e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
   sound_speed=p=q=(option_chaos)?chaos;
   volo=elemMass=calc_volume=computeElemVolume(X);
@@ -230,7 +231,8 @@ nodes void iniNodalMass(void) in (cell calc_volume) out (node nodalMass) @ -6.9{
   //const int nid=uid;
   nodalMass=0.0;
   //if (nid==0) printf("\n[iniNodalMass] tnid=%d, Node #%d, nodalMass=%.21e",tnid,nid,nodalMass);
-  foreach cell{
+  ∀ cell{
+  //foreach cell{
     //int cid=node_cell[8*tnid+i];
     //if (cid<0) continue;
     //if (nid==0) printf("\n\tprefix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
@@ -288,25 +290,24 @@ void timeIncrement(void) @ 0.1 {
 // * Thus, we initialize the diagonal terms of the stress tensor to
 // * -(p + q) in each element.
 // ****************************************************************************
-cells void initStressTermsForElems(void)
+∀ cells void initStressTermsForElems(void)
   in (node coord, cell p, cell q)
   out (cell ε, cell cForce) @ 0.3 {
   const Real chaos = (uid+1.0)*option_chaos_seed;
   const Real sig = (option_chaos)?chaos:-p-q;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
-  foreach node x[n] = coord;
+  ∀ node x[n] = coord;
   ε = dj = -¼*((x[0]+x[1]+x[5]+x[4])-(x[3]+x[2]+x[6]+x[7]));
   calcElemShapeFunctionDerivatives(x,B);
-  foreach node B[n]=0.0;
+  ∀ node B[n]=0.0;
   Σ_FaceNormal(B,0,1,2,3,x);
   Σ_FaceNormal(B,0,4,5,1,x);
   Σ_FaceNormal(B,1,5,6,2,x);
   Σ_FaceNormal(B,2,6,7,3,x);
   Σ_FaceNormal(B,3,7,4,0,x);
   Σ_FaceNormal(B,4,7,6,5,x);
-  foreach node
-    cForce = -sig*B[n];
+  ∀ node cForce = -sig*B[n];
   //printf("\n@0.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
 }
 

@@ -69,9 +69,13 @@ tstro:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
-tstrv:
+tststd:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
-tstrv2:
+tstsse:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_omp)
+tstavx:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx_omp)
+tstavx2:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx2_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)

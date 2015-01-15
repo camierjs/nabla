@@ -154,15 +154,15 @@ static char* okinaSelectEnumerate(nablaJob *job){
   return NULL;
 }
 char* okinaHookDumpEnumerate(nablaJob *job){
-  const char *foreach=strdup(okinaSelectEnumerate(job));
+  const char *forall=strdup(okinaSelectEnumerate(job));
   const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];
   char str[NABLA_MAX_FILE_NAME];
   dbg("\n\t[okinaHookDumpEnumerate] Preparing:");
-  dbg("\n\t[okinaHookDumpEnumerate]\t\tforeach=%s",foreach);
+  dbg("\n\t[okinaHookDumpEnumerate]\t\tforall=%s",forall);
   dbg("\n\t[okinaHookDumpEnumerate]\t\twarping=%s",warping);
 
-  // On prépare le format grace à la partie du foreach,
+  // On prépare le format grace à la partie du forall,
   // on rajoute l'extension suivant si on a une returnVariable
   if (job->parse.returnFromArgument){
     const char *ompOkinaLocal=job->parse.returnFromArgument?"_SHARED":"";
@@ -170,7 +170,7 @@ char* okinaHookDumpEnumerate(nablaJob *job){
     const char *ompOkinaReturnVariableWitoutPerThread=okinaReturnVariableNameForOpenMPWitoutPerThread(job);
     //const char *ompOkinaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
     //const char *ompOkinaLocalVariableName=job->parse.returnFromArgument?ompOkinaReturnVariable:"";
-    if (sprintf(format,"%s%%s%%s)",foreach)<=0) error(!0,0,"Could not patch format!");
+    if (sprintf(format,"%s%%s%%s)",forall)<=0) error(!0,0,"Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
                 warping,       // _WARP or not
                 ompOkinaLocal, // _SHARED or not
@@ -179,7 +179,7 @@ char* okinaHookDumpEnumerate(nablaJob *job){
   }else{
     dbg("\n\t[okinaHookDumpEnumerate] No returnFromArgument");
     if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
-                foreach,
+                forall,
                 job->is_a_function?"":")")<=0)
       error(!0,0,"Could not patch format!");
     dbg("\n[okinaHookDumpEnumerate] format=%s",format);
@@ -196,7 +196,7 @@ char* okinaHookDumpEnumerate(nablaJob *job){
 // ****************************************************************************
 // * Filtrage du GATHER
 // * Une passe devrait être faite à priori afin de déterminer les contextes
-// * d'utilisation: au sein d'un foreach, postfixed ou pas, etc.
+// * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
 static char* okinaGather(nablaJob *job){
@@ -225,7 +225,7 @@ static char* okinaGather(nablaJob *job){
   // S'il y en a pas, on a rien d'autre à faire
   if (nbToGather==0) return "";
 
-  // On filtre suivant s'il y a des foreach
+  // On filtre suivant s'il y a des forall
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
     //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather on %s for variable %s_%s", job->item, var->item, var->name);
     //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather enum_enum=%c", job->parse.enum_enum);
@@ -359,11 +359,11 @@ char* okinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum)
 
 
 /*****************************************************************************
- * FOREACH token switch
+ * FORALL token switch
  *****************************************************************************/
-static void okinaHookSwitchForeach(astNode *n, nablaJob *job){
+static void okinaHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
-  if (n->tokenid != FOREACH) return;
+  if (n->tokenid != FORALL) return;
   // Now we're allowed to work
   switch(n->next->children->tokenid){
   case(CELL):{
@@ -388,7 +388,7 @@ static void okinaHookSwitchForeach(astNode *n, nablaJob *job){
   // Attention au cas où on a un @ au lieu d'un statement
   if (n->next->next->tokenid == AT)
     nprintf(job->entity->main, "/* Found AT */", NULL);
-  // On skip le 'nabla_item' qui nous a renseigné sur le type de foreach
+  // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
   *n=*n->next->next;
 }
 
@@ -404,7 +404,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
   if (n->token)
     dbg("\n\t[okinaHookSwitchToken] token: '%s'?", n->token);
  
-  okinaHookSwitchForeach(n,job);
+  okinaHookSwitchForall(n,job);
   
   switch(n->tokenid){
     
@@ -487,14 +487,14 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
-  case(FOREACH_INI):{
-    nprintf(nabla, "/*FOREACH_INI*/", "{\n\t\t\t");//FOREACH_INI
+  case(FORALL_INI):{
+    nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
     nprintf(nabla, "/*okinaGather*/", "%s",okinaGather(job));
     break;
   }
-  case(FOREACH_END):{
+  case(FORALL_END):{
     nprintf(nabla, "/*okinaScatter*/", okinaScatter(job));
-    nprintf(nabla, "/*FOREACH_END*/", "\n\t\t}\n\t");//FOREACH_END
+    nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
     break;

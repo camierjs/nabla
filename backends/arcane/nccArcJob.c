@@ -31,7 +31,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
   char itm=j->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   char *drctn=j->drctn; // Direction
   if (j->xyz==NULL){
-    if (itm=='c' && j->foreach_item=='c'){
+    if (itm=='c' && j->forall_item=='c'){
       return "CellCellGroup cells_pairgroup(allCells(),allCells(),IK_Node);";
     }else{
       char prefix[2048];
@@ -94,15 +94,15 @@ char* arcaneHookDumpEnumerate(nablaJob *job){
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   char *xyz=job->xyz;// Direction
-  char foreach_item=job->foreach_item;
+  char forall_item=job->forall_item;
 //#warning Should avoid testing NULL and [0]!
   if (xyz!=NULL) return arcaneHookDumpEnumerateXYZ(job);
   //if (funcRegion!=NULL) funcRegion[0]-=32; // Si on a une région, on inner|outer => Inner|Outer
-  dbg("\n\t[arcaneHookDumpEnumerate] foreach_item='%c'", foreach_item);
+  dbg("\n\t[arcaneHookDumpEnumerate] forall_item='%c'", forall_item);
   // Pour une fonction, on fait rien ici
   if (itm=='\0') return "";
 
-  if (itm=='c' && foreach_item=='c')          return "ENUMERATE_ITEMPAIR(Cell,Cell,cell,cells_pairgroup)";
+  if (itm=='c' && forall_item=='c')          return "ENUMERATE_ITEMPAIR(Cell,Cell,cell,cells_pairgroup)";
   if (itm=='p' && grp==NULL && rgn==NULL)     return "ENUMERATE_PARTICLE(particle,m_particle_family->allItems())";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "ENUMERATE_CELL(cell,allCells())";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_CELL(cell,innerCells())";
@@ -201,7 +201,7 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
 void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *arc=job->entity->main;
   const char support=job->item[0];
-  const char foreach=job->parse.enum_enum;
+  const char forall=job->parse.enum_enum;
   
   if (n->tokenid!=0)
     dbg("\n\t[arcaneHookSwitchToken] n->token=%s", n->token);
@@ -216,9 +216,9 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 
   case(DIESE):{
     nprintf(arc, "/*DIESE*/", NULL);
-    if (support=='c' && foreach!='\0') nprintf(arc, NULL, "%c.index()", foreach);
-    if (support=='n' && foreach!='\0') nprintf(arc, NULL, "%c.index()", foreach);
-    if (support=='f' && foreach!='\0') nprintf(arc, NULL, "%c.index()", foreach);
+    if (support=='c' && forall!='\0') nprintf(arc, NULL, "%c.index()", forall);
+    if (support=='n' && forall!='\0') nprintf(arc, NULL, "%c.index()", forall);
+    if (support=='f' && forall!='\0') nprintf(arc, NULL, "%c.index()", forall);
     break;
   }
 
@@ -303,25 +303,25 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
-  case(FOREACH_INI):{ break; }
-  case(FOREACH_END):{
-    nprintf(arc, "/*FOREACH_END*/",NULL);
-    //if (job->foreach_item=='c' && job->item[0]=='c') nprintf(arc, "/*cell_foreach_cell*/","}");
+  case(FORALL_INI):{ break; }
+  case(FORALL_END):{
+    nprintf(arc, "/*FORALL_END*/",NULL);
+    //if (job->forall_item=='c' && job->item[0]=='c') nprintf(arc, "/*cell_forall_cell*/","}");
     job->parse.enum_enum='\0';
     break;
   }
     
-  case(FOREACH_NODE_INDEX):{
-    nprintf(arc, "/*FOREACH_NODE_INDEX*/","[n.index()]");
+  case(FORALL_NODE_INDEX):{
+    nprintf(arc, "/*FORALL_NODE_INDEX*/","[n.index()]");
     break;
   }
     
-  case(FOREACH_CELL_INDEX):{
+  case(FORALL_CELL_INDEX):{
     nprintf(arc, NULL, "[c.index()]");
     break;
   }
     
-  case(FOREACH):{
+  case(FORALL):{
     int tokenid;
     char *iterator=NULL;
     if (n->next->tokenid==IDENTIFIER){
@@ -361,12 +361,12 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     }
     case (MATERIAL): break;
     
-    default: error(!0,0,"[arcaneHookSwitchToken] Could not distinguish FOREACH!");
+    default: error(!0,0,"[arcaneHookSwitchToken] Could not distinguish FORALL!");
     }
     // Attention au cas où on a un @ au lieu d'un statement
     if (n->next->next->tokenid == AT)
       nprintf(arc, "/* Found AT */", "knAt");
-    // On skip le 'nabla_item' qui nous a renseigné sur le type de foreach
+    // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
     *n=*n->next->next;
     break;
   }
@@ -402,17 +402,17 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case (BOUNDARY_CELL):{
-    if (foreach=='f' && support=='c') nprintf(arc, NULL, "f->boundaryCell()");
-    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "face->boundaryCell()");
-    if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->boundaryCell()");
+    if (forall=='f' && support=='c') nprintf(arc, NULL, "f->boundaryCell()");
+    if (forall=='\0' && support=='c') nprintf(arc, NULL, "face->boundaryCell()");
+    if (forall=='\0' && support=='f') nprintf(arc, NULL, "face->boundaryCell()");
    break;
   }
     
   case (BACKCELL):{
-    if (foreach=='f' && support=='c') nprintf(arc, NULL, "f->backCell()");
-    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "face->backCell()");
-    if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->backCell()");
-    if (foreach=='f' && support=='n') nprintf(arc, NULL, "f->backCell()");
+    if (forall=='f' && support=='c') nprintf(arc, NULL, "f->backCell()");
+    if (forall=='\0' && support=='c') nprintf(arc, NULL, "face->backCell()");
+    if (forall=='\0' && support=='f') nprintf(arc, NULL, "face->backCell()");
+    if (forall=='f' && support=='n') nprintf(arc, NULL, "f->backCell()");
     break;
   }
     
@@ -422,9 +422,9 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case (FRONTCELL):{
-    if (foreach=='f' && support=='c') nprintf(arc, NULL, "f->frontCell()");
-    if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->frontCell()");
-    if (foreach=='f' && support=='n') nprintf(arc, NULL, "f->frontCell()");
+    if (forall=='f' && support=='c') nprintf(arc, NULL, "f->frontCell()");
+    if (forall=='\0' && support=='f') nprintf(arc, NULL, "face->frontCell()");
+    if (forall=='f' && support=='n') nprintf(arc, NULL, "f->frontCell()");
     break;
   }
     
@@ -435,22 +435,22 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case (NBCELL):{
-    if (foreach=='c'  && support=='n') nprintf(arc, NULL, "node->nbCell()");
-    if (foreach=='f'  && support=='c') nprintf(arc, NULL, "f->nbCell()");
-    if (foreach=='f'  && support=='n') nprintf(arc, NULL, "f->nbCell()");
-    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "face->nbCell()");
-    if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->nbCell()");
-    if (foreach=='\0' && support=='n') nprintf(arc, NULL, "node->nbCell()");
+    if (forall=='c'  && support=='n') nprintf(arc, NULL, "node->nbCell()");
+    if (forall=='f'  && support=='c') nprintf(arc, NULL, "f->nbCell()");
+    if (forall=='f'  && support=='n') nprintf(arc, NULL, "f->nbCell()");
+    if (forall=='\0' && support=='c') nprintf(arc, NULL, "face->nbCell()");
+    if (forall=='\0' && support=='f') nprintf(arc, NULL, "face->nbCell()");
+    if (forall=='\0' && support=='n') nprintf(arc, NULL, "node->nbCell()");
     break;
   }
     
   case (NBNODE):{
-    if (support=='c' && foreach=='\0') nprintf(arc, NULL, "cell->nbNode()");
-    if (support=='c' && foreach=='f') nprintf(arc, NULL, "cell->nbNode()");
-    if (support=='c' && foreach=='n') nprintf(arc, NULL, "cell->nbNode()");
-    if (support=='n' && foreach=='c') nprintf(arc, NULL, "c->nbNode()");
-    // ENUMERATE_NODES, foreach face mais qd même un nbNode, c'est pe un backCell->nbNode()?
-    if (support=='n' && foreach=='f') nprintf(arc, NULL, "nbNode");
+    if (support=='c' && forall=='\0') nprintf(arc, NULL, "cell->nbNode()");
+    if (support=='c' && forall=='f') nprintf(arc, NULL, "cell->nbNode()");
+    if (support=='c' && forall=='n') nprintf(arc, NULL, "cell->nbNode()");
+    if (support=='n' && forall=='c') nprintf(arc, NULL, "c->nbNode()");
+    // ENUMERATE_NODES, forall face mais qd même un nbNode, c'est pe un backCell->nbNode()?
+    if (support=='n' && forall=='f') nprintf(arc, NULL, "nbNode");
     if (support=='f') nprintf(arc, NULL, "face->nbNode()");
     break;
   }
@@ -486,23 +486,23 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
-    if (foreach=='\0' && support=='c') nprintf(arc, NULL, "(*cell)->uniqueId().asInteger()");
-    if (foreach=='\0' && support=='n') nprintf(arc, NULL, "node->uniqueId().asInteger()");
-    if (foreach=='\0' && support=='f') nprintf(arc, NULL, "face->uniqueId().asInteger()");
-    if (foreach=='\0' && support=='p') nprintf(arc, NULL, "particle->uniqueId().asInteger()");
-    if (foreach=='p' && support=='c') nprintf(arc, NULL, "cell->uniqueId().asInteger()");
-    if (foreach=='c' && support=='c') nprintf(arc, NULL, "cell->uniqueId().asInteger()");
-    if (foreach=='c' && support=='n') nprintf(arc, NULL, "c->uniqueId().asInteger()");
-    if (foreach=='c' && support=='f') nprintf(arc, NULL, "c->uniqueId().asInteger()");
-    if (foreach=='c' && support=='p') nprintf(arc, NULL, "c->uniqueId().asInteger()");
-    if (foreach=='n' && support=='c') nprintf(arc, NULL, "n->uniqueId().asInteger()");
-    if (foreach=='n' && support=='n') nprintf(arc, NULL, "n->uniqueId().asInteger()");
-    if (foreach=='n' && support=='f') nprintf(arc, NULL, "n->uniqueId().asInteger()");
-    if (foreach=='n' && support=='p') nprintf(arc, NULL, "n->uniqueId().asInteger()");
-    if (foreach=='f' && support=='c') nprintf(arc, NULL, "f->uniqueId().asInteger()");
-    if (foreach=='f' && support=='n') nprintf(arc, NULL, "f->uniqueId().asInteger()");
-    if (foreach=='f' && support=='f') nprintf(arc, NULL, "f->uniqueId().asInteger()");
-    if (foreach=='f' && support=='p') nprintf(arc, NULL, "f->uniqueId().asInteger()");
+    if (forall=='\0' && support=='c') nprintf(arc, NULL, "(*cell)->uniqueId().asInteger()");
+    if (forall=='\0' && support=='n') nprintf(arc, NULL, "node->uniqueId().asInteger()");
+    if (forall=='\0' && support=='f') nprintf(arc, NULL, "face->uniqueId().asInteger()");
+    if (forall=='\0' && support=='p') nprintf(arc, NULL, "particle->uniqueId().asInteger()");
+    if (forall=='p' && support=='c') nprintf(arc, NULL, "cell->uniqueId().asInteger()");
+    if (forall=='c' && support=='c') nprintf(arc, NULL, "cell->uniqueId().asInteger()");
+    if (forall=='c' && support=='n') nprintf(arc, NULL, "c->uniqueId().asInteger()");
+    if (forall=='c' && support=='f') nprintf(arc, NULL, "c->uniqueId().asInteger()");
+    if (forall=='c' && support=='p') nprintf(arc, NULL, "c->uniqueId().asInteger()");
+    if (forall=='n' && support=='c') nprintf(arc, NULL, "n->uniqueId().asInteger()");
+    if (forall=='n' && support=='n') nprintf(arc, NULL, "n->uniqueId().asInteger()");
+    if (forall=='n' && support=='f') nprintf(arc, NULL, "n->uniqueId().asInteger()");
+    if (forall=='n' && support=='p') nprintf(arc, NULL, "n->uniqueId().asInteger()");
+    if (forall=='f' && support=='c') nprintf(arc, NULL, "f->uniqueId().asInteger()");
+    if (forall=='f' && support=='n') nprintf(arc, NULL, "f->uniqueId().asInteger()");
+    if (forall=='f' && support=='f') nprintf(arc, NULL, "f->uniqueId().asInteger()");
+    if (forall=='f' && support=='p') nprintf(arc, NULL, "f->uniqueId().asInteger()");
     nprintf(arc, "/*uid*/", NULL);
     break;
   }

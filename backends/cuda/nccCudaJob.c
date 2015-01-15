@@ -136,7 +136,7 @@ char* cudaHookDumpEnumerate(nablaJob *job){
 // ****************************************************************************
 // * Filtrage du GATHER
 // * Une passe devrait être faite à priori afin de déterminer les contextes
-// * d'utilisation: au sein d'un foreach, postfixed ou pas, etc.
+// * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
 static char* cudaGather(nablaJob *job){
@@ -165,7 +165,7 @@ static char* cudaGather(nablaJob *job){
   // S'il y en a pas, on a rien d'autre à faire
   if (nbToGather==0) return "";
 
-  // On filtre suivant s'il y a des foreach
+  // On filtre suivant s'il y a des forall
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
     //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather on %s for variable %s_%s", job->item, var->item, var->name);
     //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather enum_enum=%c", job->parse.enum_enum);
@@ -295,11 +295,11 @@ char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
 
 
 /*****************************************************************************
- * FOREACH token switch
+ * FORALL token switch
  *****************************************************************************/
-static void cudaHookSwitchForeach(astNode *n, nablaJob *job){
+static void cudaHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
-  if (n->tokenid != FOREACH) return;
+  if (n->tokenid != FORALL) return;
   // Now we're allowed to work
   switch(n->next->children->tokenid){
   case(CELL):{
@@ -324,7 +324,7 @@ static void cudaHookSwitchForeach(astNode *n, nablaJob *job){
   // Attention au cas où on a un @ au lieu d'un statement
   if (n->next->next->tokenid == AT)
     nprintf(job->entity->main, "/* Found AT */", NULL);
-  // On skip le 'nabla_item' qui nous a renseigné sur le type de foreach
+  // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
   *n=*n->next->next;
 }
 
@@ -339,7 +339,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/", n->token);
 
   //nprintf(nabla, "/*cudaHookSwitchToken*/", NULL);
-  cudaHookSwitchForeach(n,job);
+  cudaHookSwitchForall(n,job);
   
   //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%d",n->tokenid);
   //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%s",n->token);
@@ -419,14 +419,14 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
 
-  case(FOREACH_INI):{
-    nprintf(nabla, "/*FOREACH_INI*/","{\n\t\t\t");
+  case(FORALL_INI):{
+    nprintf(nabla, "/*FORALL_INI*/","{\n\t\t\t");
     nprintf(nabla, "/*cudaGather*/", "%s",cudaGather(job));
     break;
   }
-  case(FOREACH_END):{
+  case(FORALL_END):{
     nprintf(nabla, "/*cudaScatter*/", "%s",cudaScatter(job));
-    nprintf(nabla, "/*FOREACH_END*/","\n\t\t}\n\t");
+    nprintf(nabla, "/*FORALL_END*/","\n\t\t}\n\t");
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
     break;

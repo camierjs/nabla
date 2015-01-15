@@ -46,11 +46,11 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 
 // ****************************************************************************
-// * Foreach
+// * Forall
 // ****************************************************************************
-#define foreach rhsTailSandwich(&yyval,yyn,FOREACH_INI,FOREACH_END,yyvsp);
-#define foreachVariadic(lhs, ...)                                        \
-  tailSandwichVariadic(FOREACH_INI,FOREACH_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
+#define forall rhsTailSandwich(&yyval,yyn,FORALL_INI,FORALL_END,yyvsp);
+#define forallVariadic(lhs, ...)                                        \
+  tailSandwichVariadic(FORALL_INI,FORALL_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
 
 // ****************************************************************************

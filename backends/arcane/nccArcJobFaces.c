@@ -28,18 +28,18 @@ char *faceJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'c') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[faceJobCellVar] scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+  dbg("\n\t\t[faceJobCellVar] scalar=%d, resolve=%d, forall_none=%d,\
+ forall_node=%d, forall_face=%d, forall_cell=%d",
+      scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
 
-  if (scalar && foreach_none && !resolve) return "[face->cell";
-  if (scalar && foreach_none &&  resolve) return "[face->cell]";
-  if (scalar && !foreach_none) return "[c";
+  if (scalar && forall_none && !resolve) return "[face->cell";
+  if (scalar && forall_none &&  resolve) return "[face->cell]";
+  if (scalar && !forall_none) return "[c";
   if (!scalar) return "[cell][node->cell";
 
   error(!0,0,"Could not switch in faceJobCellVar!");
@@ -55,24 +55,24 @@ char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'n') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[faceJobNodeVar] scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+  dbg("\n\t\t[faceJobNodeVar] scalar=%d, resolve=%d, forall_none=%d,\
+ forall_node=%d, forall_face=%d, forall_cell=%d",
+      scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   
-  if (resolve && foreach_cell) return "/*fn:rc*/[c]";
-  if (resolve && foreach_node) return "/*fn:rn*/[n]";
-  if (resolve && foreach_face) return "/*fn:rf*/[f]";
-  //if (resolve && foreach_none) return "/*fn:r0*/";
+  if (resolve && forall_cell) return "/*fn:rc*/[c]";
+  if (resolve && forall_node) return "/*fn:rn*/[n]";
+  if (resolve && forall_face) return "/*fn:rf*/[f]";
+  //if (resolve && forall_none) return "/*fn:r0*/";
     
-  //if (!resolve && foreach_cell) return "/*fn:!rc*/";
-  //if (!resolve && foreach_node) return "/*fn:!rn*/";
-  //if (!resolve && foreach_face) return "/*fn:!rf*/";
-  if (!resolve && foreach_none) return "/*fn:!r0*/[face->node";
+  //if (!resolve && forall_cell) return "/*fn:!rc*/";
+  //if (!resolve && forall_node) return "/*fn:!rn*/";
+  //if (!resolve && forall_face) return "/*fn:!rf*/";
+  if (!resolve && forall_none) return "/*fn:!r0*/[face->node";
 
   nabla_error("Could not switch in faceJobNodeVar!");
   return NULL;
@@ -87,24 +87,24 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (var->item[0] != 'f') return NULL;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
   
-  dbg("\n\t\t[faceJobFaceVar] var name: %s scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",var->name,
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+  dbg("\n\t\t[faceJobFaceVar] var name: %s scalar=%d, resolve=%d, forall_none=%d,\
+ forall_node=%d, forall_face=%d, forall_cell=%d",var->name,
+      scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   
-  //if (resolve && foreach_cell) return "/*ff:rc*/";
-  //if (resolve && foreach_node) return "/*ff:rn*/";
-  //if (resolve && foreach_face) return "/*ff:rf*/";
-  if (resolve && foreach_none) return "/*ff:r0*/[face]";
+  //if (resolve && forall_cell) return "/*ff:rc*/";
+  //if (resolve && forall_node) return "/*ff:rn*/";
+  //if (resolve && forall_face) return "/*ff:rf*/";
+  if (resolve && forall_none) return "/*ff:r0*/[face]";
   
-  //if (!resolve && foreach_cell) return "/*ff:!rc*/";
-  //if (!resolve && foreach_node) return "/*ff:!rn*/";
-  //if (!resolve && foreach_face) return "/*ff:!rf*/";
-  if (!resolve && foreach_none) return "/*ff:!r0*/[face]";
+  //if (!resolve && forall_cell) return "/*ff:!rc*/";
+  //if (!resolve && forall_node) return "/*ff:!rn*/";
+  //if (!resolve && forall_face) return "/*ff:!rf*/";
+  if (!resolve && forall_none) return "/*ff:!r0*/[face]";
   
   error(!0,0,"[faceJobFaceVar] %s: Could not switch in faceJobFaceVar!", job->name);
   return NULL;
@@ -120,13 +120,13 @@ char *faceJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVa
   const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
   const int scalar = var->dim==0;
   const int resolve = job->parse.isPostfixed!=2;
-  const int foreach_none = job->parse.enum_enum=='\0';
-  const int foreach_cell = job->parse.enum_enum=='c';
-  const int foreach_face = job->parse.enum_enum=='f';
-  const int foreach_node = job->parse.enum_enum=='n';
-  dbg("\n\t\t[faceJobGlobalVar] scalar=%d, resolve=%d, foreach_none=%d,\
- foreach_node=%d, foreach_face=%d, foreach_cell=%d",
-      scalar,resolve,foreach_none,foreach_node,foreach_face,foreach_cell);
+  const int forall_none = job->parse.enum_enum=='\0';
+  const int forall_cell = job->parse.enum_enum=='c';
+  const int forall_face = job->parse.enum_enum=='f';
+  const int forall_node = job->parse.enum_enum=='n';
+  dbg("\n\t\t[faceJobGlobalVar] scalar=%d, resolve=%d, forall_none=%d,\
+ forall_node=%d, forall_face=%d, forall_cell=%d",
+      scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   if (left_of_assignment_operator) return "";
   return "()";
 }
