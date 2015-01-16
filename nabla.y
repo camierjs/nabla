@@ -60,8 +60,8 @@ bool adrs_it=false;
 %token SUPERSCRIPT_DIGIT_TWO SUPERSCRIPT_DIGIT_THREE
 
  // SPECIFIC NABLA GRAMMAR
-%token COMPOUND_JOB_INI
-%token COMPOUND_JOB_END
+%token COMPOUND_JOB_INI COMPOUND_REDUCTION_INI
+%token COMPOUND_JOB_END COMPOUND_REDUCTION_END
 %token COORDS OPTIONS
 %token AT DIESE
 %token IN OUT INOUT
@@ -744,6 +744,13 @@ nabla_job_definition
 ;
 
 
+////////////////////////
+// ∇ single reduction //
+////////////////////////
+nabla_reduction:
+FORALL nabla_items IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;};
+
+
 /////////////////
 // ∇ libraries //
 /////////////////
@@ -778,6 +785,7 @@ nabla_grammar
 | nabla_environments_definition {rhs;}
 | function_definition	        {rhs;}
 | nabla_job_definition          {rhs;}
+| nabla_reduction               {rhs;}
 ;
 
 

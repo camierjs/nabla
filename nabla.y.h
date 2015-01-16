@@ -59,6 +59,9 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 #define compound_job(lhs,...)                                           \
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
+#define compound_reduction(lhs,...)                                     \
+  tailSandwich(COMPOUND_REDUCTION_INI,COMPOUND_REDUCTION_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
+
 #define compound_job_without__NB_ARGS__(lhs,...)                        \
   assert(NB_ARGS(__VA_ARGS__)==yyr2[yyn]);                              \
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,yyr2[yyn],__VA_ARGS__)

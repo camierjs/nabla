@@ -76,6 +76,10 @@ bool isAnArcaneService(nablaMain *middlend){
 char *nArcanePragmaGccIvdep(void){ return ""; }
 char *nArcanePragmaGccAlign(void){ return ""; }
 
+static void arcaneHookReduction(struct nablaMainStruct *middlend, astNode *n){
+#warning arcaneHookReduction
+}
+
 /*****************************************************************************
  * ncc
  *****************************************************************************/
@@ -117,6 +121,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneHookFunctionName,
     arcaneHookFunction,
     arcaneJob,
+    arcaneHookReduction,
     arcaneIteration,
     arcaneExit,
     arcaneTime,

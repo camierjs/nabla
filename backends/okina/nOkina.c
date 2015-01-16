@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
 #include "nabla.h"
+#include "nabla.tab.h"
 #include "frontend/nablaAst.h"
 
 
@@ -290,6 +291,78 @@ static void okinaReturnFromArgument(nablaMain *nabla, nablaJob *job){
 }
 
 
+// ****************************************************************************
+// * okinaHookReduction
+// ****************************************************************************
+static void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+  const astNode *item_node = n->children->next->children;
+  const astNode *global_var_node = n->children->next->next;
+  const astNode *reduction_operation_node = global_var_node->next;
+  const astNode *item_var_node = reduction_operation_node->next;
+  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
+  char *global_var_name = global_var_node->token;
+  char *item_var_name = item_var_node->token;
+  // Préparation du nom du job
+  char job_name[NABLA_MAX_FILE_NAME];
+  job_name[0]=0;
+  strcat(job_name,"okinaReduction_");
+  strcat(job_name,global_var_name);
+  // Rajout du job de reduction
+  nablaJob *redjob = nablaJobNew(nabla->entity);
+  redjob->is_an_entry_point=true;
+  redjob->is_a_function=false;
+  redjob->scope  = strdup("NoGroup");
+  redjob->region = strdup("NoRegion");
+  redjob->item   = strdup(item_node->token);
+  redjob->rtntp  = strdup("void");
+  redjob->name   = strdup(job_name);
+  redjob->name_utf8 = strdup(job_name);
+  redjob->xyz    = strdup("NoXYZ");
+  redjob->drctn  = strdup("NoDirection");
+  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
+  dbg("\n\t[okinaHookReduction] @ %s",at_single_cst_node->token);
+  sprintf(&redjob->at[0],at_single_cst_node->token);
+  redjob->whenx  = 1;
+  redjob->whens[0] = atof(at_single_cst_node->token);
+  nablaJobAdd(nabla->entity, redjob);
+  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
+  // Génération de code associé à ce job de réduction
+  nprintf(nabla, NULL, "\n\
+// ******************************************************************************\n\
+// * Kernel de reyduction de la variable '%s' vers la globale '%s'\n\
+// ******************************************************************************\n\
+void %s(void){ // @ %s\n\
+\tconst double reduction_init=%e;\n\
+\tconst int threads = omp_get_max_threads();\n\
+\tReal %s_per_thread[threads];\n\
+\tdbgFuncIn();\n\
+\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
+\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
+\t\tint tid = omp_get_thread_num();\n\
+\t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
+\t}\n\
+\tfor (int i=0; i<threads; i+=1){\n\
+\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<reduction_init)?\n\
+\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):reduction_init;\n\
+\t}\n\
+}\n\n",   reduction_init,
+          item_var_name,global_var_name,
+          job_name,
+          at_single_cst_node->token,
+          global_var_name,
+          global_var_name,
+          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          global_var_name,
+          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
+          item_var_name,
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          global_var_name,
+          global_var_name,global_var_name,global_var_name
+          );  
+}
+
+
 /*****************************************************************************
  * nccOkina
  *****************************************************************************/
@@ -412,6 +485,7 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
     okinaHookFunctionName,
     okinaHookFunction,
     okinaHookJob,
+    okinaHookReduction,
     okinaIteration,
     okinaExit,
     okinaTime,

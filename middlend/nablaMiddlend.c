@@ -165,6 +165,31 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
 
+  //////////////////////////////
+  // On a une reduction Nabla //
+  //////////////////////////////
+  if (n->ruleid == rulenameToId("nabla_reduction")){
+    const astNode *global_node = n->children->next->next;
+    const astNode *reduction_operation_node = global_node->next;
+    const astNode *item_node = reduction_operation_node->next;
+    char *global_var_name = global_node->token;
+    char *item_var_name = item_node->token;
+    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
+    dbg("\n\t[nablaMiddlendParseAndHook] Checking for global variable '%s'", global_var_name);
+    const nablaVariable *global_var = nablaVariableFind(nabla->variables, global_var_name);
+    const nablaVariable *item_var = nablaVariableFind(nabla->variables, item_var_name);
+    dbg("\n\t[nablaMiddlendParseAndHook] global_var->item '%s'", global_var->item);
+    // global_var must be 'global'
+    assert(global_var->item[0]=='g');
+    // item_var must not be 'global'
+    assert(item_var->item[0]!='g');
+    // Reduction operation is for now MIN
+    assert(reduction_operation_node->tokenid==MIN_ASSIGN);
+    // Having done these sanity checks, let's pass the rest of the generation to the backends
+    nabla->hook->reduction(nabla,n);
+    dbg("\n\t[nablaMiddlendParseAndHook] done");
+  }
+
   //////////////////
   // DFS standard //
   //////////////////

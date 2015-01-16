@@ -124,6 +124,9 @@ cells{
   Real sound_speed;
   // Boundary Conditions Flags //////////////////////////////////////////////
   Integer elemBC;          // symmetry/free-surface flags for each elem face
+  // Reductions ////////////////////////////
+  Real δt_cell_hydro;
+  Real δt_cell_courant;
 };
 
 
@@ -916,8 +919,11 @@ cells void updateVolumesForElems(void)
 // * If all element volumes remain the same, there is no Courant constraint
 // * applied during the subsequent δt calculation.
 // ****************************************************************************
-cells Real calcCourantConstraintForElems(Real dtcourant)
-  in (cell sound_speed, cell arealg, cell vdov) {
+cells void calcCourantConstraintForElems(void)
+  in (cell sound_speed, cell arealg, cell vdov)
+  out (cell δt_cell_courant) @ 12.1{
+  const Real arg_max_courant=1.0e+20;
+  δt_cell_courant=arg_max_courant;
   foreach material{
     const Real qqc2 = 64.0 * option_qqc * option_qqc ;
     const Real δf = sound_speed[m] * sound_speed[m];
@@ -926,11 +932,11 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
     const Real δfp = √(δfpp);
     const Real aδfp = arealg[m]/δfp;
     //ok printf("\n[#%d] vdov=%.21e, arealg=%.21e, sound_speed=%.21e, aδfp=%.21e",uid,vdov,arealg,sound_speed,aδfp);
-    dtcourant=(vdov!=0.0)?min(dtcourant,aδfp);
+    δt_cell_courant=(vdov!=0.0)?min(arg_max_courant,aδfp);
     //debug()<<"dtcourant="<<dtcourant;
     //ok printf("\n[#%d] dtcourant=%.21e",uid,dtcourant);
   }
-  return dtcourant;
+  //return dtcourant;
 } 
 
 
@@ -941,20 +947,23 @@ cells Real calcCourantConstraintForElems(Real dtcourant)
 // * δt_hydro for the element is some maximum allowable element volume change
 // * (prescribed) divided by dV/V in the element.
 // ****************************************************************************
-cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
+cells void calcHydroConstraintForElems(void)
+  in (cell vdov) out (cell δt_cell_hydro) @ 12.2{
+  const Real arg_max_hydro=1.0e+20;
+  δt_cell_hydro=arg_max_hydro;
   foreach material{
     const Real δdv = rabs(vdov[m]);
     const Real δdve = δdv+1.e-20;
     const Real δdvov = option_dvovmax/δdve;
-    const Real δhdr = min(dthydro,δdvov);
+    const Real δhdr = min(arg_max_hydro,δdvov);
     //debug()<<"vdov="<<vdov<<" dtdvov="<<dtdvov<<" dvovmax="<<option_dvovmax;
     //printf("\n[#%d] vdov=%.21e, dtdvov=%.21e, dvovmax=%.21e,",uid,vdov,dtdvov,option_dvovmax);
-    dthydro=(vdov!=0.0)?δhdr;
-    //debug()<<"dthydro="<<dthydro;
+    δt_cell_hydro=(vdov!=0.0)?δhdr;
+    //info()<<"δt_cell_hydro="<<δt_cell_hydro;
     //printf("\n[#%d] δdvov=%.21e, δhdr=%.21e, dthydro=%.21e",uid,δdvov,δhdr,dthydro);
-    //printf("\n[#%d] dthydro=%.21e",uid,dthydro);
+    printf("\n[#%d] δt_cell_hydro=%.21e",uid,δt_cell_hydro);
   }
-  return dthydro;
+  //return dthydro;
 }
 
 
@@ -965,19 +974,25 @@ cells Real calcHydroConstraintForElems(Real dthydro) in (cell vdov){
 // * is the minimum over all element values.
 // * The constraints are applied during the computation of δt for the next time step.
 // ****************************************************************************
-void calcCourantConstraints(void) @ 12.1{
+/*void calcCourantConstraints(void) @ 12.1{
   const Real crnt=calcCourantConstraintForElems(1.0e+20);
   δt_courant <?= (crnt);  // MIN_ASSIGN
-}
-void calcHydroTimeConstraints(void) @ 12.2{
+  }*/
+
+// Cells min reduction
+∀ cells δt_courant <?= δt_cell_courant @ 12.11;
+∀ cells δt_hydro   <?= δt_cell_hydro   @ 12.22;
+
+/*void calcHydroTimeConstraints(void) @ 12.2{
   const Real hdr=calcHydroConstraintForElems(1.0e+20);
   δt_hydro <?= (hdr); // MIN_ASSIGN
-}
+  }*/
+
 void dumpTimeConstraintsForElems(void) @ 12.3{
-  //debug()<<"\tdomain.dtcourant()="<<δt_courant;
-  //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
-  printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
-  printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
+  debug()<<"\tdomain.dtcourant()="<<δt_courant;
+  debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
+  //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
+  //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
 
 

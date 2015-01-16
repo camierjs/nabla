@@ -240,6 +240,10 @@ static void cudaTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt
   nprintf(nabla, "/*tt2o cuda*/", "%s", opt->name);
 }
 
+static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+#warning cudaHookReduction
+}
+
 
 /*****************************************************************************
  * nccCuda
@@ -277,6 +281,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     cudaHookFunctionName,
     cudaHookFunction,
     cudaHookJob,
+    cudaHookReduction,
     cudaIteration,
     cudaExit,
     cudaTime,

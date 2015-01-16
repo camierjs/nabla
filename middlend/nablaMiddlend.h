@@ -166,6 +166,8 @@ typedef struct nablaBackendHooksStruct{
   void (*function)(struct nablaMainStruct *, astNode *);
   // Génération d'un kernel associé à un support
   void (*job)(struct nablaMainStruct *, astNode *);
+  // Génération d'un kernel associé à une reduction
+  void (*reduction)(struct nablaMainStruct *, astNode *);
   // Hooks additionnels pour spécifier de façon propre au backend:
   // le numéro de l'itération, l'appel pour quitter, récupérer le temps de la simulation, etc.
   void (*iteration)(struct nablaMainStruct *);
