@@ -348,7 +348,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     
   case (MIN_ASSIGN):{
     nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/");
-   job->min_assignment=true;
+    //job->min_assignment=true;
     break;
   }
     
@@ -555,7 +555,8 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
-    #warning return reduce
+    error_at_line(-1,0,__FILE__,__LINE__,"No return statement in jobs are allowed!");
+//#warning return reduce
     nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");
     //nprintf(nabla, NULL, "};\n\t return ");
     job->parse.got_a_return=true;

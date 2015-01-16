@@ -30,7 +30,7 @@ int main(void){\n\
 \t__align__(8)int iteration=1;\n\
 \tfloat gputime=0.0;\n\
 \tstruct timeval st, et;\n\
-#warning Reduction for cells\n\
+//#warning Reduction for cells\n\
 \tconst int reduced_size=(NABLA_NB_CELLS%%CUDA_NB_THREADS_PER_BLOCK)==0?\
 (NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK):\
 (1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK);\n\
@@ -322,7 +322,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
       nprintf(n, NULL,"\
 \n\t\t__align__(8) double new_delta_t=0.0;\
 \n\t\t__align__(8) double reduced;\
-\n\t\tint courant_or_hydro=0;\
+\n#warning Should get rid of courant_or_hydro\
+\n\t\tint courant_or_hydro=0;        \
 \n\t\t//cudaFuncSetCacheConfig(...); \
 \n\t\tgettimeofday(&st, NULL);\
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
@@ -354,7 +355,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-      cudaAddExtraConnectivitiesArguments(n,&numParams);
+      if (!entry_points[i].reduction)
+        cudaAddExtraConnectivitiesArguments(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[nccCudaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
@@ -366,7 +368,7 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
     nprintf(n, NULL, ");");
     cudaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
 
-    if (entry_points[i].min_assignment==true){
+    if (entry_points[i].reduction==true){
       nprintf(n, NULL,"\
 \n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(host_reduce_results, global_device_shared_reduce_results,reduced_size*sizeof(double), cudaMemcpyDeviceToHost)); \

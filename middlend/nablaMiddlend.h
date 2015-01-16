@@ -91,8 +91,8 @@ typedef struct nablaJobStruct{
   nablaVariable *in_out_variables;
   nablaVariable *variables_to_gather_scatter;
   char forall_item;
-  // Bool pour savoir si le job en cours va faire une reduction (utile qu'en CUDA)
-  bool min_assignment;
+  // Bool pour savoir si le job est un job de réduction
+  bool reduction;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;

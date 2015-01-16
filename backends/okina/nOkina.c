@@ -329,7 +329,7 @@ static void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
-// * Kernel de reyduction de la variable '%s' vers la globale '%s'\n\
+// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 void %s(void){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
@@ -345,10 +345,10 @@ void %s(void){ // @ %s\n\
 \t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<reduction_init)?\n\
 \t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):reduction_init;\n\
 \t}\n\
-}\n\n",   reduction_init,
-          item_var_name,global_var_name,
+}\n\n",   item_var_name,global_var_name,
           job_name,
           at_single_cst_node->token,
+          reduction_init,
           global_var_name,
           global_var_name,
           (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",

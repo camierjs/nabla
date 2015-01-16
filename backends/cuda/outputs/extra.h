@@ -69,7 +69,7 @@ __device__ double reduce_min_kernel(double *results, const Real what){
     //printf("\nBloc #%%d returned %%.21e", bid, results[bid]);
     __syncthreads();
   }
-#warning Fake return for now
+//#warning Fake return for now
   // There is still a reduction to do
   return results[bid];
 }

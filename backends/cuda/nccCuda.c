@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
 #include "nabla.h"
+#include "nabla.tab.h"
 
 /*****************************************************************************
  * Cuda libraries
@@ -241,7 +242,58 @@ static void cudaTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt
 }
 
 static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
-#warning cudaHookReduction
+  int fakeNumParams=0;
+  const astNode *item_node = n->children->next->children;
+  const astNode *global_var_node = n->children->next->next;
+  const astNode *reduction_operation_node = global_var_node->next;
+  astNode *item_var_node = reduction_operation_node->next;
+  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
+  char *global_var_name = global_var_node->token;
+  char *item_var_name = item_var_node->token;
+  // Préparation du nom du job
+  char job_name[NABLA_MAX_FILE_NAME];
+  job_name[0]=0;
+  strcat(job_name,"cudaReduction_");
+  strcat(job_name,global_var_name);
+  // Rajout du job de reduction
+  nablaJob *redjob = nablaJobNew(nabla->entity);
+  redjob->is_an_entry_point=true;
+  redjob->is_a_function=false;
+  redjob->scope  = strdup("NoGroup");
+  redjob->region = strdup("NoRegion");
+  redjob->item   = strdup(item_node->token);
+  redjob->rtntp  = strdup("void");
+  redjob->name   = strdup(job_name);
+  redjob->name_utf8 = strdup(job_name);
+  redjob->xyz    = strdup("NoXYZ");
+  redjob->drctn  = strdup("NoDirection");
+  //redjob->nblParamsNode=item_var_node;
+  //nablaVariable *item_var=nablaVariableFind(nabla,item_var_name);
+  //assert(item_var!=NULL);
+  redjob->called_variables=nablaVariableNew(nabla);
+  redjob->called_variables->item=strdup("cell");
+  redjob->called_variables->name=item_var_name;
+  // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
+  redjob->reduction = true;
+  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
+  dbg("\n\t[cudaHookReduction] @ %s",at_single_cst_node->token);
+  sprintf(&redjob->at[0],at_single_cst_node->token);
+  redjob->whenx  = 1;
+  redjob->whens[0] = atof(at_single_cst_node->token);
+  nablaJobAdd(nabla->entity, redjob);
+  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
+  // Génération de code associé à ce job de réduction
+  nprintf(nabla, NULL, "\n\
+// ******************************************************************************\n\
+// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
+// ******************************************************************************\n\
+__global__ void %s(", item_var_name, global_var_name, job_name);
+  cudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
+nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
+\t//const double reduction_init=%e;\n\
+\tCUDA_INI_CELL_THREAD(tcid);\n\
+\t*global_%s=ReduceMinToDouble(cell_%s[tcid]);\n\
+}\n\n", item_var_name,at_single_cst_node->token, reduction_init,global_var_name,item_var_name);
 }
 
 

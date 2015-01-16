@@ -288,7 +288,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
     
     if (n->tokenid==MIN_ASSIGN){
-      fct->min_assignment=true;
+      //fct->min_assignment=true;
       fprintf(nabla->entity->src, "/*MIN_ASSIGN*/=ReduceMinToDouble");
       break;
     }

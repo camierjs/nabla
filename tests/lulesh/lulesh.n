@@ -58,7 +58,7 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 4;
+  Integer option_max_iterations  = 1024;
 };
 
 
@@ -961,7 +961,7 @@ cells void calcHydroConstraintForElems(void)
     δt_cell_hydro=(vdov!=0.0)?δhdr;
     //info()<<"δt_cell_hydro="<<δt_cell_hydro;
     //printf("\n[#%d] δdvov=%.21e, δhdr=%.21e, dthydro=%.21e",uid,δdvov,δhdr,dthydro);
-    printf("\n[#%d] δt_cell_hydro=%.21e",uid,δt_cell_hydro);
+    //printf("\n[#%d] δt_cell_hydro=%.21e",uid,δt_cell_hydro);
   }
   //return dthydro;
 }
@@ -977,8 +977,8 @@ cells void calcHydroConstraintForElems(void)
 /*void calcCourantConstraints(void) @ 12.1{
   const Real crnt=calcCourantConstraintForElems(1.0e+20);
   δt_courant <?= (crnt);  // MIN_ASSIGN
-  }*/
-
+  }
+*/
 // Cells min reduction
 ∀ cells δt_courant <?= δt_cell_courant @ 12.11;
 ∀ cells δt_hydro   <?= δt_cell_hydro   @ 12.22;
@@ -989,10 +989,10 @@ cells void calcHydroConstraintForElems(void)
   }*/
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
-  debug()<<"\tdomain.dtcourant()="<<δt_courant;
-  debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
-  //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
-  //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
+  //debug()<<"\tdomain.dtcourant()="<<δt_courant;
+  //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
+  printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
+  printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
 
 
