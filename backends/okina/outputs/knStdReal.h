@@ -85,7 +85,7 @@ class __attribute__ ((aligned(8))) real {
   friend inline real min(const real &r, const real &s){ return ::fmin(r,s);}
   friend inline real max(const real &r, const real &s){ return ::fmax(r,s);}
   
-  friend inline real rcbrt(const real &a){
+  friend inline real cube_root(const real &a){
     return real(::cbrt(a));
   }
   friend inline real norm(real u){ return ::fabs(u);}

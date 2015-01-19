@@ -292,7 +292,7 @@ __global__ void %s(", item_var_name, global_var_name, job_name);
 nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(tcid);\n\
-\t*global_%s=ReduceMinToDouble(cell_%s[tcid]);\n\
+\t/**global_%s=*/ReduceMinToDouble((double)(cell_%s[tcid]));\n\
 }\n\n", item_var_name,at_single_cst_node->token, reduction_init,global_var_name,item_var_name);
 }
 

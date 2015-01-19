@@ -93,7 +93,7 @@ struct __attribute__ ((aligned(64))) real {
   friend inline real min(const real &r, const real &s){ return _mm512_min_pd(r,s);}
   friend inline real max(const real &r, const real &s){ return _mm512_max_pd(r,s);}
 
-  friend inline real rcbrt(const real &a){
+  friend inline real cube_root(const real &a){
     return real(::cbrt(a[0]),::cbrt(a[1]),::cbrt(a[2]),::cbrt(a[3]),::cbrt(a[4]),::cbrt(a[5]),::cbrt(a[6]),::cbrt(a[7]));
     //return _mm512_cbrt_pd(a);
   }

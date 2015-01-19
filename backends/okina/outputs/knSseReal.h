@@ -89,7 +89,7 @@ struct __attribute__ ((aligned(16))) real {
   friend inline real max(const real &r, const real &s){ return _mm_max_pd(r,s);}
 
   
-  friend inline real rcbrt(const real &a){
+  friend inline real cube_root(const real &a){
     return real(::cbrt(a[0]),::cbrt(a[1]));
   }
   

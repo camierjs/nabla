@@ -338,12 +338,14 @@ void %s(void){ // @ %s\n\
 \tdbgFuncIn();\n\
 \tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
 \tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
-\t\tint tid = omp_get_thread_num();\n\
+\t\tconst int tid = omp_get_thread_num();\n\
 \t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
 \t}\n\
+\tglobal_%s[0]=reduction_init;\n\
 \tfor (int i=0; i<threads; i+=1){\n\
-\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<reduction_init)?\n\
-\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):reduction_init;\n\
+\t\tconst Real real_global_%s=global_%s[0];\n\
+\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
+\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
 \t}\n\
 }\n\n",   item_var_name,global_var_name,
           job_name,
@@ -358,6 +360,8 @@ void %s(void){ // @ %s\n\
           item_var_name,
           (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
           global_var_name,
+          global_var_name,global_var_name,
+          global_var_name,global_var_name,global_var_name,
           global_var_name,global_var_name,global_var_name
           );  
 }

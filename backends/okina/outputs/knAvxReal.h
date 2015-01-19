@@ -89,7 +89,7 @@ struct __attribute__ ((aligned(32))) real {
   /* Round */
   //friend real round(const real &a)  { return _mm256_svml_round_pd(a); }
   
-  friend inline real rcbrt(const real &a){
+  friend inline real cube_root(const real &a){
     return real(::cbrt(a[0]),::cbrt(a[1]),::cbrt(a[2]),::cbrt(a[3]));
     //return _mm256_cbrt_pd(a);
   }

@@ -510,10 +510,10 @@ static void cudaGlobals(nablaMain *nabla){
 // ********************************************************\n\
 // * Globals, coté DEVICE\n\
 // ********************************************************\n\
-__builtin_align__(8) double *global_time;\n\
-__builtin_align__(8) double *global_deltat;\n\
+__builtin_align__(8) Real *global_time;\n\
+__builtin_align__(8) Real *global_deltat;\n\
 __builtin_align__(8) int *global_iteration;\n\
-__builtin_align__(8) double *global_device_shared_reduce_results;\n\
+__builtin_align__(8) Real *global_device_shared_reduce_results;\n\
 \n\
 \n\
 // ********************************************************\n\

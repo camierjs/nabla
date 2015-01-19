@@ -73,7 +73,7 @@ class __attribute__ ((aligned(8))) real3 {
   friend inline real dot3(real3 u, real3 v){
     return real(u.x*v.x+u.y*v.y+u.z*v.z);
   }
-  friend inline real norm(real3 u){ return real(rsqrt(dot3(u,u)));}
+  friend inline real norm(real3 u){ return real(square_root(dot3(u,u)));}
 
   friend inline real3 cross(real3 u, real3 v){
     return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));

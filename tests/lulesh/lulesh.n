@@ -28,9 +28,6 @@ with cartesian;
 // * Options
 // ****************************************************************************
 options{
-  Bool option_chaos              = false;
-  Real option_chaos_seed         = 1.1234567890123456789;
-  
   Real option_dtfixed            = -1.0e-7;  // fixed time increment
   Real option_δt_initial         = 1.0e-7;   // variable time increment
   Real option_δt_courant         = 1.0e+20;
@@ -49,7 +46,7 @@ options{
   Real option_u_cut              = 1.0e-7;   // node velocity cut-off value
   Real option_v_cut              = 1.0e-10;  // relative volume tolerance
   Real option_qlc_monoq          = 0.5;      // linear term coef for q
-  Real option_qqc_monoq          = 0.666666666666666666;  // quadratic term coef for q, should be 2.0/3.0 
+  Real option_qqc_monoq          = 0.666666666666666666; // quadratic term coef for q
   Real option_qqc                = 2.0;
   Real option_eosvmax            = 1.0e+9;
   Real option_eosvmin            = 1.0e-9;
@@ -58,7 +55,9 @@ options{
   Real option_dvovmax            = 0.1;      // maximum allowable volume change
   Real option_refdens            = 1.0;      // reference density
   Real option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Integer option_max_iterations  = 1024;
+  Bool option_chaos              = false;
+  Real option_chaos_seed         = 1.1234567890123456789;
+  Integer option_max_iterations  = 32768;
 };
 
 
@@ -66,13 +65,10 @@ options{
 // * Node Variables
 // ****************************************************************************
 nodes{
-  Real3 𝜕x;            // Velocity vector
-  Real3 𝜕𝜕x;           // Acceleration vector
+  Real3 𝜕x;           // Velocity vector
+  Real3 𝜕𝜕x;          // Acceleration vector
   Real3 nForce;       // Force vector
   Real nodalMass;     // Nodal mass
-  //Integer symmX;
-  //Integer symmY;
-  //Integer symmZ;
 };
 
 
@@ -148,7 +144,7 @@ global{
 // * ini
 // ****************************************************************************
 void ini(void) @ -10.0{
-  δt=0.0;
+  δt=(option_chaos)?option_δt_initial*option_chaos_seed:0.0;
   δt_hydro=option_δt_hydro;
   δt_courant=option_δt_courant;
 //  if (option_eosvmax==0.) fatal("ini", "option_eosvmax==0.");
@@ -273,9 +269,12 @@ void timeIncrement(void) @ 0.1 {
   const Real scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const Real scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = reduce(ReduceMin, scaled_δt);
+  //δt = (GlobalIteration>1)?1.0-07;
+  //δt = (GlobalIteration==2)?1.199999999999999892758e-07;
+  //δt = (GlobalIteration==3)?1.439999999999999924249e-07;
   //δt <?= (scaled_δt);
   //info()<<"ITERATION "<<GlobalIteration;
-  printf("\nITERATION %d",GlobalIteration);
+  printf("\nITERATION %d, δt=%.21e",GlobalIteration,δt);
   if (GlobalIteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//0]
   //printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);
@@ -295,7 +294,7 @@ void timeIncrement(void) @ 0.1 {
 ∀ cells void initStressTermsForElems(void)
   in (node coord, cell p, cell q)
   out (cell ε, cell cForce) @ 0.3 {
-  const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
+  const Real chaos = (((Real)0.0)+1.0)*option_chaos_seed;
   const Real sig = (option_chaos)?chaos:-p-q;
   Real3 fNormals,dj,x[8],B[8];
   //debug()<<"sig="<<sig;
@@ -348,8 +347,10 @@ cells void ΣElemStressesToNodeForces(void)
   const Real volume13=∛(τv);
   const Real θ = -hourg*0.01*sound_speed*elemMass/volume13;
   const Real determ = τv;
-  foreach node x[n] = coord;
-  foreach node xd[n] = 𝜕x;  
+  //const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
+  ∀ node x[n] = coord;
+  //∀ node xd[n] = (option_chaos)?chaos:𝜕x;  
+  ∀ node xd[n] = 𝜕x;  
   dvd[0]=𝜕Volume(x[1],x[2],x[3],x[4],x[5],x[7]);
   dvd[3]=𝜕Volume(x[0],x[1],x[2],x[7],x[4],x[6]);
   dvd[2]=𝜕Volume(x[3],x[0],x[1],x[6],x[7],x[5]);
@@ -359,14 +360,19 @@ cells void ΣElemStressesToNodeForces(void)
   dvd[6]=𝜕Volume(x[5],x[4],x[7],x[2],x[1],x[3]);
   dvd[7]=𝜕Volume(x[6],x[5],x[4],x[3],x[2],x[0]);
   cHourglassModes(0,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  //printf("\n[#%d] η[0]: %.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e",uid, η0[0],η1[0],η2[0],η3[0],η4[0],η5[0],η6[0],η7[0]);
   cHourglassModes(1,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  //rintf("\n[#%d] η[1]: %.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e",uid, η0[1],η1[1],η2[1],η3[1],η4[1],η5[1],η6[1],η7[1]);
   cHourglassModes(2,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  //printf("\n[#%d] η[2]: %.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e",uid, η0[2],η1[2],η2[2],η3[2],η4[2],η5[2],η6[2],η7[2]);
   cHourglassModes(3,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  //printf("\n[#%d] η[3]: %.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e,%.21e",uid, η0[3],η1[3],η2[3],η3[3],η4[3],η5[3],η6[3],η7[3]);
   //debug()<<"hourg="<<hourg<<", sound_speed="<<sound_speed<<", elemMass="<<elemMass;
+  //printf("\nθ[%d]=%.21e",uid,θ);
   calcElemFBHourglassForce(xd,η0,η1,η2,η3,η4,η5,η6,η7,θ,η);
   //foreach node debug()<<uid<<" "<<n<<" hgf="<<η[n];
-  //foreach node printf("\n[#%d] η[%d]=(%.21e,%.21e,%.21e)",uid,n,η[n].x,η[n].y,η[n].z);
-  foreach node cForce = η[n];
+  //∀ node printf("\n[#%d] η[%d]=(%.21e,%.21e,%.21e)",uid,n,η[n].x,η[n].y,η[n].z);
+  ∀ node cForce = η[n];
 //#warning cForce chaos
     //foreach node cForce += η[n];
   //foreach node cForce = (n+1.0)*1.1234567890123456789;
@@ -989,10 +995,10 @@ cells void calcHydroConstraintForElems(void)
   }*/
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
-  //debug()<<"\tdomain.dtcourant()="<<δt_courant;
-  //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
-  printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
-  printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
+  debug()<<"\tdomain.dtcourant()="<<δt_courant;
+  debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
+  //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
+  //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
 
 

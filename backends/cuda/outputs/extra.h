@@ -31,7 +31,7 @@ __shared__ double shared_array[CUDA_NB_THREADS_PER_BLOCK];
 // *****************************************************************************
 // * Reduce MIN Kernel
 // *****************************************************************************
-__device__ double reduce_min_kernel(double *results, const Real what){
+__device__ void reduce_min_kernel(Real  *results, const Real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   const unsigned int i = bid*blockDim.x+tid;
@@ -71,7 +71,7 @@ __device__ double reduce_min_kernel(double *results, const Real what){
   }
 //#warning Fake return for now
   // There is still a reduction to do
-  return results[bid];
+  //return results[bid];
 }
 
 

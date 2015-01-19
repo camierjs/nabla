@@ -300,9 +300,9 @@ void nUtf8(char **bkp){
     // Infinity
     if (p3s(p,0x9e88e2,"/*wtf huge val*/__builtin_inff()",bkp)) p+=2;   // ∞
     // Sqrt
-    if (p3s(p,0x9a88e2,"rsqrt",bkp)) p+=2;
+    if (p3s(p,0x9a88e2,"square_root",bkp)) p+=2;
     // Cbrt
-    if (p3s(p,0x9b88e2,"rcbrt",bkp)) p+=2;
+    if (p3s(p,0x9b88e2,"cube_root",bkp)) p+=2;
     
     if (p3s(p,0xa788e2,"&&",bkp)) p+=2;
     if (p3s(p,0xa888e2,"||",bkp)) p+=2;

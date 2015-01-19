@@ -71,12 +71,16 @@ tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tststd:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
+tststd1:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
+tststd4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
 tstsse:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_omp)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_sse_omp)
 tstavx:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx_omp)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_avx_omp)
 tstavx2:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx2_omp)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_avx2_omp)
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 tstcu:

@@ -71,7 +71,7 @@ struct __attribute__ ((aligned(32))) real3 {
   inline real3& operator/=(double f){return *this=real3(x/f,y/f,z/f);}
   
   friend inline real dot3(real3 u, real3 v){ return real(u.x*v.x+u.y*v.y+u.z*v.z);}
-  friend inline real norm(real3 u){ return real(rsqrt(dot3(u,u)));}
+  friend inline real norm(real3 u){ return real(square_root(dot3(u,u)));}
   friend inline real3 cross(real3 u, real3 v){
     return
       real3(_mm256_sub_pd( _mm256_mul_pd(u.y,v.z) , _mm256_mul_pd(u.z,v.y) ),
