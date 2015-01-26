@@ -43,8 +43,12 @@
 #ifndef _NABLA_AST_H_
 #define _NABLA_AST_H_
 
+
+// ****************************************************************************
+// * Node structure used for the AST
+// ****************************************************************************
 typedef struct astNodeStruct{
-  unsigned int id;
+  unsigned int id; // Unique node ID
   char *token;
   char *token_utf8;
   int tokenid;
@@ -53,11 +57,19 @@ typedef struct astNodeStruct{
   struct astNodeStruct *next, *children, *parent;  
 }astNode;
 
+
+// ****************************************************************************
+// * Structure used to pass a batch of actions for each ruleid found while DFS
+// ****************************************************************************
 typedef struct RuleActionStruct{
   int ruleid;
   void (*action)(astNode*,void*);
 } RuleAction;
 
+
+// ****************************************************************************
+// * Forward declaration of AST functions
+// ****************************************************************************
 astNode *astNewNode(void);
 astNode *astNewNodeRule(const char*, unsigned int);
 astNode *astAddChild(astNode*, astNode*);

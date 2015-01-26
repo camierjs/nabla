@@ -45,7 +45,7 @@
 
 
 // ****************************************************************************
-// * COUNTING VARIADIC ARGUMENTS
+// * Counting Variadic Number of Arguments
 // ****************************************************************************
 #define __NB_ARGS__(z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,cnt,...) cnt
 #define NB_ARGS(...) __NB_ARGS__(,##__VA_ARGS__,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0)
@@ -63,7 +63,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 
 // ****************************************************************************
-// * RHS
+// * Right Hand Side of the Grammar
 // ****************************************************************************
 #define rhs rhsAdd(&yyval,yyn,yyvsp)
 #define RHS(lhs, ...) rhsAddVariadic(&yyval,yyn,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
@@ -113,9 +113,8 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 
 // *****************************************************************************
-// * Opérations
+// * Operations Sandwich
 // *****************************************************************************
-
 #define Yop3p(lhs, n1, op, n3)                                        \
   astNode *nOp=astNewNode();                                          \
   nOp->token=strdup(op2name(op->token));                              \
@@ -175,9 +174,8 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 
 // *****************************************************************************
-// * Autres actions particulières
+// * Other singular operations
 // *****************************************************************************
-
 #define Ypow(lhs,n1,pow)                                              \
   astNode *pPow=astNewNode();                                         \
   pPow->token=strdup("pow");                                          \

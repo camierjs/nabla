@@ -43,6 +43,10 @@
 #ifndef _NABLA_DBG_H_
 #define _NABLA_DBG_H_
 
+
+// ****************************************************************************
+// * DEBUG level Definitions
+// ****************************************************************************
 #define	DBG_OFF		0x0000ul // Debug off
 #define	DBG_EMG		0x0001ul // system is unusable
 #define	DBG_ALR		0x0002ul // action must be taken immediately
@@ -66,6 +70,10 @@
 
 #define NCC_DBG_STD_LVL DBG_OFF
 
+
+// ****************************************************************************
+// * Forward declaration of debug functions
+// ****************************************************************************
 void dbgt(const bool flag, const int fd, const char *msg, ...);
 NABLA_STATUS dbg(const char *str, ...);
 void printfdbg(const char *str, ...);

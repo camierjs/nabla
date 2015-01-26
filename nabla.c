@@ -70,7 +70,7 @@ static char *unique_temporary_file_name=NULL;
 \t[1;36m-t[0m\t\tGenerate the intermediate AST dot files\n\
 \t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
 [1;4;35mTARGET[0m can be:\n\
-\t[1;36m--okina [4mname[0m\tCode generation for native C/C++ stand-alone target\n\
+\t[1;36m--okina [4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
 \t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
 \t\t[36m--sse[0m\t\tExplicit code generation with SSE intrinsics\n\
 \t\t[36m--avx[0m\t\tExplicit code generation with AVX intrinsics\n\
@@ -109,9 +109,9 @@ static char *unique_temporary_file_name=NULL;
 //\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n
 
 
-// *****************************************************************************
+// ****************************************************************************
 // * nabla_unlink
-// *****************************************************************************
+// ****************************************************************************
 static void nabla_unlink(void){
   // Unlinking temp files
   if (unique_temporary_file_name!=NULL)
@@ -119,10 +119,10 @@ static void nabla_unlink(void){
 }
 
 
-// *****************************************************************************
+// ****************************************************************************
 // * nabla_error
 // * int vsprintf(char *str, const char *format, va_list ap);
-// *****************************************************************************
+// ****************************************************************************
 void nabla_error(const char *format,...){
   va_list args;
   va_start(args, format);
@@ -131,18 +131,18 @@ void nabla_error(const char *format,...){
 }
 
 
-// *****************************************************************************
+// ****************************************************************************
 // * yyerror
-// *****************************************************************************
+// ****************************************************************************
 void yyerror(astNode **root, char *error){
   fflush(stdout);
   printf("%s:%d: %s\n",nabla_input_file,yylineno-1, error);
 }
 
 
-/*****************************************************************************
- * Nabla Parsing
- *****************************************************************************/
+// ****************************************************************************
+// * Nabla Parsing
+// ****************************************************************************
 NABLA_STATUS nablaParsing(const char *nabla_entity_name,
                           const bool optionDumpTree,
                           char *npFileName,
@@ -153,8 +153,8 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
                           char *service_name){
   astNode *root=NULL;  
   if(!(yyin=fopen(npFileName,"r")))
-    return NABLA_ERROR | dbg("\n[nablaParsing] Could not open '%s' file", npFileName);
-
+    return NABLA_ERROR | dbg("\n[nablaParsing] Could not open '%s' file",
+                             npFileName);
   dbg("\n[nablaParsing] Starting parsing");
   if (yyparse(&root)){
     fclose(yyin);
@@ -162,19 +162,15 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   }
   dbg("\n[nablaParsing] Closing & Quit");
   fclose (yyin);
-  
   dbg("\n[nablaParsing] On scan l'arbre pour transformer les tokens en UTF8");
   dfsUtf8(root);
-  
   if (optionDumpTree){
     dbg("\n[nablaParsing] On dump l'arbre créé");
     astTreeSave(nabla_entity_name, root);
   }
-  
   // Initial files setup and checkup
   if (nabla_entity_name==NULL)
     return NABLA_ERROR | dbg("\n[nccParseur] No entity name has been set!");
-
   dbg("\n[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
   dbg("\n[nablaParsing] nabla_input_file=%s", nabla_input_file);
   dbg("\n[nablaParsing] Now launching nablaMiddlendSwitch");
@@ -189,9 +185,9 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
 }
 
 
-/*****************************************************************************
- * $(CPATH)/gcc -std=c99 -E -Wall -x c $(TGT).nabla -o $(TGT).n
- *****************************************************************************/
+// ****************************************************************************
+// * $(CPATH)/gcc -std=c99 -E -Wall -x c $(TGT).nabla -o $(TGT).n
+// ****************************************************************************
 int sysPreprocessor(const char *nabla_entity_name,
                     const char *list_of_nabla_files,
                     const char *unique_temporary_file_name,
@@ -204,7 +200,6 @@ int sysPreprocessor(const char *nabla_entity_name,
   char *cat_command=NULL;
   char *gcc_command=NULL;
   char *nabla_file, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
-  
   if ((cat_sed_temporary_file_name = malloc(size))==NULL)
     error(!0,0,"[sysPreprocessor] Could not malloc cat_sed_temporary_file_name!");
   if ((tok_command = malloc(size))==NULL)
@@ -213,7 +208,6 @@ int sysPreprocessor(const char *nabla_entity_name,
     error(!0,0,"[sysPreprocessor] Could not malloc cat_command!");
   if ((gcc_command = malloc(size))==NULL)
     error(!0,0,"[sysPreprocessor] Could not malloc gcc_command!");
-
   // On crée un fichier temporaire où l'on va sed'er les includes, par exemple
   snprintf(cat_sed_temporary_file_name, size, "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
   cat_sed_temporary_fd=mkstemp(cat_sed_temporary_file_name);
@@ -221,7 +215,6 @@ int sysPreprocessor(const char *nabla_entity_name,
     error(!0,0,"[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
   //printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
   dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",cat_sed_temporary_file_name);
-
   // Pour chaque fichier .n en entrée, on va le cat'er et insérer des délimiteurs
   cat_command[0]='\0';
   //printf("Loading: ");
@@ -248,11 +241,9 @@ int sysPreprocessor(const char *nabla_entity_name,
   free(dup_list_of_nabla_files);
   //printf("\n");
   //printf("\nfinal_cat_command: %s\n", cat_command);
-
   // On lance la commande de cat précédemment créée
   if (system(cat_command)<0)
     exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error in system cat command!\n"));
-
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
   // This might be useful when running the preprocessor on something that is not C code,
@@ -292,9 +283,9 @@ void nablaPreprocessor(char *nabla_entity_name,
 }
 
 
-// ***************************************************************************
+// ****************************************************************************
 // * Main
-// ***************************************************************************
+// ****************************************************************************
 int main(int argc, char * argv[]){
   int c;
   BACKEND_SWITCH backend=BACKEND_VOID;
@@ -312,9 +303,7 @@ int main(int argc, char * argv[]){
        {"alone",required_argument,NULL,BACKEND_COLOR_ARCANE_ALONE},
        {"module",required_argument,NULL,BACKEND_COLOR_ARCANE_MODULE},
        {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
-
     {"cuda",required_argument,NULL,BACKEND_CUDA},
-
     {"okina",required_argument,NULL,BACKEND_OKINA},
        {"tiling",no_argument,NULL,BACKEND_COLOR_OKINA_TILING},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
@@ -331,17 +320,13 @@ int main(int argc, char * argv[]){
        {"icc",no_argument,NULL,BACKEND_COLOR_OKINA_ICC},
     {NULL,0,NULL,0}
   };
-
   // Set our nabla_error_print_progname for emacs to be able to visit
   error_print_progname=&nabla_error_print_progname;
-
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
-
   // Check for at least several arguments
   if (argc<=1)
     exit(0&fprintf(stderr, NABLA_MAN));
-
   // Now switch the arguments
   while ((c=getopt_long(argc, argv, "tv:I:p:n:i:",longopts,&longindex))!=-1){
     switch (c){
@@ -358,7 +343,7 @@ int main(int argc, char * argv[]){
       dbgOpenTraceFile(optarg);
       dbg("[nabla] Command line specifies debug file: %s", optarg);
       break;
-
+      
       // ************************************************************
       // * INPUT FILES
       // ************************************************************      
@@ -416,7 +401,6 @@ int main(int argc, char * argv[]){
       service_name=strdup(optarg);
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE service name: %s", service_name);
       break;
-      
 
       // ************************************************************
       // * BACKEND OKINA avec ses variantes

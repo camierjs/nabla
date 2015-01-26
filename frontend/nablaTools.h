@@ -43,8 +43,11 @@
 #ifndef _NABLA_TOOLS_H_
 #define _NABLA_TOOLS_H_
 
-int nprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
 
+// ****************************************************************************
+// * Forward declaration of useful functions
+// ****************************************************************************
+int nprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
 int hprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
 
 char *toolStrDownCase(const char *);

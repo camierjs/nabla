@@ -1004,19 +1004,19 @@ cells void calcHydroConstraintForElems(void)
 // * is the minimum over all element values.
 // * The constraints are applied during the computation of δt for the next time step.
 // ****************************************************************************
-/*void calcCourantConstraints(void) @ 12.1{
-  const Real crnt=calcCourantConstraintForElems(1.0e+20);
-  δt_courant <?= (crnt);  // MIN_ASSIGN
-  }
-*/
+//void calcCourantConstraints(void) @ 12.1{
+//  const Real crnt=calcCourantConstraintForElems(1.0e+20);
+//  δt_courant <?= (crnt);  // MIN_ASSIGN
+//  }
+
 // Cells min reduction
 ∀ cells δt_courant <?= δt_cell_courant @ 12.11;
 ∀ cells δt_hydro   <?= δt_cell_hydro   @ 12.22;
 
-/*void calcHydroTimeConstraints(void) @ 12.2{
-  const Real hdr=calcHydroConstraintForElems(1.0e+20);
-  δt_hydro <?= (hdr); // MIN_ASSIGN
-  }*/
+//void calcHydroTimeConstraints(void) @ 12.2{
+//  const Real hdr=calcHydroConstraintForElems(1.0e+20);
+//  δt_hydro <?= (hdr); // MIN_ASSIGN
+//  }
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
   //debug()<<"\tdomain.dtcourant()="<<δt_courant;

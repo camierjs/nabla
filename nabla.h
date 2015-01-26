@@ -60,16 +60,18 @@ int mkstemp(char *template);
 void nabla_error(const char *format, ...);
 
 
-/*****************************************************************************
- * typedefs
- *****************************************************************************/
+// ****************************************************************************
+// * Typedefs
+// ****************************************************************************
 typedef enum {
   NABLA_OK    = 0,
   NABLA_ERROR = ~NABLA_OK
 } NABLA_STATUS;
 
 
-// Type de backend possible: Arcane, Cuda ou Okina
+// ****************************************************************************
+// * Possible Backend Types: Arcane, Cuda or Okina
+// ****************************************************************************
 typedef enum {
   BACKEND_VOID   = 0,
   BACKEND_ARCANE = 1<<(0),
@@ -78,9 +80,12 @@ typedef enum {
 } BACKEND_SWITCH;
 
 
-// Type de variantes possibles:
-//   - Arcane: Module|Service,
-//   - Okina: Cartesian|Lagrangian
+// ****************************************************************************
+// * Possible Variations:
+// *  - Arcane: Module|Service,
+// *  - Okina: std, sse, avx, avx2, mic and omp, cilk
+// *  - TILING, SOA, AOS are not yet or will be used (to be cleaned-up!)
+// ****************************************************************************
 typedef enum { 
   BACKEND_COLOR_VOID           = 0,
   BACKEND_COLOR_ARCANE_ALONE   = 1<<(3),

@@ -172,7 +172,6 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       fct->parse.enum_enum='\0';
       break;
     }
-
     
     if (n->tokenid==FORALL_INI){ break;}
     
@@ -328,20 +327,18 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     nablaInsertSpace(nabla,n);
     break;
   }
-  
   if(n->children != NULL) nablaFunctionParse(n->children, fct);
   if(n->next != NULL) nablaFunctionParse(n->next, fct);
 }
-
-
-
 
 
 /*****************************************************************************
  * Remplissage de la structure 'fct'
  * Dump dans le src de la déclaration de ce fct en fonction du backend
  *****************************************************************************/
-void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
+void nablaFctFill(nablaMain *nabla,
+                  nablaJob *fct,
+                  astNode *n,
                   const char *namespace){
   int numParams;
   astNode *nFctName;
@@ -380,9 +377,7 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
       (fct->region!=NULL)?fct->region:"Null",
       fct->item,//2+
       fct->rtntp, fct->name);
-  
   scanForNablaJobAtConstant(n->children, nabla);
-  
   dbg("\n\t[nablaFctFill] Now fillinf SRC file");
   nprintf(nabla, NULL, "\n\n\
 // ********************************************************\n\
@@ -394,19 +389,15 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           fct->name);
-
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
   numParams=dumpParameterTypeList(nabla->entity->src, nParams);
   nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaFctFill] adding ExtraParameters");
   if (nabla->hook->addExtraParameters!=NULL && fct->is_an_entry_point)
     nabla->hook->addExtraParameters(nabla, fct, &numParams);
-
   dbg("\n\t[nablaFctFill] launching dfsForCalls");
   nabla->hook->dfsForCalls(nabla,fct,n,namespace,nParams);
-  
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");
   for(n=n->children->next;
@@ -418,7 +409,6 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   // On saute le premier '{'
   n=n->children->next;
   nprintf(nabla, NULL, "){\n");
-
   // On prépare le bon ENUMERATE
   dbg("\n\t[nablaFctFill] prefixEnumerate");
   nprintf(nabla, NULL, "\t%s", nabla->hook->prefixEnumerate(fct));
@@ -426,7 +416,6 @@ void nablaFctFill(nablaMain *nabla, nablaJob *fct, astNode *n,
   nprintf(nabla, NULL, "\n\t%s", nabla->hook->dumpEnumerate(fct));
   dbg("\n\t[nablaFctFill] postfixEnumerate");
   nprintf(nabla, NULL, "\t%s", nabla->hook->postfixEnumerate(fct));
-  
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nablaFunctionParse(n,fct);

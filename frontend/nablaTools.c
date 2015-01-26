@@ -131,7 +131,7 @@ char *op2name(char *op){
   if (strncmp(op,"⨂",3)==0) return "opProdTensVec";
   
   if (strncmp(op,"⊛",3)==0) return "opMatrixProduct";
-  
+
   switch (op[0]){
   case ('*') : return "opMul";
   case ('/') : return "opDiv";
@@ -225,17 +225,19 @@ void nUtf8SupThree(char **read){//read
   //dbg("\n\t\t[nUtf8SupThree] out \"%s\"", *read);
 }
 
-/******************************************************************************
- * nUtf8
- * αβγδεζηθικλμνξοπρςστυφχψω
- * od -vt x2 /tmp/try
- * 0000000 b1ce b2ce b3ce b4ce b5ce b6ce b7ce b8ce
- * 0000020 b9ce bace bbce bcce bdce bece bfce 80cf
- * 0000040 81cf 3030 82cf 83cf 3030 84cf 85cf 86cf
- * 0000060 87cf 88cf 89cf 000a
- * ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
- * ½  ⅓  ¼  ⅛ 
- ******************************************************************************/
+
+// ****************************************************************************
+// * OK, that should be done more properly.
+// * nUtf8
+// * αβγδεζηθικλμνξοπρςστυφχψω
+// * od -vt x2 /tmp/try
+// * 0000000 b1ce b2ce b3ce b4ce b5ce b6ce b7ce b8ce
+// * 0000020 b9ce bace bbce bcce bdce bece bfce 80cf
+// * 0000040 81cf 3030 82cf 83cf 3030 84cf 85cf 86cf
+// * 0000060 87cf 88cf 89cf 000a
+// * ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ½  ⅓  ¼  ⅛ 
+// ****************************************************************************
 void nUtf8(char **bkp){
   char *p=*bkp;
   if (p==NULL) return;

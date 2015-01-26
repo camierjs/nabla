@@ -193,6 +193,8 @@
    (list nabla-items-regexp 1 'font-lock-type-face)
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
+   ;; highlight special keywords
+   '("\\(∀\\)" . font-lock-keyword-face)
    ;; highlight numbers[-+]?
    '("\\W\\([0-9._]+\\)\\>" 1 font-lock-constant-face)
    ;; highlight true, false

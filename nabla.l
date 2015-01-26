@@ -314,21 +314,25 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
   REJECT;}
 \n                { yylineno+=1;}
 %% 
-//"nand"             { return tok(&yylval, NAND_OP);}
+//"nand"          { return tok(&yylval, NAND_OP);}
 //"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
-//"⊻"					{ return tok(&yylval, XOR_OP);} // Xor 22BB
-//""					{ return tok(&yylval, XNOR_OP);}// Xnor F4A2
-//"⊽"					{ return tok(&yylval, NOR_OP);} // Nor 22BD
-//"::"					{ return tok(&yylval, NAMESPACE);}
+//"⊻"					{ return tok(&yylval, XOR_OP);}  // Xor 22BB
+//""				{return tok(&yylval, XNOR_OP);}  // Xnor F4A2
+//"⊽"					{ return tok(&yylval, NOR_OP);}  // Nor 22BD
+//"::"				{ return tok(&yylval, NAMESPACE);}
 //∀ ∈ ∃
 
-// Absorbe line comments
+// ****************************************************************************
+// * Get rid of line comments
+// ****************************************************************************
 static void ignoreLineComments(void){
   while(input()!='\n');
   yylineno+=1;
 }
 
-// Absorbe bloc comments
+// ****************************************************************************
+// * Get rid of bloc comments
+// ****************************************************************************
 static void ignoreBlocComments(void){
 	char c, c1;
 loop:
@@ -340,7 +344,9 @@ loop:
 	}
 }
 
-// Tokenizer
+// ****************************************************************************
+// * Tokenizer
+// ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
   //dbg("\n[astNewNode] line %d: '%s' (%d)", yylineno, yytext, tokenid);
   if (tokenid==PREPROCS){
