@@ -275,6 +275,7 @@ static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->called_variables->name=item_var_name;
   // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
   redjob->reduction = true;
+  redjob->reduction_name = strdup(global_var_name);
   assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
   dbg("\n\t[cudaHookReduction] @ %s",at_single_cst_node->token);
   sprintf(&redjob->at[0],at_single_cst_node->token);

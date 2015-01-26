@@ -77,7 +77,7 @@ char *nArcanePragmaGccIvdep(void){ return ""; }
 char *nArcanePragmaGccAlign(void){ return ""; }
 
 static void arcaneHookReduction(struct nablaMainStruct *middlend, astNode *n){
-#warning arcaneHookReduction
+#warning Reduction is not yet implemented in Arcane backend
 }
 
 /*****************************************************************************

@@ -93,6 +93,7 @@ typedef struct nablaJobStruct{
   char forall_item;
   // Bool pour savoir si le job est un job de réduction
   bool reduction;
+  char *reduction_name;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;

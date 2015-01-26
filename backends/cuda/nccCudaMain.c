@@ -268,11 +268,7 @@ NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
     if (strcmp(var->name, "coord")==0) continue;
     // Si les variables sont globales, on ne les debug pas
     if (var->item[0]=='g') continue;
-    //if (strcmp(var->name, "min_array")==0) continue;
     //if (strcmp(var->name, "iteration")==0) continue;
-    //if (strcmp(var->name, "dtt_courant")==0) continue;
-    //if (strcmp(var->name, "dtt_hydro")==0) continue;
-    //if (strcmp(var->name, "elemBC")==0) continue;
     //#warning continue dbgsVariable
     //continue;
     nprintf(nabla,NULL,"\n\t\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
@@ -322,8 +318,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
       nprintf(n, NULL,"\
 \n\t\t__align__(8) double new_delta_t=0.0;\
 \n\t\t__align__(8) double reduced;\
-\n#warning Should get rid of courant_or_hydro\
-\n\t\tint courant_or_hydro=0;        \
+\n//#warning Should get rid of courant_or_hydro\
+\n//\t\tint courant_or_hydro=0;        \
 \n\t\t//cudaFuncSetCacheConfig(...); \
 \n\t\tgettimeofday(&st, NULL);\
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
@@ -377,13 +373,13 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \n\t\t\tfor(int i=0;i<reduced_size;i+=1){\
 \n\t\t\t\t//printf(\"\\n\\treduced=%%.21e, host_reduce_results[%%d/%%d]=%%.21e\",reduced,i,host_reduce_results[i],reduced_size);\
 \n\t\t\t\treduced=min(reduced,host_reduce_results[i]);\
-\n\t\t\t}\
-\n\t\t\tif ((courant_or_hydro%%2)==0)\
-\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_dtt_courant, &reduced, sizeof(double), cudaMemcpyHostToDevice));\
-\n\t\t\telse\
-\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_dtt_hydro, &reduced, sizeof(double), cudaMemcpyHostToDevice));\
-\n\t\t\tcourant_or_hydro+=1;\
-\n");
+\n\t\t\t}\n\
+//\t\t\tif ((courant_or_hydro%%2)==0)\n\
+//\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_dtt_courant, &reduced, sizeof(double), cudaMemcpyHostToDevice));\n\
+//\t\t\telse\n\
+//\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_dtt_hydro, &reduced, sizeof(double), cudaMemcpyHostToDevice));\n\
+\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_%s, &reduced, sizeof(double), cudaMemcpyHostToDevice));\n\
+//\t\t\tcourant_or_hydro+=1;\n",entry_points[i].reduction_name);
     }
     
     nprintf(n, NULL, "\n\t\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaCheck_%s\");\

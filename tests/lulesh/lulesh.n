@@ -274,7 +274,7 @@ void timeIncrement(void) @ 0.1 {
   //δt = (GlobalIteration==3)?1.439999999999999924249e-07;
   //δt <?= (scaled_δt);
   //info()<<"ITERATION "<<GlobalIteration;
-  printf("\nITERATION %d, δt=%.21e",GlobalIteration,δt);
+  //printf("\nITERATION %d, δt=%.21e",GlobalIteration,δt[0]);
   if (GlobalIteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//0]
   //printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);
@@ -995,8 +995,8 @@ cells void calcHydroConstraintForElems(void)
   }*/
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
-  debug()<<"\tdomain.dtcourant()="<<δt_courant;
-  debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
+  //debug()<<"\tdomain.dtcourant()="<<δt_courant;
+  //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
   //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
   //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
