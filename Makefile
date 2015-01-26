@@ -71,6 +71,8 @@ tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
 tststd:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
+tstmh1:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
 tststd1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
 tststd4:
@@ -84,7 +86,7 @@ tstavx2:
 tstv:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
 tstcu:
-#	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_run_1)
+#	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
 
 ############
