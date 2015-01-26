@@ -166,11 +166,9 @@ static void okinaHeaderIncludes(nablaMain *nabla){
 #include <stdarg.h>\n\
 //#include <mathimf.h>\n\
 #include <iostream>\n\
-%s // fromnabla->parallel->includes()\n\
-%s // SOA define or not",
+%s // fromnabla->parallel->includes()\n",
           nabla->simd->includes(),
-          nabla->parallel->includes(),
-          ((nabla->colors&BACKEND_COLOR_OKINA_SOA)==BACKEND_COLOR_OKINA_SOA)?"#define _OKINA_SOA_":"");
+          nabla->parallel->includes());
 }
 
 
@@ -308,7 +306,7 @@ static bool okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astN
 // ****************************************************************************
 static void okinaReturnFromArgument(nablaMain *nabla, nablaJob *job){
   const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-  if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP)
+  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nprintf(nabla, NULL, "\
 \n\tint threads = omp_get_max_threads();\
 \n\tReal %s_per_thread[threads];", rtnVariable);
@@ -476,9 +474,9 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
     nccOkinaParallelVoidIncludes
   };
   nabla->parallel=&okinaVoidHooks;
-  if ((nabla->colors&BACKEND_COLOR_OKINA_CILK)==BACKEND_COLOR_OKINA_CILK)
+  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     nabla->parallel=&okinaCilkHooks;
-  if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP)
+  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nabla->parallel=&okinaOpenMPHooks;
 
   
@@ -492,7 +490,7 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
   };
   // Par defaut, on met GCC
   nabla->pragma=&okinaPragmaGCCHooks;
-  if ((nabla->colors&BACKEND_COLOR_OKINA_ICC)==BACKEND_COLOR_OKINA_ICC)
+  if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
     nabla->pragma=&okinaPragmaICCHooks;
   
   static nablaBackendHooks okinaBackendHooks={

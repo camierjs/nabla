@@ -140,13 +140,9 @@ __global__ void nabla_ini_cell_connectivity(int *cell_node){\n\
   cell_node[tcid+4*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;\n\
   cell_node[tcid+5*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+1;\n\
   cell_node[tcid+6*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+1;\n\
-  cell_node[tcid+7*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+0;\n\
-}\n",((nabla->colors&BACKEND_COLOR_OKINA_SOA)==BACKEND_COLOR_OKINA_SOA)?
-          "Real *node_coordx, Real *node_coordy, Real *node_coordz":"Real3 *node_coord",
-          ((nabla->colors&BACKEND_COLOR_OKINA_SOA)==BACKEND_COLOR_OKINA_SOA)?"\
-\tnode_coordx[tnid]=dx;\n\
-\tnode_coordy[tnid]=dy;\n\
-\tnode_coordz[tnid]=dz;\n":"\tnode_coord[tnid]=Real3(dx,dy,dz);");
+  cell_node[tcid+7*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+0;\n}\n",
+          "Real3 *node_coord",
+          "\tnode_coord[tnid]=Real3(dx,dy,dz);");
 }
 
 

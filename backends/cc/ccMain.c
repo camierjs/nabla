@@ -44,12 +44,12 @@
 
 
 // ****************************************************************************
-// * Backend OKINA PREFIX - Génération du 'main'
+// * Backend CC PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
-#define OKINA_MAIN_PREFIX "\n\n\n\
+#define CC_MAIN_PREFIX "\n\n\n\
 // ******************************************************************************\n\
-// * Main d'Okina\n\
+// * Main d'Cc\n\
 // ******************************************************************************\n\
 int main(int argc, char *argv[]){\n\
 \tfloat cputime=0.0;\n\
@@ -78,21 +78,21 @@ int main(int argc, char *argv[]){\n\
 
 
 /*****************************************************************************
- * Backend OKINA INIT - Génération du 'main'
+ * Backend CC INIT - Génération du 'main'
  *****************************************************************************/
-#define OKINA_MAIN_PREINIT "\n\t//OKINA_MAIN_PREINIT"
+#define CC_MAIN_PREINIT "\n\t//CC_MAIN_PREINIT"
 
 
 /*****************************************************************************
- * Backend OKINA POSTFIX - Génération du 'main'
+ * Backend CC POSTFIX - Génération du 'main'
  *****************************************************************************/
-#define OKINA_MAIN_POSTINIT "\n\t//OKINA_MAIN_POSTINIT"
+#define CC_MAIN_POSTINIT "\n\t//CC_MAIN_POSTINIT"
 
 
 /*****************************************************************************
- * Backend OKINA POSTFIX - Génération du 'main'
+ * Backend CC POSTFIX - Génération du 'main'
 \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
-#define OKINA_MAIN_POSTFIX "\n//OKINA_MAIN_POSTFIX\
+#define CC_MAIN_POSTFIX "\n//CC_MAIN_POSTFIX\
 \n\tglobal_time+=*(double*)&global_deltat[0];\
 \n\tglobal_iteration+=1;\
 \n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
@@ -104,32 +104,32 @@ int main(int argc, char *argv[]){\n\
 
 
 /*****************************************************************************
- * nccOkinaMainPrefix
+ * ccMainPrefix
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainPrefix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPrefix]");
-  fprintf(nabla->entity->src, OKINA_MAIN_PREFIX);
+NABLA_STATUS ccMainPrefix(nablaMain *nabla){
+  dbg("\n[ccMainPrefix]");
+  fprintf(nabla->entity->src, CC_MAIN_PREFIX);
   return NABLA_OK;
 }
 
 
 /*****************************************************************************
- * nccOkinaMainPreInit
+ * ccMainPreInit
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainPreInit(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPreInit]");
-  fprintf(nabla->entity->src, OKINA_MAIN_PREINIT);
+NABLA_STATUS ccMainPreInit(nablaMain *nabla){
+  dbg("\n[ccMainPreInit]");
+  fprintf(nabla->entity->src, CC_MAIN_PREINIT);
   return NABLA_OK;
 }
 
 
 /*****************************************************************************
- * nccOkinaMainVarInitKernel
+ * ccMainVarInitKernel
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainVarInitKernel(nablaMain *nabla){
+NABLA_STATUS ccMainVarInitKernel(nablaMain *nabla){
   //int i,iVar;
   nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInit]");
+  dbg("\n[ccMainVarInit]");
   nprintf(nabla,NULL,"\n\
 // ******************************************************************************\n\
 // * Kernel d'initialisation des variables\n\
@@ -170,11 +170,11 @@ void nabla_ini_variables(void){");
 
 
 /*****************************************************************************
- * nccOkinaMainVarInitKernel
+ * ccMainVarInitKernel
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainVarInitCall(nablaMain *nabla){
+NABLA_STATUS ccMainVarInitCall(nablaMain *nabla){
   nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInitCall]");
+  dbg("\n[ccMainVarInitCall]");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
@@ -191,32 +191,32 @@ NABLA_STATUS nccOkinaMainVarInitCall(nablaMain *nabla){
 
 
 /*****************************************************************************
- * nccOkinaMainPostInit
+ * ccMainPostInit
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainPostInit(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPostInit]");
-  fprintf(nabla->entity->src, OKINA_MAIN_POSTINIT);
+NABLA_STATUS ccMainPostInit(nablaMain *nabla){
+  dbg("\n[ccMainPostInit]");
+  fprintf(nabla->entity->src, CC_MAIN_POSTINIT);
   return NABLA_OK;
 }
 
 
 /*****************************************************************************
- * nccOkinaMain
+ * ccMain
  *****************************************************************************/
-NABLA_STATUS nccOkinaMain(nablaMain *n){
+NABLA_STATUS ccMain(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
   int i,numParams,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
   
-  dbg("\n[nccOkinaMain]");
+  dbg("\n[ccMain]");
   number_of_entry_points=nablaNumberOfEntryPoints(n);
   entry_points=nablaEntryPointsSort(n);
   
   // Et on rescan afin de dumper
   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
-      dbg("%s\n\t[nccOkinaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+      dbg("%s\n\t[ccMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
         entry_points[i].where);
@@ -248,50 +248,50 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    okinaAddExtraArguments(n, &entry_points[i], &numParams);
+    ccAddExtraArguments(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      okinaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      ccDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-      okinaAddExtraConnectivitiesArguments(n,&numParams);
+      ccAddExtraConnectivitiesArguments(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
-      dbg("\n\t[nccOkinaMain] Et on rajoute les called_variables en paramètre d'appel");
+      dbg("\n\t[ccMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
         nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
       }
     }else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
-    okinaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
+    ccDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
     //nprintf(n, NULL, "\n");
   }
   return NABLA_OK;
 }
 
 
-static char *okinaSourceMeshAoS_vs_SoA(nablaMain *nabla){
+static char *ccSourceMeshAoS_vs_SoA(nablaMain *nabla){
   return "node_coord[iNode]=Real3(x,y,z);"; 
 }
 
 extern char knMsh_c[];
-static void okinaSourceMesh(nablaMain *nabla){
+static void ccSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->src,knMsh_c,okinaSourceMeshAoS_vs_SoA(nabla));
+  fprintf(nabla->entity->src,knMsh_c,ccSourceMeshAoS_vs_SoA(nabla));
   //fprintf(nabla->entity->src,knMsh_c);
 }
 
 /*****************************************************************************
- * nccOkinaMainPostfix
+ * ccMainPostfix
  *****************************************************************************/
-NABLA_STATUS nccOkinaMainPostfix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPostfix] OKINA_MAIN_POSTFIX");
-  fprintf(nabla->entity->src, OKINA_MAIN_POSTFIX);
-  dbg("\n[nccOkinaMainPostfix] okinaSourceMesh");
-  okinaSourceMesh(nabla);
-  dbg("\n[nccOkinaMainPostfix] NABLA_OK");
+NABLA_STATUS ccMainPostfix(nablaMain *nabla){
+  dbg("\n[ccMainPostfix] CC_MAIN_POSTFIX");
+  fprintf(nabla->entity->src, CC_MAIN_POSTFIX);
+  dbg("\n[ccMainPostfix] ccSourceMesh");
+  ccSourceMesh(nabla);
+  dbg("\n[ccMainPostfix] NABLA_OK");
   return NABLA_OK;
 }
 

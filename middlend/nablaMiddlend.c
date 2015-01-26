@@ -240,39 +240,14 @@ static void nablaMiddlendVariableGlobalAdd(nablaMain *nabla){
   time->item=strdup("global");
   time->type=strdup("real");
   time->name=strdup("time");
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)==BACKEND_COLOR_OKINA_SOA){
-    dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding SoA variables coordx,y,z");
-    nablaVariable *coordx= nablaVariableNew(nabla);
-    nablaVariableAdd(nabla, coordx);
-    coordx->axl_it=true;
-    coordx->item=strdup("node");
-    coordx->type=strdup("real");
-    coordx->name=strdup("coordx");
-    coordx->field_name=strdup("NodeCoordX");
-    nablaVariable *coordy= nablaVariableNew(nabla);
-    nablaVariableAdd(nabla, coordy);
-    coordy->axl_it=true;
-    coordy->item=strdup("node");
-    coordy->type=strdup("real");
-    coordy->name=strdup("coordy");
-    coordy->field_name=strdup("NodeCoordY");
-    nablaVariable *coordz= nablaVariableNew(nabla);
-    nablaVariableAdd(nabla, coordz);
-    coordz->axl_it=true;
-    coordz->item=strdup("node");
-    coordz->type=strdup("real");
-    coordz->name=strdup("coordz");
-    coordz->field_name=strdup("NodeCoordZ");
-  }else{
-    dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
-    nablaVariable *coord = nablaVariableNew(nabla);
-    nablaVariableAdd(nabla, coord);
-    coord->axl_it=true;
-    coord->item=strdup("node");
-    coord->type=strdup("real3");
-    coord->name=strdup("coord");
-    coord->field_name=strdup("NodeCoord");
-  }
+  dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
+  nablaVariable *coord = nablaVariableNew(nabla);
+  nablaVariableAdd(nabla, coord);
+  coord->axl_it=true;
+  coord->item=strdup("node");
+  coord->type=strdup("real3");
+  coord->name=strdup("coord");
+  coord->field_name=strdup("NodeCoord");
 }
 
 

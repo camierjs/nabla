@@ -311,13 +311,13 @@ int main(int argc, char * argv[]){
        {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
        {"avx2",no_argument,NULL,BACKEND_COLOR_OKINA_AVX2},
        {"mic",no_argument,NULL,BACKEND_COLOR_OKINA_MIC},
-       {"cilk",no_argument,NULL,BACKEND_COLOR_OKINA_CILK},
-       {"omp",no_argument,NULL,BACKEND_COLOR_OKINA_OpenMP},
+       {"cilk",no_argument,NULL,BACKEND_COLOR_CILK},
+       {"omp",no_argument,NULL,BACKEND_COLOR_OpenMP},
        {"seq",no_argument,NULL,BACKEND_COLOR_OKINA_SEQ},
-       {"soa",no_argument,NULL,BACKEND_COLOR_OKINA_SOA},
-       {"aos",no_argument,NULL,BACKEND_COLOR_OKINA_AOS},
-       {"gcc",no_argument,NULL,BACKEND_COLOR_OKINA_GCC},
-       {"icc",no_argument,NULL,BACKEND_COLOR_OKINA_ICC},
+    //{"soa",no_argument,NULL,BACKEND_COLOR_OKINA_SOA},
+    //{"aos",no_argument,NULL,BACKEND_COLOR_OKINA_AOS},
+       {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
+       {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
     {NULL,0,NULL,0}
   };
   // Set our nabla_error_print_progname for emacs to be able to visit
@@ -437,32 +437,32 @@ int main(int argc, char * argv[]){
       backend_color|=BACKEND_COLOR_OKINA_MIC;
       dbg("\n[nabla] Command line specifies OKINA's MIC option");
       break;
-    case BACKEND_COLOR_OKINA_CILK:
-      backend_color|=BACKEND_COLOR_OKINA_CILK;
+    case BACKEND_COLOR_CILK:
+      backend_color|=BACKEND_COLOR_CILK;
       dbg("\n[nabla] Command line specifies OKINA's CILK option");
       break;
-    case BACKEND_COLOR_OKINA_OpenMP:
-      backend_color|=BACKEND_COLOR_OKINA_OpenMP;
+    case BACKEND_COLOR_OpenMP:
+      backend_color|=BACKEND_COLOR_OpenMP;
       dbg("\n[nabla] Command line specifies OKINA's OpenMP option");
       break;
     case BACKEND_COLOR_OKINA_SEQ:
       backend_color|=BACKEND_COLOR_OKINA_SEQ;
       dbg("\n[nabla] Command line specifies OKINA's SEQ option");
       break;
-    case BACKEND_COLOR_OKINA_AOS:
-      backend_color|=BACKEND_COLOR_OKINA_AOS;
-      dbg("\n[nabla] Command line specifies OKINA's AoS option");
-      break;
-    case BACKEND_COLOR_OKINA_SOA:
-      backend_color|=BACKEND_COLOR_OKINA_SOA;
-      dbg("\n[nabla] Command line specifies OKINA's SoA option");
-      break;
-    case BACKEND_COLOR_OKINA_GCC:
-      backend_color|=BACKEND_COLOR_OKINA_GCC;
+      //case BACKEND_COLOR_OKINA_AOS:
+      //backend_color|=BACKEND_COLOR_OKINA_AOS;
+      //dbg("\n[nabla] Command line specifies OKINA's AoS option");
+      //break;
+      //case BACKEND_COLOR_OKINA_SOA:
+      //backend_color|=BACKEND_COLOR_OKINA_SOA;
+      //dbg("\n[nabla] Command line specifies OKINA's SoA option");
+      //break;
+    case BACKEND_COLOR_GCC:
+      backend_color|=BACKEND_COLOR_GCC;
       dbg("\n[nabla] Command line specifies OKINA's GCC option");
       break;
-    case BACKEND_COLOR_OKINA_ICC:
-      backend_color|=BACKEND_COLOR_OKINA_ICC;
+    case BACKEND_COLOR_ICC:
+      backend_color|=BACKEND_COLOR_ICC;
       dbg("\n[nabla] Command line specifies OKINA's ICC option");
       break;
 

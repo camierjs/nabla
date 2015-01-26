@@ -526,7 +526,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
 
   case(COMPOUND_JOB_INI):{
     if (job->parse.returnFromArgument &&
-        ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP))
+        ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP))
       nprintf(nabla, NULL, "int tid = omp_get_thread_num();");
     //nprintf(nabla, NULL, "/*COMPOUND_JOB_INI:*/");
     break;
@@ -680,7 +680,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
-    if ((nabla->colors&BACKEND_COLOR_OKINA_OpenMP)==BACKEND_COLOR_OKINA_OpenMP){
+    if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP){
       char mnx[4]={'M','x','x','\0'};
       const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
       astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));
@@ -744,17 +744,8 @@ void okinaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams
   // Rajout pour l'instant systématiquement des node_coords et du global_deltat
   nablaVariable *var;
   if (*numParams!=0) nprintf(nabla, NULL, ",");
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA){
-      nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
-      *numParams+=1;
-  }else{
-    nprintf(nabla, NULL, "\n\t\tReal *node_coordx,");
-    *numParams+=1;
-    nprintf(nabla, NULL, "\n\t\tReal *node_coordy,");
-    *numParams+=1;
-    nprintf(nabla, NULL, "\n\t\tReal *node_coordz");
-    *numParams+=1;
-  }
+  nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
+  *numParams+=1;
   // Et on rajoute les variables globales
   for(var=nabla->variables;var!=NULL;var=var->next){
     //if (strcmp(var->name, "time")==0) continue;

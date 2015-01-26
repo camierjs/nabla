@@ -155,10 +155,10 @@ NABLA_STATUS nccCudaMainPrefix(nablaMain *nabla){
  *****************************************************************************/
 NABLA_STATUS nccCudaMainPreInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPreInit]");
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
+  //if ((nabla->colors&BACKEND_COLOR_SOA)!=BACKEND_COLOR_SOA)
     fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coord");
-  else
-    fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coordx,node_coordy,node_coordz");
+  //else
+    //fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coordx,node_coordy,node_coordz");
   return NABLA_OK;
 }
 

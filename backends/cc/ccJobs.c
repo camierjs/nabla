@@ -47,8 +47,8 @@
 /*****************************************************************************
  * Diffraction
  *****************************************************************************/
-void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
-  // On backup les statements qu'on rencontre pour éventuellement les diffracter (Real3 => _x, _y & _z)
+void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
   // Et on amorce la diffraction
   if ((*n)->ruleid == rulenameToId("expression_statement")
       && (*n)->children->ruleid == rulenameToId("expression")
@@ -56,7 +56,7 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       //&& job->parse.statementToDiffract==NULL
       //&& job->parse.diffractingXYZ==0
       ){
-      dbg("\n[cudaHookJobDiffractStatement] amorce la diffraction");
+    //dbg("\n[ccHookJobDiffractStatement] amorce la diffraction");
 //#warning Diffracting is turned OFF
       job->parse.statementToDiffract=NULL;//*n;
       // We're juste READY, not diffracting yet!
@@ -70,11 +70,11 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ<3){
-    dbg("\n[cudaHookJobDiffractStatement] avance dans la diffraction");
+    dbg("\n[ccHookJobDiffractStatement] avance dans la diffraction");
     job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
     (*n)=job->parse.statementToDiffract;
     nprintf(nabla, NULL, ";\n\t");
-    nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
+    //nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
   }
 
   // On flush la diffraction 
@@ -83,78 +83,138 @@ void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ==3){
-    dbg("\n[cudaHookJobDiffractStatement] Flush de la diffraction");
+    dbg("\n[ccHookJobDiffractStatement] Flush de la diffraction");
     job->parse.diffracting=false;
     job->parse.statementToDiffract=NULL;
     job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
     nprintf(nabla, "/*<end of diffracting>*/",NULL);
   }
-  //dbg("\n[cudaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
+  //dbg("\n[ccHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }
 
 
 /*****************************************************************************
  * Fonction prefix à l'ENUMERATE_*
  *****************************************************************************/
-char* cudaHookPrefixEnumerate(nablaJob *job){
-  const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //if (j->xyz==NULL) return "// void ENUMERATE prefix";
-  //nprintf(job->entity->main, "\n\t/*cudaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
-  if (itm=='c'  && strcmp(job->rtntp,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
-  if (itm=='c'  && strcmp(job->rtntp,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
-  if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
-  if (itm=='\0' && job->is_an_entry_point
-      && job->called_variables!=NULL) return "CUDA_LAUNCHER_FUNCTION_THREAD(tid);";
-  if (itm=='\0' && job->is_an_entry_point
-      && job->called_variables==NULL) return "CUDA_INI_FUNCTION_THREAD(tid);";
-  if (itm=='\0' && job->is_an_entry_point) return "CUDA_INI_FUNCTION_THREAD(tid);";
-  if (itm=='\0' && !job->is_an_entry_point) return "/*std function*/";
-  error(!0,0,"Could not distinguish PREFIX Enumerate!");
-  return NULL;
+char* ccHookPrefixEnumerate(nablaJob *job){
+  char prefix[NABLA_MAX_FILE_NAME];
+  //const nablaMain* nabla=job->entity->main;
+              
+  if (job->parse.returnFromArgument){
+    const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+    if (sprintf(prefix,"dbgFuncIn();\n\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = %s;",var,var)<=0){
+      error(!0,0,"Error in ccHookPrefixEnumerate!");
+    }
+  }else{
+    if (sprintf(prefix,"dbgFuncIn();")<=0)
+      error(!0,0,"Error in ccHookPrefixEnumerate!");
+  }
+      
+  //const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  //nprintf(job->entity->main, "\n\t/*ccHookPrefixEnumerate*/", "/*itm=%c*/", itm);
+  return strdup(prefix);
 }
 
 
 /*****************************************************************************
  * Fonction produisant l'ENUMERATE_* avec XYZ
  *****************************************************************************/
-char* cudaHookDumpEnumerateXYZ(nablaJob *job){
-  char *xyz=job->xyz;// Direction
-  nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
-  return "// cudaHookDumpEnumerateXYZ has xyz drctn";
+char* ccHookDumpEnumerateXYZ(nablaJob *job){
+  //char *xyz=job->xyz;// Direction
+  //nprintf(job->entity->main, "\n\t/*ccHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
+  return "// ccHookDumpEnumerateXYZ has xyz drctn";
+}
+
+
+// ****************************************************************************
+// *
+// ****************************************************************************
+/*static char * ccReturnVariableNameForOpenMP(nablaJob *job){
+  char str[NABLA_MAX_FILE_NAME];
+  if (job->is_a_function) return "";
+  if (sprintf(str,"%s_per_thread",
+              dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
+    error(!0,0,"Could not patch format!");
+  return strdup(str);
+  }*/
+static char * ccReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
+  char str[NABLA_MAX_FILE_NAME];
+  if (job->is_a_function) return "";
+  if (sprintf(str,"%s",
+              dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
+    error(!0,0,"Could not patch format!");
+  return strdup(str);
 }
 
 
 /*****************************************************************************
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
-char* cudaHookDumpEnumerate(nablaJob *job){
-  char *grp=job->scope;   // OWN||ALL
-  char *rgn=job->region;  // INNER, OUTER
-  char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //if (job->xyz!=NULL) return cudaHookDumpEnumerateXYZ(job);
-  if (itm=='\0') return "// function cudaHookDumpEnumerate\n";
-  if (itm=='c' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='n' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='f' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='e' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_ENV_WARP(e)";
-  if (itm=='m' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_MAT_WARP(m)";
+static char* ccSelectEnumerate(nablaJob *job){
+  const char *grp=job->scope;   // OWN||ALL
+  const char *rgn=job->region;  // INNER, OUTER
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  //if (job->xyz!=NULL) return ccHookDumpEnumerateXYZ(job);
+  if (itm=='\0') return "\n";// function ccHookDumpEnumerate\n";
+  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
+  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL%s%s(c";
+  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s%s(e";
+  if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s%s(m";
+  
   error(!0,0,"Could not distinguish ENUMERATE!");
   return NULL;
 }
+char* ccHookDumpEnumerate(nablaJob *job){
+  const char *forall=strdup(ccSelectEnumerate(job));
+  const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
+  char format[NABLA_MAX_FILE_NAME];
+  char str[NABLA_MAX_FILE_NAME];
+  dbg("\n\t[ccHookDumpEnumerate] Preparing:");
+  dbg("\n\t[ccHookDumpEnumerate]\t\tforall=%s",forall);
+  dbg("\n\t[ccHookDumpEnumerate]\t\twarping=%s",warping);
 
-
+  // On prépare le format grace à la partie du forall,
+  // on rajoute l'extension suivant si on a une returnVariable
+  if (job->parse.returnFromArgument){
+    const char *ompCcLocal=job->parse.returnFromArgument?"_SHARED":"";
+    //const char *ompCcReturnVariable=ccReturnVariableNameForOpenMP(job);
+    const char *ompCcReturnVariableWitoutPerThread=ccReturnVariableNameForOpenMPWitoutPerThread(job);
+    //const char *ompCcLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
+    //const char *ompCcLocalVariableName=job->parse.returnFromArgument?ompCcReturnVariable:"";
+    if (sprintf(format,"%s%%s%%s)",forall)<=0) error(!0,0,"Could not patch format!");
+    if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
+                warping,       // _WARP or not
+                ompCcLocal, // _SHARED or not
+                ",",           //ompCcLocalVariableComa,
+                ompCcReturnVariableWitoutPerThread)<=0) error(!0,0,"Could not patch warping within ENUMERATE!");
+  }else{
+    dbg("\n\t[ccHookDumpEnumerate] No returnFromArgument");
+    if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
+                forall,
+                job->is_a_function?"":")")<=0)
+      error(!0,0,"Could not patch format!");
+    dbg("\n[ccHookDumpEnumerate] format=%s",format);
+    if (sprintf(str,format,
+                warping,
+                "",
+                "")<=0)
+      error(!0,0,"Could not patch warping within ENUMERATE!");
+  }
+  return strdup(str);
+}
 
 
 // ****************************************************************************
@@ -163,7 +223,7 @@ char* cudaHookDumpEnumerate(nablaJob *job){
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-static char* cudaGather(nablaJob *job){
+static char* ccGather(nablaJob *job){
   int i;
   char gathers[1024];
   nablaVariable *var;
@@ -177,7 +237,7 @@ static char* cudaGather(nablaJob *job){
   if (job->parse.selection_statement_in_compound_statement){
     //nprintf(job->entity->main,
     //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!cudaGather*/");
+    //"/*if=>!ccGather*/");
     //return "";
   }
   
@@ -191,8 +251,8 @@ static char* cudaGather(nablaJob *job){
 
   // On filtre suivant s'il y a des forall
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather enum_enum=%c", job->parse.enum_enum);
+    //nprintf(job->entity->main, NULL, "\n\t\t// ccGather on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// ccGather enum_enum=%c", job->parse.enum_enum);
     if (job->parse.enum_enum=='\0') continue;
     filteredNbToGather+=1;
   }
@@ -222,7 +282,7 @@ static char* cudaGather(nablaJob *job){
 // ****************************************************************************
 // * Flush de la 'vraie' variable depuis celle déclarée en in/out
 // ****************************************************************************
-static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
+static void ccFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
   nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
   if (real_variable==NULL)
@@ -234,7 +294,7 @@ static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
 // ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
-static char* cudaScatter(nablaJob *job){
+static char* ccScatter(nablaJob *job){
   int i;
   char scatters[1024];
   nablaVariable *var;
@@ -244,7 +304,7 @@ static char* cudaScatter(nablaJob *job){
   
   if (job->parse.selection_statement_in_compound_statement){
     nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!cudaScatter*/");
+            "/*if=>!ccScatter*/");
     return "";
   }
   
@@ -256,8 +316,8 @@ static char* cudaScatter(nablaJob *job){
   if (nbToScatter==0) return "";
   
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter enum_enum=%c", job->parse.enum_enum);
+    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter enum_enum=%c", job->parse.enum_enum);
     if (job->parse.enum_enum=='\0') continue;
     filteredNbToScatter+=1;
   }
@@ -269,7 +329,7 @@ static char* cudaScatter(nablaJob *job){
   for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
     // Si c'est pas le scatter de l'ordre de la déclaration, on continue
     if (i!=job->parse.iScatter) continue;
-    cudaFlushRealVariable(job,var);
+    ccFlushRealVariable(job,var);
     // Pour l'instant, on ne scatter pas les node_coord
     if (strcmp(var->name,"coord")==0) continue;
     // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
@@ -281,20 +341,24 @@ static char* cudaScatter(nablaJob *job){
 }
 
 
-
-
-
-
 /*****************************************************************************
  * Fonction postfix à l'ENUMERATE_*
  *****************************************************************************/
-char* cudaHookPostfixEnumerate(nablaJob *job){
-  if (job->item[0]=='\0') return "// functioncudaHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return "";//// void ENUMERATE postfix\n\t";
+char* ccHookPostfixEnumerate(nablaJob *job){
+  if (job->is_a_function) return "";
+  if (job->item[0]=='\0') return "// job ccHookPostfixEnumerate\n";
+  if (job->xyz==NULL) return ccGather(job);
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
-\t\t//int prevCell=tcid-1;\n\
-\t\t//int nextCell=tcid+1;\n";
-  error(!0,0,"Could not switch in cudaHookPostfixEnumerate!");
+\t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_z = NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_x = NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_y = 1;\n\
+\t\tconst int delta_z = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
+\t\tconst int __attribute__((unused)) prevCell=delta;\n\
+\t\tconst int __attribute__((unused)) nextCell=delta;\n";
+  error(!0,0,"Could not switch in ccHookPostfixEnumerate!");
   return NULL;
 }
 
@@ -302,18 +366,18 @@ char* cudaHookPostfixEnumerate(nablaJob *job){
 /***************************************************************************** 
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
-char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
-  if (j=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
-  if (j=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
-  if (j=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
-  if (j=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
-  if (j=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
-  if (j=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (j=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
-  if (j=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (j=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  error(!0,0,"Could not switch in cudaHookItem!");
+char* ccHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
+  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  error(!0,0,"Could not switch in ccHookItem!");
   return NULL;
 }
 
@@ -321,14 +385,14 @@ char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
 /*****************************************************************************
  * FORALL token switch
  *****************************************************************************/
-static void cudaHookSwitchForall(astNode *n, nablaJob *job){
+static void ccHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
   // Now we're allowed to work
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "for(int i=0;i<8;i+=1)");
+    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_WARP_CELL(c)");
     break;
   }
   case(NODE):{
@@ -356,36 +420,49 @@ static void cudaHookSwitchForall(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void cudaHookSwitchToken(astNode *n, nablaJob *job){
+void ccHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
-
-  //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/", n->token);
-
-  //nprintf(nabla, "/*cudaHookSwitchToken*/", NULL);
-  cudaHookSwitchForall(n,job);
   
-  //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%d",n->tokenid);
-  //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%s",n->token);
-  // Dump des tokens possibles
+  //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
+  if (n->token)
+    dbg("\n\t[ccHookSwitchToken] token: '%s'?", n->token);
+ 
+  ccHookSwitchForall(n,job);
+  
   switch(n->tokenid){
     
+  case (MATERIAL):{
+    nprintf(nabla, "/*MATERIAL*/", "/*MATERIAL*/");
+    break;
+  }
+
   case (MIN_ASSIGN):{
-    nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/");
-    //job->min_assignment=true;
+    job->parse.left_of_assignment_operator=false;
+    nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/=ReduceMinToDouble");
     break;
   }
-    
-  case(INTEGER):{
-    nprintf(nabla, "/*INTEGER*/", "int ");
+  case (MAX_ASSIGN):{
+    job->parse.left_of_assignment_operator=false;
+    nprintf(nabla, "/*MAX_ASSIGN*/", "/*MAX_ASSIGN*/=ReduceMaxToDouble");
     break;
   }
-    
+
+  case(CONST):{
+    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->pragma->align());
+    break;
+  }
   case(ALIGNED):{
     nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->pragma->align());
     break;
   }
-
+    
+  case(INTEGER):{
+    nprintf(nabla, "/*INTEGER*/", "integer ");
+    break;
+  }
+    //case(RESTRICT):{nprintf(nabla, "/*RESTRICT*/", "__restrict__ ");break;}
+    
   case(POSTFIX_CONSTANT):{
      nprintf(nabla, "/*postfix_constant@true*/", NULL);
      job->parse.postfix_constant=true;
@@ -430,32 +507,36 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(UIDTYPE):{
-    nprintf(nabla, "UIDTYPE", "int64");
+    nprintf(nabla, "UIDTYPE", "int ");
     break;
   }
     
-  case(COMPOUND_JOB_INI):{
-    nprintf(nabla, "/*COMPOUND_JOB_INI:*/",NULL);
-    break;
-  }
-  case(COMPOUND_JOB_END):{
-    nprintf(nabla, "/*COMPOUND_JOB_END*/",NULL);
-    break;
-  }
-
   case(FORALL_INI):{
-    nprintf(nabla, "/*FORALL_INI*/","{\n\t\t\t");
-    nprintf(nabla, "/*cudaGather*/", "%s",cudaGather(job));
+    nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
+    nprintf(nabla, "/*ccGather*/", "%s",ccGather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*cudaScatter*/", "%s",cudaScatter(job));
-    nprintf(nabla, "/*FORALL_END*/","\n\t\t}\n\t");
+    nprintf(nabla, "/*ccScatter*/", ccScatter(job));
+    nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
     break;
   }
+
+  case(COMPOUND_JOB_INI):{
+    if (job->parse.returnFromArgument &&
+        ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP))
+      nprintf(nabla, NULL, "int tid = omp_get_thread_num();");
+    //nprintf(nabla, NULL, "/*COMPOUND_JOB_INI:*/");
+    break;
+  }
     
+  case(COMPOUND_JOB_END):{
+    //nprintf(nabla, NULL, "/*:COMPOUND_JOB_END*/");
+    break;
+  }
+     
   case('}'):{
     nprintf(nabla, NULL, "}"); 
     break;
@@ -473,16 +554,18 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case(']'):{
     if (job->parse.turnBracketsToParentheses==true){
-      if (job->item[0]=='c') nprintf(nabla, "/*tBktOFF*/", "[tcid]]");//tcid+c
-      if (job->item[0]=='n') nprintf(nabla, "/*tBktOFF*/", "[tnid]]");//tnid+c
+      if (job->item[0]=='c') nprintf(nabla, "/*tBktOFF*/", "[c]]");
+      if (job->item[0]=='n') nprintf(nabla, "/*tBktOFF*/", "[c]]");
       job->parse.turnBracketsToParentheses=false;
     }else{
       nprintf(nabla, NULL, "]");
     }
     //nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
-    //if (job->parse.isDotXYZ==1) nprintf(nabla, "/*]+FlushingIsPostfixed*/", ".x");
-    //if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, ".y");
-    //if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, ".z");
+    //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, "[c]]/*]+FlushingIsPostfixed*/");
+                                        //"[((c>>WARP_BIT)*((1+1+1)<<WARP_BIT))+(c&((1<<WARP_BIT)-1))]]/*]+FlushingIsPostfixed*/");
+    //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, NULL);
+    //if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, NULL);
+    //if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, NULL);
     job->parse.isPostfixed=0;
     // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
@@ -524,7 +607,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.enum_enum=='\0' && cnfgem=='n') nprintf(nabla, NULL, "node->nbCell()");
     break;
   }    
-  case (NBNODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->nbNode()"); break; }    
+  case (NBNODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "8/*cell->nbNode()*/"); break; }    
     //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
@@ -554,8 +637,9 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
-    if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(tcid)");//+c
-    if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(tnid)");//+n
+    if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(WARP_SIZE*c)");
+    if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(n)");
+
     break;
   }
   case (AT):{ nprintf(nabla, "/*knAt*/", "; knAt"); break; }
@@ -577,18 +661,43 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   case (XOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "^="); break; }
   case (IOR_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, "|="); break; }
 
+    
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
-    error_at_line(-1,0,__FILE__,__LINE__,"No return statement in jobs are allowed!");
-//#warning return reduce
-    nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");
-    //nprintf(nabla, NULL, "};\n\t return ");
+    if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP){
+      char mnx[4]={'M','x','x','\0'};
+      const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+      astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));
+      compound_statement=compound_statement->parent;
+      assert(compound_statement!=NULL);
+      //printf("compound_statement->rule=%s",compound_statement->rule);
+      assert(compound_statement->ruleid==rulenameToId("compound_statement"));
+      /////////////////////////////////////
+      // A *little* bit too cavalier here!
+      /////////////////////////////////////
+      min=max=NULL;
+      min=dfsFetchToken(compound_statement,"min");
+      max=dfsFetchToken(compound_statement,"max");
+      assert(min!=NULL || max !=NULL);
+      if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
+      if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}
+      //printf("mnx=%s\n",mnx); fflush(stdout);
+      nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\
+\n\tfor (int i=0; i<threads; i+=1){\n\
+//var=%s, mnx=%s\n\
+\t\t%s=(Reduce%sToDouble(%s_per_thread[i])<Reduce%sToDouble(%s))?Reduce%sToDouble(%s_per_thread[i]):Reduce%sToDouble(%s); \
+\n\t\t//info()<<\"%s=\"<<%s;\
+  \n\t}\n\treturn ",var,mnx,var,mnx,var,mnx,var,mnx,var,mnx,var,var,var);
+      job->parse.returnFromArgument=false;
+    }else{
+      nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");
+    }
     job->parse.got_a_return=true;
     job->parse.got_a_return_and_the_semi_colon=false;
     break;
   }
   case ('{'):{nprintf(nabla, NULL, "{\n\t\t"); break; }    
-  case ('&'):{nprintf(nabla, NULL, "/*adrs*/&"); break; }    
+  case ('&'):{nprintf(nabla, NULL, "&"); break; }    
   case (';'):{
     job->parse.variableIsArray=false;
     job->parse.turnBracketsToParentheses=false;
@@ -610,133 +719,79 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 }
 
 
+// ****************************************************************************
+// * Dump d'extra connectivity
+// ****************************************************************************
+void ccAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
+  return;
+}
+
+void ccAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
+  return;
+}
+
+
 /*****************************************************************************
   * Dump d'extra paramètres
  *****************************************************************************/
-void cudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+void ccHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla, "/* direct return from ccHookAddExtraParameters*/", NULL);
+  return;
+  // Rajout pour l'instant systématiquement des node_coords et du global_deltat
   nablaVariable *var;
   if (*numParams!=0) nprintf(nabla, NULL, ",");
-  nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
+  nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
   *numParams+=1;
   // Et on rajoute les variables globales
   for(var=nabla->variables;var!=NULL;var=var->next){
     //if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->item, "global")!=0) continue;
     nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
-            //(*numParams!=0)?",":"", 
-            (var->type[0]=='r')?"Real":(var->type[0]=='i')?"int":"/*Unknown type*/",
+            (var->type[0]=='r')?"real":(var->type[0]=='i')?"int":"/*Unknown type*/",
             var->name);
     *numParams+=1;
   }
+  
   // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c' || job->item[0]=='n')
-    cudaAddExtraConnectivitiesParameters(nabla, numParams);
+  if (job->item[0]=='c')
+    ccAddExtraConnectivitiesParameters(nabla, numParams);
 }
 
 
 
-// *****************************************************************************
-// * Dump d'extra connectivity
+
 // ****************************************************************************
-void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
-  const char* tabs="\t\t\t\t\t\t\t";
-  nprintf(nabla, NULL, ",\n%scell_node",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell_corner",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_prev",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_next",tabs);
-  *numParams+=1;
-}
-
-void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  nprintf(nabla, NULL, ",\n\t\tint *cell_node");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell_corner");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_prev");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_next");
-  *numParams+=1;
-}
-
-
-/*****************************************************************************
-  * Dump d'extra arguments
- *****************************************************************************/
-void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
-  const char* tabs="\t\t\t\t\t\t\t";
-  { // Rajout pour l'instant systématiquement des node_coords et du global_deltat
-    nablaVariable *var;
-    if (*numParams!=0) nprintf(nabla, NULL, "/*cudaAddExtraArguments*/,");
-    nprintf(nabla, NULL, "\n%snode_coord",tabs);
-    *numParams+=1;
-    // Et on rajoute les variables globales
-    for(var=nabla->variables;var!=NULL;var=var->next){
-      //if (strcmp(var->name, "time")==0) continue;
-      if (strcmp(var->item, "global")!=0) continue;
-      nprintf(nabla, NULL, ",global_%s", var->name);
-      *numParams+=1;
-   }
-  }
-  // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c'||job->item[0]=='n')
-    cudaAddExtraConnectivitiesArguments(nabla, numParams);
-}
-
-
-/*****************************************************************************
-  * Dump dans le src des parametres nabla en in comme en out
- *****************************************************************************/
-void cudaHookDumpNablaParameterList(nablaMain *nabla,
-                                    nablaJob *job,
-                                    astNode *n,
-                                    int *numParams){
-  dbg("\n\t[cudaHookDumpNablaParameterList]");
+// * Dump dans le src des parametres nabla en in comme en out
+// * On va surtout remplir les variables 'in' utilisées de support différent
+// * pour préparer les GATHER/SCATTER
+// ****************************************************************************
+void ccHookDumpNablaParameterList(nablaMain *nabla,
+                                     nablaJob *job,
+                                     astNode *n,
+                                     int *numParams){
+  dbg("\n\t[ccHookDumpNablaParameterList]");
+  // S'il n'y a pas de in ni de out, on a rien à faire
   if (n==NULL) return;
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")){
-    dbg("\n\t[cudaHookDumpNablaParameterList] compound_statement, returning");
-    return;
-  }
-  if (n->tokenid=='@'){
-    dbg("\n\t[cudaHookDumpNablaParameterList] @, returning");
-    return;
-  }
-  
-  //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
-  
+  // Aux premier COMPOUND_JOB_INI ou '@', on a terminé
+  if (n->tokenid==COMPOUND_JOB_INI) return;
+  if (n->tokenid=='@') return;
+  // Si on trouve un token 'OUT', c'est qu'on passe des 'in' aux 'out'
+  if (n->tokenid==OUT) job->parse.inout=enum_out_variable;
+  // Si on trouve un token 'INOUT', c'est qu'on passe des 'out' aux 'inout'
+  if (n->tokenid==INOUT) job->parse.inout=enum_inout_variable;
+  // Dés qu'on hit une déclaration, c'est qu'on a une variable candidate
   if (n->ruleid==rulenameToId("direct_declarator")){
+    // On la récupère
     nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t\t[cudaHookDumpNablaParameterList] looking for %s", n->children->token);
-    *numParams+=1;
-    // Si on ne trouve pas de variable, on a rien à faire
+    dbg("\n\t[ccHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
+    // Si elle n'existe pas, c'est pas normal à ce stade: c'est une erreur de nom
     if (var == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable error\n"));
-    if (strcmp(var->type, "real3")!=0){
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
-      }else{
-        nprintf(nabla, NULL, ",\n\t\t%s *%s_%s", var->type, var->item, n->children->token);
-      }
-    }else{
-      //exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable Real3 error\n"));
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
-        nprintf(nabla, NULL, NULL);
-      }else{
-        if (var->dim==0){
-          nprintf(nabla, NULL, ",\n\t\tReal3 *%s_%s", var->item, n->children->token);
-        }else{
-          nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
-        }
-      }
-    }
+      return exit(NABLA_ERROR|fprintf(stderr,
+                                      "\n[ccHookDumpNablaParameterList] Cannot find variable '%s'!\n",
+                                      n->children->token));
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
+      //nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
       // Création d'une nouvelle in_out_variable
       nablaVariable *new = nablaVariableNew(NULL);
       new->name=strdup(var->name);
@@ -752,150 +807,56 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
         nablaVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
-  if (n->children != NULL) cudaHookDumpNablaParameterList(nabla, job, n->children, numParams);
-  if (n->next != NULL) cudaHookDumpNablaParameterList(nabla, job, n->next, numParams);
+  if (n->children != NULL) ccHookDumpNablaParameterList(nabla,job,n->children,numParams);
+  if (n->next != NULL) ccHookDumpNablaParameterList(nabla,job,n->next, numParams);
+
 }
 
 
 
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-  if (n==NULL) return;
-  if (n->tokenid!=0) dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
-
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) {
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '{', returning");
-    return;
-  }
-  
-  if (n->tokenid=='@'){
-    return;
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '@', returning");
-  }
-    
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
-    nablaVariable *hit=nablaVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
-    // Si on ne trouve pas de variable, c'est pas normal
-    if (hit == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
-    nablaVariable *allready_here=nablaVariableFind(*variables, hit->name);
-    if (allready_here!=NULL){
-      dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
-    }else{
-      // Création d'une nouvelle called_variable
-      nablaVariable *new = nablaVariableNew(NULL);
-      new->name=strdup(hit->name);
-      new->item=strdup(hit->item);
-      new->type=strdup(hit->type);
-      new->dim=hit->dim;
-      new->size=hit->size;
-      // Rajout à notre liste
-      if (*variables==NULL){
-        dbg("\n\t\t\t[cudaAddNablaVariableList] first hit");
-        *variables=new;
-      }else{
-        dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
-        nablaVariableLast(*variables)->next=new;
-      }
-    }
-  }
-  if (n->children != NULL) cudaAddNablaVariableList(nabla, n->children, variables);
-  if (n->next != NULL) cudaAddNablaVariableList(nabla, n->next, variables);
+/*****************************************************************************
+  * Dump d'extra arguments
+ *****************************************************************************/
+void ccAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla,"\n\t\t/*ccAddExtraArguments*/",NULL);
 }
 
 
 /*****************************************************************************
   * Dump dans le src des arguments nabla en in comme en out
  *****************************************************************************/
-void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
-  //nprintf(nabla,"\n\t[cudaDumpNablaArgumentList]",NULL);
-  if (n==NULL) return;
-  
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
-  
-  if (n->tokenid=='@') return;
-  
-  //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
-  
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
-    //nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
-    *numParams+=1;
-    // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaArgumentList] Variable error\n"));
-    if (strcmp(var->type, "real3")!=0){
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
-      }else{
-        nprintf(nabla, NULL, ",\n\t\t\t\t\t\t\t%s_%s", var->item, n->children->token);
-      }
-    }else{
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0)
-        nprintf(nabla, NULL, NULL);
-      else
-        nprintf(nabla, NULL,  ",\n\t\t\t\t\t\t\t%s_%s", var->item, n->children->token);
-    }
-  }
-  if (n->children != NULL) cudaDumpNablaArgumentList(nabla, n->children, numParams);
-  if (n->next != NULL) cudaDumpNablaArgumentList(nabla, n->next, numParams);
+void ccDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
+  nprintf(nabla,"\n\t\t/*ccDumpNablaArgumentList*/",NULL);
 }
 
 
 /*****************************************************************************
   * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
  *****************************************************************************/
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
-  //nprintf(nabla,"\n\t[cudaHookDumpNablaParameterList]",NULL);
-  if (n==NULL) return;
-  
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
-  if (n->tokenid=='@') return;
+void ccDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
+  nprintf(nabla,"\n\t\t/*ccDumpNablaDebugFunctionFromOutArguments*/",NULL);
+}
 
-  if (n->tokenid==OUT) in_or_out=false;
-  if (n->tokenid==INOUT) in_or_out=false;
-    
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
-    // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
-    if (!in_or_out){
-      nprintf(nabla,NULL,"\n\t\t//printf(\"\\n%sVariable%sDim%s_%s:\");",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-      nprintf(nabla,NULL,"//dbg%sVariable%sDim%s_%s();",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-    }
-  }
-  cudaDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
-  cudaDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
+
+// *****************************************************************************
+// * Ajout des variables d'un job trouvé depuis une fonction @ée
+// *****************************************************************************
+void ccAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
+  nprintf(nabla,"\n/*ccAddNablaVariableList*/",NULL);
 }
 
 
 /*****************************************************************************
  * Génération d'un kernel associé à un support
  *****************************************************************************/
-void cudaHookJob(nablaMain *nabla, astNode *n){
+void ccHookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nablaJobNew(nabla->entity);
   nablaJobAdd(nabla->entity, job);
   nablaJobFill(nabla,job,n,NULL);
   
-  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
-  if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
-    exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CC
+  //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
+  //  exit(NABLA_ERROR|fprintf(stderr, "\n[ccHookJob] Error with return type which is not void\n"));
 }
 
 
