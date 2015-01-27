@@ -5,12 +5,20 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#####################${VT100_RESET}")
 # BACKEND *cc
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}*CC${VT100_RESET}")
 set(BACKEND_CC_C 
-    ccData.c
-    ccHook.c
-    ccJobs.c
-    ccMain.c
-    ccMesh.c
-    ${CMAKE_CURRENT_BINARY_DIR}/ccDump.S)
+  ccData.c 
+  ccHook.c 
+  ccHookGather.c 
+  ccHookReductions.c 
+  ccMain.c
+  ccHookDiffraction.c 
+  ccHookScatter.c
+  ccMesh.c       
+  ccHookArguments.c 
+  ccHookForLoops.c 
+  ccHookParameters.c 
+  ccHookTokens.c 
+  ccVariables.c
+  ${CMAKE_CURRENT_BINARY_DIR}/ccDump.S)
 
 # On spécifie en plus que nOkinaDump.S va utiliser incbin pour se compiler
 set_property(SOURCE ccDump.S 

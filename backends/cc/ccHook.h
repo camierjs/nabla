@@ -43,25 +43,31 @@
 #ifndef _NABLA_CC_H_
 #define _NABLA_CC_H_
 
-// SIMD
-char* ccStdIncludes(void);
-char* ccStdBits(void);
-extern nablaTypedef ccStdTypedef[];
-extern nablaDefine ccStdDefines[];
-extern char* ccStdForwards[];
+
+extern char* ccForwards[];
+extern nablaDefine ccDefines[];
+extern nablaTypedef ccTypedef[];
 
 
-char* ccStdGather(nablaJob *,nablaVariable*,enum_phase);
+char* ccHookBits(void);
+char* ccHookGather(nablaJob *,nablaVariable*,enum_phase);
+char* ccHookScatter(nablaVariable*);
+char* ccHookPrevCell(void);
+char* ccHookNextCell(void);
+char* ccHookIncludes(void);
 
+char* ccFilterGather(nablaJob *job);
+char* ccFilterScatter(nablaJob *job);
 
-char* ccStdScatter(nablaVariable*);
+void ccAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams);
+void ccDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams);
+void ccAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams);
+void ccDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out);
 
-
-char* ccStdPrevCell(void);
-
-
-char* ccStdNextCell(void);
-
+void ccHookReduction(struct nablaMainStruct *nabla, astNode *n);
+void ccHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct);
+void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job);
+void ccHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt);
 
 // Cilk+ parallel color
 char *ccParallelCilkSync(void);

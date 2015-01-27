@@ -47,7 +47,21 @@
 
 
 // ****************************************************************************
-// * Std or Mic DEFINES
+// * Forward Declarations
+// ****************************************************************************
+char* ccForwards[]={
+  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
+  "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
+  "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
+  "static void nabla_ini_node_coords(void);",
+  "static void verifCoords(void);",
+  NULL
+};
+
+// ****************************************************************************
+// * Defines
 // ****************************************************************************
 nablaDefine ccDefines[]={
   {"integer", "Integer"},
@@ -107,20 +121,19 @@ nablaDefine ccDefines[]={
 
 
 // ****************************************************************************
-// * Forward Declarations
+// * Typedefs
 // ****************************************************************************
-char* ccForwards[]={
-  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-  "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
-  "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
-  "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void nabla_ini_node_coords(void);",
-  "static void verifCoords(void);",
-  NULL
+nablaTypedef ccTypedef[]={
+  {"struct real3","Real3"},
+  {NULL,NULL}
 };
 
 
+// ****************************************************************************
+// * INCLUDES
+// ****************************************************************************
+char *ccHookBits(void){return "64";}
+char* ccHookIncludes(void){return "";}
 
 
 // ****************************************************************************
@@ -138,13 +151,6 @@ char *ccHookPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) 
 
 
 // ****************************************************************************
-// * INCLUDES
-// ****************************************************************************
-char* ccHookIncludes(void){return "";}
-char *ccHookBits(void){return "64";}
-
-
-// ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
 char* ccHookPrevCell(void){
@@ -159,102 +165,6 @@ char* ccHookNextCell(void){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
 }
 
-
-// ****************************************************************************
-// * Gather for Cells
-// ****************************************************************************
-static char* ccHookGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
-  // Phase de déclaration
-  if (phase==enum_phase_declaration)
-    return strdup("register int __attribute__((unused)) cw,ia;");
-  // Phase function call
-  char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-cw=(c<<WARP_BIT);\n\t\t\t\
-gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
-  return strdup(gather);
-}
-
-
-// ****************************************************************************
-// * Gather for Nodes
-// * En STD, le gather aux nodes est le même qu'aux cells
-// ****************************************************************************
-static char* ccHookGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
-  // Phase de déclaration
-  if (phase==enum_phase_declaration){
-    return strdup("int nw;");
-  }
-  // Phase function call
-  char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-nw=(n<<WARP_BIT);\n\t\t\t\
-//#warning continue node_cell_corner\n\
-//if (node_cell_corner[8*nw+c]==-1) continue;\n\
-gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
-%s\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
-  return strdup(gather);
-}
-
-
-// ****************************************************************************
-// * Gather switch
-// ****************************************************************************
-char* ccHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
-  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return ccHookGatherCells(job,var,phase);
-  if (itm=='n') return ccHookGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in ccStdGather!");
-  return NULL;
-}
-
-
-// ****************************************************************************
-// * Scatter
-// ****************************************************************************
-char* ccHookScatter(nablaVariable* var){
-  char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
-}
-
-
-// ****************************************************************************
-// * Std or Mic TYPEDEFS
-// ****************************************************************************
-nablaTypedef ccTypedef[]={
-  {"struct real3","Real3"},
-  {NULL,NULL}
-};
 
 // ****************************************************************************
 // * PARALLEL OpenMP
@@ -283,7 +193,7 @@ char *ccHookParallelVoidSync(void){
 char *ccHookParallelVoidSpawn(void){
   return "";
 }
-char *ccHookParallelVoidLoop(void){
+char *ccHookParallelVoidLoop(struct nablaMainStruct *n){
   return "";
 }
 char *ccHookParallelVoidIncludes(void){
@@ -357,80 +267,44 @@ void ccDefineEnumerates(nablaMain *nabla){
 }
 
 
+/*****************************************************************************
+ * Fonction postfix à l'ENUMERATE_*
+ *****************************************************************************/
+char* ccHookPostfixEnumerate(nablaJob *job){
+  if (job->is_a_function) return "";
+  if (job->item[0]=='\0') return "// job ccHookPostfixEnumerate\n";
+  if (job->xyz==NULL) return ccFilterGather(job);
+  if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
+\t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_z = NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_x = NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_y = 1;\n\
+\t\tconst int delta_z = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
+\t\tconst int __attribute__((unused)) prevCell=delta;\n\
+\t\tconst int __attribute__((unused)) nextCell=delta;\n";
+  error(!0,0,"Could not switch in ccHookPostfixEnumerate!");
+  return NULL;
+}
 
-// ****************************************************************************
-// * ccHookReduction
-// ****************************************************************************
-static void ccHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  const astNode *item_node = n->children->next->children;
-  const astNode *global_var_node = n->children->next->next;
-  const astNode *reduction_operation_node = global_var_node->next;
-  const astNode *item_var_node = reduction_operation_node->next;
-  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
-  char job_name[NABLA_MAX_FILE_NAME];
-  job_name[0]=0;
-  strcat(job_name,"ccReduction_");
-  strcat(job_name,global_var_name);
-  // Rajout du job de reduction
-  nablaJob *redjob = nablaJobNew(nabla->entity);
-  redjob->is_an_entry_point=true;
-  redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->rtntp  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->drctn  = strdup("NoDirection");
-  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[ccHookReduction] @ %s",at_single_cst_node->token);
-  sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->whenx  = 1;
-  redjob->whens[0] = atof(at_single_cst_node->token);
-  nablaJobAdd(nabla->entity, redjob);
-  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
-  // Génération de code associé à ce job de réduction
-  nprintf(nabla, NULL, "\n\
-// ******************************************************************************\n\
-// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
-// ******************************************************************************\n\
-void %s(void){ // @ %s\n\
-\tconst double reduction_init=%e;\n\
-\tconst int threads = omp_get_max_threads();\n\
-\tReal %s_per_thread[threads];\n\
-\tdbgFuncIn();\n\
-\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
-\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
-\t\tconst int tid = omp_get_thread_num();\n\
-\t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
-\t}\n\
-\tglobal_%s[0]=reduction_init;\n\
-\tfor (int i=0; i<threads; i+=1){\n\
-\t\tconst Real real_global_%s=global_%s[0];\n\
-\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
-\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
-\t}\n\
-}\n\n",   item_var_name,global_var_name,
-          job_name,
-          at_single_cst_node->token,
-          reduction_init,
-          global_var_name,
-          global_var_name,
-          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
-          item_var_name,
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name
-          );  
+
+/***************************************************************************** 
+ * Traitement des tokens NABLA ITEMS
+ *****************************************************************************/
+char* ccHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
+  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  error(!0,0,"Could not switch in ccHookItem!");
+  return NULL;
 }
 
 
@@ -491,20 +365,6 @@ static void ccHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNo
     nprintf(nabla, "/*has not been found*/", NULL);
   }
 }
-static void ccHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  if (fct->parse.function_call_name!=NULL){
-    //nprintf(nabla, "/*ShouldDumpParamsInCc*/", "/*Arg*/");
-    int numParams=1;
-    nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    ccAddExtraArguments(nabla, called, &numParams);
-    if (called->nblParamsNode != NULL)
-      ccDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
-  }
-}
-
-static void ccHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o cc*/", "%s", opt->name);
-}
 
 
 
@@ -534,6 +394,7 @@ static void ccHeaderPrefix(nablaMain *nabla){
           nabla->entity->name,
           nabla->entity->name);
 }
+
 
 /***************************************************************************** 
  * 
@@ -632,18 +493,6 @@ static bool ccHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, ast
 }
 
 
-// ****************************************************************************
-// * ccHookReturnFromArgument
-// ****************************************************************************
-static void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
-  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nprintf(nabla, NULL, "\
-\n\tint threads = omp_get_max_threads();\
-\n\tReal %s_per_thread[threads];", rtnVariable);
-}
-
-
 
 /*****************************************************************************
  * cc
@@ -655,15 +504,15 @@ NABLA_STATUS cc(nablaMain *nabla,
   char hdrFileName[NABLA_MAX_FILE_NAME];
   // Définition des hooks pour l'AVX ou le MIC
   nablaBackendSimdHooks nablaCcSimdStdHooks={
-    ccStdBits,
-    ccStdGather,
-    ccStdScatter,
-    ccStdTypedef,
-    ccStdDefines,
-    ccStdForwards,
-    ccStdPrevCell,
-    ccStdNextCell,
-    ccStdIncludes
+    ccHookBits,
+    ccHookGather,
+    ccHookScatter,
+    ccTypedef,
+    ccDefines,
+    ccForwards,
+    ccHookPrevCell,
+    ccHookNextCell,
+    ccHookIncludes
   };
   nabla->simd=&nablaCcSimdStdHooks;
     
@@ -798,3 +647,19 @@ NABLA_STATUS cc(nablaMain *nabla,
   ccMainPostfix(nabla);
   return NABLA_OK;
 }
+
+
+/*****************************************************************************
+ * Génération d'un kernel associé à un support
+ *****************************************************************************/
+void ccHookJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nablaJobNew(nabla->entity);
+  nablaJobAdd(nabla->entity, job);
+  nablaJobFill(nabla,job,n,NULL);
+  
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CC
+  //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
+  //  exit(NABLA_ERROR|fprintf(stderr, "\n[ccHookJob] Error with return type which is not void\n"));
+}
+
+

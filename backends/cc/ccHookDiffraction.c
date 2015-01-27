@@ -40,36 +40,56 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-// ****************************************************************************
-// * Void Sync
-// ****************************************************************************
-char *nccOkinaParallelVoidSync(void){
-  return "";
+#include "nabla.h"
+#include "ccHook.h"
+#include "nabla.tab.h"
+
+
+/*****************************************************************************
+ * Diffraction
+ *****************************************************************************/
+void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
+  // Et on amorce la diffraction
+  if ((*n)->ruleid == rulenameToId("expression_statement")
+      && (*n)->children->ruleid == rulenameToId("expression")
+      //&& (*n)->children->children->ruleid == rulenameToId("expression")
+      //&& job->parse.statementToDiffract==NULL
+      //&& job->parse.diffractingXYZ==0
+      ){
+    //dbg("\n[ccHookJobDiffractStatement] amorce la diffraction");
+//#warning Diffracting is turned OFF
+      job->parse.statementToDiffract=NULL;//*n;
+      // We're juste READY, not diffracting yet!
+      job->parse.diffractingXYZ=0;      
+      nprintf(nabla, "/* DiffractingREADY */",NULL);
+  }
+  
+  // On avance la diffraction
+  if ((*n)->tokenid == ';'
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ<3){
+    dbg("\n[ccHookJobDiffractStatement] avance dans la diffraction");
+    job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
+    (*n)=job->parse.statementToDiffract;
+    nprintf(nabla, NULL, ";\n\t");
+    //nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
+  }
+
+  // On flush la diffraction 
+  if ((*n)->tokenid == ';' 
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ==3){
+    dbg("\n[ccHookJobDiffractStatement] Flush de la diffraction");
+    job->parse.diffracting=false;
+    job->parse.statementToDiffract=NULL;
+    job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
+    nprintf(nabla, "/*<end of diffracting>*/",NULL);
+  }
+  //dbg("\n[ccHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }
 
-
-// ****************************************************************************
-// * Void Spawn
-// ****************************************************************************
-char *nccOkinaParallelVoidSpawn(void){
-  return "";
-}
-
-
-// ****************************************************************************
-// * Void for loop
-// ****************************************************************************
-char *nccOkinaParallelVoidLoop(void){
-  return "";
-}
-
-
-// ****************************************************************************
-// * Void includes
-// ****************************************************************************
-char *nccOkinaParallelVoidIncludes(void){
-  return "\
-int omp_get_max_threads(void){return 1;}\n\
-int omp_get_thread_num(void){return 0;}\n\
-";
-}

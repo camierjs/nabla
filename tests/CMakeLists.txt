@@ -141,13 +141,13 @@ endif()
 #########################
 # NABLA TESTS FOR OKINA #
 #########################
-foreach(parallel omp cilk)
+foreach(parallel seq omp cilk)
   foreach(simd std sse avx avx2 mic)
     nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
 
-foreach(parallel omp) #cilk
+foreach(parallel seq omp) #cilk
   foreach(simd std sse avx avx2) #mic
     nabla_add_okina_test(lulesh 1 run ${simd} ${parallel})
     nabla_add_okina_test(lulesh 4 run ${simd} ${parallel})
