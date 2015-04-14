@@ -74,7 +74,7 @@ faces void iniFaces(void) @ -9.5{
   const Real3 s = ½*(coord[0]+coord[1]);
   const Real k = option_isotropic?1.0:option_k;
   const Real θ = option_isotropic?0.0:KappaWaves(s, option_θ);
-  const Real3 v0 = Real3( cos(θ), sin(θ), 0.0);
+  //const Real3 v0 = Real3( cos(θ), sin(θ), 0.0);
   const Real3x3 P  = Real3x3(Real3( cos(θ), sin(θ), 0.0),
                              Real3(-sin(θ), cos(θ), 0.0),
                              Real3(    0.0,    0.0, 1.0));

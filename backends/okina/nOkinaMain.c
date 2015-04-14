@@ -215,7 +215,9 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
   entry_points=nablaEntryPointsSort(n);
   
   // Et on rescan afin de dumper
-  for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
+   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
+    if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0)continue;
       dbg("%s\n\t[nccOkinaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],

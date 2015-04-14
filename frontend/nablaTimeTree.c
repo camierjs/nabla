@@ -107,12 +107,64 @@ static char *filled(const bool is_a_function){
 }
 
 
+
+// *****************************************************************************
+// * timeTreeSaveMathematica
+// *****************************************************************************
+static void timeTreeSaveMathematica(FILE *fTreeOutput, nablaJob *job,
+                                    int number_of_entry_points){
+  dbg("\n[timeTreeSaveNodes] number_of_entry_points=%d", number_of_entry_points);
+  if (number_of_entry_points==0){
+    dbg("\n[timeTreeSaveNodes] returning");
+    return;
+  }
+  
+  for(int i=0;i<number_of_entry_points;i+=1){
+    const char *jobName=job[i].name;
+    const char *jobWhen=whenName("", job[i].whens[0]);
+    fprintf(fTreeOutput,"\n\tnode_%s_%s [style=%s, shape=%s, color=%s, label=\"%s\", fontsize=32];",
+            jobName,
+            strKillMinusDot(jobWhen),
+            filled(job[i].is_a_function),
+            shape(job[i].is_a_function),
+            color(job[i].item[0]),
+            job[i].name_utf8);
+  }
+
+  fprintf(fTreeOutput,"\n");
+  for(int i=0;i<number_of_entry_points;i+=1){
+    int j,k,n;
+    double jAt;//,kAt;
+    const double iAt=job[i].whens[0];
+    const char *iJobName=job[i].name;
+    const char *iJobWhen=strKillMinusDot(whenName("", job[i].whens[0]));
+    
+    for(j=i;j<number_of_entry_points;j+=1){
+      if (job[j].whens[0]==iAt) continue;
+      jAt=job[j].whens[0];
+      break;
+    }
+    for(k=j;k<number_of_entry_points;k+=1){
+      if (job[k].whens[0]==jAt) continue;
+      break;
+    }
+    for(n=j;n<k;n+=1){
+      const char *nJobName=job[n].name;
+      const char *nJobWhen=strKillMinusDot(whenName("", job[n].whens[0]));
+      fprintf(fTreeOutput,"\n\tnode_%s_%s -> node_%s_%s;",
+              iJobName,iJobWhen, nJobName,nJobWhen);
+    }
+  }
+}
+
+
 // *****************************************************************************
 // * timeTreeSaveNodes
 // * Les jobs en entrée sont triés et n'ont pas de siblings, tout a été mis à plat
 // * Attention car toute la structure des jobs n'est pas à jour
 // * On le fait en deux passes selon le bool subgraph
 // *****************************************************************************
+__attribute__((unused))
 static void timeTreeSaveNodes(FILE *fTreeOutput, nablaJob *job,
                               int number_of_entry_points,
                               bool subgraph){
@@ -236,16 +288,14 @@ NABLA_STATUS timeTreeSave(nablaMain *nabla, nablaJob *jobs, int number_of_entry_
   sprintf(fileName, "%s.time.dot", nabla->name);
   // Saving tree file
   if ((dotFile=fopen(fileName, "w")) == 0) return NABLA_ERROR|dbg("[timeTreeSave] fopen ERROR");
-  fprintf(dotFile, "digraph {\n\
-\tcompound=true;\n\
-\t//layers = \"Variables:TempsLogique\";\n\
-\t//node[style=filled, shape=box, color=\"#CCDDCC\", fontsize=32];\n");
+  fprintf(dotFile, "digraph {");
   dbg("\n[timeTreeSave] timeTreeSaveNodes");
-  timeTreeSaveNodes(dotFile,jobs,number_of_entry_points,true);
+  timeTreeSaveMathematica(dotFile,jobs,number_of_entry_points);
+  //timeTreeSaveNodes(dotFile,jobs,number_of_entry_points,true);
   //timeTreeSaveNodes(dotFile,jobs,number_of_entry_points,false);
   //timeTreeSaveEdges(dotFile, jobs);
-  fprintf(dotFile, "\n\t//Start [shape=Mdiamond];\n\t//End [shape=Msquare];");
-  //fprintf(dotFile, "\n\tnode_EndOfComputeLoop -> node_ComputeLoop [ltail=clusterEndOfComputeLoop, lhead=clusterComputeLoop];\t");
+  //fprintf(dotFile, "\n\t//Start [shape=Mdiamond];\n\t//End [shape=Msquare];");
+  fprintf(dotFile, "\n\tnode_ComputeLoopEnd_inf -> node_ComputeLoopBegin_0d00;");
   fprintf(dotFile, "\n}\n");
   fclose(dotFile);
   return NABLA_OK;

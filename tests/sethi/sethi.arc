@@ -10,19 +10,17 @@
   </main>
 
   <arcane-post-processing>
-    <save-init>0</save-init>
-	 <output-period>0</output-period>
+    <save-init>1</save-init>
+	 <output-period>4</output-period>
     <output-history-period>0</output-history-period>
-    <end-execution-output>0</end-execution-output>
+    <end-execution-output>1</end-execution-output>
     <output>
-      <variable>cell_rh</variable>
-      <variable>cell_u</variable>
-      <variable>cell_v</variable>
       <variable>cell_E</variable>
     </output>
   </arcane-post-processing>
 
   <arcane-checkpoint>
+    <period>0</period>
     <do-dump-at-end>false</do-dump-at-end>
   </arcane-checkpoint>
 
@@ -31,8 +29,8 @@
       <cartesian>
         <nsd>4 1</nsd> 
         <origine>0.0 0.0</origine>
-        <lx nx='256'>1.0</lx>
-        <ly ny='256'>1.0</ly>
+        <lx nx='512'>1.0</lx>
+        <ly ny='512'>1.0</ly>
       </cartesian>
     </meshgenerator>
   </mesh> 
@@ -41,6 +39,8 @@
     <testcase>1</testcase>
     <uid_bubble_one>32640</uid_bubble_one>
     <uid_bubble_two>26480</uid_bubble_two>
-    <nstepmax>4</nstepmax>
+    <!--uid_bubble_one>2148</uid_bubble_one>
+    <uid_bubble_two>1324</uid_bubble_two-->
+    <nstepmax>1024</nstepmax>
   </sethi>
 </case>

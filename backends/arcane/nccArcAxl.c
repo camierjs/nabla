@@ -189,6 +189,8 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
 
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){
+    if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
+    if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
     const double when=entry_point[i].whens[0];
     const char *where=nccAxlGeneratorEntryPointWhere(when);
     const char *whenName=nccAxlGeneratorEntryPointWhenName(when);

@@ -1,8 +1,8 @@
 TGT=${name}
-MESH=4
+MESH=16
 #SIMD=std
 #PARALLEL=omp
-#LOG=-t -v $(TGT).log
+LOG=-t #-v $(TGT).log
 ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
 
 include ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.${backend}

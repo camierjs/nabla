@@ -26,11 +26,11 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_cea\
  -larcane_aleph\
  -larcane_ios\
+ -larcane_hyoda\
+ -larcane_aleph_hypre\
  $(ARCANE_PKG_LIBS)\
  -Wl,-rpath,${ARCANE_ROOT}/lib
-# -larcane_hyoda\
 # -larcane_aleph_sloop\
-# -larcane_aleph_hypre\
 # -larcane_aleph_trilinos\
 
 
@@ -39,12 +39,13 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
 #############
 CXX=${CMAKE_CXX_COMPILER}
 CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
-			-I$(MPI_PATH)/include\
+			-I/usr/lib/openmpi/include\
 			-I${ARCANE_ROOT}/include\
+			-I${HYPRE_INCLUDE_DIR}\
+			-I${ICET_INCLUDE_DIRS}\
 			$(ARCANE_CFLAGS)
 
 #			-I${GMP_DIR}/include\
-#			-I${HYPRE_INC}/include\
 #			-I${SLOOP_INC}
 
 
@@ -80,7 +81,7 @@ main.o:$(TGT)Module.o
 
 
 $(TGT):main.o
-	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIB}
+	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
 
 
 #####################

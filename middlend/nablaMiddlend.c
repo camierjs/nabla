@@ -320,17 +320,37 @@ int nablaNumberOfEntryPoints(nablaMain *nabla){
  * nablaEntryPointsSort
  *****************************************************************************/
 nablaJob* nablaEntryPointsSort(nablaMain *nabla){
+  //bool initPhase=true;
   int i,j,number_of_entry_points=0;
   nablaJob *job, *entry_points;
   
   number_of_entry_points=nablaNumberOfEntryPoints(nabla);
   dbg("\n[nablaEntryPointsSort] found %d entry-points", number_of_entry_points);
 
+  // On va rajouter le ComputeLoop[Begin||End]
+  number_of_entry_points+=2;
+  
   // On prépare le plan de travail de l'ensemble des entry_points
-  entry_points=(nablaJob *)calloc(number_of_entry_points, sizeof(nablaJob));
+  entry_points =(nablaJob *)calloc(number_of_entry_points, sizeof(nablaJob));
+
+  entry_points[0].item = strdup("\0");
+  entry_points[0].is_an_entry_point=true;
+  entry_points[0].is_a_function=true;
+  entry_points[0].name = strdup("ComputeLoopBegin");
+  entry_points[0].name_utf8 = strdup("ComputeLoopBegin");
+  entry_points[0].whens[0] = ENTRY_POINT_compute_loop;
+  entry_points[0].whenx = 1;
+
+  entry_points[1].item = strdup("\0");
+  entry_points[1].is_an_entry_point=true;
+  entry_points[1].is_a_function=true;
+  entry_points[1].name = strdup("ComputeLoopEnd");
+  entry_points[1].name_utf8 = strdup("ComputeLoopEnd");
+  entry_points[1].whens[0] = ENTRY_POINT_exit;
+  entry_points[1].whenx = 1; 
 
   // On re scan pour remplir les duplicats
-  for(i=0,job=nabla->entity->jobs;job!=NULL;job=job->next){
+  for(i=2,job=nabla->entity->jobs;job!=NULL;job=job->next){
     if (!job->is_an_entry_point) continue;
     for(j=0;j<job->whenx;++j){
       dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %f", i, job->name, job->whens[j]);
@@ -338,7 +358,6 @@ nablaJob* nablaEntryPointsSort(nablaMain *nabla){
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=job->is_a_function;
       //assert(job->type!=NULL);
-      entry_points[i].item=job->item;
       assert(job->name!=NULL);
       entry_points[i].name=job->name;
       assert(job->name_utf8!=NULL);

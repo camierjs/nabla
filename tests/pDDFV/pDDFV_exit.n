@@ -63,7 +63,7 @@ void testForQuit(void) @ 50.0{
 // * testForSlurm
 // ********************************************************
 void testForSlurm(void) @ 51.0{
-  const Integer tlimit=time limit;
+  /*const Integer tlimit=time limit;
   const Integer tremain=time remain;
   info()<<"\33[43;30m#"<<GlobalIteration<<", remaining "
         << tremain << "/" <<tlimit <<"(s)\33[m";
@@ -72,6 +72,6 @@ void testForSlurm(void) @ 51.0{
     info()<<"\33[43;30m#"<<GlobalIteration<<" now EXITing! ("
           << tremain << "<" <<option_slurm_tremain<<"(s))\33[m";
     exit;
-  }
+    }*/
 }
 

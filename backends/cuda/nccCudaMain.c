@@ -332,6 +332,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
   
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){
+    if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0)continue;
     dbg("%s\n\t[nccCudaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
@@ -345,8 +347,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \n//#warning Should get rid of courant_or_hydro\
 \n//\t\tint courant_or_hydro=0;        \
 \n\t\t//cudaFuncSetCacheConfig(...); \
-\n\t\tgettimeofday(&st, NULL);\
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
+\n\t\tgettimeofday(&st, NULL);\
 \n\t\t//while (new_delta_t>=0. && iteration<option_max_iterations){//host_time<=OPTION_TIME_END){\
 \n\t\twhile(host_time<option_stoptime && iteration<option_max_iterations){\
 \n\t\t\t//printf(\"\\nITERATION %%d\", iteration);\
@@ -390,9 +392,9 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 
     if (entry_points[i].reduction==true){
       nprintf(n, NULL,"\
-\n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
+\n\t\t\t//CUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(host_reduce_results, global_device_shared_reduce_results,reduced_size*sizeof(double), cudaMemcpyDeviceToHost)); \
-\n\t\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
+\n\t\t\t//CUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
 \n\t\t\treduced=host_reduce_results[0];\
 \n\t\t\tfor(int i=0;i<reduced_size;i+=1){\
 \n\t\t\t\t//printf(\"\\n\\treduced=%%.21e, host_reduce_results[%%d/%%d]=%%.21e\",reduced,i,host_reduce_results[i],reduced_size);\
@@ -405,16 +407,16 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_%s, &reduced, sizeof(double), cudaMemcpyHostToDevice));\n\
 //\t\t\tcourant_or_hydro+=1;\n",entry_points[i].reduction_name);
     }
-    
-    nprintf(n, NULL, "\n\t\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaCheck_%s\");\
-\n\t\t\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\n",entry_points[i].name);
+    nprintf(n, NULL, "\n\t\t\t\t//CUDA_CHECK_LAST_KERNEL(\"cudaCheck_%s\");\
+\n\t\t\t\t//CUDA_HANDLE_ERROR(cudaDeviceSynchronize());\n",entry_points[i].name);
  }
   nprintf(n, NULL,"\
-\n\t\t\tCUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
+\n\t\t\t//CUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
 \n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.21e, reduced blocs=%%d\", iteration, new_delta_t, reduced_size);\
 \n\t\t\thost_time+=new_delta_t;\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
+\n\t\t\t//if (new_delta_t>=0.) printf(\"\\n\\t[#%%d] \\r\",iteration);\
 \n\t\t\tif (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, new_delta_t);\
 \n\t\t\titeration+=1;\
 \n\t\t}");

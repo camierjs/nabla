@@ -2,7 +2,7 @@
 # ROOT_PATHS #
 ##############
 CMAKE_ROOT_PATH = /usr/bin
-#COMPILER_ROOT_PATH=/usr/bin
+COMPILER_ROOT_PATH=/usr/bin
 COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
 
 ####################
@@ -50,6 +50,7 @@ config:cfg
 
 bin:
 	@cd $(BUILD_PATH) && make install
+install:bin
 
 ##################
 # TESTs Commands #
@@ -63,18 +64,50 @@ tstn:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
+tsta:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -R arcane)
+
+tstas:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
+tstas4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
+tsthas:
+	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
+tsthas4:
+	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
+
+tsts:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_1)
+tsths:
+	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_sethi_run_1)
+tsts4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_4)
+
+tstm:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
+tstmh:
+	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
+tstm4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_4)
+
 tstr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
 tstro:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
-tststd:
+tstl:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_1)
+tstl4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_4)
+tstl8:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_8)
+tstseq:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
 tstmh1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
-tststd1:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_omp)
+tststd:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
 tststd4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
 tstsse:

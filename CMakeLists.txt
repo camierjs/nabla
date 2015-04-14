@@ -46,8 +46,17 @@ endif()
 ##########
 find_package(MPI)
 include(CMake/FindARCANE.cmake)
+include(CMake/FindHYPRE.cmake)
+include(CMake/FindIceT.cmake)
 if(ARCANE_FOUND)
   info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
+endif()
+if(HYPRE_FOUND)
+  info("\t${VT100_FG_MAGENTA}HYPRE${VT100_RESET} has been found in ${VT100_BOLD}${HYPRE_ROOT}${VT100_RESET}")
+endif()
+if(ICET_FOUND)
+  info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} has been found in ${VT100_BOLD}${ICET_ROOT}${VT100_RESET}")
+  info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} libraries are ${VT100_BOLD}${ICET_LIBRARIES}${VT100_RESET}")
 endif()
 
 #######################

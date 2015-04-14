@@ -6,10 +6,10 @@
   </arcane>
 
 	<arcane-post-processing>
-     <save-init>0</save-init>
+     <save-init>1</save-init>
      <end-execution-output>1</end-execution-output>
      <!--format name="Ensight7PostProcessor"/-->
-	  <output-period>0</output-period>
+	  <output-period>1</output-period>
 	  <output>
 		  <variable>cell_cell_th</variable>
 		  <variable>cell_cell_th_diff</variable>
@@ -22,13 +22,13 @@
 		  <!--variable>node_node_exact_solution</variable-->
 		  <!--variable>node_node_sd_id</variable-->
 		  <!--variable>node_node_th_kp1mk</variable-->
-		  <variable>face_face_th</variable>
+		  <!--variable>face_face_th</variable-->
         <group>AllCells</group>
  		</output> 
 	</arcane-post-processing>
 
    <arcane-checkpoint>
-     <period>0</period>
+     <period>2</period>
      <do-dump-at-end>true</do-dump-at-end>
    </arcane-checkpoint>
 
@@ -44,8 +44,8 @@
  		 <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="160" prx="1.0">1.0</lx>
-			<ly ny="160" pry="1.0">1.0</ly>
+			<lx nx="64" prx="1.0">1.0</lx>
+			<ly ny="64" pry="1.0">1.0</ly>
 	    </cartesian> 
      </meshgenerator>
    </mesh>
@@ -66,7 +66,7 @@
      <option_rdq>false</option_rdq>
      <option_rdq_al>0.4</option_rdq_al>
 
-     <option_sncq>true</option_sncq>
+     <option_sncq>false</option_sncq>
      <option_sncq_th>0.25</option_sncq_th>
 
      <!-- Options des solutions Analytiques *ou pas* -->
@@ -75,10 +75,10 @@
 
      <!-- Options de l'anisotropisme -->
      <option_isotropic>false</option_isotropic>
-     <option_k>10000.0</option_k>
-     <option_th>0.52359877559829887308</option_th><!-- 0.52359877559829887308 -->
+     <option_k>200.0</option_k>
+     <option_th>0.0</option_th><!-- 0.52359877559829887308 -->
 
-     <option_spin_th>false</option_spin_th>
+     <option_spin_th>true</option_spin_th>
      <option_spin_th_x>3.0</option_spin_th_x>
      <option_spin_th_y>3.0</option_spin_th_y>
 
@@ -88,11 +88,12 @@
      <option_picard_ep>1e-5</option_picard_ep>
 
      <alephEpsilon>1e-10</alephEpsilon>
-     <alephUnderlyingSolver>1</alephUnderlyingSolver>
      <alephMaxIterations>8192</alephMaxIterations>
-     <alephPreconditionerMethod>5</alephPreconditionerMethod>
-     <alephSolverMethod>6</alephSolverMethod>
-     <alephNumberOfCores>1</alephNumberOfCores> 
+
+     <alephUnderlyingSolver>2</alephUnderlyingSolver>
+     <alephPreconditionerMethod>2</alephPreconditionerMethod>
+     <alephSolverMethod>3</alephSolverMethod>
+     <alephNumberOfCores>0</alephNumberOfCores> 
      <!--  5-3-0 ou x-6-1 -->
      
      <option_debug_geometry>false</option_debug_geometry>
@@ -110,6 +111,6 @@
      <option_dag>false</option_dag>
 
      <option_quit_when_finish>true</option_quit_when_finish>
-     <option_only_one_iteration>true</option_only_one_iteration>
+     <option_only_one_iteration>false</option_only_one_iteration>
    </p-d-d-f-v>
 </case>
