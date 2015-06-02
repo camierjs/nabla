@@ -90,7 +90,7 @@ bool adrs_it=false;
 %token AT DIESE
 %token IN OUT INOUT
 %token ALL OWN INNER OUTER
-%token BOOL INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
+%token BOOL NATURAL INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
 %token CELLTYPE NODETYPE FACETYPE
 %token CELL CELLS FACE FACES NODE NODES
 %token FORALL FORALL_INI FORALL_END FORALL_NODE_INDEX FORALL_CELL_INDEX FORALL_MTRL_INDEX
@@ -129,8 +129,11 @@ bool adrs_it=false;
 %token TIME EXIT ITERATION
 
  // If-Else Ambiguity
-%nonassoc REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY
-%nonassoc ELSE
+ //%nonassoc REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY
+ //%precedence REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY
+ //%nonassoc ELSE
+ //%precedence ELSE
+ //%right THEN ELSE
 
  // Specific options
 %debug
@@ -176,6 +179,7 @@ type_specifier
 | BOOL {rhs;}
 | SIZE_T {rhs;}
 | REAL { if (type_precise) preciseY1($$,GMP_REAL) else {rhs;}; type_precise=type_volatile=false;}
+| NATURAL {rhs;}
 | INTEGER {
     if (type_precise){
       if (type_volatile) volatilePreciseY1($$,GMP_INTEGER)
@@ -634,7 +638,9 @@ expression_statement
 | expression AT at_constant';' {rhs;}
 ;
 selection_statement
-: IF '(' expression ')' statement %prec REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY {rhs;}
+//: IF '(' expression ')' statement %prec {rhs;}
+//: IF '(' expression ')' statement REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY {rhs;}
+: IF '(' expression ')' statement {rhs;}
 | IF '(' expression ')' statement ELSE statement {rhs;}
 ;
 
@@ -779,7 +785,7 @@ FORALL nabla_items IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;};
 // ∇ libraries //
 /////////////////
 single_library:
-| LIB_DFT         {rhs;}
+  LIB_DFT         {rhs;}
 | LIB_GMP         {rhs;}
 | LIB_MPI         {rhs;}
 | MAIL            {rhs;}

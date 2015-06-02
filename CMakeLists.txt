@@ -29,7 +29,7 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c 
-  COMPILE_FLAGS "--report=all --warnings=all,error")#--graph 
+  COMPILE_FLAGS "--report=all --warnings=all")#--warnings=all,error --graph 
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
 add_flex_bison_dependency(nScanner nParser)
 

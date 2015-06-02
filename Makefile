@@ -3,7 +3,7 @@
 ##############
 CMAKE_ROOT_PATH = /usr/bin
 COMPILER_ROOT_PATH=/usr/bin
-COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
+#COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
 
 ####################
 # COMPILER OPTIONS #
@@ -66,6 +66,10 @@ tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
 tsta:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -R arcane)
+
+
+tstgram:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)
 
 tstas:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)

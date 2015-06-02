@@ -50,7 +50,7 @@ char* nccArcLibAlephHeader(void){
   return "\n\
 #include <arcane/aleph/AlephTypesSolver.h>\n\
 #include <arcane/aleph/Aleph.h>\n\n\
-#include <arcane/hyoda/Hyoda.h>\n\n\
+//#include <arcane/hyoda/Hyoda.h>\n\n\
 #ifdef ARCANE_HAS_PACKAGE_SLOOP\n\
 #define HASMPI\n\
 #define SLOOP_MATH\n\

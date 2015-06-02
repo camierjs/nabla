@@ -30,7 +30,7 @@ function(get_additional_nabla_files_and_set_Makefile name backend path)
     OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   #info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${path}/Makefile.${backend})
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${path}/Makefile)
   separate_arguments(ADDITIONAL_NABLA_FILES)
   foreach(file ${name}.n ${ADDITIONAL_NABLA_FILES})
     #info("${VT100_FG_GREEN}file=${file}${VT100_RESET}") 
@@ -48,7 +48,7 @@ function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd addition
   set(subpath ${nb_proc})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
   add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
-	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile.arcane ${cmd}${nb_proc}")
+	 COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction()
 
 #########################
@@ -69,7 +69,7 @@ function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
   set(subpath ${nb_proc}/${cmd}/${simd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
   add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
-	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile.okina ${cmd}${nb_proc}")
+	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)
@@ -83,7 +83,7 @@ function(NABLA_ADD_CUDA_TEST name nb_proc cmd)
   set(backend cuda)
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} .)
   add_test(NAME nabla_cuda_${name}_${cmd}_${nb_proc} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}
-	 COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/Makefile.cuda ${cmd}${nb_proc})
+	 COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/Makefile ${cmd}${nb_proc})
 endfunction(NABLA_ADD_CUDA_TEST)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.cuda)
 

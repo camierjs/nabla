@@ -63,6 +63,8 @@ static void ignoreLineComments(void);
 "iNode"           { return tok(&yylval, INODE);}
 "mpi"             { return tok(&yylval, LIB_MPI);}
 "reduce"          { return tok(&yylval, MPI_REDUCE);}
+ZNRC					[ℤℕℝℂ] 2114,2115,211D,2101
+ℤℕℝℂ
 */
 
 %}
@@ -133,6 +135,11 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Particle"        { return tok(&yylval, PARTICLETYPE);}
 "particles"			{ return tok(&yylval, PARTICLES);}
 "options"		   { return tok(&yylval, OPTIONS);}
+
+"ℝ"			      { return tok(&yylval, REAL);}
+"ℝ³"			      { return tok(&yylval, REAL3);}
+"ℤ"		         { return tok(&yylval, INTEGER);}
+"ℕ"		         { return tok(&yylval, NATURAL);}
 
 "size_t"			   { return tok(&yylval, SIZE_T);}
 "Bool"			   { return tok(&yylval, BOOL);}

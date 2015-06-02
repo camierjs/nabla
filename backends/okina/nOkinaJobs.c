@@ -461,6 +461,10 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*INTEGER*/", "integer ");
     break;
   }
+  case(NATURAL):{
+    nprintf(nabla, "/*NATURAL*/", "integer ");
+    break;
+  }
     //case(RESTRICT):{nprintf(nabla, "/*RESTRICT*/", "__restrict__ ");break;}
     
   case(POSTFIX_CONSTANT):{

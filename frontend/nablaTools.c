@@ -241,12 +241,17 @@ void nUtf8SupThree(char **read){//read
 void nUtf8(char **bkp){
   char *p=*bkp;
   if (p==NULL) return;
-  //dbg("\n[nUtf8] '%s'",p);
+  dbg("\n[nUtf8] '%s'",p);
   if (*(unsigned int*)p==0x0074b4ce) { // "δt"
     //dbg("\n[nUtf8] hits deltat!");
     *bkp=strdup("deltat"); 
     return;
   }
+  if (*(unsigned int*)p==0xc29d84e2) { // ℝ³: 84e2 c29d (00b3)!
+    dbg("\n[nUtf8] hits Real^3!");
+    *bkp=strdup("Real3"); 
+    return;
+  }  
   /*if (*(unsigned int*)p==0x00b584e2) { // "ℵ"
     dbg("\n[nUtf8] hits single ℵ ");
     *bkp=strdup("aleph"); 
@@ -254,7 +259,7 @@ void nUtf8(char **bkp){
     }*/
   //dbg("\n\t\t[nUtf8] '%s':", *bkp);
   for(;*p!=0;p++){
-    //dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
+    dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
     // αβγδεζηθικλμνξοπρςστυφχψω
     if (p2c(p,0xb1ce,"al")) p+=1; // α = alpha    → 'al'
     if (p2c(p,0xb2ce,"bt")) p+=1; // β = beta     → 'bt'
@@ -332,6 +337,11 @@ void nUtf8(char **bkp){
     
     if (p3s(p,0xa788e2,"&&",bkp)) p+=2;
     if (p3s(p,0xa888e2,"||",bkp)) p+=2;
+
+    // Double Struck Types
+    if (p3s(p,0x9d84e2,"Real",bkp)) p+=2; // ℝ
+    if (p3s(p,0x9584e2,"Integer",bkp)) p+=2; // ℕ: Should be Natural
+    if (p3s(p,0xa484e2,"Integer",bkp)) p+=2; // ℤ
     
     // Les opérateurs suivant ont été transformés en opXYZ()
     // Pas besoin de les modifier dans ce qui sera généré

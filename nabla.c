@@ -251,8 +251,9 @@ int sysPreprocessor(const char *nabla_entity_name,
   // -C  Do not discard comments.
   // All comments are passed through to the output file, except for comments in processed directives,
   // which are deleted along with the directive.
+  // Porting to GCC 4.8: to disable the stdc-predef.h preinclude: -ffreestanding or use the -P
   snprintf(gcc_command,size,
-           "gcc -std=c99 -C -E -Wall -x c %s>/proc/%d/fd/%d",
+           "gcc -ffreestanding -std=c99 -C -E -Wall -x c %s>/proc/%d/fd/%d",
            cat_sed_temporary_file_name,
            getpid(),
            unique_temporary_file_fd);
