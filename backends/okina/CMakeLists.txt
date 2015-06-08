@@ -16,6 +16,8 @@ set(BACKEND_OKINA_C
     nOkinaJobs.c
     nOkinaMain.c
     nOkinaMesh.c
+    nOkinaMesh1D.c
+    nOkinaMesh3D.c
     nOkinaPragmas.c
     nOkinaParallelCilk.c
     nOkinaParallelOpenMP.c

@@ -67,6 +67,11 @@ tstg:
 tsta:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -R arcane)
 
+tstu:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
+tstl:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
+
 
 tstgram:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)
@@ -100,8 +105,6 @@ tstro:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
 tstrc:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
-tstl:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_1)
 tstl4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_4)
 tstl8:

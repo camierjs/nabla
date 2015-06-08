@@ -219,6 +219,8 @@ nablaDefine okinaStdDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"File", "std::ofstream&"},
+  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
   {NULL,NULL}
 };
 

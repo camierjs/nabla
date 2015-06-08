@@ -1,0 +1,75 @@
+[nabla] Command line specifies debug file: gram.log
+[nabla] Command line hits long option okina
+[nabla] Command line specifies new OKINA nabla_entity_name: gram
+[nabla] Command line specifies OKINA's STD option
+[nabla] Command line specifies OKINA's AoS option
+[nabla] Command line specifies OKINA's OpenMP option
+[nabla] first input_file_list: gram.n 
+[sysPreprocessor] cat_sed_temporary_file_name is /tmp/nabla_gram_sed_Fn44Lk
+
+[sysPreprocessor] cat_command is echo '# 1 "gram.n"' > /tmp/nabla_gram_sed_Fn44Lk && cat gram.n|sed -e 's/#include/ include/g'>> /tmp/nabla_gram_sed_Fn44Lk
+[sysPreprocessor] gcc_command=gcc -std=c99 -C -E -Wall -x c /tmp/nabla_gram_sed_Fn44Lk>/proc/22945/fd/4
+[nablaPreprocessor] done!
+[nabla] Now triggering nablaParsing with these options
+[nablaParsing] Starting parsing
+[nablaParsing] Closing & Quit
+[nablaParsing] On scan l'arbre pour transformer les tokens en UTF8
+[nablaParsing] On dump l'arbre créé
+[nablaParsing] nabla_entity_name=gram
+[nablaParsing] nabla_input_file=gram.n
+[nablaParsing] Now launching nablaMiddlendSwitch
+	[nablaMiddlendInit] setting nabla->name to 'gram'
+	[nablaMiddlendInit] Création de notre premier entity
+	[nablaMiddlendInit] Rajout du 'main'
+	[nablaMiddlendInit] Rajout du nom de l'entity 'gram'
+	[nablaMiddlendInit] Rajout du name_upcase de l'entity GRAM
+	[nablaMiddlendInit] Returning nabla
+	[nablaMiddlendSwitch] On initialise le type de backend (= 0x4) et de ses variantes (= 0x12080)
+	[nablaMiddlendSwitch] On rajoute les variables globales
+	[nablaMiddlendVariableGlobalAdd] Adding global deltat, time
+	[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord
+	[nablaMiddlendSwitch] Now switching...
+	[nablaMiddlendParseAndHook] rule nabla_item_definition,  support cells
+		[actItemTypeSpecifier] cell:Real
+		[actItemDirectDeclarator] alpha
+	[nablaMiddlendParseAndHook] done
+	[nablaMiddlendParseAndHook] rule nabla_item_definition,  support global
+		[actItemTypeSpecifier] global:Real
+		[actItemDirectDeclarator] alpha_global
+	[nablaMiddlendParseAndHook] done
+	[nablaMiddlendParseAndHook] rule hit nabla_reduction
+	[nablaMiddlendParseAndHook] Checking for global variable 'alpha_global'
+	[nablaVariableFind] looking for 'alpha_global' ?deltat ?time ?coord ?iteration ?alpha ?alpha_global Yes!
+	[nablaVariableFind] looking for 'alpha' ?deltat ?time ?coord ?iteration ?alpha Yes!
+	[nablaMiddlendParseAndHook] global_var->item 'global'
+	[okinaHookReduction] @ 12.11
+	[nablaMiddlendParseAndHook] done
+[nccOkinaMainVarInit]
+[nccOkinaMainPrefix]
+[okinaGenerateVariableDim0] variable coord
+[okinaGenerateVariableDim0] variable coord
+[okinaGenerateVariableDim0] variable alpha
+[okinaGenerateVariableDim0] variable alpha
+[okinaGenerateVariableDim0] variable alpha_global
+[okinaGenerateVariableDim0] variable alpha_global
+[nccOkinaMainMeshPrefix]
+[nccOkinaMainPreInit]
+[nccOkinaMainVarInitCall]
+[nccOkinaMain]
+	[nablaNumberOfEntryPoints] okina_Reduction_alpha_global: whenx=1 @ 12.110000 
+	[nablaNumberOfEntryPoints] okina_Reduction_alpha_global: whenx=1 @ 12.110000 
+[nablaEntryPointsSort] found 1 entry-points
+	[nablaEntryPointsSort] dumping #0: okina_Reduction_alpha_global @ 12.110000
+[timeTreeSave] Saving time tree for gram
+[timeTreeSave] timeTreeSaveNodes
+[timeTreeSaveNodes] number_of_entry_points=1
+
+	[nccOkinaMain] sorted #0: okina_Reduction_alpha_global @ 12.110000 in 'compute-loop'
+[nccOkinaMainPostInit]
+[nccOkinaMainMeshPostfix]
+[okinaGenerateVariableDim0] variable coord
+[okinaGenerateVariableDim0] variable alpha
+[okinaGenerateVariableDim0] variable alpha_global
+[nccOkinaMainPostfix] OKINA_MAIN_POSTFIX
+[nccOkinaMainPostfix] okinaSourceMesh
+[nccOkinaMainPostfix] NABLA_OK

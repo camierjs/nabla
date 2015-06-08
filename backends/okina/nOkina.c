@@ -46,7 +46,7 @@
 
 
 // ****************************************************************************
-// * Dump des variables appelées
+// * Dump des variables appelÃ©es
 // ****************************************************************************
 static void okinaDfsForCalls(struct nablaMainStruct *nabla,
                              nablaJob *fct,
@@ -60,14 +60,14 @@ static void okinaDfsForCalls(struct nablaMainStruct *nabla,
           fct->rtntp,
           namespace?"Entity::":"",
           fct->name);
-  // On va chercher les paramètres standards pour le hdr
+  // On va chercher les paramÃ¨tres standards pour le hdr
   dumpParameterTypeList(nabla->entity->hdr, nParams);
   hprintf(nabla, NULL, ");");
 }
 
 
 // ****************************************************************************
-// * Dump du préfix des points d'entrées: inline ou pas
+// * Dump du prÃ©fix des points d'entrÃ©es: inline ou pas
 // ****************************************************************************
 static char* okinaEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
   //return "";
@@ -166,6 +166,8 @@ static void okinaHeaderIncludes(nablaMain *nabla){
 #include <stdarg.h>\n\
 //#include <mathimf.h>\n\
 #include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
 %s // fromnabla->parallel->includes()\n",
           nabla->simd->includes(),
           nabla->parallel->includes());
@@ -324,7 +326,7 @@ static void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
+  // PrÃ©paration du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   job_name[0]=0;
   strcat(job_name,"okinaReduction_");
@@ -348,7 +350,7 @@ static void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->whens[0] = atof(at_single_cst_node->token);
   nablaJobAdd(nabla->entity, redjob);
   const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
-  // Génération de code associé à ce job de réduction
+  // GÃ©nÃ©ration de code associÃ© Ã  ce job de rÃ©duction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
@@ -397,7 +399,7 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
                       const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  // Définition des hooks pour l'AVX ou le MIC
+  // DÃ©finition des hooks pour l'AVX ou le MIC
   nablaBackendSimdHooks nablaOkinaSimdStdHooks={
     okinaStdBits,
     okinaStdGather,
@@ -454,7 +456,7 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
     nabla->simd=&nablaOkinaSimdMicHooks;
     
-  // Définition des hooks pour Cilk+ *ou pas*
+  // DÃ©finition des hooks pour Cilk+ *ou pas*
   nablaBackendParallelHooks okinaCilkHooks={
     nccOkinaParallelCilkSync,
     nccOkinaParallelCilkSpawn,
@@ -553,22 +555,32 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
   okinaHeaderSimd(nabla);
   okinaHeaderDbg(nabla);
   okinaHeaderMth(nabla);
-  okinaMesh(nabla);
-  okinaDefineEnumerates(nabla);
 
   // Dump dans le fichier SOURCE
   okinaInclude(nabla);
-  
-  // Parse du code préprocessé et lance les hooks associés
+
+  // Parse du code prÃ©processÃ© et lance les hooks associÃ©s
   nablaMiddlendParseAndHook(root,nabla);
+  
+  // On rajoute le kernel d'initialisation des variable
   nccOkinaMainVarInitKernel(nabla);
 
+  // Mesh structures and functions depends on the â„ library that can be used
+  if ((nabla->entity->libraries&(1<<real))!=0){
+    dbg("\n\t[nccOkina] okinaMesh 1D !");
+    okinaMesh1D(nabla);
+  }else{
+    okinaMesh3D(nabla);
+    dbg("\n\t[nccOkina] okinaMesh 3D !");
+  }
+  okinaDefineEnumerates(nabla);
+  
   // Partie PREFIX
   nccOkinaMainPrefix(nabla);
   okinaVariablesPrefix(nabla);
   nccOkinaMainMeshPrefix(nabla);
-  
-  // Partie Pré Init
+
+  // Partie PrÃ© Init
   nccOkinaMainPreInit(nabla);
   nccOkinaMainVarInitCall(nabla);
       

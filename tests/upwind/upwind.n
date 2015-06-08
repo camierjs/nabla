@@ -1,0 +1,99 @@
+with ℝ;
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ option_a = 1.0;
+  ℝ α = 1.0;
+  ℝ β = 8.0;
+  ℝ xmin = -1.0;
+  ℝ xmax = +1.0;
+  ℝ CFL = 0.8;
+  ℕ test = 1;
+  ℕ time_steps = 8;
+  // Yet required options for Okina
+  ℝ option_δt_initial = 0.0;
+  ℝ option_stoptime = 1.0;
+};
+
+
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+nodes{
+  ℝ u;
+  ℝ unp1;
+  ℝ δxp;
+  ℝ δxm;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+};
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+void iniGlobals(void) @ -5.0{
+  δx=(xmax-xmin)/8;
+  δt=CFL*δx/option_a;
+  assert(δt>=0.0);
+}
+
+
+∀ nodes void iniδx(void) @ -5.0{
+  if (coord!=xmin) δxm=coord-coord[-1];
+  if (coord!=xmax) δxp=coord[+1]-coord;
+}
+
+
+∀ nodes void ini(void) in (node coord, node u) @ -4.0 {
+  u = 0.0;
+  u = (test==1)?u0_Test1_for_linear_advection_smooth_data(coord);
+  u = (test==2)?u0_Test2_for_linear_advection_discontinuous_data(coord);
+}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+
+
+// The First Order Upwind Scheme
+∀ nodes void loop(void) in (node u) @ 1.0 {
+  const ℝ ap = fmax(option_a,0.0);
+  const ℝ am = fmin(option_a,0.0);
+  const ℝ δtSx = δt/δx;
+  const ℝ cp = ap*δtSx;
+  const ℝ cm = am*δtSx;
+  unp1 = u - cp*(u-u[-1]) - cm*(u[+1]-u);
+}
+
+
+// Copy results
+∀ nodes void copyResults(void) in (node u) @ 2.0 {
+  u=unp1;
+}
+
+
+// ****************************************************************************
+// * Test for Quit & Dump Solution Found
+// ****************************************************************************
+∀ nodes void dumpSolution(File results) in (node u) {
+  results << coord ;//<< "\t" << u << "\n";
+}
+void testForQuit(void) @ 4.0 {
+  if (GlobalIteration>=time_steps){
+    file(results,plot);
+    results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+    dumpSolution(results);
+    exit;
+  }
+}

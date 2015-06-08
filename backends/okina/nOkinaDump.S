@@ -42,7 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
         .section ".rodata"
         .global knDbg_h
-        .global knMsh_c
+        .global knMsh1D_c
+        .global knMsh3D_c
         .global knMth_h
         
         .global knStdReal_h
@@ -81,8 +82,11 @@
 knDbg_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knDbg.h"
         .byte 0
-knMsh_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMsh.c"
+knMsh1D_c: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMsh1D.c"
+        .byte 0
+knMsh3D_c: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMsh3D.c"
         .byte 0
 knMth_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMth.h"

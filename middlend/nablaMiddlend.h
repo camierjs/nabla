@@ -55,6 +55,7 @@ typedef enum {
   cartesian,
   materials,
   mathematica,
+  real          // 1D only, no Real3 admitted
 } library;
 
 // Enumération des possibilités des variables en in/out/inout

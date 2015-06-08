@@ -158,6 +158,9 @@ foreach(parallel seq omp) #cilk
   endforeach()
 endforeach()
 
+nabla_add_okina_test(upwind 1 gen std seq)
+nabla_add_okina_test(upwind 1 run std seq)
+
 
 ########################
 # NABLA TESTS FOR CUDA #

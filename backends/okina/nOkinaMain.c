@@ -278,10 +278,14 @@ static char *okinaSourceMeshAoS_vs_SoA(nablaMain *nabla){
   return "node_coord[iNode]=Real3(x,y,z);"; 
 }
 
-extern char knMsh_c[];
+extern char knMsh1D_c[];
+extern char knMsh3D_c[];
 static void okinaSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->src,knMsh_c,okinaSourceMeshAoS_vs_SoA(nabla));
+  if ((nabla->entity->libraries&(1<<real))!=0)
+    fprintf(nabla->entity->src,knMsh1D_c);
+  else
+    fprintf(nabla->entity->src,knMsh3D_c,okinaSourceMeshAoS_vs_SoA(nabla));
   //fprintf(nabla->entity->src,knMsh_c);
 }
 

@@ -127,7 +127,8 @@ void okinaDefineEnumerates(nablaMain*);
 void okinaVariablesPrefix(nablaMain*);
 void okinaVariablesPostfix(nablaMain*);
 
-void okinaMesh(nablaMain*);
+void okinaMesh1D(nablaMain*);
+void okinaMesh3D(nablaMain*);
 void nccOkinaMainMeshPrefix(nablaMain*);
 void nccOkinaMainMeshPostfix(nablaMain*);
 
