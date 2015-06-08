@@ -71,6 +71,8 @@ void okinaMesh1D(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH GENERATION\n\
 // ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 2;\
+\n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = 0;\n\
 const int NABLA_NB_NODES_Z_AXIS = 0;\n\
@@ -86,7 +88,7 @@ const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
 const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
 const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
-const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n \
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
   okinaMesh1DConnectivity(nabla);
 }

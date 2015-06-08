@@ -185,7 +185,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   fprintf(arc->axl,"\n\t\t</variables>\n\n\t\t<entry-points>");
 
   number_of_entry_points=nablaNumberOfEntryPoints(arc);
-  entry_point=nablaEntryPointsSort(arc);
+  entry_point=nablaEntryPointsSort(arc,number_of_entry_points);
 
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){

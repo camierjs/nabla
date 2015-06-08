@@ -4,12 +4,14 @@
 // ********************************************************
 // * iniGlobals fct
 // ********************************************************
-static inline void iniGlobals(/*numParams=0*//* direct return from okinaHookAddExtraParameters*/){
+static inline void iniGlobals(/*numParams=0*/){
 	dbgFuncIn();
 	
-	/*StdJob*//*GlobalVar*/global_dtx[0]=opDiv((opSub(/*tt2o okina*/xmax,/*tt2o okina*/xmin)),8);
-	/*StdJob*//*GlobalVar*/global_deltat[0]=opDiv(opMul(/*tt2o okina*/CFL,/*StdJob*//*GlobalVar*/global_dtx[0]),/*tt2o okina*/option_a);
-	/*function_got_call*//*assert*//*has not been found*/assert(/*StdJob*//*GlobalVar*/global_deltat[0]>=0.0);
+	global_dtx[0]=opDiv((opSub(xmax,xmin)),X_EDGE_ELEMS);
+	global_deltat[0]=opDiv(opMul(CFL,global_dtx[0]),option_a);
+	/*printf*/printf("\n\t\t\33[7m[iniGlobals] dtx=%f\33[m",global_dtx[0]);
+	/*printf*/printf("\n\t\t\33[7m[iniGlobals] dtt=%f\33[m",global_deltat[0]);
+	/*assert*/assert(global_deltat[0]>=0.0);
 	}
 
 
@@ -17,43 +19,53 @@ static inline void iniGlobals(/*numParams=0*//* direct return from okinaHookAddE
 // ********************************************************
 // * inidtx job
 // ********************************************************
-static inline void inidtx(/* direct return from okinaHookAddExtraParameters*/){
+static inline void inidtx(){
 	dbgFuncIn();
 	FOR_EACH_NODE(n){
 		{
-		if ( /*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar !20*/[n]!= /*tt2o okina*/xmin) /* DiffractingREADY *//*isLeft*//*NodeJob*//*real*//*tt2a(if+real)*/((double*)node_dtxm)/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=opSub ( /*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar 20*/[- 1 ]) ;
-		if ( /*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar !20*/[n]!= /*tt2o okina*/xmax) /* DiffractingREADY *//*isLeft*//*NodeJob*//*real*//*tt2a(if+real)*/((double*)node_dtxp)/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=opSub ( /*no_item_system*//*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar 20*/[+ 1 ], /*NodeJob*//*real3*//*tt2a(if+real3)*//*if+real3 still in real3 vs double3*/node_coord/*NodeVar !20*/[n]) ;
+		if ( /*real3*//*if+real3 still in real3 vs double3*/node_coord[n]!= xmin) /*real*/((double*)node_dtxm)[n]=opSub ( /*real3*//*if+real3 still in real3 vs double3*/node_coord[n], /*real3*//*if+real3 still in real3 vs double3*/node_coord[- 1 ]) ;
+		if ( /*real3*//*if+real3 still in real3 vs double3*/node_coord[n]!= xmax) /*real*/((double*)node_dtxp)[n]=opSub ( /*real3*//*if+real3 still in real3 vs double3*/node_coord[+ 1 ], /*real3*//*if+real3 still in real3 vs double3*/node_coord[n]) ;
 		}}
 }
 
 
 // ********************************************************
-// * ini job
+// * iniU job
 // ********************************************************
-static inline void ini(/* direct return from okinaHookAddExtraParameters*/){
+static inline void iniU(){
 	dbgFuncIn();
 	FOR_EACH_NODE_WARP(n){
 		{
-		/* DiffractingREADY *//*isLeft*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=0.0 ;
-		/* DiffractingREADY *//*isLeft*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=opTernary ( ( /*tt2o okina*/test== 1 ) , /*JOB_CALL*//*got_call*//*has not been found*/u0_Test1_for_linear_advection_smooth_data ( /*function_call_arguments*//*NodeJob*//*tt2a*/node_coord/*NodeVar !20*/[n]/*ARGS*//*got_args*/) , /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ;
-		/*!function_call_arguments*//* DiffractingREADY *//*isLeft*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=opTernary ( ( /*tt2o okina*/test== 2 ) , /*JOB_CALL*//*got_call*//*has not been found*/u0_Test2_for_linear_advection_discontinuous_data ( /*function_call_arguments*//*NodeJob*//*tt2a*/node_coord/*NodeVar !20*/[n]/*ARGS*//*got_args*/) , /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ;
-		/*!function_call_arguments*/}}
+		node_u[n]=0.0 ;
+		node_u[n]=opTernary ( ( test== 1 ) , u0_Test1_for_linear_advection_smooth_data ( node_coord[n]) , node_u[n]) ;
+		node_u[n]=opTernary ( ( test== 2 ) , u0_Test2_for_linear_advection_discontinuous_data ( node_coord[n]) , node_u[n]) ;
+		}}
 }
+
+// ********************************************************
+// * dbgLoop fct
+// ********************************************************
+static inline void dbgLoop(/*numParams=0*/){
+	dbgFuncIn();
+	
+	/*printf*/printf("\n\t\t\33[7m[Loop] #%d, time=%f\33[m",GlobalIteration,global_time);
+	}
+
 
 
 // ********************************************************
 // * loop job
 // ********************************************************
-static inline void loop(/* direct return from okinaHookAddExtraParameters*/){
+static inline void loop(){
 	dbgFuncIn();
 	FOR_EACH_NODE_WARP(n){
 		{
-		/*CONST*/__attribute__ ((aligned(WARP_ALIGN))) const /*Real*/real ap /*'='->!isLeft*/=/*JOB_CALL*//*got_call*//*has not been found*/fmax ( /*function_call_arguments*//*tt2o okina*/option_a, 0.0 /*ARGS*//*got_args*/) ;
-		/*!function_call_arguments*//*CONST*/__attribute__ ((aligned(WARP_ALIGN))) const /*Real*/real am /*'='->!isLeft*/=/*JOB_CALL*//*got_call*//*has not been found*/fmin ( /*function_call_arguments*//*tt2o okina*/option_a, 0.0 /*ARGS*//*got_args*/) ;
-		/*!function_call_arguments*//*CONST*/__attribute__ ((aligned(WARP_ALIGN))) const /*Real*/real dttSx /*'='->!isLeft*/=opDiv ( /*NodeJob*//*GlobalVar*/global_deltat[0]/*turnBracketsToParentheses@true*//*n g*//*turnBracketsToParentheses@true*/, /*NodeJob*//*GlobalVar*/global_dtx[0]/*turnBracketsToParentheses@true*//*n g*//*turnBracketsToParentheses@true*/) ;
-		/*CONST*/__attribute__ ((aligned(WARP_ALIGN))) const /*Real*/real cp /*'='->!isLeft*/=opMul ( ap , dttSx ) ;
-		/*CONST*/__attribute__ ((aligned(WARP_ALIGN))) const /*Real*/real cm /*'='->!isLeft*/=opMul ( am , dttSx ) ;
-		/* DiffractingREADY *//*isLeft*//*NodeJob*//*tt2a*/node_unp1/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=opSub ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], opMul ( cp , ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[- 1 ]) ) ) ) , opMul ( cm , ( opSub ( /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[+ 1 ], /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ) ) ) ;
+		__attribute__ ((aligned(WARP_ALIGN))) const real ap =fmax ( option_a, 0.0 ) ;
+		__attribute__ ((aligned(WARP_ALIGN))) const real am =fmin ( option_a, 0.0 ) ;
+		__attribute__ ((aligned(WARP_ALIGN))) const real dttSx =opDiv ( global_deltat[0]/*n g*/, global_dtx[0]/*n g*/) ;
+		__attribute__ ((aligned(WARP_ALIGN))) const real cp =opMul ( ap , dttSx ) ;
+		__attribute__ ((aligned(WARP_ALIGN))) const real cm =opMul ( am , dttSx ) ;
+		node_unp1[n]=opSub ( opSub ( node_u[n], opMul ( cp , ( opSub ( node_u[n], node_u[- 1 ]) ) ) ) , opMul ( cm , ( opSub ( node_u[+ 1 ], node_u[n]) ) ) ) ;
 		}}
 }
 
@@ -61,11 +73,11 @@ static inline void loop(/* direct return from okinaHookAddExtraParameters*/){
 // ********************************************************
 // * copyResults job
 // ********************************************************
-static inline void copyResults(/* direct return from okinaHookAddExtraParameters*/){
+static inline void copyResults(){
 	dbgFuncIn();
 	FOR_EACH_NODE_WARP(n){
 		{
-		/* DiffractingREADY *//*isLeft*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]/*'='->!isLeft*/=/*NodeJob*//*tt2a*/node_unp1/*nvar no diffraction possible here*//*NodeVar !20*/[n];
+		node_u[n]=node_unp1[n];
 		}}
 }
 
@@ -73,29 +85,29 @@ static inline void copyResults(/* direct return from okinaHookAddExtraParameters
 // ********************************************************
 // * dumpSolution job
 // ********************************************************
-static inline void dumpSolution(File results /* direct return from okinaHookAddExtraParameters*/){
+static inline void dumpSolution(File results ){
 	dbgFuncIn();
 	FOR_EACH_NODE_WARP(n){
 		{
-		/* DiffractingREADY */results <</*NodeJob*//*tt2a*/node_coord/*NodeVar !20*/[n];
+		results <<node_coord[n]<<"\t" <<node_u[n]<<"\t" <<node_unp1[n]<<"\n" ;
 		}}
 }
 
 // ********************************************************
-// * testForQuit fct
+// * tstForQuit fct
 // ********************************************************
-static inline void testForQuit(/*numParams=0*//* direct return from okinaHookAddExtraParameters*/){
+static inline void tstForQuit(/*numParams=0*/){
 	dbgFuncIn();
 	
-	if ( GlobalIteration>=/*tt2o okina*/time_steps) {
+	/*printf*/printf("\n\t[testForQuit] GlobalIteration =%d",GlobalIteration);
+	if ( GlobalIteration<time_steps) return ;
+	{
 file ( results , plot ) ;
-	results<<"#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-	/*function_got_call*//*dumpSolution*//*isNablaJob*/dumpSolution(results
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*/);
-	/*EXIT*/exit(0.0);
+	/*printf*/printf("\n\t[testForQuit] GlobalIteration>time_steps, dumping\n");
+	/*dumpSolution*/dumpSolution(results);
 	}
-}
+exit(0.0);
+	}
 
 
 // ********************************************************
@@ -104,7 +116,7 @@ file ( results , plot ) ;
 static inline Real u0_Test1_for_linear_advection_smooth_data(Real x /*numParams=1*/){
 	dbgFuncIn();
 	
-	return opMul(/*tt2o okina*/al,/*function_got_call*//*exp*//*has not been found*/exp(opMul(-/*tt2o okina*/bt,pow(x,2.0))));
+	return opMul(al,/*exp*/exp(opMul(-bt,pow(x,2.0))));
 	}
 
 
@@ -159,19 +171,7 @@ int main(int argc, char *argv[]){
 	global_time=0.0;
 	global_iteration=1;
 	global_deltat[0] = set1(option_dtt_initial);// @ 0;
-	//printf("\n\33[7;32m[main] time=%e, Global Iteration is #%d\33[m",global_time,global_iteration);
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc	// [nccOkinaMainMeshPrefix] Allocation des connectivités
+	//printf("\n\33[7;32m[main] time=%e, Global Iteration is #%d\33[m",global_time,global_iteration);	// [nccOkinaMainMeshPrefix] Allocation des connectivités
 	//OKINA_MAIN_PREINIT
 	//printf("\ndbgsVariable iteration"); dbgCellVariableDim0_iteration();
 	//printf("\ndbgsVariable u"); dbgNodeVariableDim0_u();
@@ -179,37 +179,20 @@ int main(int argc, char *argv[]){
 	//printf("\ndbgsVariable dtxp"); dbgNodeVariableDim0_dtxp();
 	//printf("\ndbgsVariable dtxm"); dbgNodeVariableDim0_dtxm();
 	//printf("\ndbgsVariable dtx"); dbgCellVariableDim0_dtx();
-	/*@-5.000000*/iniGlobals(
-		/*okinaAddExtraArguments*//*NULL_nblParamsNode*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
-	/*@-5.000000*/inidtx(
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
+	/*@-5.000000*/iniGlobals(/*NULL_nblParamsNode*//*NULL_called_variables*/);
+	/*@-5.000000*/inidtx(/*NULL_called_variables*/);
 	
-	/*@-4.000000*/ini(
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
+	/*@-4.000000*/iniU(/*NULL_called_variables*/);
 	gettimeofday(&st, NULL);
 	while (global_time<option_stoptime){// && global_iteration!=option_max_iterations){
 		
-		/*@1.000000*/loop(
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
+		/*@1.000000*/dbgLoop(/*NULL_nblParamsNode*//*NULL_called_variables*/);
+		/*@1.000000*/loop(/*NULL_called_variables*/);
 		
-		/*@2.000000*/copyResults(
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
+		/*@2.000000*/copyResults(/*NULL_called_variables*/);
+		
+		/*@4.000000*/tstForQuit(/*NULL_nblParamsNode*//*NULL_called_variables*/);
 	//OKINA_MAIN_POSTINIT
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
 //OKINA_MAIN_POSTFIX
 	global_time+=*(double*)&global_deltat[0];
 	global_iteration+=1;
@@ -310,8 +293,8 @@ static void nabla_ini_node_coords(void){
 #endif
     // LÃ  oÃ¹ l'on poke le retour de okinaSourceMeshAoS_vs_SoA
     node_coord[iNode]=Real(x);
-    //dbg(DBG_INI,"\nSetting nodes-vector #%d @", n);
-    //dbgReal3(DBG_INI,node_coord[iNode]);
+    dbg(DBG_INI,"\nSetting nodes-vector #%d @", n);
+    dbgReal(DBG_INI,node_coord[iNode]);
   }
   verifCoords();
 
@@ -320,11 +303,11 @@ static void nabla_ini_node_coords(void){
   for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
     cell_uid=iX;
     node_bid=iX;
-    dbg(DBG_INI,"\n\tSetting cell #%d %dx, cell_uid=%d, node_bid=%d",
-        iCell,iX,cell_uid,node_bid);
+    dbg(DBG_INI,"\n\tSetting cell #%d, cell_uid=%d, node_bid=%d",
+        iCell,cell_uid,node_bid);
     cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
     cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
-        dbg(DBG_INI,"\n\tCell_%d's nodes are %d,%d", iCell,
+    dbg(DBG_INI,"\n\tCell_%d's nodes are %d,%d", iCell,
         cell_node[0*NABLA_NB_CELLS+iCell],
         cell_node[1*NABLA_NB_CELLS+iCell]);
   }

@@ -71,6 +71,8 @@ void okinaMesh3D(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH GENERATION\n\
 // ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 8;\
+\n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\

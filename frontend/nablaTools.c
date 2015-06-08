@@ -241,7 +241,8 @@ void nUtf8SupThree(char **read){//read
 void nUtf8(char **bkp){
   char *p=*bkp;
   if (p==NULL) return;
-  dbg("\n[nUtf8] '%s'",p);
+  //dbg("\n[nUtf8] '%s'",p);
+  
   if (*(unsigned int*)p==0x0074b4ce) { // "δt"
     //dbg("\n[nUtf8] hits deltat!");
     *bkp=strdup("deltat"); 
@@ -259,7 +260,7 @@ void nUtf8(char **bkp){
     }*/
   //dbg("\n\t\t[nUtf8] '%s':", *bkp);
   for(;*p!=0;p++){
-    dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
+    //dbg("\n\t\t\t%c, 0x%x 0x%x",*p, *p,*(unsigned short*)p);//αβγδεζηθικλμνξοπρςστυφχψω
     // αβγδεζηθικλμνξοπρςστυφχψω
     if (p2c(p,0xb1ce,"al")) p+=1; // α = alpha    → 'al'
     if (p2c(p,0xb2ce,"bt")) p+=1; // β = beta     → 'bt'

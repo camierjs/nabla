@@ -89,8 +89,8 @@ static void nabla_ini_node_coords(void){
 #endif
     // Là où l'on poke le retour de okinaSourceMeshAoS_vs_SoA
     node_coord[iNode]=Real(x);
-    //dbg(DBG_INI,"\nSetting nodes-vector #%%d @", n);
-    //dbgReal3(DBG_INI,node_coord[iNode]);
+    dbg(DBG_INI,"\nSetting nodes-vector #%%d @", n);
+    dbgReal(DBG_INI,node_coord[iNode]);
   }
   verifCoords();
 
@@ -99,11 +99,11 @@ static void nabla_ini_node_coords(void){
   for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
     cell_uid=iX;
     node_bid=iX;
-    dbg(DBG_INI,"\n\tSetting cell #%%d %%dx, cell_uid=%%d, node_bid=%%d",
-        iCell,iX,cell_uid,node_bid);
+    dbg(DBG_INI,"\n\tSetting cell #%%d, cell_uid=%%d, node_bid=%%d",
+        iCell,cell_uid,node_bid);
     cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
     cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
-        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d", iCell,
+    dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d", iCell,
         cell_node[0*NABLA_NB_CELLS+iCell],
         cell_node[1*NABLA_NB_CELLS+iCell]);
   }

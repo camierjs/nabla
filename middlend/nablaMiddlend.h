@@ -295,7 +295,7 @@ int dumpParameterTypeList(FILE*, astNode*);
 void nablaStoreWhen(nablaMain *, char *);
 int nablaComparEntryPoints(const void *one, const void *two);
 int nablaNumberOfEntryPoints(nablaMain *);
-nablaJob* nablaEntryPointsSort(nablaMain *);
+nablaJob* nablaEntryPointsSort(nablaMain *,int);
 
 // SPACE
 void nablaInsertSpace(nablaMain*,astNode*);

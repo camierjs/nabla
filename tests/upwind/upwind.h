@@ -567,13 +567,15 @@ inline void dbgReal(const unsigned int flag, real v){
 #endif // _KN_MATH_HPP_
 
 static inline void iniGlobals();
-static inline void testForQuit();
+static inline void dbgLoop();
+static inline void tstForQuit();
 static inline Real u0_Test1_for_linear_advection_smooth_data(Real x );
 static inline Real u0_Test2_for_linear_advection_discontinuous_data(Real x );
 
 // ********************************************************
 // * MESH GENERATION
 // ********************************************************
+const int NABLA_NODE_PER_CELL = 2;
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;
 const int NABLA_NB_NODES_Y_AXIS = 0;
 const int NABLA_NB_NODES_Z_AXIS = 0;
@@ -590,7 +592,7 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%WARP_SIZE)==0)?0:1);
 const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);
- const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);
 
 
 // ********************************************************
@@ -610,22 +612,22 @@ int node_cell_and_corner[2*2*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN
  * Forward enumerates
  *********************************************************/
 #define FOR_EACH_CELL(c) for(int c=0;c<NABLA_NB_CELLS;c+=1)
-#define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)
 
 #define FOR_EACH_CELL_WARP(c) for(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)
 #define FOR_EACH_CELL_WARP_SHARED(c,local) for(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)
 
 #define FOR_EACH_CELL_WARP_NODE(n)\
   for(int cn=WARP_SIZE*c+WARP_SIZE-1;cn>=WARP_SIZE*c;--cn)\
-    for(int n=8-1;n>=0;--n)
+    for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)
 
 #define FOR_EACH_NODE(n) /**/for(int n=0;n<NABLA_NB_NODES;n+=1)
-#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=8*n;c<8;c+=1,nc+=1)
+#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)
 
 #define FOR_EACH_NODE_WARP(n) for(int n=0;n<NABLA_NB_NODES_WARP;n+=1)
 
 #define FOR_EACH_NODE_WARP_CELL(c)\
-    for(int c=0;c<8;c+=1)
+    for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)
 
 
 // ********************************************************

@@ -328,7 +328,7 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 
   dbg("\n[nccCudaMain]");
   number_of_entry_points=nablaNumberOfEntryPoints(n);
-  entry_points=nablaEntryPointsSort(n);
+  entry_points=nablaEntryPointsSort(n,number_of_entry_points);
   
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){

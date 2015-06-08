@@ -319,13 +319,12 @@ int nablaNumberOfEntryPoints(nablaMain *nabla){
 /*****************************************************************************
  * nablaEntryPointsSort
  *****************************************************************************/
-nablaJob* nablaEntryPointsSort(nablaMain *nabla){
+nablaJob* nablaEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   //bool initPhase=true;
-  int i,j,number_of_entry_points=0;
+  int i,j;
   nablaJob *job, *entry_points;
   
-  number_of_entry_points=nablaNumberOfEntryPoints(nabla);
-  dbg("\n[nablaEntryPointsSort] found %d entry-points", number_of_entry_points);
+  dbg("\n[nablaEntryPointsSort] Sorting %d entry-points", number_of_entry_points);
 
   // On va rajouter le ComputeLoop[Begin||End]
   number_of_entry_points+=2;

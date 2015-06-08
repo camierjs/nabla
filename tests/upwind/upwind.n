@@ -42,8 +42,10 @@ global{
 // ****************************************************************************
 
 void iniGlobals(void) @ -5.0{
-  δx=(xmax-xmin)/8;
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
   δt=CFL*δx/option_a;
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", δt);
   assert(δt>=0.0);
 }
 
@@ -54,7 +56,7 @@ void iniGlobals(void) @ -5.0{
 }
 
 
-∀ nodes void ini(void) in (node coord, node u) @ -4.0 {
+∀ nodes void iniU(void) in (node coord, node u) @ -4.0 {
   u = 0.0;
   u = (test==1)?u0_Test1_for_linear_advection_smooth_data(coord);
   u = (test==2)?u0_Test2_for_linear_advection_discontinuous_data(coord);
@@ -64,7 +66,9 @@ void iniGlobals(void) @ -5.0{
 // ****************************************************************************
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
-
+void dbgLoop(void) @ 1.0 {
+  printf("\n\t\t\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+}
 
 // The First Order Upwind Scheme
 ∀ nodes void loop(void) in (node u) @ 1.0 {
@@ -74,12 +78,14 @@ void iniGlobals(void) @ -5.0{
   const ℝ cp = ap*δtSx;
   const ℝ cm = am*δtSx;
   unp1 = u - cp*(u-u[-1]) - cm*(u[+1]-u);
+  //printf("\n\t\t\33[7m[Loop] node # =%d\33[m", n);
 }
 
 
 // Copy results
 ∀ nodes void copyResults(void) in (node u) @ 2.0 {
   u=unp1;
+  //printf("\n\t\t[copyResults] u[%d] = %f", n,u);
 }
 
 
@@ -87,13 +93,17 @@ void iniGlobals(void) @ -5.0{
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
 ∀ nodes void dumpSolution(File results) in (node u) {
-  results << coord ;//<< "\t" << u << "\n";
+  results << coord << "\t" << u << "\t" << unp1 << "\n";
 }
-void testForQuit(void) @ 4.0 {
-  if (GlobalIteration>=time_steps){
+
+void tstForQuit(void) @ 4.0 {
+  printf("\n\t[testForQuit] GlobalIteration =%d", GlobalIteration);
+  if (GlobalIteration<time_steps) return;
+  {
     file(results,plot);
-    results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+    printf("\n\t[testForQuit] GlobalIteration>time_steps, dumping\n");
+    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
     dumpSolution(results);
-    exit;
   }
+  exit;
 }
