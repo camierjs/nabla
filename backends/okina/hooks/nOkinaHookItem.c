@@ -44,10 +44,20 @@
 #include "nabla.tab.h"
 
 
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-//void okinaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-//  nprintf(nabla,"\n/*okinaAddNablaVariableList*/",NULL);
-//}
-
+/***************************************************************************** 
+ * Traitement des tokens NABLA ITEMS
+ *****************************************************************************/
+char* okinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
+  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  error(!0,0,"Could not switch in okinaHookItem!");
+  return NULL;
+}

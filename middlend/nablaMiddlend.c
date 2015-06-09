@@ -82,12 +82,11 @@ NABLA_STATUS nablaDefines(nablaMain *nabla, nablaDefine *defines){
  * Dump dans le header les 'define's
  *****************************************************************************/
 NABLA_STATUS nablaTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
-  int i;
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Typedefs\
 \n// *****************************************************************************");
-  for(i=0;typedefs[i].what!=NULL;i+=1)
+  for(int i=0;typedefs[i].what!=NULL;i+=1)
     fprintf(nabla->entity->hdr, "\ntypedef %s %s;",typedefs[i].what,typedefs[i].with);
   fprintf(nabla->entity->hdr, "\n");
   return NABLA_OK;
@@ -98,12 +97,11 @@ NABLA_STATUS nablaTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
  * Dump dans le header des 'forwards's
  *****************************************************************************/
 NABLA_STATUS nablaForwards(nablaMain *nabla, char **forwards){
-  int i;
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Forwards\
 \n// *****************************************************************************");
-  for(i=0;forwards[i]!=NULL;i+=1)
+  for(int i=0;forwards[i]!=NULL;i+=1)
     fprintf(nabla->entity->hdr, "\n%s",forwards[i]);
   fprintf(nabla->entity->hdr, "\n");
   return NABLA_OK;
@@ -274,124 +272,6 @@ static nablaMain *nablaMiddlendInit(const char *nabla_entity_name){
 }
 
 
-/*****************************************************************************
- * nablaStoreWhen
- *****************************************************************************/
-void nablaStoreWhen(nablaMain *nabla, char *at){
-  nablaJob *entry_point=nablaJobLast(nabla->entity->jobs);
-  entry_point->whens[entry_point->whenx]=atof(at);
-  dbg("\n\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->whenx]);
-  entry_point->whenx+=1;
-  *at=0;
-}
-
-
-/*****************************************************************************
- * nablaComparEntryPoints
- *****************************************************************************/
-int nablaComparEntryPoints(const void *one, const void *two){
-  nablaJob *first=(nablaJob*)one;
-  nablaJob *second=(nablaJob*)two;
-  if (first->whens[0]==second->whens[0]) return 0;
-  if (first->whens[0]<second->whens[0]) return -1;
-  return +1;
-}
-
-
-/*****************************************************************************
- * nablaNumberOfEntryPoints
- *****************************************************************************/
-int nablaNumberOfEntryPoints(nablaMain *nabla){
-  nablaJob *job;;
-  int i,number_of_entry_points=0;
-  for(job=nabla->entity->jobs;job!=NULL;job=job->next){
-    if (!job->is_an_entry_point) continue;
-    assert(job->whenx>=1);
-    dbg("\n\t[nablaNumberOfEntryPoints] %s: whenx=%d @ ", job->name, job->whenx);
-    for(i=0;i<job->whenx;++i)
-      dbg("%f ", job->whens[i]);
-    number_of_entry_points+=job->whenx; // On rajoute les différents whens
-  }
-  return number_of_entry_points;
-}
-
-
-/*****************************************************************************
- * nablaEntryPointsSort
- *****************************************************************************/
-nablaJob* nablaEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
-  //bool initPhase=true;
-  int i,j;
-  nablaJob *job, *entry_points;
-  
-  dbg("\n[nablaEntryPointsSort] Sorting %d entry-points", number_of_entry_points);
-
-  // On va rajouter le ComputeLoop[Begin||End]
-  number_of_entry_points+=2;
-  
-  // On prépare le plan de travail de l'ensemble des entry_points
-  entry_points =(nablaJob *)calloc(number_of_entry_points, sizeof(nablaJob));
-
-  entry_points[0].item = strdup("\0");
-  entry_points[0].is_an_entry_point=true;
-  entry_points[0].is_a_function=true;
-  entry_points[0].name = strdup("ComputeLoopBegin");
-  entry_points[0].name_utf8 = strdup("ComputeLoopBegin");
-  entry_points[0].whens[0] = ENTRY_POINT_compute_loop;
-  entry_points[0].whenx = 1;
-
-  entry_points[1].item = strdup("\0");
-  entry_points[1].is_an_entry_point=true;
-  entry_points[1].is_a_function=true;
-  entry_points[1].name = strdup("ComputeLoopEnd");
-  entry_points[1].name_utf8 = strdup("ComputeLoopEnd");
-  entry_points[1].whens[0] = ENTRY_POINT_exit;
-  entry_points[1].whenx = 1; 
-
-  // On re scan pour remplir les duplicats
-  for(i=2,job=nabla->entity->jobs;job!=NULL;job=job->next){
-    if (!job->is_an_entry_point) continue;
-    for(j=0;j<job->whenx;++j){
-      dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %f", i, job->name, job->whens[j]);
-      entry_points[i].item=job->item;
-      entry_points[i].is_an_entry_point=true;
-      entry_points[i].is_a_function=job->is_a_function;
-      //assert(job->type!=NULL);
-      assert(job->name!=NULL);
-      entry_points[i].name=job->name;
-      assert(job->name_utf8!=NULL);
-      entry_points[i].name_utf8=job->name_utf8;
-      entry_points[i].whens[0]=job->whens[j];
-      // Pas utilisé, on passe après par la fonctionnccAxlGeneratorEntryPointWhere
-      if (entry_points[i].whens[0]>ENTRY_POINT_compute_loop)
-        entry_points[i].where=strdup("compute-loop");
-      if (entry_points[i].whens[0]==-0.0)
-        entry_points[i].where=strdup("build");
-      if (entry_points[i].whens[0]<ENTRY_POINT_start_init)
-        entry_points[i].where=strdup("init");
-      assert(job->entity!=NULL);
-      // On recopie les infos utiles pour le dump d'après
-      entry_points[i].ifAfterAt=job->ifAfterAt;
-      entry_points[i].entity=job->entity;
-      entry_points[i].stdParamsNode=job->stdParamsNode;
-      entry_points[i].nblParamsNode=job->nblParamsNode;
-      entry_points[i].called_variables=job->called_variables;
-      entry_points[i].reduction=job->reduction;
-      entry_points[i].reduction_name=job->reduction_name;
-      ++i;
-    }
-  }
-
-  // On trie afin d'avoir tous les points d'entrée
-  qsort(entry_points,number_of_entry_points,sizeof(nablaJob),nablaComparEntryPoints);
-
-  if (nabla->optionDumpTree)
-    timeTreeSave(nabla, entry_points, i);
-  
-  return entry_points;
-}
-
-
 /// ***************************************************************************
 // * nablaInsertSpace
 // ****************************************************************************
@@ -417,38 +297,10 @@ void nablaInsertSpace( nablaMain *nabla, astNode * n){
 
 
 // ****************************************************************************
-// * nablaAtConstantParse
+// * nablaMiddlendSwitch
 // ****************************************************************************
-void nablaAtConstantParse(astNode * n, nablaMain *nabla, char *at){
-  if (n->tokenid == '(') goto skip;
-  if (n->tokenid == ')') goto skip;
-  // Vérification que l'on ne déborde pas
-  if (yyTranslate(n->tokenid)!=yyUndefTok()){
-    // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point
-    if (yyNameTranslate(n->tokenid) == ',') {
-      nablaStoreWhen(nabla,at);
-      goto skip;
-    }
-  }
-  if (n->token != NULL ){
-    char *goto_end_of_at=at;
-    while(*goto_end_of_at!=0)goto_end_of_at++;
-    sprintf(goto_end_of_at, "%s", n->token);
-    dbg("'%s' ", at);
-  }
- skip:
-  if (n->children != NULL) nablaAtConstantParse(n->children, nabla, at);
-  if (n->next != NULL) nablaAtConstantParse(n->next, nabla, at);
-}
-
-
-
-/*****************************************************************************
- * nablaMiddlendSwitch
- *****************************************************************************/
 int nablaMiddlendSwitch(astNode *root,
                         const bool optionDumpTree,
-                        //const char *input,
                         const char *nabla_entity_name,
                         const BACKEND_SWITCH backend,
                         const BACKEND_COLORS colors,
@@ -456,7 +308,8 @@ int nablaMiddlendSwitch(astNode *root,
                         char *interface_path,
                         char *service_name){
   nablaMain *nabla=nablaMiddlendInit(nabla_entity_name);
-  dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
+  dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
+ (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
   nabla->backend=backend;
   nabla->colors=colors;
   nabla->interface_name=interface_name;
@@ -473,7 +326,9 @@ int nablaMiddlendSwitch(astNode *root,
   case BACKEND_CUDA:   return nccCuda  (nabla,root,nabla_entity_name);
   case BACKEND_OKINA:  return nccOkina (nabla,root,nabla_entity_name);
   default:
-    exit(NABLA_ERROR|fprintf(stderr, "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
+    exit(NABLA_ERROR
+         |fprintf(stderr,
+                  "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
   }
   return NABLA_ERROR;
 }

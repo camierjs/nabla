@@ -2,13 +2,12 @@
 [nabla] Command line hits long option okina
 [nabla] Command line specifies new OKINA nabla_entity_name: gram
 [nabla] Command line specifies OKINA's STD option
-[nabla] Command line specifies OKINA's AoS option
 [nabla] Command line specifies OKINA's OpenMP option
 [nabla] first input_file_list: gram.n 
-[sysPreprocessor] cat_sed_temporary_file_name is /tmp/nabla_gram_sed_Fn44Lk
+[sysPreprocessor] cat_sed_temporary_file_name is /tmp/nabla_gram_sed_4LwNrA
 
-[sysPreprocessor] cat_command is echo '# 1 "gram.n"' > /tmp/nabla_gram_sed_Fn44Lk && cat gram.n|sed -e 's/#include/ include/g'>> /tmp/nabla_gram_sed_Fn44Lk
-[sysPreprocessor] gcc_command=gcc -std=c99 -C -E -Wall -x c /tmp/nabla_gram_sed_Fn44Lk>/proc/22945/fd/4
+[sysPreprocessor] cat_command is echo '# 1 "gram.n"' > /tmp/nabla_gram_sed_4LwNrA && cat gram.n|sed -e 's/#include/ include/g'>> /tmp/nabla_gram_sed_4LwNrA
+[sysPreprocessor] gcc_command=gcc -ffreestanding -std=c99 -C -E -Wall -x c /tmp/nabla_gram_sed_4LwNrA>/proc/21137/fd/4
 [nablaPreprocessor] done!
 [nabla] Now triggering nablaParsing with these options
 [nablaParsing] Starting parsing
@@ -24,7 +23,7 @@
 	[nablaMiddlendInit] Rajout du nom de l'entity 'gram'
 	[nablaMiddlendInit] Rajout du name_upcase de l'entity GRAM
 	[nablaMiddlendInit] Returning nabla
-	[nablaMiddlendSwitch] On initialise le type de backend (= 0x4) et de ses variantes (= 0x12080)
+	[nablaMiddlendSwitch] On initialise le type de backend (= 0x4) et de ses variantes (= 0x2080)
 	[nablaMiddlendSwitch] On rajoute les variables globales
 	[nablaMiddlendVariableGlobalAdd] Adding global deltat, time
 	[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord
@@ -33,42 +32,223 @@
 		[actItemTypeSpecifier] cell:Real
 		[actItemDirectDeclarator] alpha
 	[nablaMiddlendParseAndHook] done
+	[nablaMiddlendParseAndHook] rule nabla_item_definition,  support nodes
+		[actItemTypeSpecifier] node:Real
+		[actItemDirectDeclarator] u
+	[nablaMiddlendParseAndHook] done
 	[nablaMiddlendParseAndHook] rule nabla_item_definition,  support global
 		[actItemTypeSpecifier] global:Real
 		[actItemDirectDeclarator] alpha_global
 	[nablaMiddlendParseAndHook] done
-	[nablaMiddlendParseAndHook] rule hit nabla_reduction
-	[nablaMiddlendParseAndHook] Checking for global variable 'alpha_global'
-	[nablaVariableFind] looking for 'alpha_global' ?deltat ?time ?coord ?iteration ?alpha ?alpha_global Yes!
-	[nablaVariableFind] looking for 'alpha' ?deltat ?time ?coord ?iteration ?alpha Yes!
-	[nablaMiddlendParseAndHook] global_var->item 'global'
-	[okinaHookReduction] @ 12.11
+	[nablaMiddlendParseAndHook] rule hit nabla_job_definition
+
+	[nablaJobFill] named 'loop'
+	[nablaJobFill] scope= region= item=nodes type_de_retour=void name=loop
+	[scanForNablaJobParameter] in (node,u)
+	[scanForNablaJobAtConstant] @ '1.0' 
+	[nablaStoreWhen] Storing when @=1.000000 
+		[dumpParameterTypeList] number_of_parameters_here+=1
+	[nablaJobFill] numParams=0
+	[nablaJobFill] On s'autorise un endroit pour insérer des paramètres
+	[nablaJobFill] Et on dump les in et les out
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookDumpNablaParameterList] Looking for variable 'u'
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[okinaHookDumpNablaParameterList]
+	[nablaJobFill] On prépare le bon ENUMERATE
+	[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramètres
+	[nablaJobFill] On cherche s'il y a un selection statement
+	[nablaJobFill] No selection statement in this job!
+	[nablaJobFill] prefixEnumerate
+	[nablaJobFill] dumpEnumerate
+	[okinaHookDumpEnumerate] Preparing:
+	[okinaHookDumpEnumerate]		forall=FOR_EACH_NODE%s%s(n
+	[okinaHookDumpEnumerate]		warping=_WARP
+	[okinaHookDumpEnumerate] No returnFromArgument
+[okinaHookDumpEnumerate] format=FOR_EACH_NODE%s%s(n)
+	[nablaJobFill] postfixEnumerate
+	[nablaJobFill] postfixEnumerate done
+	[nablaJobFill] Now parsing...
+[nablaJobParse] token: 'COMPOUND_JOB_INI'?
+	[okinaHookSwitchToken] token: 'COMPOUND_JOB_INI'?
+[nablaJobParse] token: '{'?
+	[okinaHookSwitchToken] token: '{'?
+	[nablaJobParse] primaryExpression=primary_expression child->token=unp1
+	[nablaVariableFind] looking for 'unp1' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: 'unp1'?
+	[okinaHookSwitchToken] token: 'unp1'?
+[nablaJobParse] token: '='?
+	[okinaHookSwitchToken] token: '='?
+[nablaJobParse] token: 'opSub'?
+	[okinaHookSwitchToken] token: 'opSub'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+[nablaJobParse] token: 'opSub'?
+	[okinaHookSwitchToken] token: 'opSub'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+	[nablaJobParse] primaryExpression=primary_expression child->token=u
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookTurnTokenToVariable] node_u token=u
+	[actJobItemParse] primaryExpression hits variable
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+[nablaJobParse] token: 'opMul'?
+	[okinaHookSwitchToken] token: 'opMul'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+	[nablaJobParse] primaryExpression=primary_expression child->token=cp
+	[nablaVariableFind] looking for 'cp' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: 'cp'?
+	[okinaHookSwitchToken] token: 'cp'?
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+	[nablaJobParse] primaryExpression=primary_expression child->token=(
+	[nablaVariableFind] looking for '(' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+[nablaJobParse] token: 'opSub'?
+	[okinaHookSwitchToken] token: 'opSub'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+	[nablaJobParse] primaryExpression=primary_expression child->token=u
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookTurnTokenToVariable] node_u token=u
+	[actJobItemParse] primaryExpression hits variable
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+	[nablaVariable] Looking for 'primary_expression':
+	[nablaVariable] Looking for 'nabla_item':
+	[nablaVariable] Looking for 'nabla_system':
+	[nablaVariable] primary_expression->token=u, nabla_item=NULL, nabla_system=NULL
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[nablaJobParse] primaryExpression=primary_expression child->token=u
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookTurnTokenToVariable] node_u token=u
+	[actJobItemParse] primaryExpression hits variable
+[nablaJobParse] token: '['?
+	[okinaHookSwitchToken] token: '['?
+[nablaJobParse] token: '-'?
+	[okinaHookSwitchToken] token: '-'?
+	[nablaJobParse] primaryExpression=primary_expression child->token=1
+	[nablaVariableFind] looking for '1' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: '1'?
+	[okinaHookSwitchToken] token: '1'?
+[nablaJobParse] token: ']'?
+	[okinaHookSwitchToken] token: ']'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+[nablaJobParse] token: 'opMul'?
+	[okinaHookSwitchToken] token: 'opMul'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+	[nablaJobParse] primaryExpression=primary_expression child->token=cm
+	[nablaVariableFind] looking for 'cm' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: 'cm'?
+	[okinaHookSwitchToken] token: 'cm'?
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+	[nablaJobParse] primaryExpression=primary_expression child->token=(
+	[nablaVariableFind] looking for '(' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+[nablaJobParse] token: 'opSub'?
+	[okinaHookSwitchToken] token: 'opSub'?
+[nablaJobParse] token: '('?
+	[okinaHookSwitchToken] token: '('?
+	[nablaVariable] Looking for 'primary_expression':
+	[nablaVariable] Looking for 'nabla_item':
+	[nablaVariable] Looking for 'nabla_system':
+	[nablaVariable] primary_expression->token=u, nabla_item=NULL, nabla_system=NULL
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[nablaJobParse] primaryExpression=primary_expression child->token=u
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookTurnTokenToVariable] node_u token=u
+	[actJobItemParse] primaryExpression hits variable
+[nablaJobParse] token: '['?
+	[okinaHookSwitchToken] token: '['?
+[nablaJobParse] token: '+'?
+	[okinaHookSwitchToken] token: '+'?
+	[nablaJobParse] primaryExpression=primary_expression child->token=1
+	[nablaVariableFind] looking for '1' ?deltat ?time ?coord ?iteration ?alpha ?u ?alpha_global Nope!
+[nablaJobParse] token: '1'?
+	[okinaHookSwitchToken] token: '1'?
+[nablaJobParse] token: ']'?
+	[okinaHookSwitchToken] token: ']'?
+[nablaJobParse] token: ','?
+	[okinaHookSwitchToken] token: ','?
+	[nablaJobParse] primaryExpression=primary_expression child->token=u
+	[nablaVariableFind] looking for 'u' ?deltat ?time ?coord ?iteration ?alpha ?u Yes!
+	[okinaHookTurnTokenToVariable] node_u token=u
+	[actJobItemParse] primaryExpression hits variable
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ')'?
+	[okinaHookSwitchToken] token: ')'?
+[nablaJobParse] token: ';'?
+	[okinaHookSwitchToken] token: ';'?
+[nablaJobParse] token: '}'?
+	[okinaHookSwitchToken] token: '}'?
+[nablaJobParse] token: 'COMPOUND_JOB_END'?
+	[okinaHookSwitchToken] token: 'COMPOUND_JOB_END'?
+	[nablaJobFill] done
 	[nablaMiddlendParseAndHook] done
 [nccOkinaMainVarInit]
+	[nccOkina] okinaMesh 3D !
 [nccOkinaMainPrefix]
 [okinaGenerateVariableDim0] variable coord
 [okinaGenerateVariableDim0] variable coord
 [okinaGenerateVariableDim0] variable alpha
 [okinaGenerateVariableDim0] variable alpha
+[okinaGenerateVariableDim0] variable u
+[okinaGenerateVariableDim0] variable u
 [okinaGenerateVariableDim0] variable alpha_global
 [okinaGenerateVariableDim0] variable alpha_global
 [nccOkinaMainMeshPrefix]
 [nccOkinaMainPreInit]
 [nccOkinaMainVarInitCall]
 [nccOkinaMain]
-	[nablaNumberOfEntryPoints] okina_Reduction_alpha_global: whenx=1 @ 12.110000 
-	[nablaNumberOfEntryPoints] okina_Reduction_alpha_global: whenx=1 @ 12.110000 
-[nablaEntryPointsSort] found 1 entry-points
-	[nablaEntryPointsSort] dumping #0: okina_Reduction_alpha_global @ 12.110000
+	[nablaNumberOfEntryPoints] loop: whenx=1 @ 1.000000 
+[nablaEntryPointsSort] Sorting 1 entry-points
+	[nablaEntryPointsSort] dumping #2: loop @ 1.000000
 [timeTreeSave] Saving time tree for gram
 [timeTreeSave] timeTreeSaveNodes
-[timeTreeSaveNodes] number_of_entry_points=1
-
-	[nccOkinaMain] sorted #0: okina_Reduction_alpha_global @ 12.110000 in 'compute-loop'
+[timeTreeSaveNodes] number_of_entry_points=3
+	[nccOkinaMain] sorted #1: loop @ 1.000000 in 'compute-loop'
 [nccOkinaMainPostInit]
 [nccOkinaMainMeshPostfix]
 [okinaGenerateVariableDim0] variable coord
 [okinaGenerateVariableDim0] variable alpha
+[okinaGenerateVariableDim0] variable u
 [okinaGenerateVariableDim0] variable alpha_global
 [nccOkinaMainPostfix] OKINA_MAIN_POSTFIX
 [nccOkinaMainPostfix] okinaSourceMesh

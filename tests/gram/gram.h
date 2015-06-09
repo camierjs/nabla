@@ -16,9 +16,11 @@
 #include <stdarg.h>
 //#include <mathimf.h>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <omp.h>
  // fromnabla->parallel->includes()
- // SOA define or not
+
 
 // *****************************************************************************
 // * Defines
@@ -32,7 +34,8 @@
 #define rabs(a) fabs(a)
 #define set(a) a
 #define set1(cst) cst
-#define rsqrt(u) sqrt(u)
+#define square_root(u) sqrt(u)
+#define cube_root(u) cbrt(u)
 #define store(u,_u) (*u=_u)
 #define load(u) (*u)
 #define zero() 0.0
@@ -74,6 +77,8 @@
 #define MD_DirX 0
 #define MD_DirY 1
 #define MD_DirZ 2
+#define File std::ofstream&
+#define file(name,ext) std::ofstream name(#name "." #ext)
 
 
 // *****************************************************************************
@@ -92,7 +97,6 @@ inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}
 inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}
 static void nabla_ini_node_coords(void);
 static void verifCoords(void);
-
 #ifndef _KN_STD_INTEGER_H_
 #define _KN_STD_INTEGER_H_
 
@@ -134,7 +138,6 @@ public:
 //inline integer operator^(const integer &a, const int &b) { return integer(a^b); }
 
 #endif //  _KN_STD_INTEGER_H_
-
 #ifndef _KN_STD_REAL_H_
 #define _KN_STD_REAL_H_
 
@@ -204,7 +207,7 @@ class __attribute__ ((aligned(8))) real {
   friend inline real min(const real &r, const real &s){ return ::fmin(r,s);}
   friend inline real max(const real &r, const real &s){ return ::fmax(r,s);}
   
-  friend inline real rcbrt(const real &a){
+  friend inline real cube_root(const real &a){
     return real(::cbrt(a));
   }
   friend inline real norm(real u){ return ::fabs(u);}
@@ -234,7 +237,6 @@ inline double ReduceMaxToDouble(Real r){ return r; }
 //inline real max(const double r, const double s){ return ::fmax(r,s);}
 
 #endif //  _KN_STD_REAL_H_
-
 #ifndef _KN_STD_REAL3_H_
 #define _KN_STD_REAL3_H_
 
@@ -292,7 +294,7 @@ class __attribute__ ((aligned(8))) real3 {
   friend inline real dot3(real3 u, real3 v){
     return real(u.x*v.x+u.y*v.y+u.z*v.z);
   }
-  friend inline real norm(real3 u){ return real(rsqrt(dot3(u,u)));}
+  friend inline real norm(real3 u){ return real(square_root(dot3(u,u)));}
 
   friend inline real3 cross(real3 u, real3 v){
     return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));
@@ -301,7 +303,6 @@ class __attribute__ ((aligned(8))) real3 {
 
 
 #endif //  _KN_STD_REAL3_H_
-
 #ifndef _KN_STD_TERNARY_H_
 #define _KN_STD_TERNARY_H_
 
@@ -365,7 +366,6 @@ inline real3 opTernary(const bool cond,
 }
 
 #endif //  _KN_STD_TERNARY_H_
-
 #ifndef _KN_STD_GATHER_H_
 #define _KN_STD_GATHER_H_
 
@@ -440,7 +440,6 @@ inline void gatherFromNode_3kArray8(const int a, const int corner,
 
 
 #endif //  _KN_STD_GATHER_H_
-
 #ifndef _KN_STD_SCATTER_H_
 #define _KN_STD_SCATTER_H_
 
@@ -470,7 +469,6 @@ inline void scatter3k(const int a, real3 *scatter, real3 *data){
 }
 
 #endif //  _KN_STD_SCATTER_H_
-
 #ifndef _KN_STD_OSTREAM_H_
 #define _KN_STD_OSTREAM_H_
 
@@ -507,7 +505,6 @@ std::ostream& operator<<(std::ostream &os, const Real3 &a){
 }
 
 #endif // _KN_STD_OSTREAM_H_
-
 #ifndef _KN_DBG_HPP_
 #define _KN_DBG_HPP_
 
@@ -563,7 +560,6 @@ inline void dbgReal(const unsigned int flag, real v){
 
 
 #endif // _KN_DBG_HPP_
-
 #ifndef _KN_MATH_HPP_
 #define _KN_MATH_HPP_
 
@@ -573,6 +569,7 @@ inline void dbgReal(const unsigned int flag, real v){
 // ********************************************************
 // * MESH GENERATION
 // ********************************************************
+const int NABLA_NODE_PER_CELL = 8;
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;
 const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;
 const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;
@@ -611,7 +608,7 @@ int node_cell_and_corner[2*8*NABLA_NB_NODES]         __attribute__ ((aligned(WAR
 #define FOR_EACH_CELL(c) \
 _Pragma("omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)")\
 for(int c=0;c<NABLA_NB_CELLS;c+=1)
-#define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)
 
 #define FOR_EACH_CELL_WARP(c) \
 _Pragma("omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)")\
@@ -624,19 +621,19 @@ for(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)
   \
 _Pragma("omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)")\
 for(int cn=WARP_SIZE*c+WARP_SIZE-1;cn>=WARP_SIZE*c;--cn)\
-    for(int n=8-1;n>=0;--n)
+    for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)
 
 #define FOR_EACH_NODE(n) /*\
 _Pragma("omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)")\
 */for(int n=0;n<NABLA_NB_NODES;n+=1)
-#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=8*n;c<8;c+=1,nc+=1)
+#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)
 
 #define FOR_EACH_NODE_WARP(n) \
 _Pragma("omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)")\
 for(int n=0;n<NABLA_NB_NODES_WARP;n+=1)
 
 #define FOR_EACH_NODE_WARP_CELL(c)\
-    for(int c=0;c<8;c+=1)
+    for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)
 
 
 // ********************************************************
@@ -644,6 +641,7 @@ for(int n=0;n<NABLA_NB_NODES_WARP;n+=1)
 // ********************************************************
 real3 node_coord[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));
 real cell_alpha[NABLA_NB_CELLS_WARP] __attribute__ ((aligned(WARP_ALIGN)));
+real node_u[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));
 real global_alpha_global[NABLA_NB_GLOBAL_WARP] __attribute__ ((aligned(WARP_ALIGN)));
 
 

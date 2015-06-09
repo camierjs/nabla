@@ -45,250 +45,11 @@
 #include "frontend/nablaAst.h"
 
 
-// ****************************************************************************
-// * Dump des variables appelées
-// ****************************************************************************
-static void okinaDfsForCalls(struct nablaMainStruct *nabla,
-                             nablaJob *fct,
-                             astNode *n,
-                             const char *namespace,
-                             astNode *nParams){
-  // Maintenant qu'on a tous les called_variables potentielles, on remplit aussi le hdr
-  // On remplit la ligne du hdr
-  hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->entryPointPrefix(nabla,fct),
-          fct->rtntp,
-          namespace?"Entity::":"",
-          fct->name);
-  // On va chercher les paramètres standards pour le hdr
-  dumpParameterTypeList(nabla->entity->hdr, nParams);
-  hprintf(nabla, NULL, ");");
-}
-
-
-// ****************************************************************************
-// * Dump du préfix des points d'entrées: inline ou pas
-// ****************************************************************************
-static char* okinaEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
-  //return "";
-  return "static inline";
-}
-
-static void okinaIteration(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*ITERATION*/", "okina_iteration()");
-}
-static void okinaExit(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*EXIT*/", "exit(0.0)");
-}
-static void okinaTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time");
-}
-static void okinaFatal(struct nablaMainStruct *nabla){
-  nprintf(nabla, NULL, "fatal");
-}
-static void okinaAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
-  nablaJob *foundJob;
-  char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
-  fct->parse.function_call_name=NULL;
-  if ((foundJob=nablaJobFind(fct->entity->jobs,callName))!=NULL){
-    if (foundJob->is_a_function!=true){
-      nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=strdup(callName);
-    }else{
-      nprintf(nabla, "/*isNablaFunction*/", NULL);
-    }
-  }else{
-    nprintf(nabla, "/*has not been found*/", NULL);
-  }
-}
-static void okinaAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  // En Okina, par contre il faut les y mettre
-  if (fct->parse.function_call_name!=NULL){
-    //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
-    int numParams=1;
-    nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    okinaAddExtraArguments(nabla, called, &numParams);
-    if (called->nblParamsNode != NULL)
-      okinaDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
-  }
-}
-
-static void okinaTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o okina*/", "%s", opt->name);
-}
-
-
-
-/*****************************************************************************
- * Okina libraries
- *****************************************************************************/
-void okinaHookLibraries(astNode * n, nablaEntity *entity){
-  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
-}
-
-
-// ****************************************************************************
-// * okinaInclude
-// ****************************************************************************
-void okinaInclude(nablaMain *nabla){
-  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
-}
-
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
-static void okinaHeaderPrefix(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,
-          "#ifndef __OKINA_%s_H__\n#define __OKINA_%s_H__",
-          nabla->entity->name,nabla->entity->name);
-}
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
-static void okinaHeaderIncludes(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// *****************************************************************************\n\
-// * Okina includes\n\
-// *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
-#include <sys/time.h>\n\
-#include <stdlib.h>\n\
-#include <stdio.h>\n\
-#include <string.h>\n\
-#include <vector>\n\
-#include <math.h>\n\
-#include <assert.h>\n\
-#include <stdarg.h>\n\
-//#include <mathimf.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-%s // fromnabla->parallel->includes()\n",
-          nabla->simd->includes(),
-          nabla->parallel->includes());
-}
-
-
-// ****************************************************************************
-// * okinaHeader for Std, Avx or Mic
-// ****************************************************************************
-extern char knStdReal_h[];
-extern char knStdReal3_h[];
-extern char knStdInteger_h[];
-extern char knStdGather_h[];
-extern char knStdScatter_h[];
-extern char knStdOStream_h[];
-extern char knStdTernary_h[];
-
-extern char knSseReal_h[];
-extern char knSseReal3_h[];
-extern char knSseInteger_h[];
-extern char knSseGather_h[];
-extern char knSseScatter_h[];
-extern char knSseOStream_h[];
-extern char knSseTernary_h[];
-
-extern char knAvxReal_h[];
-extern char knAvxReal3_h[];
-extern char knAvxInteger_h[];
-extern char knAvxGather_h[];
-extern char knAvx2Gather_h[];
-extern char knAvxScatter_h[];
-extern char knAvxOStream_h[];
-extern char knAvxTernary_h[];
-
-extern char knMicReal_h[];
-extern char knMicReal3_h[];
-extern char knMicInteger_h[];
-extern char knMicGather_h[];
-extern char knMicScatter_h[];
-extern char knMicOStream_h[];
-extern char knMicTernary_h[];
-static char *dumpExternalFile(char *file){
-  return file+NABLA_LICENSE_HEADER;
-}
-static void okinaHeaderSimd(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal3_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicTernary_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicGather_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicScatter_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knMicOStream_h));
-  }else if (((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)||
-            ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)){
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxInteger_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxReal_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxReal3_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxTernary_h));
-    if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-      fprintf(nabla->entity->hdr,dumpExternalFile(knAvxGather_h));
-    else
-      fprintf(nabla->entity->hdr,dumpExternalFile(knAvx2Gather_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxScatter_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knAvxOStream_h));
-  }else if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseInteger_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal3_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseTernary_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseGather_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseScatter_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knSseOStream_h));
-  }else{
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdInteger_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdReal3_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdTernary_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdGather_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdScatter_h));
-    fprintf(nabla->entity->hdr,dumpExternalFile(knStdOStream_h));
-  }
-}
-
-
-// ****************************************************************************
-// * okinaHeader for Dbg
-// ****************************************************************************
-extern char knDbg_h[];
-static void okinaHeaderDbg(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(knDbg_h));
-}
-
-
-// ****************************************************************************
-// * okinaHeader for Maths
-// ****************************************************************************
-extern char knMth_h[];
-static void okinaHeaderMth(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(knMth_h));
-}
-
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
-static void okinaHeaderPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n#endif // __OKINA_%s_H__\n",nabla->entity->name);
-}
-
 
 // ****************************************************************************
 // * okinaPrimaryExpressionToReturn
 // ****************************************************************************
-static bool okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+static bool okinaHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
   const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
   dbg("\n\t[okinaPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
@@ -306,7 +67,7 @@ static bool okinaPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astN
 // ****************************************************************************
 // * okinaReturnFromArgument
 // ****************************************************************************
-static void okinaReturnFromArgument(nablaMain *nabla, nablaJob *job){
+static void okinaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
   const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nprintf(nabla, NULL, "\
@@ -314,81 +75,6 @@ static void okinaReturnFromArgument(nablaMain *nabla, nablaJob *job){
 \n\tReal %s_per_thread[threads];", rtnVariable);
 }
 
-
-// ****************************************************************************
-// * okinaHookReduction
-// ****************************************************************************
-static void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  const astNode *item_node = n->children->next->children;
-  const astNode *global_var_node = n->children->next->next;
-  const astNode *reduction_operation_node = global_var_node->next;
-  const astNode *item_var_node = reduction_operation_node->next;
-  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
-  char job_name[NABLA_MAX_FILE_NAME];
-  job_name[0]=0;
-  strcat(job_name,"okinaReduction_");
-  strcat(job_name,global_var_name);
-  // Rajout du job de reduction
-  nablaJob *redjob = nablaJobNew(nabla->entity);
-  redjob->is_an_entry_point=true;
-  redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->rtntp  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->drctn  = strdup("NoDirection");
-  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[okinaHookReduction] @ %s",at_single_cst_node->token);
-  sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->whenx  = 1;
-  redjob->whens[0] = atof(at_single_cst_node->token);
-  nablaJobAdd(nabla->entity, redjob);
-  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
-  // Génération de code associé à ce job de réduction
-  nprintf(nabla, NULL, "\n\
-// ******************************************************************************\n\
-// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
-// ******************************************************************************\n\
-void %s(void){ // @ %s\n\
-\tconst double reduction_init=%e;\n\
-\tconst int threads = omp_get_max_threads();\n\
-\tReal %s_per_thread[threads];\n\
-\tdbgFuncIn();\n\
-\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
-\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
-\t\tconst int tid = omp_get_thread_num();\n\
-\t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
-\t}\n\
-\tglobal_%s[0]=reduction_init;\n\
-\tfor (int i=0; i<threads; i+=1){\n\
-\t\tconst Real real_global_%s=global_%s[0];\n\
-\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
-\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
-\t}\n\
-}\n\n",   item_var_name,global_var_name,
-          job_name,
-          at_single_cst_node->token,
-          reduction_init,
-          global_var_name,
-          global_var_name,
-          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
-          item_var_name,
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name
-          );  
-}
 
 
 /*****************************************************************************
@@ -514,17 +200,17 @@ NABLA_STATUS nccOkina(nablaMain *nabla,
     okinaHookFunction,
     okinaHookJob,
     okinaHookReduction,
-    okinaIteration,
-    okinaExit,
-    okinaTime,
-    okinaFatal,
-    okinaAddCallNames,
-    okinaAddArguments,
-    okinaTurnTokenToOption,
-    okinaEntryPointPrefix,
-    okinaDfsForCalls,
-    okinaPrimaryExpressionToReturn,
-    okinaReturnFromArgument
+    okinaHookIteration,
+    okinaHookExit,
+    okinaHookTime,
+    okinaHookFatal,
+    okinaHookAddCallNames,
+    okinaHookAddArguments,
+    okinaHookTurnTokenToOption,
+    okinaHookEntryPointPrefix,
+    okinaHookDfsForCalls,
+    okinaHookPrimaryExpressionToReturn,
+    okinaHookReturnFromArgument
   };
   nabla->hook=&okinaBackendHooks;
 

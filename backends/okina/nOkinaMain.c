@@ -73,19 +73,19 @@ int main(int argc, char *argv[]){\n\
 \tglobal_time=0.0;\n\
 \tglobal_iteration=1;\n\
 \tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
+\t//printf(\"\\n\\33[7;32m[main] time=%%e,\
+ Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
 
 
-
-/*****************************************************************************
- * Backend OKINA INIT - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * Backend OKINA INIT - Génération du 'main'
+// ****************************************************************************
 #define OKINA_MAIN_PREINIT "\n\t//OKINA_MAIN_PREINIT"
 
 
-/*****************************************************************************
- * Backend OKINA POSTFIX - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * Backend OKINA POSTFIX - Génération du 'main'
+// ****************************************************************************
 #define OKINA_MAIN_POSTINIT "\n\t//OKINA_MAIN_POSTINIT"
 
 
@@ -99,13 +99,13 @@ int main(int argc, char *argv[]){\n\
 \n\t}\
 \tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
-\n}\n"
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\",\
+ global_iteration-1, cputime/1000.0);\n\n}\n"
 
 
-/*****************************************************************************
- * nccOkinaMainPrefix
- *****************************************************************************/
+// ****************************************************************************
+// * nccOkinaMainPrefix
+// ****************************************************************************
 NABLA_STATUS nccOkinaMainPrefix(nablaMain *nabla){
   dbg("\n[nccOkinaMainPrefix]");
   fprintf(nabla->entity->src, OKINA_MAIN_PREFIX);
@@ -113,9 +113,9 @@ NABLA_STATUS nccOkinaMainPrefix(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nccOkinaMainPreInit
- *****************************************************************************/
+// ****************************************************************************
+// * nccOkinaMainPreInit
+// ****************************************************************************
 NABLA_STATUS nccOkinaMainPreInit(nablaMain *nabla){
   dbg("\n[nccOkinaMainPreInit]");
   fprintf(nabla->entity->src, OKINA_MAIN_PREINIT);
@@ -123,76 +123,9 @@ NABLA_STATUS nccOkinaMainPreInit(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nccOkinaMainVarInitKernel
- *****************************************************************************/
-NABLA_STATUS nccOkinaMainVarInitKernel(nablaMain *nabla){
-  //int i,iVar;
-  nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInit]");
-  nprintf(nabla,NULL,"\n\
-// ******************************************************************************\n\
-// * Kernel d'initialisation des variables\n\
-// ******************************************************************************\n\
-void nabla_ini_variables(void){");
-  // Variables aux noeuds
-  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='n') continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
-    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
-    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
-  }
-  nprintf(nabla,NULL,"\n\t}");  
-  // Variables aux mailles real
-  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='c') continue;
-    if (var->dim==0){
-      nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
-    }else{
-      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
-      nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
-    }
-  }
-  nprintf(nabla,NULL,"\n\t}");
-  nprintf(nabla,NULL,"\n}");
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * nccOkinaMainVarInitKernel
- *****************************************************************************/
-NABLA_STATUS nccOkinaMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInitCall]");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * nccOkinaMainPostInit
- *****************************************************************************/
+// ****************************************************************************
+// * nccOkinaMainPostInit
+// ****************************************************************************
 NABLA_STATUS nccOkinaMainPostInit(nablaMain *nabla){
   dbg("\n[nccOkinaMainPostInit]");
   fprintf(nabla->entity->src, OKINA_MAIN_POSTINIT);
@@ -200,9 +133,9 @@ NABLA_STATUS nccOkinaMainPostInit(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nccOkinaMain
- *****************************************************************************/
+// ****************************************************************************
+// * nccOkinaMain
+// ****************************************************************************
 NABLA_STATUS nccOkinaMain(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
@@ -213,7 +146,6 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
   dbg("\n[nccOkinaMain]");
   number_of_entry_points=nablaNumberOfEntryPoints(n);
   entry_points=nablaEntryPointsSort(n,number_of_entry_points);
-  
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
    for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
      if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
@@ -229,14 +161,12 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
 \n\tgettimeofday(&st, NULL);\n\
 \twhile (global_time<option_stoptime){// && global_iteration!=option_max_iterations){");
     }
-    
     // On sync si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])
       nprintf(n, NULL, "\n%s%s",
               is_into_compute_loop?"\t\t":"\t",
               n->parallel->sync());
     last_when=entry_points[i].whens[0];
-    
     // Dump de la tabulation et du nom du point d'entrée
     nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
             is_into_compute_loop?"\t\t":"\t",
@@ -274,12 +204,14 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
 }
 
 
+// ****************************************************************************
+// * okinaSourceMesh
+// ****************************************************************************
+extern char knMsh1D_c[];
+extern char knMsh3D_c[];
 static char *okinaSourceMeshAoS_vs_SoA(nablaMain *nabla){
   return "node_coord[iNode]=Real3(x,y,z);"; 
 }
-
-extern char knMsh1D_c[];
-extern char knMsh3D_c[];
 static void okinaSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->entity->libraries&(1<<real))!=0)
@@ -289,9 +221,10 @@ static void okinaSourceMesh(nablaMain *nabla){
   //fprintf(nabla->entity->src,knMsh_c);
 }
 
-/*****************************************************************************
- * nccOkinaMainPostfix
- *****************************************************************************/
+
+// ****************************************************************************
+// * nccOkinaMainPostfix
+// ****************************************************************************
 NABLA_STATUS nccOkinaMainPostfix(nablaMain *nabla){
   dbg("\n[nccOkinaMainPostfix] OKINA_MAIN_POSTFIX");
   fprintf(nabla->entity->src, OKINA_MAIN_POSTFIX);

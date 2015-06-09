@@ -44,10 +44,64 @@
 #include "nabla.tab.h"
 
 
-// *****************************************************************************
-// * Ajout des variables d'un job trouv� depuis une fonction @�e
-// *****************************************************************************
-//void okinaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-//  nprintf(nabla,"\n/*okinaAddNablaVariableList*/",NULL);
-//}
+// ****************************************************************************
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// ****************************************************************************
+static void okinaFlushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+  if (real_variable==NULL)
+    error(!0,0,"Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+}
+
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+char* okinaScatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!okinaScatter*/");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
+
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    okinaFlushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,job->entity->main->simd->scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
+}
 

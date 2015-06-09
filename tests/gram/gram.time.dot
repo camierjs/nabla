@@ -1,33 +1,9 @@
 digraph {
-	compound=true;
-	//layers = "Variables:TempsLogique";
-	//node[style=filled, shape=box, color="#CCDDCC", fontsize=32];
-subgraph clusterInitPhase{
-		label="InitPhase";
-		sortv=1;
-		node_InitPhase [style=filled, shape=tripleoctagon, color=gray, label="Init Phase", fontsize=32];
-}
-	}
+	node_ComputeLoopBegin_0d00 [style=filled, shape=doubleoctagon, color=palevioletred, label="ComputeLoopBegin", fontsize=32];
+	node_loop_1d00 [style=filled, shape=ellipse, color=palegoldenrod, label="loop", fontsize=32];
+	node_ComputeLoopEnd_inf [style=filled, shape=doubleoctagon, color=palevioletred, label="ComputeLoopEnd", fontsize=32];
 
-
-subgraph clusterComputeLoop{
-		//label="ComputeLoop";
-		sortv=2;
-		node_ComputeLoop [style=filled, shape=tripleoctagon, color=gray, label="Compute Loop", fontsize=32];
-	//Start -> node_okina_Reduction_alpha_global_12d11 [lhead=cluster12d11];
-
-subgraph cluster12d11{
-		label="@12.11";
-		sortv=3;
-		node_okina_Reduction_alpha_global_12d11 [style=filled, shape=ellipse, color=palegreen, label="okina_Reduction_alpha_global", fontsize=32];
-		//cluster12d11 [shape=point,style=invis];
-	}
-	//node_okina_Reduction_alpha_global_12d11 -> End [ltail=cluster12d11];
-subgraph clusterEndOfComputeLoop{
-		label="EndOfComputeLoop";
-		sortv=4;
-		node_EndOfComputeLoop [style=filled, shape=tripleoctagon, color=gray, label="End Of Compute Loop", fontsize=32];
-}
-	//Start [shape=Mdiamond];
-	//End [shape=Msquare];
+	node_ComputeLoopBegin_0d00 -> node_loop_1d00;
+	node_loop_1d00 -> node_ComputeLoopEnd_inf;
+	node_ComputeLoopEnd_inf -> node_ComputeLoopBegin_0d00;
 }

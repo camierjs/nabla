@@ -1,17 +1,23 @@
 #include "gram.h"
 
-// ******************************************************************************
-// * Kernel de réduction de la variable 'alpha' vers la globale 'alpha_global'
-// ******************************************************************************
-void okina_Reduction_alpha_global(void){//from alpha @ 12.11
+
+
+// ********************************************************
+// * loop job
+// ********************************************************
+static inline void loop(/* direct return from okinaHookAddExtraParameters*/){
+	dbgFuncIn();
+	FOR_EACH_NODE_WARP(n){
+		{
+		/* DiffractingREADY *//*isLeft*/unp1 /*'='->!isLeft*/=opSub ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], opMul ( cp , ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[- 1 ]) ) ) ) , opMul ( cm , ( opSub ( /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[+ 1 ], /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ) ) ) ;
+		}}
 }
-
-
 // ******************************************************************************
 // * Kernel d'initialisation des variables
 // ******************************************************************************
 void nabla_ini_variables(void){
 	FOR_EACH_NODE_WARP(n){
+		node_u[n]=zero();
 	}
 	FOR_EACH_CELL_WARP(c){
 		cell_alpha[c]=zero();
@@ -50,17 +56,23 @@ int main(int argc, char *argv[]){
 	// okinaGenerateSingleVariable
 	// okinaGenerateSingleVariableMalloc
 	// okinaGenerateSingleVariable
+	// okinaGenerateSingleVariableMalloc
+	// okinaGenerateSingleVariable
 	// okinaGenerateSingleVariableMalloc	// [nccOkinaMainMeshPrefix] Allocation des connectivités
 	//OKINA_MAIN_PREINIT
 	//printf("\ndbgsVariable iteration"); dbgCellVariableDim0_iteration();
 	//printf("\ndbgsVariable alpha"); dbgCellVariableDim0_alpha();
+	//printf("\ndbgsVariable u"); dbgNodeVariableDim0_u();
 	//printf("\ndbgsVariable alpha_global"); dbgCellVariableDim0_alpha_global();
 	gettimeofday(&st, NULL);
 	while (global_time<option_stoptime){// && global_iteration!=option_max_iterations){
-		/*@12.110000*/okina_Reduction_alpha_global(
-		/*okinaAddExtraArguments*//*NULL_nblParamsNode*//*NULL_called_variables*/);
+		
+		/*@1.000000*/loop(
+		/*okinaAddExtraArguments*/
+		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
 		/*okinaDumpNablaDebugFunctionFromOutArguments*/
 	//OKINA_MAIN_POSTINIT
+	// okinaGenerateSingleVariableFree
 	// okinaGenerateSingleVariableFree
 	// okinaGenerateSingleVariableFree
 	// okinaGenerateSingleVariableFree
@@ -73,24 +85,50 @@ int main(int argc, char *argv[]){
 	printf("\n\t\33[7m[#%04d] Elapsed time = %12.6e(s)\33[m\n", global_iteration-1, cputime/1000.0);
 
 }
-// NABLA - a Numerical Analysis Based LAnguage
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
 
-// Copyright (C) 2014 CEA/DAM/DIF
-// Jean-Sylvain CAMIER - Jean-Sylvain.Camier@cea.fr
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// See the LICENSE file for details.
 // ****************************************************************************
 // * nabla_ini_node_coords
 // ****************************************************************************

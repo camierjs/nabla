@@ -41,13 +41,70 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
 
 
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-//void okinaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-//  nprintf(nabla,"\n/*okinaAddNablaVariableList*/",NULL);
-//}
+/*****************************************************************************
+ * nccOkinaMainVarInitKernel
+ *****************************************************************************/
+NABLA_STATUS nccOkinaMainVarInitKernel(nablaMain *nabla){
+  //int i,iVar;
+  nablaVariable *var;
+  dbg("\n[nccOkinaMainVarInit]");
+  nprintf(nabla,NULL,"\n\
+// ******************************************************************************\n\
+// * Kernel d'initialisation des variables\n\
+// ******************************************************************************\n\
+void nabla_ini_variables(void){");
+  // Variables aux noeuds
+  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='n') continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
+    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+    if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+  }
+  nprintf(nabla,NULL,"\n\t}");  
+  // Variables aux mailles real
+  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='c') continue;
+    if (var->dim==0){
+      nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+    }else{
+      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
+      nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+    }
+  }
+  nprintf(nabla,NULL,"\n\t}");
+  nprintf(nabla,NULL,"\n}");
+  return NABLA_OK;
+}
 
+
+/*****************************************************************************
+ * nccOkinaMainVarInitKernel
+ *****************************************************************************/
+NABLA_STATUS nccOkinaMainVarInitCall(nablaMain *nabla){
+  nablaVariable *var;
+  dbg("\n[nccOkinaMainVarInitCall]");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
+            var->name,
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
+  return NABLA_OK;
+}

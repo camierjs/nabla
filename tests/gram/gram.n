@@ -21,14 +21,21 @@ cells{
   Real alpha;
 };
 
+nodes{
+  ℝ u;
+};
+
 global{
   Real alpha_global;
 };
 
-
-cells void computeGeometricVolume(void) in (cell cqs, node coord)
-  out (cell oldVolume) inout(cell v) @ -3.9,5.0{
-  ∀ node τVolume += coord⋅cqs;
+∀ nodes void loop(void) in (node u) @ 1.0 {
+  unp1 = u - cp*(u-u[-1]) - cm*(u[+1]-u);
 }
 
-∀ cells alpha_global <?= alpha @ 12.11;
+/*cells void computeGeometricVolume(void) in (cell cqs, node coord)
+  out (cell oldVolume) inout(cell v) @ -3.9,5.0{
+  ∀ node τVolume += coord⋅cqs;
+  }*/
+
+//∀ cells alpha_global <?= alpha @ 12.11;

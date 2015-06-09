@@ -69,10 +69,14 @@ extern char* okinaSseForwards[];
 extern char* okinaAvxForwards[];
 extern char* okinaMicForwards[];
 
-char* okinaStdGather(nablaJob *,nablaVariable*,enum_phase);
-char* okinaSseGather(nablaJob *,nablaVariable*,enum_phase);
-char* okinaAvxGather(nablaJob *,nablaVariable*,enum_phase);
-char* okinaMicGather(nablaJob *,nablaVariable*,enum_phase);
+char* okinaGather(nablaJob*);
+
+char* okinaStdGather(nablaJob*,nablaVariable*,enum_phase);
+char* okinaSseGather(nablaJob*,nablaVariable*,enum_phase);
+char* okinaAvxGather(nablaJob*,nablaVariable*,enum_phase);
+char* okinaMicGather(nablaJob*,nablaVariable*,enum_phase);
+
+char* okinaScatter(nablaJob*);
 
 char* okinaStdScatter(nablaVariable*);
 char* okinaSseScatter(nablaVariable*);
@@ -132,6 +136,30 @@ void okinaMesh3D(nablaMain*);
 void nccOkinaMainMeshPrefix(nablaMain*);
 void nccOkinaMainMeshPostfix(nablaMain*);
 
+void okinaInclude(nablaMain *nabla);
+void okinaHeaderPrefix(nablaMain *nabla);
+void okinaHeaderIncludes(nablaMain *nabla);
+void okinaHeaderSimd(nablaMain *nabla);
+void okinaHeaderDbg(nablaMain *nabla);
+void okinaHeaderMth(nablaMain *nabla);
+void okinaHeaderPostfix(nablaMain *nabla);
+
+
+void okinaHookDfsForCalls(struct nablaMainStruct*,
+                          nablaJob*,
+                          astNode*,
+                          const char* namespace,
+                          astNode*);
+void okinaHookIteration(struct nablaMainStruct *);
+void okinaHookExit(struct nablaMainStruct *);
+void okinaHookTime(struct nablaMainStruct *);
+void okinaHookFatal(struct nablaMainStruct *);
+void okinaHookAddCallNames(struct nablaMainStruct *,nablaJob *,astNode *);
+void okinaHookAddArguments(struct nablaMainStruct *,nablaJob *);
+void okinaHookTurnTokenToOption(struct nablaMainStruct *,nablaOption *);
+void okinaHookLibraries(astNode *, nablaEntity *);
+char* okinaHookEntryPointPrefix(struct nablaMainStruct *, nablaJob *);
+
 void okinaHookFunctionName(nablaMain*);
 void okinaHookFunction(nablaMain*, astNode*);
 void okinaHookJob(nablaMain*, astNode*);
@@ -143,17 +171,18 @@ char* okinaHookPostfixEnumerate(nablaJob*);
 char* okinaHookItem(nablaJob*,const char, const char, char);
 void okinaHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *okinaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void okinaHookSystem(astNode*,nablaMain*, const char cnf, char enum_enum);
-void okinaHookAddExtraParameters(nablaMain*, nablaJob*, int *numParams);
-void okinaHookDumpNablaParameterList(nablaMain*, nablaJob*, astNode *n, int *numParams);
-void okinaHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable *var, char cnfg);
-void okinaHookJobDiffractStatement(nablaMain*, nablaJob*, astNode **n);
+void okinaHookSystem(astNode*,nablaMain*, const char, char);
+void okinaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
+void okinaHookDumpNablaParameterList(nablaMain*, nablaJob*, astNode*, int*);
+void okinaHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char );
+void okinaHookJobDiffractStatement(nablaMain*, nablaJob*, astNode**);
+void okinaHookReduction(struct nablaMainStruct*, astNode*);
 
 // Pour dumper les arguments necessaire dans le main
-void okinaDumpNablaArgumentList(nablaMain*, astNode *n, int *numParams);
-void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain*, astNode *n,bool);
-void okinaAddExtraArguments(nablaMain*, nablaJob*, int *numParams);
-void okinaAddNablaVariableList(nablaMain*, astNode *n, nablaVariable **variables);
+void okinaDumpNablaArgumentList(nablaMain*, astNode*, int*);
+void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain*, astNode*,bool);
+void okinaAddExtraArguments(nablaMain*, nablaJob*, int*);
+void okinaAddNablaVariableList(nablaMain*, astNode*, nablaVariable**);
 void okinaAddExtraConnectivitiesParameters(nablaMain*, int*);
 void okinaAddExtraConnectivitiesArguments(nablaMain*, int*);
 

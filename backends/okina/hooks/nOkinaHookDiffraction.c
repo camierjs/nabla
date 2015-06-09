@@ -44,10 +44,50 @@
 #include "nabla.tab.h"
 
 
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-//void okinaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-//  nprintf(nabla,"\n/*okinaAddNablaVariableList*/",NULL);
-//}
+/*****************************************************************************
+ * Diffraction
+ *****************************************************************************/
+void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour Ã©ventuellement les diffracter (real3 => _x, _y & _z)
+  // Et on amorce la diffraction
+  if ((*n)->ruleid == rulenameToId("expression_statement")
+      && (*n)->children->ruleid == rulenameToId("expression")
+      //&& (*n)->children->children->ruleid == rulenameToId("expression")
+      //&& job->parse.statementToDiffract==NULL
+      //&& job->parse.diffractingXYZ==0
+      ){
+    //dbg("\n[okinaHookJobDiffractStatement] amorce la diffraction");
+//#warning Diffracting is turned OFF
+      job->parse.statementToDiffract=NULL;//*n;
+      // We're juste READY, not diffracting yet!
+      job->parse.diffractingXYZ=0;      
+      nprintf(nabla, "/* DiffractingREADY */",NULL);
+  }
+  
+  // On avance la diffraction
+  if ((*n)->tokenid == ';'
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ<3){
+    dbg("\n[okinaHookJobDiffractStatement] avance dans la diffraction");
+    job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
+    (*n)=job->parse.statementToDiffract;
+    nprintf(nabla, NULL, ";\n\t");
+    //nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
+  }
 
+  // On flush la diffraction 
+  if ((*n)->tokenid == ';' 
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ==3){
+    dbg("\n[okinaHookJobDiffractStatement] Flush de la diffraction");
+    job->parse.diffracting=false;
+    job->parse.statementToDiffract=NULL;
+    job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
+    nprintf(nabla, "/*<end of diffracting>*/",NULL);
+  }
+  //dbg("\n[okinaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
+}
