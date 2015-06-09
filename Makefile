@@ -32,7 +32,7 @@ BUILD_PATH = /tmp/nabla
 BUILD_MKDIR = mkdir --parent $(BUILD_PATH) && sync && sync
 CMAKE_FLAGS = --warn-uninitialized
 BUILD_CMAKE = cd $(BUILD_PATH) && $(CMAKE) $(CMAKE_FLAGS) $(NABLA_PATH)
-NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
+NUMBR_PROCS = 2 #$(shell getconf _NPROCESSORS_ONLN)
 
 ##################
 # BUILD Commands #

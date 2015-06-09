@@ -52,9 +52,9 @@ void okinaInclude(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
+// ****************************************************************************
+// * okinaHeaderPrefix
+// ****************************************************************************
 void okinaHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
@@ -62,9 +62,10 @@ void okinaHeaderPrefix(nablaMain *nabla){
           nabla->entity->name,nabla->entity->name);
 }
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
+
+// ****************************************************************************
+// * okinaHeaderIncludes
+// ****************************************************************************
 void okinaHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
@@ -88,6 +89,7 @@ void okinaHeaderIncludes(nablaMain *nabla){
           nabla->simd->includes(),
           nabla->parallel->includes());
 }
+
 
 // ****************************************************************************
 // * okinaHeader for Std, Avx or Mic
@@ -124,9 +126,11 @@ extern char knMicGather_h[];
 extern char knMicScatter_h[];
 extern char knMicOStream_h[];
 extern char knMicTernary_h[];
+
 static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
+
 void okinaHeaderSimd(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
@@ -192,9 +196,9 @@ void okinaHeaderMth(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
+// ****************************************************************************
+// * okinaHeaderPostfix
+// ****************************************************************************
 void okinaHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __OKINA_%s_H__\n",nabla->entity->name);
 }

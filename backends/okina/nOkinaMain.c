@@ -89,9 +89,10 @@ int main(int argc, char *argv[]){\n\
 #define OKINA_MAIN_POSTINIT "\n\t//OKINA_MAIN_POSTINIT"
 
 
-/*****************************************************************************
- * Backend OKINA POSTFIX - Génération du 'main'
-\n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
+// ****************************************************************************
+// * Backend OKINA POSTFIX - Génération du 'main'
+// * \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del
+// ****************************************************************************
 #define OKINA_MAIN_POSTFIX "\n//OKINA_MAIN_POSTFIX\
 \n\tglobal_time+=*(double*)&global_deltat[0];\
 \n\tglobal_iteration+=1;\

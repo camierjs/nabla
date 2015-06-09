@@ -43,10 +43,13 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-/***************************************************************************** 
- * Traitement des transformations '[', '(' & ''
- *****************************************************************************/
-void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
+// ****************************************************************************
+// * Traitement des transformations '[', '(' & ''
+// ****************************************************************************
+void okinaHookTurnBracketsToParentheses(nablaMain* nabla,
+                                        nablaJob *job,
+                                        nablaVariable *var,
+                                        char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
@@ -74,9 +77,9 @@ void okinaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVa
 }
 
 
-/***************************************************************************** 
- * Traitement des tokens SYSTEM
- *****************************************************************************/
+// ****************************************************************************
+// * Traitement des tokens SYSTEM
+// ****************************************************************************
 void okinaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
@@ -104,9 +107,9 @@ void okinaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum)
 }
 
 
-/*****************************************************************************
- * Prépare le nom de la variable
- *****************************************************************************/
+// ****************************************************************************
+// * Prépare le nom de la variable
+// ****************************************************************************
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   if (!job->parse.selection_statement_in_compound_statement){
     nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
@@ -117,7 +120,9 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
     if (strcmp(var->type,"integer")==0)
       nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
     if (strcmp(var->type,"real3")==0)
-      nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);
+      nprintf(nabla, "/*tt2a(if+real3)*/",
+              "/*if+real3 still in real3 vs double3*/%s_%s",
+              var->item, var->name);
     //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
   }    
   if (strcmp(var->type,"real3")!=0){
@@ -128,9 +133,9 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Postfix d'un .x|y|z slon le isDotXYZ
- *****************************************************************************/
+// ****************************************************************************
+// * Postfix d'un .x|y|z slon le isDotXYZ
+// ****************************************************************************
 static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   switch (job->parse.isDotXYZ){
   case(0): break;
@@ -145,9 +150,9 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Tokens to gathered  variables
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to gathered  variables
+// ****************************************************************************
 static bool okinaHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                  nablaVariable *var,
                                                  nablaJob *job){
@@ -158,9 +163,9 @@ static bool okinaHookTurnTokenToGatheredVariable(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'CELL Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'CELL Job' switch
+// ****************************************************************************
 static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
@@ -222,9 +227,9 @@ static void okinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'NODE Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'NODE Job' switch
+// ****************************************************************************
 static void okinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
@@ -271,9 +276,9 @@ static void okinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'FACE Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'FACE Job' switch
+// ****************************************************************************
 static void okinaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
@@ -314,9 +319,9 @@ static void okinaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'Std Function' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'Std Function' switch
+// ****************************************************************************
 static void okinaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
                                                        nablaVariable *var,
                                                        nablaJob *job){
@@ -349,9 +354,10 @@ static void okinaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Transformation de tokens en variables selon les contextes dans le cas d'un '[Cell|node]Enumerator'
- *****************************************************************************/
+// ****************************************************************************
+// * Transformation de tokens en variables selon les contextes,
+// * dans le cas d'un '[Cell|node]Enumerator'
+// ****************************************************************************
 nablaVariable *okinaHookTurnTokenToVariable(astNode * n,
                                             nablaMain *arc,
                                             nablaJob *job){
@@ -389,9 +395,9 @@ nablaVariable *okinaHookTurnTokenToVariable(astNode * n,
 }
 
 
-/***************************************************************************** 
- * Upcase de la chaîne donnée en argument
- *****************************************************************************/
+// ****************************************************************************
+// * Upcase de la chaîne donnée en argument
+// ****************************************************************************
 static inline char *itemUPCASE(const char *itm){
   if (itm[0]=='c') return "CELLS";
   if (itm[0]=='n') return "NODES";
@@ -402,9 +408,9 @@ static inline char *itemUPCASE(const char *itm){
 }
 
 
-/***************************************************************************** 
- * enums pour les différents dumps à faire: déclaration, malloc et free
- *****************************************************************************/
+// ****************************************************************************
+// * enums pour les différents dumps à faire: déclaration, malloc et free
+// ****************************************************************************
 typedef enum {
   OKINA_VARIABLES_DECLARATION=0,
   OKINA_VARIABLES_MALLOC,
@@ -412,13 +418,15 @@ typedef enum {
 } OKINA_VARIABLES_SWITCH;
 
 
-// Pointeur de fonction vers une qui dump ce que l'on souhaite
+// ****************************************************************************
+// * Pointeur de fonction vers une qui dump ce que l'on souhaite
+// ****************************************************************************
 typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth);
 
 
-/***************************************************************************** 
- * Dump d'un MALLOC d'une variables dans le fichier source
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'un MALLOC d'une variables dans le fichier source
+// ****************************************************************************
 static NABLA_STATUS okinaGenerateSingleVariableMalloc(nablaMain *nabla,
                                                     nablaVariable *var,
                                                     char *postfix,
@@ -428,9 +436,9 @@ static NABLA_STATUS okinaGenerateSingleVariableMalloc(nablaMain *nabla,
 }
 
 
-/***************************************************************************** 
- * Dump d'un FREE d'une variables dans le fichier source
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'un FREE d'une variables dans le fichier source
+// ****************************************************************************
 static NABLA_STATUS okinaGenerateSingleVariableFree(nablaMain *nabla,
                                                   nablaVariable *var,
                                                   char *postfix,
@@ -440,9 +448,9 @@ static NABLA_STATUS okinaGenerateSingleVariableFree(nablaMain *nabla,
 }
 
 
-/***************************************************************************** 
- * Dump d'une variables dans le fichier
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'une variables dans le fichier
+// ****************************************************************************
 static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
                                               nablaVariable *var,
                                               char *postfix,
@@ -450,7 +458,8 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
   nprintf(nabla,"\n\t// okinaGenerateSingleVariable",NULL);
   if (strncmp(var->name,"coord",5)==0){
     if ((nabla->entity->libraries&(1<<real))!=0){
-      fprintf(nabla->entity->hdr,"\nreal/*3*/ node_coord[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));");
+      fprintf(nabla->entity->hdr,
+              "\nreal/*3*/ node_coord[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));");
       return NABLA_OK;
     }
   }
@@ -475,9 +484,9 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
 }
 
 
-/***************************************************************************** 
- * Retourne quelle fonction selon l'enum donné
- *****************************************************************************/
+// ****************************************************************************
+// * Retourne quelle fonction selon l'enum donné
+// ****************************************************************************
 static pFunDump witch2func(OKINA_VARIABLES_SWITCH witch){
   switch (witch){
   case (OKINA_VARIABLES_DECLARATION): return okinaGenerateSingleVariable;
@@ -488,9 +497,9 @@ static pFunDump witch2func(OKINA_VARIABLES_SWITCH witch){
 }
 
 
-/***************************************************************************** 
- * Dump d'une variables de dimension 1
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'une variables de dimension 1
+// ****************************************************************************
 static NABLA_STATUS okinaGenericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
   //int i;
   //char depth[]="[0]";
@@ -500,9 +509,10 @@ static NABLA_STATUS okinaGenericVariableDim1(nablaMain *nabla, nablaVariable *va
   return NABLA_OK;
 }
 
-/***************************************************************************** 
- * Dump d'une variables de dimension 0
- *****************************************************************************/
+
+// ****************************************************************************
+// * Dump d'une variables de dimension 0
+// ****************************************************************************
 static NABLA_STATUS okinaGenericVariableDim0(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
   dbg("\n[okinaGenerateVariableDim0] variable %s", var->name);
   if (strcmp(var->type,"real3")!=0)
@@ -515,9 +525,10 @@ static NABLA_STATUS okinaGenericVariableDim0(nablaMain *nabla, nablaVariable *va
   return NABLA_ERROR;
 }
 
-/***************************************************************************** 
- * Dump d'une variables
- *****************************************************************************/
+
+// ****************************************************************************
+// * Dump d'une variables
+// ****************************************************************************
 static NABLA_STATUS okinaGenericVariable(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
   if (!var->axl_it) return NABLA_OK;
   if (var->item==NULL) return NABLA_ERROR;
@@ -530,9 +541,9 @@ static NABLA_STATUS okinaGenericVariable(nablaMain *nabla, nablaVariable *var, p
 }
 
 
-/***************************************************************************** 
- * Dump des options
- *****************************************************************************/
+// ****************************************************************************
+// * Dump des options
+// ****************************************************************************
 static void okinaOptions(nablaMain *nabla){
   nablaOption *opt;
   fprintf(nabla->entity->hdr,"\n\n\n\
@@ -545,9 +556,10 @@ static void okinaOptions(nablaMain *nabla){
             opt->name, opt->dflt);
 }
 
-/***************************************************************************** 
- * Dump des globals
- *****************************************************************************/
+
+// ****************************************************************************
+// * Dump des globals
+// ****************************************************************************
 static void okinaGlobals(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
@@ -559,9 +571,9 @@ double global_time;\n");
 }
 
 
-/***************************************************************************** 
- * Dump des variables
- *****************************************************************************/
+// ****************************************************************************
+// * Dump des variables
+// ****************************************************************************
 void okinaVariablesPrefix(nablaMain *nabla){
   nablaVariable *var;
 
@@ -580,7 +592,9 @@ void okinaVariablesPrefix(nablaMain *nabla){
 }
 
 
-
+// ****************************************************************************
+// * okinaVariablesPostfix
+// ****************************************************************************
 void okinaVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
   for(var=nabla->variables;var!=NULL;var=var->next)

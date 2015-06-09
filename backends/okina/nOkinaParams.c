@@ -44,9 +44,9 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
-  * Dump d'extra paramètres
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'extra paramètres
+// ****************************************************************************
 void okinaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   nprintf(nabla, "/* direct return from okinaHookAddExtraParameters*/", NULL);
   return;
@@ -76,11 +76,13 @@ void okinaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams
 }
 
 
-
-
+// ****************************************************************************
+// * okinaAddExtraConnectivitiesParameters
+// ****************************************************************************
 void okinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   return;
 }
+
 
 // ****************************************************************************
 // * Dump dans le src des parametres nabla en in comme en out
@@ -131,6 +133,5 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
   }
   if (n->children != NULL) okinaHookDumpNablaParameterList(nabla,job,n->children,numParams);
   if (n->next != NULL) okinaHookDumpNablaParameterList(nabla,job,n->next, numParams);
-
 }
 

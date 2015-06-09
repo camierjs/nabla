@@ -40,14 +40,18 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+
+
 // ****************************************************************************
-// * IVDEP Pragma
+// * ivdep/align ICC Pragmas
 // ****************************************************************************
 char *nccOkinaPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *nccOkinaPragmaGccIvdep(void){ return "__declspec(align(64)) "; }
+char *nccOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
 
 
-
-char *nccOkinaPragmaIccAlign(void){ return "\\\n_Pragma(\"ivdep\")"; }
+// ****************************************************************************
+// * ivdep/align  GCC Pragmas
+// ****************************************************************************
+char *nccOkinaPragmaGccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
 char *nccOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
 

@@ -44,9 +44,9 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
- * FORALL token switch
- *****************************************************************************/
+// ****************************************************************************
+// * FORALL token switch
+// ****************************************************************************
 static void okinaHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
@@ -79,9 +79,9 @@ static void okinaHookSwitchForall(astNode *n, nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Différentes actions pour un job Nabla
- *****************************************************************************/
+// ****************************************************************************
+// * Différentes actions pour un job Nabla
+// ****************************************************************************
 void okinaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];

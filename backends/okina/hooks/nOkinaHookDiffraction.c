@@ -44,9 +44,9 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
- * Diffraction
- *****************************************************************************/
+// ****************************************************************************
+// * Diffraction
+// ****************************************************************************
 void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
   // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
   // Et on amorce la diffraction

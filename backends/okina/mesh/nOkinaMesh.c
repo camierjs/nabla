@@ -43,15 +43,18 @@
 #include "nabla.h"
 
 
-/*****************************************************************************
- * Backend OKINA - Allocation de la connectivité du maillage
- *****************************************************************************/
+// ****************************************************************************
+// * Backend OKINA - Allocation de la connectivité du maillage
+// ****************************************************************************
 void nccOkinaMainMeshPrefix(nablaMain *nabla){
   dbg("\n[nccOkinaMainMeshPrefix]");
   fprintf(nabla->entity->src,"\t// [nccOkinaMainMeshPrefix] Allocation des connectivités");
 }
 
 
+// ****************************************************************************
+// * nccOkinaMainMeshPostfix
+// ****************************************************************************
 void nccOkinaMainMeshPostfix(nablaMain *nabla){
   dbg("\n[nccOkinaMainMeshPostfix]");
   //fprintf(nabla->entity->src,"");

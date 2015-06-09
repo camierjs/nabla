@@ -73,18 +73,42 @@ char* okinaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_p
   return "static inline";
 }
 
+
+// ****************************************************************************
+// * okinaHookIteration
+// ****************************************************************************
 void okinaHookIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "okina_iteration()");
 }
+
+
+// ****************************************************************************
+// * okinaHookExit
+// ****************************************************************************
 void okinaHookExit(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*EXIT*/", "exit(0.0)");
 }
+
+
+// ****************************************************************************
+// * okinaHookTime
+// ****************************************************************************
 void okinaHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "global_time");
 }
+
+
+// ****************************************************************************
+// * okinaHookFatal
+// ****************************************************************************
 void okinaHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
+
+
+// ****************************************************************************
+// * okinaHookAddCallNames
+// ****************************************************************************
 void okinaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
@@ -101,6 +125,11 @@ void okinaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *
     nprintf(nabla, "/*has not been found*/", NULL);
   }
 }
+
+
+// ****************************************************************************
+// * okinaHookAddArguments
+// ****************************************************************************
 void okinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   // En Okina, par contre il faut les y mettre
   if (fct->parse.function_call_name!=NULL){
@@ -113,24 +142,26 @@ void okinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   }
 }
 
+
+// ****************************************************************************
+// * okinaHookTurnTokenToOption
+// ****************************************************************************
 void okinaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o okina*/", "%s", opt->name);
 }
 
 
-
-/*****************************************************************************
- * Okina libraries
- *****************************************************************************/
+// ****************************************************************************
+// * Okina libraries
+// ****************************************************************************
 void okinaHookLibraries(astNode * n, nablaEntity *entity){
   fprintf(entity->src, "\n/*lib %s*/",n->children->token);
 }
 
 
-
-/*****************************************************************************
- * Génération d'un kernel associé à un support
- *****************************************************************************/
+// ****************************************************************************
+// * Génération d'un kernel associé à un support
+// ****************************************************************************
 void okinaHookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nablaJobNew(nabla->entity);
   nablaJobAdd(nabla->entity, job);

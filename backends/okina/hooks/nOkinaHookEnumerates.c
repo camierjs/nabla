@@ -44,9 +44,9 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
- * Fonction prefix à l'ENUMERATE_*
- *****************************************************************************/
+// ****************************************************************************
+// * Fonction prefix à l'ENUMERATE_*
+// ****************************************************************************
 char* okinaHookPrefixEnumerate(nablaJob *job){
   char prefix[NABLA_MAX_FILE_NAME];
   //const nablaMain* nabla=job->entity->main;
@@ -67,9 +67,9 @@ char* okinaHookPrefixEnumerate(nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_* avec XYZ
- *****************************************************************************/
+// ****************************************************************************
+// * Fonction produisant l'ENUMERATE_* avec XYZ
+// ****************************************************************************
 char* okinaHookDumpEnumerateXYZ(nablaJob *job){
   //char *xyz=job->xyz;// Direction
   //nprintf(job->entity->main, "\n\t/*okinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
@@ -98,9 +98,9 @@ static char * okinaReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_*
- *****************************************************************************/
+// ****************************************************************************
+// * Fonction produisant l'ENUMERATE_*
+// ****************************************************************************
 static char* okinaSelectEnumerate(nablaJob *job){
   const char *grp=job->scope;   // OWN||ALL
   const char *rgn=job->region;  // INNER, OUTER
@@ -128,6 +128,11 @@ static char* okinaSelectEnumerate(nablaJob *job){
   error(!0,0,"Could not distinguish ENUMERATE!");
   return NULL;
 }
+
+
+// ****************************************************************************
+// * okinaHookDumpEnumerate
+// ****************************************************************************
 char* okinaHookDumpEnumerate(nablaJob *job){
   const char *forall=strdup(okinaSelectEnumerate(job));
   const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
@@ -169,9 +174,9 @@ char* okinaHookDumpEnumerate(nablaJob *job){
 
 
 
-/*****************************************************************************
- * Fonction postfix à l'ENUMERATE_*
- *****************************************************************************/
+// ****************************************************************************
+// * Fonction postfix à l'ENUMERATE_*
+// ****************************************************************************
 char* okinaHookPostfixEnumerate(nablaJob *job){
   if (job->is_a_function) return "";
   if (job->item[0]=='\0') return "// job okinaHookPostfixEnumerate\n";

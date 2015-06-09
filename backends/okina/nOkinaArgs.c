@@ -52,26 +52,28 @@ void okinaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
 }
 
 
-/*****************************************************************************
-  * Dump d'extra arguments
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'extra arguments
+// ****************************************************************************
 void okinaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
   nprintf(nabla,"\n\t\t/*okinaAddExtraArguments*/",NULL);
 }
 
 
-/*****************************************************************************
-  * Dump dans le src des arguments nabla en in comme en out
- *****************************************************************************/
+// ****************************************************************************
+// * Dump dans le src des arguments nabla en in comme en out
+// ****************************************************************************
 void okinaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
   nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
 }
 
 
-/*****************************************************************************
-  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
- *****************************************************************************/
-void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
+// ****************************************************************************
+// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+// ****************************************************************************
+void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+                                                 astNode *n,
+                                                 bool in_or_out){
   nprintf(nabla,"\n\t\t/*okinaDumpNablaDebugFunctionFromOutArguments*/",NULL);
 }
 

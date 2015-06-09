@@ -43,6 +43,9 @@
 #include "nabla.h"
 
 
+// ****************************************************************************
+// * okinaDefineEnumerates
+// ****************************************************************************
 void okinaDefineEnumerates(nablaMain *nabla){
   const char *parallel_prefix_for_loop=nabla->parallel->loop(nabla);
   fprintf(nabla->entity->hdr,"\n\n\

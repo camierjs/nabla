@@ -44,9 +44,9 @@
 #include "nabla.tab.h"
 
 
-/***************************************************************************** 
- * Traitement des tokens NABLA ITEMS
- *****************************************************************************/
+// ****************************************************************************
+// * Traitement des tokens NABLA ITEMS
+// ****************************************************************************
 char* okinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
   if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
   if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
