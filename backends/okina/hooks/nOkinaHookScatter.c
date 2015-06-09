@@ -59,7 +59,7 @@ static void okinaFlushRealVariable(nablaJob *job, nablaVariable *var){
 // ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
-char* okinaScatter(nablaJob *job){
+char* nOkinaHookScatter(nablaJob *job){
   int i;
   char scatters[1024];
   nablaVariable *var;

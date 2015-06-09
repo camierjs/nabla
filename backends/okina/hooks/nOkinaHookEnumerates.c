@@ -47,22 +47,22 @@
 // ****************************************************************************
 // * Fonction prefix à l'ENUMERATE_*
 // ****************************************************************************
-char* okinaHookPrefixEnumerate(nablaJob *job){
+char* nOkinaHookEnumeratePrefix(nablaJob *job){
   char prefix[NABLA_MAX_FILE_NAME];
   //const nablaMain* nabla=job->entity->main;
               
   if (job->parse.returnFromArgument){
     const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
     if (sprintf(prefix,"dbgFuncIn();\n\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = %s;",var,var)<=0){
-      error(!0,0,"Error in okinaHookPrefixEnumerate!");
+      error(!0,0,"Error in nOkinaHookPrefixEnumerate!");
     }
   }else{
     if (sprintf(prefix,"dbgFuncIn();")<=0)
-      error(!0,0,"Error in okinaHookPrefixEnumerate!");
+      error(!0,0,"Error in nOkinaHookPrefixEnumerate!");
   }
       
   //const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //nprintf(job->entity->main, "\n\t/*okinaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
+  //nprintf(job->entity->main, "\n\t/*nOkinaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
   return strdup(prefix);
 }
 
@@ -70,10 +70,10 @@ char* okinaHookPrefixEnumerate(nablaJob *job){
 // ****************************************************************************
 // * Fonction produisant l'ENUMERATE_* avec XYZ
 // ****************************************************************************
-char* okinaHookDumpEnumerateXYZ(nablaJob *job){
+char* nOkinaHookEnumerateDumpXYZ(nablaJob *job){
   //char *xyz=job->xyz;// Direction
-  //nprintf(job->entity->main, "\n\t/*okinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
-  return "// okinaHookDumpEnumerateXYZ has xyz drctn";
+  //nprintf(job->entity->main, "\n\t/*nOkinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
+  return "// nOkinaHookDumpEnumerateXYZ has xyz drctn";
 }
 
 
@@ -88,7 +88,7 @@ char* okinaHookDumpEnumerateXYZ(nablaJob *job){
     error(!0,0,"Could not patch format!");
   return strdup(str);
   }*/
-static char * okinaReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
+static char* okinaReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
   char str[NABLA_MAX_FILE_NAME];
   if (job->is_a_function) return "";
   if (sprintf(str,"%s",
@@ -105,8 +105,8 @@ static char* okinaSelectEnumerate(nablaJob *job){
   const char *grp=job->scope;   // OWN||ALL
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //if (job->xyz!=NULL) return okinaHookDumpEnumerateXYZ(job);
-  if (itm=='\0') return "\n";// function okinaHookDumpEnumerate\n";
+  //if (job->xyz!=NULL) return nOkinaHookDumpEnumerateXYZ(job);
+  if (itm=='\0') return "\n";// function nOkinaHookDumpEnumerate\n";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
@@ -131,16 +131,16 @@ static char* okinaSelectEnumerate(nablaJob *job){
 
 
 // ****************************************************************************
-// * okinaHookDumpEnumerate
+// * nOkinaHookDumpEnumerate
 // ****************************************************************************
-char* okinaHookDumpEnumerate(nablaJob *job){
+char* nOkinaHookEnumerateDump(nablaJob *job){
   const char *forall=strdup(okinaSelectEnumerate(job));
   const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];
   char str[NABLA_MAX_FILE_NAME];
-  dbg("\n\t[okinaHookDumpEnumerate] Preparing:");
-  dbg("\n\t[okinaHookDumpEnumerate]\t\tforall=%s",forall);
-  dbg("\n\t[okinaHookDumpEnumerate]\t\twarping=%s",warping);
+  dbg("\n\t[nOkinaHookDumpEnumerate] Preparing:");
+  dbg("\n\t[nOkinaHookDumpEnumerate]\t\tforall=%s",forall);
+  dbg("\n\t[nOkinaHookDumpEnumerate]\t\twarping=%s",warping);
 
   // On prépare le format grace à la partie du forall,
   // on rajoute l'extension suivant si on a une returnVariable
@@ -157,12 +157,12 @@ char* okinaHookDumpEnumerate(nablaJob *job){
                 ",",           //ompOkinaLocalVariableComa,
                 ompOkinaReturnVariableWitoutPerThread)<=0) error(!0,0,"Could not patch warping within ENUMERATE!");
   }else{
-    dbg("\n\t[okinaHookDumpEnumerate] No returnFromArgument");
+    dbg("\n\t[nOkinaHookDumpEnumerate] No returnFromArgument");
     if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
                 forall,
                 job->is_a_function?"":")")<=0)
       error(!0,0,"Could not patch format!");
-    dbg("\n[okinaHookDumpEnumerate] format=%s",format);
+    dbg("\n[nOkinaHookDumpEnumerate] format=%s",format);
     if (sprintf(str,format,
                 warping,
                 "",
@@ -177,10 +177,10 @@ char* okinaHookDumpEnumerate(nablaJob *job){
 // ****************************************************************************
 // * Fonction postfix à l'ENUMERATE_*
 // ****************************************************************************
-char* okinaHookPostfixEnumerate(nablaJob *job){
+char* nOkinaHookEnumeratePostfix(nablaJob *job){
   if (job->is_a_function) return "";
-  if (job->item[0]=='\0') return "// job okinaHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return okinaGather(job);
+  if (job->item[0]=='\0') return "// job nOkinaHookPostfixEnumerate\n";
+  if (job->xyz==NULL) return nOkinaHookGather(job);
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
 \t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
 \t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
@@ -191,6 +191,6 @@ char* okinaHookPostfixEnumerate(nablaJob *job){
 \t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
 \t\tconst int __attribute__((unused)) prevCell=delta;\n\
 \t\tconst int __attribute__((unused)) nextCell=delta;\n";
-  error(!0,0,"Could not switch in okinaHookPostfixEnumerate!");
+  error(!0,0,"Could not switch in nOkinaHookPostfixEnumerate!");
   return NULL;
 }

@@ -50,7 +50,7 @@
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* okinaGather(nablaJob *job){
+char* nOkinaHookGather(nablaJob *job){
   int i;
   char gathers[1024];
   nablaVariable *var;

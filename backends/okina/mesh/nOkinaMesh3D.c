@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
-static void okinaMesh3DConnectivity(nablaMain *nabla){
+static void nOkinaMesh3DConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
 // * MESH CONNECTIVITY\n\
@@ -61,12 +61,11 @@ static void okinaMesh3DConnectivity(nablaMain *nabla){
 }
 
 
-
 // ****************************************************************************
 // * okinaMesh
 // * Adding padding for simd too 
 // ****************************************************************************
-void okinaMesh3D(nablaMain *nabla){
+void nOkinaMesh3D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH GENERATION\n\
@@ -90,6 +89,6 @@ const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
 const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
-  okinaMesh3DConnectivity(nabla);
+  nOkinaMesh3DConnectivity(nabla);
 }
 

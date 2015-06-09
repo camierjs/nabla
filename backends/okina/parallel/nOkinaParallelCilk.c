@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Cilk Sync
 // ****************************************************************************
-char *nccOkinaParallelCilkSync(void){
+char *nOkinaParallelCilkSync(void){
   return "cilk_sync;\n";
 }
 
@@ -53,7 +53,7 @@ char *nccOkinaParallelCilkSync(void){
 // ****************************************************************************
 // * Cilk Spawn
 // ****************************************************************************
-char *nccOkinaParallelCilkSpawn(void){
+char *nOkinaParallelCilkSpawn(void){
   return "cilk_spawn ";
 }
 
@@ -61,7 +61,7 @@ char *nccOkinaParallelCilkSpawn(void){
 // ****************************************************************************
 // * Cilk for loop
 // ****************************************************************************
-char *nccOkinaParallelCilkLoop(struct nablaMainStruct *n){
+char *nOkinaParallelCilkLoop(struct nablaMainStruct *n){
   return "cilk_";
 }
 
@@ -69,6 +69,6 @@ char *nccOkinaParallelCilkLoop(struct nablaMainStruct *n){
 // ****************************************************************************
 // * Cilk includes
 // ****************************************************************************
-char *nccOkinaParallelCilkIncludes(void){
+char *nOkinaParallelCilkIncludes(void){
   return "#include <cilk/cilk.h>\n";
 }

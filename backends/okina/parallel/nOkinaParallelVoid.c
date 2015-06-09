@@ -43,7 +43,7 @@
 // ****************************************************************************
 // * Void Sync
 // ****************************************************************************
-char *nccOkinaParallelVoidSync(void){
+char *nOkinaParallelVoidSync(void){
   return "";
 }
 
@@ -51,7 +51,7 @@ char *nccOkinaParallelVoidSync(void){
 // ****************************************************************************
 // * Void Spawn
 // ****************************************************************************
-char *nccOkinaParallelVoidSpawn(void){
+char *nOkinaParallelVoidSpawn(void){
   return "";
 }
 
@@ -59,7 +59,7 @@ char *nccOkinaParallelVoidSpawn(void){
 // ****************************************************************************
 // * Void for loop
 // ****************************************************************************
-char *nccOkinaParallelVoidLoop(void){
+char *nOkinaParallelVoidLoop(void){
   return "";
 }
 
@@ -67,7 +67,7 @@ char *nccOkinaParallelVoidLoop(void){
 // ****************************************************************************
 // * Void includes
 // ****************************************************************************
-char *nccOkinaParallelVoidIncludes(void){
+char *nOkinaParallelVoidIncludes(void){
   return "\
 int omp_get_max_threads(void){return 1;}\n\
 int omp_get_thread_num(void){return 0;}\n\

@@ -7,14 +7,12 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_OKINA_C 
   nOkina.c
   nOkinaArgs.c
-  nOkinaHead.c
+  nOkinaHeader.c
   nOkinaInit.c
-  nOkinaData.c
+  nOkinaVariables.c
   nOkinaEnum.c
-  nOkinaFunc.c
   nOkinaMain.c
   nOkinaPragmas.c
-  nOkinaParams.c
   ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
 
 # On spécifie en plus que nOkinaDump.S va utiliser incbin pour se compiler

@@ -47,15 +47,15 @@
 // ****************************************************************************
 // * okinaInclude
 // ****************************************************************************
-void okinaInclude(nablaMain *nabla){
+void nOkinaHeaderInclude(nablaMain *nabla){
   fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
 
 
 // ****************************************************************************
-// * okinaHeaderPrefix
+// * nOkinaHeaderPrefix
 // ****************************************************************************
-void okinaHeaderPrefix(nablaMain *nabla){
+void nOkinaHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
           "#ifndef __OKINA_%s_H__\n#define __OKINA_%s_H__",
@@ -64,9 +64,9 @@ void okinaHeaderPrefix(nablaMain *nabla){
 
 
 // ****************************************************************************
-// * okinaHeaderIncludes
+// * nOkinaHeaderIncludes
 // ****************************************************************************
-void okinaHeaderIncludes(nablaMain *nabla){
+void nOkinaHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
 // *****************************************************************************\n\
@@ -92,7 +92,7 @@ void okinaHeaderIncludes(nablaMain *nabla){
 
 
 // ****************************************************************************
-// * okinaHeader for Std, Avx or Mic
+// * nOkinaHeader for Std, Avx or Mic
 // ****************************************************************************
 extern char knStdReal_h[];
 extern char knStdReal3_h[];
@@ -131,7 +131,7 @@ static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
 
-void okinaHeaderSimd(nablaMain *nabla){
+void nOkinaHeaderSimd(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
@@ -177,29 +177,29 @@ void okinaHeaderSimd(nablaMain *nabla){
 
 
 // ****************************************************************************
-// * okinaHeader for Dbg
+// * nOkinaHeader for Dbg
 // ****************************************************************************
 extern char knDbg_h[];
-void okinaHeaderDbg(nablaMain *nabla){
+void nOkinaHeaderDbg(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(knDbg_h));
 }
 
 
 // ****************************************************************************
-// * okinaHeader for Maths
+// * nOkinaHeader for Maths
 // ****************************************************************************
 extern char knMth_h[];
-void okinaHeaderMth(nablaMain *nabla){
+void nOkinaHeaderMth(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(knMth_h));
 }
 
 
 // ****************************************************************************
-// * okinaHeaderPostfix
+// * nOkinaHeaderPostfix
 // ****************************************************************************
-void okinaHeaderPostfix(nablaMain *nabla){
+void nOkinaHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __OKINA_%s_H__\n",nabla->entity->name);
 }
 

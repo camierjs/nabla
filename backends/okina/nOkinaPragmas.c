@@ -45,13 +45,13 @@
 // ****************************************************************************
 // * ivdep/align ICC Pragmas
 // ****************************************************************************
-char *nccOkinaPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *nccOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
+char *nOkinaPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
+char *nOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
 
 
 // ****************************************************************************
 // * ivdep/align  GCC Pragmas
 // ****************************************************************************
-char *nccOkinaPragmaGccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *nccOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+char *nOkinaPragmaGccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
+char *nOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
 

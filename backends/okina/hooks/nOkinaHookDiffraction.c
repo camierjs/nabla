@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * Diffraction
 // ****************************************************************************
-void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+void nOkinaHookDiffraction(nablaMain *nabla, nablaJob *job, astNode **n){
   // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
   // Et on amorce la diffraction
   if ((*n)->ruleid == rulenameToId("expression_statement")
@@ -56,7 +56,7 @@ void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n)
       //&& job->parse.statementToDiffract==NULL
       //&& job->parse.diffractingXYZ==0
       ){
-    //dbg("\n[okinaHookJobDiffractStatement] amorce la diffraction");
+    //dbg("\n[nOkinaHookJobDiffractStatement] amorce la diffraction");
 //#warning Diffracting is turned OFF
       job->parse.statementToDiffract=NULL;//*n;
       // We're juste READY, not diffracting yet!
@@ -70,7 +70,7 @@ void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n)
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ<3){
-    dbg("\n[okinaHookJobDiffractStatement] avance dans la diffraction");
+    dbg("\n[nOkinaHookJobDiffractStatement] avance dans la diffraction");
     job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
     (*n)=job->parse.statementToDiffract;
     nprintf(nabla, NULL, ";\n\t");
@@ -83,11 +83,11 @@ void okinaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n)
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ==3){
-    dbg("\n[okinaHookJobDiffractStatement] Flush de la diffraction");
+    dbg("\n[nOkinaHookJobDiffractStatement] Flush de la diffraction");
     job->parse.diffracting=false;
     job->parse.statementToDiffract=NULL;
     job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
     nprintf(nabla, "/*<end of diffracting>*/",NULL);
   }
-  //dbg("\n[okinaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
+  //dbg("\n[nOkinaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }

@@ -43,150 +43,169 @@
 #ifndef _NABLA_OKINA_H_
 #define _NABLA_OKINA_H_
 
-// SIMD
-char* okinaStdIncludes(void);
-char* okinaSseIncludes(void);
-char* okinaAvxIncludes(void);
-char* okinaMicIncludes(void);
+// simd/[std|sse|avx|mic]
+extern char* nOkinaStdForwards[];
+extern char* nOkinaSseForwards[];
+extern char* nOkinaAvxForwards[];
+extern char* nOkinaMicForwards[];
 
-char* okinaStdBits(void);
-char* okinaSseBits(void);
-char* okinaAvxBits(void);
-char* okinaMicBits(void);
+extern nablaDefine nOkinaStdDefines[];
+extern nablaDefine nOkinaSseDefines[];
+extern nablaDefine nOkinaAvxDefines[];
+extern nablaDefine nOkinaMicDefines[];
 
-extern nablaTypedef okinaStdTypedef[];
-extern nablaTypedef okinaSseTypedef[];
-extern nablaTypedef okinaAvxTypedef[];
-extern nablaTypedef okinaMicTypedef[];
+extern nablaTypedef nOkinaStdTypedef[];
+extern nablaTypedef nOkinaSseTypedef[];
+extern nablaTypedef nOkinaAvxTypedef[];
+extern nablaTypedef nOkinaMicTypedef[];
 
-extern nablaDefine okinaStdDefines[];
-extern nablaDefine okinaSseDefines[];
-extern nablaDefine okinaAvxDefines[];
-extern nablaDefine okinaMicDefines[];
+char* nOkinaStdIncludes(void);
+char* nOkinaSseIncludes(void);
+char* nOkinaAvxIncludes(void);
+char* nOkinaMicIncludes(void);
 
-extern char* okinaStdForwards[];
-extern char* okinaSseForwards[];
-extern char* okinaAvxForwards[];
-extern char* okinaMicForwards[];
+char* nOkinaStdBits(void);
+char* nOkinaSseBits(void);
+char* nOkinaAvxBits(void);
+char* nOkinaMicBits(void);
 
-char* okinaGather(nablaJob*);
+char* nOkinaStdGather(nablaJob*,nablaVariable*,enum_phase);
+char* nOkinaSseGather(nablaJob*,nablaVariable*,enum_phase);
+char* nOkinaAvxGather(nablaJob*,nablaVariable*,enum_phase);
+char* nOkinaMicGather(nablaJob*,nablaVariable*,enum_phase);
 
-char* okinaStdGather(nablaJob*,nablaVariable*,enum_phase);
-char* okinaSseGather(nablaJob*,nablaVariable*,enum_phase);
-char* okinaAvxGather(nablaJob*,nablaVariable*,enum_phase);
-char* okinaMicGather(nablaJob*,nablaVariable*,enum_phase);
+char* nOkinaStdScatter(nablaVariable*);
+char* nOkinaSseScatter(nablaVariable*);
+char* nOkinaAvxScatter(nablaVariable*);
+char* nOkinaMicScatter(nablaVariable*);
 
-char* okinaScatter(nablaJob*);
+char* nOkinaStdPrevCell(void);
+char* nOkinaSsePrevCell(void);
+char* nOkinaAvxPrevCell(void);
+char* nOkinaMicPrevCell(void);
 
-char* okinaStdScatter(nablaVariable*);
-char* okinaSseScatter(nablaVariable*);
-char* okinaAvxScatter(nablaVariable*);
-char* okinaMicScatter(nablaVariable*);
-
-char* okinaStdPrevCell(void);
-char* okinaSsePrevCell(void);
-char* okinaAvxPrevCell(void);
-char* okinaMicPrevCell(void);
-
-char* okinaStdNextCell(void);
-char* okinaSseNextCell(void);
-char* okinaAvxNextCell(void);
-char* okinaMicNextCell(void);
-
+char* nOkinaStdNextCell(void);
+char* nOkinaSseNextCell(void);
+char* nOkinaAvxNextCell(void);
+char* nOkinaMicNextCell(void);
 
 // Cilk+ parallel color
-char *nccOkinaParallelCilkSync(void);
-char *nccOkinaParallelCilkSpawn(void);
-char *nccOkinaParallelCilkLoop(nablaMain *);
-char *nccOkinaParallelCilkIncludes(void);
+char *nOkinaParallelCilkSync(void);
+char *nOkinaParallelCilkSpawn(void);
+char *nOkinaParallelCilkLoop(nablaMain *);
+char *nOkinaParallelCilkIncludes(void);
 
 // OpenMP parallel color
-char *nccOkinaParallelOpenMPSync(void);
-char *nccOkinaParallelOpenMPSpawn(void);
-char *nccOkinaParallelOpenMPLoop(nablaMain *);
-char *nccOkinaParallelOpenMPIncludes(void);
+char *nOkinaParallelOpenMPSync(void);
+char *nOkinaParallelOpenMPSpawn(void);
+char *nOkinaParallelOpenMPLoop(nablaMain *);
+char *nOkinaParallelOpenMPIncludes(void);
 
 // Void parallel color
-char *nccOkinaParallelVoidSync(void);
-char *nccOkinaParallelVoidSpawn(void);
-char *nccOkinaParallelVoidLoop(nablaMain *);
-char *nccOkinaParallelVoidIncludes(void);
+char *nOkinaParallelVoidSync(void);
+char *nOkinaParallelVoidSpawn(void);
+char *nOkinaParallelVoidLoop(nablaMain *);
+char *nOkinaParallelVoidIncludes(void);
 
 // Pragmas: Ivdep, Align
-char *nccOkinaPragmaIccIvdep(void);
-char *nccOkinaPragmaGccIvdep(void);
-char *nccOkinaPragmaIccAlign(void);
-char *nccOkinaPragmaGccAlign(void);
+char *nOkinaPragmaIccIvdep(void);
+char *nOkinaPragmaGccIvdep(void);
+char *nOkinaPragmaIccAlign(void);
+char *nOkinaPragmaGccAlign(void);
 
-NABLA_STATUS nccOkinaMainPrefix(nablaMain*);
-NABLA_STATUS nccOkinaMainPreInit(nablaMain*);
-NABLA_STATUS nccOkinaMainVarInitKernel(nablaMain*);
-NABLA_STATUS nccOkinaMainVarInitCall(nablaMain*);
-NABLA_STATUS nccOkinaMainPostInit(nablaMain*);
-NABLA_STATUS nccOkinaMain(nablaMain*);
-NABLA_STATUS nccOkinaMainPostfix(nablaMain*);
+// nOkinaInit
+NABLA_STATUS nOkinaInitVariables(nablaMain*);
+NABLA_STATUS nOkinaInitVariableDbg(nablaMain*);
 
-void okinaInlines(nablaMain*);
-void okinaDefineEnumerates(nablaMain*);
+// nOkinaMain
+NABLA_STATUS nOkinaMainPrefix(nablaMain*);
+NABLA_STATUS nOkinaMainPreInit(nablaMain*);
+NABLA_STATUS nOkinaMainPostInit(nablaMain*);
+NABLA_STATUS nOkinaMain(nablaMain*);
+NABLA_STATUS nOkinaMainPostfix(nablaMain*);
+
+// nOkinaEnum
+void nOkinaEnumDefine(nablaMain*);
+
+// nOkinaVariables
 void okinaVariablesPrefix(nablaMain*);
 void okinaVariablesPostfix(nablaMain*);
 
-void okinaMesh1D(nablaMain*);
-void okinaMesh3D(nablaMain*);
-void nccOkinaMainMeshPrefix(nablaMain*);
-void nccOkinaMainMeshPostfix(nablaMain*);
+// nOkinaHeader
+void nOkinaHeaderInclude(nablaMain *nabla);
+void nOkinaHeaderPrefix(nablaMain *nabla);
+void nOkinaHeaderIncludes(nablaMain *nabla);
+void nOkinaHeaderSimd(nablaMain *nabla);
+void nOkinaHeaderDbg(nablaMain *nabla);
+void nOkinaHeaderMth(nablaMain *nabla);
+void nOkinaHeaderPostfix(nablaMain *nabla);
 
-void okinaInclude(nablaMain *nabla);
-void okinaHeaderPrefix(nablaMain *nabla);
-void okinaHeaderIncludes(nablaMain *nabla);
-void okinaHeaderSimd(nablaMain *nabla);
-void okinaHeaderDbg(nablaMain *nabla);
-void okinaHeaderMth(nablaMain *nabla);
-void okinaHeaderPostfix(nablaMain *nabla);
+// hooks/nOkinaHookVariables
+nablaVariable *nOkinaHookVariablesTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void nOkinaHookVariablesSystem(astNode*,nablaMain*, const char, char);
+void nOkinaHookVariablesTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char );
 
+// hooks/nOkinaHooks
+void nOkinaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char* namespace,astNode*);
+char* nOkinaHookEntryPointPrefix(struct nablaMainStruct *, nablaJob *);
+void nOkinaHookIteration(struct nablaMainStruct *);
+void nOkinaHookExit(struct nablaMainStruct *);
+void nOkinaHookTime(struct nablaMainStruct *);
+void nOkinaHookFatal(struct nablaMainStruct *);
+void nOkinaHookAddCallNames(struct nablaMainStruct *,nablaJob *,astNode *);
+void nOkinaHookAddArguments(struct nablaMainStruct *,nablaJob *);
+void nOkinaHookTurnTokenToOption(struct nablaMainStruct *,nablaOption *);
+void nOkinaHookLibraries(astNode *, nablaEntity *);
+void nOkinaHookJob(nablaMain*, astNode*);
+bool nOkinaHookPrimaryExpressionToReturn(nablaMain *, nablaJob *, astNode *);
+void nOkinaHookReturnFromArgument(nablaMain *, nablaJob *);
 
-void okinaHookDfsForCalls(struct nablaMainStruct*,
-                          nablaJob*,
-                          astNode*,
-                          const char* namespace,
-                          astNode*);
-void okinaHookIteration(struct nablaMainStruct *);
-void okinaHookExit(struct nablaMainStruct *);
-void okinaHookTime(struct nablaMainStruct *);
-void okinaHookFatal(struct nablaMainStruct *);
-void okinaHookAddCallNames(struct nablaMainStruct *,nablaJob *,astNode *);
-void okinaHookAddArguments(struct nablaMainStruct *,nablaJob *);
-void okinaHookTurnTokenToOption(struct nablaMainStruct *,nablaOption *);
-void okinaHookLibraries(astNode *, nablaEntity *);
-char* okinaHookEntryPointPrefix(struct nablaMainStruct *, nablaJob *);
+// hooks/nOkinaHookReduction
+void nOkinaHookReduction(struct nablaMainStruct*, astNode*);
 
-void okinaHookFunctionName(nablaMain*);
-void okinaHookFunction(nablaMain*, astNode*);
-void okinaHookJob(nablaMain*, astNode*);
-void okinaHookLibraries(astNode*, nablaEntity*);
-char* okinaHookPrefixEnumerate(nablaJob*);
-char* okinaHookDumpEnumerateXYZ(nablaJob*);
-char* okinaHookDumpEnumerate(nablaJob*);
-char* okinaHookPostfixEnumerate(nablaJob*);
-char* okinaHookItem(nablaJob*,const char, const char, char);
-void okinaHookSwitchToken(astNode*, nablaJob*);
-nablaVariable *okinaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void okinaHookSystem(astNode*,nablaMain*, const char, char);
-void okinaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void okinaHookDumpNablaParameterList(nablaMain*, nablaJob*, astNode*, int*);
-void okinaHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char );
-void okinaHookJobDiffractStatement(nablaMain*, nablaJob*, astNode**);
-void okinaHookReduction(struct nablaMainStruct*, astNode*);
+// hooks/nOkinaHookItem
+char* nOkinaHookItem(nablaJob*,const char, const char, char);
 
-// Pour dumper les arguments necessaire dans le main
-void okinaDumpNablaArgumentList(nablaMain*, astNode*, int*);
-void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain*, astNode*,bool);
-void okinaAddExtraArguments(nablaMain*, nablaJob*, int*);
-void okinaAddNablaVariableList(nablaMain*, astNode*, nablaVariable**);
-void okinaAddExtraConnectivitiesParameters(nablaMain*, int*);
-void okinaAddExtraConnectivitiesArguments(nablaMain*, int*);
+// hooks/nOkinaHookFunction
+void nOkinaHookFunctionName(nablaMain*);
+void nOkinaHookFunction(nablaMain*, astNode*);
 
-NABLA_STATUS nccOkina(nablaMain*, astNode*, const char*);
+// hooks/nOkinaHookDiffraction
+void nOkinaHookDiffraction(nablaMain*, nablaJob*, astNode**);
+
+// hooks/nOkinaHookEnumerate
+char* nOkinaHookEnumeratePrefix(nablaJob*);
+char* nOkinaHookEnumerateDumpXYZ(nablaJob*);
+char* nOkinaHookEnumerateDump(nablaJob*);
+char* nOkinaHookEnumeratePostfix(nablaJob*);
+
+// hooks/nOkinaHookGather
+char* nOkinaHookGather(nablaJob*);
+
+// hooks/nOkinaHookScatter
+char* nOkinaHookScatter(nablaJob*);
+
+// hooks/nOkinaHookToken
+void nOkinaHookTokenSwitch(astNode*, nablaJob*);
+
+// mesh/nOkinaMesh
+void nOkinaMeshPrefix(nablaMain*);
+void nOkinaMeshPostfix(nablaMain*);
+void nOkinaMesh1D(nablaMain*);
+void nOkinaMesh3D(nablaMain*);
+
+// nOkinaArgs
+void nOkinaArgsAddExtraConnectivities(nablaMain*, int*);
+void nOkinaArgsExtra(nablaMain*, nablaJob*, int*);
+void nOkinaArgsList(nablaMain *, astNode *, int *);
+void nOkinaArgsDumpNablaDebugFunctionFromOut(nablaMain*, astNode*,bool);
+
+// hooks/nOkinaHookParams
+void nOkinaHookParamsAddExtra(nablaMain*, nablaJob*, int*);
+void nOkinaHookParamsDumpList(nablaMain*, nablaJob*, astNode*, int*);
+
+// nOkina
+NABLA_STATUS nOkina(nablaMain*, astNode*, const char*);
 
 #endif // _NABLA_OKINA_H_
  

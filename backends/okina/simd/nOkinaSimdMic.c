@@ -42,14 +42,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* okinaMicIncludes(void){return "#include <immintrin.h>\n";}
-char *okinaMicBits(void){return "512";}
+char* nOkinaMicIncludes(void){return "#include <immintrin.h>\n";}
+char *nOkinaMicBits(void){return "512";}
 
 
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* okinaMicPrevCell(void){
+char* nOkinaMicPrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -64,7 +64,7 @@ char* okinaMicPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* okinaMicNextCell(void){
+char* nOkinaMicNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -79,7 +79,7 @@ char* okinaMicNextCell(void){
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* okinaMicGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration)
     return strdup("register int __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;");
@@ -109,7 +109,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* okinaMicGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("int nw;");
@@ -153,11 +153,11 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],%s\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* okinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return okinaMicGatherCells(job,var,phase);
-  if (itm=='n') return okinaMicGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in okinaMicGather!");
+  if (itm=='c') return nOkinaMicGatherCells(job,var,phase);
+  if (itm=='n') return nOkinaMicGatherNodes(job,var,phase);
+  error(!0,0,"Could not distinguish job item in nOkinaMicGather!");
   return NULL;
 }
 
@@ -165,7 +165,7 @@ char* okinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // ****************************************************************************
 // * MIC Scatter
 // ****************************************************************************
-char* okinaMicScatter(nablaVariable* var){
+char* nOkinaMicScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%s(ia,ib,ic,id,ie,iff,ig,ih, %s_%s, gathered_%s_%s);",
            strcmp(var->type,"real")==0?"":"3",
@@ -178,7 +178,7 @@ char* okinaMicScatter(nablaVariable* var){
 // ****************************************************************************
 // * MIC TYPEDEFS
 // ****************************************************************************
-nablaTypedef okinaMicTypedef[]={
+nablaTypedef nOkinaMicTypedef[]={
   //{"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -187,7 +187,7 @@ nablaTypedef okinaMicTypedef[]={
 // ****************************************************************************
 // * MIC DEFINES
 // ****************************************************************************
-nablaDefine okinaMicDefines[]={
+nablaDefine nOkinaMicDefines[]={
   {"integer", "Integer"},
   {"Real", "real"},
   {"Real3", "real3"},
@@ -253,7 +253,7 @@ nablaDefine okinaMicDefines[]={
 // ****************************************************************************
 // * MIC FORWARDS
 // ****************************************************************************
-char* okinaMicForwards[]={
+char* nOkinaMicForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

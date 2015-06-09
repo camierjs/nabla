@@ -42,15 +42,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* okinaStdIncludes(void){return "";}
+char* nOkinaStdIncludes(void){return "";}
 
-char *okinaStdBits(void){return "64";}
+char *nOkinaStdBits(void){return "64";}
 
 
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* okinaStdPrevCell(void){
+char* nOkinaStdPrevCell(void){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
 }
 
@@ -58,7 +58,7 @@ char* okinaStdPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* okinaStdNextCell(void){
+char* nOkinaStdNextCell(void){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
 }
 
@@ -66,7 +66,7 @@ char* okinaStdNextCell(void){
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* okinaStdGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* nOkinaStdGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration)
     return strdup("register int __attribute__((unused)) cw,ia;");
@@ -95,7 +95,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* okinaStdGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* nOkinaStdGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("int nw;");
@@ -129,11 +129,11 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* okinaStdGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaStdGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return okinaStdGatherCells(job,var,phase);
-  if (itm=='n') return okinaStdGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in okinaStdGather!");
+  if (itm=='c') return nOkinaStdGatherCells(job,var,phase);
+  if (itm=='n') return nOkinaStdGatherNodes(job,var,phase);
+  error(!0,0,"Could not distinguish job item in nOkinaStdGather!");
   return NULL;
 }
 
@@ -141,7 +141,7 @@ char* okinaStdGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* okinaStdScatter(nablaVariable* var){
+char* nOkinaStdScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
@@ -156,7 +156,7 @@ char* okinaStdScatter(nablaVariable* var){
 // ****************************************************************************
 // * Std or Mic TYPEDEFS
 // ****************************************************************************
-nablaTypedef okinaStdTypedef[]={
+nablaTypedef nOkinaStdTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -166,7 +166,7 @@ nablaTypedef okinaStdTypedef[]={
 // ****************************************************************************
 // * Std or Mic DEFINES
 // ****************************************************************************
-nablaDefine okinaStdDefines[]={
+nablaDefine nOkinaStdDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -227,7 +227,7 @@ nablaDefine okinaStdDefines[]={
 // ****************************************************************************
 // * Std or Mic FORWARDS
 // ****************************************************************************
-char* okinaStdForwards[]={
+char* nOkinaStdForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

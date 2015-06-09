@@ -42,14 +42,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* okinaSseIncludes(void){return "#include <immintrin.h>\n";}
-char *okinaSseBits(void){return "128";}
+char* nOkinaSseIncludes(void){return "#include <immintrin.h>\n";}
+char *nOkinaSseBits(void){return "128";}
 
 
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* okinaSsePrevCell(void){
+char* nOkinaSsePrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
@@ -59,7 +59,7 @@ char* okinaSsePrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* okinaSseNextCell(void){
+char* nOkinaSseNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
@@ -69,7 +69,7 @@ char* okinaSseNextCell(void){
 // ****************************************************************************
 // * Gather pour un job sur les cells
 // ****************************************************************************
-static char* okinaSseGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaSseGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){ 
   // Phase de déclaration
   if (phase==enum_phase_declaration)
     return strdup("register int __attribute__((unused)) cw,ia,ib;");
@@ -95,7 +95,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather pour un job sur les nodes
 // * En SSE, le gather aux nodes N'est PAS le même qu'aux cells
 // ****************************************************************************
-static char* okinaSseGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaSseGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("int nw;");
@@ -129,11 +129,11 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\t\t\t\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* okinaSseGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaSseGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return okinaSseGatherCells(job,var,phase);
-  if (itm=='n') return okinaSseGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in okinaSseGather!");
+  if (itm=='c') return nOkinaSseGatherCells(job,var,phase);
+  if (itm=='n') return nOkinaSseGatherNodes(job,var,phase);
+  error(!0,0,"Could not distinguish job item in nOkinaSseGather!");
   return NULL;
 }
 
@@ -141,7 +141,7 @@ char* okinaSseGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* okinaSseScatter(nablaVariable* var){
+char* nOkinaSseScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia,ib, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
@@ -154,7 +154,7 @@ char* okinaSseScatter(nablaVariable* var){
 // ****************************************************************************
 // * Sse or Mic TYPEDEFS
 // ****************************************************************************
-nablaTypedef okinaSseTypedef[]={
+nablaTypedef nOkinaSseTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -165,7 +165,7 @@ nablaTypedef okinaSseTypedef[]={
 // ****************************************************************************
 // * Sse or Mic DEFINES
 // ****************************************************************************
-nablaDefine okinaSseDefines[]={
+nablaDefine nOkinaSseDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -225,7 +225,7 @@ nablaDefine okinaSseDefines[]={
 // ****************************************************************************
 // * Sse or Mic FORWARDS
 // ****************************************************************************
-char* okinaSseForwards[]={
+char* nOkinaSseForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

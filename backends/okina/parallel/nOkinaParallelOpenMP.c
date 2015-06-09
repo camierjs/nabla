@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * OpenMP Sync
 // ****************************************************************************
-char *nccOkinaParallelOpenMPSync(void){
+char *nOkinaParallelOpenMPSync(void){
   return "";//#pragma omp barrier\n";
 }
 
@@ -53,7 +53,7 @@ char *nccOkinaParallelOpenMPSync(void){
 // ****************************************************************************
 // * OpenMP Spawn
 // ****************************************************************************
-char *nccOkinaParallelOpenMPSpawn(void){
+char *nOkinaParallelOpenMPSpawn(void){
   return "";//#pragma omp spawn ";
 }
 
@@ -61,7 +61,7 @@ char *nccOkinaParallelOpenMPSpawn(void){
 // ****************************************************************************
 // * OpenMP for loop
 // ****************************************************************************
-char *nccOkinaParallelOpenMPLoop(struct nablaMainStruct *n){
+char *nOkinaParallelOpenMPLoop(struct nablaMainStruct *n){
   return "\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)\")\\\n";
   //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)\")\\\n";
 }
@@ -70,6 +70,6 @@ char *nccOkinaParallelOpenMPLoop(struct nablaMainStruct *n){
 // ****************************************************************************
 // * OpenMP includes
 // ****************************************************************************
-char *nccOkinaParallelOpenMPIncludes(void){
+char *nOkinaParallelOpenMPIncludes(void){
   return "#include <omp.h>\n";
 }

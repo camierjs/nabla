@@ -44,12 +44,12 @@
 
 
 // ****************************************************************************
-// * nccOkinaMainVarInitKernel
+// * nOkinaInitVariables
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainVarInitKernel(nablaMain *nabla){
+NABLA_STATUS nOkinaInitVariables(nablaMain *nabla){
   //int i,iVar;
   nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInit]");
+  dbg("\n[nOkinaMainVarInit]");
   nprintf(nabla,NULL,"\n\
 // ******************************************************************************\n\
 // * Kernel d'initialisation des variables\n\
@@ -90,11 +90,11 @@ void nabla_ini_variables(void){");
 
 
 // ****************************************************************************
-// * nccOkinaMainVarInitKernel
+// * nOkinaMainVarInitKernel
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainVarInitCall(nablaMain *nabla){
+NABLA_STATUS nOkinaInitVariableDbg(nablaMain *nabla){
   nablaVariable *var;
-  dbg("\n[nccOkinaMainVarInitCall]");
+  dbg("\n[nOkinaInitVariableDbg]");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;

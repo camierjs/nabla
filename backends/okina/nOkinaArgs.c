@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * Dump d'extra connectivity
 // ****************************************************************************
-void okinaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
+void nOkinaArgsAddExtraConnectivities(nablaMain *nabla, int *numParams){
   return;
 }
 
@@ -55,7 +55,7 @@ void okinaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
 // ****************************************************************************
 // * Dump d'extra arguments
 // ****************************************************************************
-void okinaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
+void nOkinaArgsExtra(nablaMain *nabla, nablaJob *job, int *numParams){
   nprintf(nabla,"\n\t\t/*okinaAddExtraArguments*/",NULL);
 }
 
@@ -63,7 +63,7 @@ void okinaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
 // ****************************************************************************
 // * Dump dans le src des arguments nabla en in comme en out
 // ****************************************************************************
-void okinaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
+void nOkinaArgsList(nablaMain *nabla, astNode *n, int *numParams){
   nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
 }
 
@@ -71,9 +71,9 @@ void okinaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
 // ****************************************************************************
 // * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
 // ****************************************************************************
-void okinaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
-                                                 astNode *n,
-                                                 bool in_or_out){
+void nOkinaArgsDumpNablaDebugFunctionFromOut(nablaMain *nabla,
+                                                      astNode *n,
+                                                      bool in_or_out){
   nprintf(nabla,"\n\t\t/*okinaDumpNablaDebugFunctionFromOutArguments*/",NULL);
 }
 

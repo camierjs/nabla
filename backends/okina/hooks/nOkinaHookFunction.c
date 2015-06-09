@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Hook pour dumper le nom de la fonction
 // ****************************************************************************
-void okinaHookFunctionName(nablaMain *arc){
+void nOkinaHookFunctionName(nablaMain *arc){
   nprintf(arc, NULL, "%s", arc->name);
 }
 
@@ -54,7 +54,7 @@ void okinaHookFunctionName(nablaMain *arc){
 // ****************************************************************************
 // * Génération d'un kernel associé à une fonction
 // ****************************************************************************
-void okinaHookFunction(nablaMain *nabla, astNode *n){
+void nOkinaHookFunction(nablaMain *nabla, astNode *n){
   nablaJob *fct=nablaJobNew(nabla->entity);
   nablaJobAdd(nabla->entity, fct);
   nablaFctFill(nabla,fct,n,NULL);

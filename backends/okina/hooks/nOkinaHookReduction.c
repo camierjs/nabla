@@ -45,9 +45,9 @@
 
 
 // ****************************************************************************
-// * okinaHookReduction
+// * nOkinaHookReduction
 // ****************************************************************************
-void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *item_node = n->children->next->children;
   const astNode *global_var_node = n->children->next->next;
   const astNode *reduction_operation_node = global_var_node->next;
@@ -73,7 +73,7 @@ void okinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->xyz    = strdup("NoXYZ");
   redjob->drctn  = strdup("NoDirection");
   assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[okinaHookReduction] @ %s",at_single_cst_node->token);
+  dbg("\n\t[nOkinaHookReduction] @ %s",at_single_cst_node->token);
   sprintf(&redjob->at[0],at_single_cst_node->token);
   redjob->whenx  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);

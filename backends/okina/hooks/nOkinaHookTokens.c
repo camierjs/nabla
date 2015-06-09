@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static void okinaHookSwitchForall(astNode *n, nablaJob *job){
+static void nOkinaHookTokenSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
   // Now we're allowed to work
@@ -82,15 +82,15 @@ static void okinaHookSwitchForall(astNode *n, nablaJob *job){
 // ****************************************************************************
 // * Différentes actions pour un job Nabla
 // ****************************************************************************
-void okinaHookSwitchToken(astNode *n, nablaJob *job){
+void nOkinaHookTokenSwitch(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
   if (n->token)
-    dbg("\n\t[okinaHookSwitchToken] token: '%s'?", n->token);
+    dbg("\n\t[nOkinaHookSwitchToken] token: '%s'?", n->token);
  
-  okinaHookSwitchForall(n,job);
+  nOkinaHookTokenSwitchForall(n,job);
   
   switch(n->tokenid){
 
@@ -136,7 +136,7 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     if ((job->entity->libraries&(1<<real))!=0)
       exit(NABLA_ERROR|
            fprintf(stderr,
-                   "[okinaHookSwitchToken] Real3 can't be used with R library!\n"));
+                   "[nOkinaHookSwitchToken] Real3 can't be used with R library!\n"));
     
     assert((job->entity->libraries&(1<<real))==0);
     nprintf(nabla, "/*Real3*/", "real3 ");
@@ -202,11 +202,11 @@ void okinaHookSwitchToken(astNode *n, nablaJob *job){
     
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*okinaGather*/", "%s",okinaGather(job));
+    nprintf(nabla, "/*okinaGather*/", "%s",nOkinaHookGather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*okinaScatter*/", okinaScatter(job));
+    nprintf(nabla, "/*okinaScatter*/", nOkinaHookScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

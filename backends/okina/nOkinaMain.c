@@ -105,53 +105,53 @@ int main(int argc, char *argv[]){\n\
 
 
 // ****************************************************************************
-// * nccOkinaMainPrefix
+// * nOkinaMainPrefix
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainPrefix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPrefix]");
+NABLA_STATUS nOkinaMainPrefix(nablaMain *nabla){
+  dbg("\n[nOkinaMainPrefix]");
   fprintf(nabla->entity->src, OKINA_MAIN_PREFIX);
   return NABLA_OK;
 }
 
 
 // ****************************************************************************
-// * nccOkinaMainPreInit
+// * nOkinaMainPreInit
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainPreInit(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPreInit]");
+NABLA_STATUS nOkinaMainPreInit(nablaMain *nabla){
+  dbg("\n[nOkinaMainPreInit]");
   fprintf(nabla->entity->src, OKINA_MAIN_PREINIT);
   return NABLA_OK;
 }
 
 
 // ****************************************************************************
-// * nccOkinaMainPostInit
+// * nOkinaMainPostInit
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainPostInit(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPostInit]");
+NABLA_STATUS nOkinaMainPostInit(nablaMain *nabla){
+  dbg("\n[nOkinaMainPostInit]");
   fprintf(nabla->entity->src, OKINA_MAIN_POSTINIT);
   return NABLA_OK;
 }
 
 
 // ****************************************************************************
-// * nccOkinaMain
+// * nOkinaMain
 // ****************************************************************************
-NABLA_STATUS nccOkinaMain(nablaMain *n){
+NABLA_STATUS nOkinaMain(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
   int i,numParams,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
   
-  dbg("\n[nccOkinaMain]");
+  dbg("\n[nOkinaMain]");
   number_of_entry_points=nablaNumberOfEntryPoints(n);
   entry_points=nablaEntryPointsSort(n,number_of_entry_points);
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
    for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
      if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
      if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0)continue;
-     dbg("%s\n\t[nccOkinaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+     dbg("%s\n\t[nOkinaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
         entry_points[i].where);
@@ -181,24 +181,24 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    okinaAddExtraArguments(n, &entry_points[i], &numParams);
+    nOkinaArgsExtra(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      okinaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      nOkinaArgsList(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-      okinaAddExtraConnectivitiesArguments(n,&numParams);
+      nOkinaArgsAddExtraConnectivities(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
-      dbg("\n\t[nccOkinaMain] Et on rajoute les called_variables en paramètre d'appel");
+      dbg("\n\t[nOkinaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
         nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
       }
     }else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
-    okinaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
+    nOkinaArgsDumpNablaDebugFunctionFromOut(n,entry_points[i].nblParamsNode,true);
     //nprintf(n, NULL, "\n");
   }
   return NABLA_OK;
@@ -210,28 +210,28 @@ NABLA_STATUS nccOkinaMain(nablaMain *n){
 // ****************************************************************************
 extern char knMsh1D_c[];
 extern char knMsh3D_c[];
-static char *okinaSourceMeshAoS_vs_SoA(nablaMain *nabla){
+static char *nOkinaMainSourceMeshAoS_vs_SoA(nablaMain *nabla){
   return "node_coord[iNode]=Real3(x,y,z);"; 
 }
-static void okinaSourceMesh(nablaMain *nabla){
+static void nOkinaMainSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->entity->libraries&(1<<real))!=0)
     fprintf(nabla->entity->src,knMsh1D_c);
   else
-    fprintf(nabla->entity->src,knMsh3D_c,okinaSourceMeshAoS_vs_SoA(nabla));
+    fprintf(nabla->entity->src,knMsh3D_c,nOkinaMainSourceMeshAoS_vs_SoA(nabla));
   //fprintf(nabla->entity->src,knMsh_c);
 }
 
 
 // ****************************************************************************
-// * nccOkinaMainPostfix
+// * nOkinaMainPostfix
 // ****************************************************************************
-NABLA_STATUS nccOkinaMainPostfix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainPostfix] OKINA_MAIN_POSTFIX");
+NABLA_STATUS nOkinaMainPostfix(nablaMain *nabla){
+  dbg("\n[nOkinaMainPostfix] OKINA_MAIN_POSTFIX");
   fprintf(nabla->entity->src, OKINA_MAIN_POSTFIX);
-  dbg("\n[nccOkinaMainPostfix] okinaSourceMesh");
-  okinaSourceMesh(nabla);
-  dbg("\n[nccOkinaMainPostfix] NABLA_OK");
+  dbg("\n[nOkinaMainPostfix] okinaSourceMesh");
+  nOkinaMainSourceMesh(nabla);
+  dbg("\n[nOkinaMainPostfix] NABLA_OK");
   return NABLA_OK;
 }
 

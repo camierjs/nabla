@@ -42,15 +42,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* okinaAvxIncludes(void){return "#include <immintrin.h>\n";}
+char* nOkinaAvxIncludes(void){return "#include <immintrin.h>\n";}
 
-char *okinaAvxBits(void){return "256";}
+char *nOkinaAvxBits(void){return "256";}
 
 
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* okinaAvxPrevCell(void){
+char* nOkinaAvxPrevCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -61,7 +61,7 @@ char* okinaAvxPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* okinaAvxNextCell(void){
+char* nOkinaAvxNextCell(void){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -73,7 +73,7 @@ char* okinaAvxNextCell(void){
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* okinaAvxGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaAvxGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("register int __attribute__((unused)) cw,ia,ib,ic,id;");
@@ -101,7 +101,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* okinaAvxGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaAvxGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("int nw;");
@@ -137,11 +137,11 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* okinaAvxGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaAvxGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return okinaAvxGatherCells(job,var,phase);
-  if (itm=='n') return okinaAvxGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in okinaAvxGather!");
+  if (itm=='c') return nOkinaAvxGatherCells(job,var,phase);
+  if (itm=='n') return nOkinaAvxGatherNodes(job,var,phase);
+  error(!0,0,"Could not distinguish job item in nOkinaAvxGather!");
   return NULL;
 }
 
@@ -149,7 +149,7 @@ char* okinaAvxGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* okinaAvxScatter(nablaVariable* var){
+char* nOkinaAvxScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia,ib,ic,id, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
@@ -162,7 +162,7 @@ char* okinaAvxScatter(nablaVariable* var){
 // ****************************************************************************
 // * Avx TYPEDEFS
 // ****************************************************************************
-nablaTypedef okinaAvxTypedef[]={
+nablaTypedef nOkinaAvxTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -172,7 +172,7 @@ nablaTypedef okinaAvxTypedef[]={
 // ****************************************************************************
 // * Avx DEFINES
 // ****************************************************************************
-nablaDefine okinaAvxDefines[]={
+nablaDefine nOkinaAvxDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -236,7 +236,7 @@ nablaDefine okinaAvxDefines[]={
 // ****************************************************************************
 // * Avx or Mic FORWARDS
 // ****************************************************************************
-char* okinaAvxForwards[]={
+char* nOkinaAvxForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "static inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

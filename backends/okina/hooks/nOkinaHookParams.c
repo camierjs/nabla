@@ -45,9 +45,17 @@
 
 
 // ****************************************************************************
+// * okinaAddExtraConnectivitiesParameters
+// ****************************************************************************
+static void nOkinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
+  return;
+}
+
+
+// ****************************************************************************
 // * Dump d'extra paramètres
 // ****************************************************************************
-void okinaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+void nOkinaHookParamsAddExtra(nablaMain *nabla, nablaJob *job, int *numParams){
   nprintf(nabla, "/* direct return from okinaHookAddExtraParameters*/", NULL);
   return;
   // Rajout pour l'instant systématiquement des node_coords et du global_deltat
@@ -72,15 +80,7 @@ void okinaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams
   
   // Rajout pour l'instant systématiquement des connectivités
   if (job->item[0]=='c')
-    okinaAddExtraConnectivitiesParameters(nabla, numParams);
-}
-
-
-// ****************************************************************************
-// * okinaAddExtraConnectivitiesParameters
-// ****************************************************************************
-void okinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  return;
+    nOkinaAddExtraConnectivitiesParameters(nabla, numParams);
 }
 
 
@@ -89,10 +89,10 @@ void okinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
 // * On va surtout remplir les variables 'in' utilisées de support différent
 // * pour préparer les GATHER/SCATTER
 // ****************************************************************************
-void okinaHookDumpNablaParameterList(nablaMain *nabla,
-                                     nablaJob *job,
-                                     astNode *n,
-                                     int *numParams){
+void nOkinaHookParamsDumpList(nablaMain *nabla,
+                              nablaJob *job,
+                              astNode *n,
+                              int *numParams){
   dbg("\n\t[okinaHookDumpNablaParameterList]");
   // S'il n'y a pas de in ni de out, on a rien à faire
   if (n==NULL) return;
@@ -131,7 +131,7 @@ void okinaHookDumpNablaParameterList(nablaMain *nabla,
         nablaVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
-  if (n->children != NULL) okinaHookDumpNablaParameterList(nabla,job,n->children,numParams);
-  if (n->next != NULL) okinaHookDumpNablaParameterList(nabla,job,n->next, numParams);
+  if (n->children != NULL) nOkinaHookParamsDumpList(nabla,job,n->children,numParams);
+  if (n->next != NULL) nOkinaHookParamsDumpList(nabla,job,n->next, numParams);
 }
 

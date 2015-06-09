@@ -46,16 +46,16 @@
 // ****************************************************************************
 // * Backend OKINA - Allocation de la connectivité du maillage
 // ****************************************************************************
-void nccOkinaMainMeshPrefix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainMeshPrefix]");
-  fprintf(nabla->entity->src,"\t// [nccOkinaMainMeshPrefix] Allocation des connectivités");
+void nOkinaMeshPrefix(nablaMain *nabla){
+  dbg("\n[nOkinaMainMeshPrefix]");
+  fprintf(nabla->entity->src,"\t// [nOkinaMainMeshPrefix] Allocation des connectivités");
 }
 
 
 // ****************************************************************************
-// * nccOkinaMainMeshPostfix
+// * nOkinaMainMeshPostfix
 // ****************************************************************************
-void nccOkinaMainMeshPostfix(nablaMain *nabla){
-  dbg("\n[nccOkinaMainMeshPostfix]");
+void nOkinaMeshPostfix(nablaMain *nabla){
+  dbg("\n[nOkinaMainMeshPostfix]");
   //fprintf(nabla->entity->src,"");
 }
