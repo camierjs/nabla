@@ -44,42 +44,6 @@
 
 
 /******************************************************************************
- * nprintf
- ******************************************************************************/
-int nprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
-  int rtn;
-  va_list args;
-  if ((dbgGet()&DBG_CYC)!=0) if (debug!=NULL) fprintf(nabla->entity->src, debug);
-  if (format==NULL) return 0;
-  va_start(args, format);
-  if ((rtn=vfprintf(nabla->entity->src, format, args))<0)
-    exit(printf("[nprintf] error\n"));
-  if (fflush(nabla->entity->src)!=0)
-    exit(printf("[nprintf] Could not flush to file\n"));
-  va_end(args);
-  return rtn;
-}
-
-
-/******************************************************************************
- * hprintf
- ******************************************************************************/
-int hprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
-  int rtn;
-  va_list args;
-  if ((dbgGet()&DBG_CYC)!=0) if (debug!=NULL) fprintf(nabla->entity->src, debug);
-  if (format==NULL) return 0;
-  va_start(args, format);
-  if ((rtn=vfprintf(nabla->entity->hdr, format, args))<0)
-    exit(printf("[nprintf] error\n"));
-  if (fflush(nabla->entity->hdr)!=0)
-    exit(printf("[nprintf] Could not flush to file\n"));
-  va_end(args);
-  return rtn;
-}
-
-
-/******************************************************************************
  * strDownCase
  ******************************************************************************/
 char *toolStrDownCase(const char * str){

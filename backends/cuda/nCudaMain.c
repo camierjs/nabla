@@ -327,8 +327,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
   bool is_into_compute_loop=false;
 
   dbg("\n[nccCudaMain]");
-  number_of_entry_points=nablaNumberOfEntryPoints(n);
-  entry_points=nablaEntryPointsSort(n,number_of_entry_points);
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){
@@ -362,7 +362,7 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
             entry_points[i].whens[0]);
     
     if (entry_points[i].stdParamsNode != NULL)
-      numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
+      numParams=nMiddleDumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
     else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     //nprintf(n,NULL,"/*numParams=%d*/",numParams);

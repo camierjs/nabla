@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-nablaOption *nablaOptionNew(nablaMain *nabla){
+nablaOption *nMiddleOptionNew(nablaMain *nabla){
 	nablaOption *option;
 	option = (nablaOption *)malloc(sizeof(nablaOption));
  	assert(option != NULL);
@@ -53,19 +53,19 @@ nablaOption *nablaOptionNew(nablaMain *nabla){
   	return option; 
 }
 
-nablaOption *nablaOptionLast(nablaOption *options) {
+nablaOption *nMiddleOptionLast(nablaOption *options) {
    while(options->next != NULL){
      options = options->next;
    }
    return options;
 }
 
-nablaOption *nablaOptionAdd(nablaMain *nabla, nablaOption *option) {
+nablaOption *nMiddleOptionAdd(nablaMain *nabla, nablaOption *option) {
   assert(option != NULL);
   if (nabla->options == NULL)
     nabla->options=option;
   else
-    nablaOptionLast(nabla->options)->next=option;
+    nMiddleOptionLast(nabla->options)->next=option;
   return NABLA_OK;
 }
 
@@ -73,7 +73,7 @@ nablaOption *nablaOptionAdd(nablaMain *nabla, nablaOption *option) {
 /*
  * 
  */
-nablaOption *findOptionName(nablaOption *options, char *name) {
+nablaOption *nMiddleOptionFindName(nablaOption *options, char *name) {
   nablaOption *option=options;
   //dbg("\n\t[findOptionName] %s", name);
   //assert(option != NULL && name != NULL);
@@ -96,9 +96,9 @@ nablaOption *findOptionName(nablaOption *options, char *name) {
  *****************************************************************************/
 static void actOptionsTypeSpecifier(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
-  nablaOption *option = nablaOptionNew(nabla);
+  nablaOption *option = nMiddleOptionNew(nabla);
   dbg("\n\t\t[actGenericOptionsTypeSpecifier] %s",n->children->token);
-  nablaOptionAdd(nabla, option);
+  nMiddleOptionAdd(nabla, option);
   option->type=toolStrDownCase(n->children->token);
 }
 
@@ -108,7 +108,7 @@ static void actOptionsTypeSpecifier(astNode * n, void *generic_arg){
  *****************************************************************************/
 static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
-  nablaOption *option =nablaOptionLast(nabla->options);
+  nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actGenericOptionsDirectDeclarator] %s", n->children->token);
   option->name=strdup(n->children->token);
 }
@@ -117,7 +117,7 @@ static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
 /***************************************************************************** 
  * primary_expression
  *****************************************************************************/
-void catTillToken(astNode * n, char *dflt){
+void nMiddleCatTillToken(astNode * n, char *dflt){
   if (n==NULL) return;
   if (n->token != NULL){
     dbg("\n\t\t\t[catTillToken] %s", n->token);
@@ -126,8 +126,8 @@ void catTillToken(astNode * n, char *dflt){
       strcat(dflt,n->token);
     }
   }
-  if (n->children != NULL) catTillToken(n->children, dflt);
-  if (n->next != NULL) catTillToken(n->next, dflt);
+  if (n->children != NULL) nMiddleCatTillToken(n->children, dflt);
+  if (n->next != NULL) nMiddleCatTillToken(n->next, dflt);
 }
 
 
@@ -142,10 +142,10 @@ void catTillToken(astNode * n, char *dflt){
 
 static void actOptionsExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
-  nablaOption *option =nablaOptionLast(nabla->options);
+  nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsExpression] rule=%s", n->rule);
   option->dflt=strdup("");
-  catTillToken(n->children, option->dflt);
+  nMiddleCatTillToken(n->children, option->dflt);
   dbg("\n\t\t[actOptionsExpression] final option->dflt is '%s'", option->dflt);
 }
 
@@ -155,7 +155,7 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
 /***************************************************************************** 
  * Scan pour la déclaration des options
  *****************************************************************************/
-void nablaOptions(astNode * n, int ruleid, nablaMain *nabla){
+void nMiddleOptions(astNode * n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
     {rulenameToId("type_specifier"),actOptionsTypeSpecifier},
     {rulenameToId("direct_declarator"),actOptionsDirectDeclarator},
@@ -165,16 +165,16 @@ void nablaOptions(astNode * n, int ruleid, nablaMain *nabla){
   if (n->rule != NULL)
     if (ruleid ==  n->ruleid)
       scanTokensForActions(n, tokact, (void*)nabla);
-  if (n->children != NULL) nablaOptions(n->children, ruleid, nabla);
-  if (n->next != NULL) nablaOptions(n->next, ruleid, nabla);
+  if (n->children != NULL) nMiddleOptions(n->children, ruleid, nabla);
+  if (n->next != NULL) nMiddleOptions(n->next, ruleid, nabla);
 }
 
 
 /*****************************************************************************
  * Transformation de tokens en options
  *****************************************************************************/
-nablaOption *turnTokenToOption(astNode * n, nablaMain *arc){
-  nablaOption *opt=findOptionName(arc->options, n->token);
+nablaOption *nMiddleTurnTokenToOption(astNode * n, nablaMain *arc){
+  nablaOption *opt=nMiddleOptionFindName(arc->options, n->token);
   // Si on ne trouve pas d'option, on a rien à faire
   if (opt == NULL) return NULL;
   arc->hook->turnTokenToOption(arc,opt);

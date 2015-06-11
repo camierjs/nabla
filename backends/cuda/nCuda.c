@@ -207,7 +207,7 @@ static void cudaDfsForCalls(struct nablaMainStruct *nabla,
           namespace?"Entity::":"",
           fct->name);
   // On va chercher les paramètres standards pour le hdr
-  dumpParameterTypeList(nabla->entity->hdr, nParams);
+  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
   hprintf(nabla, NULL, ");");
 }
 
@@ -238,7 +238,7 @@ static void cudaAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
   fct->parse.function_call_name=NULL;
-  if ((foundJob=nablaJobFind(fct->entity->jobs,callName))!=NULL){
+  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
     if (foundJob->is_a_function!=true){
       nprintf(nabla, "/*isNablaJob*/", NULL);
       fct->parse.function_call_name=strdup(callName);
@@ -254,7 +254,7 @@ static void cudaAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   if (fct->parse.function_call_name!=NULL){
     nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments*/");
     int numParams=1;
-    nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
+    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
     cudaAddExtraArguments(nabla, called, &numParams);
     nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments done*/");
     if (called->nblParamsNode != NULL)
@@ -280,7 +280,7 @@ static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   strcat(job_name,"cudaReduction_");
   strcat(job_name,global_var_name);
   // Rajout du job de reduction
-  nablaJob *redjob = nablaJobNew(nabla->entity);
+  nablaJob *redjob = nMiddleJobNew(nabla->entity);
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
   redjob->scope  = strdup("NoGroup");
@@ -294,7 +294,7 @@ static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   //redjob->nblParamsNode=item_var_node;
   //nablaVariable *item_var=nablaVariableFind(nabla,item_var_name);
   //assert(item_var!=NULL);
-  redjob->called_variables=nablaVariableNew(nabla);
+  redjob->called_variables=nMiddleVariableNew(nabla);
   redjob->called_variables->item=strdup("cell");
   redjob->called_variables->name=item_var_name;
   // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
@@ -305,7 +305,7 @@ static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   sprintf(&redjob->at[0],at_single_cst_node->token);
   redjob->whenx  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);
-  nablaJobAdd(nabla->entity, redjob);
+  nMiddleJobAdd(nabla->entity, redjob);
   const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
@@ -381,8 +381,8 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   nabla->pragma=&cudaPragmaGCCHooks;
 
   // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, iteration);
+  nablaVariable *iteration = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, iteration);
   iteration->axl_it=false;
   iteration->item=strdup("global");
   iteration->type=strdup("integer");
@@ -398,8 +398,8 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   
   // Rajout de la variable globale 'min_array'
   // Pour la réduction aux blocs
-  nablaVariable *device_shared_reduce_results = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, device_shared_reduce_results);
+  nablaVariable *device_shared_reduce_results = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, device_shared_reduce_results);
   device_shared_reduce_results->axl_it=false;
   device_shared_reduce_results->item=strdup("global");
   device_shared_reduce_results->type=strdup("real");
@@ -416,10 +416,10 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   // Dump des includes dans le header file, puis des typedefs, defines, debug & errors stuff
   cudaHeaderPrefix(nabla);
   cudaHeaderIncludes(nabla);
-  nablaTypedefs(nabla,cudaTypedef);
+  nMiddleTypedefs(nabla,cudaTypedef);
   cudaHeaderHandleErrors(nabla);
-  nablaDefines(nabla,cudaDefines);
-  nablaForwards(nabla,cudaForwards);
+  nMiddleDefines(nabla,cudaDefines);
+  nMiddleForwards(nabla,cudaForwards);
   cudaDefineEnumerates(nabla);
    
   // Génération du maillage
@@ -437,7 +437,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   nccCudaMainMeshConnectivity(nabla);
   
   // Parse du code préprocessé et lance les hooks associés
-  nablaMiddlendParseAndHook(root,nabla);
+  nMiddleParseAndHook(root,nabla);
   nccCudaMainVarInitKernel(nabla);
 
   // Partie PREFIX

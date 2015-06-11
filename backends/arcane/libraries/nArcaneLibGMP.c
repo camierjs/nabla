@@ -91,7 +91,7 @@ char* nccArcLibGmpPrivates(void){
 // ****************************************************************************
 void nccArcLibGmpWritBfrDump(nablaMain *arc){
   int i;
-  int gmpNumberOfPrecise=nablaVariableGmpRank(arc->variables);
+  int gmpNumberOfPrecise=nMiddleVariableGmpRank(arc->variables);
   fprintf(arc->entity->src, "\n\
 \n// ****************************************************************************\
 \n// * gmpWritBfrDump\
@@ -134,7 +134,7 @@ void nccArcLibGmpWritBfrDump(nablaMain *arc){
           arc->name,
           nablaArcaneColor(arc),
           gmpNumberOfPrecise);
-   if (nablaVariableGmpDumpNumber(arc->variables)!=0){
+   if (nMiddleVariableGmpDumpNumber(arc->variables)!=0){
      fprintf(arc->entity->src, "\n\
 \n\t// On a fait cela pour resizer les tableaux de backups\
 \n\tm_gmp_backups.resize(gmp_backups_sizes);");
@@ -152,8 +152,8 @@ void nccArcLibGmpWritBfrDump(nablaMain *arc){
 \n\t\tmpz_init(imported);\
 \n\t\t//info()<<\"cell #\"<<cell->uniqueId();");
      for(i=0;i<gmpNumberOfPrecise;i+=1){
-       char *name=nablaVariableGmpNameRank(arc->variables,i);
-       if (nablaVariableGmpDumpRank(arc->variables,i)==false){
+       char *name=nMiddleVariableGmpNameRank(arc->variables,i);
+       if (nMiddleVariableGmpDumpRank(arc->variables,i)==false){
          fprintf(arc->entity->src,"\n\t\t// Not dumping cell variable m_cell_%s",name);
          continue;
        }
@@ -180,7 +180,7 @@ void nccArcLibGmpWritBfrDump(nablaMain *arc){
 // ****************************************************************************
 void nccArcLibGmpReadFrmDump(nablaMain *arc){
   int i;
-  int gmpNumberOfPrecise=nablaVariableGmpRank(arc->variables);
+  int gmpNumberOfPrecise=nMiddleVariableGmpRank(arc->variables);
 fprintf(arc->entity->src, "\n\
 \n// ****************************************************************************\
 \n// * gmpReadFrmDump\
@@ -188,7 +188,7 @@ fprintf(arc->entity->src, "\n\
  fprintf(arc->entity->src, "\nvoid %s%s::gmpReadFrmDump(void){",
          arc->name,
          nablaArcaneColor(arc));
- if (nablaVariableGmpDumpNumber(arc->variables)!=0){
+ if (nMiddleVariableGmpDumpNumber(arc->variables)!=0){
    fprintf(arc->entity->src, "\
 \n\tconst int gmpNumberOfPrecise=%d;\
 \n\tinfo()<<\"\\33[7m[gmpReadFrmDump]\"<<\"\\33[m\";\
@@ -201,8 +201,8 @@ fprintf(arc->entity->src, "\n\
 \n\t\t//const int numb = 8*size - nails;\
 \n\t\t//info()<<\"cell #\"<<cell->uniqueId();",gmpNumberOfPrecise);
    for(i=0;i<gmpNumberOfPrecise;i+=1){
-     char *name=nablaVariableGmpNameRank(arc->variables,i);
-     if (nablaVariableGmpDumpRank(arc->variables,i)==false){
+     char *name=nMiddleVariableGmpNameRank(arc->variables,i);
+     if (nMiddleVariableGmpDumpRank(arc->variables,i)==false){
        fprintf(arc->entity->src,"\n\t\t// Not restoring cell variable m_cell_%s",name);
        continue;
      }
@@ -245,9 +245,9 @@ void nccArcLibGmpIni(nablaMain *arc){
 \n\t\t\tmpz_init(m_gmp[i][cell->localId()].get_mpz_t());\
 \n\t\t};\n\t}\n}",
           arc->name,nablaArcaneColor(arc),
-          nablaVariableGmpRank(arc->variables),
+          nMiddleVariableGmpRank(arc->variables),
           arc->name, nablaArcaneColor(arc));
-  nablaJob *gmpInitFunction=nablaJobNew(arc->entity);
+  nablaJob *gmpInitFunction=nMiddleJobNew(arc->entity);
   gmpInitFunction->is_an_entry_point=true;
   gmpInitFunction->is_a_function=true;
   gmpInitFunction->scope  = strdup("NoGroup");
@@ -261,7 +261,7 @@ void nccArcLibGmpIni(nablaMain *arc){
   sprintf(&gmpInitFunction->at[0],"-huge_valf");
   gmpInitFunction->whenx  = 1;
   gmpInitFunction->whens[0] = ENTRY_POINT_init;
-  nablaJobAdd(arc->entity, gmpInitFunction);
+  nMiddleJobAdd(arc->entity, gmpInitFunction);
   
   nccArcLibGmpWritBfrDump(arc);
   
@@ -273,7 +273,7 @@ void nccArcLibGmpIni(nablaMain *arc){
 \n\tgmpReadFrmDump();\n}",
           arc->name,
           nablaArcaneColor(arc));
-  nablaJob *gmpContinueInit=nablaJobNew(arc->entity);
+  nablaJob *gmpContinueInit=nMiddleJobNew(arc->entity);
   gmpContinueInit->is_an_entry_point=true;
   gmpContinueInit->is_a_function=true;
   gmpContinueInit->scope  = strdup("NoGroup");
@@ -287,5 +287,5 @@ void nccArcLibGmpIni(nablaMain *arc){
   sprintf(&gmpContinueInit->at[0],"-0.0");
   gmpContinueInit->whenx  = 1;
   gmpContinueInit->whens[0] = ENTRY_POINT_continue_init;
-  nablaJobAdd(arc->entity, gmpContinueInit);
+  nMiddleJobAdd(arc->entity, gmpContinueInit);
 }

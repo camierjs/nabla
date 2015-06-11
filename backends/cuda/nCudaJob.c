@@ -208,7 +208,8 @@ static char* cudaGather(nablaJob *job){
     if (i!=job->parse.iGather) continue;
     strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_function_call));
     // On informe la suite que cette variable est en train d'être gatherée
-    nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables,
+                                                     var->name);
     if (real_variable==NULL)
       nablaError("Could not find real variable from gathered variables!");
     real_variable->is_gathered=true;
@@ -224,7 +225,8 @@ static char* cudaGather(nablaJob *job){
 // ****************************************************************************
 static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables,
+                                                   var->name);
   if (real_variable==NULL)
     nablaError("Could not find real variable from scattered variables!");
   real_variable->is_gathered=false;
@@ -407,7 +409,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*JOB_CALL*/", NULL);
     char *callName=n->next->children->children->token;
     nprintf(nabla, "/*got_call*/", NULL);
-    if ((foundJob=nablaJobFind(job->entity->jobs,callName))!=NULL){
+    if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
       if (foundJob->is_a_function!=true){
         nprintf(nabla, "/*isNablaJob*/", NULL);
       }else{
@@ -712,7 +714,7 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
   //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
   
   if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     dbg("\n\t\t[cudaHookDumpNablaParameterList] looking for %s", n->children->token);
     *numParams+=1;
     // Si on ne trouve pas de variable, on a rien à faire
@@ -738,7 +740,7 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
       // Création d'une nouvelle in_out_variable
-      nablaVariable *new = nablaVariableNew(NULL);
+      nablaVariable *new = nMiddleVariableNew(NULL);
       new->name=strdup(var->name);
       new->item=strdup(var->item);
       new->type=strdup(var->type);
@@ -749,7 +751,7 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
       if (job->variables_to_gather_scatter==NULL)
         job->variables_to_gather_scatter=new;
       else
-        nablaVariableLast(job->variables_to_gather_scatter)->next=new;
+        nMiddleVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
   if (n->children != NULL) cudaHookDumpNablaParameterList(nabla, job, n->children, numParams);
@@ -779,18 +781,18 @@ void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **vari
   if (n->ruleid==rulenameToId("direct_declarator")){
     dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
     dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
-    nablaVariable *hit=nablaVariableFind(nabla->variables, n->children->token);
+    nablaVariable *hit=nMiddleVariableFind(nabla->variables, n->children->token);
     dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
     // Si on ne trouve pas de variable, c'est pas normal
     if (hit == NULL)
       return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
     dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
-    nablaVariable *allready_here=nablaVariableFind(*variables, hit->name);
+    nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
     if (allready_here!=NULL){
       dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
     }else{
       // Création d'une nouvelle called_variable
-      nablaVariable *new = nablaVariableNew(NULL);
+      nablaVariable *new = nMiddleVariableNew(NULL);
       new->name=strdup(hit->name);
       new->item=strdup(hit->item);
       new->type=strdup(hit->type);
@@ -802,7 +804,7 @@ void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **vari
         *variables=new;
       }else{
         dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
-        nablaVariableLast(*variables)->next=new;
+        nMiddleVariableLast(*variables)->next=new;
       }
     }
   }
@@ -826,7 +828,7 @@ void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
   //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
   
   if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     //nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
     *numParams+=1;
     // Si on ne trouve pas de variable, on a rien à faire
@@ -863,7 +865,7 @@ void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bo
   if (n->tokenid==INOUT) in_or_out=false;
     
   if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     // Si on ne trouve pas de variable, on a rien à faire
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
@@ -889,9 +891,9 @@ void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bo
  * Génération d'un kernel associé à un support
  *****************************************************************************/
 void cudaHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, job);
-  nablaJobFill(nabla,job,n,NULL);
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
   
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
   if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))

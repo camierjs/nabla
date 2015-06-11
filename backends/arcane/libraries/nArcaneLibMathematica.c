@@ -77,7 +77,7 @@ void nccArcLibMathematicaIni(nablaMain *arc){
 \n\tm_mathlink = serviceBuilder.createInstance(\"mathlink\");\
 \n\tm_mathlink->link();\
 \n}",arc->name,nablaArcaneColor(arc));
-  nablaJob *mathlinkIniFunction=nablaJobNew(arc->entity);
+  nablaJob *mathlinkIniFunction=nMiddleJobNew(arc->entity);
   mathlinkIniFunction->is_an_entry_point=true;
   mathlinkIniFunction->is_a_function=true;
   mathlinkIniFunction->scope  = strdup("NoGroup");
@@ -91,7 +91,7 @@ void nccArcLibMathematicaIni(nablaMain *arc){
   sprintf(&mathlinkIniFunction->at[0],"-1024.0");
   mathlinkIniFunction->whenx  = 1;
   mathlinkIniFunction->whens[0] = -1024.0;
-  nablaJobAdd(arc->entity, mathlinkIniFunction);
+  nMiddleJobAdd(arc->entity, mathlinkIniFunction);
 }
 
 

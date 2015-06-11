@@ -60,7 +60,7 @@ void nOkinaHookDfsForCalls(struct nablaMainStruct *nabla,
           namespace?"Entity::":"",
           fct->name);
   // On va chercher les paramètres standards pour le hdr
-  dumpParameterTypeList(nabla->entity->hdr, nParams);
+  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
   hprintf(nabla, NULL, ");");
 }
 
@@ -114,7 +114,7 @@ void nOkinaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode 
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
   fct->parse.function_call_name=NULL;
-  if ((foundJob=nablaJobFind(fct->entity->jobs,callName))!=NULL){
+  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
     if (foundJob->is_a_function!=true){
       nprintf(nabla, "/*isNablaJob*/", NULL);
       fct->parse.function_call_name=strdup(callName);
@@ -135,7 +135,7 @@ void nOkinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   if (fct->parse.function_call_name!=NULL){
     //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
     int numParams=1;
-    nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
+    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
     nOkinaArgsExtra(nabla, called, &numParams);
     if (called->nblParamsNode != NULL)
       nOkinaArgsList(nabla,called->nblParamsNode,&numParams);
@@ -163,9 +163,9 @@ void nOkinaHookLibraries(astNode * n, nablaEntity *entity){
 // * Génération d'un kernel associé à un support
 // ****************************************************************************
 void nOkinaHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, job);
-  nablaJobFill(nabla,job,n,NULL);
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de OKINA
   //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
   //  exit(NABLA_ERROR|fprintf(stderr, "\n[nOkinaHookJob] Error with return type which is not void\n"));

@@ -176,14 +176,14 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   dbg("\n[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
   dbg("\n[nablaParsing] nabla_input_file=%s", nabla_input_file);
   dbg("\n[nablaParsing] Now launching nablaMiddlendSwitch");
-  return nablaMiddlendSwitch(root,
-                             optionDumpTree,
-                             nabla_entity_name,
-                             backend,
-                             colors,
-                             interface_name,
-                             specific_path,
-                             service_name);
+  return nMiddleSwitch(root,
+                       optionDumpTree,
+                       nabla_entity_name,
+                       backend,
+                       colors,
+                       interface_name,
+                       specific_path,
+                       service_name);
 }
 
 
@@ -211,19 +211,22 @@ int sysPreprocessor(const char *nabla_entity_name,
   if ((gcc_command = malloc(size))==NULL)
     nablaError("[sysPreprocessor] Could not malloc gcc_command!");
   // On crée un fichier temporaire où l'on va sed'er les includes, par exemple
-  snprintf(cat_sed_temporary_file_name, size, "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
+  snprintf(cat_sed_temporary_file_name,
+           size,
+           "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
   cat_sed_temporary_fd=mkstemp(cat_sed_temporary_file_name);
   if (cat_sed_temporary_fd==-1)
     nablaError("[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
-  //printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
-  dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",cat_sed_temporary_file_name);
+  printf("%s:1 is our temporary sed file\n",cat_sed_temporary_file_name);
+  dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",
+      cat_sed_temporary_file_name);
   // Pour chaque fichier .n en entrée, on va le cat'er et insérer des délimiteurs
   cat_command[0]='\0';
-  //printf("Loading: ");
+  printf("Loading: ");
   for(i=0,nabla_file=strtok(dup_list_of_nabla_files, " ");
       nabla_file!=NULL;
       i+=1,nabla_file=strtok(NULL, " ")){
-    //printf("%s%s",i==0?"":", ",nabla_file);
+    printf("%s%s",i==0?"":", ",nabla_file);
     // Une ligne de header du cat en cours
     snprintf(tok_command,size,
              "%secho '# 1 \"%s\"' %s %s",

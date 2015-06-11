@@ -41,66 +41,55 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
 
-
-// ****************************************************************************
-// * Filtrage du GATHER
-// * Une passe devrait être faite à priori afin de déterminer les contextes
-// * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
-// * Et non pas que sur leurs déclarations en in et out
-// ****************************************************************************
-char* nOkinaHookGather(nablaJob *job){
-  int i;
-  char gathers[1024];
-  nablaVariable *var;
-  gathers[0]='\0';
-  int nbToGather=0;
-  int filteredNbToGather=0;
-
-  // Si l'on a trouvé un 'selection_statement_in_compound_statement'
-  // dans le corps du kernel, on débraye les gathers
-  // *ou pas*
-  if (job->parse.selection_statement_in_compound_statement){
-    //nprintf(job->entity->main,
-    //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!okinaGather*/");
-    //return "";
-  }
-  
-  // On récupère le nombre de variables potentielles à gatherer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToGather+=1;
-  //nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
-  
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToGather==0) return "";
-
-  // On filtre suivant s'il y a des forall
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToGather+=1;
-  }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToGather=%d*/", filteredNbToGather);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToGather==0) return "";
-  
-  strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_declaration));
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le gather de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iGather) continue;
-    strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_function_call));
-    // On informe la suite que cette variable est en train d'être gatherée
-    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-    if (real_variable==NULL)
-      nablaError("Could not find real variable from gathered variables!");
-    real_variable->is_gathered=true;
-  }
-  job->parse.iGather+=1;
-  return strdup(gathers);
+/***************************************************************************** 
+ * HEADER
+ *****************************************************************************/
+char* nccArcLibCartesianHeader(void){
+  // On pr�pare le header de l'entity
+  return "\n#include \"arcane/MeshArea.h\"\n\
+#include \"arcane/ISubDomain.h\"\n\
+#include \"arcane/MeshAreaAccessor.h\"\n\
+//#include \"arcane/cea/ICartesianMesh.h\"\n\
+//#include \"arcane/cea/CellDirectionMng.h\"\n\
+//#include \"arcane/cea/FaceDirectionMng.h\"\n\
+//#include \"arcane/cea/NodeDirectionMng.h\"\n\n\
+";
 }
 
+
+/***************************************************************************** 
+ * PRIVATES
+ *****************************************************************************/
+char* nccArcLibCartesianPrivates(void){
+  return "\nprivate:\n\
+\tvoid libCartesianInitialize(void);\n\
+\tICartesianMesh* m_cartesian_mesh;";
+}
+
+
+/******************************************************************************
+ * Initialisation
+ ******************************************************************************/
+void nccArcLibCartesianIni(nablaMain *arc){
+  fprintf(arc->entity->src, "\
+\n\nvoid %s%s::libCartesianInitialize(void){\n\
+\tIMesh* mesh = defaultMesh();\n\
+\tm_cartesian_mesh = arcaneCreateCartesianMesh(mesh);\n\
+\tm_cartesian_mesh->computeDirections();\n}",arc->name,nablaArcaneColor(arc));
+  nablaJob *libCartesianInitialize=nMiddleJobNew(arc->entity);
+  libCartesianInitialize->is_an_entry_point=true;
+  libCartesianInitialize->is_a_function=true;
+  libCartesianInitialize->scope  = strdup("NoGroup");
+  libCartesianInitialize->region = strdup("NoRegion");
+  libCartesianInitialize->item   = strdup("\0");
+  libCartesianInitialize->rtntp  = strdup("void");
+  libCartesianInitialize->name   = strdup("libCartesianInitialize");
+  libCartesianInitialize->name_utf8 = strdup("libCartesianInitialize");
+  libCartesianInitialize->xyz    = strdup("NoXYZ");
+  libCartesianInitialize->drctn  = strdup("NoDirection");
+  sprintf(&libCartesianInitialize->at[0],"-huge_valf");
+  libCartesianInitialize->whenx  = 1;
+  libCartesianInitialize->whens[0] = ENTRY_POINT_init;
+  nMiddleJobAdd(arc->entity, libCartesianInitialize);
+}

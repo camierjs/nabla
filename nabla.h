@@ -53,10 +53,6 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <stdbool.h>
-int fileno(FILE *stream);
-char *strdup(const char *s);
-int mkstemp(char *template);
-void nablaError(const char *format, ...);
 
 
 // ****************************************************************************
@@ -138,21 +134,29 @@ typedef enum{
 
 
 // ****************************************************************************
-// * NABLA STR & HARDCODED DEFINES
+// * Forwwards
+// ****************************************************************************
+int fileno(FILE *stream);
+char *strdup(const char *s);
+int mkstemp(char *template);
+void nablaError(const char *format, ...);
+
+
+// ****************************************************************************
+// * Nabla Hard-coded Definitions that should be removed
 // ****************************************************************************
 #define NABLA_LICENSE_HEADER 3360
 #define NABLA_MAX_FILE_NAME 8192
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
 
-#include "frontend/nablaDebug.h"
-#include "frontend/nablaAst.h"
+#include "frontend/nFrontend.h"
 
-#include "middlend/nablaMiddlend.h"
+#include "middlend/nMiddlend.h"
 
-#include "backends/arcane/nccArcane.h"
-#include "backends/cuda/nccCuda.h"
 #include "backends/okina/nOkina.h"
+#include "backends/cuda/nCuda.h"
+#include "backends/arcane/nArcane.h"
 
-#include "frontend/nablaTools.h"
+//#include "frontend/nablaTools.h"
 
 #endif // _NABLA_H_

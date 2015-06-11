@@ -246,7 +246,7 @@ int dfsScanJobsCalls(void *vars, void *main, astNode * n){
     char *callName=n->next->children->children->token;
     dbg("\n\t\t[dfsScanJobsCalls] hit what we are looking for: token '%s', calling '%s'",
         n->token, callName);
-    if ((foundJob=nablaJobFind(nabla->entity->jobs,callName))!=NULL){
+    if ((foundJob=nMiddleJobFind(nabla->entity->jobs,callName))!=NULL){
       if (foundJob->is_a_function!=true){
         dbg("\n\t\t[dfsScanJobsCalls] which is a job!");
         nb_called+=1;

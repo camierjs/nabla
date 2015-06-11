@@ -281,7 +281,7 @@ static NABLA_STATUS timeTreeSaveEdges(FILE *fTreeOutput, astNode *l, astNode *fa
 /*****************************************************************************
  * timeTreeSave
  *****************************************************************************/
-NABLA_STATUS timeTreeSave(nablaMain *nabla, nablaJob *jobs, int number_of_entry_points){
+NABLA_STATUS nMiddleTimeTreeSave(nablaMain *nabla, nablaJob *jobs, int number_of_entry_points){
   FILE *dotFile;
   char fileName[NABLA_MAX_FILE_NAME];
   dbg("\n[timeTreeSave] Saving time tree for %s", nabla->name);

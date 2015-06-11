@@ -191,8 +191,8 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   nabla->hook=&okinaBackendHooks;
 
   // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, iteration);
+  nablaVariable *iteration = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, iteration);
   iteration->axl_it=false;
   iteration->item=strdup("global");
   iteration->type=strdup("integer");
@@ -209,9 +209,9 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   // Dump dans le HEADER: includes, typedefs, defines, debug, maths & errors stuff
   nOkinaHeaderPrefix(nabla);
   nOkinaHeaderIncludes(nabla);
-  nablaDefines(nabla,nabla->simd->defines);
-  nablaTypedefs(nabla,nabla->simd->typedefs);
-  nablaForwards(nabla,nabla->simd->forwards);
+  nMiddleDefines(nabla,nabla->simd->defines);
+  nMiddleTypedefs(nabla,nabla->simd->typedefs);
+  nMiddleForwards(nabla,nabla->simd->forwards);
 
   // On inclue les fichiers kn'SIMD'
   nOkinaHeaderSimd(nabla);
@@ -222,7 +222,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   nOkinaHeaderInclude(nabla);
 
   // Parse du code préprocessé et lance les hooks associés
-  nablaMiddlendParseAndHook(root,nabla);
+  nMiddleParseAndHook(root,nabla);
   
   // On rajoute le kernel d'initialisation des variable
   nOkinaInitVariables(nabla);

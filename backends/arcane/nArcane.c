@@ -211,7 +211,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   if (isAnArcaneModule(middlend))
     nccArcConfigHeader(middlend);
   
-  nablaMiddlendParseAndHook(root,middlend);
+  nMiddleParseAndHook(root,middlend);
 
   // Dans le cas d'un module, on le fait maintenant
   if (isAnArcaneModule(middlend)){

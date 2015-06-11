@@ -145,8 +145,8 @@ NABLA_STATUS nOkinaMain(nablaMain *n){
   double last_when;
   
   dbg("\n[nOkinaMain]");
-  number_of_entry_points=nablaNumberOfEntryPoints(n);
-  entry_points=nablaEntryPointsSort(n,number_of_entry_points);
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
    for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
      if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;

@@ -155,7 +155,7 @@ void nccArcLibParticlesIni(nablaMain *arc){
 \n\tinfo()<<\"[particlesInit] \\33[32mdone\\33[m\";\
 \n\ttraceMng()->flush();\
 \n}",arc->name,nablaArcaneColor(arc));
-  nablaJob *particlesInit=nablaJobNew(arc->entity);
+  nablaJob *particlesInit=nMiddleJobNew(arc->entity);
   particlesInit->is_an_entry_point=true;
   particlesInit->is_a_function=true;
   particlesInit->scope  = strdup("NoGroup");
@@ -169,7 +169,7 @@ void nccArcLibParticlesIni(nablaMain *arc){
   sprintf(&particlesInit->at[0],"-huge_valf");
   particlesInit->whenx  = 1;
   particlesInit->whens[0] = ENTRY_POINT_init;
-  nablaJobAdd(arc->entity, particlesInit);
+  nMiddleJobAdd(arc->entity, particlesInit);
 
   fprintf(arc->entity->src, "\
 \n\n// ****************************************************************************\

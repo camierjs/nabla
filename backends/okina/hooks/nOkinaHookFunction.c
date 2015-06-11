@@ -55,7 +55,7 @@ void nOkinaHookFunctionName(nablaMain *arc){
 // * Génération d'un kernel associé à une fonction
 // ****************************************************************************
 void nOkinaHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, fct);
-  nablaFctFill(nabla,fct,n,NULL);
+  nablaJob *fct=nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, fct);
+  nMiddleFunctionFill(nabla,fct,n,NULL);
 }

@@ -44,25 +44,25 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
- * nablaFunctionDumpHdr
- *****************************************************************************/
-void nablaFunctionDumpHdr(FILE *file, astNode * n){
+// ****************************************************************************
+// * nablaFunctionDumpHdr
+// ****************************************************************************
+void nMiddleFunctionDumpHeader(FILE *file, astNode * n){
   if (n->rule!=NULL)
     if (n->ruleid == rulenameToId("compound_statement")) return;
   for(;n->token != NULL;){
-    if (n->tokenid == AT){ return;} // Pas besoin des @ dans le header
+    if (n->tokenid == AT) return; // Pas besoin des @ dans le header
     fprintf(file,"%s ",n->token); break;
   }
-  if(n->children != NULL) nablaFunctionDumpHdr(file, n->children);
-  if(n->next != NULL) nablaFunctionDumpHdr(file, n->next);
+  if(n->children != NULL) nMiddleFunctionDumpHeader(file, n->children);
+  if(n->next != NULL) nMiddleFunctionDumpHeader(file, n->next);
 }
 
 
 /*****************************************************************************
  * nablaFunctionDeclarationReal3
  *****************************************************************************/
-__attribute__((unused)) static void nablaFunctionDeclarationReal3(astNode * n){
+__attribute__((unused)) static void nMiddleFunctionDeclarationReal3(astNode * n){
   if (n->ruleid != rulenameToId("declaration")
       || n->children->token!=NULL) // Cela peut être le cas de PREPROCS
     return;
@@ -109,7 +109,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationReal3(astNode * n){
 /*****************************************************************************
  * nablaFunctionDeclarationDouble
  *****************************************************************************/
-__attribute__((unused)) static void nablaFunctionDeclarationDouble(astNode * n){
+__attribute__((unused)) static void nMiddleFunctionDeclarationDouble(astNode * n){
   if (n->ruleid != rulenameToId("declaration")
       || n->children->token!=NULL) // Cela peut être le cas de PREPROCS
     return;
@@ -147,7 +147,7 @@ __attribute__((unused)) static void nablaFunctionDeclarationDouble(astNode * n){
 /*****************************************************************************
  * Action de parsing d'une fonction
  *****************************************************************************/
-void nablaFunctionParse(astNode * n, nablaJob *fct){
+void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
  
   // On regarde si on est 'à gauche' d'un 'assignment_expression',
@@ -299,7 +299,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
     
-    if (turnTokenToOption(n,nabla)!=NULL){
+    if (nMiddleTurnTokenToOption(n,nabla)!=NULL){
       dbg("\n\t[nablaFunctionParse] OPTION hit!");
       break;
     }
@@ -324,11 +324,11 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
     //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;
     fprintf(nabla->entity->src,"%s",n->token);
-    nablaInsertSpace(nabla,n);
+    nMiddleInsertSpace(nabla,n);
     break;
   }
-  if(n->children != NULL) nablaFunctionParse(n->children, fct);
-  if(n->next != NULL) nablaFunctionParse(n->next, fct);
+  if(n->children != NULL) nMiddleFunctionParse(n->children, fct);
+  if(n->next != NULL) nMiddleFunctionParse(n->next, fct);
 }
 
 
@@ -336,10 +336,10 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
  * Remplissage de la structure 'fct'
  * Dump dans le src de la déclaration de ce fct en fonction du backend
  *****************************************************************************/
-void nablaFctFill(nablaMain *nabla,
-                  nablaJob *fct,
-                  astNode *n,
-                  const char *namespace){
+void nMiddleFunctionFill(nablaMain *nabla,
+                         nablaJob *fct,
+                         astNode *n,
+                         const char *namespace){
   int numParams;
   astNode *nFctName;
   astNode *nParams;
@@ -377,7 +377,7 @@ void nablaFctFill(nablaMain *nabla,
       (fct->region!=NULL)?fct->region:"Null",
       fct->item,//2+
       fct->rtntp, fct->name);
-  scanForNablaJobAtConstant(n->children, nabla);
+  nMiddleScanForNablaJobAtConstant(n->children, nabla);
   dbg("\n\t[nablaFctFill] Now fillinf SRC file");
   nprintf(nabla, NULL, "\n\n\
 // ********************************************************\n\
@@ -390,7 +390,7 @@ void nablaFctFill(nablaMain *nabla,
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           fct->name);
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
-  numParams=dumpParameterTypeList(nabla->entity->src, nParams);
+  numParams=nMiddleDumpParameterTypeList(nabla->entity->src, nParams);
   nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaFctFill] adding ExtraParameters");
@@ -418,7 +418,7 @@ void nablaFctFill(nablaMain *nabla,
   nprintf(nabla, NULL, "\t%s", nabla->hook->postfixEnumerate(fct));
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
-  nablaFunctionParse(n,fct);
+  nMiddleFunctionParse(n,fct);
   dbg("\n\t[nablaFctFill] done");
 }
 

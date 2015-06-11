@@ -225,10 +225,10 @@ inline double unglitch(double a){\n\
             entity->name,isAnArcaneModule(entity->main)?"":"Service");
   // Dans le cas d'un service, on ne souhaite que les opCodes en DEFINES
   if (isAnArcaneService(entity->main))
-    return nablaDefines(entity->main, arcaneOpCodesDefines);
+    return nMiddleDefines(entity->main, arcaneOpCodesDefines);
   // Sinon pour le module, on fait les opCodes et les autres defines
-  nablaDefines(entity->main, arcaneOpCodesDefines);
-  return nablaDefines(entity->main, arcaneDefines);
+  nMiddleDefines(entity->main, arcaneOpCodesDefines);
+  return nMiddleDefines(entity->main, arcaneDefines);
 }
 
 
@@ -289,7 +289,7 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
     if (job->stdParamsNode==NULL) continue;
     if (job->is_a_function==true){
       fprintf(entity->hdr, "\n\tvirtual ");
-      nablaFunctionDumpHdr(entity->hdr, job->stdParamsNode);
+      nMiddleFunctionDumpHeader(entity->hdr, job->stdParamsNode);
       fprintf(entity->hdr, ";");
       continue;
     }
@@ -298,7 +298,7 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
     // On remplit la ligne du fichier HDR
     //assert(job->returnType->children!=NULL);
     fprintf(entity->hdr, "\n\tvirtual %s %s(", job->returnTypeNode->children->token, job->name);
-    dumpParameterTypeList(entity->hdr, job->stdParamsNode);
+    nMiddleDumpParameterTypeList(entity->hdr, job->stdParamsNode);
     // Les entry points ne prennent pas d'arguments dans Arcane
     //actFunctionDumpHdr(entity->hdr, job->params);
     fprintf(entity->hdr, ");");

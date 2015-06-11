@@ -41,111 +41,35 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
 
-static void nablaLibrariesSwitch(astNode * n, nablaEntity *entity){
-  if (strncmp(n->children->token,"â„µ",3)==0){
-    dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
-    entity->libraries|=(1<<aleph);
-    return;
-  }
-
-  if (strncmp(n->children->token,"Real",4)==0){
-    dbg("\n\t[nablaLibraries] Real single_library hit!");
-    entity->libraries|=(1<<real);
-    return;
-  }
-
-  switch(n->children->token[2]){
-    
-  case ('e'):{ // AL[E]PH || â„µ -(p3c)-> Al[e]
-    dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
-    entity->libraries|=(1<<aleph);
-    break;
-  }
-    
-  case ('i'):{ // MP[I] || MA[I]L
-    switch (n->children->token[1]){
-    case ('p'):{ // M[P]I
-      dbg("\n\t[nablaLibraries] MPI single_library hit!");
-      entity->libraries|=(1<<mpi);
-      break;
-    }
-    case ('a'):{ // M[A]IL
-      dbg("\n\t[nablaLibraries] MAIL single_library hit!");
-      entity->libraries|=(1<<mail);
-      break;
-    }
-    default: nablaError("Could not switch M[p]i || M[a]il!");
-    }
-    break;
-  }
-      
-  case ('p'):{ // GM[P]
-    dbg("\n\t[nablaLibraries] GMP single_library hit!");
-    entity->libraries|=(1<<gmp);
-    break;
-  }
-      
-  case ('r'):{ // CA[R]TESIAN || PA[R]TICLES
-    switch (n->children->token[0]){
-    case ('c'):{
-      dbg("\n\t[nablaLibraries] CARTESIAN single_library hit!");
-      entity->libraries|=(1<<cartesian);
-      break;
-    }
-    case ('p'):{
-      dbg("\n\t[nablaLibraries] PARTICLES single_library hit!");
-      entity->libraries|=(1<<particles);
-      break;
-    }
-    default: nablaError("Could not switch CARTESIAN || PARTICLES!");
-    }
-    break;
-  }
-      
-  case ('t'):{ // Ma[t]erials || Ma[t]hematica || df[t]
-    if (n->children->token[0]=='d'){
-      dbg("\n\t[nablaLibraries] DFT single_library hit!");
-      entity->libraries|=(1<<dft);
-      break;
-    }
-    switch (n->children->token[3]){
-    case ('e'):{
-      dbg("\n\t[nablaLibraries] MATERIALS single_library hit!");
-      entity->libraries|=(1<<materials);
-      break;
-    }
-    case('h'):{
-      dbg("\n\t[nablaLibraries] MATHEMATICA single_library hit!");
-      entity->libraries|=(1<<mathematica);
-      break;
-    }
-    default: nablaError("Could not switch Ma[t]erials || Ma[t]hematica!");
-    }
-    break;
-  }
-      
-  case ('u'):{ // SL[U]RM
-    dbg("\n\t[nablaLibraries] SLURM single_library hit!");
-    entity->libraries|=(1<<slurm);
-    break;
-  }
- 
-  default:{
-    dbg("\n\t[nablaLibraries] single_library token=%s",n->children->token);
-    nablaError("Could not find library!");
-  }
-  }
+// Allocation d'une nouvelle structure de entity
+nablaEntity *nMiddleEntityNew(nablaMain *nabla){
+	nablaEntity *entity;
+	entity = (nablaEntity *)malloc(sizeof(nablaEntity));
+ 	assert(entity != NULL);
+   entity->hdr=entity->src=NULL;
+   entity->next=NULL;
+   entity->main=nabla;
+   entity->jobs=NULL;
+   entity->libraries=0;// Par défaut, pas de library utilisée
+  	return entity; 
 }
 
-
-/*****************************************************************************
- * DFS scan for libraries
- *****************************************************************************/
-void nablaLibraries(astNode * n, nablaEntity *entity){
-  if (n->ruleid == rulenameToId("single_library"))
-    nablaLibrariesSwitch(n,entity);
-  if(n->children != NULL) nablaLibraries(n->children,  entity);
-  if(n->next != NULL) nablaLibraries(n->next, entity);
+nablaEntity *nMiddleEntityAddEntity(nablaMain *nabla, nablaEntity *entity) {
+  nablaEntity *iterator;
+  assert(entity != NULL);
+  if (nabla->entity==NULL){
+    nabla->entity=entity;
+    return entity;
+  }
+  iterator = nabla->entity->next;
+  if(iterator == NULL)
+    iterator = entity;
+  else {
+    while(iterator->next != NULL)
+      iterator = iterator->next;
+    iterator->next = entity;
+  }
+  return iterator;
 }
+

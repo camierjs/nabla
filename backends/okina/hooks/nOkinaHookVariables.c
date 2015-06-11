@@ -362,7 +362,7 @@ static void nOkinaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
 nablaVariable *nOkinaHookVariablesTurnTokenToVariable(astNode * n,
                                                       nablaMain *arc,
                                                       nablaJob *job){
-  nablaVariable *var=nablaVariableFind(arc->variables, n->token);
+  nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
   dbg("\n\t[nOkinaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);

@@ -275,88 +275,81 @@ typedef struct nablaMainStruct{
   struct nablaBackendPragmaHooksStruct *pragma;
 } nablaMain;
 
-NABLA_STATUS nablaInclude(nablaMain*,char*);
-NABLA_STATUS nablaDefines(nablaMain*,nablaDefine*);
-NABLA_STATUS nablaTypedefs(nablaMain*,nablaTypedef*);
-NABLA_STATUS nablaForwards(nablaMain*,char**);
-NABLA_STATUS nablaCompoundJobEnd(nablaMain*);
+// nMiddleLibraries.c
+void nMiddleLibraries(astNode *, nablaEntity *);
 
-int nablaMiddlendSwitch(astNode*,
-                        const bool,
-                        //const char*,
-                        const char*,
-                        const BACKEND_SWITCH,
-                        const BACKEND_COLORS,
-                        char*,char*,char*);
-void nablaMiddlendParseAndHook(astNode *, nablaMain *);
-int dumpParameterTypeList(FILE*, astNode*);
+// nMiddleEntities.c
+nablaEntity *nMiddleEntityNew(nablaMain*);
+nablaEntity *nMiddleEntityAddEntity(nablaMain*, nablaEntity*);
 
-// WHENS
-void nablaStoreWhen(nablaMain *, char *);
-int nablaComparEntryPoints(const void *one, const void *two);
-int nablaNumberOfEntryPoints(nablaMain *);
-nablaJob* nablaEntryPointsSort(nablaMain *,int);
+// nMiddleJobs.c
+void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc);
+void nMiddleScanForNablaJobAtConstant(astNode * n, nablaMain *arc);
+char nMiddleScanForNablaJobForallItem(astNode*);
+void nMiddleScanForIfAfterAt(astNode *, nablaJob *, nablaMain *);
+void nMiddleDumpIfAfterAt(astNode *, nablaMain *);
+int nMiddleDumpParameterTypeList(FILE*, astNode*);
+nablaJob *nMiddleJobNew(nablaEntity *);
+nablaJob *nMiddleJobAdd(nablaEntity*, nablaJob*);
+nablaJob *nMiddleJobLast(nablaJob *);
+nablaJob *nMiddleJobFind(nablaJob *,char *);
+void nMiddleJobParse(astNode *, nablaJob *);
+void nMiddleJobFill(nablaMain*, nablaJob*, astNode *, const char *);
 
-// SPACE
-void nablaInsertSpace(nablaMain*,astNode*);
-
-// AT
-void nablaAtConstantParse(astNode *, nablaMain *, char *);
-
-// ITEMS
-void nablaItems(astNode * n, int ruleid, nablaMain *arc);
-
-// VARIABLES
-nablaVariable *nablaVariableNew(nablaMain *);
-nablaVariable *nablaVariableAdd(nablaMain*, nablaVariable *);
-nablaVariable *nablaVariableLast(nablaVariable *);
-nablaVariable *nablaVariableFind(nablaVariable *variables, char *name);
-what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *arc,
+// nMiddleVariables.c
+nablaVariable *nMiddleVariableNew(nablaMain *);
+nablaVariable *nMiddleVariableAdd(nablaMain*, nablaVariable *);
+nablaVariable *nMiddleVariableLast(nablaVariable *);
+nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name);
+what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *arc,
                                                        astNode * n,
                                                        const char cnf,
                                                        char enum_enum);
-int nablaVariableGmpRank(nablaVariable *variables);
-char *nablaVariableGmpNameRank(nablaVariable *variables, int k);
-bool nablaVariableGmpDumpRank(nablaVariable *variables, int k);
-int nablaVariableGmpDumpNumber(nablaVariable *variables);
+int nMiddleVariableGmpRank(nablaVariable *variables);
+char *nMiddleVariableGmpNameRank(nablaVariable *variables, int k);
+bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k);
+int nMiddleVariableGmpDumpNumber(nablaVariable *variables);
 
-// OPTIONS
-nablaOption *nablaOptionNew(nablaMain *);
-nablaOption *nablaOptionLast(nablaOption *) ;
-nablaOption *nablaOptionAdd(nablaMain *, nablaOption *);
-nablaOption *findOptionName(nablaOption *options, char *);
-void nablaOptions(astNode * n, int ruleid, nablaMain *);
-nablaOption *turnTokenToOption(astNode*, nablaMain*);
+// nMiddleOptions.c
+nablaOption *nMiddleOptionNew(nablaMain*);
+nablaOption *nMiddleOptionLast(nablaOption*) ;
+nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);
+nablaOption *nMiddleOptionFindName(nablaOption *options, char *);
+void nMiddleOptions(astNode * n, int ruleid, nablaMain *);
+nablaOption *nMiddleTurnTokenToOption(astNode*, nablaMain*);
 
-// ENTITY
-nablaEntity *nablaEntityNew(nablaMain*);
-nablaEntity *nablaEntityAddEntity(nablaMain*, nablaEntity*);
+// nMiddle.c
+NABLA_STATUS nMiddleCompoundJobEnd(nablaMain*);
+NABLA_STATUS nMiddleInclude(nablaMain*,char*);
+NABLA_STATUS nMiddleDefines(nablaMain*,nablaDefine*);
+NABLA_STATUS nMiddleTypedefs(nablaMain*,nablaTypedef*);
+NABLA_STATUS nMiddleForwards(nablaMain*,char**);
+void nMiddleParseAndHook(astNode*,nablaMain*);
+void nMiddleInsertSpace(nablaMain*,astNode*);
+int nMiddleSwitch(astNode*,const bool,const char*,
+                  const BACKEND_SWITCH,
+                  const BACKEND_COLORS,
+                  char*,char*,char*);
+// nMiddlePrintf
+int nprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
+int hprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
 
-// FUNTIONS
-void nablaFunctionDumpHdr(FILE *file, astNode * n);
-void nablaFunctionParse(astNode * n, nablaJob *fct);
-void nablaFctFill(nablaMain *,
-                  nablaJob *,
-                  astNode *n,
-                  const char *);
+// nMiddleItems
+void nMiddleItems(astNode * n, int ruleid, nablaMain *arc);
 
-// JOBS
-void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc);
-void scanForNablaJobAtConstant(astNode * n, nablaMain *arc);
-char scanForNablaJobForallItem(astNode*);
-nablaJob *nablaJobNew(nablaEntity *);
-nablaJob *nablaJobAdd(nablaEntity*, nablaJob*);
-nablaJob *nablaJobLast(nablaJob *);
-nablaJob *nablaJobFind(nablaJob *,char *);
-void nablaJobParse(astNode *, nablaJob *);
-void nablaJobFill(nablaMain*, nablaJob*, astNode *, const char *);
-void scanForIfAfterAt(astNode *, nablaJob *, nablaMain *);
-void dumpIfAfterAt(astNode *, nablaMain *);
+// nMiddleHLT: @ + When[s]
+void nMiddleAtConstantParse(astNode *, nablaMain *, char *);
+void nMiddleStoreWhen(nablaMain *, char *);
+int nMiddleComparEntryPoints(const void *one, const void *two);
+int nMiddleNumberOfEntryPoints(nablaMain *);
+nablaJob* nMiddleEntryPointsSort(nablaMain *,int);
 
-// LIBRARIES
-void nablaLibraries(astNode *, nablaEntity *);
+// nMiddleTimeTree.c
+NABLA_STATUS nMiddleTimeTreeSave(nablaMain*, nablaJob*, int);
 
-// Time tree dump
-NABLA_STATUS timeTreeSave(nablaMain*, nablaJob*, int);
+// nMiddleFunctions
+void nMiddleFunctionDumpHeader(FILE*,astNode*);
+void nMiddleFunctionParse(astNode*,nablaJob*);
+void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
 
 #endif // _NABLA_MIDDLEND_H_

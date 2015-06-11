@@ -6,10 +6,10 @@ info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
 # BACKEND CUDA
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}CUDA${VT100_RESET}")
 
-set(BACKEND_CUDA_C nccCudaMain.c nccCuda.c 
-                      nccCudaEnumerates.c nccCudaVariables.c
-                      nccCudaMesh.c nccCudaFunction.c
-                      nccCudaJob.c nccCudaDump.S nccCudaSimd.c)
+set(BACKEND_CUDA_C nCudaMain.c nCuda.c 
+  nCudaEnumerates.c nCudaVariables.c
+  nCudaMesh.c nCudaFunction.c
+  nCudaJob.c nCudaDump.S nCudaSimd.c)
 
 # On spécifie en plus que nccCudaDump.S va utiliser incbin pour se compiler
 set_property(SOURCE nccCudaDump.S 

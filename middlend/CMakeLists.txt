@@ -1,15 +1,17 @@
 # Nabla MiddlEnd
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} gathering ${VT100_FG_YELLOW}MIDDLEND${VT100_RESET}")
 set(MIDDLEND_C
-  nablaMiddlend.c
-  nablaItems.c
-  nablaHLT.c
-  nablaVariables.c 
-  nablaOptions.c
-  nablaModules.c
-  nablaJobs.c
-  nablaFunctions.c
-  nablaLibraries.c)
+  nMiddle.c
+  nMiddleHLT.c
+  nMiddleJobs.c
+  nMiddleItems.c
+  nMiddlePrintf.c
+  nMiddleOptions.c
+  nMiddleEntities.c
+  nMiddleTimeTree.c
+  nMiddleVariables.c 
+  nMiddleFunctions.c
+  nMiddleLibraries.c)
 
 add_library(NablaMiddlend ${MIDDLEND_C})
 add_dependencies(NablaMiddlend Nabla)

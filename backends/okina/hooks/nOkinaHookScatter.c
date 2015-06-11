@@ -49,7 +49,7 @@
 // ****************************************************************************
 static void okinaFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
   if (real_variable==NULL)
     nablaError("Could not find real variable from scattered variables!");
   real_variable->is_gathered=false;

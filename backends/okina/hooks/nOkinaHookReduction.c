@@ -61,7 +61,7 @@ void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   strcat(job_name,"okinaReduction_");
   strcat(job_name,global_var_name);
   // Rajout du job de reduction
-  nablaJob *redjob = nablaJobNew(nabla->entity);
+  nablaJob *redjob = nMiddleJobNew(nabla->entity);
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
   redjob->scope  = strdup("NoGroup");
@@ -77,7 +77,7 @@ void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   sprintf(&redjob->at[0],at_single_cst_node->token);
   redjob->whenx  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);
-  nablaJobAdd(nabla->entity, redjob);
+  nMiddleJobAdd(nabla->entity, redjob);
   const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\

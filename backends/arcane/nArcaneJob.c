@@ -583,7 +583,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     
   default:{
     if (n->token) nprintf(arc, NULL, "%s",n->token);
-    nablaInsertSpace(arc,n);
+    nMiddleInsertSpace(arc,n);
   }
     break;
   }
@@ -594,7 +594,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
  * nccArcaneJob
  *****************************************************************************/
 void arcaneJob(nablaMain *arc, astNode *n){
-  nablaJob *job = nablaJobNew(arc->entity);
-  nablaJobAdd(arc->entity, job);
-  nablaJobFill(arc,job,n,arc->name);
+  nablaJob *job = nMiddleJobNew(arc->entity);
+  nMiddleJobAdd(arc->entity, job);
+  nMiddleJobFill(arc,job,n,arc->name);
 }

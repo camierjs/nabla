@@ -106,7 +106,7 @@ void nOkinaHookParamsDumpList(nablaMain *nabla,
   // Dés qu'on hit une déclaration, c'est qu'on a une variable candidate
   if (n->ruleid==rulenameToId("direct_declarator")){
     // On la récupère
-    nablaVariable *var=nablaVariableFind(nabla->variables, n->children->token);
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     dbg("\n\t[okinaHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
     // Si elle n'existe pas, c'est pas normal à ce stade: c'est une erreur de nom
     if (var == NULL)
@@ -117,7 +117,7 @@ void nOkinaHookParamsDumpList(nablaMain *nabla,
     if (var->item[0] != job->item[0]){
       //nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
       // Création d'une nouvelle in_out_variable
-      nablaVariable *new = nablaVariableNew(NULL);
+      nablaVariable *new = nMiddleVariableNew(NULL);
       new->name=strdup(var->name);
       new->item=strdup(var->item);
       new->type=strdup(var->type);
@@ -128,7 +128,7 @@ void nOkinaHookParamsDumpList(nablaMain *nabla,
       if (job->variables_to_gather_scatter==NULL)
         job->variables_to_gather_scatter=new;
       else
-        nablaVariableLast(job->variables_to_gather_scatter)->next=new;
+        nMiddleVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
   if (n->children != NULL) nOkinaHookParamsDumpList(nabla,job,n->children,numParams);

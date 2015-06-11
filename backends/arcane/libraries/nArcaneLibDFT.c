@@ -169,7 +169,7 @@ void nccArcLibDftIni(nablaMain *arc){
 \n\tlltIni();\n}",
           arc->name, nablaArcaneColor(arc),
           arc->name, nablaArcaneColor(arc));
-  nablaJob *dftInitFunction=nablaJobNew(arc->entity);
+  nablaJob *dftInitFunction=nMiddleJobNew(arc->entity);
   dftInitFunction->is_an_entry_point=true;
   dftInitFunction->is_a_function=true;
   dftInitFunction->scope  = strdup("NoGroup");
@@ -183,7 +183,7 @@ void nccArcLibDftIni(nablaMain *arc){
   sprintf(&dftInitFunction->at[0],"-huge_valf");
   dftInitFunction->whenx  = 1;
   dftInitFunction->whens[0] = ENTRY_POINT_init;
-  nablaJobAdd(arc->entity, dftInitFunction);
+  nMiddleJobAdd(arc->entity, dftInitFunction);
 
   nccArcLibDftReadBackup(arc);
   nccArcLibDftWriteBackup(arc);
@@ -197,7 +197,7 @@ void nccArcLibDftIni(nablaMain *arc){
 \n\tdftReadBackup();\
 \n}\n\n",arc->name,
           nablaArcaneColor(arc));
-  nablaJob *dftContinueInit=nablaJobNew(arc->entity);
+  nablaJob *dftContinueInit=nMiddleJobNew(arc->entity);
   dftContinueInit->is_an_entry_point=true;
   dftContinueInit->is_a_function=true;
   dftContinueInit->scope  = strdup("NoGroup");
@@ -211,6 +211,6 @@ void nccArcLibDftIni(nablaMain *arc){
   sprintf(&dftContinueInit->at[0],"-0.0");
   dftContinueInit->whenx  = 1;
   dftContinueInit->whens[0] = ENTRY_POINT_continue_init;
-  nablaJobAdd(arc->entity, dftContinueInit);
+  nMiddleJobAdd(arc->entity, dftContinueInit);
   
 }

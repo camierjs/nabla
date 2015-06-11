@@ -47,7 +47,7 @@
 /*****************************************************************************
  * Gestion des variables (items)
  *****************************************************************************/
-nablaVariable *nablaVariableNew(nablaMain *arc){
+nablaVariable *nMiddleVariableNew(nablaMain *arc){
 	nablaVariable *variable;
 	variable = (nablaVariable *)malloc(sizeof(nablaVariable));
  	assert(variable != NULL);
@@ -63,24 +63,24 @@ nablaVariable *nablaVariableNew(nablaMain *arc){
 }
 
 
-nablaVariable *nablaVariableAdd(nablaMain *arc, nablaVariable *variable) {
+nablaVariable *nMiddleVariableAdd(nablaMain *arc, nablaVariable *variable) {
   assert(variable != NULL);
   if (arc->variables == NULL)
     arc->variables=variable;
   else
-    nablaVariableLast(arc->variables)->next=variable;
+    nMiddleVariableLast(arc->variables)->next=variable;
   return NABLA_OK;
 }
 
 
-nablaVariable *nablaVariableLast(nablaVariable *variables) {
+nablaVariable *nMiddleVariableLast(nablaVariable *variables) {
    while(variables->next != NULL){
      variables = variables->next;
    }
    return variables;
 }
 
-int nablaVariableGmpRank(nablaVariable *variables) {
+int nMiddleVariableGmpRank(nablaVariable *variables) {
   int rank=0;
   while(variables->next != NULL){
     if (variables->gmpRank!=-1) rank+=1;
@@ -88,7 +88,7 @@ int nablaVariableGmpRank(nablaVariable *variables) {
   }
   return rank;
 }
-int nablaVariableGmpDumpNumber(nablaVariable *variables) {
+int nMiddleVariableGmpDumpNumber(nablaVariable *variables) {
   int number=0;
   while(variables->next != NULL){
     if (variables->gmpRank!=-1)
@@ -99,7 +99,7 @@ int nablaVariableGmpDumpNumber(nablaVariable *variables) {
   return number;
 }
 
-char *nablaVariableGmpNameRank(nablaVariable *variables, int k) {
+char *nMiddleVariableGmpNameRank(nablaVariable *variables, int k) {
   int rank=-1;
   while(variables->next != NULL){
     if (variables->gmpRank!=-1) rank+=1;
@@ -109,7 +109,7 @@ char *nablaVariableGmpNameRank(nablaVariable *variables, int k) {
   return NULL;
 }
 
-bool nablaVariableGmpDumpRank(nablaVariable *variables, int k) {
+bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k) {
   int rank=-1;
   while(variables->next != NULL){
     if (variables->gmpRank!=-1) rank+=1;
@@ -123,7 +123,7 @@ bool nablaVariableGmpDumpRank(nablaVariable *variables, int k) {
 /*
  * findTypeName
  */
-nablaVariable *nablaVariableFind(nablaVariable *variables, char *name) {
+nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
   nablaVariable *variable=variables;
   dbg("\n\t[nablaVariableFind] looking for '%s'", name);
   // Some backends use the fact it will return NULL
@@ -147,10 +147,10 @@ nablaVariable *nablaVariableFind(nablaVariable *variables, char *name) {
  * 1 il faut returner
  * postfixed_nabla_variable_with_item ou  postfixed_nabla_variable_with_unknown il faut continuer en skippant le turnTokenToVariable
  */
-what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *nabla,
-                                                       astNode * n,
-                                                       const char cnf,
-                                                       char enum_enum){
+what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
+                                                         astNode * n,
+                                                         const char cnf,
+                                                         char enum_enum){
   // On cherche la primary_expression coté gauche du premier postfix_expression
   dbg("\n\t[nablaVariable] Looking for 'primary_expression':");
   astNode *primary_expression=dfsFetch(n->children,rulenameToId("primary_expression"));
@@ -168,7 +168,7 @@ what_to_do_with_the_postfix_expressions nablaVariables(nablaMain *nabla,
   // SI on a bien une primary_expression
   if (primary_expression->token!=NULL && primary_expression!=NULL){
     // On récupère de nom de la variable potentielle de cette expression
-    nablaVariable *var=nablaVariableFind(nabla->variables, strdup(primary_expression->token));
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, strdup(primary_expression->token));
     if (var!=NULL){ // On a bien trouvé une variable nabla
       if (nabla_item!=NULL && nabla_system!=NULL){
         // Mais elle est bien postfixée mais par qq chose d'inconnu: should be smarter here!

@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * Dump dans le header des 'includes'
 // ****************************************************************************
-NABLA_STATUS nablaCompoundJobEnd(nablaMain* nabla_main){
+NABLA_STATUS nMiddleCompoundJobEnd(nablaMain* nabla_main){
   return NABLA_OK;
 }
 
@@ -55,7 +55,7 @@ NABLA_STATUS nablaCompoundJobEnd(nablaMain* nabla_main){
 /***************************************************************************** 
  * Dump dans le header des 'includes'
  *****************************************************************************/
-NABLA_STATUS nablaInclude(nablaMain *nabla, char *include){
+NABLA_STATUS nMiddleInclude(nablaMain *nabla, char *include){
   fprintf(nabla->entity->src, "%s\n", include);
   return NABLA_OK;
 }
@@ -64,7 +64,7 @@ NABLA_STATUS nablaInclude(nablaMain *nabla, char *include){
 /***************************************************************************** 
  * Dump dans le header les 'define's
  *****************************************************************************/
-NABLA_STATUS nablaDefines(nablaMain *nabla, nablaDefine *defines){
+NABLA_STATUS nMiddleDefines(nablaMain *nabla, nablaDefine *defines){
   int i;
   FILE *target_file = isAnArcaneService(nabla)?nabla->entity->src:nabla->entity->hdr;
   fprintf(target_file,"\n\
@@ -81,7 +81,7 @@ NABLA_STATUS nablaDefines(nablaMain *nabla, nablaDefine *defines){
 /***************************************************************************** 
  * Dump dans le header les 'define's
  *****************************************************************************/
-NABLA_STATUS nablaTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
+NABLA_STATUS nMiddleTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Typedefs\
@@ -96,7 +96,7 @@ NABLA_STATUS nablaTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
 /***************************************************************************** 
  * Dump dans le header des 'forwards's
  *****************************************************************************/
-NABLA_STATUS nablaForwards(nablaMain *nabla, char **forwards){
+NABLA_STATUS nMiddleForwards(nablaMain *nabla, char **forwards){
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Forwards\
@@ -124,14 +124,14 @@ static char *switchItemSupportTokenid(int item_support_tokenid){
 /*****************************************************************************
  * Fonction de parsing et d'application des actions correspondantes
  *****************************************************************************/
-void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
+void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
     
   ///////////////////////////////
   // Déclaration des libraries //
   ///////////////////////////////
   if (n->ruleid == rulenameToId("with_library")){
     dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
-    nablaLibraries(n,nabla->entity);
+    nMiddleLibraries(n,nabla->entity);
     dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
   
@@ -145,7 +145,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] rule %s,  support %s", n->rule, item_support);
     // On backup temporairement le support (kind) de l'item
     nabla->tmpVarKinds=strdup(switchItemSupportTokenid(item_support_tokenid));
-    nablaItems(n->children->next,
+    nMiddleItems(n->children->next,
                rulenameToId("nabla_item_declaration"),
                nabla);
     dbg("\n\t[nablaMiddlendParseAndHook] done");
@@ -155,7 +155,7 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   // Règle de définitions des includes
   /////////////////////////////////////
   if (n->tokenid == INCLUDES){
-    nablaInclude(nabla, n->token);
+    nMiddleInclude(nabla, n->token);
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit INCLUDES %s", n->token);
   }
 
@@ -164,8 +164,8 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   ///////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_options_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    nablaOptions(n->children,
-                 rulenameToId("nabla_option_declaration"), nabla);
+    nMiddleOptions(n->children,
+                   rulenameToId("nabla_option_declaration"), nabla);
     dbg("\n\t[nablaMiddlendParseAndHook] done");
   }
 
@@ -198,8 +198,8 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
     char *item_var_name = item_node->token;
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     dbg("\n\t[nablaMiddlendParseAndHook] Checking for global variable '%s'", global_var_name);
-    const nablaVariable *global_var = nablaVariableFind(nabla->variables, global_var_name);
-    const nablaVariable *item_var = nablaVariableFind(nabla->variables, item_var_name);
+    const nablaVariable *global_var = nMiddleVariableFind(nabla->variables, global_var_name);
+    const nablaVariable *item_var = nMiddleVariableFind(nabla->variables, item_var_name);
     dbg("\n\t[nablaMiddlendParseAndHook] global_var->item '%s'", global_var->item);
     // global_var must be 'global'
     assert(global_var->item[0]=='g');
@@ -215,8 +215,8 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
   //////////////////
   // DFS standard //
   //////////////////
-  if(n->children != NULL) nablaMiddlendParseAndHook(n->children, nabla);
-  if(n->next != NULL) nablaMiddlendParseAndHook(n->next, nabla);
+  if(n->children != NULL) nMiddleParseAndHook(n->children, nabla);
+  if(n->next != NULL) nMiddleParseAndHook(n->next, nabla);
 }
 
 
@@ -224,23 +224,23 @@ void nablaMiddlendParseAndHook(astNode * n, nablaMain *nabla){
  * Rajout des variables globales utiles aux mots clefs systèmes
  * On rajoute en dur les variables time, deltat, coord
  *****************************************************************************/
-static void nablaMiddlendVariableGlobalAdd(nablaMain *nabla){
+static void nMiddleVariableGlobalAdd(nablaMain *nabla){
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding global deltat, time");
-  nablaVariable *deltat = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, deltat);
+  nablaVariable *deltat = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, deltat);
   deltat->axl_it=false;
   deltat->item=strdup("global");
   deltat->type=strdup("real");
   deltat->name=strdup("deltat");
-  nablaVariable *time = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, time);
+  nablaVariable *time = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, time);
   time->axl_it=false;
   time->item=strdup("global");
   time->type=strdup("real");
   time->name=strdup("time");
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
-  nablaVariable *coord = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, coord);
+  nablaVariable *coord = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, coord);
   coord->axl_it=true;
   coord->item=strdup("node");
   coord->type=strdup("real3");
@@ -252,15 +252,15 @@ static void nablaMiddlendVariableGlobalAdd(nablaMain *nabla){
 /*****************************************************************************
  * nablaMiddlendInit
  *****************************************************************************/
-static nablaMain *nablaMiddlendInit(const char *nabla_entity_name){
+static nablaMain *nMiddleInit(const char *nabla_entity_name){
   nablaMain *nabla=(nablaMain*)calloc(1,sizeof(nablaMain));
   nablaEntity *entity; 
   nabla->name=strdup(nabla_entity_name);
   dbg("\n\t[nablaMiddlendInit] setting nabla->name to '%s'", nabla->name);
   dbg("\n\t[nablaMiddlendInit] Création de notre premier entity");
-  entity=nablaEntityNew(nabla);
+  entity=nMiddleEntityNew(nabla);
   dbg("\n\t[nablaMiddlendInit] Rajout du 'main'");
-  nablaEntityAddEntity(nabla, entity);
+  nMiddleEntityAddEntity(nabla, entity);
   dbg("\n\t[nablaMiddlendInit] Rajout du nom de l'entity '%s'", nabla_entity_name);  
   entity->name=strdup(nabla_entity_name);
   entity->name_upcase=toolStrUpCase(nabla_entity_name);  // On lui rajoute son nom
@@ -275,7 +275,7 @@ static nablaMain *nablaMiddlendInit(const char *nabla_entity_name){
 /// ***************************************************************************
 // * nablaInsertSpace
 // ****************************************************************************
-void nablaInsertSpace( nablaMain *nabla, astNode * n){
+void nMiddleInsertSpace( nablaMain *nabla, astNode * n){
   if (n->token!=NULL) {
     if (n->parent!=NULL){
       if (n->parent->rule!=NULL){
@@ -299,15 +299,15 @@ void nablaInsertSpace( nablaMain *nabla, astNode * n){
 // ****************************************************************************
 // * nablaMiddlendSwitch
 // ****************************************************************************
-int nablaMiddlendSwitch(astNode *root,
-                        const bool optionDumpTree,
-                        const char *nabla_entity_name,
-                        const BACKEND_SWITCH backend,
-                        const BACKEND_COLORS colors,
-                        char *interface_name,
-                        char *interface_path,
-                        char *service_name){
-  nablaMain *nabla=nablaMiddlendInit(nabla_entity_name);
+int nMiddleSwitch(astNode *root,
+                  const bool optionDumpTree,
+                  const char *nabla_entity_name,
+                  const BACKEND_SWITCH backend,
+                  const BACKEND_COLORS colors,
+                  char *interface_name,
+                  char *interface_path,
+                  char *service_name){
+  nablaMain *nabla=nMiddleInit(nabla_entity_name);
   dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
  (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
   nabla->backend=backend;
@@ -319,7 +319,7 @@ int nablaMiddlendSwitch(astNode *root,
   nabla->simd=NULL;
   nabla->parallel=NULL;  
   dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
-  nablaMiddlendVariableGlobalAdd(nabla);
+  nMiddleVariableGlobalAdd(nabla);
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   switch (backend){
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);

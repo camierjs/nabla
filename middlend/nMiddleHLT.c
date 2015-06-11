@@ -47,14 +47,14 @@
 // ****************************************************************************
 // * nablaAtConstantParse
 // ****************************************************************************
-void nablaAtConstantParse(astNode * n, nablaMain *nabla, char *at){
+void nMiddleAtConstantParse(astNode * n, nablaMain *nabla, char *at){
   if (n->tokenid == '(') goto skip;
   if (n->tokenid == ')') goto skip;
   // Vérification que l'on ne déborde pas
   if (yyTranslate(n->tokenid)!=yyUndefTok()){
     // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point
     if (yyNameTranslate(n->tokenid) == ',') {
-      nablaStoreWhen(nabla,at);
+      nMiddleStoreWhen(nabla,at);
       goto skip;
     }
   }
@@ -65,16 +65,16 @@ void nablaAtConstantParse(astNode * n, nablaMain *nabla, char *at){
     dbg("'%s' ", at);
   }
  skip:
-  if (n->children != NULL) nablaAtConstantParse(n->children, nabla, at);
-  if (n->next != NULL) nablaAtConstantParse(n->next, nabla, at);
+  if (n->children != NULL) nMiddleAtConstantParse(n->children, nabla, at);
+  if (n->next != NULL) nMiddleAtConstantParse(n->next, nabla, at);
 }
 
 
 /*****************************************************************************
  * nablaStoreWhen
  *****************************************************************************/
-void nablaStoreWhen(nablaMain *nabla, char *at){
-  nablaJob *entry_point=nablaJobLast(nabla->entity->jobs);
+void nMiddleStoreWhen(nablaMain *nabla, char *at){
+  nablaJob *entry_point=nMiddleJobLast(nabla->entity->jobs);
   entry_point->whens[entry_point->whenx]=atof(at);
   dbg("\n\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->whenx]);
   entry_point->whenx+=1;
@@ -85,7 +85,7 @@ void nablaStoreWhen(nablaMain *nabla, char *at){
 /*****************************************************************************
  * nablaComparEntryPoints
  *****************************************************************************/
-int nablaComparEntryPoints(const void *one, const void *two){
+int nMiddleComparEntryPoints(const void *one, const void *two){
   nablaJob *first=(nablaJob*)one;
   nablaJob *second=(nablaJob*)two;
   if (first->whens[0]==second->whens[0]) return 0;
@@ -97,7 +97,7 @@ int nablaComparEntryPoints(const void *one, const void *two){
 /*****************************************************************************
  * nablaNumberOfEntryPoints
  *****************************************************************************/
-int nablaNumberOfEntryPoints(nablaMain *nabla){
+int nMiddleNumberOfEntryPoints(nablaMain *nabla){
   nablaJob *job;;
   int i,number_of_entry_points=0;
   for(job=nabla->entity->jobs;job!=NULL;job=job->next){
@@ -115,7 +115,7 @@ int nablaNumberOfEntryPoints(nablaMain *nabla){
 /*****************************************************************************
  * nablaEntryPointsSort
  *****************************************************************************/
-nablaJob* nablaEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
+nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   //bool initPhase=true;
   int i,j;
   nablaJob *job, *entry_points;
@@ -179,10 +179,10 @@ nablaJob* nablaEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   }
 
   // On trie afin d'avoir tous les points d'entrée
-  qsort(entry_points,number_of_entry_points,sizeof(nablaJob),nablaComparEntryPoints);
+  qsort(entry_points,number_of_entry_points,sizeof(nablaJob),nMiddleComparEntryPoints);
 
   if (nabla->optionDumpTree)
-    timeTreeSave(nabla, entry_points, i);
+    nMiddleTimeTreeSave(nabla, entry_points, i);
   
   return entry_points;
 }

@@ -405,7 +405,7 @@ void nccArcLibAlephIni(nablaMain *arc){
   nccArcLibAlephSolve(arc);
   nccArcLibAlephSolveWithoutIndex(arc);
 
-  nablaJob *alephInitFunction=nablaJobNew(arc->entity);
+  nablaJob *alephInitFunction=nMiddleJobNew(arc->entity);
   alephInitFunction->is_an_entry_point=true;
   alephInitFunction->is_a_function=true;
   alephInitFunction->scope  = strdup("NoScope");
@@ -419,5 +419,5 @@ void nccArcLibAlephIni(nablaMain *arc){
   sprintf(&alephInitFunction->at[0],"-huge_valf");
   alephInitFunction->whenx  = 1;
   alephInitFunction->whens[0] = ENTRY_POINT_init;
-  nablaJobAdd(arc->entity, alephInitFunction);  
+  nMiddleJobAdd(arc->entity, alephInitFunction);  
 }

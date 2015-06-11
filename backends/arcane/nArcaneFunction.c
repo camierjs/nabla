@@ -43,19 +43,36 @@
 #include "nabla.h"
 
 
-/*****************************************************************************
- * Hook pour dumper le nom de la fonction
- *****************************************************************************/
-void cudaHookFunctionName(nablaMain *arc){
-  //nprintf(arc, NULL, "%sEntity::", arc->name);
+// ****************************************************************************
+// * functionGlobalVar
+// ****************************************************************************
+char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var){
+  if (job->item[0] != '\0') return NULL; // On est bien une fonction
+  if (var->item[0] != 'g') return NULL;  // On a bien affaire Ã  une variable globale
+  const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
+  const int scalar = var->dim==0;
+  const int resolve = job->parse.isPostfixed!=2;
+  dbg("\n\t\t[functionGlobalVar] name=%s, scalar=%d, resolve=%d",var->name, scalar,resolve);
+  //nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de rÃ©cupÃ©rer les m_global_...()
+  if (left_of_assignment_operator || !scalar) return "";
+  return "()";
 }
 
 
-/*****************************************************************************
- * Génération d'un kernel associé à une fonction
- *****************************************************************************/
-void cudaHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, fct);
-  nablaFctFill(nabla,fct,n,NULL);
+// ****************************************************************************
+// * arcaneHookFunctionName
+// ****************************************************************************
+void arcaneHookFunctionName(nablaMain *arc){
+  nprintf(arc, NULL, "%s%s::", arc->name, nablaArcaneColor(arc));
+}
+
+
+// *****************************************************************************
+// * Prise en charge d'une fonction
+// *****************************************************************************
+void arcaneHookFunction(nablaMain *arc, astNode *n){
+  dbg("\n\t\t[arcaneHookFunction]");
+  nablaJob *fct=nMiddleJobNew(arc->entity);
+  nMiddleJobAdd(arc->entity, fct);
+  nMiddleFunctionFill(arc,fct,n,arc->name);
 }

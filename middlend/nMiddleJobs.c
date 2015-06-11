@@ -47,7 +47,7 @@
 /***************************************************************************** 
  * Backend Generic for JOBS - New, Add, Last functions
  *****************************************************************************/
-nablaJob *nablaJobNew(nablaEntity *entity){
+nablaJob *nMiddleJobNew(nablaEntity *entity){
   int i;
   nablaJob *job;
   job = (nablaJob *)malloc(sizeof(nablaJob));
@@ -97,22 +97,22 @@ nablaJob *nablaJobNew(nablaEntity *entity){
   return job; 
 }
 
-nablaJob *nablaJobAdd(nablaEntity *entity, nablaJob *job) {
+nablaJob *nMiddleJobAdd(nablaEntity *entity, nablaJob *job) {
   assert(job != NULL);
   if (entity->jobs == NULL)
     entity->jobs=job;
   else
-    nablaJobLast(entity->jobs)->next=job;
+    nMiddleJobLast(entity->jobs)->next=job;
   return job;
 }
 
-nablaJob *nablaJobLast(nablaJob *jobs) {
+nablaJob *nMiddleJobLast(nablaJob *jobs) {
   while(jobs->next != NULL)
     jobs = jobs->next;
   return jobs;
 }
 
-nablaJob *nablaJobFind(nablaJob *jobs,char *name){
+nablaJob *nMiddleJobFind(nablaJob *jobs,char *name){
   nablaJob *job=jobs;
   while(job != NULL) {
     if(strcmp(job->name, name) == 0)
@@ -133,7 +133,7 @@ static void actNablaJobParameterItem(astNode * n, void *generic_arg){
 static void actNablaJobParameterDirectDeclarator(astNode * n, void *generic_arg){
   dbg("%s)", n->children->token);
 }
-void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
+void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
   RuleAction tokact[]={
     {rulenameToId("nabla_item"),actNablaJobParameterItem},
     {rulenameToId("direct_declarator"),actNablaJobParameterDirectDeclarator},
@@ -144,29 +144,29 @@ void scanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
     //getInOutPutsNodes(fOut, n->children->children->next, "CCCCCC");
     scanTokensForActions(n, tokact, (void*)arc);
   }
-  if(n->children != NULL) scanForNablaJobParameter(n->children, ruleid, arc);
-  if(n->next != NULL) scanForNablaJobParameter(n->next, ruleid, arc);
+  if(n->children != NULL) nMiddleScanForNablaJobParameter(n->children, ruleid, arc);
+  if(n->next != NULL) nMiddleScanForNablaJobParameter(n->next, ruleid, arc);
 }
 
 
 // ****************************************************************************
 // * scanForNablaJobAtConstant
 // ****************************************************************************
-void scanForNablaJobAtConstant(astNode *n, nablaMain *arc){
+void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *arc){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=AT) continue;
     dbg("\n\t[scanForNablaJobAtConstant] %s ", n->token);
     // Si ce Nabla Job a un 'AT', c'est qu'il faut renseigner les .config et .axl
-    nablaJob *entry_point=nablaJobLast(arc->entity->jobs);
+    nablaJob *entry_point=nMiddleJobLast(arc->entity->jobs);
     entry_point->is_an_entry_point=true;      
-    nablaAtConstantParse(n->next->children,arc,entry_point->at);
-    nablaStoreWhen(arc,entry_point->at);
+    nMiddleAtConstantParse(n->next->children,arc,entry_point->at);
+    nMiddleStoreWhen(arc,entry_point->at);
     return;
   }
 }
 
 
-void scanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla){
+void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=IF) continue;
     dbg("\n\t[scanForIfAfterAt] %s ", n->token);
@@ -179,26 +179,26 @@ void scanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla){
 // *****************************************************************************
 // * dumpIfAfterAt
 // ****************************************************************************
-void dumpIfAfterAt(astNode *n, nablaMain *nabla){
+void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla){
   //if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL))
   if (n->token!=NULL){
-    if (findOptionName(nabla->options, n->token)!=NULL){
+    if (nMiddleOptionFindName(nabla->options, n->token)!=NULL){
       hprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()", n->token);
     }else{
       hprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
     }
   }
-  if(n->children != NULL) dumpIfAfterAt(n->children,nabla);
-  if(n->next != NULL) dumpIfAfterAt(n->next,nabla);
+  if(n->children != NULL) nMiddleDumpIfAfterAt(n->children,nabla);
+  if(n->next != NULL) nMiddleDumpIfAfterAt(n->next,nabla);
 }
 
 
-char scanForNablaJobForallItem(astNode * n){
+char nMiddleScanForNablaJobForallItem(astNode * n){
   char it;
   if (n->tokenid==FORALL)
     return n->next->children->token[0];
-  if(n->children != NULL) if ((it=scanForNablaJobForallItem(n->children))!='\0') return it;
-  if(n->next != NULL) if ((it=scanForNablaJobForallItem(n->next))!='\0') return it;
+  if(n->children != NULL) if ((it=nMiddleScanForNablaJobForallItem(n->children))!='\0') return it;
+  if(n->next != NULL) if ((it=nMiddleScanForNablaJobForallItem(n->next))!='\0') return it;
   return '\0';
 }
 
@@ -208,7 +208,7 @@ char scanForNablaJobForallItem(astNode * n){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void nablaJobParse(astNode *n, nablaJob *job){
+void nMiddleJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
@@ -249,7 +249,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
     if (n->children->ruleid == rulenameToId("postfix_expression"))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '[')
-          if ((job->parse.isPostfixed=nablaVariables(nabla,n,cnfgem,job->parse.enum_enum))==1){
+          if ((job->parse.isPostfixed=nMiddleVariables(nabla,n,cnfgem,job->parse.enum_enum))==1){
             //nprintf(nabla, NULL, "/*isPostfixed=1, but returning*/",NULL);
             return;
           }
@@ -284,7 +284,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
   if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL)){
-    if (turnTokenToOption(n->children,nabla)!=NULL){
+    if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL){
       dbg("\n\t[nablaJobParse] primaryExpression hits option");
       return;
     }
@@ -321,11 +321,11 @@ void nablaJobParse(astNode *n, nablaJob *job){
 
   // On continue en s'enfonçant
   if (n->children != NULL)
-    nablaJobParse(n->children, job);
+    nMiddleJobParse(n->children, job);
    
   // On continue en allant à droite
   if (n->next != NULL)
-    nablaJobParse(n->next, job);
+    nMiddleJobParse(n->next, job);
 
 }
 
@@ -334,7 +334,7 @@ void nablaJobParse(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Dump pour le header
  *****************************************************************************/
-int dumpParameterTypeList(FILE *file, astNode * n){
+int nMiddleDumpParameterTypeList(FILE *file, astNode * n){
   int number_of_parameters_here=0;
   //if (n->token != NULL) fprintf(file, "/*dumpParameterTypeList %s:%d*/",n->token,number_of_parameters_here);
   
@@ -365,9 +365,9 @@ int dumpParameterTypeList(FILE *file, astNode * n){
     number_of_parameters_here+=1;
   }
   if (n->children != NULL)
-    number_of_parameters_here+=dumpParameterTypeList(file, n->children);
+    number_of_parameters_here+=nMiddleDumpParameterTypeList(file, n->children);
   if (n->next != NULL)
-    number_of_parameters_here+=dumpParameterTypeList(file, n->next);
+    number_of_parameters_here+=nMiddleDumpParameterTypeList(file, n->next);
   
   //fprintf(file, "/*return %d*/",number_of_parameters_here);
   return number_of_parameters_here;
@@ -379,10 +379,10 @@ int dumpParameterTypeList(FILE *file, astNode * n){
  * Remplissage de la structure 'job'
  * Dump dans le src de la déclaration de ce job en fonction du backend
  *****************************************************************************/
-void nablaJobFill(nablaMain *nabla,
-                  nablaJob *job,
-                  astNode *n,
-                  const char *namespace){
+void nMiddleJobFill(nablaMain *nabla,
+                    nablaJob *job,
+                    astNode *n,
+                    const char *namespace){
   int numParams;
   astNode *nd;
   job->is_a_function=false;
@@ -430,9 +430,9 @@ void nablaJobFill(nablaMain *nabla,
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->rtntp, job->name);
   // Remplissage des 
-  scanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
-  scanForNablaJobAtConstant(n->children, nabla);
-  scanForIfAfterAt(n->children, job, nabla);
+  nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
+  nMiddleScanForNablaJobAtConstant(n->children, nabla);
+  nMiddleScanForIfAfterAt(n->children, job, nabla);
   // On remplit la ligne du fichier SRC
   nprintf(nabla, NULL, "\n\n\n\
 // ********************************************************\n\
@@ -445,7 +445,7 @@ void nablaJobFill(nablaMain *nabla,
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           job->name);
   // On va chercher les paramètres standards
-  numParams=dumpParameterTypeList(nabla->entity->src, job->stdParamsNode);
+  numParams=nMiddleDumpParameterTypeList(nabla->entity->src, job->stdParamsNode);
   //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
   
@@ -480,7 +480,7 @@ void nablaJobFill(nablaMain *nabla,
   // On prépare le bon ENUMERATE suivant le forall interne
   // On saute l'éventuel forall du début
   dbg("\n\t[nablaJobFill] On prépare le bon ENUMERATE");
-  if ((job->forall_item=scanForNablaJobForallItem(n->children->next))!='\0')
+  if ((job->forall_item=nMiddleScanForNablaJobForallItem(n->children->next))!='\0')
     dbg("\n\t[nablaJobFill] scanForNablaJobForallItem found '%c'", job->forall_item);
 
   dbg("\n\t[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramètres");
@@ -507,7 +507,7 @@ void nablaJobFill(nablaMain *nabla,
   
   // Et on dump les tokens dans ce job
   dbg("\n\t[nablaJobFill] Now parsing...");
-  nablaJobParse(n,job);
+  nMiddleJobParse(n,job);
 
   if (!job->parse.got_a_return)
     nprintf(nabla, NULL, "}");// de l'ENUMERATE

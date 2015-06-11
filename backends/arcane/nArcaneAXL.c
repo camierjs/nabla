@@ -184,8 +184,8 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     if (nccAxlGenerateVariable(arc, var)!=NABLA_OK) return NABLA_ERROR;
   fprintf(arc->axl,"\n\t\t</variables>\n\n\t\t<entry-points>");
 
-  number_of_entry_points=nablaNumberOfEntryPoints(arc);
-  entry_point=nablaEntryPointsSort(arc,number_of_entry_points);
+  number_of_entry_points=nMiddleNumberOfEntryPoints(arc);
+  entry_point=nMiddleEntryPointsSort(arc,number_of_entry_points);
 
   // Et on rescan afin de dumper
   for(i=0;i<number_of_entry_points;++i){
@@ -220,7 +220,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     if (entry_point[i].ifAfterAt!=NULL){
       dbg("\n\t[nccAxlGenerator] dumpIfAfterAt!");
       fprintf(arc->entity->hdr, "if (");
-      dumpIfAfterAt(entry_point[i].ifAfterAt, arc);
+      nMiddleDumpIfAfterAt(entry_point[i].ifAfterAt, arc);
       fprintf(arc->entity->hdr, ") ");
     }
     fprintf(arc->entity->hdr, "%s();}", entry_point[i].name);
