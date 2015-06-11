@@ -44,8 +44,8 @@ global{
 void iniGlobals(void) @ -5.0{
   δx=(xmax-xmin)/X_EDGE_ELEMS;
   δt=CFL*δx/option_a;
-  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", δx);
-  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", δt);
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
   assert(δt>=0.0);
 }
 
@@ -77,8 +77,8 @@ void dbgLoop(void) @ 1.0 {
   const ℝ δtSx = δt/δx;
   const ℝ cp = ap*δtSx;
   const ℝ cm = am*δtSx;
-  //if (n==0) continue;
-  //if (n==NABLA_NB_NODES)continue;
+  if (n==0) continue;
+  if (n==NABLA_NB_NODES) continue;
   unp1 = u - cp*(u-u[n-1]) - cm*(u[n+1]-u);
   //printf("\n\t\t\33[7m[Loop] node # =%d\33[m", n);
 }

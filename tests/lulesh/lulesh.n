@@ -672,12 +672,12 @@ cells void calcMonotonicQForElemsQQQL(void)
 // * for each element. The calculation is partitioned into two parts.
 // * CalcQForElems
 // ****************************************************************************
-cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) @ 4.8{
+cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) {//@ 4.8{
   // Don't allow excessive artificial viscosity
-  if (q>=option_qstop){
+  //if (q>=option_qstop){
     //debug()<<"calcQForElemsExcessiveArtificialViscosityTest!";
     //fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
-  }
+  //}
 }
 
 

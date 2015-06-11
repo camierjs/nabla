@@ -59,12 +59,12 @@ void nOkinaHookVariablesTurnBracketsToParentheses(nablaMain* nabla,
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
-    if (!job->parse.selection_statement_in_compound_statement){
+//    if (!job->parse.selection_statement_in_compound_statement){
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
-    }else{
-      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
-    }
+//    }else{
+//      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
+//    }
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -112,20 +112,20 @@ void nOkinaHookVariablesSystem(astNode * n,nablaMain *arc, const char cnf, char 
 // * Prépare le nom de la variable
 // ****************************************************************************
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  if (!job->parse.selection_statement_in_compound_statement){
+//  if (!job->parse.selection_statement_in_compound_statement){
     nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-  }else{
-    nprintf(nabla,NULL,"/*%s*/",var->type);
-    if (strcmp(var->type,"real")==0)
-      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
-    if (strcmp(var->type,"integer")==0)
-      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
-    if (strcmp(var->type,"real3")==0)
-      nprintf(nabla, "/*tt2a(if+real3)*/",
-              "/*if+real3 still in real3 vs double3*/%s_%s",
-              var->item, var->name);
-    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
-  }    
+//  }else{
+//    nprintf(nabla,NULL,"/*%s*/",var->type);
+//    if (strcmp(var->type,"real")==0)
+//      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
+//    if (strcmp(var->type,"integer")==0)
+//      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
+//    if (strcmp(var->type,"real3")==0)
+//      nprintf(nabla, "/*tt2a(if+real3)*/",
+//              "/*if+real3 still in real3 vs double3*/%s_%s",
+//              var->item, var->name);
+//    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
+//  }
   if (strcmp(var->type,"real3")!=0){
     nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
     return;
