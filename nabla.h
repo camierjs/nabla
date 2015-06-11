@@ -44,7 +44,6 @@
 #define _NABLA_H 
 
 #include <math.h>
-#include <error.h>
 #include <stdio.h>
 #include <iso646.h>
 #include <getopt.h>
@@ -57,7 +56,7 @@
 int fileno(FILE *stream);
 char *strdup(const char *s);
 int mkstemp(char *template);
-void nabla_error(const char *format, ...);
+void nablaError(const char *format, ...);
 
 
 // ****************************************************************************

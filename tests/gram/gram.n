@@ -30,7 +30,7 @@ global{
 };
 
 ∀ nodes void loop(void) in (node u) @ 1.0 {
-  unp1 = u - cp*(u-u[-1]) - cm*(u[+1]-u);
+  unp1 = u - cp*(u-u[n-1]) - cm*(u[+1]-u);
 }
 
 /*cells void computeGeometricVolume(void) in (cell cqs, node coord)

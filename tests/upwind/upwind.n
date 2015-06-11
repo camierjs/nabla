@@ -77,7 +77,9 @@ void dbgLoop(void) @ 1.0 {
   const ℝ δtSx = δt/δx;
   const ℝ cp = ap*δtSx;
   const ℝ cm = am*δtSx;
-  unp1 = u - cp*(u-u[-1]) - cm*(u[+1]-u);
+  //if (n==0) continue;
+  //if (n==NABLA_NB_NODES)continue;
+  unp1 = u - cp*(u-u[n-1]) - cm*(u[n+1]-u);
   //printf("\n\t\t\33[7m[Loop] node # =%d\33[m", n);
 }
 

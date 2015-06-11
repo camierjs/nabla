@@ -65,7 +65,7 @@ static inline void loop(){
 		__attribute__ ((aligned(WARP_ALIGN))) const real dttSx =opDiv ( global_deltat[0]/*n g*/, global_dtx[0]/*n g*/) ;
 		__attribute__ ((aligned(WARP_ALIGN))) const real cp =opMul ( ap , dttSx ) ;
 		__attribute__ ((aligned(WARP_ALIGN))) const real cm =opMul ( am , dttSx ) ;
-		node_unp1[n]=opSub ( opSub ( node_u[n], opMul ( cp , ( opSub ( node_u[n], node_u[- 1 ]) ) ) ) , opMul ( cm , ( opSub ( node_u[+ 1 ], node_u[n]) ) ) ) ;
+		node_unp1[n]=opSub ( opSub ( node_u[n], opMul ( cp , ( opSub ( node_u[n], node_u[opSub ( n , 1 ) ]) ) ) ) , opMul ( cm , ( opSub ( node_u[opAdd ( n , 1 ) ], node_u[n]) ) ) ) ;
 		}}
 }
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]){
 	global_time=0.0;
 	global_iteration=1;
 	global_deltat[0] = set1(option_dtt_initial);// @ 0;
-	//printf("\n\33[7;32m[main] time=%e, Global Iteration is #%d\33[m",global_time,global_iteration);	// [nccOkinaMainMeshPrefix] Allocation des connectivités
+	//printf("\n\33[7;32m[main] time=%e, Global Iteration is #%d\33[m",global_time,global_iteration);	// [nOkinaMainMeshPrefix] Allocation des connectivités
 	//OKINA_MAIN_PREINIT
 	//printf("\ndbgsVariable iteration"); dbgCellVariableDim0_iteration();
 	//printf("\ndbgsVariable u"); dbgNodeVariableDim0_u();

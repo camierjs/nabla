@@ -157,7 +157,7 @@ char* nOkinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return nOkinaMicGatherCells(job,var,phase);
   if (itm=='n') return nOkinaMicGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in nOkinaMicGather!");
+  nablaError("Could not distinguish job item in nOkinaMicGather!");
   return NULL;
 }
 

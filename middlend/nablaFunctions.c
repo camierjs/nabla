@@ -192,7 +192,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
         // On annonce que l'on va travailler sur un forall cell
         fct->parse.enum_enum='c';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
+          nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(CellEnumerator c%s(%s->cells()); c%s.hasNext(); ++c%s)",
                   support,support,support,support);
@@ -202,7 +202,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
         nprintf(nabla, NULL, "/*FORALL FACE*/");
         fct->parse.enum_enum='f';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
+          nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(FaceEnumerator f%s(%s->faces()); f%s.hasNext(); ++f%s)",
                   support,support,support,support);
@@ -213,7 +213,7 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
         // On annonce que l'on va travailler sur un forall node
         fct->parse.enum_enum='n';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
+          nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(NodeEnumerator n%s(%s->nodes()); n%s.hasNext(); ++n%s)",
                   support,support,support,support);
@@ -223,12 +223,12 @@ void nablaFunctionParse(astNode * n, nablaJob *fct){
         nprintf(nabla, NULL, "/*FORALL PARTICLE*/");
         fct->parse.enum_enum='p';
         if (support==NULL)
-          error(!0,0,"[nablaFunctionParse] No support for this FORALL!");
+          nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL, "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",support,support,support,support);
         break;
       }
-      default: error(!0,0,"[nablaFunctionParse] Could not distinguish FORALL!");
+      default: nablaError("[nablaFunctionParse] Could not distinguish FORALL!");
       }
       // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
       *n=*n->next->next;

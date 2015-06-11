@@ -109,7 +109,7 @@ char* cudaHookPrefixEnumerate(nablaJob *job){
       && job->called_variables==NULL) return "CUDA_INI_FUNCTION_THREAD(tid);";
   if (itm=='\0' && job->is_an_entry_point) return "CUDA_INI_FUNCTION_THREAD(tid);";
   if (itm=='\0' && !job->is_an_entry_point) return "/*std function*/";
-  error(!0,0,"Could not distinguish PREFIX Enumerate!");
+  nablaError("Could not distinguish PREFIX Enumerate!");
   return NULL;
 }
 
@@ -150,7 +150,7 @@ char* cudaHookDumpEnumerate(nablaJob *job){
   if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE_WARP(f)";
   if (itm=='e' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_ENV_WARP(e)";
   if (itm=='m' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_MAT_WARP(m)";
-  error(!0,0,"Could not distinguish ENUMERATE!");
+  nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
@@ -210,7 +210,7 @@ static char* cudaGather(nablaJob *job){
     // On informe la suite que cette variable est en train d'être gatherée
     nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
     if (real_variable==NULL)
-      error(!0,0,"Could not find real variable from gathered variables!");
+      nablaError("Could not find real variable from gathered variables!");
     real_variable->is_gathered=true;
   }
   job->parse.iGather+=1;
@@ -226,7 +226,7 @@ static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
   nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
   if (real_variable==NULL)
-    error(!0,0,"Could not find real variable from scattered variables!");
+    nablaError("Could not find real variable from scattered variables!");
   real_variable->is_gathered=false;
 }
 
@@ -294,7 +294,7 @@ char* cudaHookPostfixEnumerate(nablaJob *job){
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
 \t\t//int prevCell=tcid-1;\n\
 \t\t//int nextCell=tcid+1;\n";
-  error(!0,0,"Could not switch in cudaHookPostfixEnumerate!");
+  nablaError("Could not switch in cudaHookPostfixEnumerate!");
   return NULL;
 }
 
@@ -313,7 +313,7 @@ char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
   if (j=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (j=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
   if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  error(!0,0,"Could not switch in cudaHookItem!");
+  nablaError("Could not switch in cudaHookItem!");
   return NULL;
 }
 
@@ -579,7 +579,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
-    error_at_line(-1,0,__FILE__,__LINE__,"No return statement in jobs are allowed!");
+    nablaError("No return statement in jobs are allowed!");
 //#warning return reduce
     nprintf(nabla, NULL, "\n\t\t}/* des sources */\n\t}/* de l'ENUMERATE */\n\treturn ");
     //nprintf(nabla, NULL, "};\n\t return ");

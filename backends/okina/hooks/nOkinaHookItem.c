@@ -58,6 +58,6 @@ char* nOkinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum
   if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
   if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  error(!0,0,"Could not switch in nOkinaHookItem!");
+  nablaError("Could not switch in nOkinaHookItem!");
   return NULL;
 }

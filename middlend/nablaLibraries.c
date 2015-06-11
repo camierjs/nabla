@@ -76,7 +76,7 @@ static void nablaLibrariesSwitch(astNode * n, nablaEntity *entity){
       entity->libraries|=(1<<mail);
       break;
     }
-    default: error(!0,0,"Could not switch M[p]i || M[a]il!");
+    default: nablaError("Could not switch M[p]i || M[a]il!");
     }
     break;
   }
@@ -99,7 +99,7 @@ static void nablaLibrariesSwitch(astNode * n, nablaEntity *entity){
       entity->libraries|=(1<<particles);
       break;
     }
-    default: error(!0,0,"Could not switch CARTESIAN || PARTICLES!");
+    default: nablaError("Could not switch CARTESIAN || PARTICLES!");
     }
     break;
   }
@@ -121,7 +121,7 @@ static void nablaLibrariesSwitch(astNode * n, nablaEntity *entity){
       entity->libraries|=(1<<mathematica);
       break;
     }
-    default: error(!0,0,"Could not switch Ma[t]erials || Ma[t]hematica!");
+    default: nablaError("Could not switch Ma[t]erials || Ma[t]hematica!");
     }
     break;
   }
@@ -134,7 +134,7 @@ static void nablaLibrariesSwitch(astNode * n, nablaEntity *entity){
  
   default:{
     dbg("\n\t[nablaLibraries] single_library token=%s",n->children->token);
-    error(!0,0,"Could not find library!");
+    nablaError("Could not find library!");
   }
   }
 }

@@ -126,7 +126,7 @@ char* nccCudaGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return cudaGatherCells(job,var,phase);
   if (itm=='n') return cudaGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in okinaStdGather!");
+  //error(!0,0,"Could not distinguish job item in okinaStdGather!");
   return NULL;
 }
 

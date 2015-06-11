@@ -71,7 +71,8 @@ char* nccArcLibParticlesPrivates(nablaEntity *entity){
   const size_t globl_size=8192;
   char *type,varToCat[local_size];
   char *privates=malloc(globl_size);
-  if (privates==NULL) nabla_error("[nccArcLibParticlesPrivates] cannot malloc!");
+  if (privates==NULL)
+    nablaError("[nccArcLibParticlesPrivates] cannot malloc!");
   privates[0]=0;
   strcat(privates,"\nprivate:\t//Particles stuff\
 \n\tvoid particlesInit();\
@@ -116,7 +117,8 @@ char* nccArcLibParticlesConstructor(nablaEntity *entity){
   char VariableBuildInfo[local_size];
   char *particleVars=malloc(globl_size);
   dbg("\n\t\t[nccArcLibParticlesConstructor]");
-  if (particleVars==NULL) nabla_error("[nccArcLibParticlesConstructor] cannot malloc!");
+  if (particleVars==NULL)
+    nablaError("[nccArcLibParticlesConstructor] cannot malloc!");
   particleVars[0]=0;
   strcat(particleVars,
          "\n\t\t//,m_nabla_particle_ids(VariableBuildInfo(mbi.subDomain(),\"NablaParticlesIds\"))");

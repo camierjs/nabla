@@ -97,7 +97,7 @@ char* nOkinaHookGather(nablaJob *job){
     // On informe la suite que cette variable est en train d'être gatherée
     nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
     if (real_variable==NULL)
-      error(!0,0,"Could not find real variable from gathered variables!");
+      nablaError("Could not find real variable from gathered variables!");
     real_variable->is_gathered=true;
   }
   job->parse.iGather+=1;

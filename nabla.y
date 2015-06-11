@@ -319,8 +319,8 @@ preproc
 : PREPROCS {
   {rhs;};
   if (sscanf($1->token, "# %d \"%[^\"]\"", &yylineno, nabla_input_file)!=2)
-    error(!0,0,"declaration sscanf error!");
-  //printf("%s:%d:\n",nabla_input_file,yylineno);
+    //nabla_error("declaration sscanf error!");
+    nablaError("%s:%d:\n",nabla_input_file,yylineno);
   }
 ;
 

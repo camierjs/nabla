@@ -47,7 +47,7 @@ extern FILE *yyin;
 #define YYSTYPE astNode*
 int yyparse (astNode **);
 extern char nabla_input_file[]; 
-static void nabla_error_print_progname(void){/* No program  name here */}
+//static void nabla_error_print_progname(void){/* No program  name here */}
 static char *unique_temporary_file_name=NULL;
 
 
@@ -123,10 +123,12 @@ static void nabla_unlink(void){
 // * nabla_error
 // * int vsprintf(char *str, const char *format, va_list ap);
 // ****************************************************************************
-void nabla_error(const char *format,...){
+void nablaError(const char *format,...){
   va_list args;
   va_start(args, format);
-  error_at_line(!0,0,nabla_input_file, yylineno-1, format,args);
+  //error_at_line(!0,0,nabla_input_file, yylineno-1, format,args);
+  fflush(stdout);
+  vfprintf(stdout,format,args);
   va_end(args);
 }
 
@@ -201,18 +203,18 @@ int sysPreprocessor(const char *nabla_entity_name,
   char *gcc_command=NULL;
   char *nabla_file, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
   if ((cat_sed_temporary_file_name = malloc(size))==NULL)
-    error(!0,0,"[sysPreprocessor] Could not malloc cat_sed_temporary_file_name!");
+    nablaError("[sysPreprocessor] Could not malloc cat_sed_temporary_file_name!");
   if ((tok_command = malloc(size))==NULL)
-    error(!0,0,"[sysPreprocessor] Could not malloc tok_command!");
+    nablaError("[sysPreprocessor] Could not malloc tok_command!");
   if ((cat_command = malloc(size))==NULL)
-    error(!0,0,"[sysPreprocessor] Could not malloc cat_command!");
+    nablaError("[sysPreprocessor] Could not malloc cat_command!");
   if ((gcc_command = malloc(size))==NULL)
-    error(!0,0,"[sysPreprocessor] Could not malloc gcc_command!");
+    nablaError("[sysPreprocessor] Could not malloc gcc_command!");
   // On crée un fichier temporaire où l'on va sed'er les includes, par exemple
   snprintf(cat_sed_temporary_file_name, size, "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
   cat_sed_temporary_fd=mkstemp(cat_sed_temporary_file_name);
   if (cat_sed_temporary_fd==-1)
-    error(!0,0,"[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
+    nablaError("[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
   //printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
   dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",cat_sed_temporary_file_name);
   // Pour chaque fichier .n en entrée, on va le cat'er et insérer des délimiteurs
@@ -322,7 +324,7 @@ int main(int argc, char * argv[]){
     {NULL,0,NULL,0}
   };
   // Set our nabla_error_print_progname for emacs to be able to visit
-  error_print_progname=&nabla_error_print_progname;
+  //error_print_progname=&nabla_error_print_progname;
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   // Check for at least several arguments

@@ -83,7 +83,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
   }
 
   dbg("\n\t[arcaneHookPrefixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm);
-  error(!0,0,"[arcaneHookPrefixEnumerate] Could not distinguish ENUMERATE!");
+  nablaError("[arcaneHookPrefixEnumerate] Could not distinguish ENUMERATE!");
   return NULL;
 }
 
@@ -105,7 +105,7 @@ char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
   if (itm=='n' && grp==NULL && rgn==NULL)   return "ENUMERATE_NODE(node,ndm.allNodes())";
   if (itm=='n' && grp==NULL && rgn[0]=='o') return "ENUMERATE_NODE(node,ndm.outerNodes())";
   if (itm=='n' && grp==NULL && rgn[0]=='i') return "ENUMERATE_NODE(node,ndm.innerNodes())";
-  error(!0,0,"Could not distinguish ENUMERATE with XYZ!");
+  nablaError("Could not distinguish ENUMERATE with XYZ!");
   return NULL;
 }
 
@@ -149,7 +149,7 @@ char* arcaneHookDumpEnumerate(nablaJob *job){
   if (itm=='f' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_FACE(face,allCells().innerFaceGroup())";
   if (itm=='e' && grp==NULL && rgn==NULL)     return "";//ENUMERATE_ENV(env,m_material_mng)";
   if (itm=='m' && grp==NULL && rgn==NULL)     return "";//ENUMERATE_MAT(mat,m_material_mng)";
-  error(!0,0,"Could not distinguish ENUMERATE!");
+  nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
@@ -184,7 +184,7 @@ char* arcaneHookPostfixEnumerate(nablaJob *job){
 \t\t__attribute__((unused)) DirCellNode cn(cdm.cellNode(*cell));\n";  
   if (itm[0]=='n') return "\tDirNode cc(ndm.node(*node));\n\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
   dbg("\n\t[postfixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm[0]);
-  error(!0,0,"Could not distinguish ENUMERATE!");
+  nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
@@ -214,7 +214,7 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
 
   if (j=='p' && enum_enum=='\0' && itm=='c') return "particle->";
   printf("j=%c itm=%c enum_enum=%c",j,itm,enum_enum);
-  error(!0,0,"Could not distinguish arcaneItem!");
+  nablaError("Could not distinguish arcaneItem!");
   return NULL;
 }
 
@@ -385,7 +385,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     }
     case (MATERIAL): break;
     
-    default: error(!0,0,"[arcaneHookSwitchToken] Could not distinguish FORALL!");
+    default: nablaError("[arcaneHookSwitchToken] Could not distinguish FORALL!");
     }
     // Attention au cas où on a un @ au lieu d'un statement
     if (n->next->next->tokenid == AT)

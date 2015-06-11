@@ -75,7 +75,7 @@ char *nodeJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (!scalar && resolve && forall_face) return "[node][f.index()]";
   if (!scalar && !resolve && forall_face) return "[node]";
   
-  error(!0,0,"Could not switch in nodeJobNodeVar!");
+  nablaError("Could not switch in nodeJobNodeVar!");
   return NULL;
 }
 
@@ -104,7 +104,7 @@ char *nodeJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (forall_cell) return "[c]";
   if (forall_none) return "[cell->node";
   
-  error(!0,0,"Could not switch in nodeJobNodeVar!");
+  nablaError("Could not switch in nodeJobNodeVar!");
   return NULL;
 }
 
@@ -129,7 +129,7 @@ char *nodeJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (forall_face) return "[f]";
   if (forall_none) return "[face]";
   
-  error(!0,0,"Could not switch in nodeJobFaceVar!");
+  nablaError("Could not switch in nodeJobFaceVar!");
   return NULL;
 }
 

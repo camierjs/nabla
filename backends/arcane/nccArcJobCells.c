@@ -68,7 +68,7 @@ forall_none=%d, forall_node=%d, forall_face=%d, forall_cell=%d",
   if (!scalar && forall_face) return "[cell][f.index()]";
   if (!scalar) return "[cell]";
 
-  error(!0,0,"Could not switch in cellJobCellVar!");
+  nablaError("Could not switch in cellJobCellVar!");
   return NULL;
 }
 
@@ -101,7 +101,7 @@ forall_cell=%d isPostfixed=%d",
   if (!resolve && forall_face) return "[";
   if (!resolve && forall_node) return "[cell->node";
   
-  error(!0,0,"Could not switch in cellJobNodeVar!");
+  nablaError("Could not switch in cellJobNodeVar!");
   return NULL;
 }
 
@@ -124,7 +124,7 @@ char *cellJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   if (forall_face) return "[f]";
   if (forall_none) return "[cell->face";
   
-  error(!0,0,"Could not switch in cellJobFaceVar!");
+  nablaError("Could not switch in cellJobFaceVar!");
   return NULL;
 }
 
@@ -148,7 +148,7 @@ char *cellJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nabla
   if (forall_particle) return "[p]";
   if (forall_none) return "[cell->particle";
 
-  error(!0,0,"Could not switch in cellJobParticleVar!");
+  nablaError("Could not switch in cellJobParticleVar!");
   return NULL;
 }
 

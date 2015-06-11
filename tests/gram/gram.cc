@@ -9,7 +9,7 @@ static inline void loop(/* direct return from okinaHookAddExtraParameters*/){
 	dbgFuncIn();
 	FOR_EACH_NODE_WARP(n){
 		{
-		/* DiffractingREADY *//*isLeft*/unp1 /*'='->!isLeft*/=opSub ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], opMul ( cp , ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[- 1 ]) ) ) ) , opMul ( cm , ( opSub ( /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[+ 1 ], /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ) ) ) ;
+		/* DiffractingREADY *//*isLeft*/unp1 /*'='->!isLeft*/=opSub ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], opMul ( cp , ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[opSub ( n , 1 ) ]) ) ) ) , opMul ( cm , ( opSub ( /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[+ 1 ], /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ) ) ) ;
 		}}
 }
 // ******************************************************************************
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 	// okinaGenerateSingleVariable
 	// okinaGenerateSingleVariableMalloc
 	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc	// [nccOkinaMainMeshPrefix] Allocation des connectivités
+	// okinaGenerateSingleVariableMalloc	// [nOkinaMainMeshPrefix] Allocation des connectivités
 	//OKINA_MAIN_PREINIT
 	//printf("\ndbgsVariable iteration"); dbgCellVariableDim0_iteration();
 	//printf("\ndbgsVariable alpha"); dbgCellVariableDim0_alpha();

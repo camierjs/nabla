@@ -141,7 +141,7 @@ char* nOkinaAvxGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return nOkinaAvxGatherCells(job,var,phase);
   if (itm=='n') return nOkinaAvxGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in nOkinaAvxGather!");
+  nablaError("Could not distinguish job item in nOkinaAvxGather!");
   return NULL;
 }
 
