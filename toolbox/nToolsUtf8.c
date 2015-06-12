@@ -43,73 +43,6 @@
 #include "nabla.h"
 
 
-/******************************************************************************
- * strDownCase
- ******************************************************************************/
-char *toolStrDownCase(const char * str){
-  char *p=strdup(str);
-  char *bkp=p;
-  for(;*p!=0;p++){
-    if (*p>64 && *p<91) *p+=32;
-  }
-  return bkp;
-}
-
-
-/******************************************************************************
- * strUpCase
- ******************************************************************************/
-char *toolStrUpCase(const char * str){
-  char *p=strdup(str);
-  char *bkp=p;
-  for(;*p!=0;p++)
-    if ((*p>=97)&&(*p<=122)) *p-=32;
-  return bkp;
-}
-
-/******************************************************************************
- * ''' to ' '
- ******************************************************************************/
-char *trQuote(const char * str){
-  char *p=strdup(str);
-  char *bkp=p;
-  for(;*p!=0;p++)
-    if (*p==0x27) *p=0x20;
-  return bkp;
-}
-
-
-// *****************************************************************************
-// * op2name
-// *****************************************************************************
-char *op2name(char *op){
-  //printf("[%s] ",op);
-  if (strncmp(op,"√",3)==0) return "opSqrt";
-  if (strncmp(op,"∛",3)==0) return "opCbrt";
-  
-  if (strncmp(op,"⋅",3)==0) return "opScaMul";
-  if (strncmp(op,"⨯",3)==0) return "opVecMul";
-  if (strncmp(op,"⤫",3)==0) return "cross2D";
-  
-  if (strncmp(op,"⊗",3)==0) return "opProdTens";
-  if (strncmp(op,"⨂",3)==0) return "opProdTensVec";
-  
-  if (strncmp(op,"⊛",3)==0) return "opMatrixProduct";
-
-  switch (op[0]){
-  case ('*') : return "opMul";
-  case ('/') : return "opDiv";
-  case ('%') : return "opMod";
-  case ('+') : return "opAdd";
-  case ('-') : return "opSub";
-  case ('?') : return "opTernary";
-  default: return "opUnknown"; 
-  }
-  return "opUnknown";
-}
-
-
-
 // *****************************************************************************
 // * p?[c|s]
 // *****************************************************************************
@@ -316,19 +249,4 @@ void nUtf8(char **bkp){
     //p2c(p,0x22C5,"cd"); // CENTER_DOT_OP → 'cd'
     //p2c(p,0x2297,"ct"); // CIRCLE_TIMES_OP → 'ct'
  }
-}
-
-
-// *****************************************************************************
-// * nablaMakeTempFile
-// *****************************************************************************
-int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name){
-  int n,size = NABLA_MAX_FILE_NAME;
-  if ((*unique_temporary_file_name=malloc(size))==NULL)
-    nablaError("[nablaMakeTempFile] Could not malloc our unique_temporary_file_name!");
-  n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
-  if (n > -1 && n < size)
-    return mkstemp(*unique_temporary_file_name);
-  nablaError("[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
-  return -1;
 }
