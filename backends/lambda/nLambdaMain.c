@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 
 
 // ****************************************************************************
@@ -212,8 +211,8 @@ NABLA_STATUS ccMain(nablaMain *n){
   double last_when;
   
   dbg("\n[ccMain]");
-  number_of_entry_points=nablaNumberOfEntryPoints(n);
-  entry_points=nablaEntryPointsSort(n);
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   
   // Et on rescan afin de dumper
   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){

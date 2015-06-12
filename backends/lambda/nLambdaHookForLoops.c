@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 
 
@@ -56,11 +55,11 @@ char* ccHookPrefixEnumerate(nablaJob *job){
   if (job->parse.returnFromArgument){
     const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
     if (sprintf(prefix,"dbgFuncIn();\n\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = %s;",var,var)<=0){
-      error(!0,0,"Error in ccHookPrefixEnumerate!");
+      nablaError("Error in ccHookPrefixEnumerate!");
     }
   }else{
     if (sprintf(prefix,"dbgFuncIn();")<=0)
-      error(!0,0,"Error in ccHookPrefixEnumerate!");
+      nablaError("Error in ccHookPrefixEnumerate!");
   }
       
   //const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
@@ -86,7 +85,7 @@ static char * ccReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
   if (job->is_a_function) return "";
   if (sprintf(str,"%s",
               dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
-    error(!0,0,"Could not patch format!");
+    nablaError("Could not patch format!");
   return strdup(str);
 }
 
@@ -118,7 +117,7 @@ static char* ccSelectEnumerate(nablaJob *job){
   if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s%s(e";
   if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s%s(m";
   
-  error(!0,0,"Could not distinguish ENUMERATE!");
+  nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
@@ -140,24 +139,26 @@ char* ccHookDumpEnumerate(nablaJob *job){
     const char *ompCcReturnVariableWitoutPerThread=ccReturnVariableNameForOpenMPWitoutPerThread(job);
     //const char *ompCcLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
     //const char *ompCcLocalVariableName=job->parse.returnFromArgument?ompCcReturnVariable:"";
-    if (sprintf(format,"%s%%s%%s)",forall)<=0) error(!0,0,"Could not patch format!");
+    if (sprintf(format,"%s%%s%%s)",forall)<=0)
+      nablaError("Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
                 warping,       // _WARP or not
                 ompCcLocal, // _SHARED or not
                 ",",           //ompCcLocalVariableComa,
-                ompCcReturnVariableWitoutPerThread)<=0) error(!0,0,"Could not patch warping within ENUMERATE!");
+                ompCcReturnVariableWitoutPerThread)<=0)
+      nablaError("Could not patch warping within ENUMERATE!");
   }else{
     dbg("\n\t[ccHookDumpEnumerate] No returnFromArgument");
     if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
                 forall,
                 job->is_a_function?"":")")<=0)
-      error(!0,0,"Could not patch format!");
+      nablaError("Could not patch format!");
     dbg("\n[ccHookDumpEnumerate] format=%s",format);
     if (sprintf(str,format,
                 warping,
                 "",
                 "")<=0)
-      error(!0,0,"Could not patch warping within ENUMERATE!");
+      nablaError("Could not patch warping within ENUMERATE!");
   }
   return strdup(str);
 }

@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 
 
@@ -116,7 +115,7 @@ char* ccHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return ccHookGatherCells(job,var,phase);
   if (itm=='n') return ccHookGatherNodes(job,var,phase);
-  error(!0,0,"Could not distinguish job item in ccStdGather!");
+  nablaError("Could not distinguish job item in ccStdGather!");
   return NULL;
 }
 
@@ -172,9 +171,9 @@ char* ccFilterGather(nablaJob *job){
     if (i!=job->parse.iGather) continue;
     strcat(gathers,job->entity->main->simd->gather(job,var,enum_phase_function_call));
     // On informe la suite que cette variable est en train d'être gatherée
-    nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
+    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
     if (real_variable==NULL)
-      error(!0,0,"Could not find real variable from gathered variables!");
+      nablaError("Could not find real variable from gathered variables!");
     real_variable->is_gathered=true;
   }
   job->parse.iGather+=1;

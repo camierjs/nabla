@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 
 
@@ -153,7 +152,7 @@ void ccHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*JOB_CALL*/", NULL);
     char *callName=n->next->children->children->token;
     nprintf(nabla, "/*got_call*/", NULL);
-    if ((foundJob=nablaJobFind(job->entity->jobs,callName))!=NULL){
+    if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
       if (foundJob->is_a_function!=true){
         nprintf(nabla, "/*isNablaJob*/", NULL);
       }else{

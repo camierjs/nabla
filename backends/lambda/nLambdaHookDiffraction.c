@@ -41,82 +41,54 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 
 
-// ****************************************************************************
-// * Flush de la 'vraie' variable depuis celle déclarée en in/out
-// ****************************************************************************
-static void ccFlushRealVariable(nablaJob *job, nablaVariable *var){
-  // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nablaVariableFind(job->entity->main->variables, var->name);
-  if (real_variable==NULL)
-    error(!0,0,"Could not find real variable from scattered variables!");
-  real_variable->is_gathered=false;
-}
-
-
-// ****************************************************************************
-// * Filtrage du SCATTER
-// ****************************************************************************
-char* ccFilterScatter(nablaJob *job){
-  int i;
-  char scatters[1024];
-  nablaVariable *var;
-  scatters[0]='\0';
-  int nbToScatter=0;
-  int filteredNbToScatter=0;
-  
-  if (job->parse.selection_statement_in_compound_statement){
-    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!ccScatter*/");
-    return "";
+/*****************************************************************************
+ * Diffraction
+ *****************************************************************************/
+void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
+  // Et on amorce la diffraction
+  if ((*n)->ruleid == rulenameToId("expression_statement")
+      && (*n)->children->ruleid == rulenameToId("expression")
+      //&& (*n)->children->children->ruleid == rulenameToId("expression")
+      //&& job->parse.statementToDiffract==NULL
+      //&& job->parse.diffractingXYZ==0
+      ){
+    //dbg("\n[ccHookJobDiffractStatement] amorce la diffraction");
+//#warning Diffracting is turned OFF
+      job->parse.statementToDiffract=NULL;//*n;
+      // We're juste READY, not diffracting yet!
+      job->parse.diffractingXYZ=0;      
+      nprintf(nabla, "/* DiffractingREADY */",NULL);
   }
   
-  // On récupère le nombre de variables potentielles à scatterer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToScatter+=1;
-
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToScatter==0) return "";
-  
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToScatter+=1;
+  // On avance la diffraction
+  if ((*n)->tokenid == ';'
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ<3){
+    dbg("\n[ccHookJobDiffractStatement] avance dans la diffraction");
+    job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
+    (*n)=job->parse.statementToDiffract;
+    nprintf(nabla, NULL, ";\n\t");
+    //nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
   }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
 
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToScatter==0) return "";
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iScatter) continue;
-    ccFlushRealVariable(job,var);
-    // Pour l'instant, on ne scatter pas les node_coord
-    if (strcmp(var->name,"coord")==0) continue;
-    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
-    if (var->inout==enum_in_variable) continue;
-    strcat(scatters,job->entity->main->simd->scatter(var));
+  // On flush la diffraction 
+  if ((*n)->tokenid == ';' 
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ==3){
+    dbg("\n[ccHookJobDiffractStatement] Flush de la diffraction");
+    job->parse.diffracting=false;
+    job->parse.statementToDiffract=NULL;
+    job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
+    nprintf(nabla, "/*<end of diffracting>*/",NULL);
   }
-  job->parse.iScatter+=1;
-  return strdup(scatters);
-}
-
-
-
-// ****************************************************************************
-// * Scatter
-// ****************************************************************************
-char* ccHookScatter(nablaVariable* var){
-  char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
+  //dbg("\n[ccHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }
 

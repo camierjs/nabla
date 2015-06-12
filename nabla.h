@@ -72,7 +72,7 @@ typedef enum {
   BACKEND_ARCANE = 1<<(0),
   BACKEND_CUDA   = 1<<(1),
   BACKEND_OKINA  = 1<<(2),
-  BACKEND_CC     = 1<<(3),
+  BACKEND_LAMBDA = 1<<(3),
 } BACKEND_SWITCH;
 
 
@@ -153,10 +153,10 @@ void nablaError(const char *format, ...);
 
 #include "middlend/nMiddlend.h"
 
-#include "backends/okina/nOkina.h"
 #include "backends/cuda/nCuda.h"
+#include "backends/okina/nOkina.h"
 #include "backends/arcane/nArcane.h"
+#include "backends/lambda/nLambda.h"
 
-//#include "frontend/nablaTools.h"
 
 #endif // _NABLA_H_

@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 #include "frontend/nablaAst.h"
 

@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
 #include "frontend/nablaAst.h"
 
@@ -225,9 +224,9 @@ void ccHookFunctionName(nablaMain *arc){
   nprintf(arc, NULL, "%s", arc->name);
 }
 void ccHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, fct);
-  nablaFctFill(nabla,fct,n,NULL);
+  nablaJob *fct=nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, fct);
+  nMiddleFunctionFill(nabla,fct,n,NULL);
 }
 
 
@@ -284,7 +283,7 @@ char* ccHookPostfixEnumerate(nablaJob *job){
 \t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
 \t\tconst int __attribute__((unused)) prevCell=delta;\n\
 \t\tconst int __attribute__((unused)) nextCell=delta;\n";
-  error(!0,0,"Could not switch in ccHookPostfixEnumerate!");
+  nablaError("Could not switch in ccHookPostfixEnumerate!");
   return NULL;
 }
 
@@ -303,7 +302,7 @@ char* ccHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
   if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
   if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  error(!0,0,"Could not switch in ccHookItem!");
+  nablaError("Could not switch in ccHookItem!");
   return NULL;
 }
 
@@ -324,7 +323,7 @@ static void ccHookDfsForCalls(struct nablaMainStruct *nabla,
           namespace?"Entity::":"",
           fct->name);
   // On va chercher les paramètres standards pour le hdr
-  dumpParameterTypeList(nabla->entity->hdr, nParams);
+  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
   hprintf(nabla, NULL, ");");
 }
 
@@ -354,7 +353,7 @@ static void ccHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNo
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
   fct->parse.function_call_name=NULL;
-  if ((foundJob=nablaJobFind(fct->entity->jobs,callName))!=NULL){
+  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
     if (foundJob->is_a_function!=true){
       nprintf(nabla, "/*isNablaJob*/", NULL);
       fct->parse.function_call_name=strdup(callName);
@@ -589,8 +588,8 @@ NABLA_STATUS cc(nablaMain *nabla,
   nabla->hook=&ccBackendHooks;
 
   // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, iteration);
+  nablaVariable *iteration = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, iteration);
   iteration->axl_it=false;
   iteration->item=strdup("global");
   iteration->type=strdup("integer");
@@ -607,9 +606,9 @@ NABLA_STATUS cc(nablaMain *nabla,
   // Dump dans le HEADER des includes, typedefs, defines, debug, maths & errors stuff
   ccHeaderPrefix(nabla);
   ccHeaderIncludes(nabla);
-  nablaDefines(nabla,nabla->simd->defines);
-  nablaTypedefs(nabla,nabla->simd->typedefs);
-  nablaForwards(nabla,nabla->simd->forwards);
+  nMiddleDefines(nabla,nabla->simd->defines);
+  nMiddleTypedefs(nabla,nabla->simd->typedefs);
+  nMiddleForwards(nabla,nabla->simd->forwards);
 
   // On inclue les fichiers kn'SIMD'
   ccHeaderSimd(nabla);
@@ -622,7 +621,7 @@ NABLA_STATUS cc(nablaMain *nabla,
   ccInclude(nabla);
   
   // Parse du code préprocessé et lance les hooks associés
-  nablaMiddlendParseAndHook(root,nabla);
+  nMiddleParseAndHook(root,nabla);
   ccMainVarInitKernel(nabla);
 
   // Partie PREFIX
@@ -653,9 +652,9 @@ NABLA_STATUS cc(nablaMain *nabla,
  * Génération d'un kernel associé à un support
  *****************************************************************************/
 void ccHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nablaJobNew(nabla->entity);
-  nablaJobAdd(nabla->entity, job);
-  nablaJobFill(nabla,job,n,NULL);
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
   
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de CC
   //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))

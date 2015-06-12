@@ -41,69 +41,81 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "ccHook.h"
 #include "nabla.tab.h"
-
-
-/*****************************************************************************
-  * Dump d'extra arguments
- *****************************************************************************/
-void ccAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla,"\n\t\t/*ccAddExtraArguments*/",NULL);
-}
-
-
-
-/*****************************************************************************
-  * Dump dans le src des arguments nabla en in comme en out
- *****************************************************************************/
-void ccDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
-  nprintf(nabla,"\n\t\t/*ccDumpNablaArgumentList*/",NULL);
-}
-
-
-/*****************************************************************************
-  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
- *****************************************************************************/
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
-  nprintf(nabla,"\n\t\t/*ccDumpNablaDebugFunctionFromOutArguments*/",NULL);
-}
-
-
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-void ccAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-  nprintf(nabla,"\n/*ccAddNablaVariableList*/",NULL);
-}
+#include "frontend/nablaAst.h"
 
 
 // ****************************************************************************
-// * Dump d'extra connectivity
+// * ccHookReduction
 // ****************************************************************************
-void ccAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
-  return;
-}
-
-
-// ****************************************************************************
-// * ccHookReturnFromArgument
-// ****************************************************************************
-void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
-  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nprintf(nabla, NULL, "\
-\n\tint threads = omp_get_max_threads();\
-\n\tReal %s_per_thread[threads];", rtnVariable);
-}
-
-void ccHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  if (fct->parse.function_call_name!=NULL){
-    //nprintf(nabla, "/*ShouldDumpParamsInCc*/", "/*Arg*/");
-    int numParams=1;
-    nablaJob *called=nablaJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    ccAddExtraArguments(nabla, called, &numParams);
-    if (called->nblParamsNode != NULL)
-      ccDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
-  }
+void ccHookReduction(struct nablaMainStruct *nabla, astNode *n){
+  const astNode *item_node = n->children->next->children;
+  const astNode *global_var_node = n->children->next->next;
+  const astNode *reduction_operation_node = global_var_node->next;
+  const astNode *item_var_node = reduction_operation_node->next;
+  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
+  char *global_var_name = global_var_node->token;
+  char *item_var_name = item_var_node->token;
+  // Préparation du nom du job
+  char job_name[NABLA_MAX_FILE_NAME];
+  job_name[0]=0;
+  strcat(job_name,"ccReduction_");
+  strcat(job_name,global_var_name);
+  // Rajout du job de reduction
+  nablaJob *redjob = nMiddleJobNew(nabla->entity);
+  redjob->is_an_entry_point=true;
+  redjob->is_a_function=false;
+  redjob->scope  = strdup("NoGroup");
+  redjob->region = strdup("NoRegion");
+  redjob->item   = strdup(item_node->token);
+  redjob->rtntp  = strdup("void");
+  redjob->name   = strdup(job_name);
+  redjob->name_utf8 = strdup(job_name);
+  redjob->xyz    = strdup("NoXYZ");
+  redjob->drctn  = strdup("NoDirection");
+  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
+  dbg("\n\t[ccHookReduction] @ %s",at_single_cst_node->token);
+  sprintf(&redjob->at[0],at_single_cst_node->token);
+  redjob->whenx  = 1;
+  redjob->whens[0] = atof(at_single_cst_node->token);
+  nMiddleJobAdd(nabla->entity, redjob);
+  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
+  // Génération de code associé à ce job de réduction
+  nprintf(nabla, NULL, "\n\
+// ******************************************************************************\n\
+// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
+// ******************************************************************************\n\
+void %s(void){ // @ %s\n\
+\tconst double reduction_init=%e;\n\
+\tconst int threads = omp_get_max_threads();\n\
+\tReal %s_per_thread[threads];\n\
+\tdbgFuncIn();\n\
+\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
+\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
+\t\tconst int tid = omp_get_thread_num();\n\
+\t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
+\t}\n\
+\tglobal_%s[0]=reduction_init;\n\
+\tfor (int i=0; i<threads; i+=1){\n\
+\t\tconst Real real_global_%s=global_%s[0];\n\
+\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
+\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
+\t}\n\
+}\n\n",   item_var_name,global_var_name,
+          job_name,
+          at_single_cst_node->token,
+          reduction_init,
+          global_var_name,
+          global_var_name,
+          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          global_var_name,
+          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
+          item_var_name,
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          global_var_name,
+          global_var_name,global_var_name,
+          global_var_name,global_var_name,global_var_name,
+          global_var_name,global_var_name,global_var_name
+          );  
 }
