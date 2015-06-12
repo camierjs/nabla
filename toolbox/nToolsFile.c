@@ -42,7 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-
 // *****************************************************************************
 // * nablaMakeTempFile
 // *****************************************************************************
@@ -56,3 +55,54 @@ int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name
   nablaError("[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
   return -1;
 }
+
+
+// ****************************************************************************
+// * nToolUnlink: deletes a name from the filesystem
+// ****************************************************************************
+void nToolUnlink(char *pathname){
+  if (pathname!=NULL)
+    if (unlink(pathname)!=0)
+      nablaError("Error while removing '%s' file", pathname);
+}
+
+
+
+// ****************************************************************************
+// * nToolFileCatAndHackIncludes
+// ****************************************************************************
+int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
+                                const char *cat_sed_temporary_file_name){
+  size_t size;
+  char buf[BUFSIZ];
+  char *pointer_that_matches=NULL;
+  char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
+  FILE *cat_sed_temporary_file=NULL;
+  
+  printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
+  dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",
+      cat_sed_temporary_file_name);
+  
+  cat_sed_temporary_file=fopen(cat_sed_temporary_file_name,"w");
+  
+  for(nabla_file_name=strtok(dup_list_of_nabla_files, " ");
+      nabla_file_name!=NULL;
+      nabla_file_name=strtok(NULL, " ")){
+    fprintf(cat_sed_temporary_file,"# 1 \"%s\"\n",nabla_file_name);
+    FILE *nabla_FILE=fopen(nabla_file_name,"r");
+    // Now copying .n file to our tmp one
+    while ((size=fread(buf, 1, BUFSIZ, nabla_FILE))){
+      //printf("\n\tbuf: '%s'",buf);
+      // On recherche les '#include' pour les transformer en ' include'
+      while ((pointer_that_matches=strstr(buf,"#include"))!=NULL){
+        //printf("'#include' FOUND! Hacking!");
+        *pointer_that_matches=' ';
+      }
+      fwrite(buf, 1, size, cat_sed_temporary_file);
+    }
+  }
+  fclose(cat_sed_temporary_file);
+  free(dup_list_of_nabla_files);  
+  return NABLA_OK;
+}
+ 

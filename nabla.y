@@ -336,7 +336,7 @@ declaration_specifiers
 | type_qualifier declaration_specifiers {rhs;}
 ;
 declaration
-// On patche l'espace qui nous a été laissé par le sed pour remettre le bon #include
+// On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
 : INCLUDES {$1->token[0]='#';{rhs;}}
 | preproc {rhs;}
 | declaration_specifiers ';' {rhs;}

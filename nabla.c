@@ -70,7 +70,7 @@ static char *unique_temporary_file_name=NULL;
 \t[1;36m-t[0m\t\tGenerate the intermediate AST dot files\n\
 \t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
 [1;4;35mTARGET[0m can be:\n\
-\t[1;36m--okina [4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
+\t[1;35m--okina [36;4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
 \t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
 \t\t[36m--sse[0m\t\tExplicit code generation with SSE intrinsics\n\
 \t\t[36m--avx[0m\t\tExplicit code generation with AVX intrinsics\n\
@@ -82,9 +82,10 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\t\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\t\tIntel® ICC pragma generation\n\
-\t[1;36m--cuda [4mname[0m\tCode generation for the target CUDA\n\
+\t[1;35m--lambda [36;4mname[0m\tCode generation for the generic C/C++ Lambda target ([5;31mnot yet usable![0m)\n\
+\t[1;35m--cuda [36;4mname[0m\tCode generation for the target CUDA\n\
 \t\t\tCUDA does not yet support all of nabla's system libraries\n\
-\t[1;36m--arcane [4mname[0m\tCode generation for the middleware ARCANE\n\
+\t[1;35m--arcane [36;4mname[0m\tCode generation for the middleware ARCANE\n\
 \t\t[36m--alone[0m\t\tGenerate a [4mstand-alone[0m application\n\
 \t\t[36m--module[0m\tGenerate a [4mmodule[0m\n\
 \t\t[36m--service[0m\tGenerate a [4mservice[0m\n\
@@ -109,14 +110,6 @@ static char *unique_temporary_file_name=NULL;
 //\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n
 
 
-// ****************************************************************************
-// * nabla_unlink
-// ****************************************************************************
-static void nabla_unlink(void){
-  // Unlinking temp files
-  if (unique_temporary_file_name!=NULL)
-    unlink(unique_temporary_file_name);
-}
 
 
 // ****************************************************************************
@@ -194,63 +187,30 @@ int sysPreprocessor(const char *nabla_entity_name,
                     const char *list_of_nabla_files,
                     const char *unique_temporary_file_name,
                     const int unique_temporary_file_fd){
-  int i=0;
   const int size = NABLA_MAX_FILE_NAME;
-  int cat_sed_temporary_fd=0;
   char *cat_sed_temporary_file_name=NULL;
-  char *tok_command=NULL;
-  char *cat_command=NULL;
   char *gcc_command=NULL;
-  char *nabla_file, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
+  int cat_sed_temporary_fd=0;
+  
   if ((cat_sed_temporary_file_name = malloc(size))==NULL)
     nablaError("[sysPreprocessor] Could not malloc cat_sed_temporary_file_name!");
-  if ((tok_command = malloc(size))==NULL)
-    nablaError("[sysPreprocessor] Could not malloc tok_command!");
-  if ((cat_command = malloc(size))==NULL)
-    nablaError("[sysPreprocessor] Could not malloc cat_command!");
+  
   if ((gcc_command = malloc(size))==NULL)
     nablaError("[sysPreprocessor] Could not malloc gcc_command!");
-  // On crée un fichier temporaire où l'on va sed'er les includes, par exemple
+  
+  // On crée un fichier temporaire où l'on va:
+  //    - cat'er les différents fichiers .n et en initialisant le numéro de ligne
+  //    - sed'er les includes, par exemple
   snprintf(cat_sed_temporary_file_name,
            size,
            "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
   cat_sed_temporary_fd=mkstemp(cat_sed_temporary_file_name);
   if (cat_sed_temporary_fd==-1)
     nablaError("[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
-  printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
-  dbg("\n[sysPreprocessor] cat_sed_temporary_file_name is %s",
-      cat_sed_temporary_file_name);
-  // Pour chaque fichier .n en entrée, on va le cat'er et insérer des délimiteurs
-  cat_command[0]='\0';
-  //printf("Loading: ");
-  for(i=0,nabla_file=strtok(dup_list_of_nabla_files, " ");
-      nabla_file!=NULL;
-      i+=1,nabla_file=strtok(NULL, " ")){
-    //printf("%s%s",i==0?"":", ",nabla_file);
-    // Une ligne de header du cat en cours
-    // Cela permet de compter les numéros de lignes et de pointer vers le bon fichier
-    snprintf(tok_command,size,
-             "%secho '# 1 \"%s\"' %s %s",
-             i==0?"":" && ",
-             nabla_file,
-             i==0?">":">>",
-             cat_sed_temporary_file_name);
-    strcat(cat_command,tok_command);
-    snprintf(tok_command,size,
-             " && cat %s|sed -e 's/#include/ include/g'>> %s",//--squeeze-blank
-             //" && cat %s >> %s",//--squeeze-blank
-             nabla_file,
-             cat_sed_temporary_file_name);
-    strcat(cat_command,tok_command);
-    //printf("\ncat_command: %s", cat_command);
-    dbg("\n\n[sysPreprocessor] cat_command is %s",cat_command);
-  }
-  free(dup_list_of_nabla_files);
-  //printf("\n");
-  //printf("\nfinal_cat_command: %s\n", cat_command);
-  // On lance la commande de cat précédemment créée
-  if (system(cat_command)<0)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error in system cat command!\n"));
+  
+  nToolFileCatAndHackIncludes(list_of_nabla_files,
+                              cat_sed_temporary_file_name);
+  
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
   // This might be useful when running the preprocessor on something that is not C code,
@@ -312,6 +272,7 @@ int main(int argc, char * argv[]){
        {"module",required_argument,NULL,BACKEND_COLOR_ARCANE_MODULE},
        {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
     {"cuda",required_argument,NULL,BACKEND_CUDA},
+    {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
        {"tiling",no_argument,NULL,BACKEND_COLOR_OKINA_TILING},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
@@ -484,6 +445,17 @@ int main(int argc, char * argv[]){
       unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new CUDA nabla_entity_name: %s", nabla_entity_name);
       break;
+
+      // ************************************************************
+      // * BACKEND LAMBDA avec pas de variantes pour l'instant
+      // ************************************************************
+    case BACKEND_LAMBDA:
+      backend=BACKEND_LAMBDA;
+      dbg("\n[nabla] Command line hits long option %s", longopts[longindex].name);
+      nabla_entity_name=strdup(optarg);
+      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s", nabla_entity_name);
+      break;
        
       // ************************************************************
       // * UNKNOWN OPTIONS
@@ -526,7 +498,7 @@ int main(int argc, char * argv[]){
                    specific_path,
                    service_name)!=NABLA_OK)
     exit(NABLA_ERROR|fprintf(stderr, "\n[nabla] nablaParsing error\n"));
-  nabla_unlink();
+  nToolUnlink(unique_temporary_file_name);
   return NABLA_OK;
 }
 

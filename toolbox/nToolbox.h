@@ -58,5 +58,8 @@ int nablaMakeTempFile(const char*,char**);
 void nUtf8SupThree(char **);
 
 int nablaMakeTempFile(const char*,char**);
+void nToolUnlink(char *);
+
+int nToolFileCatAndHackIncludes(const char*,const char*);
 
 #endif // _NABLA_TOOLS_H_
