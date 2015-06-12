@@ -45,6 +45,5 @@
 
 #include "nablaAst.h"
 #include "nablaDebug.h"
-#include "nablaTools.h"
 
 #endif // _NABLA_FRONTEND_H_

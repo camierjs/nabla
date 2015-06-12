@@ -43,18 +43,20 @@
 #ifndef _NABLA_TOOLS_H_
 #define _NABLA_TOOLS_H_
 
-char *toolStrDownCase(const char *);
+char *toolStrDownCase(const char*);
 
-char *toolStrUpCase(const char *);
+char *toolStrUpCase(const char*);
 
-char *trQuote(const char * str);
+char *trQuote(const char*);
 
-char *op2name(char *op);
+char *op2name(char*);
 
 void nUtf8(char**);
 
-int nablaMakeTempFile(const char *, char **);
+int nablaMakeTempFile(const char*,char**);
 
 void nUtf8SupThree(char **);
+
+int nablaMakeTempFile(const char*,char**);
 
 #endif // _NABLA_TOOLS_H_

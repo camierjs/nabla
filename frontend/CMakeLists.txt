@@ -4,8 +4,7 @@ set(FRONTEND_C
   nablaAstDfs.c
   nablaAstNode.c
   nablaAstTree.c
-  nablaDebug.c
-  nablaTools.c)
+  nablaDebug.c)
 
 add_library(NablaFrontend ${FRONTEND_C})
 add_dependencies(NablaFrontend Nabla)

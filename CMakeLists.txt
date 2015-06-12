@@ -59,11 +59,12 @@ if(ICET_FOUND)
   info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} libraries are ${VT100_BOLD}${ICET_LIBRARIES}${VT100_RESET}")
 endif()
 
-#######################
-# Frontend & Middlend #
-#######################
+################################
+# Frontend, Middlend & Toolbox #
+################################
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/frontend)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/middlend)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 
 ####################################
 # Executable, librairie et install #
@@ -78,7 +79,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
-target_link_libraries(nabla Nabla ${FLEX_LIBRARIES} NablaMiddlend NablaArcane NablaCuda NablaLambda NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks NablaMiddlend NablaFrontend)
+target_link_libraries(nabla Nabla ${FLEX_LIBRARIES} NablaMiddlend NablaArcane NablaCuda NablaLambda NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks NablaMiddlend NablaFrontend NablaToolbox)
 
 ###########
 # INSTALL #

@@ -228,6 +228,7 @@ int sysPreprocessor(const char *nabla_entity_name,
       i+=1,nabla_file=strtok(NULL, " ")){
     //printf("%s%s",i==0?"":", ",nabla_file);
     // Une ligne de header du cat en cours
+    // Cela permet de compter les numéros de lignes et de pointer vers le bon fichier
     snprintf(tok_command,size,
              "%secho '# 1 \"%s\"' %s %s",
              i==0?"":" && ",

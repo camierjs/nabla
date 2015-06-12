@@ -158,5 +158,7 @@ void nablaError(const char *format, ...);
 #include "backends/arcane/nArcane.h"
 #include "backends/lambda/nLambda.h"
 
+#include "toolbox/nToolbox.h"
+
 
 #endif // _NABLA_H_
