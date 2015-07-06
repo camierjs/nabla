@@ -44,10 +44,18 @@
 #include "nabla.tab.h"
 
 
+// ****************************************************************************
+// * isWithLibrary
+// ****************************************************************************
 bool isWithLibrary(nablaMain *nabla, with_library lib){
-  return ((nabla->entity->libraries & (1<<lib))!=0);
+  const int this_lib = 1<<lib;
+  return ((nabla->entity->libraries & this_lib)==this_lib);
 }
 
+
+// ****************************************************************************
+// * nMiddleLibrariesSwitch
+// ****************************************************************************
 static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
   if (strncmp(n->children->token,"ℵ",3)==0){
     dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
