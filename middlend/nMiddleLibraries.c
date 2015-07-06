@@ -43,16 +43,21 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+
+bool isWithLibrary(nablaMain *nabla, with_library lib){
+  return ((nabla->entity->libraries & (1<<lib))!=0);
+}
+
 static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
   if (strncmp(n->children->token,"ℵ",3)==0){
     dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
-    entity->libraries|=(1<<aleph);
+    entity->libraries|=(1<<with_aleph);
     return;
   }
 
   if (strncmp(n->children->token,"Real",4)==0){
     dbg("\n\t[nablaLibraries] Real single_library hit!");
-    entity->libraries|=(1<<real);
+    entity->libraries|=(1<<with_real);
     return;
   }
 
@@ -60,7 +65,7 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
     
   case ('e'):{ // AL[E]PH || ℵ -(p3c)-> Al[e]
     dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
-    entity->libraries|=(1<<aleph);
+    entity->libraries|=(1<<with_aleph);
     break;
   }
     
@@ -68,12 +73,12 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
     switch (n->children->token[1]){
     case ('p'):{ // M[P]I
       dbg("\n\t[nablaLibraries] MPI single_library hit!");
-      entity->libraries|=(1<<mpi);
+      entity->libraries|=(1<<with_mpi);
       break;
     }
     case ('a'):{ // M[A]IL
       dbg("\n\t[nablaLibraries] MAIL single_library hit!");
-      entity->libraries|=(1<<mail);
+      entity->libraries|=(1<<with_mail);
       break;
     }
     default: nablaError("Could not switch M[p]i || M[a]il!");
@@ -83,7 +88,7 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
       
   case ('p'):{ // GM[P]
     dbg("\n\t[nablaLibraries] GMP single_library hit!");
-    entity->libraries|=(1<<gmp);
+    entity->libraries|=(1<<with_gmp);
     break;
   }
       
@@ -91,12 +96,12 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
     switch (n->children->token[0]){
     case ('c'):{
       dbg("\n\t[nablaLibraries] CARTESIAN single_library hit!");
-      entity->libraries|=(1<<cartesian);
+      entity->libraries|=(1<<with_cartesian);
       break;
     }
     case ('p'):{
       dbg("\n\t[nablaLibraries] PARTICLES single_library hit!");
-      entity->libraries|=(1<<particles);
+      entity->libraries|=(1<<with_particles);
       break;
     }
     default: nablaError("Could not switch CARTESIAN || PARTICLES!");
@@ -107,18 +112,18 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
   case ('t'):{ // Ma[t]erials || Ma[t]hematica || df[t]
     if (n->children->token[0]=='d'){
       dbg("\n\t[nablaLibraries] DFT single_library hit!");
-      entity->libraries|=(1<<dft);
+      entity->libraries|=(1<<with_dft);
       break;
     }
     switch (n->children->token[3]){
     case ('e'):{
       dbg("\n\t[nablaLibraries] MATERIALS single_library hit!");
-      entity->libraries|=(1<<materials);
+      entity->libraries|=(1<<with_materials);
       break;
     }
     case('h'):{
       dbg("\n\t[nablaLibraries] MATHEMATICA single_library hit!");
-      entity->libraries|=(1<<mathematica);
+      entity->libraries|=(1<<with_mathematica);
       break;
     }
     default: nablaError("Could not switch Ma[t]erials || Ma[t]hematica!");
@@ -128,7 +133,7 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
       
   case ('u'):{ // SL[U]RM
     dbg("\n\t[nablaLibraries] SLURM single_library hit!");
-    entity->libraries|=(1<<slurm);
+    entity->libraries|=(1<<with_slurm);
     break;
   }
  

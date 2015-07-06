@@ -215,7 +215,7 @@ static char *nOkinaMainSourceMeshAoS_vs_SoA(nablaMain *nabla){
 }
 static void nOkinaMainSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  if ((nabla->entity->libraries&(1<<real))!=0)
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,knMsh1D_c);
   else
     fprintf(nabla->entity->src,knMsh3D_c,nOkinaMainSourceMeshAoS_vs_SoA(nabla));

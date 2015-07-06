@@ -105,7 +105,7 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
                                               char *depth){  
   nprintf(nabla,"\n\t// okinaGenerateSingleVariable",NULL);
   if (strncmp(var->name,"coord",5)==0){
-    if ((nabla->entity->libraries&(1<<real))!=0){
+    if ((nabla->entity->libraries&(1<<with_real))!=0){
       fprintf(nabla->entity->hdr,
               "\nreal/*3*/ node_coord[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));");
       return NABLA_OK;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 201~2015 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -228,7 +228,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   nOkinaInitVariables(nabla);
 
   // Mesh structures and functions depends on the ℝ library that can be used
-  if ((nabla->entity->libraries&(1<<real))!=0){
+  if (isWithLibrary(nabla,with_real)){
     dbg("\n\t[nOkina] okinaMesh 1D !");
     nOkinaMesh1D(nabla);
   }else{

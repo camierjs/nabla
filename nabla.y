@@ -353,6 +353,7 @@ declaration_list
 /////////////////
 declarator
 : pointer direct_declarator {rhs;}
+//| IDENTIFIER direct_declarator {rhs;}
 | direct_declarator {rhs;}
 ;
 identifier_list

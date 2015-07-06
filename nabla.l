@@ -154,6 +154,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "Uid"             { return tok(&yylval, UIDTYPE);}
 "file"            { return tok(&yylval, FILECALL);}
 "File"            { return tok(&yylval, FILETYPE);}
+"FILE"            { return tok(&yylval, FILETYPE);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}

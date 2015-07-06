@@ -45,18 +45,19 @@
 
 // Enumération des libraries possible depuis Arcane
 typedef enum {
-  mpi=0,
-  gmp,
-  dft,
-  mail,
-  aleph,
-  slurm,
-  particles,
-  cartesian,
-  materials,
-  mathematica,
-  real          // 1D only, no Real3 admitted
-} library;
+  with_mpi=0,
+  with_gmp,
+  with_dft,
+  with_mail,
+  with_aleph,
+  with_slurm,
+  with_particles,
+  with_cartesian,
+  with_materials,
+  with_mathematica,
+  with_real          // 1D only, no Real3 admitted
+} with_library;
+
 
 // Enumération des possibilités des variables en in/out/inout
 typedef enum {
@@ -64,6 +65,7 @@ typedef enum {
   enum_out_variable,
   enum_inout_variable
 } inout_mode;
+
 
 // Middlend VARIABLE 
 typedef struct nablaVariableStruct{
@@ -82,6 +84,7 @@ typedef struct nablaVariableStruct{
   struct nablaVariableStruct *next;
 }nablaVariable;
 
+
 // Backend OPTION 
 typedef struct nablaOptionStruct{
   bool axl_it;
@@ -91,6 +94,7 @@ typedef struct nablaOptionStruct{
   struct nablaMainStruct *main;
   struct nablaOptionStruct *next;
 }nablaOption;
+
 
 // Middlend JOB 
 typedef struct nablaJobStruct{
@@ -150,16 +154,18 @@ typedef struct nablaJobStruct{
   struct nablaJobStruct *next;
 }nablaJob;
 
+
 // Middlend ENTITY 
 typedef struct nablaEntityStruct{
   FILE *hdr, *src;
   const char *name;
   const char *name_upcase;
   nablaJob *jobs;
-  library libraries;
+  with_library libraries;
   struct nablaMainStruct *main; 
   struct nablaEntityStruct *next;
 } nablaEntity;
+
 
 // Backend HOOKS
 typedef struct nablaBackendHooksStruct{
@@ -276,7 +282,8 @@ typedef struct nablaMainStruct{
 } nablaMain;
 
 // nMiddleLibraries.c
-void nMiddleLibraries(astNode *, nablaEntity *);
+bool isWithLibrary(nablaMain*,with_library);
+void nMiddleLibraries(astNode*, nablaEntity*);
 
 // nMiddleEntities.c
 nablaEntity *nMiddleEntityNew(nablaMain*);

@@ -210,16 +210,16 @@ inline double unglitch(double a){\n\
   data.i&= mask.i;\n\
   return data.d;\n \
 }*/\n",
-            ((entity->libraries&(1<<mathematica))!=0)?nccArcLibMathematicaHeader():"",
-            ((entity->libraries&(1<<gmp))!=0)?nccArcLibDftHeader():"",
-            ((entity->libraries&(1<<gmp))!=0)?nccArcLibGmpHeader():"",
-            ((entity->libraries&(1<<mail))!=0)?nccArcLibMailHeader():"",
-            ((entity->libraries&(1<<aleph))!=0)?
+            ((entity->libraries&(1<<with_mathematica))!=0)?nccArcLibMathematicaHeader():"",
+            ((entity->libraries&(1<<with_gmp))!=0)?nccArcLibDftHeader():"",
+            ((entity->libraries&(1<<with_gmp))!=0)?nccArcLibGmpHeader():"",
+            ((entity->libraries&(1<<with_mail))!=0)?nccArcLibMailHeader():"",
+            ((entity->libraries&(1<<with_aleph))!=0)?
             isAnArcaneModule(entity->main)?nccArcLibAlephHeader():nccArcLibSchemeHeader():"",
-            ((entity->libraries&(1<<cartesian))!=0)?nccArcLibCartesianHeader():"",
-            ((entity->libraries&(1<<materials))!=0)?nccArcLibMaterialsHeader():"",
-            ((entity->libraries&(1<<slurm))!=0)?nccArcLibSlurmHeader():"",
-            ((entity->libraries&(1<<particles))!=0)?nccArcLibParticlesHeader():"",
+            ((entity->libraries&(1<<with_cartesian))!=0)?nccArcLibCartesianHeader():"",
+            ((entity->libraries&(1<<with_materials))!=0)?nccArcLibMaterialsHeader():"",
+            ((entity->libraries&(1<<with_slurm))!=0)?nccArcLibSlurmHeader():"",
+            ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesHeader():"",
             (isAnArcaneModule(entity->main)
              &&(entity->main->interface_path!=NULL))?entity->main->interface_path:"",
             entity->name,isAnArcaneModule(entity->main)?"":"Service");
@@ -245,15 +245,15 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
           entity->name, nablaArcaneColor(entity->main), nablaArcaneColor(entity->main),
           entity->name,
           isAnArcaneModule(entity->main)?"\n\t\t,m_physic_type_code(VariableBuildInfo(this,\"PhysicTypeCode\"))":"",
-          ((entity->libraries&(1<<particles))!=0)?",m_particle_family(0)":"",
-          ((entity->libraries&(1<<particles))!=0)?nccArcLibParticlesConstructor(entity):"",
-          ((entity->libraries&(1<<dft))!=0)?"\
+          ((entity->libraries&(1<<with_particles))!=0)?",m_particle_family(0)":"",
+          ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesConstructor(entity):"",
+          ((entity->libraries&(1<<with_dft))!=0)?"\
 \n\t\t, m_dft_i(VariableBuildInfo(this,\"DFTi\"))\
 \n\t\t, m_dft_sh0(VariableBuildInfo(this,\"DFTsh0\"))\
 \n\t\t, m_dft_sh1(VariableBuildInfo(this,\"DFTsh1\"))\
 \n\t\t, m_dft_sh2(VariableBuildInfo(this,\"DFTsh2\"))\
 \n\t\t, m_dft_data(VariableBuildInfo(this,\"DFTdata\",IVariable::PPersistant))":"",
-          ((entity->libraries&(1<<gmp))!=0)?"\
+          ((entity->libraries&(1<<with_gmp))!=0)?"\
 \n\t\t, m_gmp_backups(VariableBuildInfo(mbi.subDomain(),\"GmpMPZBackups\"))\
 \n\t\t, m_gmp_iteration(0){\
 \n\t\t//addEntryPoint(this,\"ContinueInit\",&naheaModule::gmpContinueInit,IEntryPoint::WContinueInit);":"{");
@@ -263,7 +263,7 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
     fprintf(entity->hdr, "\n\t\tm_%s_%s.resize(%ld);", var->item, var->name, var->size);
   } 
   
-  if ((entity->libraries&(1<<particles))!=0){
+  if ((entity->libraries&(1<<with_particles))!=0){
     fprintf(entity->hdr, "\n\t\tm_particle_family = mbi.mesh()->createItemFamily(IK_Particle,\"particles\");");
   }
 //#warning WTF m_physic_type_code
@@ -271,7 +271,7 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
           "\n\t}\n\t~%s%s(){%s}\npublic:%s",
           entity->name,
           nablaArcaneColor(entity->main),
-          ((entity->libraries&(1<<mathematica))!=0)?nccArcLibMathematicaDelete():"",
+          ((entity->libraries&(1<<with_mathematica))!=0)?nccArcLibMathematicaDelete():"",
           isAnArcaneModule(entity->main)?"\n\tVariableScalarInteger m_physic_type_code;":""
           );  
   return NABLA_OK;
@@ -314,16 +314,16 @@ NABLA_STATUS nccArcaneEntityGeneratorPrivates(nablaEntity *entity){
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
   if (isAnArcaneService(entity->main)) return NABLA_OK;
   fprintf(entity->hdr, "%s%s%s%s%s%s%s%s%s\n};\n#endif // %s_ENTITY_H\n",
-          ((entity->libraries&(1<<dft))!=0)?nccArcLibDftPrivates():"",
-          ((entity->libraries&(1<<gmp))!=0)?nccArcLibGmpPrivates():"",
-          ((entity->libraries&(1<<mail))!=0)?nccArcLibMailPrivates():"",
-          ((entity->libraries&(1<<aleph))!=0)?
+          ((entity->libraries&(1<<with_dft))!=0)?nccArcLibDftPrivates():"",
+          ((entity->libraries&(1<<with_gmp))!=0)?nccArcLibGmpPrivates():"",
+          ((entity->libraries&(1<<with_mail))!=0)?nccArcLibMailPrivates():"",
+          ((entity->libraries&(1<<with_aleph))!=0)?
           isAnArcaneModule(entity->main)?nccArcLibAlephPrivates():nccArcLibSchemePrivates():"",
-          ((entity->libraries&(1<<slurm))!=0)?nccArcLibSlurmPrivates():"",
-          ((entity->libraries&(1<<particles))!=0)?nccArcLibParticlesPrivates(entity):"",
-          ((entity->libraries&(1<<cartesian))!=0)?nccArcLibCartesianPrivates():"",
-          ((entity->libraries&(1<<materials))!=0)?nccArcLibMaterialsPrivates():"",
-          ((entity->libraries&(1<<mathematica))!=0)?nccArcLibMathematicaPrivates():"",
+          ((entity->libraries&(1<<with_slurm))!=0)?nccArcLibSlurmPrivates():"",
+          ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesPrivates(entity):"",
+          ((entity->libraries&(1<<with_cartesian))!=0)?nccArcLibCartesianPrivates():"",
+          ((entity->libraries&(1<<with_materials))!=0)?nccArcLibMaterialsPrivates():"",
+          ((entity->libraries&(1<<with_mathematica))!=0)?nccArcLibMathematicaPrivates():"",
           entity->name_upcase);
   return NABLA_OK;
 }

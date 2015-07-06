@@ -1,12 +1,19 @@
 
 //Test 1 for linear advection (smooth data)
-ℝ u0_Test1_for_linear_advection_smooth_data(ℝ x){
-  return α*exp(-β*x²);
+ℝ p0_condini (ℝ x){
+ return -sigma*x  ;
 }
 
 // Test 2 for linear advection (discontinuous data)
-ℝ u0_Test2_for_linear_advection_discontinuous_data(ℝ x){
-  if (x<0.3) return 0.0;
-  if (x<0.7) return 1.0;
-  return 0.0;
+ℝ u0_condini(ℝ x){
+  return 1.0;
+}
+
+
+ℝ p_node(ℝ x){
+  return -sigma*x;
+}
+
+ℝ u_node(ℝ x){
+  return 1.0;
 }

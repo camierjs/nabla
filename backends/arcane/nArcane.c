@@ -227,48 +227,48 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
 
   { // Should be done by a hook
     // MATHEMATICA fonctions d'initialisation
-    if ((entity->libraries&(1<<mathematica))!=0){
+    if ((entity->libraries&(1<<with_mathematica))!=0){
       dbg("\n[nccArcane] MATHEMATICA initialization");
       nccArcLibMathematicaIni(middlend);
     }
     // MAIL fonctions d'initialisation
-    if ((entity->libraries&(1<<mail))!=0){
+    if ((entity->libraries&(1<<with_mail))!=0){
       dbg("\n[nccArcane] MAIL initialization");
       nccArcLibMailIni(middlend);
     }
     // PARTICLES fonctions d'initialisation
-    if ((entity->libraries&(1<<particles))!=0){
+    if ((entity->libraries&(1<<with_particles))!=0){
       dbg("\n[nccArcane] PARTICLES initialization");
       nccArcLibParticlesIni(middlend);
     }
     // ALEPH fonctions d'initialisation
-    if ((entity->libraries&(1<<aleph))!=0){
+    if ((entity->libraries&(1<<with_aleph))!=0){
       dbg("\n[nccArcane] ALEPH initialization");
       if (isAnArcaneModule(middlend)) nccArcLibAlephIni(middlend);
       if (isAnArcaneService(middlend)) nccArcLibSchemeIni(middlend);
     }
     // CARTESIAN fonctions d'initialisation
-    if ((entity->libraries&(1<<cartesian))!=0){
+    if ((entity->libraries&(1<<with_cartesian))!=0){
       dbg("\n[nccArcane] CARTESIAN initialization");
       nccArcLibCartesianIni(middlend);
     }
     // MATERIALS fonctions d'initialisation
-    if ((entity->libraries&(1<<materials))!=0){
+    if ((entity->libraries&(1<<with_materials))!=0){
       dbg("\n[nccArcane] MATERIALS initialization");
       nccArcLibMaterialsIni(middlend);
     }
     // GMP fonctions d'initialisation
-    if ((entity->libraries&(1<<gmp))!=0){
+    if ((entity->libraries&(1<<with_gmp))!=0){
       dbg("\n[nccArcane] GMP initialization");
       nccArcLibGmpIni(middlend);
     }
     // DFT fonctions d'initialisation
-    if ((entity->libraries&(1<<dft))!=0){
+    if ((entity->libraries&(1<<with_dft))!=0){
       dbg("\n[nccArcane] DFT initialization");
       nccArcLibDftIni(middlend);
     }
     // SLURM fonctions d'initialisation
-    if ((entity->libraries&(1<<slurm))!=0){
+    if ((entity->libraries&(1<<with_slurm))!=0){
       dbg("\n[nccArcane] SLURM initialization");
       nccArcLibSlurmIni(middlend);
     }

@@ -1,31 +1,58 @@
+
 with ℝ;
+// αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀
+// ℝℕℤ
+// ²³√½⅓¼⅛
+//⋅
+
 
 // ****************************************************************************
 // * Options
 // ****************************************************************************
 options{
   ℝ option_a = 1.0;
-  ℝ α = 1.0;
-  ℝ β = 8.0;
-  ℝ xmin = -1.0;
-  ℝ xmax = +1.0;
-  ℝ CFL = 0.8;
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
   ℕ test = 1;
-  ℕ time_steps = 8;
+  ℕ test2 = 1;
+  ℕ time_steps = 0.0005;
+  ℝ π= 4.0*atan(1.0);
+  ℝ final_time = 5.0;
+  ℝ sigma=1.0;
+  //ℝ Delta_t=0.0005;
+  
   // Yet required options for Okina
-  ℝ option_δt_initial = 0.0;
-  ℝ option_stoptime = 1.0;
+  ℝ option_δt_initial = 0.005;
+  ℝ option_stoptime =1.0;//0.2;//10.0
+  ℝ meancE1;
+  ℝ meancU;
+  ℝ CFL = 0.8;
+  
+  
 };
 
 
-// ****************************************************************************
+// **************************************************************************
 // * Node Variables
 // ****************************************************************************
+cells{
+  ℝ cP;
+  ℝ cp1P;
+  ℝ cU;
+  ℝ cp1U;
+  ℝ center;
+ 
+};
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
 nodes{
-  ℝ u;
-  ℝ unp1;
-  ℝ δxp;
-  ℝ δxm;
+  /* ℝ coord */
+  ℝ nP;
+  ℝ nU;
+ 
 };
 
 
@@ -34,6 +61,7 @@ nodes{
 // ****************************************************************************
 global{
   ℝ δx;
+  
 };
 
 
@@ -41,26 +69,40 @@ global{
 // * Initialization Part @ ]-∞,-0.0[
 // ****************************************************************************
 
+
 void iniGlobals(void) @ -5.0{
   δx=(xmax-xmin)/X_EDGE_ELEMS;
-  δt=CFL*δx/option_a;
+  δt=δx*CFL;
   printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
   printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
   assert(δt>=0.0);
 }
 
 
-∀ nodes void iniδx(void) @ -5.0{
-  if (coord!=xmin) δxm=coord-coord[-1];
-  if (coord!=xmax) δxp=coord[+1]-coord;
+
+
+// ****************************************************************************
+// * iniCellCenter
+// ****************************************************************************
+∀ cells void iniCellCenter(void) out (/*node coord,*/ cell center) @ -5.0 {
+  center=0.0;
+  ∀ node center+=coord;
+  center *= 0.5;
 }
 
 
-∀ nodes void iniU(void) in (node coord, node u) @ -4.0 {
-  u = 0.0;
-  u = (test==1)?u0_Test1_for_linear_advection_smooth_data(coord);
-  u = (test==2)?u0_Test2_for_linear_advection_discontinuous_data(coord);
+∀ cells void inicellP(void) in (cell center) out (cell cP) @ -4.0 {
+  cP =  p0_condini(center);
 }
+
+
+
+∀ cells void iniCellU(void) in (cell center) out (cell cU) @ -4.0 {
+  cU = u0_condini(center);
+}
+
+
+
 
 
 // ****************************************************************************
@@ -70,42 +112,179 @@ void dbgLoop(void) @ 1.0 {
   printf("\n\t\t\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
 }
 
-// The First Order Upwind Scheme
-∀ nodes void loop(void) in (node u) @ 1.0 {
-  const ℝ ap = fmax(option_a,0.0);
-  const ℝ am = fmin(option_a,0.0);
-  const ℝ δtSx = δt/δx;
-  const ℝ cp = ap*δtSx;
-  const ℝ cm = am*δtSx;
+// !!!!!
+∀ nodes void flushNodePU(void)@ 1.0{
+  nP=nU=0.0;
+}
+
+// nP au centre
+∀ nodes void computeNodP(void)
+  /*in (cell center, cell cU)*/
+  out (node nP) @ 2.0 {
+  
+  //nP=0.0;
   if (n==0) continue;
-  if (n==NABLA_NB_NODES) continue;
-  unp1 = u - cp*(u-u[n-1]) - cm*(u[n+1]-u);
-  //printf("\n\t\t\33[7m[Loop] node # =%d\33[m", n);
+  if (n==(NABLA_NB_NODES-1)) continue;
+  
+  ∀ cell {
+    // maille de droite, on ajoute l'invariant de Rieman pour la vp -1
+    if (center>coord){
+      nP+=cP-cU ;
+      // maille de gauche, on ajoute l'invariant de Rieman pour la vp 1
+      
+    }else{
+      nP+=cP+cU;
+    }
+  }
+  nP *=0.5;
+}
+
+// nU au centre
+∀ nodes void computeNodU(void)
+  //in (cell center, cell cP)
+  out (node nU) @ 2.3 {
+ 
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  
+  ∀ cell {
+ 
+    if (center>coord){
+      nU+=cU-cP ;
+    
+    }else{
+      nU+=cU+cP ;
+   
+    }
+  }
+  nU*=0.5;
+}
+
+
+// nP et nU à 0.0
+∀ nodes void outer0Loop1(void) 
+  in (node nP/*, node nP, node nU*/)
+  out (node nP,node nU)@ 2.4 {
+  if (n!=0) continue;
+  
+  ∀ cell {
+    if (c==0) continue;
+    nP+=cP-cU;
+    nU+=cU-cP;
+    
+  }
+  
+//  nP=0.;
+//  nU=1.;
+  nP+= p_node(-δx*0.5) + u_node(-δx*0.5) ;
+  nP*= 0.5 ; // valeur de la fonction analytique(p+u) (-Delta_x/2, current_time)
+  nU+= p_node(-δx*0.5) + u_node(-δx*0.5) ;
+  nU*= 0.5; // ******* (p+u)
+  
+}
+ 
+// nP et nU à NABLA_NB_NODES
+∀ nodes void outer0Loop2(void)
+  in (node nP, node nU/*, node nP, node nU*/)
+  out (node nP, node nU)@ 2.45 {
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  //info()<<"[outer0Loop2] node="<<n;
+  ∀ cell {
+    if (c==0) continue;
+    //info()<<"\t[outer0Loop2] cell="<<c;
+    nP+=cP +cU;
+    nU+=cP +cU;
+  }
+//  nP=-xmax;
+//  nU=1.;
+ nP+= p_node(xmax+0.5*δx) - u_node(xmax+0.5*δx);
+ nP*=0.5; // (p+u)
+ nU+=-(p_node(xmax+0.5*δx) - u_node(xmax+0.5*δx));
+ nU*=0.5; // -(p-u)
+}
+
+
+
+
+// cp1P partout
+∀ cells void loop1(void) in (cell cP/*, node nP, node nU*/)  @ 2.6 {
+  const ℝ δtSx = δt/(δx);
+   // Que les termes aux mailles
+  cp1P = cP ;
+  
+  
+  ∀ node {    
+     //info()<<"\t[loop1] node="<<n<<", cp1P="<<cp1P;
+    if (coord<center){
+      cp1P += δtSx*nU ;        
+     
+      //info()<<"\t\t[loop1] then: cp1P="<<cp1P<<", nP="<<nP;
+    }else{
+      cp1P += -δtSx*nU ;
+      
+      //info()<<"\t\t[loop1] else: cp1P="<<cp1P;
+    }
+  }
+  
+}
+
+//void exitHere(void)@2.04{exit;}
+              
+// cp1U partout 
+∀ cells void loop2(void) in (cell cU) @ 2.6 {
+  const ℝ δtSx = δt/(δx);
+  cp1U = cU-sigma*cU*δt;
+  info()<<"[loop2] avant flux cU " << cU << ", δtSx="<<δtSx<<", cp1U="<<cp1U;
+  ∀ node {
+    //info()<<"\t[loop2] node="<<n;
+    if (center<coord){
+      cp1U += -δtSx*nP;
+      info()<<"[loop2] dans flux (+1/2) coord="<<coord << " nP " << nP;  
+    } else {
+      cp1U += δtSx*nP;
+      info()<<"[loop2] dans flux (-1/2) coord="<<coord << " nP " << nP;  
+    }
+  }
+  info()<<"[loop2] apres flux cp1U="<<cp1U;
+  //printf("\n\t\t\33[7m[Loop] node # =%d\33[m", n); 
 }
 
 
 // Copy results
-∀ nodes void copyResults(void) in (node u) @ 2.0 {
-  u=unp1;
-  //printf("\n\t\t[copyResults] u[%d] = %f", n,u);
+∀ cells  void copyResults(void) in (cell cP, cell cU) @ 2.7 {
+  cP = cp1P;
+  cU = cp1U;
+ //printf(y"\n\t\t[copyResults] u[%d] = %f", n,u);
 }
+
 
 
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ nodes void dumpSolution(File results) in (node u) {
-  results << coord << "\t" << u << "\t" << unp1 << "\n";
+∀ cells void dumpSolution(File results) in (cell cP, cell cU) {
+  results << "\t" << center
+          << "\t" << δx
+    //<< "\t" << time 
+          << "\t" << cP
+          << "\t" << cU
+          << "\n";
 }
 
+
+
 void tstForQuit(void) @ 4.0 {
-  printf("\n\t[testForQuit] GlobalIteration =%d", GlobalIteration);
-  if (GlobalIteration<time_steps) return;
-  {
-    file(results,plot);
-    printf("\n\t[testForQuit] GlobalIteration>time_steps, dumping\n");
-    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-    dumpSolution(results);
-  }
+  printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f", GlobalIteration, time,(double)δt);
+  //file(resultsvstime,plot);
+  //dumpVsTimeSolution(resultsvstime);
+  if ((time<(option_stoptime-δt))) return;
+  //if ((GlobalIteration==time_steps)){
+    {
+      file(results,plot);
+      printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+      //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+      dumpSolution(results);
+    }
+   
   exit;
 }
