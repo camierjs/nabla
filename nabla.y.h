@@ -176,6 +176,16 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // *****************************************************************************
 // * Other singular operations
 // *****************************************************************************
+#define superNP1(lhs,ident)                                           \
+  char *dest;                                                         \
+  dest=malloc(1024);                                                        \
+  dest=strcat(dest,ident->token);                                     \
+  dest=strcat(dest,"np1");                                            \
+  astNode *superNP1Node=astNewNode();                                 \
+  superNP1Node->token=strdup(dest);                                   \
+  superNP1Node->tokenid=IDENTIFIER;                                   \
+  RHS(lhs,superNP1Node)
+
 #define Ypow(lhs,n1,pow)                                              \
   astNode *pPow=astNewNode();                                         \
   pPow->token=strdup("pow");                                          \

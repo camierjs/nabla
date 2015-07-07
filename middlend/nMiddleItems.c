@@ -121,12 +121,40 @@ static void actItemPrimaryExpression(astNode * n, void *generic_arg){
 }
 
 
+//***************************************************************************** 
+// * actItemList
+// ****************************************************************************
+__attribute__((unused)) static void actItemList(astNode * n, void *generic_arg){
+  dbg("\n\t\t[actItemList]");
+}
+
+
+//***************************************************************************** 
+// * actItemComa
+// ****************************************************************************
+static void actItemComa(astNode * n, void *generic_arg){
+  dbg("\n\t\t[actItemComa]");
+  nablaMain *arc=(nablaMain*)generic_arg;
+  nablaVariable *variable = nMiddleVariableNew(arc);
+  // On va chercher la dernière variable créée
+  nablaVariable *last_variable = nMiddleVariableLast(arc->variables);
+  variable->dump=true;
+  nMiddleVariableAdd(arc, variable);
+  variable->item=strdup(arc->tmpVarKinds);
+  // On utilise le type de la dernière variable pour cette nouvelle
+  variable->type=last_variable->type;
+  variable->dim=0;
+}
+
+
 /***************************************************************************** 
  * Scan pour la déclaration des variables
  *****************************************************************************/
 void nMiddleItems(astNode * n, int ruleid, nablaMain *arc){
   RuleAction tokact[]={
     {rulenameToId("type_specifier"),actItemTypeSpecifier},
+    //{rulenameToId("nabla_direct_declarator_list") ,actItemList},
+    {tokenidToRuleid(',') ,actItemComa},
     {rulenameToId("nabla_direct_declarator"),actItemDirectDeclarator},
     {rulenameToId("nabla_items"), actItemNablaItems},
     {rulenameToId("primary_expression"), actItemPrimaryExpression},

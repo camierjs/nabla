@@ -150,6 +150,11 @@ void nUtf8(char **bkp){
     *bkp=strdup("Real3"); 
     return;
   }  
+  if (strcmp(p,"ⁿ⁺¹")==0) {
+    dbg("\n[nUtf8] hits 'ⁿ⁺¹'!");
+    *bkp=strdup("np1"); 
+    return;
+  }  
   /*if (*(unsigned int*)p==0x00b584e2) { // "ℵ"
     dbg("\n[nUtf8] hits single ℵ ");
     *bkp=strdup("aleph"); 

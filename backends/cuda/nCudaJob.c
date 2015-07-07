@@ -829,7 +829,7 @@ void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
   
   if (n->ruleid==rulenameToId("direct_declarator")){
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    //nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
+    nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
     *numParams+=1;
     // Si on ne trouve pas de variable, on a rien à faire
     if (var == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaArgumentList] Variable error\n"));

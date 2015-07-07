@@ -127,22 +127,28 @@ nablaJob *nMiddleJobFind(nablaJob *jobs,char *name){
 /***************************************************************************** 
  * Backend Generic for JOBS - New, Add, Last functions
  *****************************************************************************/
-static void actNablaJobParameterItem(astNode * n, void *generic_arg){
-  dbg(" (%s,", n->children->token);
+static void actNablaJobParameterItem(astNode * n, void *current_item){
+  current_item=n->children->token;
+  dbg("\n\titem set to '%s' ", n->children->token);
 }
-static void actNablaJobParameterDirectDeclarator(astNode * n, void *generic_arg){
-  dbg("%s)", n->children->token);
+static void actNablaJobParameterDirectDeclarator(astNode * n, void *current_item){
+  dbg("'%s'", n->children->token);
 }
 void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
+  char *current_item=NULL;
   RuleAction tokact[]={
     {rulenameToId("nabla_item"),actNablaJobParameterItem},
     {rulenameToId("direct_declarator"),actNablaJobParameterDirectDeclarator},
     {0,NULL}};
+  
+  if (n->tokenid=='@') return;
+  if (n->ruleid==rulenameToId("compound_statement")) return;
+  
   if (ruleid ==  n->ruleid){
-    dbg("\n\t[scanForNablaJobParameter] %s", n->children->children->token);
+    //dbg("\n\t[scanForNablaJobParameter] %s", n->token);
     // On peut en profiter pour générer les IN, OUT & INOUT pour ce job
     //getInOutPutsNodes(fOut, n->children->children->next, "CCCCCC");
-    scanTokensForActions(n, tokact, (void*)arc);
+    scanTokensForActions(n, tokact, (void*)&current_item);
   }
   if(n->children != NULL) nMiddleScanForNablaJobParameter(n->children, ruleid, arc);
   if(n->next != NULL) nMiddleScanForNablaJobParameter(n->next, ruleid, arc);
@@ -430,7 +436,7 @@ void nMiddleJobFill(nablaMain *nabla,
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->rtntp, job->name);
   // Remplissage des 
-  nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter"), nabla);
+  //nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter_list"), nabla);
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
   nMiddleScanForIfAfterAt(n->children, job, nabla);
   // On remplit la ligne du fichier SRC
@@ -452,7 +458,7 @@ void nMiddleJobFill(nablaMain *nabla,
   // On va chercher les paramètres nabla in/out/inout
   //nd=dfsFetch(n->children,rulenameToId("nabla_parameter"));
   job->nblParamsNode=n->children->next->next->next->next->next->next;
-  //job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_parameter"));
+  //job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_inout_parameter"));
 
   // Si on a un type de retour et des arguments
   if (numParams!=0 && strncmp(job->rtntp,"void",4)!=0){

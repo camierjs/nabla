@@ -301,6 +301,8 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 
 "∞"               { return tok(&yylval, BUILTIN_INFF);}//9e88e2
 
+"ⁿ⁺¹"             { return tok(&yylval, SUPERSCRIPT_N_PLUS_ONE);}
+
 "[n]"             { return tok(&yylval, FORALL_NODE_INDEX);}
 "[c]"             { return tok(&yylval, FORALL_CELL_INDEX);}
 "[m]"             { return tok(&yylval, FORALL_MTRL_INDEX);}

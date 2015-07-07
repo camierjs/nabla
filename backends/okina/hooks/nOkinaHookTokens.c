@@ -97,6 +97,10 @@ void nOkinaHookTokenSwitch(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
 
+  case (SUPERSCRIPT_N_PLUS_ONE):{
+    nprintf(nabla, "/*SUPERSCRIPT_N_PLUS_ONE*/", "/*SUPERSCRIPT_N_PLUS_ONE*/");
+    break;
+  }
   case (FILETYPE):{
     nprintf(nabla, "/*FILETYPE*/", "/*FILETYPE*/");
     break;

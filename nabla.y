@@ -97,6 +97,9 @@ bool adrs_it=false;
 %token PARTICLE PARTICLES PARTICLETYPE
 %token FILECALL FILETYPE
 
+ // Nabla SUPERSCRIPT_*
+%token SUPERSCRIPT_N_PLUS_ONE
+
  // Nabla Cartesian
 %token XYZ NEXTCELL PREVCELL NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
 
@@ -362,6 +365,7 @@ identifier_list
 ;
 direct_declarator
 : IDENTIFIER {rhs;}
+| IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 | '(' declarator ')'{rhs;}
 | direct_declarator '[' constant_expression ']'{rhs;}
 | direct_declarator '[' ']'{rhs;}
@@ -428,10 +432,43 @@ nabla_mat_material:IDENTIFIER {rhs;};
 nabla_mat_declaration: MAT nabla_mat_material {rhs;};
 nabla_env_environment:IDENTIFIER {rhs;};
 nabla_env_declaration: ENV nabla_env_environment {rhs;};
-nabla_parameter_declaration: nabla_item direct_declarator {rhs;};
+
 /////////////////////////
 // ∇ IN/OUT parameters //
+// Permettant de faire des virgules
+// Attention, on utilise le nom 'direct_declarator'
+// dans nMiddleScanForNablaJobParameter pour récupérer les noms
+// 150707 Ne marche pas pour le backend CUDA qui utilise qqchose pour dumper les arguments des jobs
 /////////////////////////
+/*nabla_inout
+: IN {rhs;};
+| OUT {rhs;};
+| INOUT {rhs;};
+;
+nabla_parameter_declaration
+: direct_declarator {rhs;}
+| nabla_item direct_declarator {rhs;}
+;
+*/
+/*IDENTIFIER {rhs;}
+| IDENTIFIER  SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
+| nabla_item IDENTIFIER {rhs;}
+| nabla_item IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$2);}
+;*/
+/*nabla_parameter_declaration_list
+: nabla_parameter_declaration
+| nabla_parameter_declaration_list ',' nabla_parameter_declaration
+;
+nabla_inout_parameter
+: nabla_inout '(' nabla_parameter_declaration_list ')' {rhs;}
+;
+nabla_parameter_list
+: nabla_inout_parameter {rhs;}
+| nabla_parameter_list nabla_inout_parameter {rhs;}
+;
+*/
+
+nabla_parameter_declaration: nabla_item direct_declarator {rhs;};
 nabla_parameter
 : nabla_in_parameter_list {rhs;}
 | nabla_out_parameter_list {rhs;}
@@ -440,15 +477,13 @@ nabla_parameter
 nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {rhs;};
 nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {rhs;};
 nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {rhs;};
-/////////////////////////////////////////////
-// ∇ IN/OUT || xyz/mat/env parameters list //
-/////////////////////////////////////////////
 nabla_parameter_list
 : nabla_parameter {rhs;}
 | nabla_parameter_declaration {rhs;}
 | nabla_parameter_list nabla_parameter {rhs;}
 | nabla_parameter_list ',' nabla_parameter_declaration {rhs;}
 ;
+
 
 
 //////////////////////////////////
@@ -470,6 +505,7 @@ primary_expression
 | FRACTION_ONE_EIGHTH_CST {rhs;}
 | DIESE {rhs;}  // Permet d'écrire un '#' à la place d'un [c|n]
 | IDENTIFIER {rhs;}
+| IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 | nabla_item {rhs;} // Permet de rajouter les items Nabla au sein des corps de fonctions
 | nabla_system {rhs;}
 | HEX_CONSTANT {rhs;} 
@@ -482,6 +518,7 @@ primary_expression
 ;
 postfix_expression
 : primary_expression {rhs;}
+//| postfix_expression SUPERSCRIPT_N_PLUS_ONE {rhs;}
 | postfix_expression FORALL_NODE_INDEX {rhs;}
 | postfix_expression FORALL_CELL_INDEX {rhs;}
 | postfix_expression FORALL_MTRL_INDEX 
@@ -701,14 +738,19 @@ nabla_item_declaration_list
 : nabla_item_declaration {rhs;}
 | nabla_item_declaration_list nabla_item_declaration {rhs;}
 ;
+nabla_item_declaration
+: type_name nabla_direct_declarator_list ';' {rhs;}
+| preproc {rhs;}
+;
+nabla_direct_declarator_list
+: nabla_direct_declarator {rhs;}
+| nabla_direct_declarator_list ',' nabla_direct_declarator {rhs;}
+;
 nabla_direct_declarator
 : IDENTIFIER {rhs;}
 | IDENTIFIER '[' nabla_items ']'{rhs;}
 | IDENTIFIER '[' primary_expression ']'{rhs;}
-;
-nabla_item_declaration
-: type_name nabla_direct_declarator ';' {rhs;}
-| preproc {rhs;}
+| IDENTIFIER  SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 ;
 
 

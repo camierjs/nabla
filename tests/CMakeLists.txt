@@ -161,6 +161,9 @@ endforeach()
 nabla_add_okina_test(upwind 1 gen std seq)
 nabla_add_okina_test(upwind 1 run std seq)
 
+nabla_add_okina_test(upwindAP 1 gen std seq)
+nabla_add_okina_test(upwindAP 1 run std seq)
+
 
 ########################
 # NABLA TESTS FOR CUDA #

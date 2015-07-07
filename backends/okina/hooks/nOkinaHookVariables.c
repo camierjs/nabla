@@ -59,12 +59,12 @@ void nOkinaHookVariablesTurnBracketsToParentheses(nablaMain* nabla,
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
-//    if (!job->parse.selection_statement_in_compound_statement){
+    // Le test upwind a de 'if' qu'il ne faut pas "cell_node["'er
+    //if (!job->parse.selection_statement_in_compound_statement){
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
-//    }else{
-//      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
-//    }
+      //}else{
+      //  nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
+      //}
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -232,8 +232,8 @@ static void nOkinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
 // * Tokens to variables 'NODE Job' switch
 // ****************************************************************************
 static void nOkinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                                    nablaVariable *var,
+                                                    nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;
@@ -250,8 +250,8 @@ static void nOkinaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[c][c");
     if (enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    //if (enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[c]");
-    if (enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[node_cell[2*n+c]]");
+    if (enum_enum=='c' && (!isWithLibrary(arc,with_real)))  nprintf(arc, "/*CellVar c*/", "[c]");
+    if (enum_enum=='c' && isWithLibrary(arc,with_real))  nprintf(arc, "/*CellVar c*/", "[node_cell[2*n+c]]");
     if (enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
     break;
   }
