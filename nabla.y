@@ -440,7 +440,7 @@ nabla_env_declaration: ENV nabla_env_environment {rhs;};
 // dans nMiddleScanForNablaJobParameter pour récupérer les noms
 // 150707 Ne marche pas pour le backend CUDA qui utilise qqchose pour dumper les arguments des jobs
 /////////////////////////
-/*nabla_inout
+nabla_inout
 : IN {rhs;};
 | OUT {rhs;};
 | INOUT {rhs;};
@@ -449,15 +449,14 @@ nabla_parameter_declaration
 : direct_declarator {rhs;}
 | nabla_item direct_declarator {rhs;}
 ;
-*/
 /*IDENTIFIER {rhs;}
 | IDENTIFIER  SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 | nabla_item IDENTIFIER {rhs;}
 | nabla_item IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$2);}
 ;*/
-/*nabla_parameter_declaration_list
-: nabla_parameter_declaration
-| nabla_parameter_declaration_list ',' nabla_parameter_declaration
+nabla_parameter_declaration_list
+: nabla_parameter_declaration {rhs;}
+| nabla_parameter_declaration_list ',' nabla_parameter_declaration {rhs;}
 ;
 nabla_inout_parameter
 : nabla_inout '(' nabla_parameter_declaration_list ')' {rhs;}
@@ -466,10 +465,10 @@ nabla_parameter_list
 : nabla_inout_parameter {rhs;}
 | nabla_parameter_list nabla_inout_parameter {rhs;}
 ;
-*/
 
-nabla_parameter_declaration: nabla_item direct_declarator {rhs;};
-nabla_parameter
+
+//nabla_parameter_declaration: nabla_item direct_declarator {rhs;};
+/*nabla_parameter
 : nabla_in_parameter_list {rhs;}
 | nabla_out_parameter_list {rhs;}
 | nabla_inout_parameter_list {rhs;}
@@ -477,12 +476,13 @@ nabla_parameter
 nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {rhs;};
 nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {rhs;};
 nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {rhs;};
+
 nabla_parameter_list
 : nabla_parameter {rhs;}
 | nabla_parameter_declaration {rhs;}
 | nabla_parameter_list nabla_parameter {rhs;}
 | nabla_parameter_list ',' nabla_parameter_declaration {rhs;}
-;
+;*/
 
 
 
@@ -565,7 +565,8 @@ unary_expression
 | CUBE_ROOT_OP unary_expression {rhs;}
 | INC_OP unary_expression {rhs;}
 | DEC_OP unary_expression {rhs;}
-| '&' unary_expression {Yadrs($$,$1,$2);}
+//| '&' unary_expression {Yadrs($$,$1,$2);}
+| '&' unary_expression {YadrsSandwich($$,$1,$2);}
 | unary_prefix_operator cast_expression {rhs;}
 | SIZEOF unary_expression {rhs;}
 | SIZEOF '(' type_name ')'{rhs;}

@@ -168,6 +168,7 @@ nabla_add_okina_test(upwindAP 1 run std seq)
 ########################
 # NABLA TESTS FOR CUDA #
 ########################
+nabla_add_cuda_test(gram 1 gen)
 nabla_add_cuda_test(lulesh 1 gen)
 nabla_add_cuda_test(mhydro 1 gen)
 if(CUDA_FOUND)

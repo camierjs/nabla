@@ -699,8 +699,11 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
                                     nablaJob *job,
                                     astNode *n,
                                     int *numParams){
-  dbg("\n\t[cudaHookDumpNablaParameterList]");
-  if (n==NULL) return;
+  if (n==NULL){
+    dbg("\n\t\t[cudaHookDumpNablaParameterList] NULL node, returning");
+    return;
+  }
+  //dbg("\n\t\t[cudaHookDumpNablaParameterList]");
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")){
     dbg("\n\t[cudaHookDumpNablaParameterList] compound_statement, returning");
@@ -712,24 +715,33 @@ void cudaHookDumpNablaParameterList(nablaMain *nabla,
   }
   
   //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
+  if (n->rule) dbg("\n\t\t[cudaHookDumpNablaParameterList] rule '%s'", n->rule);
+  if (n->token) dbg("\n\t\t[cudaHookDumpNablaParameterList] token '%s'", n->token);
   
   if (n->ruleid==rulenameToId("direct_declarator")){
+    dbg("\n\t\t[cudaHookDumpNablaParameterList] Looking for '%s':", n->children->token);
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t\t[cudaHookDumpNablaParameterList] looking for %s", n->children->token);
     *numParams+=1;
     // Si on ne trouve pas de variable, on a rien à faire
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable error\n"));
+
+    dbg("\n\t\t[cudaHookDumpNablaParameterList] Working with '%s %s':", var->item, var->name);
+    
     if (strcmp(var->type, "real3")!=0){
+      dbg("\n\t\t[cudaHookDumpNablaParameterList] Non Real3 variable!\n");
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
       }else{
         nprintf(nabla, NULL, ",\n\t\t%s *%s_%s", var->type, var->item, n->children->token);
       }
     }else{
+      //dbg("\n\t\t[cudaHookDumpNablaParameterList] Working with '%s':", var->name);
       //exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable Real3 error\n"));
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
-        nprintf(nabla, NULL, NULL);
+        //nprintf(nabla, NULL, NULL);
+        dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found 'node coord', nothing to do!\n");
       }else{
+        dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found %s %s!\n", var->item, n->children->token);
         if (var->dim==0){
           nprintf(nabla, NULL, ",\n\t\tReal3 *%s_%s", var->item, n->children->token);
         }else{

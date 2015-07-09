@@ -141,6 +141,7 @@ void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
     {rulenameToId("direct_declarator"),actNablaJobParameterDirectDeclarator},
     {0,NULL}};
   
+  //dbg("\n\t[scanForNablaJobParameter] %s", n->token);
   if (n->tokenid=='@') return;
   if (n->ruleid==rulenameToId("compound_statement")) return;
   
@@ -345,11 +346,12 @@ int nMiddleDumpParameterTypeList(FILE *file, astNode * n){
   //if (n->token != NULL) fprintf(file, "/*dumpParameterTypeList %s:%d*/",n->token,number_of_parameters_here);
   
   if ((n->token != NULL )&&(strncmp(n->token,"xyz",3)==0)){// hit 'xyz'
-    //fprintf(file, "/*xyz here!*/");
+    //fprintf(file, "/*xyz hit!*/");
     number_of_parameters_here+=1;
   }
 
   if ((n->token != NULL )&&(strncmp(n->token,"void",4)==0)){
+    //fprintf(file, "/*void hit!*/");
     number_of_parameters_here-=1;
   }
   
@@ -435,7 +437,7 @@ void nMiddleJobFill(nablaMain *nabla,
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->rtntp, job->name);
-  // Remplissage des 
+  // nMiddleScanForNablaJobParameter ne fait que dumper
   //nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter_list"), nabla);
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
   nMiddleScanForIfAfterAt(n->children, job, nabla);
@@ -473,8 +475,13 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // Et on dump les in et les out
   dbg("\n\t[nablaJobFill] Et on dump les in et les out");
-  if (nabla->hook->dumpNablaParameterList!=NULL)
+  if (nabla->hook->dumpNablaParameterList!=NULL){
+    dbg("\n\t\t[nablaJobFill] job->nblParamsNode->ruleid is '%s'",job->nblParamsNode->rule);
+    // On enlève ce teste tant qu'on autorise des jobs sans déclaration
+    // Mais il faudra le remettre quand on l'obligera!
+    // assert(job->nblParamsNode->ruleid==rulenameToId("nabla_parameter_list"));
     nabla->hook->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
+  }
 
   // On ferme la parenthèse des paramètres que l'on avait pas pris dans les tokens
   nprintf(nabla, NULL, "){");// du job

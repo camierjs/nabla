@@ -18,20 +18,28 @@
 // See the LICENSE file for details.
 
 cells{
-  Real alpha;
+  Real v;
+  Real e,volo;
 };
 
 nodes{
   ℝ u;
 };
-
+//
 global{
   Real alpha_global;
 };
 
-∀ nodes void loop(void) in (node u) @ 1.0 {
-  unp1 = u - cp*(u-u[n-1]) - cm*(u[+1]-u);
+
+∀ cells void iniCells(void) in (cell e,v)
+  out (cell volo) @ 8.0 {
+  volo += e*v;
 }
+
+
+/*∀ nodes void loop(void) in (node u) @ 1.0 {
+  unp1 = u - cp*(u-u[n-1]) - cm*(u[+1]-u);
+  }*/
 
 //  FILE *f=fopen("temporal.plot","r");
 //  fprintf(f,"bla");

@@ -92,7 +92,7 @@ void dbgLoop(void) @ 1.0 {
 }
 
 // !!!!!
-∀ nodes void flushNodePU(void)@ 1.0{
+∀ nodes void flushNodePU(void) @ 1.0{
   nP=nU=0.0;
 }
 

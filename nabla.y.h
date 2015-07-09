@@ -104,12 +104,18 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 #define Yp3p(lhs, n1, n2, n3)                                         \
   tailSandwich('(', ')',yyr2[yyn],n1,n2,n3)
 
+
+// *****************************************************************************
+// * Yadrs and YadrsSandwich that uses tailSandwich
+// *****************************************************************************
 #define Yadrs(lhs,and,expr)                                           \
   astNode *i=astNewNode();                                            \
   i->tokenid=ADRS_IN;                                                 \
   astNode *o=astNewNode();                                            \
   o->tokenid=ADRS_OUT;                                                \
   RHS(lhs,i,and,expr,o)
+#define YadrsSandwich(lhs,nd,expr)                                    \
+  tailSandwich(ADRS_IN,ADRS_OUT,2,nd,expr)
 
 
 // *****************************************************************************
