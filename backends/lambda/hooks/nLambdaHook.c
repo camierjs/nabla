@@ -310,7 +310,7 @@ char* ccHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
 // ****************************************************************************
 // * Dump des variables appelées
 // ****************************************************************************
-static void ccHookDfsForCalls(struct nablaMainStruct *nabla,
+void ccHookDfsForCalls(struct nablaMainStruct *nabla,
                              nablaJob *fct,
                              astNode *n,
                              const char *namespace,
@@ -331,24 +331,24 @@ static void ccHookDfsForCalls(struct nablaMainStruct *nabla,
 // ****************************************************************************
 // * Dump du préfix des points d'entrées: inline ou pas
 // ****************************************************************************
-static char* ccHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
+char* ccHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
   //return "";
   return "static inline";
 }
 
-static void ccHookIteration(struct nablaMainStruct *nabla){
+void ccHookIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "cc_iteration()");
 }
-static void ccHookExit(struct nablaMainStruct *nabla){
+void ccHookExit(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*EXIT*/", "exit(0.0)");
 }
-static void ccHookTime(struct nablaMainStruct *nabla){
+void ccHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "global_time");
 }
-static void ccHookFatal(struct nablaMainStruct *nabla){
+void ccHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
-static void ccHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
+void ccHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
@@ -386,7 +386,7 @@ void ccInclude(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-static void ccHeaderPrefix(nablaMain *nabla){
+void ccHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
           "#ifndef __CC_%s_H__\n#define __CC_%s_H__",
@@ -398,7 +398,7 @@ static void ccHeaderPrefix(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-static void ccHeaderIncludes(nablaMain *nabla){
+void ccHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
 // *****************************************************************************\n\
@@ -431,10 +431,10 @@ extern char knStdScatter_h[];
 extern char knStdOStream_h[];
 extern char knStdTernary_h[];
 
-static char *dumpExternalFile(char *file){
+char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
-static void ccHeaderSimd(nablaMain *nabla){
+void ccHeaderSimd(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(knStdInteger_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(knStdReal_h));
@@ -450,7 +450,7 @@ static void ccHeaderSimd(nablaMain *nabla){
 // * ccHeader for Dbg
 // ****************************************************************************
 extern char knDbg_h[];
-static void ccHeaderDbg(nablaMain *nabla){
+void ccHeaderDbg(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(knDbg_h));
 }
@@ -460,7 +460,7 @@ static void ccHeaderDbg(nablaMain *nabla){
 // * ccHeader for Maths
 // ****************************************************************************
 extern char knMth_h[];
-static void ccHeaderMth(nablaMain *nabla){
+void ccHeaderMth(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(knMth_h));
 }
@@ -469,7 +469,7 @@ static void ccHeaderMth(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-static void ccHeaderPostfix(nablaMain *nabla){
+void ccHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __CC_%s_H__\n",nabla->entity->name);
 }
 
@@ -477,7 +477,7 @@ static void ccHeaderPostfix(nablaMain *nabla){
 // ****************************************************************************
 // * ccHookPrimaryExpressionToReturn
 // ****************************************************************************
-static bool ccHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+bool ccHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
   const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
   dbg("\n\t[ccHookPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
@@ -491,161 +491,6 @@ static bool ccHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, ast
   return false;
 }
 
-
-
-/*****************************************************************************
- * cc
- *****************************************************************************/
-NABLA_STATUS cc(nablaMain *nabla,
-                astNode *root,
-                const char *nabla_entity_name){
-  char srcFileName[NABLA_MAX_FILE_NAME];
-  char hdrFileName[NABLA_MAX_FILE_NAME];
-  // Définition des hooks pour l'AVX ou le MIC
-  nablaBackendSimdHooks nablaCcSimdStdHooks={
-    ccHookBits,
-    ccHookGather,
-    ccHookScatter,
-    ccTypedef,
-    ccDefines,
-    ccForwards,
-    ccHookPrevCell,
-    ccHookNextCell,
-    ccHookIncludes
-  };
-  nabla->simd=&nablaCcSimdStdHooks;
-    
-  // Définition des hooks pour Cilk+ *ou pas*
-  nablaBackendParallelHooks ccCilkHooks={
-    ccHookParallelCilkSync,
-    ccHookParallelCilkSpawn,
-    ccHookParallelCilkLoop,
-    ccHookParallelCilkIncludes
-  };
-  nablaBackendParallelHooks ccOpenMPHooks={
-    ccHookParallelOpenMPSync,
-    ccHookParallelOpenMPSpawn,
-    ccHookParallelOpenMPLoop,
-    ccHookParallelOpenMPIncludes
-  };
-  nablaBackendParallelHooks ccVoidHooks={
-    ccHookParallelVoidSync,
-    ccHookParallelVoidSpawn,
-    ccHookParallelVoidLoop,
-    ccHookParallelVoidIncludes
-  };
-  nabla->parallel=&ccVoidHooks;
-  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nabla->parallel=&ccCilkHooks;
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nabla->parallel=&ccOpenMPHooks;
-
-  
-  nablaBackendPragmaHooks ccPragmaICCHooks ={
-    ccHookPragmaIccIvdep,
-    ccHookPragmaIccAlign
-  };
-  nablaBackendPragmaHooks ccPragmaGCCHooks={
-    ccHookPragmaGccIvdep,
-    ccHookPragmaGccAlign
-  };
-  // Par defaut, on met GCC
-  nabla->pragma=&ccPragmaGCCHooks;
-  if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    nabla->pragma=&ccPragmaICCHooks;
-  
-  static nablaBackendHooks ccBackendHooks={
-    // Jobs stuff
-    ccHookPrefixEnumerate,
-    ccHookDumpEnumerateXYZ,
-    ccHookDumpEnumerate,
-    ccHookPostfixEnumerate,
-    ccHookItem,
-    ccHookSwitchToken,
-    ccHookTurnTokenToVariable,
-    ccHookSystem,
-    ccHookAddExtraParameters,
-    ccHookDumpNablaParameterList,
-    ccHookTurnBracketsToParentheses,
-    ccHookJobDiffractStatement,
-    // Other hooks
-    ccHookFunctionName,
-    ccHookFunction,
-    ccHookJob,
-    ccHookReduction,
-    ccHookIteration,
-    ccHookExit,
-    ccHookTime,
-    ccHookFatal,
-    ccHookAddCallNames,
-    ccHookAddArguments,
-    ccHookTurnTokenToOption,
-    ccHookEntryPointPrefix,
-    ccHookDfsForCalls,
-    ccHookPrimaryExpressionToReturn,
-    ccHookReturnFromArgument
-  };
-  nabla->hook=&ccBackendHooks;
-
-  // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nMiddleVariableNew(nabla);
-  nMiddleVariableAdd(nabla, iteration);
-  iteration->axl_it=false;
-  iteration->item=strdup("global");
-  iteration->type=strdup("integer");
-  iteration->name=strdup("iteration");
- 
-  // Ouverture du fichier source du entity
-  sprintf(srcFileName, "%s.cc", nabla->name);
-  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
-
-  // Ouverture du fichier header du entity
-  sprintf(hdrFileName, "%s.h", nabla->name);
-  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
-  
-  // Dump dans le HEADER des includes, typedefs, defines, debug, maths & errors stuff
-  ccHeaderPrefix(nabla);
-  ccHeaderIncludes(nabla);
-  nMiddleDefines(nabla,nabla->simd->defines);
-  nMiddleTypedefs(nabla,nabla->simd->typedefs);
-  nMiddleForwards(nabla,nabla->simd->forwards);
-
-  // On inclue les fichiers kn'SIMD'
-  ccHeaderSimd(nabla);
-  ccHeaderDbg(nabla);
-  ccHeaderMth(nabla);
-  ccMesh(nabla);
-  ccDefineEnumerates(nabla);
-
-  // Dump dans le fichier SOURCE
-  ccInclude(nabla);
-  
-  // Parse du code préprocessé et lance les hooks associés
-  nMiddleParseAndHook(root,nabla);
-  ccMainVarInitKernel(nabla);
-
-  // Partie PREFIX
-  ccMainPrefix(nabla);
-  ccVariablesPrefix(nabla);
-  ccMainMeshPrefix(nabla);
-  
-  // Partie Pré Init
-  ccMainPreInit(nabla);
-  ccMainVarInitCall(nabla);
-      
-  // Dump des entry points dans le main
-  ccMain(nabla);
-
-  // Partie Post Init
-  ccMainPostInit(nabla);
-  
-  // Partie POSTFIX
-  ccHeaderPostfix(nabla); 
-  ccMainMeshPostfix(nabla);
-  ccVariablesPostfix(nabla);
-  ccMainPostfix(nabla);
-  return NABLA_OK;
-}
 
 
 /*****************************************************************************

@@ -44,10 +44,6 @@
 #include "nabla.tab.h"
 
 
-
-
-
-
 // *****************************************************************************
 // * Dump d'extra connectivity
 // ****************************************************************************
@@ -78,13 +74,12 @@ void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   *numParams+=1;
 }
 
-
 /*****************************************************************************
   * Dump d'extra arguments
  *****************************************************************************/
 void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
   const char* tabs="\t\t\t\t\t\t\t";
-  { // Rajout pour l'instant systématiquement des node_coords et du global_deltat
+  { // Rajout pour l'instant systÃ©matiquement des node_coords et du global_deltat
     nablaVariable *var;
     if (*numParams!=0) nprintf(nabla, NULL, "/*cudaAddExtraArguments*/,");
     nprintf(nabla, NULL, "\n%snode_coord",tabs);
@@ -97,62 +92,9 @@ void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
       *numParams+=1;
    }
   }
-  // Rajout pour l'instant systématiquement des connectivités
+  // Rajout pour l'instant systÃ©matiquement des connectivitÃ©s
   if (job->item[0]=='c'||job->item[0]=='n')
     cudaAddExtraConnectivitiesArguments(nabla, numParams);
-}
-
-
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-  if (n==NULL) return;
-  if (n->tokenid!=0) dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
-
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) {
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '{', returning");
-    return;
-  }
-  
-  if (n->tokenid=='@'){
-    return;
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '@', returning");
-  }
-    
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
-    nablaVariable *hit=nMiddleVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
-    // Si on ne trouve pas de variable, c'est pas normal
-    if (hit == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
-    nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
-    if (allready_here!=NULL){
-      dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
-    }else{
-      // Création d'une nouvelle called_variable
-      nablaVariable *new = nMiddleVariableNew(NULL);
-      new->name=strdup(hit->name);
-      new->item=strdup(hit->item);
-      new->type=strdup(hit->type);
-      new->dim=hit->dim;
-      new->size=hit->size;
-      // Rajout à notre liste
-      if (*variables==NULL){
-        dbg("\n\t\t\t[cudaAddNablaVariableList] first hit");
-        *variables=new;
-      }else{
-        dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
-        nMiddleVariableLast(*variables)->next=new;
-      }
-    }
-  }
-  if (n->children != NULL) cudaAddNablaVariableList(nabla, n->children, variables);
-  if (n->next != NULL) cudaAddNablaVariableList(nabla, n->next, variables);
 }
 
 
@@ -163,7 +105,7 @@ void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
   //nprintf(nabla,"\n\t[cudaDumpNablaArgumentList]",NULL);
   if (n==NULL) return;
   
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
+  // Si on tombe sur la '{', on arrÃªte; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) return;
   
   if (n->tokenid=='@') return;
@@ -174,7 +116,7 @@ void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
     *numParams+=1;
-    // Si on ne trouve pas de variable, on a rien à faire
+    // Si on ne trouve pas de variable, on a rien Ã  faire
     if (var == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaArgumentList] Variable error\n"));
     if (strcmp(var->type, "real3")!=0){
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
@@ -193,6 +135,7 @@ void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
 }
 
 
+
 /*****************************************************************************
   * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
  *****************************************************************************/
@@ -200,7 +143,7 @@ void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bo
   //nprintf(nabla,"\n\t[cudaHookDumpNablaParameterList]",NULL);
   if (n==NULL) return;
   
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
+  // Si on tombe sur la '{', on arrÃªte; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) return;
   if (n->tokenid=='@') return;
 
@@ -209,7 +152,7 @@ void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bo
     
   if (n->ruleid==rulenameToId("direct_declarator")){
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    // Si on ne trouve pas de variable, on a rien à faire
+    // Si on ne trouve pas de variable, on a rien Ã  faire
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
     if (!in_or_out){

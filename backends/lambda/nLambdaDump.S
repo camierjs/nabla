@@ -54,36 +54,36 @@
         .global knStdOStream_h
         
 knDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knDbg.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knDbg.h"
         .byte 0
 knMsh_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMsh.c"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knMsh.c"
         .byte 0
 knMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knMth.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knMth.h"
         .byte 0
 
 
         
 knStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdReal.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdReal.h"
         .byte 0
 knStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdReal3.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdReal3.h"
         .byte 0
 knStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdInteger.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdInteger.h"
         .byte 0
 knStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdTernary.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdTernary.h"
         .byte 0
 knStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdGather.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdGather.h"
         .byte 0
 knStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdScatter.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdScatter.h"
         .byte 0
 knStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/outputs/knStdOStream.h"
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/knStdOStream.h"
         .byte 0
 

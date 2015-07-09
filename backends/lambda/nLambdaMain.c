@@ -56,11 +56,8 @@ int main(int argc, char *argv[]){\n\
 \tstruct timeval st, et;\n\
 \t//int iteration=1;\n\
 #ifdef __AVX__\n\
-\t//avxTest();\n\
 #endif\n\
 #if defined(__MIC__)||defined(__AVX512F__)\n\
-\t//micTestReal();\n\
-\t//micTestReal3();\n\
 #endif\n\
 \tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
 \tnabla_ini_variables();\n\

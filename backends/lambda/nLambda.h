@@ -43,55 +43,53 @@
 #ifndef _NABLA_CC_H_
 #define _NABLA_CC_H_
 
-
 extern char* ccForwards[];
 extern nablaDefine ccDefines[];
 extern nablaTypedef ccTypedef[];
 
-
 char* ccHookBits(void);
-char* ccHookGather(nablaJob *,nablaVariable*,enum_phase);
+char* ccHookGather(nablaJob*,nablaVariable*,enum_phase);
 char* ccHookScatter(nablaVariable*);
 char* ccHookPrevCell(void);
 char* ccHookNextCell(void);
 char* ccHookIncludes(void);
 
-char* ccFilterGather(nablaJob *job);
-char* ccFilterScatter(nablaJob *job);
+char* ccFilterGather(nablaJob*);
+char* ccFilterScatter(nablaJob*);
 
-void ccAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams);
-void ccDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams);
-void ccAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams);
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out);
+void ccAddExtraArguments(nablaMain*,nablaJob*,int*);
+void ccDumpNablaArgumentList(nablaMain*,astNode*,int*);
+void ccAddExtraConnectivitiesArguments(nablaMain*,int*);
+void ccDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
-void ccHookReduction(struct nablaMainStruct *nabla, astNode *n);
-void ccHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct);
-void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job);
-void ccHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt);
+void ccHookReduction(struct nablaMainStruct*,astNode*);
+void ccHookAddArguments(struct nablaMainStruct*,nablaJob*);
+void ccHookReturnFromArgument(nablaMain*,nablaJob*);
+void ccHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
 // Cilk+ parallel color
-char *ccParallelCilkSync(void);
-char *ccParallelCilkSpawn(void);
-char *ccParallelCilkLoop(nablaMain *);
-char *ccParallelCilkIncludes(void);
+char *ccHookParallelCilkSync(void);
+char *ccHookParallelCilkSpawn(void);
+char *ccHookParallelCilkLoop(nablaMain *);
+char *ccHookParallelCilkIncludes(void);
 
 // OpenMP parallel color
-char *ccParallelOpenMPSync(void);
-char *ccParallelOpenMPSpawn(void);
-char *ccParallelOpenMPLoop(nablaMain *);
-char *ccParallelOpenMPIncludes(void);
+char *ccHookParallelOpenMPSync(void);
+char *ccHookParallelOpenMPSpawn(void);
+char *ccHookParallelOpenMPLoop(nablaMain *);
+char *ccHookParallelOpenMPIncludes(void);
 
 // Void parallel color
-char *ccParallelVoidSync(void);
-char *ccParallelVoidSpawn(void);
-char *ccParallelVoidLoop(nablaMain *);
-char *ccParallelVoidIncludes(void);
+char *ccHookParallelVoidSync(void);
+char *ccHookParallelVoidSpawn(void);
+char *ccHookParallelVoidLoop(nablaMain *);
+char *ccHookParallelVoidIncludes(void);
 
 // Pragmas: Ivdep, Align
-char *ccPragmaIccIvdep(void);
-char *ccPragmaGccIvdep(void);
-char *ccPragmaIccAlign(void);
-char *ccPragmaGccAlign(void);
+char *ccHookPragmaIccIvdep(void);
+char *ccHookPragmaGccIvdep(void);
+char *ccHookPragmaIccAlign(void);
+char *ccHookPragmaGccAlign(void);
 
 NABLA_STATUS ccMainPrefix(nablaMain*);
 NABLA_STATUS ccMainPreInit(nablaMain*);
@@ -110,6 +108,22 @@ void ccMesh(nablaMain*);
 void ccMainMeshPrefix(nablaMain*);
 void ccMainMeshPostfix(nablaMain*);
 
+void ccHookIteration(struct nablaMainStruct*);
+void ccHookExit(struct nablaMainStruct*);
+void ccHookTime(struct nablaMainStruct*);
+void ccHookFatal(struct nablaMainStruct*);
+void ccHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+bool ccHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+char* ccHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
+void ccHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+void ccHeaderPrefix(nablaMain*);
+void ccHeaderIncludes(nablaMain*);
+void ccHeaderSimd(nablaMain*);
+void ccHeaderDbg(nablaMain*);
+void ccHeaderMth(nablaMain*);
+void ccHeaderPostfix(nablaMain*);
+void ccInclude(nablaMain*);
+
 void ccHookFunctionName(nablaMain*);
 void ccHookFunction(nablaMain*, astNode*);
 void ccHookJob(nablaMain*, astNode*);
@@ -121,21 +135,21 @@ char* ccHookPostfixEnumerate(nablaJob*);
 char* ccHookItem(nablaJob*,const char, const char, char);
 void ccHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *ccHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void ccHookSystem(astNode*,nablaMain*, const char cnf, char enum_enum);
-void ccHookAddExtraParameters(nablaMain*, nablaJob*, int *numParams);
-void ccHookDumpNablaParameterList(nablaMain*, nablaJob*, astNode *n, int *numParams);
-void ccHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable *var, char cnfg);
-void ccHookJobDiffractStatement(nablaMain*, nablaJob*, astNode **n);
+void ccHookSystem(astNode*,nablaMain*,const char,char);
+void ccHookAddExtraParameters(nablaMain*,nablaJob*,int*);
+void ccHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
+void ccHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+void ccHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
-void ccDumpNablaArgumentList(nablaMain*, astNode *n, int *numParams);
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain*, astNode *n,bool);
-void ccAddExtraArguments(nablaMain*, nablaJob*, int *numParams);
-void ccAddNablaVariableList(nablaMain*, astNode *n, nablaVariable **variables);
-void ccAddExtraConnectivitiesParameters(nablaMain*, int*);
-void ccAddExtraConnectivitiesArguments(nablaMain*, int*);
+void ccDumpNablaArgumentList(nablaMain*,astNode*,int*);
+void ccDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
+void ccAddExtraArguments(nablaMain*,nablaJob*,int*);
+void ccAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
+void ccAddExtraConnectivitiesParameters(nablaMain*,int*);
+void ccAddExtraConnectivitiesArguments(nablaMain*,int*);
 
-NABLA_STATUS cc(nablaMain*, astNode*, const char*);
+NABLA_STATUS cc(nablaMain*,astNode*,const char*);
 
 #endif // _NABLA_CC_H_
  

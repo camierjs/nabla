@@ -44,61 +44,6 @@
 #include "nabla.tab.h"
 
 
-// ***************************************************************************** 
-// * 
-// *****************************************************************************
-extern char real3_h[];
-static void cudaHeaderReal3(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,real3_h+NABLA_LICENSE_HEADER);
-}
-
-extern char extra_h[];
-static void cudaHeaderExtra(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,extra_h+NABLA_LICENSE_HEADER);
-}
-
-extern char cuMsh_h[];
-static void cudaHeaderMesh(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,cuMsh_h+NABLA_LICENSE_HEADER);
-}
-
-extern char error_h[];
-static void cudaHeaderHandleErrors(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,error_h);
-}
-
-extern char debug_h[];
-static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
-  nablaVariable *var;
-  fprintf(nabla->entity->hdr,debug_h+NABLA_LICENSE_HEADER);
-  hprintf(nabla,NULL,"\n\n\
-// *****************************************************************************\n \
-// * Debug macro functions\n\
-// *****************************************************************************");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->item, "global")==0) continue;
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    //continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-    continue;
-    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-}
-
-
 // ****************************************************************************
 // * cudaInlines
 // ****************************************************************************

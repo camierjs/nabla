@@ -267,3 +267,56 @@ void cudaVariablesPostfix(nablaMain *nabla){
 
 
 
+
+// *****************************************************************************
+// * Ajout des variables d'un job trouvé depuis une fonction @ée
+// *****************************************************************************
+void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
+  if (n==NULL) return;
+  if (n->tokenid!=0) dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
+
+  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
+  if (n->ruleid==rulenameToId("compound_statement")) {
+    dbg("\n\t\t\t[cudaAddNablaVariableList] '{', returning");
+    return;
+  }
+  
+  if (n->tokenid=='@'){
+    return;
+    dbg("\n\t\t\t[cudaAddNablaVariableList] '@', returning");
+  }
+    
+  if (n->ruleid==rulenameToId("direct_declarator")){
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
+    nablaVariable *hit=nMiddleVariableFind(nabla->variables, n->children->token);
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
+    // Si on ne trouve pas de variable, c'est pas normal
+    if (hit == NULL)
+      return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
+    nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
+    if (allready_here!=NULL){
+      dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
+    }else{
+      // Création d'une nouvelle called_variable
+      nablaVariable *new = nMiddleVariableNew(NULL);
+      new->name=strdup(hit->name);
+      new->item=strdup(hit->item);
+      new->type=strdup(hit->type);
+      new->dim=hit->dim;
+      new->size=hit->size;
+      // Rajout à notre liste
+      if (*variables==NULL){
+        dbg("\n\t\t\t[cudaAddNablaVariableList] first hit");
+        *variables=new;
+      }else{
+        dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
+        nMiddleVariableLast(*variables)->next=new;
+      }
+    }
+  }
+  if (n->children != NULL) cudaAddNablaVariableList(nabla, n->children, variables);
+  if (n->next != NULL) cudaAddNablaVariableList(nabla, n->next, variables);
+}
+

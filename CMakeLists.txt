@@ -82,8 +82,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 target_link_libraries(nabla Nabla ${FLEX_LIBRARIES}
   NablaMiddlend 
   NablaArcane 
-  NablaCuda NablaCudaHooks
-  NablaLambda 
+  NablaCuda NablaCudaHooks NablaCudaMesh
+  NablaLambda NablaLambdaHooks NablaLambdaMesh
   NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks 
   NablaFrontend NablaMiddlend NablaToolbox)
 

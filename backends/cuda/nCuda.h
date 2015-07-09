@@ -67,6 +67,12 @@ void cudaDefineEnumerates(nablaMain*);
 void cudaVariablesPrefix(nablaMain*);
 void cudaVariablesPostfix(nablaMain*);
 
+void cudaHeaderReal3(nablaMain*);
+void cudaHeaderExtra(nablaMain*);
+void cudaHeaderMesh(nablaMain*);
+void cudaHeaderHandleErrors(nablaMain*);
+void cudaHeaderDebug(nablaMain*);
+
 void cudaMesh(nablaMain*);
 void cudaMeshConnectivity(nablaMain*);
 void nccCudaMainMeshConnectivity(nablaMain*);
