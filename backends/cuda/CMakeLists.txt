@@ -6,10 +6,16 @@ info("${VT100_BOLD}${VT100_FG_GREEN}######################${VT100_RESET}")
 # BACKEND CUDA
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}CUDA${VT100_RESET}")
 
-set(BACKEND_CUDA_C nCudaMain.c nCuda.c 
-  nCudaEnumerates.c nCudaVariables.c
-  nCudaMesh.c nCudaFunction.c
-  nCudaJob.c nCudaDump.S nCudaSimd.c)
+set(BACKEND_CUDA_C
+  nCuda.c 
+  nCudaMain.c
+  nCudaEnumerates.c
+  nCudaVariables.c
+  nCudaMesh.c
+  nCudaFunction.c
+  nCudaJob.c
+  nCudaDump.S
+  nCudaSimd.c)
 
 # On spécifie en plus que nccCudaDump.S va utiliser incbin pour se compiler
 set_property(SOURCE nccCudaDump.S 
@@ -22,6 +28,7 @@ configure_file(outputs/error.h ${CMAKE_CURRENT_BINARY_DIR}/error.h)
 configure_file(outputs/extra.h ${CMAKE_CURRENT_BINARY_DIR}/extra.h)
 configure_file(outputs/cuMsh.h ${CMAKE_CURRENT_BINARY_DIR}/cuMsh.h)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hooks)
 
 add_library(NablaCuda ${BACKEND_CUDA_C})
 add_dependencies(NablaCuda Nabla)

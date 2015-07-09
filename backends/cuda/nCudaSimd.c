@@ -42,112 +42,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* nccCudaIncludes(void){return "";}
+char *nCudaHookBits(void){return "Not relevant here";}
+char* nCudaHookIncludes(void){return "";}
 
-char *nccCudaBits(void){return "Not relevant here";}
-
-
-// ****************************************************************************
-// * Prev Cell
-// ****************************************************************************
-char* nccCudaPrevCell(void){
-  return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
-}
-
-// ****************************************************************************
-// * Next Cell
-// ****************************************************************************
-char* nccCudaNextCell(void){
-  return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
-}
-
-
-
-// ****************************************************************************
-// * Gather for Cells
-// ****************************************************************************
-static char* cudaGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
-  // Phase de déclaration
-  if (phase==enum_phase_declaration) return "";
-  // Phase function call
-  char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-gather%sk(cell_node[n*NABLA_NB_CELLS+tcid],\n\t\t\t\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
-  return strdup(gather);
-}
-
-// ****************************************************************************
-// * Gather for Nodes
-// ****************************************************************************
-static char* cudaGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
-  // Phase de déclaration
-  if (phase==enum_phase_declaration) return "";
-  // Phase function call
-  char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-//#warning continue node_cell_corner\n\
-//if (node_cell_corner[8*tnid+i]==-1) continue;\n\
-gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
-%s\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*tnid+i],\n\t\t\t",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
-  return strdup(gather);
-}
-
-
-// ****************************************************************************
-// * Gather switch
-// ****************************************************************************
-char* nccCudaGather(nablaJob *job,nablaVariable* var, enum_phase phase){
-  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return cudaGatherCells(job,var,phase);
-  if (itm=='n') return cudaGatherNodes(job,var,phase);
-  //error(!0,0,"Could not distinguish job item in okinaStdGather!");
-  return NULL;
-}
-
-
-// ****************************************************************************
-// * Scatter
-// ****************************************************************************
-char* nccCudaScatter(nablaVariable* var){
-  char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
-}
 
 
 // ****************************************************************************
 // * CUDA TYPEDEFS
 // ****************************************************************************
-nablaTypedef cudaTypedef[]={
+nablaTypedef nCudaHookTypedef[]={
   {"int","integer"},
   {NULL,NULL}
 };
@@ -157,7 +60,7 @@ nablaTypedef cudaTypedef[]={
 // ****************************************************************************
 // * CUDA DEFINES
 // ****************************************************************************
-nablaDefine cudaDefines[]={
+nablaDefine nCudaHookDefines[]={
   {"Real3","real3"},
   {"Real","real"},
   //{"real","double"},
@@ -186,7 +89,7 @@ nablaDefine cudaDefines[]={
 // ****************************************************************************
 // * Std or Mic FORWARDS
 // ****************************************************************************
-char* cudaForwards[]={
+char* nCudaHookForwards[]={
   "void gpuEnum(void);",
   NULL
 };

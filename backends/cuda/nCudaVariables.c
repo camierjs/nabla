@@ -43,332 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-/***************************************************************************** 
- * Traitement des transformations '[', '(' & ''
- *****************************************************************************/
-void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
-  dbg("\n\t[actJobItemParse] primaryExpression hits Cuda variable");
-  if (  (cnfg=='c' && var->item[0]=='n')
-      ||(cnfg=='c' && var->item[0]=='f')
-      ||(cnfg=='n' && var->item[0]!='n')            
-      ||(cnfg=='f' && var->item[0]!='f')
-      ||(cnfg=='e' && var->item[0]!='e')
-      ||(cnfg=='m' && var->item[0]!='m')
-      ){
-    //nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
-    job->parse.turnBracketsToParentheses=true;
-  }else{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_X*/", NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Y*/", NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Z*/", NULL);
-    job->parse.isDotXYZ=0;
-    job->parse.turnBracketsToParentheses=false;
-  }
-}
-
-
-/***************************************************************************** 
- * Traitement des tokens SYSTEM
- *****************************************************************************/
-void cudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
-  char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
-  char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
-  if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger
-  if (n->tokenid == SID)           nprintf(arc, "/*chs*/", "[subDomain()->subDomainId()]");
-  if (n->tokenid == THIS)          nprintf(arc, "/*chs THIS*/", NULL);
-  if (n->tokenid == NBNODE)        nprintf(arc, "/*chs NBNODE*/", NULL);
-  if (n->tokenid == NBCELL)        nprintf(arc, "/*chs NBCELL*/", NULL);
-  //if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
-  if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
-  if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException]");
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[%s->backCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[%s->backCell().uniqueId()]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[%s->frontCell().uniqueId()]",itm);
-  if (n->tokenid == NEXTCELL)      nprintf(arc, "/*chs NEXTCELL*/", ")");
-  if (n->tokenid == PREVCELL)      nprintf(arc, "/*chs PREVCELL*/", ")");
-  if (n->tokenid == NEXTNODE)      nprintf(arc, "/*chs NEXTNODE*/", "[nextNode]");
-  if (n->tokenid == PREVNODE)      nprintf(arc, "/*chs PREVNODE*/", "[prevNode]");
-  if (n->tokenid == PREVLEFT)      nprintf(arc, "/*chs PREVLEFT*/", "[cn.previousLeft()]");
-  if (n->tokenid == PREVRIGHT)     nprintf(arc, "/*chs PREVRIGHT*/", "[cn.previousRight()]");
-  if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*chs NEXTLEFT*/", "[cn.nextLeft()]");
-  if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*chs NEXTRIGHT*/", "[cn.nextRight()]");
-  //error(!0,0,"Could not switch Cuda Hook System!");
-}
-
-
-/*****************************************************************************
- * Prépare le nom de la fonction
- *****************************************************************************/
-static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-  if (strcmp(var->type,"real3")!=0){
-    nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
-    return;
-  }
-  return;
-}
-
-
-/*****************************************************************************
- * Postfix d'un .x|y|z selon le isDotXYZ
- *****************************************************************************/
-static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  switch (job->parse.isDotXYZ){
-  case(0): break;
-  case(1): {nprintf(nabla, "/*setDotX+flush*/", ""); break;}
-  case(2): {nprintf(nabla, "/*setDotY+flush*/", ""); break;}
-  case(3): {nprintf(nabla, "/*setDotZ+flush*/", ""); break;}
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[nvar] Switch isDotXYZ error\n"));
-  }
-  //nprintf(nabla,NULL,"/*setDotXYZ: Flushing isDotXYZ*/");
-  job->parse.isDotXYZ=0;
-  job->parse.turnBracketsToParentheses=false;
-}
-
-
-
-/*****************************************************************************
- * Tokens to gathered  variables
- *****************************************************************************/
-static bool cudaHookTurnTokenToGatheredVariable(nablaMain *arc,
-                                                nablaVariable *var,
-                                                nablaJob *job){
-  //nprintf(arc, NULL, "/*gathered variable?*/");
-  if (!var->is_gathered) return false;
-  nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
-  return true;
-}
-
-/*****************************************************************************
- * Tokens to variables 'CELL Job' switch
- *****************************************************************************/
-static void cudaHookTurnTokenToVariableForCellJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
-  const char cnfg=job->item[0];
-  char enum_enum=job->parse.enum_enum;
-  int isPostfixed=job->parse.isPostfixed;
-
-  // Preliminary pertinence test
-  if (cnfg != 'c') return;
-  
-  nprintf(arc, "/*CellJob*/",NULL);
-  
-  // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
-  if ((job->parse.function_call_arguments==true)&&(var->dim==1)){
-    //nprintf(arc, "/*function_call_arguments,*/","&");
-  }
-  switch (var->item[0]){
-  case ('c'):{
-    nvar(arc,var,job);
-    nprintf(arc, "/*CellVar*/",
-            "%s",
-            ((var->dim==0)? (isPostfixed==2)?"":"[tcid":
-             (enum_enum!='\0')?"[n+8*(tcid)":
-             (var->dim==1)?"[8*(tcid)":"[tcid"));
-    job->parse.variableIsArray=(var->dim==1)?true:false;
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true)
-      nprintf(arc, NULL,"+");
-    else
-      nprintf(arc, NULL,"]");
-    break;
-  }
-  case ('n'):{
-    nvar(arc,var,job);
-    if (enum_enum=='f') nprintf(arc, "/*f*/", "[");
-    if (enum_enum=='n') nprintf(arc, "/*n*/", "[cell_node[tcid+n*NABLA_NB_CELLS]]");
-    if (isPostfixed!=2 && enum_enum=='\0'){
-      if (job->parse.postfix_constant==true)
-        nprintf(arc, "/*NodeVar + postfix_constant*/", "[");
-      else
-        nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
-    }
-    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
-    if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
-    break;
-  }
-  case ('f'):{
-    nvar(arc,var,job);
-    if (enum_enum=='f') nprintf(arc, "/*FaceVar*/", "[f]");
-    if (enum_enum=='\0') nprintf(arc, "/*FaceVar*/", "[cell->face");
-    break;
-  }
-  case ('g'):{
-    nprintf(arc, "/*GlobalVar*/", "*%s_%s", var->item, var->name);
-    break;      // GLOBAL variable
-  }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job turnTokenToCudaVariable\n"));
-  }
-}
-
-
-/*****************************************************************************
- * Tokens to variables 'NODE Job' switch
- *****************************************************************************/
-static void cudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
-  const char cnfg=job->item[0];
-  char enum_enum=job->parse.enum_enum;
-  int isPostfixed=job->parse.isPostfixed;
-
-  // Preliminary pertinence test
-  if (cnfg != 'n') return;
-  nprintf(arc, "/*NodeJob*/", NULL);
-
-  // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
-  if (var->item[0]!='g') nvar(arc,var,job);
-
-  switch (var->item[0]){
-  case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[node_cell[8*tnid+i]]");//tcid][c");
-    if (var->dim==0 && enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
-    if (var->dim==0 && enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[node_cell[8*tnid+i]]");//[8*tnid+i]");
-    if (var->dim==0 && enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[node_cell");
-    break;
-  }
-  case ('n'):{
-    if ((isPostfixed!=2) && enum_enum=='f')  nprintf(arc, "/*NodeVar !2f*/", "[tnid]");
-    if ((isPostfixed==2) && enum_enum=='f')  ;//nprintf(arc, NULL);
-    if ((isPostfixed==2) && enum_enum=='\0') nprintf(arc, "/*NodeVar 20*/", NULL);
-    if ((isPostfixed!=2) && enum_enum=='n')  nprintf(arc, "/*NodeVar !2n*/", "[n]");
-    if ((isPostfixed!=2) && enum_enum=='c')  nprintf(arc, "/*NodeVar !2c*/", "[tnid]");
-    if ((isPostfixed!=2) && enum_enum=='\0') nprintf(arc, "/*NodeVar !20*/", "[tnid]");
-    break;
-  }
-  case ('f'):{
-    if (enum_enum=='f')  nprintf(arc, "/*FaceVar f*/", "[f]");
-    if (enum_enum=='\0') nprintf(arc, "/*FaceVar 0*/", "[face]");
-    break;
-  }
-  case ('g'):{
-    nprintf(arc, "/*GlobalVar*/", "*%s_%s", var->item, var->name);
-    break;
-  }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] NODES job turnTokenToCudaVariable\n"));
-  }
-}
-
-
-/*****************************************************************************
- * Tokens to variables 'FACE Job' switch
- *****************************************************************************/
-static void cudaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
-  const char cnfg=job->item[0];
-  char enum_enum=job->parse.enum_enum;
-  int isPostfixed=job->parse.isPostfixed;
-
-  // Preliminary pertinence test
-  if (cnfg != 'f') return;
-  nprintf(arc, "/*FaceJob*/", NULL);
-  // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
-  if (var->item[0]!='g') nvar(arc,var,job);
-  switch (var->item[0]){
-  case ('c'):{
-    nprintf(arc, "/*CellVar*/",
-            "%s",
-            ((var->dim==0)?
-             ((enum_enum=='\0')?
-              (isPostfixed==2)?"[":"[face->cell"
-              :"[c")
-             :"[cell][node->cell")); 
-    break;
-  }
-  case ('n'):{
-    nprintf(arc, "/*NodeVar*/", "[face->node");
-    break;
-  }
-  case ('f'):{
-    nprintf(arc, "/*FaceVar*/", "[face]");
-    break;
-  }
-  case ('g'):{
-    nprintf(arc, "/*GlobalVar*/", "*%s_%s", var->item, var->name);
-    break;
-  }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job turnTokenToCudaVariable\n"));
-  }
-}
-
-
-/*****************************************************************************
- * Tokens to variables 'Std Function' switch
- *****************************************************************************/
-static void cudaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
-                                                      nablaVariable *var,
-                                                      nablaJob *job){
-  const char cnfg=job->item[0];
- 
-  // Preliminary pertinence test
-  if (cnfg != '\0') return;
-  nprintf(arc, "/*StdJob*/", NULL);// Fonction standard
-  // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
-  if (var->item[0]!='g') nvar(arc,var,job);
-  switch (var->item[0]){
-  case ('c'):{
-    nprintf(arc, "/*CellVar*/", NULL);// CELL variable
-    break;
-  }
-  case ('n'):{
-    nprintf(arc, "/*NodeVar*/", NULL); // NODE variable
-    break;
-  }
-  case ('f'):{
-    nprintf(arc, "/*FaceVar*/", NULL);// FACE variable
-    break;
-  }
-  case('g'):{
-    nprintf(arc, "/*GlobalVar*/", "*%s_%s", var->item, var->name);
-    break;
-  }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob turnTokenToCudaVariable\n"));
-  }
-}
-
-
-/*****************************************************************************
- * Transformation de tokens en variables Cuda selon les contextes dans le cas d'un '[Cell|node]Enumerator'
- *****************************************************************************/
-nablaVariable *cudaHookTurnTokenToVariable(astNode * n,
-                                           nablaMain *arc,
-                                           nablaJob *job){
-  nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
-  
-  // Si on ne trouve pas de variable, on a rien à faire
-  if (var == NULL) return NULL;
-  dbg("\n\t[cudaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
-
-  // Set good isDotXYZ
-  if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){
-//    #warning Diffracting OFF
-    //nprintf(arc, NULL, "/* DiffractingNOW */");
-    //job->parse.diffracting=true;
-    //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
-  }
-  //nprintf(arc, NULL, "\n\t/*cudaHookTurnTokenToVariable::isDotXYZ=%d*/", job->parse.isDotXYZ);
-  
-   // Check whether this variable is being gathered
-  if (cudaHookTurnTokenToGatheredVariable(arc,var,job)){
-    return var;
-  }
-  // Check whether there's job for a cell job
-  cudaHookTurnTokenToVariableForCellJob(arc,var,job);
-  // Check whether there's job for a node job
-  cudaHookTurnTokenToVariableForNodeJob(arc,var,job);
-  // Check whether there's job for a face job
-  cudaHookTurnTokenToVariableForFaceJob(arc,var,job);
-  // Check whether there's job for a face job
-  cudaHookTurnTokenToVariableForStdFunction(arc,var,job);
-  return var;
-}
-
 
 /***************************************************************************** 
  * Upcase de la chaîne donnée en argument
@@ -381,7 +55,6 @@ static inline char *itemUPCASE(const char *itm){
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;
 }
-
 
 
 /***************************************************************************** 
@@ -403,14 +76,21 @@ typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *pos
  *****************************************************************************/
 static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){
   if (var->dim==0){
-    fprintf(nabla->entity->src,"\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
-            var->item, var->name, postfix?postfix:"", depth?depth:"",
-            itemUPCASE(var->item), postfix?"real":var->type);
+    fprintf(nabla->entity->src,
+            "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            depth?depth:"",
+            itemUPCASE(var->item),
+            postfix?"real":var->type);
   }else{
     fprintf(nabla->entity->src,
             "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s, NABLA_NB_%s*8*sizeof(%s)));",
-            var->item, var->name, 
-            itemUPCASE(var->item), postfix?"real":var->type);
+            var->item,
+            var->name, 
+            itemUPCASE(var->item),
+            postfix?"real":var->type);
   }
   return NABLA_OK;
 }
@@ -419,13 +99,22 @@ static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla, nablaVari
 /***************************************************************************** 
  * Dump d'un FREE d'une variables dans le fichier source
  *****************************************************************************/
-static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){  
+static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla,
+                                                   nablaVariable *var,
+                                                   char *postfix,
+                                                   char *depth){  
   if (var->dim==0)
-    fprintf(nabla->entity->src,"\n\tCUDA_HANDLE_ERROR(cudaFree(%s_%s%s%s));",
-            var->item, var->name, postfix?postfix:"", depth?depth:"");
+    fprintf(nabla->entity->src,
+            "\n\tCUDA_HANDLE_ERROR(cudaFree(%s_%s%s%s));",
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            depth?depth:"");
   else
-    fprintf(nabla->entity->src,"\n\tCUDA_HANDLE_ERROR(cudaFree(%s_%s));",
-            var->item, var->name);
+    fprintf(nabla->entity->src,
+            "\n\tCUDA_HANDLE_ERROR(cudaFree(%s_%s));",
+            var->item,
+            var->name);
   
   return NABLA_OK;
 }
@@ -434,7 +123,10 @@ static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla, nablaVariab
 /***************************************************************************** 
  * Dump d'une variables dans le fichier
  *****************************************************************************/
-static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){  
+static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla,
+                                               nablaVariable *var,
+                                               char *postfix,
+                                               char *depth){  
   if (var->dim==0)
     fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s%s; %s host_%s_%s%s%s[NABLA_NB_%s];",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
@@ -461,9 +153,6 @@ pFunDump witch2func(CUDA_VARIABLES_SWITCH witch){
   default: exit(NABLA_ERROR|fprintf(stderr, "\n[witch2switch] Error with witch\n"));
   }
 }
-
-
-
 
 
 
@@ -526,6 +215,7 @@ static void cudaOptions(nablaMain *nabla){
             opt->dflt);
 }
 
+
 /***************************************************************************** 
  * Dump des globals
  *****************************************************************************/
@@ -566,7 +256,6 @@ void cudaVariablesPrefix(nablaMain *nabla){
   cudaOptions(nabla);
   cudaGlobals(nabla);
 }
-
 
 
 void cudaVariablesPostfix(nablaMain *nabla){

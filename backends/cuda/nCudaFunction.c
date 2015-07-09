@@ -41,21 +41,3 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-
-/*****************************************************************************
- * Hook pour dumper le nom de la fonction
- *****************************************************************************/
-void cudaHookFunctionName(nablaMain *arc){
-  //nprintf(arc, NULL, "%sEntity::", arc->name);
-}
-
-
-/*****************************************************************************
- * Génération d'un kernel associé à une fonction
- *****************************************************************************/
-void cudaHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, fct);
-  nMiddleFunctionFill(nabla,fct,n,NULL);
-}

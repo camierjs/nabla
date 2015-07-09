@@ -40,82 +40,52 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_CUDA_H_
-#define _NABLA_CUDA_H_
-
-char *nCudaHookBits(void);
-char* nCudaHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* nCudaHookScatter(nablaVariable*);
-char* nCudaHookPrevCell(void);
-char* nCudaHookNextCell(void);
-char* nCudaHookIncludes(void);
-
-extern nablaTypedef nCudaHookTypedef[];
-extern nablaDefine nCudaHookDefines[];
-extern char* nCudaHookForwards[];
-
-NABLA_STATUS nccCudaMainPrefix(nablaMain*);
-NABLA_STATUS nccCudaMainPreInit(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitKernel(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitCall(nablaMain*);
-NABLA_STATUS nccCudaMainPostInit(nablaMain*);
-NABLA_STATUS nccCudaMain(nablaMain*);
-NABLA_STATUS nccCudaMainPostfix(nablaMain*);
-
-void nCudaInlines(nablaMain*);
-void cudaDefineEnumerates(nablaMain*);
-void cudaVariablesPrefix(nablaMain*);
-void cudaVariablesPostfix(nablaMain*);
-
-void cudaMesh(nablaMain*);
-void cudaMeshConnectivity(nablaMain*);
-void nccCudaMainMeshConnectivity(nablaMain*);
-void nccCudaMainMeshPrefix(nablaMain*);
-void nccCudaMainMeshPostfix(nablaMain*);
-
-void nCudaHookFunctionName(nablaMain*);
-void nCudaHookFunction(nablaMain*,astNode*);
-void nCudaHookJob(nablaMain*,astNode*);
-void nCudaHookLibraries(astNode*,nablaEntity*);
-char* nCudaHookPrefixEnumerate(nablaJob*);
-char* nCudaHookDumpEnumerateXYZ(nablaJob*);
-char* nCudaHookDumpEnumerate(nablaJob*);
-char* nCudaHookPostfixEnumerate(nablaJob*);
-char* nCudaHookItem(nablaJob*,const char,const char,char);
-void nCudaHookSwitchToken(astNode*,nablaJob*);
-nablaVariable *nCudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void nCudaHookSystem(astNode*,nablaMain*,const char,char);
-void nCudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void nCudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void nCudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void nCudaHookReduction(struct nablaMainStruct*,astNode *);
-
-void nCudaHookIteration(struct nablaMainStruct*);
-void nCudaHookExit(struct nablaMainStruct*);
-void nCudaHookTime(struct nablaMainStruct*);
-void nCudaHookFatal(struct nablaMainStruct*);
-void nCudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-void nCudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void nCudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-char* nCudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-
-char *nCudaPragmaGccIvdep(void);
-char *nCudaPragmaGccAlign(void);
-char* cudaGather(nablaJob*);
-char* cudaScatter(nablaJob*);
+#include "nabla.h"
 
 
-// Pour dumper les arguments necessaire dans le main
-void cudaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
-void cudaAddExtraArguments(nablaMain*, nablaJob*,int*);
-void cudaAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
-void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
-void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
+/*****************************************************************************
+ * Génération d'un kernel associé à un support
+ *****************************************************************************/
+void nCudaHookJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
+  
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
+  if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
+    exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
+}
 
-NABLA_STATUS nccCuda(nablaMain*,astNode*,const char*);
 
-#endif // _NABLA_CUDA_H_
- 
+/*****************************************************************************
+  * Dump d'extra paramètres
+ *****************************************************************************/
+void nCudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+  nablaVariable *var;
+  if (*numParams!=0) nprintf(nabla, NULL, ",");
+  nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
+  *numParams+=1;
+  // Et on rajoute les variables globales
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    //if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->item, "global")!=0) continue;
+    nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
+            //(*numParams!=0)?",":"", 
+            (var->type[0]=='r')?"Real":(var->type[0]=='i')?"int":"/*Unknown type*/",
+            var->name);
+    *numParams+=1;
+  }
+  // Rajout pour l'instant systématiquement des connectivités
+  if (job->item[0]=='c' || job->item[0]=='n')
+    cudaAddExtraConnectivitiesParameters(nabla, numParams);
+}
+
+
+
+/*****************************************************************************
+ * Cuda libraries
+ *****************************************************************************/
+void nCudaHookLibraries(astNode * n, nablaEntity *entity){
+  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
+}
+

@@ -43,31 +43,10 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-/*****************************************************************************
- * Cuda libraries
- *****************************************************************************/
-void cudaHookLibraries(astNode * n, nablaEntity *entity){
-  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
-}
 
-
-// ****************************************************************************
-// * cudaInlines
-// ****************************************************************************
-void cudaInlines(nablaMain *nabla){
-  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
-}
-
-// ****************************************************************************
-// * cudaPragmas
-// ****************************************************************************
-char *nCudaPragmaGccIvdep(void){ return ""; }
-char *nCudaPragmaGccAlign(void){ return "__align__(8)"; }
-
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
+// ***************************************************************************** 
+// * 
+// *****************************************************************************
 extern char real3_h[];
 static void cudaHeaderReal3(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
@@ -86,10 +65,59 @@ static void cudaHeaderMesh(nablaMain *nabla){
   fprintf(nabla->entity->hdr,cuMsh_h+NABLA_LICENSE_HEADER);
 }
 
+extern char error_h[];
+static void cudaHeaderHandleErrors(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,error_h);
+}
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
+extern char debug_h[];
+static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
+  nablaVariable *var;
+  fprintf(nabla->entity->hdr,debug_h+NABLA_LICENSE_HEADER);
+  hprintf(nabla,NULL,"\n\n\
+// *****************************************************************************\n \
+// * Debug macro functions\n\
+// *****************************************************************************");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->item, "global")==0) continue;
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    //continue;
+    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+    continue;
+    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
+}
+
+
+// ****************************************************************************
+// * cudaInlines
+// ****************************************************************************
+void nCudaInlines(nablaMain *nabla){
+  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * cudaPragmas
+// ****************************************************************************
+char *nCudaPragmaGccIvdep(void){ return ""; }
+char *nCudaPragmaGccAlign(void){ return "__align__(8)"; }
+
+
+
+// ****************************************************************************
+// *
+//*****************************************************************************
 static void cudaHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
@@ -98,9 +126,9 @@ static void cudaHeaderPrefix(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
+// ****************************************************************************
+// *
+// ****************************************************************************
 static void cudaHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
@@ -136,190 +164,11 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
-extern char debug_h[];
-static __attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
-  nablaVariable *var;
-  fprintf(nabla->entity->hdr,debug_h+NABLA_LICENSE_HEADER);
-  hprintf(nabla,NULL,"\n\n\
-// *****************************************************************************\n \
-// * Debug macro functions\n\
-// *****************************************************************************");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->item, "global")==0) continue;
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    //continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-    continue;
-    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-}
-
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
-extern char error_h[];
-static void cudaHeaderHandleErrors(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,error_h);
-}
-
-
-/***************************************************************************** 
- * 
- *****************************************************************************/
-static void cudaDfsForCalls(struct nablaMainStruct *nabla,
-                            nablaJob *fct, astNode *n,
-                            const char *namespace,
-                            astNode *nParams){
-  int nb_called;
-  nablaVariable *var;
-  // On scan en dfs pour chercher ce que cette fonction va appeler
-  dbg("\n\t[cudaDfsForCalls] On scan en DFS pour chercher ce que cette fonction va appeler");
-  nb_called=dfsScanJobsCalls(&fct->called_variables,nabla,n);
-  dbg("\n\t[cudaDfsForCalls] nb_called = %d", nb_called);
-  if (nb_called!=0){
-    int numParams=1;
-    cudaAddExtraConnectivitiesParameters(nabla,&numParams);
-    dbg("\n\t[cudaDfsForCalls] dumping variables found:");
-    for(var=fct->called_variables;var!=NULL;var=var->next){
-      dbg("\n\t\t[cudaDfsForCalls] variable %s %s %s", var->type, var->item, var->name);
-      nprintf(nabla, NULL, ",\n\t\t/*used_called_variable*/%s *%s_%s",var->type, var->item, var->name);
-    }
-  }
-  // Maintenant qu'on a tous les called_variables potentielles, on remplit aussi le hdr
-  // On remplit la ligne du hdr
-  hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->entryPointPrefix(nabla,fct),
-          fct->rtntp,
-          namespace?"Entity::":"",
-          fct->name);
-  // On va chercher les paramètres standards pour le hdr
-  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
-  hprintf(nabla, NULL, ");");
-}
-
 
 static void cudaHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __CUDA_%s_H__\n",nabla->entity->name);
 }
 
-static char* cudaEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
-  if (entry_point->is_an_entry_point) return "__global__";
-  return "__device__ inline";
-}
-
-static void cudaIteration(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*ITERATION*/", "cuda_iteration()");
-}
-static void cudaExit(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*EXIT*/", "cudaExit(global_deltat)");
-}
-static void cudaTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "*global_time");
-}
-static void cudaFatal(struct nablaMainStruct *nabla){
-  nprintf(nabla, NULL, "fatal");
-}
-static void cudaAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
-  nablaJob *foundJob;
-  char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
-  fct->parse.function_call_name=NULL;
-  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
-    if (foundJob->is_a_function!=true){
-      nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=strdup(callName);
-    }else{
-      nprintf(nabla, "/*isNablaFunction*/", NULL);
-    }
-  }else{
-    nprintf(nabla, "/*has not been found*/", NULL);
-  }
-}
-static void cudaAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  // En Cuda, par contre il faut les y mettre
-  if (fct->parse.function_call_name!=NULL){
-    nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments*/");
-    int numParams=1;
-    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    cudaAddExtraArguments(nabla, called, &numParams);
-    nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments done*/");
-    if (called->nblParamsNode != NULL)
-      cudaDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
-  }
-}
-static void cudaTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o cuda*/", "%s", opt->name);
-}
-
-static  void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  int fakeNumParams=0;
-  const astNode *item_node = n->children->next->children;
-  const astNode *global_var_node = n->children->next->next;
-  const astNode *reduction_operation_node = global_var_node->next;
-  astNode *item_var_node = reduction_operation_node->next;
-  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
-  char job_name[NABLA_MAX_FILE_NAME];
-  job_name[0]=0;
-  strcat(job_name,"cudaReduction_");
-  strcat(job_name,global_var_name);
-  // Rajout du job de reduction
-  nablaJob *redjob = nMiddleJobNew(nabla->entity);
-  redjob->is_an_entry_point=true;
-  redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->rtntp  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->drctn  = strdup("NoDirection");
-  //redjob->nblParamsNode=item_var_node;
-  //nablaVariable *item_var=nablaVariableFind(nabla,item_var_name);
-  //assert(item_var!=NULL);
-  redjob->called_variables=nMiddleVariableNew(nabla);
-  redjob->called_variables->item=strdup("cell");
-  redjob->called_variables->name=item_var_name;
-  // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
-  redjob->reduction = true;
-  redjob->reduction_name = strdup(global_var_name);
-  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[cudaHookReduction] @ %s",at_single_cst_node->token);
-  sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->whenx  = 1;
-  redjob->whens[0] = atof(at_single_cst_node->token);
-  nMiddleJobAdd(nabla->entity, redjob);
-  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
-  // Génération de code associé à ce job de réduction
-  nprintf(nabla, NULL, "\n\
-// ******************************************************************************\n\
-// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
-// ******************************************************************************\n\
-__global__ void %s(", item_var_name, global_var_name, job_name);
-  cudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
-nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
-\t//const double reduction_init=%e;\n\
-\tCUDA_INI_CELL_THREAD(tcid);\n\
-\t/**global_%s=*/ReduceMinToDouble((double)(cell_%s[tcid]));\n\
-}\n\n", item_var_name,at_single_cst_node->token, reduction_init,global_var_name,item_var_name);
-}
 
 
 /*****************************************************************************
@@ -330,49 +179,49 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
                    const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  nablaBackendSimdHooks nablaCudaSimdHooks={
-    nccCudaBits,
-    nccCudaGather,
-    nccCudaScatter,
-    cudaTypedef,
-    cudaDefines,
-    cudaForwards,
-    nccCudaPrevCell,
-    nccCudaNextCell,
-    nccCudaIncludes
+  nablaBackendSimdHooks nCudaSimdHooks={
+    nCudaHookBits,
+    nCudaHookGather,
+    nCudaHookScatter,
+    nCudaHookTypedef,
+    nCudaHookDefines,
+    nCudaHookForwards,
+    nCudaHookPrevCell,
+    nCudaHookNextCell,
+    nCudaHookIncludes
   };
-  nablaBackendHooks cudaBackendHooks={
+  nablaBackendHooks nCudaBackendHooks={
     // Jobs stuff
-    cudaHookPrefixEnumerate,
-    cudaHookDumpEnumerateXYZ,
-    cudaHookDumpEnumerate,
-    cudaHookPostfixEnumerate,
-    cudaHookItem,
-    cudaHookSwitchToken,
-    cudaHookTurnTokenToVariable,
-    cudaHookSystem,
-    cudaHookAddExtraParameters,
-    cudaHookDumpNablaParameterList,
-    cudaHookTurnBracketsToParentheses,
-    cudaHookJobDiffractStatement,
-    cudaHookFunctionName,
-    cudaHookFunction,
-    cudaHookJob,
-    cudaHookReduction,
-    cudaIteration,
-    cudaExit,
-    cudaTime,
-    cudaFatal,
-    cudaAddCallNames,
-    cudaAddArguments,
-    cudaTurnTokenToOption,
-    cudaEntryPointPrefix,
-    cudaDfsForCalls,
+    nCudaHookPrefixEnumerate,
+    nCudaHookDumpEnumerateXYZ,
+    nCudaHookDumpEnumerate,
+    nCudaHookPostfixEnumerate,
+    nCudaHookItem,
+    nCudaHookSwitchToken,
+    nCudaHookTurnTokenToVariable,
+    nCudaHookSystem,
+    nCudaHookAddExtraParameters,
+    nCudaHookDumpNablaParameterList,
+    nCudaHookTurnBracketsToParentheses,
+    nCudaHookJobDiffractStatement,
+    nCudaHookFunctionName,
+    nCudaHookFunction,
+    nCudaHookJob,
+    nCudaHookReduction,
+    nCudaHookIteration,
+    nCudaHookExit,
+    nCudaHookTime,
+    nCudaHookFatal,
+    nCudaHookAddCallNames,
+    nCudaHookAddArguments,
+    nCudaHookTurnTokenToOption,
+    nCudaHookEntryPointPrefix,
+    nCudaHookDfsForCalls,
     NULL, // primary_expression_to_return
     NULL // returnFromArgument
   };
-  nabla->simd=&nablaCudaSimdHooks;
-  nabla->hook=&cudaBackendHooks;
+  nabla->simd=&nCudaSimdHooks;
+  nabla->hook=&nCudaBackendHooks;
   
   nablaBackendPragmaHooks cudaPragmaGCCHooks={
     nCudaPragmaGccIvdep,
@@ -416,10 +265,10 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   // Dump des includes dans le header file, puis des typedefs, defines, debug & errors stuff
   cudaHeaderPrefix(nabla);
   cudaHeaderIncludes(nabla);
-  nMiddleTypedefs(nabla,cudaTypedef);
+  nMiddleTypedefs(nabla,nCudaHookTypedef);
   cudaHeaderHandleErrors(nabla);
-  nMiddleDefines(nabla,cudaDefines);
-  nMiddleForwards(nabla,cudaForwards);
+  nMiddleDefines(nabla,nCudaHookDefines);
+  nMiddleForwards(nabla,nCudaHookForwards);
   cudaDefineEnumerates(nabla);
    
   // Génération du maillage
@@ -433,7 +282,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   cudaHeaderMesh(nabla);
 
   // Dump dans le fichier source
-  cudaInlines(nabla);
+  nCudaInlines(nabla);
   nccCudaMainMeshConnectivity(nabla);
   
   // Parse du code préprocessé et lance les hooks associés

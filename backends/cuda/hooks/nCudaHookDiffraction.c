@@ -40,82 +40,53 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_CUDA_H_
-#define _NABLA_CUDA_H_
-
-char *nCudaHookBits(void);
-char* nCudaHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* nCudaHookScatter(nablaVariable*);
-char* nCudaHookPrevCell(void);
-char* nCudaHookNextCell(void);
-char* nCudaHookIncludes(void);
-
-extern nablaTypedef nCudaHookTypedef[];
-extern nablaDefine nCudaHookDefines[];
-extern char* nCudaHookForwards[];
-
-NABLA_STATUS nccCudaMainPrefix(nablaMain*);
-NABLA_STATUS nccCudaMainPreInit(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitKernel(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitCall(nablaMain*);
-NABLA_STATUS nccCudaMainPostInit(nablaMain*);
-NABLA_STATUS nccCudaMain(nablaMain*);
-NABLA_STATUS nccCudaMainPostfix(nablaMain*);
-
-void nCudaInlines(nablaMain*);
-void cudaDefineEnumerates(nablaMain*);
-void cudaVariablesPrefix(nablaMain*);
-void cudaVariablesPostfix(nablaMain*);
-
-void cudaMesh(nablaMain*);
-void cudaMeshConnectivity(nablaMain*);
-void nccCudaMainMeshConnectivity(nablaMain*);
-void nccCudaMainMeshPrefix(nablaMain*);
-void nccCudaMainMeshPostfix(nablaMain*);
-
-void nCudaHookFunctionName(nablaMain*);
-void nCudaHookFunction(nablaMain*,astNode*);
-void nCudaHookJob(nablaMain*,astNode*);
-void nCudaHookLibraries(astNode*,nablaEntity*);
-char* nCudaHookPrefixEnumerate(nablaJob*);
-char* nCudaHookDumpEnumerateXYZ(nablaJob*);
-char* nCudaHookDumpEnumerate(nablaJob*);
-char* nCudaHookPostfixEnumerate(nablaJob*);
-char* nCudaHookItem(nablaJob*,const char,const char,char);
-void nCudaHookSwitchToken(astNode*,nablaJob*);
-nablaVariable *nCudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void nCudaHookSystem(astNode*,nablaMain*,const char,char);
-void nCudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void nCudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void nCudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void nCudaHookReduction(struct nablaMainStruct*,astNode *);
-
-void nCudaHookIteration(struct nablaMainStruct*);
-void nCudaHookExit(struct nablaMainStruct*);
-void nCudaHookTime(struct nablaMainStruct*);
-void nCudaHookFatal(struct nablaMainStruct*);
-void nCudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-void nCudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void nCudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-char* nCudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-
-char *nCudaPragmaGccIvdep(void);
-char *nCudaPragmaGccAlign(void);
-char* cudaGather(nablaJob*);
-char* cudaScatter(nablaJob*);
+#include "nabla.h"
 
 
-// Pour dumper les arguments necessaire dans le main
-void cudaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
-void cudaAddExtraArguments(nablaMain*, nablaJob*,int*);
-void cudaAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
-void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
-void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
+/*****************************************************************************
+ * Diffraction
+ *****************************************************************************/
+void nCudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour éventuellement les diffracter (Real3 => _x, _y & _z)
+  // Et on amorce la diffraction
+  if ((*n)->ruleid == rulenameToId("expression_statement")
+      && (*n)->children->ruleid == rulenameToId("expression")
+      //&& (*n)->children->children->ruleid == rulenameToId("expression")
+      //&& job->parse.statementToDiffract==NULL
+      //&& job->parse.diffractingXYZ==0
+      ){
+      dbg("\n[cudaHookJobDiffractStatement] amorce la diffraction");
+//#warning Diffracting is turned OFF
+      job->parse.statementToDiffract=NULL;//*n;
+      // We're juste READY, not diffracting yet!
+      job->parse.diffractingXYZ=0;      
+      nprintf(nabla, "/* DiffractingREADY */",NULL);
+  }
+  
+  // On avance la diffraction
+  if ((*n)->tokenid == ';'
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ<3){
+    dbg("\n[cudaHookJobDiffractStatement] avance dans la diffraction");
+    job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
+    (*n)=job->parse.statementToDiffract;
+    nprintf(nabla, NULL, ";\n\t");
+    nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
+  }
 
-NABLA_STATUS nccCuda(nablaMain*,astNode*,const char*);
-
-#endif // _NABLA_CUDA_H_
- 
+  // On flush la diffraction 
+  if ((*n)->tokenid == ';' 
+      && job->parse.diffracting==true
+      && job->parse.statementToDiffract!=NULL
+      && job->parse.diffractingXYZ>0
+      && job->parse.diffractingXYZ==3){
+    dbg("\n[cudaHookJobDiffractStatement] Flush de la diffraction");
+    job->parse.diffracting=false;
+    job->parse.statementToDiffract=NULL;
+    job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
+    nprintf(nabla, "/*<end of diffracting>*/",NULL);
+  }
+  //dbg("\n[cudaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
+}

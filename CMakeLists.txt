@@ -79,7 +79,14 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
-target_link_libraries(nabla Nabla ${FLEX_LIBRARIES} NablaMiddlend NablaArcane NablaCuda NablaLambda NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks NablaMiddlend NablaFrontend NablaToolbox)
+target_link_libraries(nabla Nabla ${FLEX_LIBRARIES}
+  NablaMiddlend 
+  NablaArcane 
+  NablaCuda NablaCudaHooks
+  NablaLambda 
+  NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks 
+  NablaFrontend NablaMiddlend NablaToolbox)
+
 
 ###########
 # INSTALL #

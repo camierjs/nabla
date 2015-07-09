@@ -40,82 +40,78 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_CUDA_H_
-#define _NABLA_CUDA_H_
+#include "nabla.h"
 
-char *nCudaHookBits(void);
-char* nCudaHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* nCudaHookScatter(nablaVariable*);
-char* nCudaHookPrevCell(void);
-char* nCudaHookNextCell(void);
-char* nCudaHookIncludes(void);
+// ****************************************************************************
+// * Scatter
+// ****************************************************************************
+char* nCudaHookScatter(nablaVariable* var){
+  char scatter[1024];
+  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+           strcmp(var->type,"real")==0?"":"3",
+           var->item, var->name,
+           var->item, var->name);
+  return strdup(scatter);
+}
 
-extern nablaTypedef nCudaHookTypedef[];
-extern nablaDefine nCudaHookDefines[];
-extern char* nCudaHookForwards[];
-
-NABLA_STATUS nccCudaMainPrefix(nablaMain*);
-NABLA_STATUS nccCudaMainPreInit(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitKernel(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitCall(nablaMain*);
-NABLA_STATUS nccCudaMainPostInit(nablaMain*);
-NABLA_STATUS nccCudaMain(nablaMain*);
-NABLA_STATUS nccCudaMainPostfix(nablaMain*);
-
-void nCudaInlines(nablaMain*);
-void cudaDefineEnumerates(nablaMain*);
-void cudaVariablesPrefix(nablaMain*);
-void cudaVariablesPostfix(nablaMain*);
-
-void cudaMesh(nablaMain*);
-void cudaMeshConnectivity(nablaMain*);
-void nccCudaMainMeshConnectivity(nablaMain*);
-void nccCudaMainMeshPrefix(nablaMain*);
-void nccCudaMainMeshPostfix(nablaMain*);
-
-void nCudaHookFunctionName(nablaMain*);
-void nCudaHookFunction(nablaMain*,astNode*);
-void nCudaHookJob(nablaMain*,astNode*);
-void nCudaHookLibraries(astNode*,nablaEntity*);
-char* nCudaHookPrefixEnumerate(nablaJob*);
-char* nCudaHookDumpEnumerateXYZ(nablaJob*);
-char* nCudaHookDumpEnumerate(nablaJob*);
-char* nCudaHookPostfixEnumerate(nablaJob*);
-char* nCudaHookItem(nablaJob*,const char,const char,char);
-void nCudaHookSwitchToken(astNode*,nablaJob*);
-nablaVariable *nCudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void nCudaHookSystem(astNode*,nablaMain*,const char,char);
-void nCudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void nCudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void nCudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void nCudaHookReduction(struct nablaMainStruct*,astNode *);
-
-void nCudaHookIteration(struct nablaMainStruct*);
-void nCudaHookExit(struct nablaMainStruct*);
-void nCudaHookTime(struct nablaMainStruct*);
-void nCudaHookFatal(struct nablaMainStruct*);
-void nCudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-void nCudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void nCudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-char* nCudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-
-char *nCudaPragmaGccIvdep(void);
-char *nCudaPragmaGccAlign(void);
-char* cudaGather(nablaJob*);
-char* cudaScatter(nablaJob*);
+// ****************************************************************************
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// ****************************************************************************
+static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables,
+                                                   var->name);
+  if (real_variable==NULL)
+    nablaError("Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+}
 
 
-// Pour dumper les arguments necessaire dans le main
-void cudaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
-void cudaAddExtraArguments(nablaMain*, nablaJob*,int*);
-void cudaAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
-void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
-void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+char* cudaScatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!cudaScatter*/");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
 
-NABLA_STATUS nccCuda(nablaMain*,astNode*,const char*);
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// cudaScatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
 
-#endif // _NABLA_CUDA_H_
- 
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    cudaFlushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,job->entity->main->simd->scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
+}
