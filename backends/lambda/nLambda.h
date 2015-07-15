@@ -68,22 +68,22 @@ void ccHookReturnFromArgument(nablaMain*,nablaJob*);
 void ccHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
 // Cilk+ parallel color
-char *ccHookParallelCilkSync(void);
-char *ccHookParallelCilkSpawn(void);
-char *ccHookParallelCilkLoop(nablaMain *);
-char *ccHookParallelCilkIncludes(void);
+char *nLambdaParallelCilkSync(void);
+char *nLambdaParallelCilkSpawn(void);
+char *nLambdaParallelCilkLoop(nablaMain *);
+char *nLambdaParallelCilkIncludes(void);
 
 // OpenMP parallel color
-char *ccHookParallelOpenMPSync(void);
-char *ccHookParallelOpenMPSpawn(void);
-char *ccHookParallelOpenMPLoop(nablaMain *);
-char *ccHookParallelOpenMPIncludes(void);
+char *nLambdaParallelOpenMPSync(void);
+char *nLambdaParallelOpenMPSpawn(void);
+char *nLambdaParallelOpenMPLoop(nablaMain *);
+char *nLambdaParallelOpenMPIncludes(void);
 
 // Void parallel color
-char *ccHookParallelVoidSync(void);
-char *ccHookParallelVoidSpawn(void);
-char *ccHookParallelVoidLoop(nablaMain *);
-char *ccHookParallelVoidIncludes(void);
+char *nLambdaParallelVoidSync(void);
+char *nLambdaParallelVoidSpawn(void);
+char *nLambdaParallelVoidLoop(nablaMain *);
+char *nLambdaParallelVoidIncludes(void);
 
 // Pragmas: Ivdep, Align
 char *ccHookPragmaIccIvdep(void);
@@ -149,7 +149,7 @@ void ccAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
 void ccAddExtraConnectivitiesParameters(nablaMain*,int*);
 void ccAddExtraConnectivitiesArguments(nablaMain*,int*);
 
-NABLA_STATUS cc(nablaMain*,astNode*,const char*);
+NABLA_STATUS nLambda(nablaMain*,astNode*,const char*);
 
 #endif // _NABLA_CC_H_
  

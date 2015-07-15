@@ -74,6 +74,9 @@ tstu:
 tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
 
+tstla:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
+
 
 tstgram:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)

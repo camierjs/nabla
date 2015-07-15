@@ -83,7 +83,7 @@ target_link_libraries(nabla Nabla ${FLEX_LIBRARIES}
   NablaMiddlend 
   NablaArcane 
   NablaCuda NablaCudaHooks NablaCudaMesh
-  NablaLambda NablaLambdaHooks NablaLambdaMesh
+  NablaLambda NablaLambdaParallel NablaLambdaHooks NablaLambdaMesh
   NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks 
   NablaFrontend NablaMiddlend NablaToolbox)
 

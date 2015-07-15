@@ -104,6 +104,13 @@ static NABLA_STATUS ccGenerateSingleVariable(nablaMain *nabla,
                                               char *postfix,
                                               char *depth){  
   nprintf(nabla,"\n\t// ccGenerateSingleVariable",NULL);
+  if (strncmp(var->name,"coord",5)==0){
+    if ((nabla->entity->libraries&(1<<with_real))!=0){
+      fprintf(nabla->entity->hdr,
+              "\nreal/*3*/ node_coord[NABLA_NB_NODES_WARP] __attribute__ ((aligned(WARP_ALIGN)));");
+      return NABLA_OK;
+    }
+  }
   if (var->dim==0)
     fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",

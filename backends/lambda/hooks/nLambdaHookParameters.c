@@ -112,7 +112,11 @@ void ccHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   // Rajout pour l'instant systématiquement des node_coords et du global_deltat
   nablaVariable *var;
   if (*numParams!=0) nprintf(nabla, NULL, ",");
-  nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
+  // Si on est dans le cas 1D
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    nprintf(nabla, NULL, "\n\t\treal *node_coords");
+  else // Sinon pour l'instant c'est le 3D
+    nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
   *numParams+=1;
   // Et on rajoute les variables globales
   for(var=nabla->variables;var!=NULL;var=var->next){

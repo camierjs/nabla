@@ -65,7 +65,10 @@ static void ccHookSwitchForall(astNode *n, nablaJob *job){
   }
   case(NODE):{
     job->parse.enum_enum='n';
-    nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
+    if ((job->entity->libraries&(1<<with_real))!=0) // Iteration 1D
+      nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
+    else
+      nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
     break;
   }
   case(FACE):{
@@ -125,6 +128,20 @@ void ccHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
+  case(REAL):{
+    nprintf(nabla, "/*Real*/", "real ");
+    break;
+  }
+  case(REAL3):{
+    if ((job->entity->libraries&(1<<with_real))!=0)
+      exit(NABLA_ERROR|
+           fprintf(stderr,
+                   "[nLambdaHookSwitchToken] Real3 can't be used with R library!\n"));
+    
+    assert((job->entity->libraries&(1<<with_real))==0);
+    nprintf(nabla, "/*Real3*/", "real3 ");
+    break;
+  }
   case(INTEGER):{
     nprintf(nabla, "/*INTEGER*/", "integer ");
     break;

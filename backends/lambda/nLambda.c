@@ -43,12 +43,12 @@
 #include "nabla.h"
 
 
-/*****************************************************************************
- * cc
- *****************************************************************************/
-NABLA_STATUS cc(nablaMain *nabla,
-                astNode *root,
-                const char *nabla_entity_name){
+// ****************************************************************************
+// * nLambda
+// ****************************************************************************
+NABLA_STATUS nLambda(nablaMain *nabla,
+                     astNode *root,
+                     const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
   // Définition des hooks pour l'AVX ou le MIC
@@ -67,22 +67,22 @@ NABLA_STATUS cc(nablaMain *nabla,
     
   // Définition des hooks pour Cilk+ *ou pas*
   nablaBackendParallelHooks ccCilkHooks={
-    ccHookParallelCilkSync,
-    ccHookParallelCilkSpawn,
-    ccHookParallelCilkLoop,
-    ccHookParallelCilkIncludes
+    nLambdaParallelCilkSync,
+    nLambdaParallelCilkSpawn,
+    nLambdaParallelCilkLoop,
+    nLambdaParallelCilkIncludes
   };
   nablaBackendParallelHooks ccOpenMPHooks={
-    ccHookParallelOpenMPSync,
-    ccHookParallelOpenMPSpawn,
-    ccHookParallelOpenMPLoop,
-    ccHookParallelOpenMPIncludes
+    nLambdaParallelOpenMPSync,
+    nLambdaParallelOpenMPSpawn,
+    nLambdaParallelOpenMPLoop,
+    nLambdaParallelOpenMPIncludes
   };
   nablaBackendParallelHooks ccVoidHooks={
-    ccHookParallelVoidSync,
-    ccHookParallelVoidSpawn,
-    ccHookParallelVoidLoop,
-    ccHookParallelVoidIncludes
+    nLambdaParallelVoidSync,
+    nLambdaParallelVoidSpawn,
+    nLambdaParallelVoidLoop,
+    nLambdaParallelVoidIncludes
   };
   nabla->parallel=&ccVoidHooks;
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)

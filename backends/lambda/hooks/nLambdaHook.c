@@ -115,6 +115,8 @@ nablaDefine ccDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"File", "std::ofstream&"},
+  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
   {NULL,NULL}
 };
 
@@ -414,6 +416,8 @@ void ccHeaderIncludes(nablaMain *nabla){
 #include <assert.h>\n\
 #include <stdarg.h>\n\
 #include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
 %s // from nabla->parallel->includes()",
           nabla->simd->includes(),
           nabla->parallel->includes());

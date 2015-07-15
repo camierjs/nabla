@@ -40,68 +40,36 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-
-
-//****************************************************************************
-// * Backend CC - Génération de la connectivité du maillage coté header
-// ***************************************************************************
-static void ccMeshConnectivity(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * MESH CONNECTIVITY\n\
-// ********************************************************\
-\nint cell_node[8*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell[8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_corner[8*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_next[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_prev[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_and_corner[2*8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
-\n\n\n");
+// ****************************************************************************
+// * Void Sync
+// ****************************************************************************
+char *nLambdaParallelVoidSync(void){
+  return "";
 }
-
 
 
 // ****************************************************************************
-// * ccMesh
-// * Adding padding for simd too 
+// * Void Spawn
 // ****************************************************************************
-void ccMesh(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * MESH GENERATION\n\
-// ********************************************************\n\
-const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\
-\n\
-const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
-\n\
-const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
-const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
-const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\
-\n\
-const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\
-const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
-const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
-const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
-const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
-  ccMeshConnectivity(nabla);
+char *nLambdaParallelVoidSpawn(void){
+  return "";
 }
 
 
-/*****************************************************************************
- * Backend CC - Allocation de la connectivité du maillage
- *****************************************************************************/
-void ccMainMeshPrefix(nablaMain *nabla){
-  dbg("\n[nccCcMainMeshPrefix]");
-  fprintf(nabla->entity->src,"\t// [nccCcMainMeshPrefix] Allocation des connectivités");
+// ****************************************************************************
+// * Void for loop
+// ****************************************************************************
+char *nLambdaParallelVoidLoop(void){
+  return "";
 }
 
 
-void ccMainMeshPostfix(nablaMain *nabla){
-  dbg("\n[nccCcMainMeshPostfix]");
-  //fprintf(nabla->entity->src,"");
+// ****************************************************************************
+// * Void includes
+// ****************************************************************************
+char *nLambdaParallelVoidIncludes(void){
+  return "\
+int omp_get_max_threads(void){return 1;}\n\
+int omp_get_thread_num(void){return 0;}\n\
+";
 }

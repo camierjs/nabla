@@ -323,8 +323,9 @@ int nMiddleSwitch(astNode *root,
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   switch (backend){
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
-  case BACKEND_CUDA:   return nccCuda  (nabla,root,nabla_entity_name);
-  case BACKEND_OKINA:  return nOkina (nabla,root,nabla_entity_name);
+  case BACKEND_CUDA:   return nccCuda(nabla,root,nabla_entity_name);
+  case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
+  case BACKEND_LAMBDA: return nLambda(nabla,root,nabla_entity_name);
   default:
     exit(NABLA_ERROR
          |fprintf(stderr,

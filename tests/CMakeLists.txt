@@ -71,8 +71,21 @@ function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
   add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
 	 COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
-
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.okina)
+
+
+#######################################
+# NABLA TEST MACRO FOR LAMBDA BACKEND #
+#######################################
+function(NABLA_ADD_LAMBDA_TEST name nb_proc cmd parallel)
+  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_MAGENTA}lambda${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${parallel}${VT100_RESET}")
+  set(backend lambda)
+  set(subpath ${nb_proc}/${cmd}/${parallel})
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
+  add_test(NAME nabla_lambda_${name}_${cmd}_${nb_proc}_${simd}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
+	 COMMAND /bin/sh -c "PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
+endfunction(NABLA_ADD_LAMBDA_TEST)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.lambda)
  
 
 #####################################
@@ -163,6 +176,16 @@ nabla_add_okina_test(upwind 1 run std seq)
 
 nabla_add_okina_test(upwindAP 1 gen std seq)
 nabla_add_okina_test(upwindAP 1 run std seq)
+
+
+##########################
+# NABLA TESTS FOR LAMBDA #
+##########################
+nabla_add_lambda_test(lulesh 1 gen std seq)
+nabla_add_lambda_test(lulesh 1 run std seq)
+
+nabla_add_lambda_test(upwindAP 1 gen std seq)
+nabla_add_lambda_test(upwindAP 1 run std seq)
 
 
 ########################
