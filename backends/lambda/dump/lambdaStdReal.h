@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_REAL_H_
-#define _KN_STD_REAL_H_
+#ifndef _LAMBDA_STD_REAL_H_
+#define _LAMBDA_STD_REAL_H_
 
 #pragma pack(push,8)
 
@@ -138,4 +138,4 @@ inline double ReduceMaxToDouble(Real r){ return r; }
 //inline real min(const double r, const double s){ return ::fmin(r,s);}
 //inline real max(const double r, const double s){ return ::fmax(r,s);}
 
-#endif //  _KN_STD_REAL_H_
+#endif //  _LAMBDA_STD_REAL_H_

@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * Flush de la 'vraie' variable depuis celle déclarée en in/out
 // ****************************************************************************
-static void ccFlushRealVariable(nablaJob *job, nablaVariable *var){
+static void lambdaHookFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
   nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
   if (real_variable==NULL)
@@ -59,7 +59,7 @@ static void ccFlushRealVariable(nablaJob *job, nablaVariable *var){
 // ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
-char* ccFilterScatter(nablaJob *job){
+char* lambdaHookFilterScatter(nablaJob *job){
   int i;
   char scatters[1024];
   nablaVariable *var;
@@ -69,7 +69,7 @@ char* ccFilterScatter(nablaJob *job){
   
   if (job->parse.selection_statement_in_compound_statement){
     nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!ccScatter*/");
+            "/*if=>!lambdaScatter*/");
     return "";
   }
   
@@ -81,8 +81,8 @@ char* ccFilterScatter(nablaJob *job){
   if (nbToScatter==0) return "";
   
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccScatter enum_enum=%c", job->parse.enum_enum);
+    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaScatter enum_enum=%c", job->parse.enum_enum);
     if (job->parse.enum_enum=='\0') continue;
     filteredNbToScatter+=1;
   }
@@ -94,7 +94,7 @@ char* ccFilterScatter(nablaJob *job){
   for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
     // Si c'est pas le scatter de l'ordre de la déclaration, on continue
     if (i!=job->parse.iScatter) continue;
-    ccFlushRealVariable(job,var);
+    lambdaHookFlushRealVariable(job,var);
     // Pour l'instant, on ne scatter pas les node_coord
     if (strcmp(var->name,"coord")==0) continue;
     // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
@@ -110,7 +110,7 @@ char* ccFilterScatter(nablaJob *job){
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* ccHookScatter(nablaVariable* var){
+char* lambdaHookScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",

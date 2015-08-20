@@ -40,54 +40,77 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global lambdaDbg_h
-        .global lambdaMsh1D_c
-        .global lambdaMsh3D_c
-        .global lambdaMth_h
-        
-        .global lambdaStdReal_h
-        .global lambdaStdReal3_h
-        .global lambdaStdInteger_h
-        .global lambdaStdTernary_h
-        .global lambdaStdGather_h
-        .global lambdaStdScatter_h
-        .global lambdaStdOStream_h
-        
-lambdaDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaDbg.h"
-        .byte 0
-lambdaMsh1D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh1D.c"
-        .byte 0
-lambdaMsh3D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh3D.c"
-        .byte 0
-lambdaMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMth.h"
-        .byte 0
+#ifndef _LAMBDA_STD_GATHER_H_
+#define _LAMBDA_STD_GATHER_H_
 
- 
-        
-lambdaStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal.h"
-        .byte 0
-lambdaStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal3.h"
-        .byte 0
-lambdaStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdInteger.h"
-        .byte 0
-lambdaStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdTernary.h"
-        .byte 0
-lambdaStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdGather.h"
-        .byte 0
-lambdaStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdScatter.h"
-        .byte 0
-lambdaStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdOStream.h"
-        .byte 0
 
+/******************************************************************************
+ * Gather: (X is the data @ offset x)       a            b       c   d
+ * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      
+ * gather: |ABCD|
+ ******************************************************************************/
+inline void gatherk_load(const int a, real *data, real *gthr){
+  *gthr=*(data+a);
+}
+
+inline void gatherk(const int a, real *data, real *gthr){
+  gatherk_load(a,data,gthr);
+}
+
+
+inline real gatherk_and_zero_neg_ones(const int a, real *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+
+inline void gatherFromNode_k(const int a, real *data, real *gthr){
+  *gthr=gatherk_and_zero_neg_ones(a,data);
+}
+
+
+/******************************************************************************
+ * Gather avec des real3
+ ******************************************************************************/
+inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
+  //debug()<<"gather3ki, i="<<i;
+  double *p=(double *)data;
+  double value=p[3*a+i];
+  if (i==0) (*gthr).x=value;
+  if (i==1) (*gthr).y=value;
+  if (i==2) (*gthr).z=value;
+}
+
+inline void gather3k(const int a, real3 *data, real3 *gthr){
+  //debug()<<"gather3k";
+  gather3ki(a, data, gthr, 0);
+  gather3ki(a, data, gthr, 1);
+  gather3ki(a, data, gthr, 2);
+  //debug()<<"gather3k done";
+}
+
+
+
+/******************************************************************************
+ * Gather avec des real3[nodes(#8)]
+ ******************************************************************************/
+inline void gatherFromNode_3kiArray8(const int a, const int corner,
+                                     real3 *data, real3 *gthr, int i){
+  //debug()<<"gather3ki, i="<<i;
+  double *p=(double *)data;
+  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
+  if (i==0) (*gthr).x=value;
+  if (i==1) (*gthr).y=value;
+  if (i==2) (*gthr).z=value;
+}
+
+inline void gatherFromNode_3kArray8(const int a, const int corner,
+                                    real3 *data, real3 *gthr){
+  //debug()<<"gather3k";
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 0);
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 1);
+  gatherFromNode_3kiArray8(a,corner, data, gthr, 2);
+  //debug()<<"gather3k done";
+}
+
+
+#endif //  _LAMBDA_STD_GATHER_H_

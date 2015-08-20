@@ -48,14 +48,14 @@
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* ccHookGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration)
     return strdup("register int __attribute__((unused)) cw,ia;");
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-cw=(c<<WARP_BIT);\n\t\t\t\
+cw=c;\n\t\t\t\
 gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
@@ -77,7 +77,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* ccHookGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* lambdaHookGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration){
     return strdup("int nw;");
@@ -85,7 +85,7 @@ static char* ccHookGatherNodes(nablaJob *job, nablaVariable* var, enum_phase pha
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-nw=(n<<WARP_BIT);\n\t\t\t\
+nw=n;\n\t\t\t\
 //#warning continue node_cell_corner\n\
 //if (node_cell_corner[8*nw+c]==-1) continue;\n\
 gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
@@ -111,11 +111,11 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* ccHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* lambdaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return ccHookGatherCells(job,var,phase);
-  if (itm=='n') return ccHookGatherNodes(job,var,phase);
-  nablaError("Could not distinguish job item in ccStdGather!");
+  if (itm=='c') return lambdaHookGatherCells(job,var,phase);
+  if (itm=='n') return lambdaHookGatherNodes(job,var,phase);
+  nablaError("Could not distinguish job item in lambdaStdGather!");
   return NULL;
 }
 
@@ -126,7 +126,7 @@ char* ccHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* ccFilterGather(nablaJob *job){
+char* lambdaHookFilterGather(nablaJob *job){
   int i;
   char gathers[1024];
   nablaVariable *var;
@@ -140,7 +140,7 @@ char* ccFilterGather(nablaJob *job){
   if (job->parse.selection_statement_in_compound_statement){
     //nprintf(job->entity->main,
     //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!ccGather*/");
+    //"/*if=>!lambdaGather*/");
     //return "";
   }
   
@@ -154,8 +154,8 @@ char* ccFilterGather(nablaJob *job){
 
   // On filtre suivant s'il y a des forall
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// ccGather enum_enum=%c", job->parse.enum_enum);
+    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaGather on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaGather enum_enum=%c", job->parse.enum_enum);
     if (job->parse.enum_enum=='\0') continue;
     filteredNbToGather+=1;
   }

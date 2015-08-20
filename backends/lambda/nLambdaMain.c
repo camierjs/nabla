@@ -44,12 +44,12 @@
 
 
 // ****************************************************************************
-// * Backend CC PREFIX - Génération du 'main'
+// * Backend LAMBDA PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
-#define CC_MAIN_PREFIX "\n\n\n\
+#define LAMBDA_MAIN_PREFIX "\n\n\n\
 // ******************************************************************************\n\
-// * Main d'Cc\n\
+// * Main d'Lambda\n\
 // ******************************************************************************\n\
 int main(int argc, char *argv[]){\n\
 \tfloat cputime=0.0;\n\
@@ -75,21 +75,21 @@ int main(int argc, char *argv[]){\n\
 
 
 /*****************************************************************************
- * Backend CC INIT - Génération du 'main'
+ * Backend LAMBDA INIT - Génération du 'main'
  *****************************************************************************/
-#define CC_MAIN_PREINIT "\n\t//CC_MAIN_PREINIT"
+#define LAMBDA_MAIN_PREINIT "\n\t//LAMBDA_MAIN_PREINIT"
 
 
 /*****************************************************************************
- * Backend CC POSTFIX - Génération du 'main'
+ * Backend LAMBDA POSTFIX - Génération du 'main'
  *****************************************************************************/
-#define CC_MAIN_POSTINIT "\n\t//CC_MAIN_POSTINIT"
+#define LAMBDA_MAIN_POSTINIT "\n\t//LAMBDA_MAIN_POSTINIT"
 
 
 /*****************************************************************************
- * Backend CC POSTFIX - Génération du 'main'
+ * Backend LAMBDA POSTFIX - Génération du 'main'
 \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
-#define CC_MAIN_POSTFIX "\n//CC_MAIN_POSTFIX\
+#define LAMBDA_MAIN_POSTFIX "\n//LAMBDA_MAIN_POSTFIX\
 \n\tglobal_time+=*(double*)&global_deltat[0];\
 \n\tglobal_iteration+=1;\
 \n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
@@ -101,32 +101,32 @@ int main(int argc, char *argv[]){\n\
 
 
 /*****************************************************************************
- * ccMainPrefix
+ * lambdaMainPrefix
  *****************************************************************************/
-NABLA_STATUS ccMainPrefix(nablaMain *nabla){
-  dbg("\n[ccMainPrefix]");
-  fprintf(nabla->entity->src, CC_MAIN_PREFIX);
+NABLA_STATUS lambdaMainPrefix(nablaMain *nabla){
+  dbg("\n[lambdaMainPrefix]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
   return NABLA_OK;
 }
 
 
 /*****************************************************************************
- * ccMainPreInit
+ * lambdaMainPreInit
  *****************************************************************************/
-NABLA_STATUS ccMainPreInit(nablaMain *nabla){
-  dbg("\n[ccMainPreInit]");
-  fprintf(nabla->entity->src, CC_MAIN_PREINIT);
+NABLA_STATUS lambdaMainPreInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPreInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
   return NABLA_OK;
 }
 
 
 /*****************************************************************************
- * ccMainVarInitKernel
+ * lambdaMainVarInitKernel
  *****************************************************************************/
-NABLA_STATUS ccMainVarInitKernel(nablaMain *nabla){
+NABLA_STATUS lambdaMainVarInitKernel(nablaMain *nabla){
   //int i,iVar;
   nablaVariable *var;
-  dbg("\n[ccMainVarInit]");
+  dbg("\n[lambdaMainVarInit]");
   nprintf(nabla,NULL,"\n\
 // ******************************************************************************\n\
 // * Kernel d'initialisation des variables\n\
@@ -167,11 +167,11 @@ void nabla_ini_variables(void){");
 
 
 /*****************************************************************************
- * ccMainVarInitKernel
+ * lambdaMainVarInitKernel
  *****************************************************************************/
-NABLA_STATUS ccMainVarInitCall(nablaMain *nabla){
+NABLA_STATUS lambdaMainVarInitCall(nablaMain *nabla){
   nablaVariable *var;
-  dbg("\n[ccMainVarInitCall]");
+  dbg("\n[lambdaMainVarInitCall]");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
     if (strcmp(var->name, "time")==0) continue;
@@ -188,26 +188,58 @@ NABLA_STATUS ccMainVarInitCall(nablaMain *nabla){
 
 
 /*****************************************************************************
- * ccMainPostInit
+ * lambdaMainPostInit
  *****************************************************************************/
-NABLA_STATUS ccMainPostInit(nablaMain *nabla){
-  dbg("\n[ccMainPostInit]");
-  fprintf(nabla->entity->src, CC_MAIN_POSTINIT);
+NABLA_STATUS lambdaMainPostInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPostInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
   return NABLA_OK;
+}
+
+/*****************************************************************************
+  * Dump d'extra arguments
+ *****************************************************************************/
+void lambdaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla,"\n\t\t/*lambdaAddExtraArguments*/",NULL);
+}
+
+
+
+/*****************************************************************************
+  * Dump dans le src des arguments nabla en in comme en out
+ *****************************************************************************/
+void lambdaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
+  nprintf(nabla,"\n\t\t/*lambdaDumpNablaArgumentList*/",NULL);
 }
 
 
 /*****************************************************************************
- * ccMain
+  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
  *****************************************************************************/
-NABLA_STATUS ccMain(nablaMain *n){
+void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
+  nprintf(nabla,"\n\t\t/*lambdaDumpNablaDebugFunctionFromOutArguments*/",NULL);
+}
+
+
+// ****************************************************************************
+// * Dump d'extra connectivity
+// ****************************************************************************
+void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
+  return;
+}
+
+
+/*****************************************************************************
+ * lambdaMain
+ *****************************************************************************/
+NABLA_STATUS lambdaMain(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
   int i,numParams,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
   
-  dbg("\n[ccMain]");
+  dbg("\n[lambdaMain]");
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
   entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   
@@ -215,7 +247,7 @@ NABLA_STATUS ccMain(nablaMain *n){
   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
      if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
      if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
-      dbg("%s\n\t[ccMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+      dbg("%s\n\t[lambdaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
         entry_points[i].where);
@@ -247,54 +279,54 @@ NABLA_STATUS ccMain(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    ccAddExtraArguments(n, &entry_points[i], &numParams);
+    lambdaAddExtraArguments(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      ccDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      lambdaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-      ccAddExtraConnectivitiesArguments(n,&numParams);
+      lambdaAddExtraConnectivitiesArguments(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
-      dbg("\n\t[ccMain] Et on rajoute les called_variables en paramètre d'appel");
+      dbg("\n\t[lambdaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
         nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
       }
     }else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
-    ccDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
+    lambdaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
     //nprintf(n, NULL, "\n");
   }
   return NABLA_OK;
 }
 
 
-static char *ccSourceMeshAoS_vs_SoA(nablaMain *nabla){
+static char *lambdaSourceMeshAoS_vs_SoA(nablaMain *nabla){
   return "node_coord[iNode]=Real3(x,y,z);"; 
 }
 
-extern char knMsh1D_c[];
-extern char knMsh3D_c[];
-static void ccSourceMesh(nablaMain *nabla){
+extern char lambdaMsh1D_c[];
+extern char lambdaMsh3D_c[];
+static void lambdaSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->entity->libraries&(1<<with_real))!=0)
-    fprintf(nabla->entity->src,knMsh1D_c);
+    fprintf(nabla->entity->src,lambdaMsh1D_c);
   else
-    fprintf(nabla->entity->src,knMsh3D_c,ccSourceMeshAoS_vs_SoA(nabla));
+    fprintf(nabla->entity->src,lambdaMsh3D_c,lambdaSourceMeshAoS_vs_SoA(nabla));
   //fprintf(nabla->entity->src,knMsh_c);
 }
 
 /*****************************************************************************
- * ccMainPostfix
+ * lambdaMainPostfix
  *****************************************************************************/
-NABLA_STATUS ccMainPostfix(nablaMain *nabla){
-  dbg("\n[ccMainPostfix] CC_MAIN_POSTFIX");
-  fprintf(nabla->entity->src, CC_MAIN_POSTFIX);
-  dbg("\n[ccMainPostfix] ccSourceMesh");
-  ccSourceMesh(nabla);
-  dbg("\n[ccMainPostfix] NABLA_OK");
+NABLA_STATUS lambdaMainPostfix(nablaMain *nabla){
+  dbg("\n[lambdaMainPostfix] LAMBDA_MAIN_POSTFIX");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
+  dbg("\n[lambdaMainPostfix] lambdaSourceMesh");
+  lambdaSourceMesh(nabla);
+  dbg("\n[lambdaMainPostfix] NABLA_OK");
   return NABLA_OK;
 }
 

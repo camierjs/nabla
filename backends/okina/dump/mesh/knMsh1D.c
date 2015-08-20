@@ -162,7 +162,7 @@ static void nabla_ini_node_coords(void){
   }
   verifNextPrev(); 
   dbg(DBG_INI,"\nIni done");
-  dbgFuncOut();
+  //dbgFuncOut();
 }
 
 

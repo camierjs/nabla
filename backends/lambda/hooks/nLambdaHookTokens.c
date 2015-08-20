@@ -45,15 +45,15 @@
 
 
 
-void ccHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o cc*/", "%s", opt->name);
+void lambdaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+  nprintf(nabla, "/*tt2o lambda*/", "%s", opt->name);
 }
 
 
 /*****************************************************************************
  * FORALL token switch
  *****************************************************************************/
-static void ccHookSwitchForall(astNode *n, nablaJob *job){
+static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
   // Now we're allowed to work
@@ -91,15 +91,15 @@ static void ccHookSwitchForall(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void ccHookSwitchToken(astNode *n, nablaJob *job){
+void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
   if (n->token)
-    dbg("\n\t[ccHookSwitchToken] token: '%s'?", n->token);
+    dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
  
-  ccHookSwitchForall(n,job);
+  lambdaHookSwitchForall(n,job);
   
   switch(n->tokenid){
     
@@ -198,11 +198,11 @@ void ccHookSwitchToken(astNode *n, nablaJob *job){
     
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*ccFilterGather*/", "%s",ccFilterGather(job));
+    nprintf(nabla, "/*lambdaFilterGather*/", "%s",lambdaHookFilterGather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*ccFilterScatter*/", ccFilterScatter(job));
+    nprintf(nabla, "/*lambdaFilterScatter*/", lambdaHookFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
@@ -245,12 +245,6 @@ void ccHookSwitchToken(astNode *n, nablaJob *job){
     }else{
       nprintf(nabla, NULL, "]");
     }
-    //nprintf(nabla, "/*FlushingIsPostfixed*/","/*isDotXYZ=%d*/",job->parse.isDotXYZ);
-    //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, "[c]]/*]+FlushingIsPostfixed*/");
-                                        //"[((c>>WARP_BIT)*((1+1+1)<<WARP_BIT))+(c&((1<<WARP_BIT)-1))]]/*]+FlushingIsPostfixed*/");
-    //if (job->parse.isDotXYZ==1) nprintf(nabla, NULL, NULL);
-    //if (job->parse.isDotXYZ==2) nprintf(nabla, NULL, NULL);
-    //if (job->parse.isDotXYZ==3) nprintf(nabla, NULL, NULL);
     job->parse.isPostfixed=0;
     // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
@@ -322,7 +316,7 @@ void ccHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
-    if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(WARP_SIZE*c)");
+    if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(c)");
     if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(n)");
 
     break;

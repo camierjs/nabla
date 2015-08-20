@@ -44,6 +44,229 @@
 
 
 // ****************************************************************************
+// * ENUMERATES Hooks
+// ****************************************************************************
+void lambdaDefineEnumerates(nablaMain *nabla){
+  const char *parallel_prefix_for_loop=nabla->parallel->loop(nabla);
+  fprintf(nabla->entity->hdr,"\n\n\
+/*********************************************************\n\
+ * Forward enumerates\n\
+ *********************************************************/\n\
+#define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)\n\
+\n\
+#define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
+#define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
+\n\
+#define FOR_EACH_CELL_WARP_NODE(n)\\\n\
+  %sfor(int cn=c;cn>=c;--cn)\\\n\
+    for(int n=8-1;n>=0;--n)\n\
+\n\
+#define FOR_EACH_NODE(n) /*%s*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
+#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=8*n;c<8;c+=1,nc+=1)\n\
+\n\
+#define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
+\n\
+#define FOR_EACH_NODE_WARP_CELL(c)\\\n\
+    for(int c=0;c<8;c+=1)\n",
+          parallel_prefix_for_loop, // FOR_EACH_CELL
+          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
+          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
+          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
+          parallel_prefix_for_loop, // FOR_EACH_NODE
+          parallel_prefix_for_loop  // FOR_EACH_NODE_WARP
+          );
+}
+
+
+// ****************************************************************************
+// * Forward Declarations
+// ****************************************************************************
+char* lambdaForwards[]={
+  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline int WARP_BASE(int a){ return (a);}",
+  "inline int WARP_OFFSET(int a){ return (a);}",
+  "inline int WARP_NFFSET(int a){ return (-WARP_OFFSET(a));}",
+  "static void nabla_ini_node_coords(void);",
+  "static void verifCoords(void);",
+  NULL
+};
+
+
+// ****************************************************************************
+// * Defines
+// ****************************************************************************
+nablaDefine lambdaDefines[]={
+  {"integer", "Integer"},
+  {"real", "Real"},
+  {"WARP_ALIGN", "8"},    
+  {"NABLA_NB_GLOBAL_WARP","1"},
+  //{"reducemin(a)","0.0"},
+  {"rabs(a)","fabs(a)"},
+  {"set(a)", "a"},
+  {"set1(cst)", "cst"},
+  {"square_root(u)", "sqrt(u)"},
+  {"cube_root(u)", "cbrt(u)"},
+  {"store(u,_u)", "(*u=_u)"},
+  {"load(u)", "(*u)"},
+  {"zero()", "0.0"},
+  {"DBG_MODE", "(false)"},
+  {"DBG_LVL", "(DBG_INI)"},
+  {"DBG_OFF", "0x0000ul"},
+  {"DBG_CELL_VOLUME", "0x0001ul"},
+  {"DBG_CELL_CQS", "0x0002ul"},
+  {"DBG_GTH", "0x0004ul"},
+  {"DBG_NODE_FORCE", "0x0008ul"},
+  {"DBG_INI_EOS", "0x0010ul"},
+  {"DBG_EOS", "0x0020ul"},
+  {"DBG_DENSITY", "0x0040ul"},
+  {"DBG_MOVE_NODE", "0x0080ul"},
+  {"DBG_INI", "0x0100ul"},
+  {"DBG_INI_CELL", "0x0200ul"},
+  {"DBG_INI_NODE", "0x0400ul"},
+  {"DBG_LOOP", "0x0800ul"},
+  {"DBG_FUNC_IN", "0x1000ul"},
+  {"DBG_FUNC_OUT", "0x2000ul"},
+  {"DBG_VELOCITY", "0x4000ul"},
+  {"DBG_BOUNDARIES", "0x8000ul"},
+  {"DBG_ALL", "0xFFFFul"},
+  {"opAdd(u,v)", "(u+v)"},
+  {"opSub(u,v)", "(u-v)"},
+  {"opDiv(u,v)", "(u/v)"},
+  {"opMul(u,v)", "(u*v)"},
+  {"opMod(u,v)", "(u%v)"},
+  {"opScaMul(u,v)","dot3(u,v)"},
+  {"opVecMul(u,v)","cross(u,v)"},    
+  {"dot", "dot3"},
+  {"knAt(a)",""},
+  {"fatal(a,b)","exit(-1)"},
+  {"synchronize(a)","_Pragma(\"omp barrier\")"},
+  {"mpi_reduce(how,what)","how##ToDouble(what)"},
+  {"reduce(how,what)","how##ToDouble(what)"},
+  {"xyz","int"},
+  {"GlobalIteration", "global_iteration"},
+  {"MD_DirX","0"},
+  {"MD_DirY","1"},
+  {"MD_DirZ","2"},
+  {"File", "std::ofstream&"},
+  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
+  {NULL,NULL}
+};
+
+
+// ****************************************************************************
+// * Typedefs
+// ****************************************************************************
+nablaTypedef lambdaTypedef[]={
+  {"struct real3","Real3"},
+  {NULL,NULL}
+};
+
+
+// ****************************************************************************
+// * lambdaInclude
+// ****************************************************************************
+void lambdaInclude(nablaMain *nabla){
+  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
+}
+
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void lambdaHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,
+          "#ifndef __LAMBDA_%s_H__\n#define __LAMBDA_%s_H__",
+          nabla->entity->name,
+          nabla->entity->name);
+}
+
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void lambdaHeaderIncludes(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// *****************************************************************************\n\
+// * Lambda includes\n\
+// *****************************************************************************\n\
+%s // from nabla->simd->includes\n\
+#include <sys/time.h>\n\
+#include <stdlib.h>\n\
+#include <stdio.h>\n\
+#include <string.h>\n\
+#include <vector>\n\
+#include <math.h>\n\
+#include <assert.h>\n\
+#include <stdarg.h>\n\
+#include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+using namespace std;\n\
+%s // from nabla->parallel->includes()",
+          nabla->simd->includes(),
+          nabla->parallel->includes());
+}
+
+
+// ****************************************************************************
+// * lambdaHeader for Std, Avx or Mic
+// ****************************************************************************
+extern char lambdaStdReal_h[];
+extern char lambdaStdReal3_h[];
+extern char lambdaStdInteger_h[];
+extern char lambdaStdGather_h[];
+extern char lambdaStdScatter_h[];
+extern char lambdaStdOStream_h[];
+extern char lambdaStdTernary_h[];
+
+char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
+}
+void lambdaHeaderSimd(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdInteger_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal3_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdTernary_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdGather_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdScatter_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdOStream_h));
+}
+
+
+// ****************************************************************************
+// * lambdaHeader for Dbg
+// ****************************************************************************
+extern char lambdaDbg_h[];
+void lambdaHeaderDbg(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
+}
+
+
+// ****************************************************************************
+// * lambdaHeader for Maths
+// ****************************************************************************
+extern char lambdaMth_h[];
+void lambdaHeaderMth(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaMth_h));
+}
+
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void lambdaHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n#endif // __LAMBDA_%s_H__\n",nabla->entity->name);
+}
+
+
+// ****************************************************************************
 // * nLambda
 // ****************************************************************************
 NABLA_STATUS nLambda(nablaMain *nabla,
@@ -52,90 +275,90 @@ NABLA_STATUS nLambda(nablaMain *nabla,
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
   // Définition des hooks pour l'AVX ou le MIC
-  nablaBackendSimdHooks nablaCcSimdStdHooks={
-    ccHookBits,
-    ccHookGather,
-    ccHookScatter,
-    ccTypedef,
-    ccDefines,
-    ccForwards,
-    ccHookPrevCell,
-    ccHookNextCell,
-    ccHookIncludes
+  nablaBackendSimdHooks nablaLambdaSimdStdHooks={
+    lambdaHookBits,
+    lambdaHookGather,
+    lambdaHookScatter,
+    lambdaTypedef,
+    lambdaDefines,
+    lambdaForwards,
+    lambdaHookPrevCell,
+    lambdaHookNextCell,
+    lambdaHookIncludes
   };
-  nabla->simd=&nablaCcSimdStdHooks;
+  nabla->simd=&nablaLambdaSimdStdHooks;
     
   // Définition des hooks pour Cilk+ *ou pas*
-  nablaBackendParallelHooks ccCilkHooks={
+  nablaBackendParallelHooks lambdaCilkHooks={
     nLambdaParallelCilkSync,
     nLambdaParallelCilkSpawn,
     nLambdaParallelCilkLoop,
     nLambdaParallelCilkIncludes
   };
-  nablaBackendParallelHooks ccOpenMPHooks={
+  nablaBackendParallelHooks lambdaOpenMPHooks={
     nLambdaParallelOpenMPSync,
     nLambdaParallelOpenMPSpawn,
     nLambdaParallelOpenMPLoop,
     nLambdaParallelOpenMPIncludes
   };
-  nablaBackendParallelHooks ccVoidHooks={
+  nablaBackendParallelHooks lambdaVoidHooks={
     nLambdaParallelVoidSync,
     nLambdaParallelVoidSpawn,
     nLambdaParallelVoidLoop,
     nLambdaParallelVoidIncludes
   };
-  nabla->parallel=&ccVoidHooks;
+  nabla->parallel=&lambdaVoidHooks;
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nabla->parallel=&ccCilkHooks;
+    nabla->parallel=&lambdaCilkHooks;
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nabla->parallel=&ccOpenMPHooks;
+    nabla->parallel=&lambdaOpenMPHooks;
 
   
-  nablaBackendPragmaHooks ccPragmaICCHooks ={
-    ccHookPragmaIccIvdep,
-    ccHookPragmaIccAlign
+  nablaBackendPragmaHooks lambdaPragmaICCHooks ={
+    lambdaHookPragmaIccIvdep,
+    lambdaHookPragmaIccAlign
   };
-  nablaBackendPragmaHooks ccPragmaGCCHooks={
-    ccHookPragmaGccIvdep,
-    ccHookPragmaGccAlign
+  nablaBackendPragmaHooks lambdaPragmaGCCHooks={
+    lambdaHookPragmaGccIvdep,
+    lambdaHookPragmaGccAlign
   };
   // Par defaut, on met GCC
-  nabla->pragma=&ccPragmaGCCHooks;
+  nabla->pragma=&lambdaPragmaGCCHooks;
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    nabla->pragma=&ccPragmaICCHooks;
+    nabla->pragma=&lambdaPragmaICCHooks;
   
-  static nablaBackendHooks ccBackendHooks={
+  static nablaBackendHooks lambdaBackendHooks={
     // Jobs stuff
-    ccHookPrefixEnumerate,
-    ccHookDumpEnumerateXYZ,
-    ccHookDumpEnumerate,
-    ccHookPostfixEnumerate,
-    ccHookItem,
-    ccHookSwitchToken,
-    ccHookTurnTokenToVariable,
-    ccHookSystem,
-    ccHookAddExtraParameters,
-    ccHookDumpNablaParameterList,
-    ccHookTurnBracketsToParentheses,
-    ccHookJobDiffractStatement,
+    lambdaHookPrefixEnumerate,
+    lambdaHookDumpEnumerateXYZ,
+    lambdaHookDumpEnumerate,
+    lambdaHookPostfixEnumerate,
+    lambdaHookItem,
+    lambdaHookSwitchToken,
+    lambdaHookTurnTokenToVariable,
+    lambdaHookSystem,
+    lambdaHookAddExtraParameters,
+    lambdaHookDumpNablaParameterList,
+    lambdaHookTurnBracketsToParentheses,
+    lambdaHookJobDiffractStatement,
     // Other hooks
-    ccHookFunctionName,
-    ccHookFunction,
-    ccHookJob,
-    ccHookReduction,
-    ccHookIteration,
-    ccHookExit,
-    ccHookTime,
-    ccHookFatal,
-    ccHookAddCallNames,
-    ccHookAddArguments,
-    ccHookTurnTokenToOption,
-    ccHookEntryPointPrefix,
-    ccHookDfsForCalls,
-    ccHookPrimaryExpressionToReturn,
-    ccHookReturnFromArgument
+    lambdaHookFunctionName,
+    lambdaHookFunction,
+    lambdaHookJob,
+    lambdaHookReduction,
+    lambdaHookIteration,
+    lambdaHookExit,
+    lambdaHookTime,
+    lambdaHookFatal,
+    lambdaHookAddCallNames,
+    lambdaHookAddArguments,
+    lambdaHookTurnTokenToOption,
+    lambdaHookEntryPointPrefix,
+    lambdaHookDfsForCalls,
+    lambdaHookPrimaryExpressionToReturn,
+    lambdaHookReturnFromArgument
   };
-  nabla->hook=&ccBackendHooks;
+  nabla->hook=&lambdaBackendHooks;
 
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);
@@ -154,46 +377,53 @@ NABLA_STATUS nLambda(nablaMain *nabla,
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
   
   // Dump dans le HEADER des includes, typedefs, defines, debug, maths & errors stuff
-  ccHeaderPrefix(nabla);
-  ccHeaderIncludes(nabla);
+  lambdaHeaderPrefix(nabla);
+  lambdaHeaderIncludes(nabla);
   nMiddleDefines(nabla,nabla->simd->defines);
   nMiddleTypedefs(nabla,nabla->simd->typedefs);
   nMiddleForwards(nabla,nabla->simd->forwards);
 
-  // On inclue les fichiers kn'SIMD'
-  ccHeaderSimd(nabla);
-  ccHeaderDbg(nabla);
-  ccHeaderMth(nabla);
-  ccMesh(nabla);
-  ccDefineEnumerates(nabla);
+  // On inclue les fichiers lambda'SIMD'
+  lambdaHeaderSimd(nabla);
+  lambdaHeaderDbg(nabla);
+  lambdaHeaderMth(nabla);
+
+  //lambdaMesh(nabla);
+  // Mesh structures and functions depends on the ℝ library that can be used
+  if (isWithLibrary(nabla,with_real)){
+    lambdaMesh1D(nabla);
+  }else{
+    lambdaMesh3D(nabla);
+  }
+  lambdaDefineEnumerates(nabla);
 
   // Dump dans le fichier SOURCE
-  ccInclude(nabla);
+  lambdaInclude(nabla);
   
   // Parse du code préprocessé et lance les hooks associés
   nMiddleParseAndHook(root,nabla);
-  ccMainVarInitKernel(nabla);
+  lambdaMainVarInitKernel(nabla);
 
   // Partie PREFIX
-  ccMainPrefix(nabla);
-  ccVariablesPrefix(nabla);
-  ccMainMeshPrefix(nabla);
+  lambdaMainPrefix(nabla);
+  lambdaVariablesPrefix(nabla);
+  lambdaMainMeshPrefix(nabla);
   
   // Partie Pré Init
-  ccMainPreInit(nabla);
-  ccMainVarInitCall(nabla);
+  lambdaMainPreInit(nabla);
+  lambdaMainVarInitCall(nabla);
       
   // Dump des entry points dans le main
-  ccMain(nabla);
+  lambdaMain(nabla);
 
   // Partie Post Init
-  ccMainPostInit(nabla);
+  lambdaMainPostInit(nabla);
   
   // Partie POSTFIX
-  ccHeaderPostfix(nabla); 
-  ccMainMeshPostfix(nabla);
-  ccVariablesPostfix(nabla);
-  ccMainPostfix(nabla);
+  lambdaHeaderPostfix(nabla); 
+  lambdaMainMeshPostfix(nabla);
+  lambdaVariablesPostfix(nabla);
+  lambdaMainPostfix(nabla);
   return NABLA_OK;
 }
 

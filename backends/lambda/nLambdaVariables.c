@@ -49,10 +49,10 @@
  * enums pour les différents dumps à faire: déclaration, malloc et free
  *****************************************************************************/
 typedef enum {
-  CC_VARIABLES_DECLARATION=0,
-  CC_VARIABLES_MALLOC,
-  CC_VARIABLES_FREE
-} CC_VARIABLES_SWITCH;
+  LAMBDA_VARIABLES_DECLARATION=0,
+  LAMBDA_VARIABLES_MALLOC,
+  LAMBDA_VARIABLES_FREE
+} LAMBDA_VARIABLES_SWITCH;
 
 
 // Pointeur de fonction vers une qui dump ce que l'on souhaite
@@ -75,11 +75,11 @@ static inline char *itemUPCASE(const char *itm){
 /***************************************************************************** 
  * Dump d'un MALLOC d'une variables dans le fichier source
  *****************************************************************************/
-static NABLA_STATUS ccGenerateSingleVariableMalloc(nablaMain *nabla,
+static NABLA_STATUS lambdaGenerateSingleVariableMalloc(nablaMain *nabla,
                                                     nablaVariable *var,
                                                     char *postfix,
                                                     char *depth){
-  nprintf(nabla,"\n\t// ccGenerateSingleVariableMalloc",NULL);
+  nprintf(nabla,"\n\t// lambdaGenerateSingleVariableMalloc",NULL);
   return NABLA_OK;
 }
 
@@ -87,11 +87,11 @@ static NABLA_STATUS ccGenerateSingleVariableMalloc(nablaMain *nabla,
 /***************************************************************************** 
  * Dump d'un FREE d'une variables dans le fichier source
  *****************************************************************************/
-static NABLA_STATUS ccGenerateSingleVariableFree(nablaMain *nabla,
+static NABLA_STATUS lambdaGenerateSingleVariableFree(nablaMain *nabla,
                                                   nablaVariable *var,
                                                   char *postfix,
                                                   char *depth){  
-  nprintf(nabla,"\n\t// ccGenerateSingleVariableFree",NULL);
+  nprintf(nabla,"\n\t// lambdaGenerateSingleVariableFree",NULL);
   return NABLA_OK;
 }
 
@@ -99,11 +99,11 @@ static NABLA_STATUS ccGenerateSingleVariableFree(nablaMain *nabla,
 /***************************************************************************** 
  * Dump d'une variables dans le fichier
  *****************************************************************************/
-static NABLA_STATUS ccGenerateSingleVariable(nablaMain *nabla,
+static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
                                               nablaVariable *var,
                                               char *postfix,
                                               char *depth){  
-  nprintf(nabla,"\n\t// ccGenerateSingleVariable",NULL);
+  nprintf(nabla,"\n\t// lambdaGenerateSingleVariable",NULL);
   if (strncmp(var->name,"coord",5)==0){
     if ((nabla->entity->libraries&(1<<with_real))!=0){
       fprintf(nabla->entity->hdr,
@@ -129,11 +129,11 @@ static NABLA_STATUS ccGenerateSingleVariable(nablaMain *nabla,
 /***************************************************************************** 
  * Retourne quelle fonction selon l'enum donné
  *****************************************************************************/
-static pFunDump witch2func(CC_VARIABLES_SWITCH witch){
+static pFunDump witch2func(LAMBDA_VARIABLES_SWITCH witch){
   switch (witch){
-  case (CC_VARIABLES_DECLARATION): return ccGenerateSingleVariable;
-  case (CC_VARIABLES_MALLOC): return ccGenerateSingleVariableMalloc;
-  case (CC_VARIABLES_FREE): return ccGenerateSingleVariableFree;
+  case (LAMBDA_VARIABLES_DECLARATION): return lambdaGenerateSingleVariable;
+  case (LAMBDA_VARIABLES_MALLOC): return lambdaGenerateSingleVariableMalloc;
+  case (LAMBDA_VARIABLES_FREE): return lambdaGenerateSingleVariableFree;
   default: exit(NABLA_ERROR|fprintf(stderr, "\n[witch2switch] Error with witch\n"));
   }
 }
@@ -142,10 +142,10 @@ static pFunDump witch2func(CC_VARIABLES_SWITCH witch){
 /***************************************************************************** 
  * Dump d'une variables de dimension 1
  *****************************************************************************/
-static NABLA_STATUS ccGenericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
+static NABLA_STATUS lambdaGenericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
   //int i;
   //char depth[]="[0]";
-  dbg("\n[ccGenerateVariableDim1] variable %s", var->name);
+  dbg("\n[lambdaGenerateVariableDim1] variable %s", var->name);
   //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1) fDump(nabla, var, NULL, depth);
   fDump(nabla, var, NULL, "/*8*/");
   return NABLA_OK;
@@ -155,8 +155,8 @@ static NABLA_STATUS ccGenericVariableDim1(nablaMain *nabla, nablaVariable *var, 
 /***************************************************************************** 
  * Dump d'une variables de dimension 0
  *****************************************************************************/
-static NABLA_STATUS ccGenericVariableDim0(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
-  dbg("\n[ccGenerateVariableDim0] variable %s", var->name);
+static NABLA_STATUS lambdaGenericVariableDim0(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
+  dbg("\n[lambdaGenerateVariableDim0] variable %s", var->name);
   if (strcmp(var->type,"real3")!=0)
     return fDump(nabla, var, NULL, NULL);
   else
@@ -168,22 +168,22 @@ static NABLA_STATUS ccGenericVariableDim0(nablaMain *nabla, nablaVariable *var, 
 /***************************************************************************** 
  * Dump d'une variables
  *****************************************************************************/
-static NABLA_STATUS ccGenericVariable(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
+static NABLA_STATUS lambdaGenericVariable(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
   if (!var->axl_it) return NABLA_OK;
   if (var->item==NULL) return NABLA_ERROR;
   if (var->name==NULL) return NABLA_ERROR;
   if (var->type==NULL) return NABLA_ERROR;
-  if (var->dim==0) return ccGenericVariableDim0(nabla,var,fDump);
-  if (var->dim==1) return ccGenericVariableDim1(nabla,var,fDump);
-  dbg("\n[ccGenericVariable] variable dim error: %d", var->dim);
-  exit(NABLA_ERROR|fprintf(stderr, "\n[ccGenericVariable] Error with given variable\n"));
+  if (var->dim==0) return lambdaGenericVariableDim0(nabla,var,fDump);
+  if (var->dim==1) return lambdaGenericVariableDim1(nabla,var,fDump);
+  dbg("\n[lambdaGenericVariable] variable dim error: %d", var->dim);
+  exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaGenericVariable] Error with given variable\n"));
 }
 
 
 /***************************************************************************** 
  * Dump des options
  *****************************************************************************/
-static void ccOptions(nablaMain *nabla){
+static void lambdaOptions(nablaMain *nabla){
   nablaOption *opt;
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
@@ -199,7 +199,7 @@ static void ccOptions(nablaMain *nabla){
 /***************************************************************************** 
  * Dump des globals
  *****************************************************************************/
-static void ccGlobals(nablaMain *nabla){
+static void lambdaGlobals(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
 // * Temps de la simulation\n\
@@ -213,7 +213,7 @@ double global_time;\n");
 /***************************************************************************** 
  * Dump des variables
  *****************************************************************************/
-void ccVariablesPrefix(nablaMain *nabla){
+void lambdaVariablesPrefix(nablaMain *nabla){
   nablaVariable *var;
 
   fprintf(nabla->entity->hdr,"\n\n\
@@ -221,24 +221,24 @@ void ccVariablesPrefix(nablaMain *nabla){
 // * Variables\n\
 // ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next){
-    if (ccGenericVariable(nabla, var, witch2func(CC_VARIABLES_DECLARATION))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[ccVariables] Error with variable %s\n", var->name));
-    if (ccGenericVariable(nabla, var, witch2func(CC_VARIABLES_MALLOC))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[ccVariables] Error with variable %s\n", var->name));
+    if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_DECLARATION))==NABLA_ERROR)
+      exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
+    if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_MALLOC))==NABLA_ERROR)
+      exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
   }
-  ccOptions(nabla);
-  ccGlobals(nabla);
+  lambdaOptions(nabla);
+  lambdaGlobals(nabla);
 }
 
 
 // ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void ccVariablesPostfix(nablaMain *nabla){
+void lambdaVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
   for(var=nabla->variables;var!=NULL;var=var->next)
-    if (ccGenericVariable(nabla, var, witch2func(CC_VARIABLES_FREE))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[ccVariables] Error with variable %s\n", var->name));
+    if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_FREE))==NABLA_ERROR)
+      exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
 }
 
 

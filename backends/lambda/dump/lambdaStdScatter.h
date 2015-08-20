@@ -40,54 +40,32 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global lambdaDbg_h
-        .global lambdaMsh1D_c
-        .global lambdaMsh3D_c
-        .global lambdaMth_h
-        
-        .global lambdaStdReal_h
-        .global lambdaStdReal3_h
-        .global lambdaStdInteger_h
-        .global lambdaStdTernary_h
-        .global lambdaStdGather_h
-        .global lambdaStdScatter_h
-        .global lambdaStdOStream_h
-        
-lambdaDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaDbg.h"
-        .byte 0
-lambdaMsh1D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh1D.c"
-        .byte 0
-lambdaMsh3D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh3D.c"
-        .byte 0
-lambdaMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMth.h"
-        .byte 0
+#ifndef _LAMBDA_STD_SCATTER_H_
+#define _LAMBDA_STD_SCATTER_H_
 
- 
-        
-lambdaStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal.h"
-        .byte 0
-lambdaStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal3.h"
-        .byte 0
-lambdaStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdInteger.h"
-        .byte 0
-lambdaStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdTernary.h"
-        .byte 0
-lambdaStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdGather.h"
-        .byte 0
-lambdaStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdScatter.h"
-        .byte 0
-lambdaStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdOStream.h"
-        .byte 0
 
+// *****************************************************************************
+// * Scatter: (X is the data @ offset x)
+// * scatter: |ABCD| and offsets:    a                 b       c   d
+// * data:    |....|....|....|....|..A.|....|....|....|B...|...C|..D.|....|....|
+// * ! à la séquence car quand c et d sont sur le même warp, ça percute
+// ******************************************************************************
+inline void scatterk(const int a, real *scatter, real *data){
+  double *s=(double *)scatter;
+  double *p=(double *)data;
+  p[a]=s[0];
+}
+
+
+// *****************************************************************************
+// * Scatter for real3
+// *****************************************************************************
+inline void scatter3k(const int a, real3 *scatter, real3 *data){
+  double *s=(double *)scatter;
+  double *p=(double *)data;
+  p[3*a+0]=s[0];
+  p[3*a+1]=s[1];
+  p[3*a+2]=s[2];
+}
+
+#endif //  _LAMBDA_STD_SCATTER_H_

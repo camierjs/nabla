@@ -50,11 +50,11 @@
 // * On va surtout remplir les variables 'in' utilisées de support différent
 // * pour préparer les GATHER/SCATTER
 // ****************************************************************************
-void ccHookDumpNablaParameterList(nablaMain *nabla,
+void lambdaHookDumpNablaParameterList(nablaMain *nabla,
                                      nablaJob *job,
                                      astNode *n,
                                      int *numParams){
-  dbg("\n\t[ccHookDumpNablaParameterList]");
+  dbg("\n\t[lambdaHookDumpNablaParameterList]");
   // S'il n'y a pas de in ni de out, on a rien à faire
   if (n==NULL) return;
   // Aux premier COMPOUND_JOB_INI ou '@', on a terminé
@@ -68,11 +68,11 @@ void ccHookDumpNablaParameterList(nablaMain *nabla,
   if (n->ruleid==rulenameToId("direct_declarator")){
     // On la récupère
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t[ccHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
+    dbg("\n\t[lambdaHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
     // Si elle n'existe pas, c'est pas normal à ce stade: c'est une erreur de nom
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr,
-                                      "\n[ccHookDumpNablaParameterList] Cannot find variable '%s'!\n",
+                                      "\n[lambdaHookDumpNablaParameterList] Cannot find variable '%s'!\n",
                                       n->children->token));
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
@@ -92,13 +92,13 @@ void ccHookDumpNablaParameterList(nablaMain *nabla,
         nMiddleVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
-  if (n->children != NULL) ccHookDumpNablaParameterList(nabla,job,n->children,numParams);
-  if (n->next != NULL) ccHookDumpNablaParameterList(nabla,job,n->next, numParams);
+  if (n->children != NULL) lambdaHookDumpNablaParameterList(nabla,job,n->children,numParams);
+  if (n->next != NULL) lambdaHookDumpNablaParameterList(nabla,job,n->next, numParams);
 
 }
 
 
-void ccAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
+void lambdaHookAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   return;
 }
 
@@ -106,8 +106,8 @@ void ccAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
 /*****************************************************************************
   * Dump d'extra paramètres
  *****************************************************************************/
-void ccHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla, "/* direct return from ccHookAddExtraParameters*/", NULL);
+void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla, "/* direct return from lambdaHookAddExtraParameters*/", NULL);
   return;
   // Rajout pour l'instant systématiquement des node_coords et du global_deltat
   nablaVariable *var;
@@ -130,5 +130,5 @@ void ccHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   
   // Rajout pour l'instant systématiquement des connectivités
   if (job->item[0]=='c')
-    ccAddExtraConnectivitiesParameters(nabla, numParams);
+    lambdaHookAddExtraConnectivitiesParameters(nabla, numParams);
 }

@@ -6,10 +6,10 @@
   </arcane>
 
 	<arcane-post-processing>
-     <save-init>1</save-init>
-     <end-execution-output>1</end-execution-output>
+     <save-init>0</save-init>
+     <end-execution-output>0</end-execution-output>
      <!--format name="Ensight7PostProcessor"/-->
-	  <output-period>1</output-period>
+	  <output-period>0</output-period>
 	  <output>
 		  <variable>cell_cell_th</variable>
 		  <variable>cell_cell_th_diff</variable>

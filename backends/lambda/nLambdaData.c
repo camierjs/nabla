@@ -47,7 +47,7 @@
 /***************************************************************************** 
  * Traitement des transformations '[', '(' & ''
  *****************************************************************************/
-void ccHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
+void lambdaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
@@ -66,9 +66,9 @@ void ccHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVaria
   }else{
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*ccHookTurnBracketsToParentheses_X*/", NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*ccHookTurnBracketsToParentheses_Y*/", NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*ccHookTurnBracketsToParentheses_Z*/", NULL);
+    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_X*/", NULL);
+    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Y*/", NULL);
+    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Z*/", NULL);
     job->parse.isDotXYZ=0;
     job->parse.turnBracketsToParentheses=false;
   }
@@ -78,7 +78,7 @@ void ccHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVaria
 /***************************************************************************** 
  * Traitement des tokens SYSTEM
  *****************************************************************************/
-void ccHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
+void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger
@@ -101,7 +101,7 @@ void ccHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   if (n->tokenid == PREVRIGHT)     nprintf(arc, "/*chs PREVRIGHT*/", "[cn.previousRight()]");
   if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*chs NEXTLEFT*/", "[cn.nextLeft()]");
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*chs NEXTRIGHT*/", "[cn.nextRight()]");
-  //error(!0,0,"Could not switch Cc Hook System!");
+  //error(!0,0,"Could not switch Lambda Hook System!");
 }
 
 
@@ -149,7 +149,7 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 /*****************************************************************************
  * Tokens to gathered  variables
  *****************************************************************************/
-static bool ccHookTurnTokenToGatheredVariable(nablaMain *arc,
+static bool lambdaHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                  nablaVariable *var,
                                                  nablaJob *job){
   //nprintf(arc, NULL, "/*gathered variable?*/");
@@ -162,7 +162,7 @@ static bool ccHookTurnTokenToGatheredVariable(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'CELL Job' switch
  *****************************************************************************/
-static void ccHookTurnTokenToVariableForCellJob(nablaMain *arc,
+static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
   const char cnfg=job->item[0];
@@ -218,7 +218,7 @@ static void ccHookTurnTokenToVariableForCellJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;      // GLOBAL variable
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job ccHookTurnTokenToVariableForCellJob\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job lambdaHookTurnTokenToVariableForCellJob\n"));
   }
 }
 
@@ -226,7 +226,7 @@ static void ccHookTurnTokenToVariableForCellJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'NODE Job' switch
  *****************************************************************************/
-static void ccHookTurnTokenToVariableForNodeJob(nablaMain *arc,
+static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
   const char cnfg=job->item[0];
@@ -269,7 +269,7 @@ static void ccHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] NODES job ccHookTurnTokenToVariableForNodeJob\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[nlambda] NODES job lambdaHookTurnTokenToVariableForNodeJob\n"));
   }
 }
 
@@ -277,7 +277,7 @@ static void ccHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'FACE Job' switch
  *****************************************************************************/
-static void ccHookTurnTokenToVariableForFaceJob(nablaMain *arc,
+static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
   const char cnfg=job->item[0];
@@ -312,7 +312,7 @@ static void ccHookTurnTokenToVariableForFaceJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job ccHookTurnTokenToVariableForFaceJob\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job lambdaHookTurnTokenToVariableForFaceJob\n"));
   }
 }
 
@@ -320,7 +320,7 @@ static void ccHookTurnTokenToVariableForFaceJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'Std Function' switch
  *****************************************************************************/
-static void ccHookTurnTokenToVariableForStdFunction(nablaMain *arc,
+static void lambdaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
                                                     nablaVariable *var,
                                                     nablaJob *job){
   const char cnfg=job->item[0];
@@ -346,7 +346,7 @@ static void ccHookTurnTokenToVariableForStdFunction(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob ccHookTurnTokenToVariableForStdFunction\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob lambdaHookTurnTokenToVariableForStdFunction\n"));
   }
 }
 
@@ -354,13 +354,13 @@ static void ccHookTurnTokenToVariableForStdFunction(nablaMain *arc,
 /*****************************************************************************
  * Transformation de tokens en variables selon les contextes dans le cas d'un '[Cell|node]Enumerator'
  *****************************************************************************/
-nablaVariable *ccHookTurnTokenToVariable(astNode * n,
+nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
                                             nablaMain *arc,
                                             nablaJob *job){
   nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
-  dbg("\n\t[ccHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
+  dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
 
   // Set good isDotXYZ
   if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){
@@ -369,24 +369,24 @@ nablaVariable *ccHookTurnTokenToVariable(astNode * n,
     //job->parse.diffracting=true;
     //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
   }
-  //nprintf(arc, NULL, "\n\t/*ccHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
+  //nprintf(arc, NULL, "\n\t/*lambdaHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
 
   // Check whether this variable is being gathered
-  if (ccHookTurnTokenToGatheredVariable(arc,var,job)){
+  if (lambdaHookTurnTokenToGatheredVariable(arc,var,job)){
     return var;
   }
   
   // Check whether there's job for a cell job
-  ccHookTurnTokenToVariableForCellJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForCellJob(arc,var,job);
   
   // Check whether there's job for a node job
-  ccHookTurnTokenToVariableForNodeJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForNodeJob(arc,var,job);
   
   // Check whether there's job for a face job
-  ccHookTurnTokenToVariableForFaceJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForFaceJob(arc,var,job);
   
   // Check whether there's job for a face job
-  ccHookTurnTokenToVariableForStdFunction(arc,var,job);
+  lambdaHookTurnTokenToVariableForStdFunction(arc,var,job);
   return var;
 }
 

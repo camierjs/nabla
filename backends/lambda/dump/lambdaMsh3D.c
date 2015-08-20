@@ -1,90 +1,3 @@
-#include "gram.h"
-
-
-
-// ********************************************************
-// * loop job
-// ********************************************************
-static inline void loop(/* direct return from okinaHookAddExtraParameters*/){
-	dbgFuncIn();
-	FOR_EACH_NODE_WARP(n){
-		{
-		/* DiffractingREADY *//*isLeft*/unp1 /*'='->!isLeft*/=opSub ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], opMul ( cp , ( opSub ( /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n], /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[opSub ( n , 1 ) ]) ) ) ) , opMul ( cm , ( opSub ( /*no_item_system*//*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar 20*/[+ 1 ], /*NodeJob*//*tt2a*/node_u/*nvar no diffraction possible here*//*NodeVar !20*/[n]) ) ) ) ;
-		}}
-}
-// ******************************************************************************
-// * Kernel d'initialisation des variables
-// ******************************************************************************
-void nabla_ini_variables(void){
-	FOR_EACH_NODE_WARP(n){
-		node_u[n]=zero();
-	}
-	FOR_EACH_CELL_WARP(c){
-		cell_alpha[c]=zero();
-	}
-}
-
-
-// ******************************************************************************
-// * Main d'Okina
-// ******************************************************************************
-int main(int argc, char *argv[]){
-	float cputime=0.0;
-	struct timeval st, et;
-	//int iteration=1;
-#ifdef __AVX__
-	//avxTest();
-#endif
-#if defined(__MIC__)||defined(__AVX512F__)
-	//micTestReal();
-	//micTestReal3();
-#endif
-	printf("%d noeuds, %d mailles",NABLA_NB_NODES,NABLA_NB_CELLS);
-	nabla_ini_variables();
-	nabla_ini_node_coords();
-	// Initialisation de la pr�cision du cout
-	std::cout.precision(21);
-	//std::cout.setf(std::ios::floatfield);
-	std::cout.setf(std::ios::scientific, std::ios::floatfield);
-	// Initialisation du temps et du deltaT
-	global_time=0.0;
-	global_iteration=1;
-	global_deltat[0] = set1(option_dtt_initial);// @ 0;
-	//printf("\n\33[7;32m[main] time=%e, Global Iteration is #%d\33[m",global_time,global_iteration);
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc
-	// okinaGenerateSingleVariable
-	// okinaGenerateSingleVariableMalloc	// [nOkinaMainMeshPrefix] Allocation des connectivit�s
-	//OKINA_MAIN_PREINIT
-	//printf("\ndbgsVariable iteration"); dbgCellVariableDim0_iteration();
-	//printf("\ndbgsVariable alpha"); dbgCellVariableDim0_alpha();
-	//printf("\ndbgsVariable u"); dbgNodeVariableDim0_u();
-	//printf("\ndbgsVariable alpha_global"); dbgCellVariableDim0_alpha_global();
-	gettimeofday(&st, NULL);
-	while (global_time<option_stoptime){// && global_iteration!=option_max_iterations){
-		
-		/*@1.000000*/loop(
-		/*okinaAddExtraArguments*/
-		/*okinaDumpNablaArgumentList*//*NULL_called_variables*/);
-		/*okinaDumpNablaDebugFunctionFromOutArguments*/
-	//OKINA_MAIN_POSTINIT
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-	// okinaGenerateSingleVariableFree
-//OKINA_MAIN_POSTFIX
-	global_time+=*(double*)&global_deltat[0];
-	global_iteration+=1;
-	//printf("\ntime=%e, dt=%e\n", global_time, *(double*)&global_deltat[0]);
-	}	gettimeofday(&et, NULL);
-	cputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);
-	printf("\n\t\33[7m[#%04d] Elapsed time = %12.6e(s)\33[m\n", global_iteration-1, cputime/1000.0);
-
-}
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
@@ -127,8 +40,6 @@ int main(int argc, char *argv[]){
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-
-
 // ****************************************************************************
 // * nabla_ini_node_coords
 // ****************************************************************************
@@ -159,14 +70,14 @@ static double zOf7(const int n){
 
 static void nabla_ini_node_coords(void){
   dbgFuncIn();
-  dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= WARP_SIZE...");
-  assert((NABLA_NB_NODES_Y_AXIS >= WARP_SIZE));
+  dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= 1...");
+  assert((NABLA_NB_NODES_Y_AXIS >= 1));
 
-  dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS % WARP_SIZE)==0...");
-  assert((NABLA_NB_CELLS % WARP_SIZE)==0);
+  dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
+  assert((NABLA_NB_CELLS %% 1)==0);
     
   for(int iNode=0; iNode<NABLA_NB_NODES_WARP; iNode+=1){
-    const int n=WARP_SIZE*iNode;
+    const int n=iNode;
     Real x,y,z;
 #if defined(__MIC__)||defined(__AVX512F__)
     x=set(xOf7(n+7), xOf7(n+6), xOf7(n+5), xOf7(n+4), xOf7(n+3), xOf7(n+2), xOf7(n+1), xOf7(n));
@@ -186,9 +97,9 @@ static void nabla_ini_node_coords(void){
     z=set(zOf7(n));
 #endif
     // Là où l'on poke le retour de okinaSourceMeshAoS_vs_SoA
-    node_coord[iNode]=Real3(x,y,z);
+    %s
     //node_coord[n]=Real3(x,y,z);
-    //dbg(DBG_INI,"\nSetting nodes-vector #%d @", n);
+    //dbg(DBG_INI,"\nSetting nodes-vector #%%d @", n);
     dbgReal3(DBG_INI,node_coord[iNode]);
   }
   verifCoords();
@@ -200,7 +111,7 @@ static void nabla_ini_node_coords(void){
       for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
         cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
         node_bid=iX + iY*NABLA_NB_NODES_X_AXIS + iZ*NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
-        dbg(DBG_INI,"\n\tSetting cell #%d %dx%dx%d, cell_uid=%d, node_bid=%d",
+        dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d",
             iCell,iX,iY,iZ,cell_uid,node_bid);
         cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
         cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
@@ -210,7 +121,7 @@ static void nabla_ini_node_coords(void){
         cell_node[5*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS +1 ;
         cell_node[6*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS+1;
         cell_node[7*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS;
-        dbg(DBG_INI,"\n\tCell_%d's nodes are %d,%d,%d,%d,%d,%d,%d,%d", iCell,
+        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
             cell_node[0*NABLA_NB_CELLS+iCell],
             cell_node[1*NABLA_NB_CELLS+iCell],
             cell_node[2*NABLA_NB_CELLS+iCell],
@@ -235,10 +146,10 @@ static void nabla_ini_node_coords(void){
   }
   
   for(int c=0;c<NABLA_NB_CELLS;c+=1){
-    dbg(DBG_INI,"\nFocusing on cells %d",c);
+    dbg(DBG_INI,"\nFocusing on cells %%d",c);
     for(int n=0;n<8;n++){
       const int iNode = cell_node[n*NABLA_NB_CELLS+c];
-      dbg(DBG_INI,"\n\tcell_%d @%d: pushs node %d",c,n,iNode);
+      dbg(DBG_INI,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
       // les 8 emplacements donnent l'offset jusqu'aux mailles
       // node_corner a une structure en 8*NABLA_NB_NODES
       node_cell[8*iNode+n]=c;
@@ -270,7 +181,7 @@ static void nabla_ini_node_coords(void){
     cell_next[MD_DirX*NABLA_NB_CELLS+i] = i+1 ;
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%NABLA_NB_CELLS_X_AXIS)==0){
+    if ((i%%NABLA_NB_CELLS_X_AXIS)==0){
       cell_prev[MD_DirX*NABLA_NB_CELLS+i] = -33333333 ;
       cell_next[MD_DirX*NABLA_NB_CELLS+i+NABLA_NB_CELLS_X_AXIS-1] = -44444444 ;
     }
@@ -281,7 +192,7 @@ static void nabla_ini_node_coords(void){
     cell_next[MD_DirY*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_X_AXIS ;
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))<NABLA_NB_CELLS_Y_AXIS){
+    if ((i%%(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))<NABLA_NB_CELLS_Y_AXIS){
       cell_prev[MD_DirY*NABLA_NB_CELLS+i] = -55555555 ;
       cell_next[MD_DirY*NABLA_NB_CELLS+i+(NABLA_NB_CELLS_X_AXIS-1)*NABLA_NB_CELLS_Y_AXIS] = -66666666 ;
     }
@@ -299,34 +210,25 @@ static void nabla_ini_node_coords(void){
   }
   verifNextPrev(); 
   dbg(DBG_INI,"\nIni done");
-  dbgFuncOut();
 }
 
 
 __attribute__((unused)) static void verifCoords(void){
   dbg(DBG_INI,"\nVérification des coordonnés des noeuds");
   FOR_EACH_NODE_WARP(n){
-    // dbg(DBG_INI,"\nFocusing on nodes-vector %d",n);
-    // _OKINA_SOA_ is defined or not depending on nabla's colors
-#ifdef _OKINA_SOA_
-    dbgReal(DBG_INI,node_coordx[n]);
-    dbgReal(DBG_INI,node_coordy[n]);
-    dbgReal(DBG_INI,node_coordz[n]);
-#else
-    dbg(DBG_INI,"\n%d:",n);
+    dbg(DBG_INI,"\n%%d:",n);
     dbgReal3(DBG_INI,node_coord[n]);
-#endif
   }
 }
-
+ 
 
 __attribute__((unused)) static void verifConnectivity(void){
   dbg(DBG_INI,"\nVérification des connectivité des noeuds");
   FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %d",n);
+    dbg(DBG_INI,"\nFocusing on node %%d",n);
     FOR_EACH_NODE_CELL(c){
-      dbg(DBG_INI,"\n\tnode_%d knows cell %d",n,node_cell[nc]);
-      dbg(DBG_INI,", and node_%d knows cell %d",n,node_cell_and_corner[2*nc+0]);
+      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
+      dbg(DBG_INI,", and node_%%d knows cell %%d",n,node_cell_and_corner[2*nc+0]);
     }
   }
 }
@@ -334,30 +236,30 @@ __attribute__((unused)) static void verifConnectivity(void){
 __attribute__((unused)) static void verifCorners(void){
   dbg(DBG_INI,"\nVérification des coins des noeuds");
   FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %d",n);
+    dbg(DBG_INI,"\nFocusing on node %%d",n);
     FOR_EACH_NODE_CELL(c){
       if (node_cell_corner[nc]==-1) continue;
-      dbg(DBG_INI,"\n\tnode_%d is corner #%d of cell %d",n,node_cell_corner[nc],node_cell[nc]);
-      //dbg(DBG_INI,", and node_%d is corner #%d of cell %d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
+      dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
+      //dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
     }
   }
 }
 
 __attribute__((unused)) static void verifNextPrev(void){
  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(X) for cells %d <- #%d -> %d: ",
+    dbg(DBG_INI,"\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
         cell_prev[MD_DirX*NABLA_NB_CELLS+i],
         i,
         cell_next[MD_DirX*NABLA_NB_CELLS+i]);
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(Y) for cells %d <- #%d -> %d: ",
+    dbg(DBG_INI,"\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
         cell_prev[MD_DirY*NABLA_NB_CELLS+i],
         i,
         cell_next[MD_DirY*NABLA_NB_CELLS+i]);
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(Z) for cells %d <- #%d -> %d: ",
+    dbg(DBG_INI,"\nNext/Prev(Z) for cells %%d <- #%%d -> %%d: ",
         cell_prev[MD_DirZ*NABLA_NB_CELLS+i],
         i,
         cell_next[MD_DirZ*NABLA_NB_CELLS+i]);

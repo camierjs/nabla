@@ -40,32 +40,55 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_SCATTER_H_
-#define _KN_STD_SCATTER_H_
+#include "nabla.h"
 
 
-// *****************************************************************************
-// * Scatter: (X is the data @ offset x)
-// * scatter: |ABCD| and offsets:    a                 b       c   d
-// * data:    |....|....|....|....|..A.|....|....|....|B...|...C|..D.|....|....|
-// * ! Ã  la sÃ©quence car quand c et d sont sur le mÃªme warp, Ã§a percute
-// ******************************************************************************
-inline void scatterk(const int a, real *scatter, real *data){
-  double *s=(double *)scatter;
-  double *p=(double *)data;
-  p[a]=s[0];
+// ****************************************************************************
+// * Backend OKINA - Génération de la connectivité du maillage coté header
+// ****************************************************************************
+static void lambdaMesh3DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// ********************************************************\n\
+// * MESH CONNECTIVITY\n\
+// ********************************************************\
+\nint cell_node[8*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell[8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_corner[8*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_next[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_prev[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_and_corner[2*8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
+\n\n\n");
 }
 
 
-// *****************************************************************************
-// * Scatter for real3
-// *****************************************************************************
-inline void scatter3k(const int a, real3 *scatter, real3 *data){
-  double *s=(double *)scatter;
-  double *p=(double *)data;
-  p[3*a+0]=s[0];
-  p[3*a+1]=s[1];
-  p[3*a+2]=s[2];
+// ****************************************************************************
+// * okinaMesh
+// * Adding padding for simd too 
+// ****************************************************************************
+void lambdaMesh3D(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * MESH GENERATION\n\
+// ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 8;\
+\n\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\
+\n\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
+\n\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
+const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
+const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\
+\n\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
+const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES);\n\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS);");
+  lambdaMesh3DConnectivity(nabla);
 }
 
-#endif //  _KN_STD_SCATTER_H_

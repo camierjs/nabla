@@ -46,9 +46,9 @@
 
 
 // ****************************************************************************
-// * ccHookReduction
+// * lambdaHookReduction
 // ****************************************************************************
-void ccHookReduction(struct nablaMainStruct *nabla, astNode *n){
+void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *item_node = n->children->next->children;
   const astNode *global_var_node = n->children->next->next;
   const astNode *reduction_operation_node = global_var_node->next;
@@ -59,7 +59,7 @@ void ccHookReduction(struct nablaMainStruct *nabla, astNode *n){
   // Préparation du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   job_name[0]=0;
-  strcat(job_name,"ccReduction_");
+  strcat(job_name,"lambdaReduction_");
   strcat(job_name,global_var_name);
   // Rajout du job de reduction
   nablaJob *redjob = nMiddleJobNew(nabla->entity);
@@ -74,7 +74,7 @@ void ccHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->xyz    = strdup("NoXYZ");
   redjob->drctn  = strdup("NoDirection");
   assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[ccHookReduction] @ %s",at_single_cst_node->token);
+  dbg("\n\t[lambdaHookReduction] @ %s",at_single_cst_node->token);
   sprintf(&redjob->at[0],at_single_cst_node->token);
   redjob->whenx  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);

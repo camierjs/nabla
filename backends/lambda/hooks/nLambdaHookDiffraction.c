@@ -47,7 +47,7 @@
 /*****************************************************************************
  * Diffraction
  *****************************************************************************/
-void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+void lambdaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
   // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
   // Et on amorce la diffraction
   if ((*n)->ruleid == rulenameToId("expression_statement")
@@ -56,7 +56,7 @@ void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       //&& job->parse.statementToDiffract==NULL
       //&& job->parse.diffractingXYZ==0
       ){
-    //dbg("\n[ccHookJobDiffractStatement] amorce la diffraction");
+    //dbg("\n[lambdaHookJobDiffractStatement] amorce la diffraction");
 //#warning Diffracting is turned OFF
       job->parse.statementToDiffract=NULL;//*n;
       // We're juste READY, not diffracting yet!
@@ -70,7 +70,7 @@ void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ<3){
-    dbg("\n[ccHookJobDiffractStatement] avance dans la diffraction");
+    dbg("\n[lambdaHookJobDiffractStatement] avance dans la diffraction");
     job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
     (*n)=job->parse.statementToDiffract;
     nprintf(nabla, NULL, ";\n\t");
@@ -83,12 +83,12 @@ void ccHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
       && job->parse.statementToDiffract!=NULL
       && job->parse.diffractingXYZ>0
       && job->parse.diffractingXYZ==3){
-    dbg("\n[ccHookJobDiffractStatement] Flush de la diffraction");
+    dbg("\n[lambdaHookJobDiffractStatement] Flush de la diffraction");
     job->parse.diffracting=false;
     job->parse.statementToDiffract=NULL;
     job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
     nprintf(nabla, "/*<end of diffracting>*/",NULL);
   }
-  //dbg("\n[ccHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
+  //dbg("\n[lambdaHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
 }
 

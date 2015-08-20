@@ -40,77 +40,54 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_GATHER_H_
-#define _KN_STD_GATHER_H_
+#include "nabla.h"
 
 
-/******************************************************************************
- * Gather: (X is the data @ offset x)       a            b       c   d
- * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      
- * gather: |ABCD|
- ******************************************************************************/
-inline void gatherk_load(const int a, real *data, real *gthr){
-  *gthr=*(data+a);
-}
-
-inline void gatherk(const int a, real *data, real *gthr){
-  gatherk_load(a,data,gthr);
-}
-
-
-inline real gatherk_and_zero_neg_ones(const int a, real *data){
-  if (a>=0) return *(data+a);
-  return 0.0;
-}
-
-inline void gatherFromNode_k(const int a, real *data, real *gthr){
-  *gthr=gatherk_and_zero_neg_ones(a,data);
+// ****************************************************************************
+// * Backend OKINA - Génération de la connectivité du maillage coté header
+// ****************************************************************************
+static void lambdaMesh1DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// ********************************************************\n\
+// * MESH CONNECTIVITY\n\
+// ********************************************************\
+\nint cell_node[2*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell[2*NABLA_NB_NODES]               __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_corner[2*NABLA_NB_NODES]        __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_next[1*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_prev[1*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_and_corner[2*2*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN)));\
+\n\n\n");
 }
 
 
-/******************************************************************************
- * Gather avec des real3
- ******************************************************************************/
-inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
-  //debug()<<"gather3ki, i="<<i;
-  double *p=(double *)data;
-  double value=p[3*a+i];
-  if (i==0) (*gthr).x=value;
-  if (i==1) (*gthr).y=value;
-  if (i==2) (*gthr).z=value;
+// ****************************************************************************
+// * okinaMesh
+// * Adding padding for simd too 
+// ****************************************************************************
+void lambdaMesh1D(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * MESH GENERATION\n\
+// ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 2;\
+\n\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Y_AXIS = 0;\n\
+const int NABLA_NB_NODES_Z_AXIS = 0;\n\
+\n\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Y_AXIS = 0;\n\
+const int NABLA_NB_CELLS_Z_AXIS = 0;\n\
+\n\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
+const double NABLA_NB_NODES_Y_TICK = 0.0;\n\
+const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
+\n\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
+const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES);\n\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS);");
+  lambdaMesh1DConnectivity(nabla);
 }
-
-inline void gather3k(const int a, real3 *data, real3 *gthr){
-  //debug()<<"gather3k";
-  gather3ki(a, data, gthr, 0);
-  gather3ki(a, data, gthr, 1);
-  gather3ki(a, data, gthr, 2);
-  //debug()<<"gather3k done";
-}
-
-
-
-/******************************************************************************
- * Gather avec des real3[nodes(#8)]
- ******************************************************************************/
-inline void gatherFromNode_3kiArray8(const int a, const int corner,
-                                     real3 *data, real3 *gthr, int i){
-  //debug()<<"gather3ki, i="<<i;
-  double *p=(double *)data;
-  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
-  if (i==0) (*gthr).x=value;
-  if (i==1) (*gthr).y=value;
-  if (i==2) (*gthr).z=value;
-}
-
-inline void gatherFromNode_3kArray8(const int a, const int corner,
-                                    real3 *data, real3 *gthr){
-  //debug()<<"gather3k";
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 0);
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 1);
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 2);
-  //debug()<<"gather3k done";
-}
-
-
-#endif //  _KN_STD_GATHER_H_

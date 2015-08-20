@@ -40,39 +40,53 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_OSTREAM_H_
-#define _KN_STD_OSTREAM_H_
+#ifndef _LAMBDA_DBG_HPP_
+#define _LAMBDA_DBG_HPP_
+
+#include <stdarg.h>
+
+/******************************************************************************
+ * Outils de traces
+ *****************************************************************************/
+
+void dbg(const unsigned int flag, const char *format, ...){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  fflush(stdout);
+  va_end(args);
+}
+
+#define dbgFuncIn()  do{dbg(DBG_FUNC_IN,"\n\t > %%s",__FUNCTION__);}while(0)
+//#define dbgFuncOut() do{dbg(DBG_FUNC_OUT,"\n\t\t < %%s",__FUNCTION__);}while(0)
 
 
-// ****************************************************************************
-// * INTEGERS
-// ****************************************************************************
-std::ostream& operator<<(std::ostream &os, const integer &a){
-  int *ip = (int*)&(a);
-  //return os << "["<<*ip<<"]";
-  return os << *ip;
+
+inline void dbgReal3(const unsigned int flag, real3& v){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  double x[1];
+  double y[1];
+  double z[1];
+  store(x, v.x);
+  store(y, v.y);
+  store(z, v.z);
+  printf("\n\t\t\t[%%.14f,%%.14f,%%.14f]", x[0], y[0], z[0]);
+  fflush(stdout);
 }
 
 
-// ****************************************************************************
-// * REALS
-// ****************************************************************************
-std::ostream& operator<<(std::ostream &os, const Real &a){
-  double *fp = (double*)&a;
-  //return os << "["<<*fp<<"]";
-  return os << *fp;
+inline void dbgReal(const unsigned int flag, real v){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  double x[1];
+  store(x, v);
+  printf("[");
+  printf("%%.14f ", x);
+  printf("]");
+  fflush(stdout);
 }
 
-
-// ****************************************************************************
-// * REALS_3
-// ****************************************************************************
-std::ostream& operator<<(std::ostream &os, const Real3 &a){
-  double *x = (double*)&(a.x);
-  double *y = (double*)&(a.y);
-  double *z = (double*)&(a.z);
-  //return os << "[("<<*x<<","<<*y<<","<<*z<< ")]";
-  return os << "("<<*x<<","<<*y<<","<<*z<< ")";
-}
-
-#endif // _KN_STD_OSTREAM_H_
+#endif // _LAMBDA_DBG_HPP_

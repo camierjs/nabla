@@ -40,66 +40,44 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_TERNARY_H_
-#define _KN_STD_TERNARY_H_
-
+#ifndef _LAMBDA_STD_INTEGER_H_
+#define _LAMBDA_STD_INTEGER_H_
 
 // ****************************************************************************
-// * opTernary
+// * Standard integer
 // ****************************************************************************
+class integer {
+public:
+  int vec;
+public:
+  // Constructors
+  inline integer():vec(0){}
+  inline integer(int i):vec(i){}
+  //inline integer(int i3, int i2, int i1, int i0){vec=_mm_set_epi32(i3, i2, i1, i0);}
+  
+  // Convertors
+  inline operator int() const { return vec; }
 
-inline integer opTernary(const bool cond,
-                         const int ifStatement,
-                         const int elseStatement){
-  //debug()<<"opTernary bool int int";
-  if (cond) return integer(ifStatement);
-  return integer(elseStatement);
-}
+  //inline integer operator&(const integer &b) { return (vec&b); }
+  //inline integer operator|(const integer &b) { return (vec|b); }
+  //inline integer operator^(const integer &b) { return (vec^b); }
+      
+  inline integer& operator&=(const integer &a) { return *this = (integer) (vec&a); }
+  inline integer& operator|=(const integer &a) { return *this = (integer) (vec|a); }
+  inline integer& operator^=(const integer &a) { return *this = (integer) (vec^a); }
 
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const double elseStatement){
-  //debug()<<"opTernary bool double double";
-  if (cond) return real(ifStatement);
-  return real(elseStatement);
-}
+  inline integer& operator+=(const integer &a) { return *this = (integer)(vec+a); }
+  inline integer& operator-=(const integer &a) { return *this = (integer)(vec-a); }   
 
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const real&  elseStatement){
-  //debug()<<"opTernary bool double real";
-  if (cond) return real(ifStatement);
-  return elseStatement;
-}
+  //friend inline bool operator==(const integer &a, const int i){ return a==i; }
+};
 
-inline real opTernary(const bool cond,
-                      const real& ifStatement,
-                      const double elseStatement){
-  //debug()<<"opTernary bool real double";
-  if (cond) return ifStatement;
-  return real(elseStatement);
-}
-inline real3 opTernary(const bool cond,
-                      const real3& ifStatement,
-                      const double elseStatement){
-  if (cond) return ifStatement;
-  return real3(elseStatement);
-}
+//inline integer operator&(const integer &a, const integer &b) { return (a&b); }
+//inline integer operator|(const integer &a, const integer &b) { return (a|b); }
+//inline integer operator^(const integer &a, const integer &b) { return (a^b); }
 
-inline real opTernary(const bool cond,
-                      const real& ifStatement,
-                      const real& elseStatement){
-  //debug()<<"opTernary bool real real";
-  if (cond) return ifStatement;
-  return elseStatement;
-}
+//inline integer operator&(const integer &a, const int &b) { return integer(a&b); }
+//inline integer operator|(const integer &a, const int &b) { return integer(a|b); }
+//inline integer operator^(const integer &a, const int &b) { return integer(a^b); }
 
-inline real3 opTernary(const bool cond,
-                       const double ifStatement,
-                       const real3&  elseStatement){
-  //debug()<<"opTernary bool double real3";
-  if (cond) return Real3(ifStatement);
-  return elseStatement;
-}
-
-#endif //  _KN_STD_TERNARY_H_
+#endif //  _LAMBDA_STD_INTEGER_H_

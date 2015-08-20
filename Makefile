@@ -75,7 +75,11 @@ tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
 
 tstla:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
+tstlao:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
+tstlau:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_upwindAP_run_1_seq)
 
 
 tstgram:

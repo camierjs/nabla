@@ -40,32 +40,23 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_CC_H_
-#define _NABLA_CC_H_
+#ifndef _NABLA_LAMBDA_H_
+#define _NABLA_LAMBDA_H_
 
-extern char* ccForwards[];
-extern nablaDefine ccDefines[];
-extern nablaTypedef ccTypedef[];
+char* lambdaHookBits(void);
+char* lambdaHookGather(nablaJob*,nablaVariable*,enum_phase);
+char* lambdaHookScatter(nablaVariable*);
+char* lambdaHookPrevCell(void);
+char* lambdaHookNextCell(void);
+char* lambdaHookIncludes(void);
 
-char* ccHookBits(void);
-char* ccHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* ccHookScatter(nablaVariable*);
-char* ccHookPrevCell(void);
-char* ccHookNextCell(void);
-char* ccHookIncludes(void);
+char* lambdaHookFilterGather(nablaJob*);
+char* lambdaHookFilterScatter(nablaJob*);
 
-char* ccFilterGather(nablaJob*);
-char* ccFilterScatter(nablaJob*);
-
-void ccAddExtraArguments(nablaMain*,nablaJob*,int*);
-void ccDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void ccAddExtraConnectivitiesArguments(nablaMain*,int*);
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
-
-void ccHookReduction(struct nablaMainStruct*,astNode*);
-void ccHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void ccHookReturnFromArgument(nablaMain*,nablaJob*);
-void ccHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+void lambdaHookReduction(struct nablaMainStruct*,astNode*);
+void lambdaHookAddArguments(struct nablaMainStruct*,nablaJob*);
+void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
+void lambdaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
 // Cilk+ parallel color
 char *nLambdaParallelCilkSync(void);
@@ -86,70 +77,69 @@ char *nLambdaParallelVoidLoop(nablaMain *);
 char *nLambdaParallelVoidIncludes(void);
 
 // Pragmas: Ivdep, Align
-char *ccHookPragmaIccIvdep(void);
-char *ccHookPragmaGccIvdep(void);
-char *ccHookPragmaIccAlign(void);
-char *ccHookPragmaGccAlign(void);
+char *lambdaHookPragmaIccIvdep(void);
+char *lambdaHookPragmaGccIvdep(void);
+char *lambdaHookPragmaIccAlign(void);
+char *lambdaHookPragmaGccAlign(void);
 
-NABLA_STATUS ccMainPrefix(nablaMain*);
-NABLA_STATUS ccMainPreInit(nablaMain*);
-NABLA_STATUS ccMainVarInitKernel(nablaMain*);
-NABLA_STATUS ccMainVarInitCall(nablaMain*);
-NABLA_STATUS ccMainPostInit(nablaMain*);
-NABLA_STATUS ccMain(nablaMain*);
-NABLA_STATUS ccMainPostfix(nablaMain*);
+NABLA_STATUS lambdaMainPrefix(nablaMain*);
+NABLA_STATUS lambdaMainPreInit(nablaMain*);
+NABLA_STATUS lambdaMainVarInitKernel(nablaMain*);
+NABLA_STATUS lambdaMainVarInitCall(nablaMain*);
+NABLA_STATUS lambdaMainPostInit(nablaMain*);
+NABLA_STATUS lambdaMain(nablaMain*);
+NABLA_STATUS lambdaMainPostfix(nablaMain*);
 
-void ccInlines(nablaMain*);
-void ccDefineEnumerates(nablaMain*);
-void ccVariablesPrefix(nablaMain*);
-void ccVariablesPostfix(nablaMain*);
+void lambdaInlines(nablaMain*);
+void lambdaDefineEnumerates(nablaMain*);
+void lambdaVariablesPrefix(nablaMain*);
+void lambdaVariablesPostfix(nablaMain*);
 
-void ccMesh(nablaMain*);
-void ccMainMeshPrefix(nablaMain*);
-void ccMainMeshPostfix(nablaMain*);
+void lambdaMesh(nablaMain*);
+void lambdaMainMeshPrefix(nablaMain*);
+void lambdaMainMeshPostfix(nablaMain*);
 
-void ccHookIteration(struct nablaMainStruct*);
-void ccHookExit(struct nablaMainStruct*);
-void ccHookTime(struct nablaMainStruct*);
-void ccHookFatal(struct nablaMainStruct*);
-void ccHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-bool ccHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
-char* ccHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
-void ccHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-void ccHeaderPrefix(nablaMain*);
-void ccHeaderIncludes(nablaMain*);
-void ccHeaderSimd(nablaMain*);
-void ccHeaderDbg(nablaMain*);
-void ccHeaderMth(nablaMain*);
-void ccHeaderPostfix(nablaMain*);
-void ccInclude(nablaMain*);
+void lambdaHookIteration(struct nablaMainStruct*);
+void lambdaHookExit(struct nablaMainStruct*);
+void lambdaHookTime(struct nablaMainStruct*);
+void lambdaHookFatal(struct nablaMainStruct*);
+void lambdaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+char* lambdaHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
+void lambdaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+void lambdaHeaderPrefix(nablaMain*);
+void lambdaHeaderIncludes(nablaMain*);
+void lambdaHeaderSimd(nablaMain*);
+void lambdaHeaderDbg(nablaMain*);
+void lambdaHeaderMth(nablaMain*);
+void lambdaHeaderPostfix(nablaMain*);
+void lambdaInclude(nablaMain*);
 
-void ccHookFunctionName(nablaMain*);
-void ccHookFunction(nablaMain*, astNode*);
-void ccHookJob(nablaMain*, astNode*);
-void ccHookLibraries(astNode*, nablaEntity*);
-char* ccHookPrefixEnumerate(nablaJob*);
-char* ccHookDumpEnumerateXYZ(nablaJob*);
-char* ccHookDumpEnumerate(nablaJob*);
-char* ccHookPostfixEnumerate(nablaJob*);
-char* ccHookItem(nablaJob*,const char, const char, char);
-void ccHookSwitchToken(astNode*, nablaJob*);
-nablaVariable *ccHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void ccHookSystem(astNode*,nablaMain*,const char,char);
-void ccHookAddExtraParameters(nablaMain*,nablaJob*,int*);
-void ccHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-void ccHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void ccHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
+void lambdaHookFunctionName(nablaMain*);
+void lambdaHookFunction(nablaMain*, astNode*);
+void lambdaHookJob(nablaMain*, astNode*);
+void lambdaHookLibraries(astNode*, nablaEntity*);
+char* lambdaHookPrefixEnumerate(nablaJob*);
+char* lambdaHookDumpEnumerateXYZ(nablaJob*);
+char* lambdaHookDumpEnumerate(nablaJob*);
+char* lambdaHookPostfixEnumerate(nablaJob*);
+char* lambdaHookItem(nablaJob*,const char, const char, char);
+void lambdaHookSwitchToken(astNode*, nablaJob*);
+nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void lambdaHookSystem(astNode*,nablaMain*,const char,char);
+void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
+void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
+void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
-void ccDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
-void ccAddExtraArguments(nablaMain*,nablaJob*,int*);
-void ccAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
-void ccAddExtraConnectivitiesParameters(nablaMain*,int*);
-void ccAddExtraConnectivitiesArguments(nablaMain*,int*);
+void lambdaDumpNablaArgumentList(nablaMain*,astNode*,int*);
+void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
+void lambdaAddExtraArguments(nablaMain*,nablaJob*,int*);
+void lambdaHookAddExtraConnectivitiesParameters(nablaMain*,int*);
+void lambdaAddExtraConnectivitiesArguments(nablaMain*,int*);
 
 NABLA_STATUS nLambda(nablaMain*,astNode*,const char*);
 
-#endif // _NABLA_CC_H_
+#endif // _NABLA_LAMBDA_H_
  

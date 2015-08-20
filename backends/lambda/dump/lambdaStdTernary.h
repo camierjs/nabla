@@ -40,69 +40,66 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_STD_REAL3_H_
-#define _KN_STD_REAL3_H_
+#ifndef _LAMBDA_STD_TERNARY_H_
+#define _LAMBDA_STD_TERNARY_H_
 
-#pragma pack(push,8)
 
 // ****************************************************************************
-// * real3
+// * opTernary
 // ****************************************************************************
-class __attribute__ ((aligned(8))) real3 {
- public:
-  // Les formules 4*(3*WARP_BASE(a)+0)+WARP_OFFSET(a) fonctionnent grâce au fait
-  // que real3 est bien une struct avec les x,y et z en positions [0],[1] et [2]
-  __attribute__ ((aligned(8))) real x;
-  __attribute__ ((aligned(8))) real y;
-  __attribute__ ((aligned(8))) real z;
- public:
-  // Constructors
-  inline real3(): x(0.0), y(0.0), z(0.0){}
-  inline real3(double d) {x=d; y=d; z=d;}
-  inline real3(double _x,double _y,double _z): x(_x), y(_y), z(_z){}
-  inline real3(real f):x(f), y(f), z(f){}
-  inline real3(real _x, real _y, real _z):x(_x), y(_y), z(_z){}
-  inline real3(double *_x, double *_y, double *_z): x(*_x), y(*_y), z(*_z){}
 
-  // Logicals
-  friend inline real3 operator&(const real3 &a, const real3 &b) { return real3((a.x&b.x), (a.y&b.y), (a.z&b.z)); }
-  friend inline real3 operator|(const real3 &a, const real3 &b) { return real3((a.x|b.x), (a.y|b.y), (a.z|b.z)); }
-  friend inline real3 operator^(const real3 &a, const real3 &b) { return real3((a.x^b.x), (a.y^b.y), (a.z^b.z)); }
+inline integer opTernary(const bool cond,
+                         const int ifStatement,
+                         const int elseStatement){
+  //debug()<<"opTernary bool int int";
+  if (cond) return integer(ifStatement);
+  return integer(elseStatement);
+}
 
-  // Arithmetic operators
-  friend inline real3 operator+(const real3 &a, const real3& b) { return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
-  friend inline real3 operator-(const real3 &a, const real3& b) { return real3((a.x-b.x), (a.y-b.y), (a.z-b.z));}
-  friend inline real3 operator*(const real3 &a, const real3& b) { return real3((a.x*b.x), (a.y*b.y), (a.z*b.z));}
-  friend inline real3 operator/(const real3 &a, const real3& b) { return real3((a.x/b.x), (a.y/b.y), (a.z/b.z));}
-  friend inline real3 operator+(const volatile real3 &a, const volatile real3& b) { return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
+inline real opTernary(const bool cond,
+                      const double ifStatement,
+                      const double elseStatement){
+  //debug()<<"opTernary bool double double";
+  if (cond) return real(ifStatement);
+  return real(elseStatement);
+}
 
-  // op= operators
-  inline real3& operator+=(const real3& b) { return *this=real3((x+b.x),(y+b.y),(z+b.z));}
-  inline real3& operator-=(const real3& b) { return *this=real3((x-b.x),(y-b.y),(z-b.z));}
-  inline real3& operator*=(const real3& b) { return *this=real3((x*b.x),(y*b.y),(z*b.z));}
-  inline real3& operator/=(const real3& b) { return *this=real3((x/b.x),(y/b.y),(z/b.z));}
+inline real opTernary(const bool cond,
+                      const double ifStatement,
+                      const real&  elseStatement){
+  //debug()<<"opTernary bool double real";
+  if (cond) return real(ifStatement);
+  return elseStatement;
+}
 
-  inline real3 operator-()const {return real3(0.0-x, 0.0-y, 0.0-z);}
+inline real opTernary(const bool cond,
+                      const real& ifStatement,
+                      const double elseStatement){
+  //debug()<<"opTernary bool real double";
+  if (cond) return ifStatement;
+  return real(elseStatement);
+}
+inline real3 opTernary(const bool cond,
+                      const real3& ifStatement,
+                      const double elseStatement){
+  if (cond) return ifStatement;
+  return real3(elseStatement);
+}
 
-  // op= operators with real
-  inline real3& operator+=(real f){return *this=real3(x+f,y+f,z+f);}
-  inline real3& operator-=(real f){return *this=real3(x-f,y-f,z-f);}
-  inline real3& operator*=(real f){return *this=real3(x*f,y*f,z*f);}
-  inline real3& operator/=(real f){return *this=real3(x/f,y/f,z/f);}
+inline real opTernary(const bool cond,
+                      const real& ifStatement,
+                      const real& elseStatement){
+  //debug()<<"opTernary bool real real";
+  if (cond) return ifStatement;
+  return elseStatement;
+}
 
-  inline real3& operator+=(double f){return *this=real3(x+f,y+f,z+f);}
-  inline real3& operator-=(double f){return *this=real3(x-f,y-f,z-f);}
-  inline real3& operator*=(double f){return *this=real3(x*f,y*f,z*f);}
-  inline real3& operator/=(double f){return *this=real3(x/f,y/f,z/f);}
-  friend inline real dot3(real3 u, real3 v){
-    return real(u.x*v.x+u.y*v.y+u.z*v.z);
-  }
-  friend inline real norm(real3 u){ return real(square_root(dot3(u,u)));}
+inline real3 opTernary(const bool cond,
+                       const double ifStatement,
+                       const real3&  elseStatement){
+  //debug()<<"opTernary bool double real3";
+  if (cond) return Real3(ifStatement);
+  return elseStatement;
+}
 
-  friend inline real3 cross(real3 u, real3 v){
-    return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));
-  }
-};
-
-
-#endif //  _KN_STD_REAL3_H_
+#endif //  _LAMBDA_STD_TERNARY_H_

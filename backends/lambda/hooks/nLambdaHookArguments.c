@@ -44,51 +44,10 @@
 #include "nabla.tab.h"
 
 
-/*****************************************************************************
-  * Dump d'extra arguments
- *****************************************************************************/
-void ccAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla,"\n\t\t/*ccAddExtraArguments*/",NULL);
-}
-
-
-
-/*****************************************************************************
-  * Dump dans le src des arguments nabla en in comme en out
- *****************************************************************************/
-void ccDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
-  nprintf(nabla,"\n\t\t/*ccDumpNablaArgumentList*/",NULL);
-}
-
-
-/*****************************************************************************
-  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
- *****************************************************************************/
-void ccDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
-  nprintf(nabla,"\n\t\t/*ccDumpNablaDebugFunctionFromOutArguments*/",NULL);
-}
-
-
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-void ccAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
-  nprintf(nabla,"\n/*ccAddNablaVariableList*/",NULL);
-}
-
-
 // ****************************************************************************
-// * Dump d'extra connectivity
+// * lambdaHookReturnFromArgument
 // ****************************************************************************
-void ccAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
-  return;
-}
-
-
-// ****************************************************************************
-// * ccHookReturnFromArgument
-// ****************************************************************************
-void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
+void lambdaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
   const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nprintf(nabla, NULL, "\
@@ -96,13 +55,13 @@ void ccHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
 \n\tReal %s_per_thread[threads];", rtnVariable);
 }
 
-void ccHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
+void lambdaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   if (fct->parse.function_call_name!=NULL){
-    //nprintf(nabla, "/*ShouldDumpParamsInCc*/", "/*Arg*/");
+    //nprintf(nabla, "/*ShouldDumpParamsInLambda*/", "/*Arg*/");
     int numParams=1;
     nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    ccAddExtraArguments(nabla, called, &numParams);
+    lambdaAddExtraArguments(nabla, called, &numParams);
     if (called->nblParamsNode != NULL)
-      ccDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
+      lambdaDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
   }
 }
