@@ -143,7 +143,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case(INTEGER):{
-    nprintf(nabla, "/*INTEGER*/", "integer ");
+    nprintf(nabla, "/*INTEGER*/", "int ");
     break;
   }
     //case(RESTRICT):{nprintf(nabla, "/*RESTRICT*/", "__restrict__ ");break;}

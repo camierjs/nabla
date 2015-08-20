@@ -6,6 +6,7 @@ set(BACKEND_LAMBDA_HOOKS_C
   nLambdaHookReductions.c
   nLambdaHookTokens.c
   nLambdaHook.c
+  nLambdaHookData.c
   nLambdaHookForLoops.c
   nLambdaHookParameters.c
   nLambdaHookScatter.c)

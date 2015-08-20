@@ -71,19 +71,33 @@ int main(int argc, char *argv[]){\n\
 \tglobal_iteration=1;\n\
 \tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
-
+NABLA_STATUS lambdaMainPrefix(nablaMain *nabla){
+  dbg("\n[lambdaMainPrefix]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
+  return NABLA_OK;
+}
 
 
 /*****************************************************************************
  * Backend LAMBDA INIT - Génération du 'main'
  *****************************************************************************/
 #define LAMBDA_MAIN_PREINIT "\n\t//LAMBDA_MAIN_PREINIT"
+NABLA_STATUS lambdaMainPreInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPreInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
+  return NABLA_OK;
+}
 
 
 /*****************************************************************************
  * Backend LAMBDA POSTFIX - Génération du 'main'
  *****************************************************************************/
 #define LAMBDA_MAIN_POSTINIT "\n\t//LAMBDA_MAIN_POSTINIT"
+NABLA_STATUS lambdaMainPostInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPostInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
+  return NABLA_OK;
+}
 
 
 /*****************************************************************************
@@ -98,26 +112,6 @@ int main(int argc, char *argv[]){\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
 \n}\n"
-
-
-/*****************************************************************************
- * lambdaMainPrefix
- *****************************************************************************/
-NABLA_STATUS lambdaMainPrefix(nablaMain *nabla){
-  dbg("\n[lambdaMainPrefix]");
-  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * lambdaMainPreInit
- *****************************************************************************/
-NABLA_STATUS lambdaMainPreInit(nablaMain *nabla){
-  dbg("\n[lambdaMainPreInit]");
-  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
-  return NABLA_OK;
-}
 
 
 /*****************************************************************************
@@ -140,7 +134,7 @@ void nabla_ini_variables(void){");
     nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
     if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
     if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+    if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
   }
   nprintf(nabla,NULL,"\n\t}");  
   // Variables aux mailles real
@@ -151,13 +145,13 @@ void nabla_ini_variables(void){");
       nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
     }else{
       nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
       nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
     }
   }
   nprintf(nabla,NULL,"\n\t}");
@@ -188,18 +182,11 @@ NABLA_STATUS lambdaMainVarInitCall(nablaMain *nabla){
 
 
 /*****************************************************************************
- * lambdaMainPostInit
- *****************************************************************************/
-NABLA_STATUS lambdaMainPostInit(nablaMain *nabla){
-  dbg("\n[lambdaMainPostInit]");
-  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
-  return NABLA_OK;
-}
-
-/*****************************************************************************
   * Dump d'extra arguments
  *****************************************************************************/
-void lambdaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
+void lambdaAddExtraArguments(nablaMain *nabla,
+                             nablaJob *job,
+                             int *numParams){
   nprintf(nabla,"\n\t\t/*lambdaAddExtraArguments*/",NULL);
 }
 
@@ -208,7 +195,8 @@ void lambdaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
 /*****************************************************************************
   * Dump dans le src des arguments nabla en in comme en out
  *****************************************************************************/
-void lambdaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
+void lambdaDumpNablaArgumentList(nablaMain *nabla, astNode *n,
+                                 int *numParams){
   nprintf(nabla,"\n\t\t/*lambdaDumpNablaArgumentList*/",NULL);
 }
 
@@ -216,7 +204,9 @@ void lambdaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
 /*****************************************************************************
   * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
  *****************************************************************************/
-void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
+static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+                                                         astNode *n,
+                                                         bool in_or_out){
   nprintf(nabla,"\n\t\t/*lambdaDumpNablaDebugFunctionFromOutArguments*/",NULL);
 }
 
@@ -224,7 +214,8 @@ void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, 
 // ****************************************************************************
 // * Dump d'extra connectivity
 // ****************************************************************************
-void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
+static void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla,
+                                                  int *numParams){
   return;
 }
 

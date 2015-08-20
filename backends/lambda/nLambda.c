@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
-void lambdaDefineEnumerates(nablaMain *nabla){
+static void lambdaDefineEnumerates(nablaMain *nabla){
   const char *parallel_prefix_for_loop=nabla->parallel->loop(nabla);
   fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
@@ -82,12 +82,9 @@ void lambdaDefineEnumerates(nablaMain *nabla){
 // ****************************************************************************
 // * Forward Declarations
 // ****************************************************************************
-char* lambdaForwards[]={
+static char* lambdaForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-  "inline int WARP_BASE(int a){ return (a);}",
-  "inline int WARP_OFFSET(int a){ return (a);}",
-  "inline int WARP_NFFSET(int a){ return (-WARP_OFFSET(a));}",
   "static void nabla_ini_node_coords(void);",
   "static void verifCoords(void);",
   NULL
@@ -97,12 +94,10 @@ char* lambdaForwards[]={
 // ****************************************************************************
 // * Defines
 // ****************************************************************************
-nablaDefine lambdaDefines[]={
-  {"integer", "Integer"},
+static nablaDefine lambdaDefines[]={
   {"real", "Real"},
   {"WARP_ALIGN", "8"},    
   {"NABLA_NB_GLOBAL_WARP","1"},
-  //{"reducemin(a)","0.0"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
@@ -158,7 +153,7 @@ nablaDefine lambdaDefines[]={
 // ****************************************************************************
 // * Typedefs
 // ****************************************************************************
-nablaTypedef lambdaTypedef[]={
+static nablaTypedef lambdaTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -167,7 +162,7 @@ nablaTypedef lambdaTypedef[]={
 // ****************************************************************************
 // * lambdaInclude
 // ****************************************************************************
-void lambdaInclude(nablaMain *nabla){
+static void lambdaInclude(nablaMain *nabla){
   fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
 
@@ -175,7 +170,7 @@ void lambdaInclude(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-void lambdaHeaderPrefix(nablaMain *nabla){
+static void lambdaHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
           "#ifndef __LAMBDA_%s_H__\n#define __LAMBDA_%s_H__",
@@ -187,7 +182,7 @@ void lambdaHeaderPrefix(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-void lambdaHeaderIncludes(nablaMain *nabla){
+static void lambdaHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
 // *****************************************************************************\n\
@@ -223,10 +218,10 @@ extern char lambdaStdScatter_h[];
 extern char lambdaStdOStream_h[];
 extern char lambdaStdTernary_h[];
 
-char *dumpExternalFile(char *file){
+static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
-void lambdaHeaderSimd(nablaMain *nabla){
+static void lambdaHeaderTypes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdInteger_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal_h));
@@ -242,7 +237,7 @@ void lambdaHeaderSimd(nablaMain *nabla){
 // * lambdaHeader for Dbg
 // ****************************************************************************
 extern char lambdaDbg_h[];
-void lambdaHeaderDbg(nablaMain *nabla){
+static void lambdaHeaderDbg(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
 }
@@ -252,7 +247,7 @@ void lambdaHeaderDbg(nablaMain *nabla){
 // * lambdaHeader for Maths
 // ****************************************************************************
 extern char lambdaMth_h[];
-void lambdaHeaderMth(nablaMain *nabla){
+static void lambdaHeaderMth(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaMth_h));
 }
@@ -261,7 +256,7 @@ void lambdaHeaderMth(nablaMain *nabla){
 /***************************************************************************** 
  * 
  *****************************************************************************/
-void lambdaHeaderPostfix(nablaMain *nabla){
+static void lambdaHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __LAMBDA_%s_H__\n",nabla->entity->name);
 }
 
@@ -384,7 +379,7 @@ NABLA_STATUS nLambda(nablaMain *nabla,
   nMiddleForwards(nabla,nabla->simd->forwards);
 
   // On inclue les fichiers lambda'SIMD'
-  lambdaHeaderSimd(nabla);
+  lambdaHeaderTypes(nabla);
   lambdaHeaderDbg(nabla);
   lambdaHeaderMth(nabla);
 

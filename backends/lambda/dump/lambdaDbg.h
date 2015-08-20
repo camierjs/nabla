@@ -84,7 +84,7 @@ inline void dbgReal(const unsigned int flag, real v){
   double x[1];
   store(x, v);
   printf("[");
-  printf("%%.14f ", x);
+  printf("%%.14f ", x[0]);
   printf("]");
   fflush(stdout);
 }

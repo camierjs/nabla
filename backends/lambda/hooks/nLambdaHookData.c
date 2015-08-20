@@ -47,7 +47,10 @@
 /***************************************************************************** 
  * Traitement des transformations '[', '(' & ''
  *****************************************************************************/
-void lambdaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
+void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
+                                         nablaJob *job,
+                                         nablaVariable *var,
+                                         char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
@@ -66,9 +69,12 @@ void lambdaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaV
   }else{
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_X*/", NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Y*/", NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Z*/", NULL);
+    if (job->parse.isDotXYZ==1)
+      nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_X*/", NULL);
+    if (job->parse.isDotXYZ==2)
+      nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Y*/", NULL);
+    if (job->parse.isDotXYZ==3)
+      nprintf(nabla, "/*lambdaHookTurnBracketsToParentheses_Z*/", NULL);
     job->parse.isDotXYZ=0;
     job->parse.turnBracketsToParentheses=false;
   }
@@ -115,7 +121,7 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
     nprintf(nabla,NULL,"/*%s*/",var->type);
     if (strcmp(var->type,"real")==0)
       nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
-    if (strcmp(var->type,"integer")==0)
+    if (strcmp(var->type,"int")==0)
       nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
     if (strcmp(var->type,"real3")==0)
       nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);

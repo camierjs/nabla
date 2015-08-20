@@ -9,7 +9,6 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 
 set(BACKEND_LAMBDA_C 
   nLambda.c 
-  nLambdaData.c 
   nLambdaMain.c
   nLambdaVariables.c
   ${CMAKE_CURRENT_BINARY_DIR}/nLambdaDump.S)

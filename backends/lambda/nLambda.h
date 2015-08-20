@@ -91,11 +91,12 @@ NABLA_STATUS lambdaMain(nablaMain*);
 NABLA_STATUS lambdaMainPostfix(nablaMain*);
 
 void lambdaInlines(nablaMain*);
-void lambdaDefineEnumerates(nablaMain*);
+// static void lambdaDefineEnumerates(nablaMain*);
 void lambdaVariablesPrefix(nablaMain*);
 void lambdaVariablesPostfix(nablaMain*);
 
-void lambdaMesh(nablaMain*);
+void lambdaMesh1D(nablaMain*);
+void lambdaMesh3D(nablaMain*);
 void lambdaMainMeshPrefix(nablaMain*);
 void lambdaMainMeshPostfix(nablaMain*);
 
@@ -107,13 +108,12 @@ void lambdaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
 bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
 char* lambdaHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
 void lambdaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-void lambdaHeaderPrefix(nablaMain*);
-void lambdaHeaderIncludes(nablaMain*);
-void lambdaHeaderSimd(nablaMain*);
-void lambdaHeaderDbg(nablaMain*);
-void lambdaHeaderMth(nablaMain*);
-void lambdaHeaderPostfix(nablaMain*);
-void lambdaInclude(nablaMain*);
+// static void lambdaHeaderPrefix(nablaMain*);
+// static void lambdaHeaderIncludes(nablaMain*);
+// static void lambdaHeaderDbg(nablaMain*);
+// static void lambdaHeaderMth(nablaMain*);
+// static void lambdaHeaderPostfix(nablaMain*);
+// static void lambdaInclude(nablaMain*);
 
 void lambdaHookFunctionName(nablaMain*);
 void lambdaHookFunction(nablaMain*, astNode*);
@@ -134,10 +134,10 @@ void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
 void lambdaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
+// static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 void lambdaAddExtraArguments(nablaMain*,nablaJob*,int*);
+// static void lambdaAddExtraConnectivitiesArguments(nablaMain*,int*);
 void lambdaHookAddExtraConnectivitiesParameters(nablaMain*,int*);
-void lambdaAddExtraConnectivitiesArguments(nablaMain*,int*);
 
 NABLA_STATUS nLambda(nablaMain*,astNode*,const char*);
 

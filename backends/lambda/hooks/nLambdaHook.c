@@ -55,14 +55,14 @@ char* lambdaHookIncludes(void){return "";}
 // * IVDEP Pragma
 // ****************************************************************************
 char *lambdaHookPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *lambdaHookPragmaGccIvdep(void){ return "__declspec(align(64)) "; }
+char *lambdaHookPragmaGccIvdep(void){ return "__declspec(align(64))"; }
 
 
 // ****************************************************************************
 // * ALIGN hooks
 // ****************************************************************************
-char *lambdaHookPragmaIccAlign(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *lambdaHookPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+char *lambdaHookPragmaIccAlign(void){ return ""; }
+char *lambdaHookPragmaGccAlign(void){ return ""; }
 
 
 // ****************************************************************************
