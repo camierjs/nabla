@@ -37,10 +37,10 @@
 
  	<mesh>
      <!--file internal-partition="true">block_mesh.mli</file-->
-     <file internal-partition="true">../thex_mesh.unf</file>
+     <!--file internal-partition="true">../thex_mesh.unf</file-->
 
      <!--file internal-partition="true">cyl200.mli</file-->
-	  <!--meshgenerator>
+	  <meshgenerator>
  		 <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
@@ -48,7 +48,7 @@
 			<ly ny="16" pry="1.0">1.0</ly>
 			<lz nz="16" prz="1.0">1.0</lz>
 		 </cartesian> 
-	  </meshgenerator-->
+	  </meshgenerator>
 	</mesh>
    <glace>
      <option_chic>false</option_chic>
@@ -84,6 +84,6 @@
      <option_ini_zd_rh>1.0</option_ini_zd_rh>
      <option_ini_zd_p>1.0</option_ini_zd_p>
 
-     <option_max_iterations>1</option_max_iterations>
+     <option_max_iterations>8</option_max_iterations>
    </glace>
 </case>

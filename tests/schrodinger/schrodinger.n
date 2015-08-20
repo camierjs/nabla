@@ -497,5 +497,6 @@ void testForQuit(void) @ 5.0{
   synchronize(node_density);
   synchronize(node_density_re);
   synchronize(node_density_im);
+  info()<< "\33[7m[testForQuit] GlobalIteration="<<GlobalIteration<<"\33[m";
   if (GlobalIteration >= option_max_iterations) exit;
 }

@@ -121,18 +121,74 @@ static char *switchItemSupportTokenid(int item_support_tokenid){
 }
 
 
-/*****************************************************************************
- * Fonction de parsing et d'application des actions correspondantes
- *****************************************************************************/
+// ****************************************************************************
+// * nMiddleDeclarationDump
+// ****************************************************************************
+static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
+  for(;n->token != NULL;){
+    dbg(" %s",n->token);
+    nprintf(nabla, NULL, "%s ", n->token);
+    if (n->tokenid == ';'){
+      //nprintf(nabla, NULL, "\n");
+      return;
+    }
+    break;
+  }
+  if(n->children != NULL) nMiddleDeclarationDump(nabla, n->children);
+  if(n->next != NULL) nMiddleDeclarationDump(nabla, n->next);
+}
+
+
+// ****************************************************************************
+// * Fonction de parsing et d'application des actions correspondantes
+// * On scrute les possibilités du 'nabla_grammar':
+// *    - INCLUDES
+// *    - preproc
+// *    - with_library
+// *    - declaration
+// *    - nabla_options_definition
+// *    - nabla_item_definition
+// *    - function_definition
+// *    - nabla_job_definition
+// *    - nabla_reduction
+// *    - (nabla_materials_definition)
+// *    - (nabla_environments_definition)
+// ****************************************************************************
 void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
     
+  ////////////////////////////////////
+  // Règle de définitions des includes
+  /////////////////////////////////////
+  if (n->tokenid == INCLUDES){
+    nMiddleInclude(nabla, n->token);
+    dbg("\n\t[nablaMiddlendParseAndHook] rule hit INCLUDES %s", n->token);
+  }
+
+  /////////////////////////////////////
+  // Règle de définitions des preprocs 
+  /////////////////////////////////////
+  if (n->ruleid == rulenameToId("preproc")){
+    nprintf(nabla, NULL, "%s\n", n->children->token);
+    dbg("\n\t[nablaMiddlendParseAndHook] preproc '%s'", n->children->token);
+  }
+  
   ///////////////////////////////
   // Déclaration des libraries //
   ///////////////////////////////
   if (n->ruleid == rulenameToId("with_library")){
     dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
     nMiddleLibraries(n,nabla->entity);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] library done");
+  }
+
+  //////////////////////////////
+  // Règle ∇ de 'declaration' //
+  //////////////////////////////
+  if (n->ruleid == rulenameToId("declaration")){
+    dbg("\n\t[nablaMiddlendParseAndHook] declaration hit:");
+    nMiddleDeclarationDump(nabla,n);
+    nprintf(nabla, NULL, "\n");
+    dbg(", done");
   }
   
   ///////////////////////////////////////////////////////
@@ -148,16 +204,9 @@ void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
     nMiddleItems(n->children->next,
                rulenameToId("nabla_item_declaration"),
                nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] item done");
   }
 
-  ////////////////////////////////////
-  // Règle de définitions des includes
-  /////////////////////////////////////
-  if (n->tokenid == INCLUDES){
-    nMiddleInclude(nabla, n->token);
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit INCLUDES %s", n->token);
-  }
 
   ///////////////////////////////////
   // Règle de définitions des options
@@ -166,7 +215,7 @@ void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nMiddleOptions(n->children,
                    rulenameToId("nabla_option_declaration"), nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] option done");
   }
 
   /////////////////////////////////////////////////
@@ -175,7 +224,11 @@ void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("function_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nabla->hook->function(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] function done");
+    goto step_next;
+    // On continue sans s'engouffrer dans la fonction
+    if(n->next != NULL) nMiddleParseAndHook(n->next, nabla);
+    return;
   }
   
   ////////////////////////////////////////
@@ -184,7 +237,8 @@ void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("nabla_job_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nabla->hook->job(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] job done");
+    goto step_next;
   }
 
   //////////////////////////////
@@ -209,13 +263,17 @@ void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
     assert(reduction_operation_node->tokenid==MIN_ASSIGN);
     // Having done these sanity checks, let's pass the rest of the generation to the backends
     nabla->hook->reduction(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] done");
+    dbg("\n\t[nablaMiddlendParseAndHook] reduction done");
   }
 
+  // nabla_materials_definition
+  // nabla_environments_definition
+  
   //////////////////
   // DFS standard //
   //////////////////
   if(n->children != NULL) nMiddleParseAndHook(n->children, nabla);
+ step_next:
   if(n->next != NULL) nMiddleParseAndHook(n->next, nabla);
 }
 
@@ -318,6 +376,7 @@ int nMiddleSwitch(astNode *root,
   nabla->optionDumpTree=optionDumpTree;
   nabla->simd=NULL;
   nabla->parallel=NULL;  
+  nabla->options=NULL;  
   dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
   nMiddleVariableGlobalAdd(nabla);
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");

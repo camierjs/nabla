@@ -28,8 +28,8 @@
 	</arcane-post-processing>
 
    <arcane-checkpoint>
-     <period>2</period>
-     <do-dump-at-end>true</do-dump-at-end>
+     <period>0</period>
+     <do-dump-at-end>false</do-dump-at-end>
    </arcane-checkpoint>
 
    <mesh>
@@ -44,8 +44,8 @@
  		 <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="64" prx="1.0">1.0</lx>
-			<ly ny="64" pry="1.0">1.0</ly>
+			<lx nx="8" prx="1.0">1.0</lx>
+			<ly ny="8" pry="1.0">1.0</ly>
 	    </cartesian> 
      </meshgenerator>
    </mesh>

@@ -6,6 +6,8 @@ TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 
+LOG = -t -v $(TGT).log
+
 
 ########################## 
 # ARCANE_LIBS and CFLAGS #
@@ -23,13 +25,13 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_core\
  -larcane_utils\
  -larcane_driverlib\
- -larcane_cea\
  -larcane_aleph\
  -larcane_ios\
- -larcane_hyoda\
  -larcane_aleph_hypre\
  $(ARCANE_PKG_LIBS)\
  -Wl,-rpath,${ARCANE_ROOT}/lib
+# -larcane_hyoda\
+# -larcane_cea\
 # -larcane_aleph_sloop\
 # -larcane_aleph_trilinos\
 
@@ -81,7 +83,7 @@ main.o:$(TGT)Module.o
 
 
 $(TGT):main.o
-	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
+	$(CXX) -g -o $(TGT) $(TGT)Module.o main.o -Wl,-rpath,. $(ARCANE_LIBS) ${CEA_LIB}	${GMP_LIB} ${SUPERLU_LIB} #${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
 
 
 #####################
@@ -108,6 +110,16 @@ h1:$(TGT)
 	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 $(HYODA) ./$(TGT) $(ARC_FILE)
 
 
+#########
+# CLEAN #
+#########
 cln:
 	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT).axl $(TGT)_axl.h $(TGT)Module.* $(TGT).E.* *.log *.dot *.svg main.cc mcuda.config
 	@-rm -rf output* signal* fatal* logs *.o *.a *.so *.co $(TGT) $(TGT)Module* $(TGT).E.* *.log *.dot *.svg main.cc *.config errors
+
+
+#############
+# DOT 2 PNG #
+#############
+png:
+	dot -Tpng $(TGT).dot -o $(TGT).png

@@ -102,6 +102,7 @@ static nablaDefine arcaneDefines[] ={
   {"synchronize(a)","a.synchronize()"},
   {"mpi_reduce(how,what)","subDomain()->parallelMng()->reduce(how,what)"},
   {"mpInteger","mpz_class"},
+  {"restrict",""},
   {NULL,NULL}
 };
 static nablaDefine arcaneOpCodesDefines[] ={

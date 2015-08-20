@@ -569,8 +569,16 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
-  case (ADRS_IN):{adrs_it=true;break;}
-  case (ADRS_OUT):{adrs_it=false;break;}
+  case (ADRS_IN):{
+    nprintf(arc, "/*ADRS_IN*/", NULL);
+    adrs_it=true;
+    break;
+  }
+  case (ADRS_OUT):{
+    nprintf(arc, "/*ADRS_OUT*/", NULL);
+    adrs_it=false;
+    break;
+  }
     
   case ('&'):{
     if (adrs_it==true){

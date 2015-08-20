@@ -85,6 +85,7 @@ void nOkinaHeaderIncludes(nablaMain *nabla){
 #include <iostream>\n\
 #include <sstream>\n\
 #include <fstream>\n\
+using namespace std;\n\
 %s // fromnabla->parallel->includes()\n",
           nabla->simd->includes(),
           nabla->parallel->includes());

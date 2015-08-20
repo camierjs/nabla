@@ -45,7 +45,7 @@
 
 
 // ****************************************************************************
-// * nablaFunctionDumpHdr
+// * nMiddleFunctionDumpHeader
 // ****************************************************************************
 void nMiddleFunctionDumpHeader(FILE *file, astNode * n){
   if (n->rule!=NULL)
@@ -60,7 +60,7 @@ void nMiddleFunctionDumpHeader(FILE *file, astNode * n){
 
 
 /*****************************************************************************
- * nablaFunctionDeclarationReal3
+ * nMiddleFunctionDeclarationReal3
  *****************************************************************************/
 __attribute__((unused)) static void nMiddleFunctionDeclarationReal3(astNode * n){
   if (n->ruleid != rulenameToId("declaration")
@@ -107,7 +107,7 @@ __attribute__((unused)) static void nMiddleFunctionDeclarationReal3(astNode * n)
 
 
 /*****************************************************************************
- * nablaFunctionDeclarationDouble
+ * nMiddleFunctionDeclarationDouble
  *****************************************************************************/
 __attribute__((unused)) static void nMiddleFunctionDeclarationDouble(astNode * n){
   if (n->ruleid != rulenameToId("declaration")
@@ -144,9 +144,10 @@ __attribute__((unused)) static void nMiddleFunctionDeclarationDouble(astNode * n
 }
 
   
-/*****************************************************************************
- * Action de parsing d'une fonction
- *****************************************************************************/
+// ****************************************************************************
+// * nMiddleFunctionParse
+// *Action de parsing d'une fonction
+// ****************************************************************************
 void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
  

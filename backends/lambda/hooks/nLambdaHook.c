@@ -418,6 +418,7 @@ void ccHeaderIncludes(nablaMain *nabla){
 #include <iostream>\n\
 #include <sstream>\n\
 #include <fstream>\n\
+using namespace std;\n\
 %s // from nabla->parallel->includes()",
           nabla->simd->includes(),
           nabla->parallel->includes());

@@ -8,7 +8,7 @@
     </modules>
   </arcane>
 
-	<arcane-post-processing>
+	<!--arcane-post-processing>
      <save-init>0</save-init>
 	  <output-period>0</output-period>
      <output-history-period>0</output-history-period>
@@ -16,8 +16,12 @@
 		  <variable>cell_natom</variable>
         <group>AllCells</group>
  		</output>
-	</arcane-post-processing>
- 
+	</arcane-post-processing-->
+
+   <arcane-checkpoint>
+    <do-dump-at-end>false</do-dump-at-end>
+  </arcane-checkpoint>
+
    <mesh nb-ghostlayer="1" ghostlayer-builder-version="3">
      <meshgenerator>
        <cartesian>

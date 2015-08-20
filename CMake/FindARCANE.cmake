@@ -1,7 +1,10 @@
 include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
 
-find_path(ARCANE_INCLUDE_DIR arcane_config.h ${ARCANE_ROOT}/include)
+#info("ARCANE_ROOT set to ${ARCANE_ROOT}")
 
-#if(ARCANE_INCLUDE_DIR)
-#  set(ARCANE_FOUND "YES")
-#endif()
+find_path(ARCANE_INCLUDE_DIR arcane_config.h ${ARCANE_ROOT}/include)
+#info("ARCANE_INCLUDE_DIR set to ${VT100_FG_RED}${ARCANE_INCLUDE_DIR}${VT100_RESET}")
+
+if(ARCANE_INCLUDE_DIR)
+  set(ARCANE_FOUND "YES")
+endif(ARCANE_INCLUDE_DIR)

@@ -330,8 +330,8 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
   entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   
-  // Et on rescan afin de dumper
-  for(i=0;i<number_of_entry_points;++i){
+  // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
+  for(i=0;i<number_of_entry_points+2;++i){
     if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
     if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0)continue;
     dbg("%s\n\t[nccCudaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,

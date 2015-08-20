@@ -17,11 +17,11 @@
 	</arcane-post-processing>
 
    <arcane-checkpoint>
-     <period>1</period>
-     <do-dump-at-end>true</do-dump-at-end>
+     <period>0</period>
+     <do-dump-at-end>false</do-dump-at-end>
    </arcane-checkpoint>
+   
    <mesh>
-
      <!--file internal-partition="true">../nabla.unf</file-->
      <meshgenerator>
        <sod zyx='true'>

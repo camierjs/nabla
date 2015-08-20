@@ -220,15 +220,17 @@ int sysPreprocessor(const char *nabla_entity_name,
   // which are deleted along with the directive.
   // Porting to GCC 4.8: to disable the stdc-predef.h preinclude: -ffreestanding or use the -P
   snprintf(gcc_command,size,
-           "gcc -ffreestanding -std=c99 -C -E -Wall -x c %s>/proc/%d/fd/%d",
+           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > /proc/%d/fd/%d",
            cat_sed_temporary_file_name,
-           getpid(),
-           unique_temporary_file_fd);
+           getpid(), 
+           unique_temporary_file_fd
+           );
   dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
   if (system(gcc_command)<0)
     exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while preprocessing!\n"));
-  if (unlink(cat_sed_temporary_file_name)<0)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while unlinking sed file!\n"));
+  #warning unlinked cat_sed_temporary_file_name
+  /*if (unlink(cat_sed_temporary_file_name)<0)
+    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while unlinking sed file!\n"));*/
   return NABLA_OK;
 }
  
@@ -498,7 +500,8 @@ int main(int argc, char * argv[]){
                    specific_path,
                    service_name)!=NABLA_OK)
     exit(NABLA_ERROR|fprintf(stderr, "\n[nabla] nablaParsing error\n"));
-  nToolUnlink(unique_temporary_file_name);
+  #warning unlinked unique_temporary_file_name
+  //nToolUnlink(unique_temporary_file_name);
   return NABLA_OK;
 }
 

@@ -4,6 +4,7 @@ set(MIDDLEND_C
   nMiddle.c
   nMiddleHLT.c
   nMiddleJobs.c
+  nMiddleTypes.c
   nMiddleItems.c
   nMiddlePrintf.c
   nMiddleOptions.c

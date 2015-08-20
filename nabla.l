@@ -6,6 +6,7 @@
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                  http://www.quut.com/c/ANSI-C-grammar-l-2011.html         //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -44,29 +45,18 @@
 #include "nabla.h"
 #include <stdio.h>
 //#define YY_SKIP_YYWRAP
-extern int yylineno;
+  extern int yylineno;
+  extern bool typedef_hit;
+  extern bool direct_declarator_hit;
+  extern nablaType *typedef_names;
+  char *last_identifier=NULL;
 #undef YY_NEED_STRLEN
 #define YYSTYPE  astNode*   
 #include "nabla.tab.h"
 static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 
 static void ignoreLineComments(void);
- 
-/* Terminals unused in grammar
-"struct"				{ return tok(&yylval, STRUCT);}
-"case"				{ return tok(&yylval, CASE);}
-"default"			{ return tok(&yylval, DEFAULT);}
-"enum"				{ return tok(&yylval, ENUM);}
-"goto"				{ return tok(&yylval, GOTO);}
-"switch"				{ return tok(&yylval, SWITCH);}
-"union"				{ return tok(&yylval, UNION);}
-"iNode"           { return tok(&yylval, INODE);}
-"mpi"             { return tok(&yylval, LIB_MPI);}
-"reduce"          { return tok(&yylval, MPI_REDUCE);}
-ZNRC					[ℤℕℝℂ] 2114,2115,211D,2101
-ℤℕℝℂ
-*/
-
+static int tok_type(YYSTYPE*);
 %}
 
 D					[0-9]
@@ -75,7 +65,7 @@ H					[a-fA-F0-9]
 E					[Ee][+-]?{D}+
 FS					(f|F|l|L)
 IS					(u|U|l|L)*
-preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-3])*
+preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-4])*
 includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 
 %%
@@ -83,15 +73,19 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "//"              { ignoreLineComments();}
 "auto"				{ return tok(&yylval, AUTO);}
 "break"				{ return tok(&yylval, BREAK);}
+"case"				{ return tok(&yylval, CASE);}
 "char"				{ return tok(&yylval, CHAR);}
 "const"				{ return tok(&yylval, CONST);}
 "continue"			{ return tok(&yylval, CONTINUE);}
+"default"			{ return tok(&yylval, DEFAULT);}
 "do"					{ return tok(&yylval, DO);}
 "double"				{ return tok(&yylval, DOUBLE);}
 "else"				{ return tok(&yylval, ELSE);}
+"enum"				{ return tok(&yylval, ENUM);}
 "extern"				{ return tok(&yylval, EXTERN);}
 "float"				{ return tok(&yylval, FLOAT);}
 "for"					{ return tok(&yylval, FOR);}
+"goto"				{ return tok(&yylval, GOTO);}
 "if"					{ return tok(&yylval, IF);}
 "inline" 			{ return tok(&yylval, INLINE);}
 "int"					{ return tok(&yylval, INT);}
@@ -104,10 +98,17 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "signed"				{ return tok(&yylval, SIGNED);}
 "sizeof"				{ return tok(&yylval, SIZEOF);}
 "static"				{ return tok(&yylval, STATIC);}
+"struct"				{ return tok(&yylval, STRUCT);}
+"switch"				{ return tok(&yylval, SWITCH);}
+"typedef"         { typedef_hit=true; return tok(&yylval, TYPEDEF);}
+"union"				{ return tok(&yylval, UNION);}
 "unsigned"			{ return tok(&yylval, UNSIGNED);}
 "void"				{ return tok(&yylval, VOID);}
 "volatile"			{ return tok(&yylval, VOLATILE);}
 "while"				{ return tok(&yylval, WHILE);}
+__attribute__     { return tok(&yylval, ATTRIBUTE);}
+__restrict        { return tok(&yylval, RESTRICT);}
+__asm__           { return tok(&yylval, ASM);}
 
 "#"			      { return tok(&yylval, DIESE);}
 "@"			      { return tok(&yylval, AT);}
@@ -155,6 +156,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "file"            { return tok(&yylval, FILECALL);}
 "File"            { return tok(&yylval, FILETYPE);}
 "FILE"            { return tok(&yylval, FILETYPE);}
+"ofstream"        { return tok(&yylval, OFSTREAM);}
 
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
@@ -226,7 +228,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
 "or"              { return tok(&yylval, IOR_OP);}
 
-{L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER);}
+{L}({L}|{D})*		{ return tok_type(&yylval); }
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
 {D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
@@ -324,6 +326,7 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
   REJECT;}
 \n                { yylineno+=1;}
 %% 
+//__gnuc_va_list    { return tok(&yylval, GNU_VA_LIST);}
 //"nand"          { return tok(&yylval, NAND_OP);}
 //"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
 //"⊻"					{ return tok(&yylval, XOR_OP);}  // Xor 22BB
@@ -369,4 +372,32 @@ static int tok(YYSTYPE *yylval, int tokenid){
   (*yylval)->token=strdup(yytext);
   (*yylval)->tokenid=tokenid;
   return tokenid;
+}
+
+
+// ****************************************************************************
+// *
+// ****************************************************************************
+static int tok_type(YYSTYPE *yylval){
+  (*yylval) = astNewNode();
+  (*yylval)->token=strdup(yytext);
+  
+  last_identifier=strdup(yytext);
+  //dbg("\n\t[tok_type] last_identifier is %s!",yytext);
+  
+  // On check s'il est déjà connu comme TYPEDEF_NAME
+  if (nMiddleTypeFindName(typedef_names,yytext)!=NULL){
+    dbg("\n\t[tok_type] TYPEDEF_NAME: %s <=> known type!",yytext);
+    (*yylval)->tokenid=TYPEDEF_NAME;
+    return TYPEDEF_NAME;
+  }
+
+  if (strstr(yytext,"__builtin")!=NULL){
+    dbg("\n\t[tok_type] BUILTIN TYPE: %s!",yytext);
+    (*yylval)->tokenid=TYPEDEF_NAME;
+    return TYPEDEF_NAME;
+  }
+
+  (*yylval)->tokenid=IDENTIFIER;
+  return IDENTIFIER;
 }

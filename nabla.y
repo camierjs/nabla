@@ -52,6 +52,10 @@ void yyerror(astNode **root, const char *s);
 bool type_volatile=false;
 bool type_precise=false;
 bool adrs_it=false;
+ 
+bool typedef_hit=false;
+nablaType *typedef_names=NULL;
+extern char *last_identifier;
 %}
  
 ///////////////////////////////
@@ -66,14 +70,16 @@ bool adrs_it=false;
 %token NULL_ASSIGN MIN_ASSIGN MAX_ASSIGN
 %token SUB_ASSIGN LSH_ASSIGN RSH_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN IOR_ASSIGN
-%token EXTERN STATIC AUTO REGISTER RESTRICT ALIGNED
+%token TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-%token ELLIPSIS
-%token IF ELSE WHILE DO FOR CONTINUE BREAK RETURN
-%token INLINE GLOBAL
+%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 %token HEX_CONSTANT OCT_CONSTANT Z_CONSTANT R_CONSTANT
 %token CALL END_OF_CALL ADRS_IN ADRS_OUT POSTFIX_CONSTANT POSTFIX_CONSTANT_VALUE
 %token PREFIX_PRIMARY_CONSTANT POSTFIX_PRIMARY_CONSTANT
+%token STRUCT UNION ENUM ELLIPSIS
+%token TYPEDEF_NAME
+%token GLOBAL RESTRICT ALIGNED
+%token ATTRIBUTE ASM // GNU_VA_LIST
 
  // MATHS tokens
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
@@ -95,7 +101,7 @@ bool adrs_it=false;
 %token CELL CELLS FACE FACES NODE NODES
 %token FORALL FORALL_INI FORALL_END FORALL_NODE_INDEX FORALL_CELL_INDEX FORALL_MTRL_INDEX
 %token PARTICLE PARTICLES PARTICLETYPE
-%token FILECALL FILETYPE
+%token FILECALL FILETYPE OFSTREAM
 
  // Nabla SUPERSCRIPT_*
 %token SUPERSCRIPT_N_PLUS_ONE
@@ -131,14 +137,19 @@ bool adrs_it=false;
 %token WITH
 %token TIME EXIT ITERATION
 
- // If-Else Ambiguity
+ ///////////////////////
+ // If-Else Ambiguity //
+ ///////////////////////
  //%nonassoc REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY
  //%precedence REMOVE_SHIFT_REDUCE_MESSAGE_OF_IF_ELSE_AMBIGUITY
  //%nonassoc ELSE
  //%precedence ELSE
  //%right THEN ELSE
+%expect 1 // shift/reduce conflicts
 
- // Specific options
+ //////////////////////
+ // Specific options //
+ //////////////////////
 %debug
 %error-verbose
 %start entry_point
@@ -166,6 +177,43 @@ start_scope: '{' {rhs;};
 end_scope: '}' {rhs;} | '}' AT at_constant {rhs;};
 
 
+////////////////////
+// GNU Attributes //
+////////////////////
+attribute_specifiers
+: attribute_specifier {rhs;}
+| asm_specifier {rhs;}
+| attribute_specifiers attribute_specifier {rhs;}
+;
+attribute_specifier
+: ATTRIBUTE '(' '(' attribute_list ')' ')' {rhs;}
+;
+attribute_list
+: attribute {rhs;}
+| attribute_list '(' attribute_list ')' {rhs;}
+| attribute_list ','  attribute {rhs;}
+;
+attribute
+: IDENTIFIER {rhs;}
+| Z_CONSTANT {rhs;}
+| storage_class_specifier {rhs;}
+;
+
+
+/////////////
+// GNU ASM //
+/////////////
+asm_specifier
+: ASM '(' asm_list ')' {rhs;}
+;
+asm_list
+: asm_code {rhs;}
+| asm_list asm_code {rhs;}
+;
+asm_code
+: STRING_LITERAL {rhs;}
+;
+
 //////////////////////////////////////////////////
 // ∇ types, qualifiers, specifier, lists & name //
 //////////////////////////////////////////////////
@@ -179,6 +227,9 @@ type_specifier
 | DOUBLE {rhs;}
 | SIGNED {rhs;}
 | UNSIGNED {rhs;}
+| struct_or_union_specifier {rhs;}
+| enum_specifier {rhs;}
+| TYPEDEF_NAME {rhs;}		/* after it has been defined as such */
 | BOOL {rhs;}
 | SIZE_T {rhs;}
 | REAL { if (type_precise) preciseY1($$,GMP_REAL) else {rhs;}; type_precise=type_volatile=false;}
@@ -202,14 +253,14 @@ type_specifier
 | FACETYPE {rhs;}
 | UIDTYPE {rhs;}
 | FILETYPE {rhs;} 
+| OFSTREAM {rhs;} 
 | FILECALL '(' IDENTIFIER ',' IDENTIFIER ')' {rhs;} 
 | MATERIAL {rhs;}
-//| struct_or_union_specifier {rhs;}
-//| enum_specifier {rhs;}
 ;
 
-storage_class_specifier
-: EXTERN {rhs;}
+storage_class_specifier 
+: TYPEDEF {rhs;}	/* identifiers must be flagged as TYPEDEF_NAME */
+| EXTERN {rhs;}
 | STATIC {rhs;}
 | AUTO {rhs;}
 | INLINE {rhs;}
@@ -226,14 +277,14 @@ type_qualifier_list:
 | type_qualifier_list type_qualifier {rhs;}
 ;
 specifier_qualifier_list
-: type_specifier {rhs;}
-| type_specifier specifier_qualifier_list {rhs;}
-| type_qualifier {rhs;}
+: type_specifier specifier_qualifier_list {rhs;}
+| type_specifier {rhs;}
 | type_qualifier specifier_qualifier_list {rhs;}
+| type_qualifier {rhs;}
 ;
 type_name
-: specifier_qualifier_list {rhs;}
-| specifier_qualifier_list abstract_declarator {rhs;}
+: specifier_qualifier_list abstract_declarator {rhs;}
+| specifier_qualifier_list {rhs;}
 ;
 
 
@@ -297,10 +348,11 @@ nabla_system
 // Pointers //
 //////////////
 pointer
-: '*' {rhs;}
+: '*' type_qualifier_list pointer {rhs;}
 | '*' type_qualifier_list {rhs;}
 | '*' RESTRICT {rhs;}
-| '*' type_qualifier_list pointer {rhs;}
+| '*' pointer {rhs;}
+| '*' {rhs;}
 ;
 
 //////////////////
@@ -308,7 +360,7 @@ pointer
 //////////////////
 initializer
 : assignment_expression {rhs;}
-| '{' initializer_list '}'{rhs;}
+| '{' initializer_list '}' {rhs;}
 ;
 initializer_list
 : initializer {rhs;}
@@ -330,21 +382,31 @@ preproc
 //////////////////
 // DeclaraTIONS //
 //////////////////
-declaration_specifiers
-: storage_class_specifier {rhs;}
-| storage_class_specifier declaration_specifiers {rhs;}
-| type_specifier {rhs;}
-| type_specifier declaration_specifiers {rhs;}
-| type_qualifier {rhs;}
-| type_qualifier declaration_specifiers {rhs;}
-;
 declaration
-// On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
-: INCLUDES {$1->token[0]='#';{rhs;}}
-| preproc {rhs;}
-| declaration_specifiers ';' {rhs;}
-| declaration_specifiers init_declarator_list ';' {rhs;}  
+: declaration_specifiers ';' {rhs;}
+| declaration_specifiers init_declarator_list ';' {rhs;
+    if (typedef_hit){
+      //dbg("\n\t[direct_declarator] last_ident is %s", last_identifier);
+      dbg("\n\t[direct_declarator] IDENTIFIER: %s => new type!", last_identifier);
+      // On créée le nouveau type 
+      nablaType *new_type=nMiddleTypeNew();
+      new_type->name=strdup(last_identifier);
+      // On le rajoute aux connus
+      typedef_names=nMiddleTypeAdd(typedef_names,new_type);
+      typedef_hit=false;
+    }
+  }  
 ;
+
+declaration_specifiers
+: storage_class_specifier declaration_specifiers{rhs;}
+| storage_class_specifier {rhs;}
+| type_specifier declaration_specifiers {rhs;}
+| type_specifier {rhs;}
+| type_qualifier declaration_specifiers {rhs;}
+| type_qualifier {rhs;}
+;
+
 declaration_list
 : declaration {rhs;}
 | declaration_list declaration {rhs;}
@@ -356,7 +418,6 @@ declaration_list
 /////////////////
 declarator
 : pointer direct_declarator {rhs;}
-//| IDENTIFIER direct_declarator {rhs;}
 | direct_declarator {rhs;}
 ;
 identifier_list
@@ -366,12 +427,15 @@ identifier_list
 direct_declarator
 : IDENTIFIER {rhs;}
 | IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
-| '(' declarator ')'{rhs;}
-| direct_declarator '[' constant_expression ']'{rhs;}
-| direct_declarator '[' ']'{rhs;}
-| direct_declarator '(' parameter_type_list ')'{rhs;}
-| direct_declarator '(' identifier_list ')'{rhs;}
-| direct_declarator '(' ')'{rhs;}
+| '(' declarator ')' {rhs;}
+| direct_declarator '(' STRING_LITERAL ')' {rhs;}
+| direct_declarator '[' constant_expression ']' {rhs;}
+| direct_declarator '[' ']' {rhs;}
+| direct_declarator '(' parameter_type_list ')' {rhs;}
+| direct_declarator '(' parameter_type_list ')' attribute_specifiers {rhs;}
+| direct_declarator '(' identifier_list ')' {rhs;}
+| direct_declarator '(' identifier_list ')' attribute_specifiers {rhs;}
+| direct_declarator '(' ')' {rhs;}
 ;
 init_declarator
 :	declarator {rhs;}
@@ -382,22 +446,32 @@ init_declarator_list
 |	init_declarator_list ',' init_declarator {rhs;}
 ;
 abstract_declarator
-: 	pointer {rhs;}
-|	direct_abstract_declarator {rhs;}
-|	pointer direct_abstract_declarator {rhs;}
+: pointer direct_abstract_declarator {rhs;}
+| pointer {rhs;}
+| direct_abstract_declarator  {rhs;}
 ;
 direct_abstract_declarator
-: '(' abstract_declarator ')'{rhs;}
-| '[' ']'{rhs;}
-| '[' constant_expression ']'{rhs;}
-| direct_abstract_declarator '[' ']'{rhs;}
-| direct_abstract_declarator '[' constant_expression ']'{rhs;}
+: '(' abstract_declarator ')' {rhs;}
+| '[' ']' {rhs;}
+| '[' '*' ']' {rhs;}
+| '[' constant_expression ']' {rhs;}
+| direct_abstract_declarator '[' ']' {rhs;}
+| direct_abstract_declarator '[' constant_expression ']' {rhs;}
 | '(' ')'{rhs;}
-| '(' parameter_type_list ')'{rhs;}
-| direct_abstract_declarator '(' ')'{rhs;}
-| direct_abstract_declarator '(' parameter_type_list ')'{rhs;}
+| '(' parameter_type_list ')' {rhs;}
+| direct_abstract_declarator '(' ')' {rhs;}
+| direct_abstract_declarator '(' parameter_type_list ')' {rhs;}
 ;
 
+struct_declarator
+: declarator {rhs;}
+| ':' constant_expression {rhs;}
+| declarator ':' constant_expression {rhs;}
+;
+struct_declarator_list
+: struct_declarator {rhs;}
+|	struct_declarator_list ',' struct_declarator {rhs;}
+;
 
 ////////////////////
 // Std parameters //
@@ -417,6 +491,7 @@ parameter_declaration
 | declaration_specifiers declarator {rhs;}
 | declaration_specifiers abstract_declarator {rhs;}
 | declaration_specifiers {rhs;}
+//| GNU_VA_LIST {rhs;}
 ;
 
 
@@ -565,8 +640,7 @@ unary_expression
 | CUBE_ROOT_OP unary_expression {rhs;}
 | INC_OP unary_expression {rhs;}
 | DEC_OP unary_expression {rhs;}
-//| '&' unary_expression {Yadrs($$,$1,$2);}
-| '&' unary_expression {YadrsSandwich($$,$1,$2);}
+| '&' unary_expression {Yadrs($$,$1,$2);}
 | unary_prefix_operator cast_expression {rhs;}
 | SIZEOF unary_expression {rhs;}
 | SIZEOF '(' type_name ')'{rhs;}
@@ -852,15 +926,18 @@ with_library: WITH with_library_list ';'{rhs;};
 // ∇ grammar //
 ///////////////
 nabla_grammar
-: with_library                  {rhs;}
+// On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
+: INCLUDES {$1->token[0]='#';   {rhs;}}
+| preproc                       {rhs;}
+| with_library                  {rhs;}
 | declaration                   {rhs;}
 | nabla_options_definition      {rhs;}
 | nabla_item_definition         {rhs;}
-| nabla_materials_definition    {rhs;}
-| nabla_environments_definition {rhs;}
 | function_definition	        {rhs;}
 | nabla_job_definition          {rhs;}
 | nabla_reduction               {rhs;}
+| nabla_materials_definition    {rhs;}
+| nabla_environments_definition {rhs;}
 ;
 
 
@@ -889,29 +966,28 @@ aleph_expression
 /////////////////////////////
 // STRUCTS, ENUMS & UNIONS //
 /////////////////////////////
-
-/*
-struct_declaration
-: specifier_qualifier_list struct_declarator_list ';'{rhs;}
-;
 struct_declaration_list
-:	struct_declaration {rhs;}
-|	struct_declaration_list struct_declaration{rhs;}
+: struct_declaration_list preproc{rhs;}
+| struct_declaration {rhs;}
+| struct_declaration_list struct_declaration {rhs;}
+;
+struct_declaration
+: specifier_qualifier_list struct_declarator_list ';' {rhs;}
 ;
 
 // ENUMERATORS
 enumerator
 : IDENTIFIER {rhs;}
-| IDENTIFIER '=' constant_expression{rhs;}
+| IDENTIFIER '=' constant_expression {rhs;}
 ;
 enumerator_list
 : enumerator {rhs;}
-| enumerator_list ',' enumerator{rhs;}
+| enumerator_list ',' enumerator {rhs;}
 ;
 enum_specifier
-: ENUM '{' enumerator_list '}'{rhs;}
-| ENUM IDENTIFIER '{' enumerator_list '}'{rhs;}
-| ENUM IDENTIFIER{rhs;}
+: ENUM '{' enumerator_list '}' {rhs;}
+| ENUM IDENTIFIER '{' enumerator_list '}' {rhs;}
+| ENUM IDENTIFIER {rhs;}
 ;
 
 // SPECIFIERS
@@ -922,16 +998,25 @@ struct_or_union
 
 // Structs or Unions
 struct_or_union_specifier
-: struct_or_union IDENTIFIER '{' struct_declaration_list '}'{rhs;}
-| struct_or_union '{' struct_declaration_list '}'{rhs;}
-| struct_or_union IDENTIFIER{rhs;}
+: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {rhs;}
+| struct_or_union TYPEDEF_NAME '{' struct_declaration_list '}' {rhs;}
+| struct_or_union '{' struct_declaration_list '}' {rhs;}
+| struct_or_union TYPEDEF_NAME {rhs;}
+| struct_or_union IDENTIFIER {rhs;
+    dbg("\n[struct_or_union_specifier] Adding *struct* new type '%s'",last_identifier);
+    // On créée le nouveau type 
+    nablaType *new_type=nMiddleTypeNew();
+    new_type->name=strdup(last_identifier);
+    // On le rajoute aux connus
+    typedef_names=nMiddleTypeAdd(typedef_names,new_type);
+  }
 ;
 
+/*
 mathlinks:
 | MATHLINK PRIME '[' IDENTIFIER ']' {primeY1ident($$,$4)}
 | MATHLINK PRIME '[' Z_CONSTANT ']' {primeY1($$,$4)}
 ;
-
 */
 
 %%

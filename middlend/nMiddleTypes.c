@@ -42,67 +42,44 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-// *****************************************************************************
-// * nablaMakeTempFile
-// *****************************************************************************
-int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name){
-  int n,size = NABLA_MAX_FILE_NAME;
-  if ((*unique_temporary_file_name=malloc(size))==NULL)
-    nablaError("[nablaMakeTempFile] Could not malloc our unique_temporary_file_name!");
-  n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
-  if (n > -1 && n < size)
-    return mkstemp(*unique_temporary_file_name);
-  nablaError("[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
-  return -1;
+nablaType *nMiddleTypeNew(void){
+  nablaType *type = (nablaType *)malloc(sizeof(nablaType));
+  assert(type != NULL);
+  type->name=NULL;
+  type->next=NULL;
+  return type; 
 }
 
-
-// ****************************************************************************
-// * nToolUnlink: deletes a name from the filesystem
-// ****************************************************************************
-void nToolUnlink(char *pathname){
-  if (pathname!=NULL)
-    if (unlink(pathname)!=0)
-      nablaError("Error while removing '%s' file", pathname);
+nablaType *nMiddleTypeLast(nablaType *types){
+  while(types->next != NULL)
+    types = types->next;
+  return types;
 }
 
+nablaType *nMiddleTypeAdd(nablaType *types, nablaType *type){
+  assert(type != NULL);
+  //dbg("\n\t[nMiddleTypeAdd] ADDING %s", type->name);
+  if (types == NULL)
+    types=type;
+  else
+    nMiddleTypeLast(types)->next=type;
+  return types;
+}
 
-
-// ****************************************************************************
-// * nToolFileCatAndHackIncludes
-// ****************************************************************************
-int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
-                                const char *cat_sed_temporary_file_name){
-  size_t size;
-  char buf[BUFSIZ];
-  char *pointer_that_matches=NULL;
-  char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
-  FILE *cat_sed_temporary_file=NULL;
-  
-  printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
-  dbg("\n[nToolFileCatAndHackIncludes] cat_sed_temporary_file_name is %s",
-      cat_sed_temporary_file_name);
-  
-  cat_sed_temporary_file=fopen(cat_sed_temporary_file_name,"w");
-  
-  for(nabla_file_name=strtok(dup_list_of_nabla_files, " ");
-      nabla_file_name!=NULL;
-      nabla_file_name=strtok(NULL, " ")){
-    fprintf(cat_sed_temporary_file,"# 1 \"%s\"\n",nabla_file_name);
-    FILE *nabla_FILE=fopen(nabla_file_name,"r");
-    // Now copying .n file to our tmp one
-    while ((size=fread(buf, 1, BUFSIZ, nabla_FILE))){
-      //printf("\n\tbuf: '%s'",buf);
-      // On recherche les '#include' pour les transformer en ' include'
-      while ((pointer_that_matches=strstr(buf,"#include"))!=NULL){
-        dbg("\n[nToolFileCatAndHackIncludes] '#include' FOUND! Hacking!");
-        *pointer_that_matches=' ';
-      }
-      fwrite(buf, 1, size, cat_sed_temporary_file);
+nablaType *nMiddleTypeFindName(nablaType *types, char *name) {
+  nablaType *type=types;
+  //dbg("\n\t[findTypeName] %s", name);
+  //assert(type != NULL);
+  //assert(name != NULL);
+  if (type==NULL) return NULL;
+  while(type != NULL) {
+    // dbg(" ?%s", type->name);
+    if(strcmp(type->name, name) == 0){
+      //dbg(" Yes!");
+      return type;
     }
+    type = type->next;
   }
-  fclose(cat_sed_temporary_file);
-  free(dup_list_of_nabla_files);
-  return NABLA_OK;
+  //dbg(" Nope!");
+  return NULL;
 }
- 

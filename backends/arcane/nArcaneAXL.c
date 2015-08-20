@@ -187,8 +187,8 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   number_of_entry_points=nMiddleNumberOfEntryPoints(arc);
   entry_point=nMiddleEntryPointsSort(arc,number_of_entry_points);
 
-  // Et on rescan afin de dumper
-  for(i=0;i<number_of_entry_points;++i){
+  // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
+  for(i=0;i<number_of_entry_points+2;++i){
     if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
     if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
     const double when=entry_point[i].whens[0];

@@ -32,7 +32,7 @@ BUILD_PATH = /tmp/nabla
 BUILD_MKDIR = mkdir --parent $(BUILD_PATH) && sync && sync
 CMAKE_FLAGS = --warn-uninitialized
 BUILD_CMAKE = cd $(BUILD_PATH) && $(CMAKE) $(CMAKE_FLAGS) $(NABLA_PATH)
-NUMBR_PROCS = 1 #$(shell getconf _NPROCESSORS_ONLN)
+NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 
 ##################
 # BUILD Commands #
@@ -56,7 +56,7 @@ install:bin
 # TESTs Commands #
 ##################
 tst:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS))
+	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS))
 test:tst
 tst1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1)
@@ -81,10 +81,20 @@ tstla:
 tstgram:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)
 
+tstgad:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gad_run_1)
+tstcomd:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_comd_run_1)
 tstas:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tstas4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
+
+tstal1:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
+tstag1:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
+
 tsthas:
 	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tsthas4:
@@ -115,11 +125,11 @@ tstl4:
 tstl8:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_8)
 tstseq:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_2_std_seq)
 tstmh1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
 tststd:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_2_std_omp)
 tststd4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
 tstsse:

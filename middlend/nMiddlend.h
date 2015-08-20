@@ -96,6 +96,13 @@ typedef struct nablaOptionStruct{
 }nablaOption;
 
 
+// Backend TYPE 
+typedef struct nablaTypeStruct{
+  const char *name;
+  struct nablaTypeStruct *next;
+}nablaType;
+
+
 // Middlend JOB 
 typedef struct nablaJobStruct{
   bool is_an_entry_point;
@@ -267,6 +274,7 @@ typedef struct nablaMainStruct{
   const char *name;
   char *tmpVarKinds;
   nablaVariable *variables;
+  nablaType *types;
   nablaOption *options;
   nablaEntity *entity;
   BACKEND_SWITCH backend;
@@ -316,6 +324,13 @@ int nMiddleVariableGmpRank(nablaVariable *variables);
 char *nMiddleVariableGmpNameRank(nablaVariable *variables, int k);
 bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k);
 int nMiddleVariableGmpDumpNumber(nablaVariable *variables);
+
+// nMiddleType
+nablaType *nMiddleTypeNew(void);
+nablaType *nMiddleTypeLast(nablaType*);
+nablaType *nMiddleTypeAdd(nablaType*,nablaType*);
+nablaType *nMiddleTypeFindName(nablaType*,char*);
+
 
 // nMiddleOptions.c
 nablaOption *nMiddleOptionNew(nablaMain*);
