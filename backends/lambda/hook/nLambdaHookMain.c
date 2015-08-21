@@ -192,13 +192,13 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     if (last_when!=entry_points[i].whens[0])
       nprintf(n, NULL, "\n%s%s",
               is_into_compute_loop?"\t\t":"\t",
-              n->parallel->sync());
+              n->hook->parallel->sync());
     last_when=entry_points[i].whens[0];
     
     // Dump de la tabulation et du nom du point d'entrée
     nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
             is_into_compute_loop?"\t\t":"\t",
-            n->parallel->spawn(), 
+            n->hook->parallel->spawn(), 
             entry_points[i].name,
             entry_points[i].whens[0]);
     // Dump des arguments *ou pas*
@@ -208,11 +208,11 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    lambdaAddExtraArguments(n, &entry_points[i], &numParams);
+    nLambdaHookAddExtraArguments(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      lambdaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      nLambdaHookDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée

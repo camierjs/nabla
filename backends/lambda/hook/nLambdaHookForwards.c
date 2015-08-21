@@ -42,3 +42,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+
+// ****************************************************************************
+// * Forward Declarations
+// ****************************************************************************
+char* nLambdaHookForwards[]={
+  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "static void nabla_ini_node_coords(void);",
+  "static void verifCoords(void);",
+  NULL
+};

@@ -164,7 +164,7 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
     
     if(n->tokenid==CONST){
-      nprintf(nabla, "/*CONST*/", "%s const ", fct->entity->main->pragma->align());
+      nprintf(nabla, "/*CONST*/", "%s const ", fct->entity->main->hook->pragma->align());
       break;
     }
 

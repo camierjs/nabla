@@ -76,12 +76,12 @@ void nLambdaHookHeaderIncludes(nablaMain *nabla){
 #include <fstream>\n\
 using namespace std;\n\
 // Next are dump from nabla->parallel->includes()\n\%s",
-          nabla->simd->includes(),
-          nabla->parallel->includes());
+          nabla->hook->simd->includes(),
+          nabla->hook->parallel->includes());
   
-  nMiddleDefines(nabla,nabla->simd->defines);
-  nMiddleTypedefs(nabla,nabla->simd->typedefs);
-  nMiddleForwards(nabla,nabla->simd->forwards);
+  nMiddleDefines(nabla,nabla->hook->simd->defines);
+  nMiddleTypedefs(nabla,nabla->hook->simd->typedefs);
+  nMiddleForwards(nabla,nabla->hook->simd->forwards);
 }
 
 
@@ -110,7 +110,7 @@ void nLambdaHookHeaderPrefix(nablaMain *nabla){
 // * ENUMERATES Hooks
 // ****************************************************************************
 void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
-  const char *parallel_prefix_for_loop=nabla->parallel->loop(nabla);
+  const char *parallel_prefix_for_loop=nabla->hook->parallel->loop(nabla);
   fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
  * Forward enumerates\n\

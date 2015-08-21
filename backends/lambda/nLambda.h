@@ -43,6 +43,10 @@
 #ifndef _NABLA_LAMBDA_H_
 #define _NABLA_LAMBDA_H_
 
+extern char* nLambdaHookForwards[];
+extern nablaDefine nLambdaHookDefines[];
+extern nablaTypedef nLambdaHookTypedef[];
+
 void nLambdaHookSourceOpen(nablaMain*);
 void nLambdaHookSourceInclude(nablaMain*);
 
@@ -144,10 +148,10 @@ void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,cha
 void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
-void lambdaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void lambdaAddExtraArguments(nablaMain*,nablaJob*,int*);
+void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
+void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
-NABLA_STATUS nLambda(nablaMain*,astNode*,const char*);
+nablaBackendHooks *nLambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_H_
  

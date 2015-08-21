@@ -330,7 +330,7 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 }
 
 
-/// ***************************************************************************
+// ****************************************************************************
 // * nablaInsertSpace
 // ****************************************************************************
 void nMiddleInsertSpace( nablaMain *nabla, astNode * n){
@@ -355,7 +355,49 @@ void nMiddleInsertSpace( nablaMain *nabla, astNode * n){
 
 
 // ****************************************************************************
-// * nablaMiddlendSwitch
+// * nMiddleBackendAnimate
+// ****************************************************************************
+//#warning nMiddleBackendAnimate a simplifier
+static NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
+  ///////////////////////////////////////////////////////////
+  // Partie des hooks à remonter à termes dans le middlend //
+  ///////////////////////////////////////////////////////////
+  nabla->hook->vars->init(nabla);
+  nabla->hook->source->open(nabla);
+  nabla->hook->source->include(nabla);
+  nabla->hook->header->open(nabla);
+  nabla->hook->header->prefix(nabla);
+  nabla->hook->header->includes(nabla);
+  nabla->hook->header->dump(nabla);
+  nabla->hook->header->enumerates(nabla);
+  nabla->hook->mesh->core(nabla);
+  
+  // Parse du code préprocessé et lance les hooks associés
+  nMiddleParseAndHook(root,nabla);
+  
+  nabla->hook->main->varInitKernel(nabla);
+  nabla->hook->main->prefix(nabla);
+  
+  nabla->hook->vars->prefix(nabla);
+  
+  nabla->hook->mesh->prefix(nabla);
+  nabla->hook->main->preInit(nabla);
+  nabla->hook->main->varInitCall(nabla);
+  nabla->hook->main->main(nabla);
+  nabla->hook->main->postInit(nabla);
+  
+  // Partie POSTFIX
+  nabla->hook->header->postfix(nabla); 
+  nabla->hook->mesh->postfix(nabla);
+  nabla->hook->vars->postfix(nabla);
+  nabla->hook->main->postfix(nabla);
+  
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * nMiddleSwitch
 // ****************************************************************************
 int nMiddleSwitch(astNode *root,
                   const bool optionDumpTree,
@@ -374,8 +416,8 @@ int nMiddleSwitch(astNode *root,
   nabla->interface_path=interface_path;
   nabla->service_name=service_name;
   nabla->optionDumpTree=optionDumpTree;
-  nabla->simd=NULL;
-  nabla->parallel=NULL;  
+  //nabla->hook->simd=NULL;
+  //nabla->hook->parallel=NULL;  
   nabla->options=NULL;  
   dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
   nMiddleVariableGlobalAdd(nabla);
@@ -384,7 +426,12 @@ int nMiddleSwitch(astNode *root,
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
   case BACKEND_CUDA:   return nccCuda(nabla,root,nabla_entity_name);
   case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
-  case BACKEND_LAMBDA: return nLambda(nabla,root,nabla_entity_name);
+    // La backend Lambda utilise maintenant le nMiddleBackendAnimate
+    // il remplit les hooks et rend la main au middle
+  case BACKEND_LAMBDA: {
+    nabla->hook=nLambda(nabla);
+    return nMiddleBackendAnimate(nabla,root);
+  }
   default:
     exit(NABLA_ERROR
          |fprintf(stderr,
@@ -392,3 +439,4 @@ int nMiddleSwitch(astNode *root,
   }
   return NABLA_ERROR;
 }
+

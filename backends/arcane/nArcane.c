@@ -159,14 +159,14 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL, // returnFromArgument
     NULL  // Header hooks
   };
-  middlend->simd=&nablaArcaneSimdHooks;
   middlend->hook=&arcaneBackendHooks;
+  middlend->hook->simd=&nablaArcaneSimdHooks;
   
   nablaBackendPragmaHooks arcanePragmaGCCHooks={
     nArcanePragmaGccIvdep,
     nArcanePragmaGccAlign
   };
-  middlend->pragma=&arcanePragmaGCCHooks;
+  middlend->hook->pragma=&arcanePragmaGCCHooks;
     
   dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
   if (isAnArcaneModule(middlend)==true)

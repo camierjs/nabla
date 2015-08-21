@@ -120,11 +120,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(CONST):{
-    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->pragma->align());
+    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->hook->pragma->align());
     break;
   }
   case(ALIGNED):{
-    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->pragma->align());
+    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
     break;
   }
     

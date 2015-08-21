@@ -162,34 +162,36 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookReturnFromArgument,
     NULL  // Header hooks
   };
+  
+  // Set the hooks for this backend
+  nabla->hook=&okinaBackendHooks;
+
   // Switch between STD, SSE, AVX, MIC
   // Par défaut, on est en mode 'std'
-  nabla->simd=&nablaOkinaSimdStdHooks;  
+  nabla->hook->simd=&nablaOkinaSimdStdHooks;  
   if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-    nabla->simd=&nablaOkinaSimdSseHooks;  
+    nabla->hook->simd=&nablaOkinaSimdSseHooks;  
   if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-    nabla->simd=&nablaOkinaSimdAvxHooks;  
+    nabla->hook->simd=&nablaOkinaSimdAvxHooks;  
   if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-    nabla->simd=&nablaOkinaSimdAvxHooks;  
+    nabla->hook->simd=&nablaOkinaSimdAvxHooks;  
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-    nabla->simd=&nablaOkinaSimdMicHooks;
+    nabla->hook->simd=&nablaOkinaSimdMicHooks;
 
   // Switch between parallel modes
   // By default, we have no parallelization
-  nabla->parallel=&okinaVoidHooks;
+  nabla->hook->parallel=&okinaVoidHooks;
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nabla->parallel=&okinaCilkHooks;
+    nabla->hook->parallel=&okinaCilkHooks;
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nabla->parallel=&okinaOpenMPHooks;
+    nabla->hook->parallel=&okinaOpenMPHooks;
 
   // Switch between ICC or GCC pragmas
   // Par defaut, on met GCC
-  nabla->pragma=&okinaPragmaGCCHooks;
+  nabla->hook->pragma=&okinaPragmaGCCHooks;
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    nabla->pragma=&okinaPragmaICCHooks;
+    nabla->hook->pragma=&okinaPragmaICCHooks;
 
-  // Set the hooks for this backend
-  nabla->hook=&okinaBackendHooks;
 
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);
@@ -210,9 +212,9 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   // Dump dans le HEADER: includes, typedefs, defines, debug, maths & errors stuff
   nOkinaHeaderPrefix(nabla);
   nOkinaHeaderIncludes(nabla);
-  nMiddleDefines(nabla,nabla->simd->defines);
-  nMiddleTypedefs(nabla,nabla->simd->typedefs);
-  nMiddleForwards(nabla,nabla->simd->forwards);
+  nMiddleDefines(nabla,nabla->hook->simd->defines);
+  nMiddleTypedefs(nabla,nabla->hook->simd->typedefs);
+  nMiddleForwards(nabla,nabla->hook->simd->forwards);
 
   // On inclue les fichiers kn'SIMD'
   nOkinaHeaderSimd(nabla);

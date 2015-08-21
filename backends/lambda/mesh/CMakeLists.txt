@@ -1,6 +1,0 @@
-info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: LAMBDA/${VT100_BOLD}${VT100_FG_YELLOW}MESH${VT100_RESET}")
-set(BACKEND_LAMBDA_MESH_C nLambdaMesh1D.c nLambdaMesh3D.c nLambdaMesh.c)
-
-add_library(NablaLambdaMesh ${BACKEND_LAMBDA_MESH_C})
-
-#add_dependencies(NablaLambdaSimd Nabla)

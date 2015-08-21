@@ -109,7 +109,7 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(ALIGNED):{
-    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->pragma->align());
+    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
     break;
   }
 

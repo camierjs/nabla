@@ -166,14 +166,14 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     NULL, // returnFromArgument
     NULL  // Header hooks
   };
-  nabla->simd=&nCudaSimdHooks;
   nabla->hook=&nCudaBackendHooks;
+  nabla->hook->simd=&nCudaSimdHooks;
   
   nablaBackendPragmaHooks cudaPragmaGCCHooks={
     nCudaPragmaGccIvdep,
     nCudaPragmaGccAlign
   };
-  nabla->pragma=&cudaPragmaGCCHooks;
+  nabla->hook->pragma=&cudaPragmaGCCHooks;
 
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);

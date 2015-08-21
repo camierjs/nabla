@@ -269,6 +269,11 @@ typedef struct nablaBackendHooksStruct{
   bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
+  
+  struct nablaBackendSimdHooksStruct *simd;
+  struct nablaBackendParallelHooksStruct *parallel;
+  struct nablaBackendPragmaHooksStruct *pragma;
+
   struct nHookHeaderStruct *header;
   struct nHookSourceStruct *source;
   struct nHookMeshStruct *mesh;
@@ -331,9 +336,6 @@ typedef struct nablaMainStruct{
   char *service_name;
   bool optionDumpTree;
   struct nablaBackendHooksStruct *hook;
-  struct nablaBackendSimdHooksStruct *simd;
-  struct nablaBackendParallelHooksStruct *parallel;
-  struct nablaBackendPragmaHooksStruct *pragma;
 } nablaMain;
 
 // nMiddleLibraries.c
