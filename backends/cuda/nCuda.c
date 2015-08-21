@@ -163,7 +163,8 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     nCudaHookEntryPointPrefix,
     nCudaHookDfsForCalls,
     NULL, // primary_expression_to_return
-    NULL // returnFromArgument
+    NULL, // returnFromArgument
+    NULL  // Header hooks
   };
   nabla->simd=&nCudaSimdHooks;
   nabla->hook=&nCudaBackendHooks;

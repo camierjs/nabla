@@ -1,0 +1,290 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
+
+/*****************************************************************************
+ * Backend LAMBDA POSTFIX - Génération du 'main'
+\n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
+#define LAMBDA_MAIN_POSTFIX "\n//LAMBDA_MAIN_POSTFIX\
+\n\tglobal_time+=*(double*)&global_deltat[0];\
+\n\tglobal_iteration+=1;\
+\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
+\n\t}\
+\tgettimeofday(&et, NULL);\n\
+\tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
+\n}\n"
+
+
+/*****************************************************************************
+  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+ *****************************************************************************/
+static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+                                                         astNode *n,
+                                                         bool in_or_out){
+  nprintf(nabla,"\n\t\t/*lambdaDumpNablaDebugFunctionFromOutArguments*/",NULL);
+}
+
+
+// ****************************************************************************
+// * Dump d'extra connectivity
+// ****************************************************************************
+static void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla,
+                                                  int *numParams){
+  return;
+}
+
+
+
+
+/*****************************************************************************
+ * lambdaMainVarInitKernel
+ *****************************************************************************/
+NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain *nabla){
+  //int i,iVar;
+  nablaVariable *var;
+  dbg("\n[lambdaMainVarInit]");
+  nprintf(nabla,NULL,"\n\
+// ******************************************************************************\n\
+// * Kernel d'initialisation des variables\n\
+// ******************************************************************************\n\
+void nabla_ini_variables(void){");
+  // Variables aux noeuds
+  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='n') continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
+    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+    if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+  }
+  nprintf(nabla,NULL,"\n\t}");  
+  // Variables aux mailles real
+  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='c') continue;
+    if (var->dim==0){
+      nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+    }else{
+      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
+      nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+    }
+  }
+  nprintf(nabla,NULL,"\n\t}");
+  nprintf(nabla,NULL,"\n}");
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * Backend LAMBDA PREFIX - Génération du 'main'
+// * look at c++/4.7/bits/ios_base.h for cout options
+// ****************************************************************************
+#define LAMBDA_MAIN_PREFIX "\n\n\n\
+// ******************************************************************************\n\
+// * Main d'Lambda\n\
+// ******************************************************************************\n\
+int main(int argc, char *argv[]){\n\
+\tfloat cputime=0.0;\n\
+\tstruct timeval st, et;\n\
+\t//int iteration=1;\n\
+#ifdef __AVX__\n\
+#endif\n\
+#if defined(__MIC__)||defined(__AVX512F__)\n\
+#endif\n\
+\tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
+\tnabla_ini_variables();\n\
+\tnabla_ini_node_coords();\n\
+\t// Initialisation de la précision du cout\n\
+\tstd::cout.precision(21);\n\
+\t//std::cout.setf(std::ios::floatfield);\n\
+\tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
+\t// Initialisation du temps et du deltaT\n\
+\tglobal_time=0.0;\n\
+\tglobal_iteration=1;\n\
+\tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
+\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
+NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
+  dbg("\n[lambdaMainPrefix]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
+  return NABLA_OK;
+}
+
+
+/*****************************************************************************
+ * lambdaMain
+ *****************************************************************************/
+NABLA_STATUS nLambdaHookMain(nablaMain *n){
+  nablaVariable *var;
+  nablaJob *entry_points;
+  int i,numParams,number_of_entry_points;
+  bool is_into_compute_loop=false;
+  double last_when;
+  
+  dbg("\n[lambdaMain]");
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
+  
+  // Et on rescan afin de dumper
+  for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
+     if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
+     if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
+      dbg("%s\n\t[lambdaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+        entry_points[i].name,
+        entry_points[i].whens[0],
+        entry_points[i].where);
+    // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
+    if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
+      is_into_compute_loop=true;
+      nprintf(n, NULL,"\
+\n\tgettimeofday(&st, NULL);\n\
+\twhile (global_time<option_stoptime){// && global_iteration!=option_max_iterations){");
+    }
+    
+    // On sync si l'on découvre un temps logique différent
+    if (last_when!=entry_points[i].whens[0])
+      nprintf(n, NULL, "\n%s%s",
+              is_into_compute_loop?"\t\t":"\t",
+              n->parallel->sync());
+    last_when=entry_points[i].whens[0];
+    
+    // Dump de la tabulation et du nom du point d'entrée
+    nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
+            is_into_compute_loop?"\t\t":"\t",
+            n->parallel->spawn(), 
+            entry_points[i].name,
+            entry_points[i].whens[0]);
+    // Dump des arguments *ou pas*
+    if (entry_points[i].stdParamsNode != NULL){
+      //nprintf(n, "/*entry_points[i].stdParamsNode != NULL*/",NULL);
+      //numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
+    }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
+    
+    // On s'autorise un endroit pour insérer des arguments
+    lambdaAddExtraArguments(n, &entry_points[i], &numParams);
+    
+    // Et on dump les in et les out
+    if (entry_points[i].nblParamsNode != NULL){
+      lambdaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+    }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
+
+    // Si on doit appeler des jobs depuis cette fonction @ée
+    if (entry_points[i].called_variables != NULL){
+      lambdaAddExtraConnectivitiesArguments(n,&numParams);
+      // Et on rajoute les called_variables en paramètre d'appel
+      dbg("\n\t[lambdaMain] Et on rajoute les called_variables en paramètre d'appel");
+      for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
+        nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
+      }
+    }else nprintf(n,NULL,"/*NULL_called_variables*/");
+    nprintf(n, NULL, ");");
+    lambdaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
+    //nprintf(n, NULL, "\n");
+  }
+  return NABLA_OK;
+}
+
+/*****************************************************************************
+ * lambdaMainPostfix
+ *****************************************************************************/
+NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
+  dbg("\n[lambdaMainPostfix] LAMBDA_MAIN_POSTFIX");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
+  //dbg("\n[lambdaMainPostfix] lambdaSourceMesh");
+  nLambdaDumpSource(nabla);
+  dbg("\n[lambdaMainPostfix] NABLA_OK");
+  return NABLA_OK;
+}
+
+
+
+
+/*****************************************************************************
+ * Backend LAMBDA INIT - Génération du 'main'
+ *****************************************************************************/
+#define LAMBDA_MAIN_PREINIT "\n\t//LAMBDA_MAIN_PREINIT"
+NABLA_STATUS nLambdaHookMainPreInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPreInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
+  return NABLA_OK;
+}
+
+
+/*****************************************************************************
+ * Backend LAMBDA POSTFIX - Génération du 'main'
+ *****************************************************************************/
+#define LAMBDA_MAIN_POSTINIT "\n\t//LAMBDA_MAIN_POSTINIT"
+NABLA_STATUS nLambdaHookMainPostInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPostInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
+  return NABLA_OK;
+}
+
+
+/*****************************************************************************
+ * lambdaMainVarInitKernel
+ *****************************************************************************/
+NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain *nabla){
+  nablaVariable *var;
+  dbg("\n[lambdaMainVarInitCall]");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
+            var->name,
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
+  return NABLA_OK;
+}
+

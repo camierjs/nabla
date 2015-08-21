@@ -67,13 +67,15 @@ tstg:
 tsta:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -R arcane)
 
-tstuap:
+tstoua:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwindAP_run_1_std_seq)
-tstu:
+tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
-tstl:
+tstol:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
 
+tstl:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
 tstla:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
 tstlao:

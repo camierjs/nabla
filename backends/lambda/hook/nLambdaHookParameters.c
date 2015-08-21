@@ -98,7 +98,7 @@ void lambdaHookDumpNablaParameterList(nablaMain *nabla,
 }
 
 
-void lambdaHookAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
+static void lambdaHookAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
   return;
 }
 

@@ -174,45 +174,87 @@ typedef struct nablaEntityStruct{
 } nablaEntity;
 
 
+// Hook for Header
+typedef struct nHookHeaderStruct{
+  void (*open)(struct nablaMainStruct *);  
+  void (*prefix)(struct nablaMainStruct *);  
+  void (*includes)(struct nablaMainStruct *);  
+  void (*dump)(struct nablaMainStruct *);  
+  void (*enumerates)(struct nablaMainStruct *);  
+  void (*postfix)(struct nablaMainStruct *);  
+} nHookHeader;
+
+// Hooks for Sources
+typedef struct nHookSourceStruct{
+  void (*open)(struct nablaMainStruct *);  
+  void (*include)(struct nablaMainStruct *);  
+} nHookSource;
+
+// Hooks for Main
+typedef struct nHookMainStruct{
+  NABLA_STATUS (*prefix)(struct nablaMainStruct *);  
+  NABLA_STATUS (*preInit)(struct nablaMainStruct *);  
+  NABLA_STATUS (*varInitKernel)(struct nablaMainStruct *);  
+  NABLA_STATUS (*varInitCall)(struct nablaMainStruct *);  
+  NABLA_STATUS (*main)(struct nablaMainStruct *);  
+  NABLA_STATUS (*postInit)(struct nablaMainStruct *);  
+  NABLA_STATUS (*postfix)(struct nablaMainStruct *);  
+} nHookMain;
+
+// Mesh Hooks
+typedef struct nHookMeshStruct{
+  void (*prefix)(struct nablaMainStruct *);  
+  void (*core)(struct nablaMainStruct *);  
+  void (*postfix)(struct nablaMainStruct *);  
+} nHookMesh;
+
+// Variables Hooks
+typedef struct nHookVarsStruct{
+  void (*init)(struct nablaMainStruct *);  
+  void (*prefix)(struct nablaMainStruct *);  
+  void (*postfix)(struct nablaMainStruct *);  
+} nHookVars;
+
+
 // Backend HOOKS
 typedef struct nablaBackendHooksStruct{
   // Prefix à l'ENUMERATE_*
-  char* (*prefixEnumerate)(nablaJob *);
+  char* (*prefixEnumerate)(nablaJob*);
   // Produit l'ENUMERATE_* avec XYZ
-  char* (*dumpEnumerateXYZ)(nablaJob *);
+  char* (*dumpEnumerateXYZ)(nablaJob*);
   // Dump l'ENUMERATE_*
-  char* (*dumpEnumerate)(nablaJob *);
+  char* (*dumpEnumerate)(nablaJob*);
   // Postfix à l'ENUMERATE_*
-  char* (*postfixEnumerate)(nablaJob *);
+  char* (*postfixEnumerate)(nablaJob*);
   // Dump la référence à un item au sein d'un ENUMERATE_*
   char* (*item)(nablaJob*,const char, const char, char);
   // Gestion des différentes actions pour un job
-  void (*switchTokens)(astNode *, nablaJob *);
+  void (*switchTokens)(astNode*, nablaJob*);
   // Transformation de tokens en variables selon l'ENUMERATE_*
-  nablaVariable* (*turnTokenToVariable)(astNode*,struct nablaMainStruct*, nablaJob *);
-  void (*system)(astNode * n, struct nablaMainStruct *arc, const char cnf, char enum_enum);
+  nablaVariable* (*turnTokenToVariable)(astNode*, struct nablaMainStruct*, nablaJob*);
+  void (*system)(astNode*, struct nablaMainStruct*, const char, char);
   // Permet de rajouter des paramètres aux fonctions (coords/globals)
-  void (*addExtraParameters)(struct nablaMainStruct *nabla, nablaJob*, int *numParams);
+  void (*addExtraParameters)(struct nablaMainStruct*, nablaJob*, int*);
   // Dump dans le src des parametres nabla en in comme en out
   // Et dans le cas Okina de remplir quelles variables in on va utiliser pour les gather/scatter
-  void (*dumpNablaParameterList)(struct nablaMainStruct*, nablaJob*, astNode*,int *);
+  void (*dumpNablaParameterList)(struct nablaMainStruct*, nablaJob*, astNode*,int*);
   void (*turnBracketsToParentheses)(struct nablaMainStruct*, nablaJob*, nablaVariable*, char);
   // Gestion de l'ex diffraction (plus utilisé)
-  void (*diffractStatement)(struct nablaMainStruct *, nablaJob *, astNode **);
+  void (*diffractStatement)(struct nablaMainStruct*, nablaJob*, astNode**);
   // Hook pour dumper le nom de la fonction
-  void (*functionName)(struct nablaMainStruct *);
+  void (*functionName)(struct nablaMainStruct*);
   // Hook de génération d'un kernel associé à une fonction
-  void (*function)(struct nablaMainStruct *, astNode *);
+  void (*function)(struct nablaMainStruct*, astNode*);
   // Génération d'un kernel associé à un support
-  void (*job)(struct nablaMainStruct *, astNode *);
+  void (*job)(struct nablaMainStruct*, astNode*);
   // Génération d'un kernel associé à une reduction
   void (*reduction)(struct nablaMainStruct *, astNode *);
   // Hooks additionnels pour spécifier de façon propre au backend:
   // le numéro de l'itération, l'appel pour quitter, récupérer le temps de la simulation, etc.
-  void (*iteration)(struct nablaMainStruct *);
-  void (*exit)(struct nablaMainStruct *);
-  void (*time)(struct nablaMainStruct *);
-  void (*fatal)(struct nablaMainStruct *);
+  void (*iteration)(struct nablaMainStruct*);
+  void (*exit)(struct nablaMainStruct*);
+  void (*time)(struct nablaMainStruct*);
+  void (*fatal)(struct nablaMainStruct*);
   // Hooks pour rajouter au fur et à mesure qu'on les découvre
   // les fonctions appelées et les arguments
   void (*addCallNames)(struct nablaMainStruct*,nablaJob*,astNode*);
@@ -227,6 +269,11 @@ typedef struct nablaBackendHooksStruct{
   bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
+  struct nHookHeaderStruct *header;
+  struct nHookSourceStruct *source;
+  struct nHookMeshStruct *mesh;
+  struct nHookVarsStruct *vars;
+  struct nHookMainStruct *main;
 } nablaBackendHooks;
 
 typedef struct nablaDefinesStruct{

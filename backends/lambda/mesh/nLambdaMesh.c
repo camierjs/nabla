@@ -41,18 +41,3 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-
-/*****************************************************************************
- * Backend LAMBDA - Allocation de la connectivité du maillage
- *****************************************************************************/
-void lambdaMainMeshPrefix(nablaMain *nabla){
-  dbg("\n[lambdaMainMeshPrefix]");
-  fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
-}
-
-
-void lambdaMainMeshPostfix(nablaMain *nabla){
-  dbg("\n[lambdaMainMeshPostfix]");
-  //fprintf(nabla->entity->src,"");
-}

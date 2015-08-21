@@ -96,10 +96,7 @@ static void nabla_ini_node_coords(void){
     y=set(yOf7(n));
     z=set(zOf7(n));
 #endif
-    // Là où l'on poke le retour de okinaSourceMeshAoS_vs_SoA
-    %s
-    //node_coord[n]=Real3(x,y,z);
-    //dbg(DBG_INI,"\nSetting nodes-vector #%%d @", n);
+    node_coord[iNode]=Real3(x,y,z);
     dbgReal3(DBG_INI,node_coord[iNode]);
   }
   verifCoords();

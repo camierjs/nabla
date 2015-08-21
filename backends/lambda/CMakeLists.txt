@@ -9,21 +9,18 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 
 set(BACKEND_LAMBDA_C 
   nLambda.c 
-  nLambdaMain.c
-  nLambdaVariables.c
-  ${CMAKE_CURRENT_BINARY_DIR}/nLambdaDump.S)
-
-# On spécifie en plus que nLambdaDump.S va utiliser incbin pour se compiler
-set_property(SOURCE nLambdaDump.S 
-             PROPERTY OBJECT_DEPENDS 
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/*.*)
-           
-configure_file(nLambdaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nLambdaDump.S)
+  nLambdaMain.c)
 
 add_library(NablaLambda ${BACKEND_LAMBDA_C})
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hooks)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/parallel)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/para)
+
+target_link_libraries(NablaLambda
+  NablaLambdaHook
+  NablaLambdaMesh
+  NablaLambdaPara)
 
 add_dependencies(NablaLambda Nabla)

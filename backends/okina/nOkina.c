@@ -159,7 +159,8 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookEntryPointPrefix,
     nOkinaHookDfsForCalls,
     nOkinaHookPrimaryExpressionToReturn,
-    nOkinaHookReturnFromArgument
+    nOkinaHookReturnFromArgument,
+    NULL  // Header hooks
   };
   // Switch between STD, SSE, AVX, MIC
   // Par défaut, on est en mode 'std'

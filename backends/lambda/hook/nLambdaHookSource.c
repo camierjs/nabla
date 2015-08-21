@@ -41,3 +41,23 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+
+
+// ****************************************************************************
+// * nLambdaHookSourceOpen
+// ****************************************************************************
+void nLambdaHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source
+  sprintf(srcFileName, "%s.cc", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
+}
+
+  
+// ****************************************************************************
+// * lambdaInclude
+// ****************************************************************************
+void nLambdaHookSourceInclude(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
+}

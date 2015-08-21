@@ -27,8 +27,13 @@ configure_file(dump/error.h ${CMAKE_CURRENT_BINARY_DIR}/error.h)
 configure_file(dump/extra.h ${CMAKE_CURRENT_BINARY_DIR}/extra.h)
 configure_file(dump/cuMsh.h ${CMAKE_CURRENT_BINARY_DIR}/cuMsh.h)
 
+add_library(NablaCuda ${BACKEND_CUDA_C})
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hooks)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mesh)
 
-add_library(NablaCuda ${BACKEND_CUDA_C})
+target_link_libraries(NablaCuda
+  NablaCudaHooks
+  NablaCudaMesh)
+
 add_dependencies(NablaCuda Nabla)

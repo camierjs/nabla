@@ -43,6 +43,9 @@
 #ifndef _NABLA_LAMBDA_H_
 #define _NABLA_LAMBDA_H_
 
+void nLambdaHookSourceOpen(nablaMain*);
+void nLambdaHookSourceInclude(nablaMain*);
+
 char* lambdaHookBits(void);
 char* lambdaHookGather(nablaJob*,nablaVariable*,enum_phase);
 char* lambdaHookScatter(nablaVariable*);
@@ -82,23 +85,37 @@ char *lambdaHookPragmaGccIvdep(void);
 char *lambdaHookPragmaIccAlign(void);
 char *lambdaHookPragmaGccAlign(void);
 
-NABLA_STATUS lambdaMainPrefix(nablaMain*);
-NABLA_STATUS lambdaMainPreInit(nablaMain*);
-NABLA_STATUS lambdaMainVarInitKernel(nablaMain*);
-NABLA_STATUS lambdaMainVarInitCall(nablaMain*);
-NABLA_STATUS lambdaMainPostInit(nablaMain*);
-NABLA_STATUS lambdaMain(nablaMain*);
-NABLA_STATUS lambdaMainPostfix(nablaMain*);
+// Hooks: Header
+void nLambdaHookHeaderOpen(nablaMain *);
+void nLambdaHookHeaderDefineEnumerates(nablaMain *);
+void nLambdaHookHeaderPrefix(nablaMain *);
+void nLambdaHookHeaderPostfix(nablaMain *);
+void nLambdaHookHeaderIncludes(nablaMain *);
 
-void lambdaInlines(nablaMain*);
-// static void lambdaDefineEnumerates(nablaMain*);
-void lambdaVariablesPrefix(nablaMain*);
-void lambdaVariablesPostfix(nablaMain*);
+// Dump into Header & Source
+void nLambdaHookHeaderDump(nablaMain *);
+void nLambdaDumpSource(nablaMain*);
+void nLambdaDumpHeaderTypes(nablaMain *);
+void nLambdaDumpHeaderDebug(nablaMain *);
+void nLambdaDumpHeaderMaths(nablaMain *);
+void nLambdaDumpMesh(nablaMain*);
 
-void lambdaMesh1D(nablaMain*);
-void lambdaMesh3D(nablaMain*);
-void lambdaMainMeshPrefix(nablaMain*);
-void lambdaMainMeshPostfix(nablaMain*);
+NABLA_STATUS nLambdaHookMainPrefix(nablaMain*);
+NABLA_STATUS nLambdaHookMainPreInit(nablaMain*);
+NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain*);
+NABLA_STATUS nLambdaHookMainPostInit(nablaMain*);
+NABLA_STATUS nLambdaHookMain(nablaMain*);
+NABLA_STATUS nLambdaHookMainPostfix(nablaMain*);
+
+void nLambdaHookVariablesPrefix(nablaMain*);
+void nLambdaHookVariablesPostfix(nablaMain*);
+
+void nLambdaHookMeshPrefix(nablaMain*);
+void nLambdaHookMeshCore(nablaMain*);
+void nLambdaHookMeshPostfix(nablaMain*);
+
+void nLambdaHookVarsInit(nablaMain*);
 
 void lambdaHookIteration(struct nablaMainStruct*);
 void lambdaHookExit(struct nablaMainStruct*);
@@ -108,12 +125,6 @@ void lambdaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
 bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
 char* lambdaHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
 void lambdaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-// static void lambdaHeaderPrefix(nablaMain*);
-// static void lambdaHeaderIncludes(nablaMain*);
-// static void lambdaHeaderDbg(nablaMain*);
-// static void lambdaHeaderMth(nablaMain*);
-// static void lambdaHeaderPostfix(nablaMain*);
-// static void lambdaInclude(nablaMain*);
 
 void lambdaHookFunctionName(nablaMain*);
 void lambdaHookFunction(nablaMain*, astNode*);
@@ -134,10 +145,7 @@ void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
 void lambdaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-// static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 void lambdaAddExtraArguments(nablaMain*,nablaJob*,int*);
-// static void lambdaAddExtraConnectivitiesArguments(nablaMain*,int*);
-void lambdaHookAddExtraConnectivitiesParameters(nablaMain*,int*);
 
 NABLA_STATUS nLambda(nablaMain*,astNode*,const char*);
 

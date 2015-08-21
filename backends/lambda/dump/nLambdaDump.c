@@ -40,54 +40,80 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global lambdaDbg_h
-        .global lambdaMsh1D_c
-        .global lambdaMsh3D_c
-        .global lambdaMth_h
-        
-        .global lambdaStdReal_h
-        .global lambdaStdReal3_h
-        .global lambdaStdInteger_h
-        .global lambdaStdTernary_h
-        .global lambdaStdGather_h
-        .global lambdaStdScatter_h
-        .global lambdaStdOStream_h
-        
-lambdaDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaDbg.h"
-        .byte 0
-lambdaMsh1D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh1D.c"
-        .byte 0
-lambdaMsh3D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMsh3D.c"
-        .byte 0
-lambdaMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaMth.h"
-        .byte 0
+#include "nabla.h"   
 
- 
-        
-lambdaStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal.h"
-        .byte 0
-lambdaStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdReal3.h"
-        .byte 0
-lambdaStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdInteger.h"
-        .byte 0
-lambdaStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdTernary.h"
-        .byte 0
-lambdaStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdGather.h"
-        .byte 0
-lambdaStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdScatter.h"
-        .byte 0
-lambdaStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/lambdaStdOStream.h"
-        .byte 0
 
+// ****************************************************************************
+// * dumpExternalFile
+// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
+// ****************************************************************************
+static char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
+}
+
+
+// ****************************************************************************
+// * extern definitions from lambdaDump.S
+// ****************************************************************************
+extern char lambdaDbg_h[];
+extern char lambdaMth_h[];
+extern char lambdaStdReal_h[];
+extern char lambdaStdReal3_h[];
+extern char lambdaStdInteger_h[];
+extern char lambdaStdGather_h[];
+extern char lambdaStdScatter_h[];
+extern char lambdaStdOStream_h[];
+extern char lambdaStdTernary_h[];
+extern char lambdaMsh1D_c[];
+extern char lambdaMsh3D_c[];
+
+
+// ****************************************************************************
+// * lambdaHeader for Std, Avx or Mic
+// ****************************************************************************
+void nLambdaDumpHeaderTypes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdInteger_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal3_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdTernary_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdGather_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdScatter_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdOStream_h));
+}
+
+
+// ****************************************************************************
+// * lambdaHeader for Dbg
+// ****************************************************************************
+void nLambdaDumpHeaderDebug(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
+}
+
+
+// ****************************************************************************
+// * lambdaHeader for Maths
+// ****************************************************************************
+void nLambdaDumpHeaderMaths(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaMth_h));
+}
+
+
+// ****************************************************************************
+// * lambdaSourceMesh
+// ****************************************************************************
+void nLambdaDumpMesh(nablaMain *nabla){
+  assert(nabla->entity->name);
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    fprintf(nabla->entity->src,lambdaMsh1D_c);
+  else
+    fprintf(nabla->entity->src,lambdaMsh3D_c);
+}
+
+
+// ****************************************************************************
+// * lambdaDump in source
+// ****************************************************************************
+void nLambdaDumpSource(nablaMain *nabla){
+  assert(nabla->entity->name);
+  nLambdaDumpMesh(nabla);
+}

@@ -30,10 +30,16 @@ configure_file(nOkinaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hooks)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/simd)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/parallel)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/para)
+
+target_link_libraries(NablaOkina
+  NablaOkinaPara
+  NablaOkinaMesh
+  NablaOkinaSimd
+  NablaOkinaHook)
 
 add_dependencies(NablaOkina Nabla)
 

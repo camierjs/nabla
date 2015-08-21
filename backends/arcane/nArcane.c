@@ -156,7 +156,8 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneEntryPointPrefix,
     arcaneDfsForCalls,
     NULL, // primary_expression_to_return
-    NULL // returnFromArgument
+    NULL, // returnFromArgument
+    NULL  // Header hooks
   };
   middlend->simd=&nablaArcaneSimdHooks;
   middlend->hook=&arcaneBackendHooks;

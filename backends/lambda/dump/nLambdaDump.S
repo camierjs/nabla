@@ -40,4 +40,54 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
+        .section ".rodata"
+        .global lambdaDbg_h
+        .global lambdaMsh1D_c
+        .global lambdaMsh3D_c
+        .global lambdaMth_h
+        
+        .global lambdaStdReal_h
+        .global lambdaStdReal3_h
+        .global lambdaStdInteger_h
+        .global lambdaStdTernary_h
+        .global lambdaStdGather_h
+        .global lambdaStdScatter_h
+        .global lambdaStdOStream_h
+        
+lambdaDbg_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaDbg.h"
+        .byte 0
+lambdaMsh1D_c: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh1D.c"
+        .byte 0
+lambdaMsh3D_c: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh3D.c"
+        .byte 0
+lambdaMth_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMth.h"
+        .byte 0
+
+ 
+        
+lambdaStdReal_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdReal.h"
+        .byte 0
+lambdaStdReal3_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdReal3.h"
+        .byte 0
+lambdaStdInteger_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdInteger.h"
+        .byte 0
+lambdaStdTernary_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdTernary.h"
+        .byte 0
+lambdaStdGather_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdGather.h"
+        .byte 0
+lambdaStdScatter_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdScatter.h"
+        .byte 0
+lambdaStdOStream_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdOStream.h"
+        .byte 0
+

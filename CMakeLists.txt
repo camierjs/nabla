@@ -72,21 +72,22 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 add_executable(nabla nabla.c)
 add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
-
+############
+# Backends #
+############
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 
+##################
+# Link libraries #
+##################
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
 target_link_libraries(nabla Nabla ${FLEX_LIBRARIES}
   NablaMiddlend 
-  NablaArcane 
-  NablaCuda NablaCudaHooks NablaCudaMesh
-  NablaLambda NablaLambdaParallel NablaLambdaHooks NablaLambdaMesh
-  NablaOkina NablaOkinaParallel NablaOkinaMesh NablaOkinaSimd NablaOkinaHooks 
+  NablaArcane NablaCuda NablaLambda NablaOkina
   NablaFrontend NablaMiddlend NablaToolbox)
-
 
 ###########
 # INSTALL #
