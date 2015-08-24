@@ -162,7 +162,7 @@ char* nOkinaAvxScatter(nablaVariable* var){
 // ****************************************************************************
 // * Avx TYPEDEFS
 // ****************************************************************************
-nablaTypedef nOkinaAvxTypedef[]={
+nWhatWith nOkinaAvxTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -172,7 +172,7 @@ nablaTypedef nOkinaAvxTypedef[]={
 // ****************************************************************************
 // * Avx DEFINES
 // ****************************************************************************
-nablaDefine nOkinaAvxDefines[]={
+nWhatWith nOkinaAvxDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},

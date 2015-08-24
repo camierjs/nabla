@@ -7,6 +7,9 @@ set(MIDDLEND_C
   nMiddleTypes.c
   nMiddleItems.c
   nMiddlePrintf.c
+  nMiddleHeader.c
+  nMiddleGrammar.c
+  nMiddleAnimate.c
   nMiddleOptions.c
   nMiddleEntities.c
   nMiddleTimeTree.c

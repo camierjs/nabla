@@ -53,7 +53,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
   char *grp=j->scope;   // OWN||ALL
   char *rgn=j->region;  // INNER, OUTER
   char itm=j->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  char *drctn=j->drctn; // Direction
+  char *direction=j->direction; // Direction
   if (j->xyz==NULL){
     if (itm=='c' && j->forall_item=='c'){
       return "CellCellGroup cells_pairgroup(allCells(),allCells(),IK_Node);";
@@ -65,13 +65,13 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
   }
   if (itm=='c'){
     char str[1024];
-    if (sprintf(str,"CellDirectionMng cdm(m_cartesian_mesh->cellDirection(%s));",drctn)<0)
+    if (sprintf(str,"CellDirectionMng cdm(m_cartesian_mesh->cellDirection(%s));",direction)<0)
       return NULL;
     return strdup(str);
   }
   if (itm=='n'){
     char str[1024];
-    if (sprintf(str,"NodeDirectionMng ndm(m_cartesian_mesh->nodeDirection(%s));",drctn)<0)
+    if (sprintf(str,"NodeDirectionMng ndm(m_cartesian_mesh->nodeDirection(%s));",direction)<0)
       return NULL;
     return strdup(str);
   }

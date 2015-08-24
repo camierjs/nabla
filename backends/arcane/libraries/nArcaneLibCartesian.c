@@ -83,13 +83,13 @@ void nccArcLibCartesianIni(nablaMain *arc){
   libCartesianInitialize->scope  = strdup("NoGroup");
   libCartesianInitialize->region = strdup("NoRegion");
   libCartesianInitialize->item   = strdup("\0");
-  libCartesianInitialize->rtntp  = strdup("void");
+  libCartesianInitialize->return_type  = strdup("void");
   libCartesianInitialize->name   = strdup("libCartesianInitialize");
   libCartesianInitialize->name_utf8 = strdup("libCartesianInitialize");
   libCartesianInitialize->xyz    = strdup("NoXYZ");
-  libCartesianInitialize->drctn  = strdup("NoDirection");
+  libCartesianInitialize->direction  = strdup("NoDirection");
   sprintf(&libCartesianInitialize->at[0],"-huge_valf");
-  libCartesianInitialize->whenx  = 1;
+  libCartesianInitialize->when_index  = 1;
   libCartesianInitialize->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(arc->entity, libCartesianInitialize);
 }

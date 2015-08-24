@@ -44,240 +44,6 @@
 #include "nabla.tab.h"
 
 
-// ****************************************************************************
-// * Dump dans le header des 'includes'
-// ****************************************************************************
-NABLA_STATUS nMiddleCompoundJobEnd(nablaMain* nabla_main){
-  return NABLA_OK;
-}
-
-
-/***************************************************************************** 
- * Dump dans le header des 'includes'
- *****************************************************************************/
-NABLA_STATUS nMiddleInclude(nablaMain *nabla, char *include){
-  fprintf(nabla->entity->src, "%s\n", include);
-  return NABLA_OK;
-}
-
-
-/***************************************************************************** 
- * Dump dans le header les 'define's
- *****************************************************************************/
-NABLA_STATUS nMiddleDefines(nablaMain *nabla, nablaDefine *defines){
-  int i;
-  FILE *target_file = isAnArcaneService(nabla)?nabla->entity->src:nabla->entity->hdr;
-  fprintf(target_file,"\n\
-\n// *****************************************************************************\
-\n// * Defines\
-\n// *****************************************************************************");
-  for(i=0;defines[i].what!=NULL;i+=1)
-    fprintf(target_file, "\n#define %s %s",defines[i].what,defines[i].with);
-  fprintf(target_file, "\n");
-  return NABLA_OK;
-}
-
-
-/***************************************************************************** 
- * Dump dans le header les 'define's
- *****************************************************************************/
-NABLA_STATUS nMiddleTypedefs(nablaMain *nabla, nablaTypedef *typedefs){
-  fprintf(nabla->entity->hdr,"\n\
-\n// *****************************************************************************\
-\n// * Typedefs\
-\n// *****************************************************************************");
-  for(int i=0;typedefs[i].what!=NULL;i+=1)
-    fprintf(nabla->entity->hdr, "\ntypedef %s %s;",typedefs[i].what,typedefs[i].with);
-  fprintf(nabla->entity->hdr, "\n");
-  return NABLA_OK;
-}
-
-
-/***************************************************************************** 
- * Dump dans le header des 'forwards's
- *****************************************************************************/
-NABLA_STATUS nMiddleForwards(nablaMain *nabla, char **forwards){
-  fprintf(nabla->entity->hdr,"\n\
-\n// *****************************************************************************\
-\n// * Forwards\
-\n// *****************************************************************************");
-  for(int i=0;forwards[i]!=NULL;i+=1)
-    fprintf(nabla->entity->hdr, "\n%s",forwards[i]);
-  fprintf(nabla->entity->hdr, "\n");
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
-// * switchItemSupportTokenid
-// ****************************************************************************
-static char *switchItemSupportTokenid(int item_support_tokenid){
-  if (item_support_tokenid==CELLS) return "cell";
-  if (item_support_tokenid==FACES) return "face";
-  if (item_support_tokenid==NODES) return "node";
-  if (item_support_tokenid==PARTICLES) return "particle";
-//#warning switchItemSupportTokenid should be deterministic
-  return "global";
-}
-
-
-// ****************************************************************************
-// * nMiddleDeclarationDump
-// ****************************************************************************
-static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
-  for(;n->token != NULL;){
-    dbg(" %s",n->token);
-    nprintf(nabla, NULL, "%s ", n->token);
-    if (n->tokenid == ';'){
-      //nprintf(nabla, NULL, "\n");
-      return;
-    }
-    break;
-  }
-  if(n->children != NULL) nMiddleDeclarationDump(nabla, n->children);
-  if(n->next != NULL) nMiddleDeclarationDump(nabla, n->next);
-}
-
-
-// ****************************************************************************
-// * Fonction de parsing et d'application des actions correspondantes
-// * On scrute les possibilités du 'nabla_grammar':
-// *    - INCLUDES
-// *    - preproc
-// *    - with_library
-// *    - declaration
-// *    - nabla_options_definition
-// *    - nabla_item_definition
-// *    - function_definition
-// *    - nabla_job_definition
-// *    - nabla_reduction
-// *    - (nabla_materials_definition)
-// *    - (nabla_environments_definition)
-// ****************************************************************************
-void nMiddleParseAndHook(astNode * n, nablaMain *nabla){
-    
-  ////////////////////////////////////
-  // Règle de définitions des includes
-  /////////////////////////////////////
-  if (n->tokenid == INCLUDES){
-    nMiddleInclude(nabla, n->token);
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit INCLUDES %s", n->token);
-  }
-
-  /////////////////////////////////////
-  // Règle de définitions des preprocs 
-  /////////////////////////////////////
-  if (n->ruleid == rulenameToId("preproc")){
-    nprintf(nabla, NULL, "%s\n", n->children->token);
-    dbg("\n\t[nablaMiddlendParseAndHook] preproc '%s'", n->children->token);
-  }
-  
-  ///////////////////////////////
-  // Déclaration des libraries //
-  ///////////////////////////////
-  if (n->ruleid == rulenameToId("with_library")){
-    dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
-    nMiddleLibraries(n,nabla->entity);
-    dbg("\n\t[nablaMiddlendParseAndHook] library done");
-  }
-
-  //////////////////////////////
-  // Règle ∇ de 'declaration' //
-  //////////////////////////////
-  if (n->ruleid == rulenameToId("declaration")){
-    dbg("\n\t[nablaMiddlendParseAndHook] declaration hit:");
-    nMiddleDeclarationDump(nabla,n);
-    nprintf(nabla, NULL, "\n");
-    dbg(", done");
-  }
-  
-  ///////////////////////////////////////////////////////
-  // Règle de définitions des items sur leurs supports //
-  ///////////////////////////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_item_definition")){
-    char *item_support=n->children->children->token;
-    // Nodes|Cells|Global|Faces|Particles
-    int item_support_tokenid=n->children->children->tokenid;
-    dbg("\n\t[nablaMiddlendParseAndHook] rule %s,  support %s", n->rule, item_support);
-    // On backup temporairement le support (kind) de l'item
-    nabla->tmpVarKinds=strdup(switchItemSupportTokenid(item_support_tokenid));
-    nMiddleItems(n->children->next,
-               rulenameToId("nabla_item_declaration"),
-               nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] item done");
-  }
-
-
-  ///////////////////////////////////
-  // Règle de définitions des options
-  ///////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_options_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    nMiddleOptions(n->children,
-                   rulenameToId("nabla_option_declaration"), nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] option done");
-  }
-
-  /////////////////////////////////////////////////
-  // On a une définition d'une fonction standard //
-  /////////////////////////////////////////////////
-  if (n->ruleid == rulenameToId("function_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    nabla->hook->function(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] function done");
-    goto step_next;
-    // On continue sans s'engouffrer dans la fonction
-    if(n->next != NULL) nMiddleParseAndHook(n->next, nabla);
-    return;
-  }
-  
-  ////////////////////////////////////////
-  // On a une définition d'un job Nabla //
-  ////////////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_job_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    nabla->hook->job(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] job done");
-    goto step_next;
-  }
-
-  //////////////////////////////
-  // On a une reduction Nabla //
-  //////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_reduction")){
-    const astNode *global_node = n->children->next->next;
-    const astNode *reduction_operation_node = global_node->next;
-    const astNode *item_node = reduction_operation_node->next;
-    char *global_var_name = global_node->token;
-    char *item_var_name = item_node->token;
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    dbg("\n\t[nablaMiddlendParseAndHook] Checking for global variable '%s'", global_var_name);
-    const nablaVariable *global_var = nMiddleVariableFind(nabla->variables, global_var_name);
-    const nablaVariable *item_var = nMiddleVariableFind(nabla->variables, item_var_name);
-    dbg("\n\t[nablaMiddlendParseAndHook] global_var->item '%s'", global_var->item);
-    // global_var must be 'global'
-    assert(global_var->item[0]=='g');
-    // item_var must not be 'global'
-    assert(item_var->item[0]!='g');
-    // Reduction operation is for now MIN
-    assert(reduction_operation_node->tokenid==MIN_ASSIGN);
-    // Having done these sanity checks, let's pass the rest of the generation to the backends
-    nabla->hook->reduction(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] reduction done");
-  }
-
-  // nabla_materials_definition
-  // nabla_environments_definition
-  
-  //////////////////
-  // DFS standard //
-  //////////////////
-  if(n->children != NULL) nMiddleParseAndHook(n->children, nabla);
- step_next:
-  if(n->next != NULL) nMiddleParseAndHook(n->next, nabla);
-}
-
-
 /*****************************************************************************
  * Rajout des variables globales utiles aux mots clefs systèmes
  * On rajoute en dur les variables time, deltat, coord
@@ -331,72 +97,6 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 
 
 // ****************************************************************************
-// * nablaInsertSpace
-// ****************************************************************************
-void nMiddleInsertSpace( nablaMain *nabla, astNode * n){
-  if (n->token!=NULL) {
-    if (n->parent!=NULL){
-      if (n->parent->rule!=NULL){
-        if ( (n->parent->ruleid==rulenameToId("type_qualifier")) ||
-             (n->parent->ruleid==rulenameToId("type_specifier")) ||
-             (n->parent->ruleid==rulenameToId("jump_statement")) ||
-             (n->parent->ruleid==rulenameToId("selection_statement")) ||
-             (n->parent->ruleid==rulenameToId("storage_class_specifier"))
-             ){
-          nprintf(nabla, NULL, " ");
-          //nprintf(nabla, NULL, "/*%s*/ ",n->parent->rule);
-        }else{
-          //nprintf(nabla, NULL, "/*%s*/",n->parent->rule);
-        }
-      }
-    }
-  }
-}
-
-
-// ****************************************************************************
-// * nMiddleBackendAnimate
-// ****************************************************************************
-//#warning nMiddleBackendAnimate a simplifier
-static NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
-  ///////////////////////////////////////////////////////////
-  // Partie des hooks à remonter à termes dans le middlend //
-  ///////////////////////////////////////////////////////////
-  nabla->hook->vars->init(nabla);
-  nabla->hook->source->open(nabla);
-  nabla->hook->source->include(nabla);
-  nabla->hook->header->open(nabla);
-  nabla->hook->header->prefix(nabla);
-  nabla->hook->header->includes(nabla);
-  nabla->hook->header->dump(nabla);
-  nabla->hook->header->enumerates(nabla);
-  nabla->hook->mesh->core(nabla);
-  
-  // Parse du code préprocessé et lance les hooks associés
-  nMiddleParseAndHook(root,nabla);
-  
-  nabla->hook->main->varInitKernel(nabla);
-  nabla->hook->main->prefix(nabla);
-  
-  nabla->hook->vars->prefix(nabla);
-  
-  nabla->hook->mesh->prefix(nabla);
-  nabla->hook->main->preInit(nabla);
-  nabla->hook->main->varInitCall(nabla);
-  nabla->hook->main->main(nabla);
-  nabla->hook->main->postInit(nabla);
-  
-  // Partie POSTFIX
-  nabla->hook->header->postfix(nabla); 
-  nabla->hook->mesh->postfix(nabla);
-  nabla->hook->vars->postfix(nabla);
-  nabla->hook->main->postfix(nabla);
-  
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
 // * nMiddleSwitch
 // ****************************************************************************
 int nMiddleSwitch(astNode *root,
@@ -416,25 +116,23 @@ int nMiddleSwitch(astNode *root,
   nabla->interface_path=interface_path;
   nabla->service_name=service_name;
   nabla->optionDumpTree=optionDumpTree;
-  //nabla->hook->simd=NULL;
-  //nabla->hook->parallel=NULL;  
   nabla->options=NULL;  
   dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
   nMiddleVariableGlobalAdd(nabla);
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
+  // Switching between our possible backends:
   switch (backend){
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
   case BACKEND_CUDA:   return nccCuda(nabla,root,nabla_entity_name);
   case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
-    // La backend Lambda utilise maintenant le nMiddleBackendAnimate
-    // il remplit les hooks et rend la main au middle
+    // The Lambda backend now uses nMiddleBackendAnimate
+    // Hook structures are filled by the backend
   case BACKEND_LAMBDA: {
     nabla->hook=nLambda(nabla);
     return nMiddleBackendAnimate(nabla,root);
   }
   default:
-    exit(NABLA_ERROR
-         |fprintf(stderr,
+    exit(NABLA_ERROR|fprintf(stderr,
                   "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
   }
   return NABLA_ERROR;

@@ -175,13 +175,13 @@ void nccArcLibDftIni(nablaMain *arc){
   dftInitFunction->scope  = strdup("NoGroup");
   dftInitFunction->region = strdup("NoRegion");
   dftInitFunction->item   = strdup("\0");
-  dftInitFunction->rtntp  = strdup("void");
+  dftInitFunction->return_type  = strdup("void");
   dftInitFunction->name   = strdup("dftIni");
   dftInitFunction->name_utf8 = strdup("dftIni");
   dftInitFunction->xyz    = strdup("NoXYZ");
-  dftInitFunction->drctn  = strdup("NoDirection");
+  dftInitFunction->direction  = strdup("NoDirection");
   sprintf(&dftInitFunction->at[0],"-huge_valf");
-  dftInitFunction->whenx  = 1;
+  dftInitFunction->when_index  = 1;
   dftInitFunction->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(arc->entity, dftInitFunction);
 
@@ -203,13 +203,13 @@ void nccArcLibDftIni(nablaMain *arc){
   dftContinueInit->scope  = strdup("NoGroup");
   dftContinueInit->region = strdup("NoRegion");
   dftContinueInit->item   = strdup("\0");
-  dftContinueInit->rtntp  = strdup("void");
+  dftContinueInit->return_type  = strdup("void");
   dftContinueInit->name   = strdup("dftContinueInit");
   dftContinueInit->name_utf8   = strdup("dftContinueInit");
   dftContinueInit->xyz    = strdup("NoXYZ");
-  dftContinueInit->drctn  = strdup("NoDirection");
+  dftContinueInit->direction  = strdup("NoDirection");
   sprintf(&dftContinueInit->at[0],"-0.0");
-  dftContinueInit->whenx  = 1;
+  dftContinueInit->when_index  = 1;
   dftContinueInit->whens[0] = ENTRY_POINT_continue_init;
   nMiddleJobAdd(arc->entity, dftContinueInit);
   

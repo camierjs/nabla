@@ -83,13 +83,13 @@ void nccArcLibMathematicaIni(nablaMain *arc){
   mathlinkIniFunction->scope  = strdup("NoGroup");
   mathlinkIniFunction->region = strdup("NoRegion");
   mathlinkIniFunction->item   = strdup("\0");
-  mathlinkIniFunction->rtntp  = strdup("void");
+  mathlinkIniFunction->return_type  = strdup("void");
   mathlinkIniFunction->name   = strdup("mathematicaIni");
   mathlinkIniFunction->name_utf8   = strdup("mathematicaIni");
   mathlinkIniFunction->xyz    = strdup("NoXYZ");
-  mathlinkIniFunction->drctn  = strdup("NoDirection");
+  mathlinkIniFunction->direction  = strdup("NoDirection");
   sprintf(&mathlinkIniFunction->at[0],"-1024.0");
-  mathlinkIniFunction->whenx  = 1;
+  mathlinkIniFunction->when_index  = 1;
   mathlinkIniFunction->whens[0] = -1024.0;
   nMiddleJobAdd(arc->entity, mathlinkIniFunction);
 }

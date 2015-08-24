@@ -177,6 +177,6 @@ nablaOption *nMiddleTurnTokenToOption(astNode * n, nablaMain *arc){
   nablaOption *opt=nMiddleOptionFindName(arc->options, n->token);
   // Si on ne trouve pas d'option, on a rien à faire
   if (opt == NULL) return NULL;
-  arc->hook->turnTokenToOption(arc,opt);
+  arc->hook->token->option(arc,opt);
   return opt;
 }

@@ -178,7 +178,7 @@ char* nOkinaMicScatter(nablaVariable* var){
 // ****************************************************************************
 // * MIC TYPEDEFS
 // ****************************************************************************
-nablaTypedef nOkinaMicTypedef[]={
+nWhatWith nOkinaMicTypedef[]={
   //{"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -187,7 +187,7 @@ nablaTypedef nOkinaMicTypedef[]={
 // ****************************************************************************
 // * MIC DEFINES
 // ****************************************************************************
-nablaDefine nOkinaMicDefines[]={
+nWhatWith nOkinaMicDefines[]={
   {"integer", "Integer"},
   {"Real", "real"},
   {"Real3", "real3"},

@@ -49,15 +49,15 @@ extern char* nOkinaSseForwards[];
 extern char* nOkinaAvxForwards[];
 extern char* nOkinaMicForwards[];
 
-extern nablaDefine nOkinaStdDefines[];
-extern nablaDefine nOkinaSseDefines[];
-extern nablaDefine nOkinaAvxDefines[];
-extern nablaDefine nOkinaMicDefines[];
+extern nWhatWith nOkinaStdDefines[];
+extern nWhatWith nOkinaSseDefines[];
+extern nWhatWith nOkinaAvxDefines[];
+extern nWhatWith nOkinaMicDefines[];
 
-extern nablaTypedef nOkinaStdTypedef[];
-extern nablaTypedef nOkinaSseTypedef[];
-extern nablaTypedef nOkinaAvxTypedef[];
-extern nablaTypedef nOkinaMicTypedef[];
+extern nWhatWith nOkinaStdTypedef[];
+extern nWhatWith nOkinaSseTypedef[];
+extern nWhatWith nOkinaAvxTypedef[];
+extern nWhatWith nOkinaMicTypedef[];
 
 char* nOkinaStdIncludes(void);
 char* nOkinaSseIncludes(void);

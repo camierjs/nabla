@@ -411,13 +411,13 @@ void nccArcLibAlephIni(nablaMain *arc){
   alephInitFunction->scope  = strdup("NoScope");
   alephInitFunction->region = strdup("NoRegion");
   alephInitFunction->item   = strdup("\0");
-  alephInitFunction->rtntp  = strdup("void");
+  alephInitFunction->return_type  = strdup("void");
   alephInitFunction->name   = strdup("alephIni");
   alephInitFunction->name_utf8 = strdup("ℵIni");
   alephInitFunction->xyz    = strdup("NoXYZ");
-  alephInitFunction->drctn  = strdup("NoDirection");
+  alephInitFunction->direction  = strdup("NoDirection");
   sprintf(&alephInitFunction->at[0],"-huge_valf");
-  alephInitFunction->whenx  = 1;
+  alephInitFunction->when_index  = 1;
   alephInitFunction->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(arc->entity, alephInitFunction);  
 }

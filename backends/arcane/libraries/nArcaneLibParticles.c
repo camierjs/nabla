@@ -161,13 +161,13 @@ void nccArcLibParticlesIni(nablaMain *arc){
   particlesInit->scope  = strdup("NoGroup");
   particlesInit->region = strdup("NoRegion");
   particlesInit->item   = strdup("\0");
-  particlesInit->rtntp  = strdup("void");
+  particlesInit->return_type  = strdup("void");
   particlesInit->name   = strdup("particlesInit");
   particlesInit->name_utf8   = strdup("particlesInit");
   particlesInit->xyz    = strdup("NoXYZ");
-  particlesInit->drctn  = strdup("NoDirection");
+  particlesInit->direction  = strdup("NoDirection");
   sprintf(&particlesInit->at[0],"-huge_valf");
-  particlesInit->whenx  = 1;
+  particlesInit->when_index  = 1;
   particlesInit->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(arc->entity, particlesInit);
 

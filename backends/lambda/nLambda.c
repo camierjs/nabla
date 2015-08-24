@@ -42,123 +42,134 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-nablaBackendSimdHooks lambdaSimdHooks={
+const nHookSimd lambdaSimdHooks={
   lambdaHookBits,
   lambdaHookGather,
   lambdaHookScatter,
-  nLambdaHookTypedef,
-  nLambdaHookDefines,
-  nLambdaHookForwards,
-  lambdaHookPrevCell,
-  lambdaHookNextCell,
+  lambdaHookPrevCell, // nMiddleVariables
+  lambdaHookNextCell, // nMiddleVariables
   lambdaHookIncludes
 };
   
-nablaBackendParallelHooks lambdaCilkHooks={
+const nHookParallel lambdaCilkHooks={
   nLambdaParallelCilkSync,
   nLambdaParallelCilkSpawn,
   nLambdaParallelCilkLoop,
   nLambdaParallelCilkIncludes
 };
 
-nablaBackendParallelHooks lambdaOpenMPHooks={
+const nHookParallel lambdaOpenMPHooks={
   nLambdaParallelOpenMPSync,
   nLambdaParallelOpenMPSpawn,
   nLambdaParallelOpenMPLoop,
   nLambdaParallelOpenMPIncludes
 };
 
-nablaBackendParallelHooks lambdaVoidHooks={
+const nHookParallel lambdaVoidHooks={
   nLambdaParallelVoidSync,
   nLambdaParallelVoidSpawn,
   nLambdaParallelVoidLoop,
   nLambdaParallelVoidIncludes
 };
 
-nablaBackendPragmaHooks lambdaPragmaICCHooks ={
+const nHookPragma lambdaPragmaICCHooks ={
   lambdaHookPragmaIccIvdep,
-  lambdaHookPragmaIccAlign
+  lambdaHookPragmaIccAlign // nMiddleFunctions
 };
 
-nablaBackendPragmaHooks lambdaPragmaGCCHooks={
+const nHookPragma lambdaPragmaGCCHooks={
   lambdaHookPragmaGccIvdep,
-  lambdaHookPragmaGccAlign
-};
-
-// Hooks pour le source
-nHookSource nLHookSource={
-  nLambdaHookSourceOpen,
-  nLambdaHookSourceInclude
+  lambdaHookPragmaGccAlign // nMiddleFunctions
 };
 
 // Hooks pour le header
-nHookHeader nLHookHeader={
-  nLambdaHookHeaderOpen,
-  nLambdaHookHeaderPrefix,
-  nLambdaHookHeaderIncludes,
-  nLambdaHookHeaderDump,
-  nLambdaHookHeaderDefineEnumerates,
-  nLambdaHookHeaderPostfix
+const nHookHeader nLHookHeader={
+  nLambdaHookForwards,
+  nLambdaHookDefines,
+  nLambdaHookTypedef,
+  nLambdaHookHeaderDump, // nMiddleAnimate
+  nLambdaHookHeaderOpen, // nMiddleAnimate
+  nLambdaHookHeaderDefineEnumerates, // nMiddleAnimate
+  nLambdaHookHeaderPrefix, // nMiddleAnimate
+  nLambdaHookHeaderIncludes, // nMiddleAnimate
+  nLambdaHookHeaderPostfix // nMiddleAnimate
+};
+
+// Hooks pour le source
+const nHookSource nLHookSource={
+  nLambdaHookSourceOpen, // nMiddleAnimate
+  nLambdaHookSourceInclude // nMiddleAnimate
 };
   
 // Hooks pour le maillage
-nHookMesh nLHookMesh={
-  nLambdaHookMeshPrefix,
-  nLambdaHookMeshCore,
-  nLambdaHookMeshPostfix
+const nHookMesh nLHookMesh={
+  nLambdaHookMeshPrefix, // nMiddleAnimate
+  nLambdaHookMeshCore, // nMiddleAnimate
+  nLambdaHookMeshPostfix // nMiddleAnimate
 };
   
 // Hooks pour les variables
-nHookVars nLHookVars={
-  nLambdaHookVarsInit,
-  nLambdaHookVariablesPrefix,
-  nLambdaHookVariablesPostfix
+const nHookVars nLHookVars={
+  nLambdaHookVarsInit, // nMiddleAnimate
+  nLambdaHookVariablesPrefix, // nMiddleAnimate
+  nLambdaHookVariablesPostfix // nMiddleAnimate
 };  
 
 // Hooks pour le main
-nHookMain nLHookMain={
-  nLambdaHookMainPrefix,
-  nLambdaHookMainPreInit,
-  nLambdaHookMainVarInitKernel,
-  nLambdaHookMainVarInitCall,
-  nLambdaHookMain,
-  nLambdaHookMainPostInit,
-  nLambdaHookMainPostfix
+const nHookMain nLHookMain={
+  nLambdaHookMainPrefix, // nMiddleAnimate
+  nLambdaHookMainPreInit, // nMiddleAnimate
+  nLambdaHookMainVarInitKernel, // nMiddleAnimate
+  nLambdaHookMainVarInitCall, // nMiddleAnimate
+  nLambdaHookMain, // nMiddleAnimate
+  nLambdaHookMainPostInit, // nMiddleAnimate
+  nLambdaHookMainPostfix // nMiddleAnimate
 };  
 
-nablaBackendHooks lambdaBackendHooks={
-  lambdaHookPrefixEnumerate,
-  lambdaHookDumpEnumerateXYZ,
-  lambdaHookDumpEnumerate,
-  lambdaHookPostfixEnumerate,
-  lambdaHookItem,
-  lambdaHookSwitchToken,
-  lambdaHookTurnTokenToVariable,
-  lambdaHookSystem,
-  lambdaHookAddExtraParameters,
-  lambdaHookDumpNablaParameterList,
-  lambdaHookTurnBracketsToParentheses,
-  lambdaHookJobDiffractStatement,
-  lambdaHookFunctionName,
-  lambdaHookFunction,
-  lambdaHookJob,
-  lambdaHookReduction,
-  lambdaHookIteration,
-  lambdaHookExit,
-  lambdaHookTime,
-  lambdaHookFatal,
-  lambdaHookAddCallNames,
-  lambdaHookAddArguments,
-  lambdaHookTurnTokenToOption,
-  lambdaHookEntryPointPrefix,
-  lambdaHookDfsForCalls,
-  lambdaHookPrimaryExpressionToReturn,
-  lambdaHookReturnFromArgument,
-  
+const nHookForAll nLHookForAll={
+  lambdaHookPrefixEnumerate, // nMiddleJobs, nMiddleFunctions?
+  lambdaHookDumpEnumerate, // nMiddleJobs, nMiddleFunctions?
+  lambdaHookItem, // nMiddleJobs
+  lambdaHookPostfixEnumerate // nMiddleJobs, nMiddleFunctions?
+};
+
+const nHookToken nLHookToken={
+  lambdaHookSwitchToken, // nMiddleJobs
+  lambdaHookTurnTokenToVariable, // nMiddleJobs, nMiddleFunctions
+  lambdaHookTurnTokenToOption, // nMiddleOptions
+  lambdaHookSystem, // nMiddleVariables
+  lambdaHookIteration, // nMiddleFunctions
+  lambdaHookExit, // nMiddleFunctions
+  lambdaHookTime, // nMiddleFunctions
+  lambdaHookFatal, // nMiddleFunctions
+  lambdaHookTurnBracketsToParentheses // nMiddleJobs
+};
+
+const nHookGrammar hookGrammar={
+  lambdaHookFunction, // nMiddleGrammar
+  lambdaHookJob, // nMiddleGrammar
+  lambdaHookReduction, // nMiddleGrammar
+  lambdaHookPrimaryExpressionToReturn, // nMiddleJobs
+  lambdaHookReturnFromArgument // nMiddleJobs
+};
+
+const nHookCall nLambdaHookCall={
+  lambdaHookAddCallNames, // nMiddleFunctions
+  lambdaHookAddArguments, // nMiddleFunctions
+  lambdaHookEntryPointPrefix, // nMiddleJobs, nMiddleFunctions
+  lambdaHookDfsForCalls, // nMiddleFunctions
+  lambdaHookAddExtraParameters, // nMiddleJobs, nMiddleFunctions
+  lambdaHookDumpNablaParameterList // nMiddleJobs
+};
+
+nHooks nLambdaHooks={
+  &nLHookForAll,
+  &nLHookToken,
+  &hookGrammar,
+  &nLambdaHookCall,
   &lambdaSimdHooks,
   &lambdaVoidHooks,
   &lambdaPragmaGCCHooks,
-  
   &nLHookHeader,
   &nLHookSource,
   &nLHookMesh,
@@ -170,15 +181,15 @@ nablaBackendHooks lambdaBackendHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-nablaBackendHooks *nLambda(nablaMain *nabla){
+nHooks *nLambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    lambdaBackendHooks.parallel=&lambdaCilkHooks;
+    nLambdaHooks.parallel=&lambdaCilkHooks;
   
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    lambdaBackendHooks.parallel=&lambdaOpenMPHooks;
+    nLambdaHooks.parallel=&lambdaOpenMPHooks;
   
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    lambdaBackendHooks.pragma=&lambdaPragmaICCHooks;
+    nLambdaHooks.pragma=&lambdaPragmaICCHooks;
 
-  return &lambdaBackendHooks;
+  return &nLambdaHooks;
 }

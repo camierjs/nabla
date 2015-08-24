@@ -65,11 +65,11 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->scope  = strdup("NoGroup");
   redjob->region = strdup("NoRegion");
   redjob->item   = strdup(item_node->token);
-  redjob->rtntp  = strdup("void");
+  redjob->return_type  = strdup("void");
   redjob->name   = strdup(job_name);
   redjob->name_utf8 = strdup(job_name);
   redjob->xyz    = strdup("NoXYZ");
-  redjob->drctn  = strdup("NoDirection");
+  redjob->direction  = strdup("NoDirection");
   //redjob->nblParamsNode=item_var_node;
   //nablaVariable *item_var=nablaVariableFind(nabla,item_var_name);
   //assert(item_var!=NULL);
@@ -82,7 +82,7 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
   dbg("\n\t[cudaHookReduction] @ %s",at_single_cst_node->token);
   sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->whenx  = 1;
+  redjob->when_index  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);
   nMiddleJobAdd(nabla->entity, redjob);
   const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;

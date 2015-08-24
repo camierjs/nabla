@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Typedefs
 // ****************************************************************************
-nablaTypedef nLambdaHookTypedef[]={
+nWhatWith nLambdaHookTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };

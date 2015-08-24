@@ -75,9 +75,9 @@ void nMiddleAtConstantParse(astNode * n, nablaMain *nabla, char *at){
  *****************************************************************************/
 void nMiddleStoreWhen(nablaMain *nabla, char *at){
   nablaJob *entry_point=nMiddleJobLast(nabla->entity->jobs);
-  entry_point->whens[entry_point->whenx]=atof(at);
-  dbg("\n\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->whenx]);
-  entry_point->whenx+=1;
+  entry_point->whens[entry_point->when_index]=atof(at);
+  dbg("\n\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->when_index]);
+  entry_point->when_index+=1;
   *at=0;
 }
 
@@ -102,11 +102,11 @@ int nMiddleNumberOfEntryPoints(nablaMain *nabla){
   int i,number_of_entry_points=0;
   for(job=nabla->entity->jobs;job!=NULL;job=job->next){
     if (!job->is_an_entry_point) continue;
-    assert(job->whenx>=1);
-    dbg("\n\t[nablaNumberOfEntryPoints] %s: whenx=%d @ ", job->name, job->whenx);
-    for(i=0;i<job->whenx;++i)
+    assert(job->when_index>=1);
+    dbg("\n\t[nablaNumberOfEntryPoints] %s: when_index=%d @ ", job->name, job->when_index);
+    for(i=0;i<job->when_index;++i)
       dbg("%f ", job->whens[i]);
-    number_of_entry_points+=job->whenx; // On rajoute les différents whens
+    number_of_entry_points+=job->when_index; // On rajoute les différents whens
   }
   return number_of_entry_points;
 }
@@ -134,7 +134,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   entry_points[0].name = strdup("ComputeLoopBegin");
   entry_points[0].name_utf8 = strdup("ComputeLoopBegin");
   entry_points[0].whens[0] = ENTRY_POINT_compute_loop;
-  entry_points[0].whenx = 1;
+  entry_points[0].when_index = 1;
 
   entry_points[1].item = strdup("\0");
   entry_points[1].is_an_entry_point=true;
@@ -142,12 +142,12 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   entry_points[1].name = strdup("ComputeLoopEnd");
   entry_points[1].name_utf8 = strdup("ComputeLoopEnd");
   entry_points[1].whens[0] = ENTRY_POINT_exit;
-  entry_points[1].whenx = 1; 
+  entry_points[1].when_index = 1; 
 
   // On re scan pour remplir les duplicats
   for(i=2,job=nabla->entity->jobs;job!=NULL;job=job->next){
     if (!job->is_an_entry_point) continue;
-    for(j=0;j<job->whenx;++j){
+    for(j=0;j<job->when_index;++j){
       dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %f", i, job->name, job->whens[j]);
       entry_points[i].item=job->item;
       entry_points[i].is_an_entry_point=true;

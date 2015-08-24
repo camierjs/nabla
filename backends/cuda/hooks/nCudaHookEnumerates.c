@@ -50,8 +50,8 @@ char* nCudaHookPrefixEnumerate(nablaJob *job){
   const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   //if (j->xyz==NULL) return "// void ENUMERATE prefix";
   //nprintf(job->entity->main, "\n\t/*cudaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
-  if (itm=='c'  && strcmp(job->rtntp,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
-  if (itm=='c'  && strcmp(job->rtntp,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
+  if (itm=='c'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
+  if (itm=='c'  && strcmp(job->return_type,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
   if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
   if (itm=='\0' && job->is_an_entry_point
       && job->called_variables!=NULL) return "CUDA_LAUNCHER_FUNCTION_THREAD(tid);";
@@ -69,8 +69,8 @@ char* nCudaHookPrefixEnumerate(nablaJob *job){
  *****************************************************************************/
 char* nCudaHookDumpEnumerateXYZ(nablaJob *job){
   char *xyz=job->xyz;// Direction
-  nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
-  return "// cudaHookDumpEnumerateXYZ has xyz drctn";
+  nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->direction);
+  return "// cudaHookDumpEnumerateXYZ has xyz direction";
 }
 
 

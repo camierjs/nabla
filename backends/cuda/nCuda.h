@@ -50,8 +50,8 @@ char* nCudaHookPrevCell(void);
 char* nCudaHookNextCell(void);
 char* nCudaHookIncludes(void);
 
-extern nablaTypedef nCudaHookTypedef[];
-extern nablaDefine nCudaHookDefines[];
+extern nWhatWith nCudaHookTypedef[];
+extern nWhatWith nCudaHookDefines[];
 extern char* nCudaHookForwards[];
 
 NABLA_STATUS nccCudaMainPrefix(nablaMain*);

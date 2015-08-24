@@ -104,6 +104,19 @@ static void arcaneHookReduction(struct nablaMainStruct *middlend, astNode *n){
 //#warning Reduction is not yet implemented in Arcane backend
 }
 
+// Typedefs, Defines & Forwards
+const nHookHeader nablaArcaneHeaderHooks={
+  NULL,//arcaneForwards,
+  NULL,//arcaneDefines,
+  NULL,//arcaneTypedef,
+  NULL, // dump
+  NULL, // open
+  NULL, // enums
+  NULL, // prefix
+  NULL, // include
+  NULL  // postfix
+};
+
 /*****************************************************************************
  * ncc
  *****************************************************************************/
@@ -115,54 +128,68 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
   nablaEntity *entity=middlend->entity;  // On fait l'hypothèse qu'il n'y a qu'un entity pour l'instant
-  nablaBackendSimdHooks nablaArcaneSimdHooks={
+
+  nHookSimd nablaArcaneSimdHooks={
     nccArcBits,
     nccArcGather,
     nccArcScatter,
-    NULL,//Typedefs
-    NULL,//Defines
-    NULL,//Forwards
     nccArcPrevCell,
     nccArcNextCell,
     nccArcIncludes
   };
-  static nablaBackendHooks arcaneBackendHooks={
-    // Jobs stuff
+  const nHookForAll nArcaneHookForAll={
     arcaneHookPrefixEnumerate,
-    arcaneHookDumpEnumerateXYZ,
     arcaneHookDumpEnumerate,
-    arcaneHookPostfixEnumerate,
     arcaneHookItem,
+    arcaneHookPostfixEnumerate
+  };
+  const nHookToken nArcaneHookToken={
     arcaneHookSwitchToken,
     arcaneHookTurnTokenToVariable,
+    arcaneTurnTokenToOption,
     arcaneHookSystem,
-    NULL,//addExtraParameters
-    NULL,//dumpNablaParameterList
-    arcaneHookTurnBracketsToParentheses,
-    NULL,//diffractStatement
-// Is this true ? #warning Arcane backend does not support Real3 globals
-    // Other hooks
-    arcaneHookFunctionName,
-    arcaneHookFunction,
-    arcaneJob,
-    arcaneHookReduction,
     arcaneIteration,
     arcaneExit,
     arcaneTime,
     arcaneFatal,
+    arcaneHookTurnBracketsToParentheses
+  };
+
+  const nHookGrammar hookGrammar={
+    arcaneHookFunction,
+    arcaneJob,
+    arcaneHookReduction,
+    NULL, // primary_expression_to_return
+    NULL // returnFromArgument
+  };
+  
+  const nHookCall nArcaneHookCall={
     arcaneAddCallNames,
     arcaneAddArguments,
-    arcaneTurnTokenToOption,
     arcaneEntryPointPrefix,
     arcaneDfsForCalls,
-    NULL, // primary_expression_to_return
-    NULL, // returnFromArgument
-    NULL  // Header hooks
+    NULL, // addExtraParameters
+    NULL  // dumpNablaParameterList
+  };
+  
+  nHooks arcaneBackendHooks={
+    &nArcaneHookForAll,
+    &nArcaneHookToken,
+    &hookGrammar,
+    &nArcaneHookCall,
+    NULL, // simd
+    NULL, // parallel
+    NULL, // pragma
+    &nablaArcaneHeaderHooks, // header
+    NULL, // source
+    NULL, // mesh
+    NULL, // vars
+    NULL // main
   };
   middlend->hook=&arcaneBackendHooks;
   middlend->hook->simd=&nablaArcaneSimdHooks;
   
-  nablaBackendPragmaHooks arcanePragmaGCCHooks={
+  nHookPragma arcanePragmaGCCHooks={
     nArcanePragmaGccIvdep,
     nArcanePragmaGccAlign
   };
@@ -212,7 +239,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   if (isAnArcaneModule(middlend))
     nccArcConfigHeader(middlend);
   
-  nMiddleParseAndHook(root,middlend);
+  nMiddleGrammar(root,middlend);
 
   // Dans le cas d'un module, on le fait maintenant
   if (isAnArcaneModule(middlend)){

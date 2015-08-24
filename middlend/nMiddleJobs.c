@@ -54,9 +54,9 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   assert(job != NULL);
   job->is_an_entry_point=false;
   job->is_a_function=false;
-  job->scope=job->region=job->item=job->name=job->xyz=job->drctn=NULL;
+  job->scope=job->region=job->item=job->name=job->xyz=job->direction=NULL;
   job->at[0]=0;
-  job->whenx=0;
+  job->when_index=0;
   for(i=0;i<32;++i)
     job->whens[i]=HUGE_VAL;
   job->returnTypeNode=NULL;
@@ -224,10 +224,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
     dbg("\n[nablaJobParse] token: '%s'?", n->token);
 
   if (job->parse.got_a_return && job->parse.got_a_return_and_the_semi_colon) return;
-  
-  if (nabla->hook->diffractStatement)
-    nabla->hook->diffractStatement(nabla,job,&n);
- 
+   
   // On regarde si on a un appel de fonction avec l'argument_expression_list
   if ((n->ruleid == rulenameToId("argument_expression_list"))
       && (job->parse.function_call_arguments==false)){
@@ -286,7 +283,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
       && (n->children->ruleid == rulenameToId("nabla_item"))){
     dbg("\n\t[nablaJobParse] C'est le cas primary_expression suivi d'un nabla_item");
     nprintf(nabla, "/*nabla_item*/", "\t%s",
-            nabla->hook->item(job,cnfgem,n->children->children->token[0],job->parse.enum_enum));
+            nabla->hook->forall->item(job,cnfgem,n->children->children->token[0],job->parse.enum_enum));
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
@@ -299,13 +296,14 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
 
   // Dés qu'on a une primary_expression,
   // on teste pour voir si ce n'est pas un argument que l'on return
+  // A confirmer si cela est toujours utile
   if ((n->ruleid == rulenameToId("primary_expression"))
       && (n->children->token!=NULL)
       && (job->parse.returnFromArgument)){
     dbg("\n\t[nablaJobParse] primary_expression test for return");
-    if (nabla->hook->primary_expression_to_return){
+    if (nabla->hook->grammar->primary_expression_to_return){
       dbg("\n\t\t[nablaJobParse] primary_expression_to_return");
-      if (nabla->hook->primary_expression_to_return(nabla,job,n)==true)
+      if (nabla->hook->grammar->primary_expression_to_return(nabla,job,n)==true)
         return;
     }else{
        dbg("\n\t\t[nablaJobParse] ELSE primary_expression_to_return");
@@ -316,15 +314,15 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL)){
     nablaVariable *var;
     dbg("\n\t[nablaJobParse] primaryExpression=%s child->token=%s",n->rule,n->children->token);
-    if ((var=nabla->hook->turnTokenToVariable(n->children, nabla,job))!=NULL){
-      if (nabla->hook->turnBracketsToParentheses)
-        nabla->hook->turnBracketsToParentheses(nabla,job,var,cnfgem);
+    if ((var=nabla->hook->token->variable(n->children, nabla,job))!=NULL){
+      if (nabla->hook->token->turnBracketsToParentheses)
+        nabla->hook->token->turnBracketsToParentheses(nabla,job,var,cnfgem);
       return;
     }
   }
   
   // On fait le switch des tokens
-  nabla->hook->switchTokens(n, job);
+  nabla->hook->token->svvitch(n, job);
 
   // On continue en s'enfonçant
   if (n->children != NULL)
@@ -403,7 +401,7 @@ void nMiddleJobFill(nablaMain *nabla,
   if (job->item==NULL)
     job->item = dfsFetchFirst(n->children,rulenameToId("nabla_matenvs"));
   assert(job->item);
-  job->rtntp = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
+  job->return_type = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   
   // On va chercher le premier identifiant qui est le nom du job
   nd=dfsFetchTokenId(n->children,IDENTIFIER);
@@ -419,12 +417,12 @@ void nMiddleJobFill(nablaMain *nabla,
   //assert(n->children->next->next->next->children!=NULL);
   nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
   job->xyz = dfsFetchFirst(nd,rulenameToId("nabla_xyz_declaration"));
-  job->drctn = dfsFetchFirst(n->children,
+  job->direction = dfsFetchFirst(n->children,
                               rulenameToId("nabla_xyz_direction"));
   // Vérification si l'on a des 'directions' dans les paramètres
   if (job->xyz!=NULL){
     dbg("\n\t[nablaJobFill] direction=%s, xyz=%s",
-        job->drctn?job->drctn:"NULL",
+        job->direction?job->direction:"NULL",
         job->xyz?job->xyz:"NULL");
     nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
@@ -436,7 +434,7 @@ void nMiddleJobFill(nablaMain *nabla,
   job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
-      job->item, job->rtntp, job->name);
+      job->item, job->return_type, job->name);
   // nMiddleScanForNablaJobParameter ne fait que dumper
   //nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter_list"), nabla);
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
@@ -447,8 +445,8 @@ void nMiddleJobFill(nablaMain *nabla,
 // * %s job\n\
 // ********************************************************\n\
 %s %s %s%s%s(", job->name,
-          nabla->hook->entryPointPrefix(nabla,job),
-          job->rtntp,
+          nabla->hook->call->entryPointPrefix(nabla,job),
+          job->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           job->name);
@@ -463,32 +461,32 @@ void nMiddleJobFill(nablaMain *nabla,
   //job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_inout_parameter"));
 
   // Si on a un type de retour et des arguments
-  if (numParams!=0 && strncmp(job->rtntp,"void",4)!=0){
+  if (numParams!=0 && strncmp(job->return_type,"void",4)!=0){
     dbg("\n\t[nablaJobFill] Returning perhaps from an argument!");
     job->parse.returnFromArgument=true;
   }
   
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaJobFill] On s'autorise un endroit pour insérer des paramètres");
-  if (nabla->hook->addExtraParameters!=NULL) 
-    nabla->hook->addExtraParameters(nabla, job,&numParams);
+  if (nabla->hook->call->addExtraParameters!=NULL) 
+    nabla->hook->call->addExtraParameters(nabla, job,&numParams);
   
   // Et on dump les in et les out
   dbg("\n\t[nablaJobFill] Et on dump les in et les out");
-  if (nabla->hook->dumpNablaParameterList!=NULL){
+  if (nabla->hook->call->dumpNablaParameterList!=NULL){
     dbg("\n\t\t[nablaJobFill] job->nblParamsNode->ruleid is '%s'",job->nblParamsNode->rule);
-    // On enlève ce teste tant qu'on autorise des jobs sans déclaration
+    // On enlève ce test tant qu'on autorise des jobs sans déclaration
     // Mais il faudra le remettre quand on l'obligera!
     // assert(job->nblParamsNode->ruleid==rulenameToId("nabla_parameter_list"));
-    nabla->hook->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
+    nabla->hook->call->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
   }
 
   // On ferme la parenthèse des paramètres que l'on avait pas pris dans les tokens
   nprintf(nabla, NULL, "){");// du job
 
   if (job->parse.returnFromArgument)
-    if (nabla->hook->returnFromArgument)
-      nabla->hook->returnFromArgument(nabla,job);
+    if (nabla->hook->grammar->returnFromArgument)
+      nabla->hook->grammar->returnFromArgument(nabla,job);
 
   // On prépare le bon ENUMERATE suivant le forall interne
   // On saute l'éventuel forall du début
@@ -509,13 +507,13 @@ void nMiddleJobFill(nablaMain *nabla,
  }
   
   dbg("\n\t[nablaJobFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\n\t%s", nabla->hook->prefixEnumerate(job));
+  nprintf(nabla, NULL, "\n\t%s", nabla->hook->forall->prefix(job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
-  nprintf(nabla, NULL, "\n\t%s{", nabla->hook->dumpEnumerate(job));// de l'ENUMERATE_
+  nprintf(nabla, NULL, "\n\t%s{", nabla->hook->forall->dump(job));// de l'ENUMERATE_
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
-  nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->postfixEnumerate(job));
+  nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
   // Et on dump les tokens dans ce job

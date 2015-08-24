@@ -42,54 +42,57 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char *nCudaHookBits(void){return "Not relevant here";}
-char* nCudaHookIncludes(void){return "";}
-
+// ****************************************************************************
+// * Call function to launch backend's hooks
+// ****************************************************************************
+static inline void call(struct nablaMainStruct *nabla,
+                        void (*hook)(struct nablaMainStruct *)){
+  if (hook) hook(nabla);
+}
 
 
 // ****************************************************************************
-// * CUDA TYPEDEFS
+// * nMiddleBackendAnimate
 // ****************************************************************************
-nWhatWith nCudaHookTypedef[]={
-  {"int","integer"},
-  {NULL,NULL}
-};
+//#warning nMiddleBackendAnimate a simplifier
+NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
+  ///////////////////////////////////////////////////////////
+  // Partie des hooks à remonter à termes dans le middlend //
+  ///////////////////////////////////////////////////////////
+  //call(nabla,nabla->hook->prefix);
+  
+  nabla->hook->vars->init(nabla);
+  nabla->hook->source->open(nabla);
+  nabla->hook->source->include(nabla);
+  nabla->hook->header->open(nabla);
+  nabla->hook->header->prefix(nabla);
+  nabla->hook->header->include(nabla);
+  nabla->hook->header->dump(nabla);
+  nabla->hook->header->enums(nabla);
+  nabla->hook->mesh->core(nabla);
+  
+  // Parse du code préprocessé et lance les hooks associés
+  nMiddleGrammar(root,nabla);
+  
+  nabla->hook->main->varInitKernel(nabla);
+  nabla->hook->main->prefix(nabla);
+  
+  nabla->hook->vars->prefix(nabla);
+  
+  nabla->hook->mesh->prefix(nabla);
+  nabla->hook->main->preInit(nabla);
+  nabla->hook->main->varInitCall(nabla);
+  nabla->hook->main->main(nabla);
+  nabla->hook->main->postInit(nabla);
+  
+  // Partie POSTFIX
+  //call(nabla, nabla->hook->postfix);
+  
+  nabla->hook->header->postfix(nabla); 
+  nabla->hook->mesh->postfix(nabla);
+  nabla->hook->vars->postfix(nabla);
+  nabla->hook->main->postfix(nabla);
 
+  return NABLA_OK;
+}
 
-
-// ****************************************************************************
-// * CUDA DEFINES
-// ****************************************************************************
-nWhatWith nCudaHookDefines[]={
-  {"Real3","real3"},
-  {"Real","real"},
-  //{"real","double"},
-  {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
-  {"norm","fabs"},
-  {"rabs","fabs"},
-  {"square_root","sqrt"},
-  {"cube_root","cbrt"},
-  {"opAdd(u,v)", "(u+v)"},
-  {"opSub(u,v)", "(u-v)"},
-  {"opDiv(u,v)", "(u/v)"},
-  {"opMul(u,v)", "(u*v)"},
-  {"opScaMul(a,b)","dot3(a,b)"},
-  {"opVecMul(a,b)","cross3(a,b)"},
-  //{"opTernary(cond,ifStatement,elseStatement)","((cond)?ifStatement:elseStatement)"},
-  {"knAt(a)",""},
-  {"fatal(a,b)","cudaThreadExit()"},
-  {"synchronize(a)",""},
-  {"reduce(how,what)","what"},
-  {"xyz","int"},
-  {"GlobalIteration", "*global_iteration"},
-  {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
-  {NULL,NULL}
-};
-
-// ****************************************************************************
-// * Std or Mic FORWARDS
-// ****************************************************************************
-char* nCudaHookForwards[]={
-  "void gpuEnum(void);",
-  NULL
-};

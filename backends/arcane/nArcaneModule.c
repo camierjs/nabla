@@ -70,7 +70,7 @@ NABLA_STATUS nccArcaneBeginNamespace(nablaMain *arc){
 /***************************************************************************** 
  * DEFINES LIST ==> ARCANE
  *****************************************************************************/
-static nablaDefine arcaneDefines[] ={
+static nWhatWith arcaneDefines[] ={
   {"reducemin(a)","0.0"},
   {"dot(a,b)","math::scaMul(a,b)"},
   {"opScaMul(a,b)","math::scaMul(a,b)"},
@@ -105,7 +105,7 @@ static nablaDefine arcaneDefines[] ={
   {"restrict",""},
   {NULL,NULL}
 };
-static nablaDefine arcaneOpCodesDefines[] ={
+static nWhatWith arcaneOpCodesDefines[] ={
   {"opMul(a,b)","(a*b)"},
   {"opDiv(a,b)","(a/b)"},
   {"opMod(a,b)","(a%b)"},

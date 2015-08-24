@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Defines
 // ****************************************************************************
-nablaDefine nLambdaHookDefines[]={
+nWhatWith nLambdaHookDefines[]={
   {"real", "Real"},
   {"WARP_ALIGN", "8"},    
   {"NABLA_NB_GLOBAL_WARP","1"},

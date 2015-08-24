@@ -237,7 +237,7 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     }
 
     if (n->tokenid == FATAL){
-      nabla->hook->fatal(nabla);
+      nabla->hook->token->fatal(nabla);
       break;
     }
     
@@ -248,28 +248,28 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     
     if (n->tokenid == CALL){
       dbg("\n\t[nablaFunctionParse] CALL");
-      nabla->hook->addCallNames(nabla,fct,n);
+      nabla->hook->call->addCallNames(nabla,fct,n);
       dbg("\n\t[nablaFunctionParse] CALL done");
       break;
     }
     
     if (n->tokenid == END_OF_CALL){
-      nabla->hook->addArguments(nabla,fct);
+      nabla->hook->call->addArguments(nabla,fct);
       break;
     }
 
     if (n->tokenid == TIME){
-      nabla->hook->time(nabla);
+      nabla->hook->token->time(nabla);
       break;
     }
 
     if (n->tokenid == EXIT){
-      nabla->hook->exit(nabla);
+      nabla->hook->token->exit(nabla);
       break;
     }
 
     if (n->tokenid == ITERATION){
-      nabla->hook->iteration(nabla);
+      nabla->hook->token->iteration(nabla);
       break;
     }
 
@@ -306,7 +306,7 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     }
 
     // dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
-    if (nabla->hook->turnTokenToVariable(n, nabla, fct)!=NULL) break;
+    if (nabla->hook->token->variable(n, nabla, fct)!=NULL) break;
     if (n->tokenid == '{'){ fprintf(nabla->entity->src, "{\n"); break; }
     if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
     if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n\t"); break; }
@@ -351,15 +351,15 @@ void nMiddleFunctionFill(nablaMain *nabla,
   assert(fct != NULL);
   if (fct->xyz!=NULL)
     dbg("\n\t[nablaFctFill] direction=%s, xyz=%s",
-        fct->drctn?fct->drctn:"NULL", fct->xyz?fct->xyz:"NULL");
+        fct->direction?fct->direction:"NULL", fct->xyz?fct->xyz:"NULL");
   fct->scope  = strdup("NoGroup");
   fct->region = strdup("NoRegion");
   fct->item   = strdup("\0function\0");fct->item[0]=0; 
   dbg("\n\t[nablaFctFill] Looking for fct->rtntp:");
-  fct->rtntp  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
-  dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->rtntp);
+  fct->return_type  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
+  dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->return_type);
   fct->xyz    = strdup("NoXYZ");
-  fct->drctn  = strdup("NoDirection");
+  fct->direction  = strdup("NoDirection");
   dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
   fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");
@@ -377,7 +377,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
       (fct->scope!=NULL)?fct->scope:"Null",
       (fct->region!=NULL)?fct->region:"Null",
       fct->item,//2+
-      fct->rtntp, fct->name);
+      fct->return_type, fct->name);
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
   dbg("\n\t[nablaFctFill] Now fillinf SRC file");
   nprintf(nabla, NULL, "\n\n\
@@ -385,8 +385,8 @@ void nMiddleFunctionFill(nablaMain *nabla,
 // * %s fct\n\
 // ********************************************************\n\
 %s %s %s%s%s(", fct->name, 
-          nabla->hook->entryPointPrefix(nabla,fct),
-          fct->rtntp,
+          nabla->hook->call->entryPointPrefix(nabla,fct),
+          fct->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           fct->name);
@@ -395,10 +395,10 @@ void nMiddleFunctionFill(nablaMain *nabla,
   nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaFctFill] adding ExtraParameters");
-  if (nabla->hook->addExtraParameters!=NULL && fct->is_an_entry_point)
-    nabla->hook->addExtraParameters(nabla, fct, &numParams);
+  if (nabla->hook->call->addExtraParameters!=NULL && fct->is_an_entry_point)
+    nabla->hook->call->addExtraParameters(nabla, fct, &numParams);
   dbg("\n\t[nablaFctFill] launching dfsForCalls");
-  nabla->hook->dfsForCalls(nabla,fct,n,namespace,nParams);
+  nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");
   for(n=n->children->next;
@@ -412,11 +412,11 @@ void nMiddleFunctionFill(nablaMain *nabla,
   nprintf(nabla, NULL, "){\n");
   // On prépare le bon ENUMERATE
   dbg("\n\t[nablaFctFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\t%s", nabla->hook->prefixEnumerate(fct));
+  nprintf(nabla, NULL, "\t%s", nabla->hook->forall->prefix(fct));
   dbg("\n\t[nablaFctFill] dumpEnumerate");
-  nprintf(nabla, NULL, "\n\t%s", nabla->hook->dumpEnumerate(fct));
+  nprintf(nabla, NULL, "\n\t%s", nabla->hook->forall->dump(fct));
   dbg("\n\t[nablaFctFill] postfixEnumerate");
-  nprintf(nabla, NULL, "\t%s", nabla->hook->postfixEnumerate(fct));
+  nprintf(nabla, NULL, "\t%s", nabla->hook->forall->postfix(fct));
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nMiddleFunctionParse(n,fct);

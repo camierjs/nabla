@@ -52,7 +52,7 @@ void nCudaHookJob(nablaMain *nabla, astNode *n){
   nMiddleJobFill(nabla,job,n,NULL);
   
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
-  if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
+  if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
     exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
 }
 

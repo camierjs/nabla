@@ -44,8 +44,8 @@
 #define _NABLA_LAMBDA_H_
 
 extern char* nLambdaHookForwards[];
-extern nablaDefine nLambdaHookDefines[];
-extern nablaTypedef nLambdaHookTypedef[];
+extern nWhatWith nLambdaHookDefines[];
+extern nWhatWith nLambdaHookTypedef[];
 
 void nLambdaHookSourceOpen(nablaMain*);
 void nLambdaHookSourceInclude(nablaMain*);
@@ -151,7 +151,7 @@ void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
 void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
-nablaBackendHooks *nLambda(nablaMain*);
+nHooks *nLambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_H_
  

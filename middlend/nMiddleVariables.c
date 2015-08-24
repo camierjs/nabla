@@ -196,7 +196,7 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
         nprintf(nabla, "/*is_system*/", "%s%s_%s",
                 (nabla->backend==BACKEND_ARCANE)?"m_":hookNextPrev,
                 var->item, var->name);
-        nabla->hook->system(nabla_system,nabla,cnf,enum_enum);
+        nabla->hook->token->system(nabla_system,nabla,cnf,enum_enum);
         nprintf(nabla, "/*EndOf: is_system*/", "",NULL);
         // Variable postfixée par un mot clé system (prev/next, ...)
         return postfixed_nabla_system_keyword;

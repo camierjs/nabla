@@ -124,52 +124,83 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
                    const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  nablaBackendSimdHooks nCudaSimdHooks={
+
+  // Std Typedefs, Defines & Forwards
+  nHookHeader nCudaHeaderHooks={
+    nCudaHookForwards,
+    nCudaHookDefines,
+    nCudaHookTypedef,
+    NULL, // dump
+    NULL, // open
+    NULL, // enums
+    NULL, // prefix
+    NULL, // include
+    NULL  // postfix
+  };
+  
+  nHookSimd nCudaSimdHooks={
     nCudaHookBits,
     nCudaHookGather,
     nCudaHookScatter,
-    nCudaHookTypedef,
-    nCudaHookDefines,
-    nCudaHookForwards,
     nCudaHookPrevCell,
     nCudaHookNextCell,
     nCudaHookIncludes
   };
-  nablaBackendHooks nCudaBackendHooks={
-    // Jobs stuff
+  
+  nHookForAll nCudaHookForAll={
     nCudaHookPrefixEnumerate,
-    nCudaHookDumpEnumerateXYZ,
     nCudaHookDumpEnumerate,
-    nCudaHookPostfixEnumerate,
     nCudaHookItem,
+    nCudaHookPostfixEnumerate
+  };
+  
+  const nHookToken nCudaHookToken={
     nCudaHookSwitchToken,
     nCudaHookTurnTokenToVariable,
+    nCudaHookTurnTokenToOption,
     nCudaHookSystem,
-    nCudaHookAddExtraParameters,
-    nCudaHookDumpNablaParameterList,
-    nCudaHookTurnBracketsToParentheses,
-    nCudaHookJobDiffractStatement,
-    nCudaHookFunctionName,
-    nCudaHookFunction,
-    nCudaHookJob,
-    nCudaHookReduction,
     nCudaHookIteration,
     nCudaHookExit,
     nCudaHookTime,
     nCudaHookFatal,
+    nCudaHookTurnBracketsToParentheses
+  };
+  
+  const nHookGrammar nCudaHookGrammar={
+    nCudaHookFunction,
+    nCudaHookJob,
+    nCudaHookReduction,
+    NULL, // primary_expression_to_return
+    NULL // returnFromArgument
+  };
+  
+  const nHookCall nCudaHookCall={
     nCudaHookAddCallNames,
     nCudaHookAddArguments,
-    nCudaHookTurnTokenToOption,
     nCudaHookEntryPointPrefix,
     nCudaHookDfsForCalls,
-    NULL, // primary_expression_to_return
-    NULL, // returnFromArgument
-    NULL  // Header hooks
+    nCudaHookAddExtraParameters,
+    nCudaHookDumpNablaParameterList
+  };
+  
+  nHooks nCudaBackendHooks={
+    &nCudaHookForAll,
+    &nCudaHookToken,
+    &nCudaHookGrammar,
+    &nCudaHookCall,
+    NULL, // simd
+    NULL, // parallel
+    NULL, // pragma
+    &nCudaHeaderHooks, // header
+    NULL, // source
+    NULL, // mesh
+    NULL, // vars
+    NULL // main
   };
   nabla->hook=&nCudaBackendHooks;
   nabla->hook->simd=&nCudaSimdHooks;
   
-  nablaBackendPragmaHooks cudaPragmaGCCHooks={
+  nHookPragma cudaPragmaGCCHooks={
     nCudaPragmaGccIvdep,
     nCudaPragmaGccAlign
   };
@@ -232,7 +263,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   nccCudaMainMeshConnectivity(nabla);
   
   // Parse du code préprocessé et lance les hooks associés
-  nMiddleParseAndHook(root,nabla);
+  nMiddleGrammar(root,nabla);
   nccCudaMainVarInitKernel(nabla);
 
   // Partie PREFIX

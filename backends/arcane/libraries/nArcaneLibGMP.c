@@ -253,13 +253,13 @@ void nccArcLibGmpIni(nablaMain *arc){
   gmpInitFunction->scope  = strdup("NoGroup");
   gmpInitFunction->region = strdup("NoRegion");
   gmpInitFunction->item   = strdup("\0");
-  gmpInitFunction->rtntp  = strdup("void");
+  gmpInitFunction->return_type  = strdup("void");
   gmpInitFunction->name   = strdup("gmpInit");
   gmpInitFunction->name_utf8   = strdup("gmpInit");
   gmpInitFunction->xyz    = strdup("NoXYZ");
-  gmpInitFunction->drctn  = strdup("NoDirection");
+  gmpInitFunction->direction  = strdup("NoDirection");
   sprintf(&gmpInitFunction->at[0],"-huge_valf");
-  gmpInitFunction->whenx  = 1;
+  gmpInitFunction->when_index  = 1;
   gmpInitFunction->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(arc->entity, gmpInitFunction);
   
@@ -279,13 +279,13 @@ void nccArcLibGmpIni(nablaMain *arc){
   gmpContinueInit->scope  = strdup("NoGroup");
   gmpContinueInit->region = strdup("NoRegion");
   gmpContinueInit->item   = strdup("\0");
-  gmpContinueInit->rtntp  = strdup("void");
+  gmpContinueInit->return_type  = strdup("void");
   gmpContinueInit->name   = strdup("gmpContinueInit");
   gmpContinueInit->name_utf8   = strdup("gmpContinueInit");
   gmpContinueInit->xyz    = strdup("NoXYZ");
-  gmpContinueInit->drctn  = strdup("NoDirection");
+  gmpContinueInit->direction  = strdup("NoDirection");
   sprintf(&gmpContinueInit->at[0],"-0.0");
-  gmpContinueInit->whenx  = 1;
+  gmpContinueInit->when_index  = 1;
   gmpContinueInit->whens[0] = ENTRY_POINT_continue_init;
   nMiddleJobAdd(arc->entity, gmpContinueInit);
 }

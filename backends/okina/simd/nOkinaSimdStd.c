@@ -156,7 +156,7 @@ char* nOkinaStdScatter(nablaVariable* var){
 // ****************************************************************************
 // * Std or Mic TYPEDEFS
 // ****************************************************************************
-nablaTypedef nOkinaStdTypedef[]={
+nWhatWith nOkinaStdTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -166,7 +166,7 @@ nablaTypedef nOkinaStdTypedef[]={
 // ****************************************************************************
 // * Std or Mic DEFINES
 // ****************************************************************************
-nablaDefine nOkinaStdDefines[]={
+nWhatWith nOkinaStdDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},

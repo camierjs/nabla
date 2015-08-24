@@ -55,8 +55,8 @@ void nOkinaHookDfsForCalls(struct nablaMainStruct *nabla,
   // Maintenant qu'on a tous les called_variables potentielles, on remplit aussi le hdr
   // On remplit la ligne du hdr
   hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->entryPointPrefix(nabla,fct),
-          fct->rtntp,
+          nabla->hook->call->entryPointPrefix(nabla,fct),
+          fct->return_type,
           namespace?"Entity::":"",
           fct->name);
   // On va chercher les paramètres standards pour le hdr
@@ -167,7 +167,7 @@ void nOkinaHookJob(nablaMain *nabla, astNode *n){
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,NULL);
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de OKINA
-  //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
+  //if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
   //  exit(NABLA_ERROR|fprintf(stderr, "\n[nOkinaHookJob] Error with return type which is not void\n"));
 }
 

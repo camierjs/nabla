@@ -154,7 +154,7 @@ char* nOkinaSseScatter(nablaVariable* var){
 // ****************************************************************************
 // * Sse or Mic TYPEDEFS
 // ****************************************************************************
-nablaTypedef nOkinaSseTypedef[]={
+nWhatWith nOkinaSseTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -165,7 +165,7 @@ nablaTypedef nOkinaSseTypedef[]={
 // ****************************************************************************
 // * Sse or Mic DEFINES
 // ****************************************************************************
-nablaDefine nOkinaSseDefines[]={
+nWhatWith nOkinaSseDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},

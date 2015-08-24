@@ -43,7 +43,9 @@
 #ifndef _NABLA_MIDDLEND_H_
 #define _NABLA_MIDDLEND_H_
 
-// Enumération des libraries possible depuis Arcane
+// ****************************************************************************
+// * Enumération des libraries possible
+// ****************************************************************************
 typedef enum {
   with_mpi=0,
   with_gmp,
@@ -58,16 +60,35 @@ typedef enum {
   with_real          // 1D only, no Real3 admitted
 } with_library;
 
-
+// ****************************************************************************
 // Enumération des possibilités des variables en in/out/inout
+// ****************************************************************************
 typedef enum {
   enum_in_variable=0,
   enum_out_variable,
   enum_inout_variable
 } inout_mode;
 
+// ****************************************************************************
+// * Standard Association Struct
+// ****************************************************************************
+typedef struct nWhatWithStruct{
+  char *what;
+  char *with;
+} nWhatWith;
 
-// Middlend VARIABLE 
+// ****************************************************************************
+// * Nabla Grammar TYPE struct
+// ****************************************************************************
+typedef struct nablaTypeStruct{
+  const char *name;
+  struct nablaTypeStruct *next;
+}nablaType;
+
+
+// ****************************************************************************
+// * Nabla VARIABLE struct
+// ****************************************************************************
 typedef struct nablaVariableStruct{
   bool axl_it;
   char *item; // node, cell, etc.
@@ -85,7 +106,9 @@ typedef struct nablaVariableStruct{
 }nablaVariable;
 
 
-// Backend OPTION 
+// ****************************************************************************
+// * Nabla OPTION struct
+// ****************************************************************************
 typedef struct nablaOptionStruct{
   bool axl_it;
   const char *type; // int, Real, Real3, etc.
@@ -95,29 +118,23 @@ typedef struct nablaOptionStruct{
   struct nablaOptionStruct *next;
 }nablaOption;
 
-
-// Backend TYPE 
-typedef struct nablaTypeStruct{
-  const char *name;
-  struct nablaTypeStruct *next;
-}nablaType;
-
-
-// Middlend JOB 
+// ****************************************************************************
+// * Nabla JOB struct
+// ****************************************************************************
 typedef struct nablaJobStruct{
   bool is_an_entry_point;
   bool is_a_function;
   char *scope;
   char *region;
   char *item;
-  char *rtntp;//return_type;
+  char *return_type;
   char *name;
   char *name_utf8;
   char *xyz;
-  char *drctn;//direction
-  char at[128]; // Buffer de construction
-  int whenx; // index des whens
-  double whens[32];
+  char *direction;
+  char at[256]; // Buffer de construction
+  int when_index;
+  double whens[64];
   char *where;
   astNode *returnTypeNode;
   astNode *stdParamsNode;
@@ -127,7 +144,6 @@ typedef struct nablaJobStruct{
   nablaVariable *in_out_variables;
   nablaVariable *variables_to_gather_scatter;
   char forall_item;
-  // Bool pour savoir si le job est un job de réduction
   bool reduction;
   char *reduction_name;
   struct{
@@ -153,8 +169,9 @@ typedef struct nablaJobStruct{
     inout_mode inout; // mode en cours, parmis in, out et inout
     int iGather; // Indice de la variable qui est à gatherer
     int iScatter; // Indice de la variable qui est à scatterer
-    // Bool pour savoir si l'on est en train de travailler pour returner depuis
-    // un argument du job courant
+    // Bool pour savoir si l'on est en train de travailler
+    // pour 'return'er depuis un argument du job courant
+    // A voir si c'est encore utile
     bool returnFromArgument;
   } parse;
   struct nablaEntityStruct *entity;
@@ -162,7 +179,9 @@ typedef struct nablaJobStruct{
 }nablaJob;
 
 
-// Middlend ENTITY 
+// ****************************************************************************
+// * Nabla ENTITY struct
+// ****************************************************************************
 typedef struct nablaEntityStruct{
   FILE *hdr, *src;
   const char *name;
@@ -174,153 +193,9 @@ typedef struct nablaEntityStruct{
 } nablaEntity;
 
 
-// Hook for Header
-typedef struct nHookHeaderStruct{
-  void (*open)(struct nablaMainStruct *);  
-  void (*prefix)(struct nablaMainStruct *);  
-  void (*includes)(struct nablaMainStruct *);  
-  void (*dump)(struct nablaMainStruct *);  
-  void (*enumerates)(struct nablaMainStruct *);  
-  void (*postfix)(struct nablaMainStruct *);  
-} nHookHeader;
-
-// Hooks for Sources
-typedef struct nHookSourceStruct{
-  void (*open)(struct nablaMainStruct *);  
-  void (*include)(struct nablaMainStruct *);  
-} nHookSource;
-
-// Hooks for Main
-typedef struct nHookMainStruct{
-  NABLA_STATUS (*prefix)(struct nablaMainStruct *);  
-  NABLA_STATUS (*preInit)(struct nablaMainStruct *);  
-  NABLA_STATUS (*varInitKernel)(struct nablaMainStruct *);  
-  NABLA_STATUS (*varInitCall)(struct nablaMainStruct *);  
-  NABLA_STATUS (*main)(struct nablaMainStruct *);  
-  NABLA_STATUS (*postInit)(struct nablaMainStruct *);  
-  NABLA_STATUS (*postfix)(struct nablaMainStruct *);  
-} nHookMain;
-
-// Mesh Hooks
-typedef struct nHookMeshStruct{
-  void (*prefix)(struct nablaMainStruct *);  
-  void (*core)(struct nablaMainStruct *);  
-  void (*postfix)(struct nablaMainStruct *);  
-} nHookMesh;
-
-// Variables Hooks
-typedef struct nHookVarsStruct{
-  void (*init)(struct nablaMainStruct *);  
-  void (*prefix)(struct nablaMainStruct *);  
-  void (*postfix)(struct nablaMainStruct *);  
-} nHookVars;
-
-
-// Backend HOOKS
-typedef struct nablaBackendHooksStruct{
-  // Prefix à l'ENUMERATE_*
-  char* (*prefixEnumerate)(nablaJob*);
-  // Produit l'ENUMERATE_* avec XYZ
-  char* (*dumpEnumerateXYZ)(nablaJob*);
-  // Dump l'ENUMERATE_*
-  char* (*dumpEnumerate)(nablaJob*);
-  // Postfix à l'ENUMERATE_*
-  char* (*postfixEnumerate)(nablaJob*);
-  // Dump la référence à un item au sein d'un ENUMERATE_*
-  char* (*item)(nablaJob*,const char, const char, char);
-  // Gestion des différentes actions pour un job
-  void (*switchTokens)(astNode*, nablaJob*);
-  // Transformation de tokens en variables selon l'ENUMERATE_*
-  nablaVariable* (*turnTokenToVariable)(astNode*, struct nablaMainStruct*, nablaJob*);
-  void (*system)(astNode*, struct nablaMainStruct*, const char, char);
-  // Permet de rajouter des paramètres aux fonctions (coords/globals)
-  void (*addExtraParameters)(struct nablaMainStruct*, nablaJob*, int*);
-  // Dump dans le src des parametres nabla en in comme en out
-  // Et dans le cas Okina de remplir quelles variables in on va utiliser pour les gather/scatter
-  void (*dumpNablaParameterList)(struct nablaMainStruct*, nablaJob*, astNode*,int*);
-  void (*turnBracketsToParentheses)(struct nablaMainStruct*, nablaJob*, nablaVariable*, char);
-  // Gestion de l'ex diffraction (plus utilisé)
-  void (*diffractStatement)(struct nablaMainStruct*, nablaJob*, astNode**);
-  // Hook pour dumper le nom de la fonction
-  void (*functionName)(struct nablaMainStruct*);
-  // Hook de génération d'un kernel associé à une fonction
-  void (*function)(struct nablaMainStruct*, astNode*);
-  // Génération d'un kernel associé à un support
-  void (*job)(struct nablaMainStruct*, astNode*);
-  // Génération d'un kernel associé à une reduction
-  void (*reduction)(struct nablaMainStruct *, astNode *);
-  // Hooks additionnels pour spécifier de façon propre au backend:
-  // le numéro de l'itération, l'appel pour quitter, récupérer le temps de la simulation, etc.
-  void (*iteration)(struct nablaMainStruct*);
-  void (*exit)(struct nablaMainStruct*);
-  void (*time)(struct nablaMainStruct*);
-  void (*fatal)(struct nablaMainStruct*);
-  // Hooks pour rajouter au fur et à mesure qu'on les découvre
-  // les fonctions appelées et les arguments
-  void (*addCallNames)(struct nablaMainStruct*,nablaJob*,astNode*);
-  void (*addArguments)(struct nablaMainStruct*,nablaJob*);
-  // Hook pour mettre en forme les options
-  void (*turnTokenToOption)(struct nablaMainStruct*,nablaOption*);
-  // Hook pour préfixer les points d'entrée (à-la inline, par exemple)
-  char* (*entryPointPrefix)(struct nablaMainStruct*,nablaJob*);
-  // Hook pour associer aux fonctions appelées les arguments à rajouter
-  void (*dfsForCalls)(struct nablaMainStruct*,nablaJob*,astNode*,const char *,astNode *);
-  // Hook pour transformer les variables à returner
-  bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
-  // Hook returnFromArgument for OKINA and OMP
-  void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
-  
-  struct nablaBackendSimdHooksStruct *simd;
-  struct nablaBackendParallelHooksStruct *parallel;
-  struct nablaBackendPragmaHooksStruct *pragma;
-
-  struct nHookHeaderStruct *header;
-  struct nHookSourceStruct *source;
-  struct nHookMeshStruct *mesh;
-  struct nHookVarsStruct *vars;
-  struct nHookMainStruct *main;
-} nablaBackendHooks;
-
-typedef struct nablaDefinesStruct{
-  char *what;
-  char *with;
-}nablaDefine;
-
-typedef struct nablaTypedefStruct{
-  char *what;
-  char *with;
-}nablaTypedef;
-
-// Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
-typedef struct nablaBackendSimdHooksStruct{
-  char* (*bits)(void);
-  char* (*gather)(nablaJob*,nablaVariable*,enum_phase);
-  char* (*scatter)(nablaVariable*);
-  nablaTypedef* typedefs;
-  nablaDefine* defines;
-  char** forwards;
-  char* (*prevCell)(void);
-  char* (*nextCell)(void);
-  char* (*includes)(void);
-} nablaBackendSimdHooks;
-
-struct nablaMainStruct;
-
-// Structure des hooks que l'on va utiliser afin de générer avec ou sans parallel color
-typedef struct nablaBackendParallelHooksStruct{
-  char* (*sync)(void);
-  char* (*spawn)(void);
-  char* (*loop)(struct nablaMainStruct*);
-  char* (*includes)(void);
-} nablaBackendParallelHooks;
-
-// Structure des hooks que l'on va utiliser afin de générer les pragmas
-typedef struct nablaBackendPragmaHooksStruct{
-  char* (*ivdep)(void);
-  char* (*align)(void);
-} nablaBackendPragmaHooks;
-
-// Middlend TOP 
+// ****************************************************************************
+// Nabla MAIN struct
+// ****************************************************************************
 typedef struct nablaMainStruct{
   FILE *main, *cfg, *axl, *dot;
   const char *name;
@@ -331,48 +206,53 @@ typedef struct nablaMainStruct{
   nablaEntity *entity;
   BACKEND_SWITCH backend;
   BACKEND_COLORS colors;
-  char *interface_name;
-  char *interface_path;
-  char *service_name;
+  char *interface_name; // Arcane specific
+  char *interface_path; // Arcane specific
+  char *service_name;   // Arcane specific
   bool optionDumpTree;
-  struct nablaBackendHooksStruct *hook;
+  struct nHooksStruct *hook;
 } nablaMain;
+
+
+// ****************************************************************************
+// * Forward declaration
+// ****************************************************************************
 
 // nMiddleLibraries.c
 bool isWithLibrary(nablaMain*,with_library);
-void nMiddleLibraries(astNode*, nablaEntity*);
+void nMiddleLibraries(astNode*,nablaEntity*);
 
 // nMiddleEntities.c
 nablaEntity *nMiddleEntityNew(nablaMain*);
-nablaEntity *nMiddleEntityAddEntity(nablaMain*, nablaEntity*);
+nablaEntity *nMiddleEntityAddEntity(nablaMain*,nablaEntity*);
 
 // nMiddleJobs.c
-void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc);
-void nMiddleScanForNablaJobAtConstant(astNode * n, nablaMain *arc);
+void nMiddleScanForNablaJobParameter(astNode*,int,nablaMain*);
+void nMiddleScanForNablaJobAtConstant(astNode*,nablaMain*);
 char nMiddleScanForNablaJobForallItem(astNode*);
-void nMiddleScanForIfAfterAt(astNode *, nablaJob *, nablaMain *);
-void nMiddleDumpIfAfterAt(astNode *, nablaMain *);
-int nMiddleDumpParameterTypeList(FILE*, astNode*);
-nablaJob *nMiddleJobNew(nablaEntity *);
-nablaJob *nMiddleJobAdd(nablaEntity*, nablaJob*);
-nablaJob *nMiddleJobLast(nablaJob *);
-nablaJob *nMiddleJobFind(nablaJob *,char *);
-void nMiddleJobParse(astNode *, nablaJob *);
-void nMiddleJobFill(nablaMain*, nablaJob*, astNode *, const char *);
+void nMiddleScanForIfAfterAt(astNode*,nablaJob*,nablaMain*);
+void nMiddleDumpIfAfterAt(astNode*,nablaMain*);
+int nMiddleDumpParameterTypeList(FILE*,astNode*);
+nablaJob *nMiddleJobNew(nablaEntity*);
+nablaJob *nMiddleJobAdd(nablaEntity*,nablaJob*);
+nablaJob *nMiddleJobLast(nablaJob*);
+nablaJob *nMiddleJobFind(nablaJob*,char*);
+void nMiddleJobParse(astNode*,nablaJob*);
+void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
 
 // nMiddleVariables.c
-nablaVariable *nMiddleVariableNew(nablaMain *);
-nablaVariable *nMiddleVariableAdd(nablaMain*, nablaVariable *);
-nablaVariable *nMiddleVariableLast(nablaVariable *);
-nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name);
-what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *arc,
-                                                       astNode * n,
-                                                       const char cnf,
-                                                       char enum_enum);
-int nMiddleVariableGmpRank(nablaVariable *variables);
-char *nMiddleVariableGmpNameRank(nablaVariable *variables, int k);
-bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k);
-int nMiddleVariableGmpDumpNumber(nablaVariable *variables);
+nablaVariable *nMiddleVariableNew(nablaMain*);
+nablaVariable *nMiddleVariableAdd(nablaMain*,nablaVariable*);
+nablaVariable *nMiddleVariableLast(nablaVariable*);
+nablaVariable *nMiddleVariableFind(nablaVariable*,char*);
+what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
+                                                         astNode*,
+                                                         const char,
+                                                         char );
+int nMiddleVariableGmpRank(nablaVariable*);
+char *nMiddleVariableGmpNameRank(nablaVariable*,int);
+bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
+int nMiddleVariableGmpDumpNumber(nablaVariable*);
 
 // nMiddleType
 nablaType *nMiddleTypeNew(void);
@@ -380,47 +260,53 @@ nablaType *nMiddleTypeLast(nablaType*);
 nablaType *nMiddleTypeAdd(nablaType*,nablaType*);
 nablaType *nMiddleTypeFindName(nablaType*,char*);
 
-
 // nMiddleOptions.c
 nablaOption *nMiddleOptionNew(nablaMain*);
-nablaOption *nMiddleOptionLast(nablaOption*) ;
+nablaOption *nMiddleOptionLast(nablaOption*);
 nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);
-nablaOption *nMiddleOptionFindName(nablaOption *options, char *);
-void nMiddleOptions(astNode * n, int ruleid, nablaMain *);
-nablaOption *nMiddleTurnTokenToOption(astNode*, nablaMain*);
+nablaOption *nMiddleOptionFindName(nablaOption*,char*);
+void nMiddleOptions(astNode*,int,nablaMain*);
+nablaOption *nMiddleTurnTokenToOption(astNode*,nablaMain*);
 
-// nMiddle.c
-NABLA_STATUS nMiddleCompoundJobEnd(nablaMain*);
+// nMiddleHeader.c
 NABLA_STATUS nMiddleInclude(nablaMain*,char*);
-NABLA_STATUS nMiddleDefines(nablaMain*,nablaDefine*);
-NABLA_STATUS nMiddleTypedefs(nablaMain*,nablaTypedef*);
+NABLA_STATUS nMiddleDefines(nablaMain*,nWhatWith*);
+NABLA_STATUS nMiddleTypedefs(nablaMain*,nWhatWith*);
 NABLA_STATUS nMiddleForwards(nablaMain*,char**);
-void nMiddleParseAndHook(astNode*,nablaMain*);
+
+// nMiddleGrammar.c
+void nMiddleGrammar(astNode*,nablaMain*);
 void nMiddleInsertSpace(nablaMain*,astNode*);
+
+// nMiddle
 int nMiddleSwitch(astNode*,const bool,const char*,
                   const BACKEND_SWITCH,
                   const BACKEND_COLORS,
                   char*,char*,char*);
+
 // nMiddlePrintf
-int nprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
-int hprintf(const struct nablaMainStruct *nabla, const char *debug, const char *format, ...);
+int nprintf(const struct nablaMainStruct*,const char*,const char*,...);
+int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 
 // nMiddleItems
-void nMiddleItems(astNode * n, int ruleid, nablaMain *arc);
+void nMiddleItems(astNode*,int,nablaMain*);
 
 // nMiddleHLT: @ + When[s]
-void nMiddleAtConstantParse(astNode *, nablaMain *, char *);
-void nMiddleStoreWhen(nablaMain *, char *);
-int nMiddleComparEntryPoints(const void *one, const void *two);
-int nMiddleNumberOfEntryPoints(nablaMain *);
-nablaJob* nMiddleEntryPointsSort(nablaMain *,int);
+void nMiddleAtConstantParse(astNode*,nablaMain*,char*);
+void nMiddleStoreWhen(nablaMain*,char*);
+int nMiddleComparEntryPoints(const void*,const void*);
+int nMiddleNumberOfEntryPoints(nablaMain*);
+nablaJob* nMiddleEntryPointsSort(nablaMain*,int);
 
 // nMiddleTimeTree.c
-NABLA_STATUS nMiddleTimeTreeSave(nablaMain*, nablaJob*, int);
+NABLA_STATUS nMiddleTimeTreeSave(nablaMain*,nablaJob*,int);
 
 // nMiddleFunctions
 void nMiddleFunctionDumpHeader(FILE*,astNode*);
 void nMiddleFunctionParse(astNode*,nablaJob*);
 void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
+
+// nMiddleAnimate
+NABLA_STATUS nMiddleBackendAnimate(nablaMain*,astNode*);
 
 #endif // _NABLA_MIDDLEND_H_
