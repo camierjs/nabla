@@ -83,6 +83,9 @@ tstlao:
 tstlau:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_upwindAP_run_1_seq)
 
+tstalch:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_comd_heat)
+
 
 tstgram:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)

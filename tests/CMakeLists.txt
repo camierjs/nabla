@@ -103,12 +103,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_B
 
 
 ########################################
-# Now scan tests directory to add some # 
+# Now scan tests directory to add some #
+# man ls: -X             -> sort alphabetically by entry extension
+#         -F, --classify -> append indicator (one of */=>@|) to entries
+#         -1             -> list one file per line
 ########################################
-execute_process(COMMAND /bin/ls -1XF
-                COMMAND grep -v mesh
-                COMMAND sed -e "/.*\\//!d;s/\\///g"
-                COMMAND tr \\n " "
+#execute_process(COMMAND /bin/ls -1XF
+#                COMMAND grep -v mesh
+#                COMMAND sed -e "/.*\\//!d;s/\\///g"
+#                COMMAND tr \\n " "
+#                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#                RESULT_VARIABLE RESULT_NABLA_TESTS
+#                OUTPUT_VARIABLE NABLA_TESTS
+#                OUTPUT_STRIP_TRAILING_WHITESPACE)
+# bash -c "find . -maxdepth 1 -name [^\\.]\\*[^\\(mesh\\)]\\* -type d -printf '%f\\\\;'"
+execute_process(COMMAND find . -maxdepth 1 -type d -name [^.]*[^\(mesh\)]* -printf %f\ 
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 RESULT_VARIABLE RESULT_NABLA_TESTS
                 OUTPUT_VARIABLE NABLA_TESTS
@@ -117,8 +126,10 @@ if (${RESULT_NABLA_TESTS})
   message(SEND_ERROR "Error: Could not load tests directories!")
 endif (${RESULT_NABLA_TESTS})
 separate_arguments(NABLA_TESTS)
+#info("Loading NABLA_TESTS: ${NABLA_TESTS}${VT100_RESET}")
 
 foreach(tst IN ITEMS ${NABLA_TESTS})
+  info("\tFocusing on test ${tst}")
   string(REGEX MATCH ".*_aleph_index$" ALEPH_INDEX ${tst})
   if (ALEPH_INDEX)
     nabla_add_arcane_test_with_additional_defines(${tst} 1 gen ALEPH_INDEX)
