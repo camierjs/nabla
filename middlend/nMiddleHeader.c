@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Dump dans le header des 'includes'
 // ****************************************************************************
-NABLA_STATUS nMiddleInclude(nablaMain *nabla, char *include){
+NABLA_STATUS nMiddleInclude(nablaMain *nabla, const char *include){
   fprintf(nabla->entity->src, "%s\n", include);
   return NABLA_OK;
 }
@@ -55,7 +55,7 @@ NABLA_STATUS nMiddleInclude(nablaMain *nabla, char *include){
 // ****************************************************************************
 // * Dump dans le header les 'define's
 // ****************************************************************************
-NABLA_STATUS nMiddleDefines(nablaMain *nabla, nWhatWith *defines){
+NABLA_STATUS nMiddleDefines(nablaMain *nabla, const nWhatWith *defines){
   int i;
   FILE *target_file = isAnArcaneService(nabla)?nabla->entity->src:nabla->entity->hdr;
   fprintf(target_file,"\n\
@@ -72,7 +72,7 @@ NABLA_STATUS nMiddleDefines(nablaMain *nabla, nWhatWith *defines){
 // ****************************************************************************
 // * Dump dans le header les 'typedef's
 // ****************************************************************************
-NABLA_STATUS nMiddleTypedefs(nablaMain *nabla, nWhatWith *typedefs){
+NABLA_STATUS nMiddleTypedefs(nablaMain *nabla, const nWhatWith *typedefs){
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Typedefs\
@@ -88,7 +88,7 @@ NABLA_STATUS nMiddleTypedefs(nablaMain *nabla, nWhatWith *typedefs){
 // ****************************************************************************
 // * Dump dans le header des 'forwards's
 // ****************************************************************************
-NABLA_STATUS nMiddleForwards(nablaMain *nabla, char **forwards){
+NABLA_STATUS nMiddleForwards(nablaMain *nabla, const char **forwards){
   fprintf(nabla->entity->hdr,"\n\
 \n// *****************************************************************************\
 \n// * Forwards\

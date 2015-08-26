@@ -42,34 +42,39 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-static void arcaneDfsForCalls(struct nablaMainStruct *nabla,nablaJob *job, astNode *n,const char *namespace,
-                            astNode *nParams){}
+static void arcaneDfsForCalls(nablaMain *nabla,
+                              nablaJob *job, astNode *n,
+                              const char *namespace,
+                              astNode *nParams){}
 
-static char* arcaneEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
+static char* arcaneEntryPointPrefix(nablaMain *nabla,
+                                    nablaJob *entry_point){
   return "";
 }
-static void arcaneIteration(struct nablaMainStruct *nabla){
+static void arcaneIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
 }
-static void arcaneExit(struct nablaMainStruct *nabla){
+static void arcaneExit(nablaMain *nabla){
   nprintf(nabla, "/*EXIT*/", "subDomain()->timeLoopMng()->stopComputeLoop(true)");
 }
-static void arcaneTime(struct nablaMainStruct *nabla){
+static void arcaneTime(nablaMain *nabla){
   nprintf(nabla, "/*TIME*/", "subDomain()->commonVariables().globalTime()");
 }
 static void arcaneFatal(struct nablaMainStruct *nabla){
   dbg("\n[arcaneFatal]");
   nprintf(nabla, NULL, "throw FatalErrorException");
 } 
-static void arcaneAddCallNames(struct nablaMainStruct *nabla,nablaJob *job,astNode *n){
+static void arcaneAddCallNames(nablaMain *nabla,
+                               nablaJob *job,
+                               astNode *n){
   dbg("\n[arcaneAddCallNames]");
   /*nothing to do*/
 }
-static void arcaneAddArguments(struct nablaMainStruct *nabla,nablaJob *job){
+static void arcaneAddArguments(nablaMain *nabla,nablaJob *job){
   dbg("\n[arcaneAddArguments]");
   /*nothing to do*/
 }
-static void arcaneTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+static void arcaneTurnTokenToOption(nablaMain *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o arc*/", "options()->%s()", opt->name);
 }
 
@@ -100,7 +105,7 @@ bool isAnArcaneService(nablaMain *middlend){
 char *nArcanePragmaGccIvdep(void){ return ""; }
 char *nArcanePragmaGccAlign(void){ return ""; }
 
-static void arcaneHookReduction(struct nablaMainStruct *middlend, astNode *n){
+static void arcaneHookReduction(nablaMain *middlend, astNode *n){
 //#warning Reduction is not yet implemented in Arcane backend
 }
 

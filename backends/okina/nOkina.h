@@ -44,20 +44,20 @@
 #define _NABLA_OKINA_H_
 
 // simd/[std|sse|avx|mic]
-extern char* nOkinaStdForwards[];
-extern char* nOkinaSseForwards[];
-extern char* nOkinaAvxForwards[];
-extern char* nOkinaMicForwards[];
+extern const char* nOkinaStdForwards[];
+extern const char* nOkinaSseForwards[];
+extern const char* nOkinaAvxForwards[];
+extern const char* nOkinaMicForwards[];
 
-extern nWhatWith nOkinaStdDefines[];
-extern nWhatWith nOkinaSseDefines[];
-extern nWhatWith nOkinaAvxDefines[];
-extern nWhatWith nOkinaMicDefines[];
+extern const nWhatWith nOkinaStdDefines[];
+extern const nWhatWith nOkinaSseDefines[];
+extern const nWhatWith nOkinaAvxDefines[];
+extern const nWhatWith nOkinaMicDefines[];
 
-extern nWhatWith nOkinaStdTypedef[];
-extern nWhatWith nOkinaSseTypedef[];
-extern nWhatWith nOkinaAvxTypedef[];
-extern nWhatWith nOkinaMicTypedef[];
+extern const nWhatWith nOkinaStdTypedef[];
+extern const nWhatWith nOkinaSseTypedef[];
+extern const nWhatWith nOkinaAvxTypedef[];
+extern const nWhatWith nOkinaMicTypedef[];
 
 char* nOkinaStdIncludes(void);
 char* nOkinaSseIncludes(void);

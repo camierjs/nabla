@@ -43,10 +43,6 @@
 #ifndef _NABLA_LAMBDA_H_
 #define _NABLA_LAMBDA_H_
 
-extern char* nLambdaHookForwards[];
-extern nWhatWith nLambdaHookDefines[];
-extern nWhatWith nLambdaHookTypedef[];
-
 void nLambdaHookSourceOpen(nablaMain*);
 void nLambdaHookSourceInclude(nablaMain*);
 

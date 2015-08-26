@@ -57,13 +57,13 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 extern char lambdaDbg_h[];
 extern char lambdaMth_h[];
-extern char lambdaStdReal_h[];
-extern char lambdaStdReal3_h[];
-extern char lambdaStdInteger_h[];
-extern char lambdaStdGather_h[];
-extern char lambdaStdScatter_h[];
-extern char lambdaStdOStream_h[];
-extern char lambdaStdTernary_h[];
+extern char lambdaReal_h[];
+extern char lambdaReal3_h[];
+extern char lambdaInteger_h[];
+extern char lambdaGather_h[];
+extern char lambdaScatter_h[];
+extern char lambdaOStream_h[];
+extern char lambdaTernary_h[];
 extern char lambdaMsh1D_c[];
 extern char lambdaMsh3D_c[];
 
@@ -72,13 +72,13 @@ extern char lambdaMsh3D_c[];
 // * lambdaHeader for Std, Avx or Mic
 // ****************************************************************************
 void nLambdaDumpHeaderTypes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdInteger_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdReal3_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdTernary_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdGather_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdScatter_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaStdOStream_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaInteger_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal3_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaTernary_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaScatter_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaOStream_h));
 }
 
 

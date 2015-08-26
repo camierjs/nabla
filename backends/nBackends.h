@@ -44,9 +44,9 @@
 #define _NABLA_BACKENDS_CALLS_H_
 
 typedef struct nFwdDefTypesStruct{
-  char** forwards;
-  nWhatWith* defines;
-  nWhatWith* typedefs;
+  const char** forwards;
+  const nWhatWith* defines;
+  const nWhatWith* typedefs;
 } nFwdDefTypes;
 
 // Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC

@@ -50,7 +50,7 @@ char* nCudaHookIncludes(void){return "";}
 // ****************************************************************************
 // * CUDA TYPEDEFS
 // ****************************************************************************
-nWhatWith nCudaHookTypedef[]={
+const nWhatWith nCudaHookTypedef[]={
   {"int","integer"},
   {NULL,NULL}
 };
@@ -60,7 +60,7 @@ nWhatWith nCudaHookTypedef[]={
 // ****************************************************************************
 // * CUDA DEFINES
 // ****************************************************************************
-nWhatWith nCudaHookDefines[]={
+const nWhatWith nCudaHookDefines[]={
   {"Real3","real3"},
   {"Real","real"},
   //{"real","double"},
@@ -89,7 +89,7 @@ nWhatWith nCudaHookDefines[]={
 // ****************************************************************************
 // * Std or Mic FORWARDS
 // ****************************************************************************
-char* nCudaHookForwards[]={
+const char* nCudaHookForwards[]={
   "void gpuEnum(void);",
   NULL
 };

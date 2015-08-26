@@ -156,7 +156,7 @@ char* nOkinaStdScatter(nablaVariable* var){
 // ****************************************************************************
 // * Std or Mic TYPEDEFS
 // ****************************************************************************
-nWhatWith nOkinaStdTypedef[]={
+const nWhatWith nOkinaStdTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -166,7 +166,7 @@ nWhatWith nOkinaStdTypedef[]={
 // ****************************************************************************
 // * Std or Mic DEFINES
 // ****************************************************************************
-nWhatWith nOkinaStdDefines[]={
+const nWhatWith nOkinaStdDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -227,7 +227,7 @@ nWhatWith nOkinaStdDefines[]={
 // ****************************************************************************
 // * Std or Mic FORWARDS
 // ****************************************************************************
-char* nOkinaStdForwards[]={
+const char* nOkinaStdForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

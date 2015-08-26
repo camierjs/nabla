@@ -270,10 +270,10 @@ void nMiddleOptions(astNode*,int,nablaMain*);
 nablaOption *nMiddleTurnTokenToOption(astNode*,nablaMain*);
 
 // nMiddleHeader.c
-NABLA_STATUS nMiddleInclude(nablaMain*,char*);
-NABLA_STATUS nMiddleDefines(nablaMain*,nWhatWith*);
-NABLA_STATUS nMiddleTypedefs(nablaMain*,nWhatWith*);
-NABLA_STATUS nMiddleForwards(nablaMain*,char**);
+NABLA_STATUS nMiddleInclude(nablaMain*,const char*);
+NABLA_STATUS nMiddleDefines(nablaMain*,const nWhatWith*);
+NABLA_STATUS nMiddleTypedefs(nablaMain*,const nWhatWith*);
+NABLA_STATUS nMiddleForwards(nablaMain*,const char**);
 
 // nMiddleGrammar.c
 void nMiddleGrammar(astNode*,nablaMain*);

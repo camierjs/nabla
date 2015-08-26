@@ -53,36 +53,28 @@ NABLA_STATUS nOkina(nablaMain *nabla,
                       const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-
-
-  nFwdDefTypes nablaOkinaHeaderStdHeader={
+  const nFwdDefTypes nablaOkinaHeaderStdHeader={
     nOkinaStdForwards,
     nOkinaStdDefines,
     nOkinaStdTypedef
   };
-  
-  nFwdDefTypes nablaOkinaHeaderSseHeader={
+  const nFwdDefTypes nablaOkinaHeaderSseHeader={
     nOkinaSseForwards,
     nOkinaSseDefines,
     nOkinaSseTypedef
   };
-  
-  nFwdDefTypes nablaOkinaHeaderAvxHeader={
+  const nFwdDefTypes nablaOkinaHeaderAvxHeader={
     nOkinaAvxForwards,
     nOkinaAvxDefines,
     nOkinaAvxTypedef
   };
-  
-  nFwdDefTypes nablaOkinaHeaderMicHeader={
+  const nFwdDefTypes nablaOkinaHeaderMicHeader={
     nOkinaMicForwards,
     nOkinaMicDefines,
     nOkinaMicTypedef
   };
-  
-
-  
   // Std Typedefs, Defines & Forwards
-  nHookHeader nablaOkinaHeaderStdHooks={
+  const nHookHeader nablaOkinaHeaderStdHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -90,9 +82,8 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL, // include
     NULL  // postfix
   };
-  
   // Sse Typedefs, Defines & Forwards
-  nHookHeader nablaOkinaHeaderSseHooks={
+  const nHookHeader nablaOkinaHeaderSseHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -101,7 +92,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Avx Typedefs, Defines & Forwards
-  nHookHeader nablaOkinaHeaderAvxHooks={
+  const nHookHeader nablaOkinaHeaderAvxHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -110,7 +101,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Mic Typedefs, Defines & Forwards
-  nHookHeader nablaOkinaHeaderMicHooks={
+  const nHookHeader nablaOkinaHeaderMicHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -119,92 +110,88 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Définition des hooks pour le mode Standard
-  nCallSimd nablaOkinaSimdStdCalls={
+  const nCallSimd nablaOkinaSimdStdCalls={
     nOkinaStdBits,
     nOkinaStdGather,
     nOkinaStdScatter,
     nOkinaStdIncludes
   };
   // Définition des calls pour le mode SSE
-  nCallSimd nablaOkinaSimdSseCalls={
+  const nCallSimd nablaOkinaSimdSseCalls={
     nOkinaSseBits,
     nOkinaSseGather,
     nOkinaSseScatter,
     nOkinaSseIncludes
   };
   // Définition des calls pour le mode AVX
-  nCallSimd nablaOkinaSimdAvxCalls={
+  const nCallSimd nablaOkinaSimdAvxCalls={
     nOkinaAvxBits,
     nOkinaAvxGather,
     nOkinaAvxScatter,
     nOkinaAvxIncludes
   };
   // Définition des calls pour le mode MIC
-  nCallSimd nablaOkinaSimdMicCalls={ 
+  const nCallSimd nablaOkinaSimdMicCalls={ 
     nOkinaMicBits,
     nOkinaMicGather,
     nOkinaMicScatter,
     nOkinaMicIncludes
   };
-
   // Définition des hooks des directions
-  nHookXyz nablaOkinaXyzStdHooks={
+  const nHookXyz nablaOkinaXyzStdHooks={
     nOkinaStdPrevCell,
     nOkinaStdNextCell
   };
   // Définition des hooks des directions
-  nHookXyz nablaOkinaXyzSseHooks={
+  const nHookXyz nablaOkinaXyzSseHooks={
     nOkinaSsePrevCell,
     nOkinaSseNextCell
   };
   // Définition des hooks pour le mode AVX
-  nHookXyz nablaOkinaXyzAvxHooks={
+  const nHookXyz nablaOkinaXyzAvxHooks={
     nOkinaAvxPrevCell,
     nOkinaAvxNextCell
   };
   // Définition des hooks pour le mode MIC
-  nHookXyz nablaOkinaXyzMicHooks={ 
+  const nHookXyz nablaOkinaXyzMicHooks={ 
     nOkinaMicPrevCell,
     nOkinaMicNextCell
   };
   // Définition des calls pour Cilk+
-  nCallParallel okinaCilkCalls={
+  const nCallParallel okinaCilkCalls={
     nOkinaParallelCilkSync,
     nOkinaParallelCilkSpawn,
     nOkinaParallelCilkLoop,
     nOkinaParallelCilkIncludes
   };
   // Définition des calls pour OpenMP
-  nCallParallel okinaOpenMPCalls={
+  const nCallParallel okinaOpenMPCalls={
     nOkinaParallelOpenMPSync,
     nOkinaParallelOpenMPSpawn,
     nOkinaParallelOpenMPLoop,
     nOkinaParallelOpenMPIncludes
   };
   // Définition des calls quand il n'y a pas de parallélisation
-  nCallParallel okinaVoidCalls={
+  const nCallParallel okinaVoidCalls={
     nOkinaParallelVoidSync,
     nOkinaParallelVoidSpawn,
     nOkinaParallelVoidLoop,
     nOkinaParallelVoidIncludes
   };
   // Pragmas hooks definition for ICC or GCC
-  nHookPragma okinaPragmaICCHooks ={
-    //nOkinaPragmaIccIvdep,
+  const nHookPragma okinaPragmaICCHooks ={
     nOkinaPragmaIccAlign
   };
-  nHookPragma okinaPragmaGCCHooks={
-    //nOkinaPragmaGccIvdep,
+  const nHookPragma okinaPragmaGCCHooks={
     nOkinaPragmaGccAlign
   };
-  nHookForAll nOkinaHookForAll={
+  const nHookForAll nOkinaHookForAll={
     nOkinaHookEnumeratePrefix,
     nOkinaHookEnumerateDump,
     nOkinaHookItem,
     nOkinaHookEnumeratePostfix
   };
-  
-  nHookToken nOkinaHookToken={
+  const nHookToken nOkinaHookToken={
     nOkinaHookTokenSwitch,
     nOkinaHookVariablesTurnTokenToVariable,
     nOkinaHookTurnTokenToOption,
@@ -215,7 +202,6 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookFatal,
     nOkinaHookVariablesTurnBracketsToParentheses
   };
-
   const nHookGrammar nOkinaHookGrammar={
     nOkinaHookFunction,
     nOkinaHookJob,
@@ -223,7 +209,6 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookPrimaryExpressionToReturn,
     nOkinaHookReturnFromArgument
   };
-
   const nHookCall nOkinaHookCall={
     nOkinaHookAddCallNames,
     nOkinaHookAddArguments,
@@ -232,7 +217,6 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookParamsAddExtra,
     nOkinaHookParamsDumpList
   };
-  
   // Definition of Okina's Hooks
   nHooks okinaBackendHooks={
     &nOkinaHookForAll,
@@ -247,15 +231,14 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL, // vars
     NULL // main
   };
-  
   // Par défaut, on est en mode 'std'
   nCalls okinaBackendCalls={
     &nablaOkinaHeaderStdHeader,
     &nablaOkinaSimdStdCalls,
     &okinaVoidCalls // parallel
   };
+  
   nabla->call=&okinaBackendCalls;
-  // Set the hooks for this backend
   nabla->hook=&okinaBackendHooks;
 
   // Switch between STD, SSE, AVX, MIC
@@ -312,12 +295,14 @@ NABLA_STATUS nOkina(nablaMain *nabla,
 
 
   // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nMiddleVariableNew(nabla);
-  nMiddleVariableAdd(nabla, iteration);
-  iteration->axl_it=false;
-  iteration->item=strdup("global");
-  iteration->type=strdup("integer");
-  iteration->name=strdup("iteration");
+  {
+    nablaVariable *iteration = nMiddleVariableNew(nabla);
+    nMiddleVariableAdd(nabla, iteration);
+    iteration->axl_it=false;
+    iteration->item=strdup("global");
+    iteration->type=strdup("integer");
+    iteration->name=strdup("iteration");
+  }
  
   // Ouverture du fichier source du entity
   sprintf(srcFileName, "%s.cc", nabla->name);

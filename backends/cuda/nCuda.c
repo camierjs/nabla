@@ -126,7 +126,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   char hdrFileName[NABLA_MAX_FILE_NAME];
 
   // Std Typedefs, Defines & Forwards
-  nHookHeader nCudaHeaderHooks={
+  const nHookHeader nCudaHeaderHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -135,19 +135,19 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     NULL  // postfix
   };
   
-  nCallSimd nCudaSimdCalls={
+  const nCallSimd nCudaSimdCalls={
     nCudaHookBits,
     nCudaHookGather,
     nCudaHookScatter,
     nCudaHookIncludes
   };
 
-  nHookXyz nCudaXyzHooks={
+  const nHookXyz nCudaXyzHooks={
     nCudaHookPrevCell,
     nCudaHookNextCell
   };
   
-  nHookForAll nCudaHookForAll={
+  const nHookForAll nCudaHookForAll={
     nCudaHookPrefixEnumerate,
     nCudaHookDumpEnumerate,
     nCudaHookItem,
@@ -183,32 +183,33 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     nCudaHookDumpNablaParameterList
   };
   
+  const nHookPragma cudaPragmaGCCHooks={
+    //nCudaPragmaGccIvdep,
+    nCudaPragmaGccAlign
+  };
+
   nHooks nCudaBackendHooks={
     &nCudaHookForAll,
     &nCudaHookToken,
     &nCudaHookGrammar,
     &nCudaHookCall,
     &nCudaXyzHooks, // xyz
-    NULL, // pragma
+    &cudaPragmaGCCHooks, // pragma
     &nCudaHeaderHooks, // header
     NULL, // source
     NULL, // mesh
     NULL, // vars
     NULL // main
   };
+  
   nCalls nCudaBackendCalls={
     NULL, // header
     &nCudaSimdCalls, // simd
     NULL, // parallel
   };
+  
   nabla->call=&nCudaBackendCalls;
   nabla->hook=&nCudaBackendHooks;
-  
-  nHookPragma cudaPragmaGCCHooks={
-    //nCudaPragmaGccIvdep,
-    nCudaPragmaGccAlign
-  };
-  nabla->hook->pragma=&cudaPragmaGCCHooks;
 
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);

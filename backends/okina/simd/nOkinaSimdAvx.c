@@ -162,7 +162,7 @@ char* nOkinaAvxScatter(nablaVariable* var){
 // ****************************************************************************
 // * Avx TYPEDEFS
 // ****************************************************************************
-nWhatWith nOkinaAvxTypedef[]={
+const nWhatWith nOkinaAvxTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
@@ -172,7 +172,7 @@ nWhatWith nOkinaAvxTypedef[]={
 // ****************************************************************************
 // * Avx DEFINES
 // ****************************************************************************
-nWhatWith nOkinaAvxDefines[]={
+const nWhatWith nOkinaAvxDefines[]={
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -236,7 +236,7 @@ nWhatWith nOkinaAvxDefines[]={
 // ****************************************************************************
 // * Avx or Mic FORWARDS
 // ****************************************************************************
-char* nOkinaAvxForwards[]={
+const char* nOkinaAvxForwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "static inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",

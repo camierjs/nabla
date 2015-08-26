@@ -46,13 +46,13 @@
         .global lambdaMsh3D_c
         .global lambdaMth_h
         
-        .global lambdaStdReal_h
-        .global lambdaStdReal3_h
-        .global lambdaStdInteger_h
-        .global lambdaStdTernary_h
-        .global lambdaStdGather_h
-        .global lambdaStdScatter_h
-        .global lambdaStdOStream_h
+        .global lambdaReal_h
+        .global lambdaReal3_h
+        .global lambdaInteger_h
+        .global lambdaTernary_h
+        .global lambdaGather_h
+        .global lambdaScatter_h
+        .global lambdaOStream_h
         
 lambdaDbg_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaDbg.h"
@@ -69,25 +69,25 @@ lambdaMth_h:
 
  
         
-lambdaStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdReal.h"
+lambdaReal_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaReal.h"
         .byte 0
-lambdaStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdReal3.h"
+lambdaReal3_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaReal3.h"
         .byte 0
-lambdaStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdInteger.h"
+lambdaInteger_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaInteger.h"
         .byte 0
-lambdaStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdTernary.h"
+lambdaTernary_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaTernary.h"
         .byte 0
-lambdaStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdGather.h"
+lambdaGather_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaGather.h"
         .byte 0
-lambdaStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdScatter.h"
+lambdaScatter_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaScatter.h"
         .byte 0
-lambdaStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaStdOStream.h"
+lambdaOStream_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaOStream.h"
         .byte 0
 
