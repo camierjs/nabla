@@ -43,34 +43,19 @@
 #ifndef _NABLA_MIDDLEND_HOOKS_H_
 #define _NABLA_MIDDLEND_HOOKS_H_
 
-// Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
-typedef struct nHookSimdStruct{
-  char* (*bits)(void);
-  char* (*gather)(nablaJob*,nablaVariable*,enum_phase);
-  char* (*scatter)(nablaVariable*);
+// Structure des hooks utilisé pour la gestion des directions
+typedef struct nHookXyzStruct{
   char* (*prevCell)(void);
   char* (*nextCell)(void);
-  char* (*includes)(void);
-} nHookSimd;
-
-// Structure des hooks que l'on va utiliser afin de générer avec ou sans parallel color
-typedef struct nHookParallelStruct{
-  char* (*sync)(void);
-  char* (*spawn)(void);
-  char* (*loop)(struct nablaMainStruct*);
-  char* (*includes)(void);
-} nHookParallel;
+} nHookXyz;
 
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
 typedef struct nHookPragmaStruct{
-  char* (*ivdep)(void);
+  //char* (*ivdep)(void);
   char* (*align)(void);
 } nHookPragma;
 
 typedef struct nHookHeaderStruct{
-  char** forwards;
-  nWhatWith* defines;
-  nWhatWith* typedefs;
   void (*dump)(struct nablaMainStruct*);  
   void (*open)(struct nablaMainStruct*);  
   void (*enums)(struct nablaMainStruct*);  
@@ -171,8 +156,7 @@ typedef struct nHooksStruct{
   const nHookToken *token;
   const nHookGrammar *grammar;
   const nHookCall *call;
-  const nHookSimd *simd;
-  const nHookParallel *parallel;
+  const nHookXyz *xyz;
   const nHookPragma *pragma;
   const nHookHeader *header;
   const nHookSource *source;

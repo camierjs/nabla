@@ -42,51 +42,56 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-const nHookSimd lambdaSimdHooks={
+// ****************************************************************************
+// * CALLS
+// ****************************************************************************
+const nCallSimd lambdaSimdCalls={
   lambdaHookBits,
   lambdaHookGather,
   lambdaHookScatter,
-  lambdaHookPrevCell, // nMiddleVariables
-  lambdaHookNextCell, // nMiddleVariables
   lambdaHookIncludes
 };
-  
-const nHookParallel lambdaCilkHooks={
+
+const nCallParallel lambdaCilkCalls={
   nLambdaParallelCilkSync,
   nLambdaParallelCilkSpawn,
   nLambdaParallelCilkLoop,
   nLambdaParallelCilkIncludes
 };
 
-const nHookParallel lambdaOpenMPHooks={
+const nCallParallel lambdaOpenMPCalls={
   nLambdaParallelOpenMPSync,
   nLambdaParallelOpenMPSpawn,
   nLambdaParallelOpenMPLoop,
   nLambdaParallelOpenMPIncludes
 };
 
-const nHookParallel lambdaVoidHooks={
+const nCallParallel lambdaVoidCalls={
   nLambdaParallelVoidSync,
   nLambdaParallelVoidSpawn,
   nLambdaParallelVoidLoop,
   nLambdaParallelVoidIncludes
 };
 
+
+// ****************************************************************************
+// * HOOKS
+// ****************************************************************************
+const nHookXyz lambdaXyzHooks={
+  lambdaHookPrevCell, // nMiddleVariables
+  lambdaHookNextCell // nMiddleVariables
+};
+  
 const nHookPragma lambdaPragmaICCHooks ={
-  lambdaHookPragmaIccIvdep,
   lambdaHookPragmaIccAlign // nMiddleFunctions
 };
 
 const nHookPragma lambdaPragmaGCCHooks={
-  lambdaHookPragmaGccIvdep,
   lambdaHookPragmaGccAlign // nMiddleFunctions
 };
 
 // Hooks pour le header
 const nHookHeader nLHookHeader={
-  nLambdaHookForwards,
-  nLambdaHookDefines,
-  nLambdaHookTypedef,
   nLambdaHookHeaderDump, // nMiddleAnimate
   nLambdaHookHeaderOpen, // nMiddleAnimate
   nLambdaHookHeaderDefineEnumerates, // nMiddleAnimate
@@ -167,8 +172,7 @@ nHooks nLambdaHooks={
   &nLHookToken,
   &hookGrammar,
   &nLambdaHookCall,
-  &lambdaSimdHooks,
-  &lambdaVoidHooks,
+  &lambdaXyzHooks,
   &lambdaPragmaGCCHooks,
   &nLHookHeader,
   &nLHookSource,
@@ -178,18 +182,119 @@ nHooks nLambdaHooks={
 };
 
 
+
+// ****************************************************************************
+// * Defines
+// ****************************************************************************
+nWhatWith nLambdaHeaderDefines[]={
+  {"real", "Real"},
+  {"WARP_ALIGN", "8"},    
+  {"NABLA_NB_GLOBAL_WARP","1"},
+  {"rabs(a)","fabs(a)"},
+  {"set(a)", "a"},
+  {"set1(cst)", "cst"},
+  {"square_root(u)", "sqrt(u)"},
+  {"cube_root(u)", "cbrt(u)"},
+  {"store(u,_u)", "(*u=_u)"},
+  {"load(u)", "(*u)"},
+  {"zero()", "0.0"},
+  {"DBG_MODE", "(false)"},
+  {"DBG_LVL", "(DBG_INI)"},
+  {"DBG_OFF", "0x0000ul"},
+  {"DBG_CELL_VOLUME", "0x0001ul"},
+  {"DBG_CELL_CQS", "0x0002ul"},
+  {"DBG_GTH", "0x0004ul"},
+  {"DBG_NODE_FORCE", "0x0008ul"},
+  {"DBG_INI_EOS", "0x0010ul"},
+  {"DBG_EOS", "0x0020ul"},
+  {"DBG_DENSITY", "0x0040ul"},
+  {"DBG_MOVE_NODE", "0x0080ul"},
+  {"DBG_INI", "0x0100ul"},
+  {"DBG_INI_CELL", "0x0200ul"},
+  {"DBG_INI_NODE", "0x0400ul"},
+  {"DBG_LOOP", "0x0800ul"},
+  {"DBG_FUNC_IN", "0x1000ul"},
+  {"DBG_FUNC_OUT", "0x2000ul"},
+  {"DBG_VELOCITY", "0x4000ul"},
+  {"DBG_BOUNDARIES", "0x8000ul"},
+  {"DBG_ALL", "0xFFFFul"},
+  {"opAdd(u,v)", "(u+v)"},
+  {"opSub(u,v)", "(u-v)"},
+  {"opDiv(u,v)", "(u/v)"},
+  {"opMul(u,v)", "(u*v)"},
+  {"opMod(u,v)", "(u%v)"},
+  {"opScaMul(u,v)","dot3(u,v)"},
+  {"opVecMul(u,v)","cross(u,v)"},    
+  {"dot", "dot3"},
+  {"knAt(a)",""},
+  {"fatal(a,b)","exit(-1)"},
+  {"synchronize(a)","_Pragma(\"omp barrier\")"},
+  {"mpi_reduce(how,what)","how##ToDouble(what)"},
+  {"reduce(how,what)","how##ToDouble(what)"},
+  {"xyz","int"},
+  {"GlobalIteration", "global_iteration"},
+  {"MD_DirX","0"},
+  {"MD_DirY","1"},
+  {"MD_DirZ","2"},
+  {"File", "std::ofstream&"},
+  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
+  {NULL,NULL}
+};
+
+
+// ****************************************************************************
+// * Forward Declarations
+// ****************************************************************************
+char* nLambdaHeaderForwards[]={
+  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
+  "static void nabla_ini_node_coords(void);",
+  "static void verifCoords(void);",
+  NULL
+};
+
+
+
+// ****************************************************************************
+// * Typedefs
+// ****************************************************************************
+nWhatWith nLambdaHeaderTypedef[]={
+  {"struct real3","Real3"},
+  {NULL,NULL}
+};
+
+
+
+nFwdDefTypes nLambdaHeader={
+  nLambdaHeaderForwards,
+  nLambdaHeaderDefines,
+  nLambdaHeaderTypedef
+};
+
+
+
+
+nCalls nLambdaCalls={
+  &nLambdaHeader,
+  &lambdaSimdCalls,
+  &lambdaVoidCalls,
+};
+
+
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
 nHooks *nLambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nLambdaHooks.parallel=&lambdaCilkHooks;
+    nLambdaCalls.parallel=&lambdaCilkCalls;
   
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nLambdaHooks.parallel=&lambdaOpenMPHooks;
+    nLambdaCalls.parallel=&lambdaOpenMPCalls;
   
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
     nLambdaHooks.pragma=&lambdaPragmaICCHooks;
 
+  nabla->call=&nLambdaCalls;
   return &nLambdaHooks;
+  
 }

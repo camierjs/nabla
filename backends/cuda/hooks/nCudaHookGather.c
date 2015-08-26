@@ -156,12 +156,12 @@ char* cudaGather(nablaJob *job){
   // S'il reste rien après le filtre, on a rien d'autre à faire
   if (filteredNbToGather==0) return "";
   
-  strcat(gathers,job->entity->main->hook->simd->gather(job,var,enum_phase_declaration));
+  strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_declaration));
   
   for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
     // Si c'est pas le gather de l'ordre de la déclaration, on continue
     if (i!=job->parse.iGather) continue;
-    strcat(gathers,job->entity->main->hook->simd->gather(job,var,enum_phase_function_call));
+    strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_function_call));
     // On informe la suite que cette variable est en train d'être gatherée
     nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables,
                                                      var->name);

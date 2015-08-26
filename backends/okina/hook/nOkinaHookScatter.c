@@ -99,7 +99,7 @@ char* nOkinaHookScatter(nablaJob *job){
     if (strcmp(var->name,"coord")==0) continue;
     // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
     if (var->inout==enum_in_variable) continue;
-    strcat(scatters,job->entity->main->hook->simd->scatter(var));
+    strcat(scatters,job->entity->main->call->simd->scatter(var));
   }
   job->parse.iScatter+=1;
   return strdup(scatters);

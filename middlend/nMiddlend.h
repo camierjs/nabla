@@ -211,6 +211,7 @@ typedef struct nablaMainStruct{
   char *service_name;   // Arcane specific
   bool optionDumpTree;
   struct nHooksStruct *hook;
+  struct nCallsStruct *call;
 } nablaMain;
 
 

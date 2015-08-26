@@ -153,6 +153,7 @@ void nablaError(const char *format, ...);
 
 #include "middlend/nMiddlend.h"
 #include "middlend/nMiddlendHooks.h"
+#include "backends/nBackends.h"
 
 #include "backends/cuda/nCuda.h"
 #include "backends/okina/nOkina.h"

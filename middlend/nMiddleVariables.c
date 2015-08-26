@@ -190,8 +190,8 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
       }
       if (nabla_item==NULL && nabla_system!=NULL){
         // Et elle est postfixée avec un nabla_system
-        char *hookPrev=nabla->hook->simd->prevCell();
-        char *hookNext=nabla->hook->simd->nextCell();
+        char *hookPrev=nabla->hook->xyz->prevCell();
+        char *hookNext=nabla->hook->xyz->nextCell();
         char *hookNextPrev=(nabla_system->tokenid==NEXTCELL)?hookNext:hookPrev;
         nprintf(nabla, "/*is_system*/", "%s%s_%s",
                 (nabla->backend==BACKEND_ARCANE)?"m_":hookNextPrev,

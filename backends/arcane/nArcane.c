@@ -106,9 +106,6 @@ static void arcaneHookReduction(struct nablaMainStruct *middlend, astNode *n){
 
 // Typedefs, Defines & Forwards
 const nHookHeader nablaArcaneHeaderHooks={
-  NULL,//arcaneForwards,
-  NULL,//arcaneDefines,
-  NULL,//arcaneTypedef,
   NULL, // dump
   NULL, // open
   NULL, // enums
@@ -129,13 +126,15 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   char hdrFileName[NABLA_MAX_FILE_NAME];
   nablaEntity *entity=middlend->entity;  // On fait l'hypothèse qu'il n'y a qu'un entity pour l'instant
 
-  nHookSimd nablaArcaneSimdHooks={
+  nCallSimd nablaArcaneSimdCalls={
     nccArcBits,
     nccArcGather,
     nccArcScatter,
-    nccArcPrevCell,
-    nccArcNextCell,
     nccArcIncludes
+  };
+  nHookXyz nablaArcaneXyzHooks={
+    nccArcPrevCell,
+    nccArcNextCell
   };
   const nHookForAll nArcaneHookForAll={
     arcaneHookPrefixEnumerate,
@@ -177,8 +176,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     &nArcaneHookToken,
     &hookGrammar,
     &nArcaneHookCall,
-    NULL, // simd
-    NULL, // parallel
+    &nablaArcaneXyzHooks, // Xyz
     NULL, // pragma
     &nablaArcaneHeaderHooks, // header
     NULL, // source
@@ -186,11 +184,17 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL, // vars
     NULL // main
   };
+  nCalls arcaneBackendCalls={
+    NULL, // header
+    &nablaArcaneSimdCalls, // simd
+    NULL // parallel
+  };
+
+  middlend->call=&arcaneBackendCalls;
   middlend->hook=&arcaneBackendHooks;
-  middlend->hook->simd=&nablaArcaneSimdHooks;
+  //middlend->hook->simd=&nablaArcaneSimdHooks;
   
   nHookPragma arcanePragmaGCCHooks={
-    nArcanePragmaGccIvdep,
     nArcanePragmaGccAlign
   };
   middlend->hook->pragma=&arcanePragmaGCCHooks;

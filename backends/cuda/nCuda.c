@@ -127,9 +127,6 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
 
   // Std Typedefs, Defines & Forwards
   nHookHeader nCudaHeaderHooks={
-    nCudaHookForwards,
-    nCudaHookDefines,
-    nCudaHookTypedef,
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -138,13 +135,16 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     NULL  // postfix
   };
   
-  nHookSimd nCudaSimdHooks={
+  nCallSimd nCudaSimdCalls={
     nCudaHookBits,
     nCudaHookGather,
     nCudaHookScatter,
-    nCudaHookPrevCell,
-    nCudaHookNextCell,
     nCudaHookIncludes
+  };
+
+  nHookXyz nCudaXyzHooks={
+    nCudaHookPrevCell,
+    nCudaHookNextCell
   };
   
   nHookForAll nCudaHookForAll={
@@ -188,8 +188,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     &nCudaHookToken,
     &nCudaHookGrammar,
     &nCudaHookCall,
-    NULL, // simd
-    NULL, // parallel
+    &nCudaXyzHooks, // xyz
     NULL, // pragma
     &nCudaHeaderHooks, // header
     NULL, // source
@@ -197,11 +196,16 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     NULL, // vars
     NULL // main
   };
+  nCalls nCudaBackendCalls={
+    NULL, // header
+    &nCudaSimdCalls, // simd
+    NULL, // parallel
+  };
+  nabla->call=&nCudaBackendCalls;
   nabla->hook=&nCudaBackendHooks;
-  nabla->hook->simd=&nCudaSimdHooks;
   
   nHookPragma cudaPragmaGCCHooks={
-    nCudaPragmaGccIvdep,
+    //nCudaPragmaGccIvdep,
     nCudaPragmaGccAlign
   };
   nabla->hook->pragma=&cudaPragmaGCCHooks;

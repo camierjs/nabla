@@ -40,67 +40,41 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "nabla.tab.h"
+#ifndef _NABLA_BACKENDS_CALLS_H_
+#define _NABLA_BACKENDS_CALLS_H_
+
+typedef struct nFwdDefTypesStruct{
+  char** forwards;
+  nWhatWith* defines;
+  nWhatWith* typedefs;
+} nFwdDefTypes;
+
+// Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
+typedef struct nCallSimdStruct{
+  char* (*bits)(void);
+  char* (*gather)(nablaJob*,nablaVariable*,enum_phase);
+  char* (*scatter)(nablaVariable*);
+  char* (*includes)(void);
+} nCallSimd;
+
+
+// Structure des calls de gestion du parallelisme
+typedef struct nCallParallelStruct{
+  char* (*sync)(void);
+  char* (*spawn)(void);
+  char* (*loop)(struct nablaMainStruct*);
+  char* (*includes)(void);
+} nCallParallel;
 
 
 // ****************************************************************************
-// * Filtrage du GATHER
-// * Une passe devrait être faite à priori afin de déterminer les contextes
-// * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
-// * Et non pas que sur leurs déclarations en in et out
+// * Backend CALLS
 // ****************************************************************************
-char* nOkinaHookGather(nablaJob *job){
-  int i;
-  char gathers[1024];
-  nablaVariable *var;
-  gathers[0]='\0';
-  int nbToGather=0;
-  int filteredNbToGather=0;
+typedef struct nCallsStruct{
+  const nFwdDefTypes *header;
+  const nCallSimd *simd; 
+  const nCallParallel *parallel;
+} nCalls;
 
-  // Si l'on a trouvé un 'selection_statement_in_compound_statement'
-  // dans le corps du kernel, on débraye les gathers
-  // *ou pas*
-  if (job->parse.selection_statement_in_compound_statement){
-    //nprintf(job->entity->main,
-    //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!okinaGather*/");
-    //return "";
-  }
-  
-  // On récupère le nombre de variables potentielles à gatherer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToGather+=1;
-  //nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
-  
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToGather==0) return "";
 
-  // On filtre suivant s'il y a des forall
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToGather+=1;
-  }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToGather=%d*/", filteredNbToGather);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToGather==0) return "";
-  
-  strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_declaration));
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le gather de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iGather) continue;
-    strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_function_call));
-    // On informe la suite que cette variable est en train d'être gatherée
-    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-    if (real_variable==NULL)
-      nablaError("Could not find real variable from gathered variables!");
-    real_variable->is_gathered=true;
-  }
-  job->parse.iGather+=1;
-  return strdup(gathers);
-}
-
+#endif // _NABLA_BACKENDS_CALLS_H_

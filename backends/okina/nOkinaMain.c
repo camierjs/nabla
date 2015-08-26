@@ -166,12 +166,12 @@ NABLA_STATUS nOkinaMain(nablaMain *n){
     if (last_when!=entry_points[i].whens[0])
       nprintf(n, NULL, "\n%s%s",
               is_into_compute_loop?"\t\t":"\t",
-              n->hook->parallel->sync());
+              n->call->parallel->sync());
     last_when=entry_points[i].whens[0];
     // Dump de la tabulation et du nom du point d'entrée
     nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
             is_into_compute_loop?"\t\t":"\t",
-            n->hook->parallel->spawn(), 
+            n->call->parallel->spawn(), 
             entry_points[i].name,
             entry_points[i].whens[0]);
     // Dump des arguments *ou pas*
