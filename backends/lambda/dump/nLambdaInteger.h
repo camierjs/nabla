@@ -43,9 +43,4 @@
 #ifndef _LAMBDA_STD_INTEGER_H_
 #define _LAMBDA_STD_INTEGER_H_
 
-// ****************************************************************************
-// * Standard integer
-// ****************************************************************************
-typedef int integer;
-
 #endif //  _LAMBDA_STD_INTEGER_H_

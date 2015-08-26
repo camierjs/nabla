@@ -58,6 +58,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
+  //{"norme(u)","::fabs(u)"},
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
@@ -102,14 +103,13 @@ const static nWhatWith nLambdaHeaderDefines[]={
 };
 
 const char* nLambdaHeaderForwards[]={
-  "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-  "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "static void nabla_ini_node_coords(void);",
   "static void verifCoords(void);",
   NULL
 };
 
 const nWhatWith nLambdaHeaderTypedef[]={
+  {"int","integer"},
   {"struct real3","Real3"},
   {NULL,NULL}
 };

@@ -43,6 +43,10 @@
 #ifndef _LAMBDA_STD_OSTREAM_H_
 #define _LAMBDA_STD_OSTREAM_H_
 
+inline std::ostream& info(){std::cout.flush();std::cout<<"\n";return std::cout;}
+
+inline std::ostream& debug(){std::cout.flush();std::cout<<"\n";return std::cout;}
+
 // ****************************************************************************
 // * REALS_3
 // ****************************************************************************
