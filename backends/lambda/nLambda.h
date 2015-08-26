@@ -141,7 +141,6 @@ void lambdaHookSystem(astNode*,nablaMain*,const char,char);
 void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
 void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void lambdaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 
 // Pour dumper les arguments necessaire dans le main
 void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);

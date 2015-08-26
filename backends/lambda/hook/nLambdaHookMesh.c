@@ -68,12 +68,12 @@ static void nLambdaHookMesh1DConnectivity(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH CONNECTIVITY\n\
 // ********************************************************\
-\nint cell_node[2*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell[2*NABLA_NB_NODES]               __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_corner[2*NABLA_NB_NODES]        __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_next[1*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_prev[1*NABLA_NB_CELLS]               __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_and_corner[2*2*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_node[2*NABLA_NB_CELLS];\
+\nint node_cell[2*NABLA_NB_NODES];\
+\nint node_cell_corner[2*NABLA_NB_NODES];\
+\nint cell_next[1*NABLA_NB_CELLS];\
+\nint cell_prev[1*NABLA_NB_CELLS];\
+\nint node_cell_and_corner[2*2*NABLA_NB_NODES];\
 \n\n\n");
 }
 
@@ -118,12 +118,12 @@ static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH CONNECTIVITY\n\
 // ********************************************************\
-\nint cell_node[8*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell[8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_corner[8*NABLA_NB_NODES]  __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_next[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint cell_prev[3*NABLA_NB_CELLS]         __attribute__ ((aligned(WARP_ALIGN)));\
-\nint node_cell_and_corner[2*8*NABLA_NB_NODES]         __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_node[8*NABLA_NB_CELLS];\
+\nint node_cell[8*NABLA_NB_NODES];\
+\nint node_cell_corner[8*NABLA_NB_NODES];\
+\nint cell_next[3*NABLA_NB_CELLS];\
+\nint cell_prev[3*NABLA_NB_CELLS];\
+\nint node_cell_and_corner[2*8*NABLA_NB_NODES];\
 \n\n\n");
 }
 

@@ -128,7 +128,7 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
     //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
   }    
   if (strcmp(var->type,"real3")!=0){
-    nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
+    //nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
     return;
   }
   return;

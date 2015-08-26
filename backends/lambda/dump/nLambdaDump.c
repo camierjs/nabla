@@ -56,10 +56,7 @@ static char *dumpExternalFile(char *file){
 // * extern definitions from lambdaDump.S
 // ****************************************************************************
 extern char lambdaDbg_h[];
-extern char lambdaMth_h[];
-extern char lambdaReal_h[];
 extern char lambdaReal3_h[];
-extern char lambdaInteger_h[];
 extern char lambdaGather_h[];
 extern char lambdaScatter_h[];
 extern char lambdaOStream_h[];
@@ -72,8 +69,6 @@ extern char lambdaMsh3D_c[];
 // * lambdaHeader for Std, Avx or Mic
 // ****************************************************************************
 void nLambdaDumpHeaderTypes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaInteger_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal3_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaTernary_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
@@ -93,9 +88,7 @@ void nLambdaDumpHeaderDebug(nablaMain *nabla){
 // ****************************************************************************
 // * lambdaHeader for Maths
 // ****************************************************************************
-void nLambdaDumpHeaderMaths(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaMth_h));
-}
+void nLambdaDumpHeaderMaths(nablaMain *nabla){}
 
 
 // ****************************************************************************

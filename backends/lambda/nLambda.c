@@ -47,9 +47,8 @@
 // * CALLS
 // ****************************************************************************
 const static nWhatWith nLambdaHeaderDefines[]={
-  {"real", "Real"},
-  {"WARP_ALIGN", "8"},    
   {"NABLA_NB_GLOBAL_WARP","1"},
+  {"real", "Real"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
@@ -58,7 +57,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  //{"norme(u)","::fabs(u)"},
+  {"norm(u)","::fabs(u)"},
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
@@ -87,6 +86,8 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"opScaMul(u,v)","dot3(u,v)"},
   {"opVecMul(u,v)","cross(u,v)"},    
   {"dot", "dot3"},
+  {"ReduceMinToDouble(a)","a"},
+  {"ReduceMaxToDouble(a)","a"},
   {"knAt(a)",""},
   {"fatal(a,b)","exit(-1)"},
   {"synchronize(a)","_Pragma(\"omp barrier\")"},
@@ -102,14 +103,11 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {NULL,NULL}
 };
 
-const char* nLambdaHeaderForwards[]={
-  "static void nabla_ini_node_coords(void);",
-  "static void verifCoords(void);",
-  NULL
-};
+const char* nLambdaHeaderForwards[]={NULL};
 
 const nWhatWith nLambdaHeaderTypedef[]={
   {"int","integer"},
+  {"double","real"},
   {"struct real3","Real3"},
   {NULL,NULL}
 };

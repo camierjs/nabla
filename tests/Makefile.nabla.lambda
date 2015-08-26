@@ -4,7 +4,7 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
 SIMD = std
 PARALLEL = seq
-LOG = -t -v $(TGT).log
+LOG = -t #-v $(TGT).log
 
 SIMD_std_FLAGS  = -mno-avx -DNO_SSE2
 

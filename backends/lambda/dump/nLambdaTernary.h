@@ -46,14 +46,14 @@
 // ****************************************************************************
 // * opTernary
 // ****************************************************************************
-inline integer opTernary(const bool cond,
-                         const int ifStatement,
-                         const int elseStatement){
+inline int opTernary(const bool cond,
+                     const int ifStatement,
+                     const int elseStatement){
   if (cond) return ifStatement;
   return elseStatement;
 }
 
-inline real opTernary(const bool cond,
+inline double opTernary(const bool cond,
                       const double ifStatement,
                       const double elseStatement){
   if (cond) return ifStatement;

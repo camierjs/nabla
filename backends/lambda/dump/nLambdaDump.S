@@ -44,11 +44,9 @@
         .global lambdaDbg_h
         .global lambdaMsh1D_c
         .global lambdaMsh3D_c
-        .global lambdaMth_h
         
         .global lambdaReal_h
         .global lambdaReal3_h
-        .global lambdaInteger_h
         .global lambdaTernary_h
         .global lambdaGather_h
         .global lambdaScatter_h
@@ -63,10 +61,6 @@ lambdaMsh1D_c:
 lambdaMsh3D_c: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh3D.c"
         .byte 0
-lambdaMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMth.h"
-        .byte 0
-
  
         
 lambdaReal_h:
@@ -75,9 +69,7 @@ lambdaReal_h:
 lambdaReal3_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaReal3.h"
         .byte 0
-lambdaInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaInteger.h"
-        .byte 0
+
 lambdaTernary_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaTernary.h"
         .byte 0

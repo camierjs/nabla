@@ -14,7 +14,6 @@ set(BACKEND_LAMBDA_HOOK_C
   nLambdaHookArguments.c
   nLambdaHookParameters.c
   nLambdaHookReductions.c
-  nLambdaHookDiffraction.c
   nLambdaHookParallelCilk.c
   nLambdaHookParallelOpenMP.c
   nLambdaHookParallelVoid.c)
