@@ -54,7 +54,7 @@ void lambdaHookDumpNablaParameterList(nablaMain *nabla,
                                      nablaJob *job,
                                      astNode *n,
                                      int *numParams){
-  dbg("\n\t[lambdaHookDumpNablaParameterList]");
+  //nprintf(nabla, NULL, "/*lambdaHookDumpNablaParameterList*/");
   // S'il n'y a pas de in ni de out, on a rien à faire
   if (n==NULL) return;
   // Aux premier COMPOUND_JOB_INI ou '@', on a terminé
@@ -64,16 +64,46 @@ void lambdaHookDumpNablaParameterList(nablaMain *nabla,
   if (n->tokenid==OUT) job->parse.inout=enum_out_variable;
   // Si on trouve un token 'INOUT', c'est qu'on passe des 'out' aux 'inout'
   if (n->tokenid==INOUT) job->parse.inout=enum_inout_variable;
+  
+  if (n->rule) dbg("\n\t\t[lambdaHookDumpNablaParameterList] rule '%s'", n->rule);
+  if (n->token) dbg("\n\t\t[lambdaHookDumpNablaParameterList] token '%s'", n->token);
+
   // Dés qu'on hit une déclaration, c'est qu'on a une variable candidate
   if (n->ruleid==rulenameToId("direct_declarator")){
     // On la récupère
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
+    *numParams+=1;
     dbg("\n\t[lambdaHookDumpNablaParameterList] Looking for variable '%s'", n->children->token);
     // Si elle n'existe pas, c'est pas normal à ce stade: c'est une erreur de nom
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr,
                                       "\n[lambdaHookDumpNablaParameterList] Cannot find variable '%s'!\n",
                                       n->children->token));
+    dbg("\n\t\t[lambdaHookDumpNablaParameterList] Working with '%s %s':", var->item, var->name);
+
+    // Dump des parametres des variables
+    if (strcmp(var->type, "real3")!=0){
+      dbg("\n\t\t[cudaHookDumpNablaParameterList] Non Real3 variable!\n");
+      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
+      }else{
+        nprintf(nabla, NULL, ",\n\t\t%s *%s_%s", var->type, var->item, n->children->token);
+      }
+    }else{
+      //dbg("\n\t\t[cudaHookDumpNablaParameterList] Working with '%s':", var->name);
+      //exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable Real3 error\n"));
+      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
+        //nprintf(nabla, NULL, NULL);
+        dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found 'node coord', nothing to do!\n");
+      }else{
+        dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found %s %s!\n", var->item, n->children->token);
+        if (var->dim==0){
+          nprintf(nabla, NULL, ",\n\t\tReal3 *%s_%s", var->item, n->children->token);
+        }else{
+          nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
+        }
+      }
+    }
+
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
       //nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
@@ -92,23 +122,18 @@ void lambdaHookDumpNablaParameterList(nablaMain *nabla,
         nMiddleVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
+  
   if (n->children != NULL) lambdaHookDumpNablaParameterList(nabla,job,n->children,numParams);
   if (n->next != NULL) lambdaHookDumpNablaParameterList(nabla,job,n->next, numParams);
 
 }
 
 
-static void lambdaHookAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  return;
-}
-
 
 /*****************************************************************************
   * Dump d'extra paramètres
  *****************************************************************************/
 void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla, "/* direct return from lambdaHookAddExtraParameters*/", NULL);
-  return;
   // Rajout pour l'instant systématiquement des node_coords et du global_deltat
   nablaVariable *var;
   if (*numParams!=0) nprintf(nabla, NULL, ",");
@@ -127,8 +152,8 @@ void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParam
             var->name);
     *numParams+=1;
   }
-  
   // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c')
-    lambdaHookAddExtraConnectivitiesParameters(nabla, numParams);
+  if (job->item[0]=='c' || job->item[0]=='n')
+    nMiddleParamsAddExtra(nabla, numParams);
+  //nprintf(nabla, NULL, "/*eolambdaHookAddExtraParameters*/");
 }

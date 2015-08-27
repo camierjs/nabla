@@ -284,13 +284,14 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
  *****************************************************************************/
 NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
   nablaJob *job=entity->jobs;
+
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
   if (isAnArcaneService(entity->main)) return NABLA_OK;
   for(;job!=NULL;job=job->next){
     if (job->stdParamsNode==NULL) continue;
-    if (job->is_a_function==true){
-      fprintf(entity->hdr, "\n\tvirtual ");
-      nMiddleFunctionDumpHeader(entity->hdr, job->stdParamsNode);
+    if (job->is_a_function){
+      fprintf(entity->hdr, "\n\t virtual ");
+      nMiddleFunctionDumpHeader(entity->hdr, job->jobNode);
       fprintf(entity->hdr, ";");
       continue;
     }
@@ -299,7 +300,7 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
     // On remplit la ligne du fichier HDR
     //assert(job->returnType->children!=NULL);
     fprintf(entity->hdr, "\n\tvirtual %s %s(", job->returnTypeNode->children->token, job->name);
-    nMiddleDumpParameterTypeList(entity->hdr, job->stdParamsNode);
+    nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);
     // Les entry points ne prennent pas d'arguments dans Arcane
     //actFunctionDumpHdr(entity->hdr, job->params);
     fprintf(entity->hdr, ");");

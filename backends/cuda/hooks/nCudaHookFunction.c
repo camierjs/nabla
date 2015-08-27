@@ -87,10 +87,10 @@ void nCudaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
     nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments*/");
     int numParams=1;
     nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    cudaAddExtraArguments(nabla, called, &numParams);
+    nMiddleArgsAddGlobal(nabla, called, &numParams);
     nprintf(nabla, "/*ShouldDumpParamsInCuda*/", "/*cudaAddArguments done*/");
     if (called->nblParamsNode != NULL)
-      cudaDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
+      nMiddleArgsDump(nabla,called->nblParamsNode,&numParams);
   }
 }
 
@@ -112,31 +112,7 @@ void nCudaHookDfsForCalls(struct nablaMainStruct *nabla,
                          nablaJob *fct, astNode *n,
                          const char *namespace,
                          astNode *nParams){
-  int nb_called;
-  nablaVariable *var;
-  // On scan en dfs pour chercher ce que cette fonction va appeler
-  dbg("\n\t[cudaDfsForCalls] On scan en DFS pour chercher ce que cette fonction va appeler");
-  nb_called=dfsScanJobsCalls(&fct->called_variables,nabla,n);
-  dbg("\n\t[cudaDfsForCalls] nb_called = %d", nb_called);
-  if (nb_called!=0){
-    int numParams=1;
-    cudaAddExtraConnectivitiesParameters(nabla,&numParams);
-    dbg("\n\t[cudaDfsForCalls] dumping variables found:");
-    for(var=fct->called_variables;var!=NULL;var=var->next){
-      dbg("\n\t\t[cudaDfsForCalls] variable %s %s %s", var->type, var->item, var->name);
-      nprintf(nabla, NULL, ",\n\t\t/*used_called_variable*/%s *%s_%s",var->type, var->item, var->name);
-    }
-  }
-  // Maintenant qu'on a tous les called_variables potentielles, on remplit aussi le hdr
-  // On remplit la ligne du hdr
-  hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->call->entryPointPrefix(nabla,fct),
-          fct->return_type,
-          namespace?"Entity::":"",
-          fct->name);
-  // On va chercher les paramètres standards pour le hdr
-  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
-  hprintf(nabla, NULL, ");");
+  nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
 }
 
 

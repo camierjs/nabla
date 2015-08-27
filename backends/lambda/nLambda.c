@@ -94,7 +94,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
-  {"GlobalIteration", "global_iteration"},
+  {"GlobalIteration", "global_iteration[0]"},
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},

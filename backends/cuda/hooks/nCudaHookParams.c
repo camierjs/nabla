@@ -122,3 +122,26 @@ void nCudaHookDumpNablaParameterList(nablaMain *nabla,
 }
 
 
+// ****************************************************************************
+// * Dump d'extra paramètres
+// ****************************************************************************
+void nCudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+  nablaVariable *var;
+  if (*numParams!=0) nprintf(nabla, NULL, ",");
+  nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
+  *numParams+=1;
+  // Et on rajoute les variables globales
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    //if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->item, "global")!=0) continue;
+    nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
+            //(*numParams!=0)?",":"", 
+            (var->type[0]=='r')?"Real":(var->type[0]=='i')?"int":"/*Unknown type*/",
+            var->name);
+    *numParams+=1;
+  }
+  // Rajout pour l'instant systématiquement des connectivités
+  if (job->item[0]=='c' || job->item[0]=='n')
+    nMiddleParamsAddExtra(nabla, numParams);
+}
+

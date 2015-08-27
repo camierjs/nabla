@@ -50,36 +50,10 @@ void nCudaHookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,NULL);
-  
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
   if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
     exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
 }
-
-
-/*****************************************************************************
-  * Dump d'extra paramètres
- *****************************************************************************/
-void nCudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
-  nablaVariable *var;
-  if (*numParams!=0) nprintf(nabla, NULL, ",");
-  nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
-  *numParams+=1;
-  // Et on rajoute les variables globales
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    //if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->item, "global")!=0) continue;
-    nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
-            //(*numParams!=0)?",":"", 
-            (var->type[0]=='r')?"Real":(var->type[0]=='i')?"int":"/*Unknown type*/",
-            var->name);
-    *numParams+=1;
-  }
-  // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c' || job->item[0]=='n')
-    cudaAddExtraConnectivitiesParameters(nabla, numParams);
-}
-
 
 
 /*****************************************************************************

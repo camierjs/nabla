@@ -354,31 +354,33 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \n\t\t\t//printf(\"\\nITERATION %%d\", iteration);\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_iteration, &iteration, sizeof(int), cudaMemcpyHostToDevice));");
     }
+    // Dump de la tabulation et du nom du point d'entrée
     nprintf(n, NULL, "\n%s%s<<<dim%sGrid,dim%sBlock>>>( // @ %f",
             is_into_compute_loop?"\t\t\t":"\t\t",
             entry_points[i].name,
             entry_points[i].item[0]=='c'?"Cell":entry_points[i].item[0]=='n'?"Node":"Func",
             entry_points[i].item[0]=='c'?"Job":entry_points[i].item[0]=='n'?"Job":"Func",
             entry_points[i].whens[0]);
-    
+   // Dump des arguments *ou pas*    
     if (entry_points[i].stdParamsNode != NULL)
-      numParams=nMiddleDumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
+      numParams=nMiddleDumpParameterTypeList(n,n->entity->src,
+                                             entry_points[i].stdParamsNode);
     else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     //nprintf(n,NULL,"/*numParams=%d*/",numParams);
     
     // On s'autorise un endroit pour insérer des arguments
-    cudaAddExtraArguments(n, &entry_points[i], &numParams);
+    nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      cudaDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      nMiddleArgsDump(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
       if (!entry_points[i].reduction)
-        cudaAddExtraConnectivitiesArguments(n,&numParams);
+        nMiddleArgsAddExtra(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[nccCudaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){

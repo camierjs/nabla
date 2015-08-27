@@ -136,6 +136,7 @@ typedef struct nablaJobStruct{
   int when_index;
   double whens[64];
   char *where;
+  astNode *jobNode;
   astNode *returnTypeNode;
   astNode *stdParamsNode;
   astNode *nblParamsNode;
@@ -233,7 +234,7 @@ void nMiddleScanForNablaJobAtConstant(astNode*,nablaMain*);
 char nMiddleScanForNablaJobForallItem(astNode*);
 void nMiddleScanForIfAfterAt(astNode*,nablaJob*,nablaMain*);
 void nMiddleDumpIfAfterAt(astNode*,nablaMain*);
-int nMiddleDumpParameterTypeList(FILE*,astNode*);
+int nMiddleDumpParameterTypeList(nablaMain*,FILE*,astNode*);
 nablaJob *nMiddleJobNew(nablaEntity*);
 nablaJob *nMiddleJobAdd(nablaEntity*,nablaJob*);
 nablaJob *nMiddleJobLast(nablaJob*);
@@ -309,5 +310,12 @@ void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
 
 // nMiddleAnimate
 NABLA_STATUS nMiddleBackendAnimate(nablaMain*,astNode*);
+
+
+void nMiddleArgsAddExtra(nablaMain*,int*);
+void nMiddleArgsAddGlobal(nablaMain*,nablaJob*,int*);
+void nMiddleArgsDump(nablaMain*,astNode*,int*);
+void nMiddleParamsAddExtra(nablaMain*,int*);
+void nMiddleDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
 
 #endif // _NABLA_MIDDLEND_H_

@@ -59,6 +59,7 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->when_index=0;
   for(i=0;i<32;++i)
     job->whens[i]=HUGE_VAL;
+  job->jobNode=NULL;
   job->returnTypeNode=NULL;
   job->stdParamsNode=NULL;
   job->nblParamsNode=NULL;
@@ -337,51 +338,6 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
 
 
 /*****************************************************************************
- * Dump pour le header
- *****************************************************************************/
-int nMiddleDumpParameterTypeList(FILE *file, astNode * n){
-  int number_of_parameters_here=0;
-  //if (n->token != NULL) fprintf(file, "/*dumpParameterTypeList %s:%d*/",n->token,number_of_parameters_here);
-  
-  if ((n->token != NULL )&&(strncmp(n->token,"xyz",3)==0)){// hit 'xyz'
-    //fprintf(file, "/*xyz hit!*/");
-    number_of_parameters_here+=1;
-  }
-
-  if ((n->token != NULL )&&(strncmp(n->token,"void",4)==0)){
-    //fprintf(file, "/*void hit!*/");
-    number_of_parameters_here-=1;
-  }
-  
-  if ((n->token != NULL )&&(strncmp(n->token,"void",4)!=0)){// avoid 'void'
-    if (strncmp(n->token,"restrict",8)==0){
-      fprintf(file, "__restrict__ ");
-    }else if (strncmp(n->token,"aligned",7)==0){
-      fprintf(file, "/*aligned*/");
-    }else{
-      //fprintf(file, "/*%s*/", n->token);
-      fprintf(file, "%s ", n->token);
-      dbg("\n\t\t[dumpParameterTypeList] %s", n->token);
-    }
-  }
-  // A chaque parameter_declaration, on incrémente le compteur de paramètre
-  if (n->ruleid==rulenameToId("parameter_declaration")){
-    //fprintf(file, "/*number_of_parameters_here+=1*/");
-    dbg("\n\t\t[dumpParameterTypeList] number_of_parameters_here+=1");
-    number_of_parameters_here+=1;
-  }
-  if (n->children != NULL)
-    number_of_parameters_here+=nMiddleDumpParameterTypeList(file, n->children);
-  if (n->next != NULL)
-    number_of_parameters_here+=nMiddleDumpParameterTypeList(file, n->next);
-  
-  //fprintf(file, "/*return %d*/",number_of_parameters_here);
-  return number_of_parameters_here;
-}
-
-
-
-/*****************************************************************************
  * Remplissage de la structure 'job'
  * Dump dans le src de la déclaration de ce job en fonction du backend
  *****************************************************************************/
@@ -431,6 +387,7 @@ void nMiddleJobFill(nablaMain *nabla,
   job->returnTypeNode=n->children->next->children;
   // Récupération de la liste des paramètres
   nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  assert(nd);
   job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
@@ -451,7 +408,7 @@ void nMiddleJobFill(nablaMain *nabla,
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           job->name);
   // On va chercher les paramètres standards
-  numParams=nMiddleDumpParameterTypeList(nabla->entity->src, job->stdParamsNode);
+  numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
   

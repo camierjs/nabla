@@ -93,7 +93,7 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // ******************************************************************************\n\
 __global__ void %s(", item_var_name, global_var_name, job_name);
   nCudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
-nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
+  nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(tcid);\n\
 \t/**global_%s=*/ReduceMinToDouble((double)(cell_%s[tcid]));\n\

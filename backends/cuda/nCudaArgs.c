@@ -44,112 +44,19 @@
 #include "nabla.tab.h"
 
 
-// *****************************************************************************
-// * Dump d'extra connectivity
 // ****************************************************************************
-void cudaAddExtraConnectivitiesArguments(nablaMain *nabla, int *numParams){
-  const char* tabs="\t\t\t\t\t\t\t";
-  nprintf(nabla, NULL, ",\n%scell_node",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell_corner",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_prev",tabs);
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_next",tabs);
-  *numParams+=1;
-}
-
-void cudaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  nprintf(nabla, NULL, ",\n\t\tint *cell_node");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell_corner");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_prev");
-  *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_next");
-  *numParams+=1;
-}
-
-/*****************************************************************************
-  * Dump d'extra arguments
- *****************************************************************************/
-void cudaAddExtraArguments(nablaMain *nabla, nablaJob *job, int *numParams){
-  const char* tabs="\t\t\t\t\t\t\t";
-  { // Rajout pour l'instant systématiquement des node_coords et du global_deltat
-    nablaVariable *var;
-    if (*numParams!=0) nprintf(nabla, NULL, "/*cudaAddExtraArguments*/,");
-    nprintf(nabla, NULL, "\n%snode_coord",tabs);
-    *numParams+=1;
-    // Et on rajoute les variables globales
-    for(var=nabla->variables;var!=NULL;var=var->next){
-      //if (strcmp(var->name, "time")==0) continue;
-      if (strcmp(var->item, "global")!=0) continue;
-      nprintf(nabla, NULL, ",global_%s", var->name);
-      *numParams+=1;
-   }
-  }
-  // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c'||job->item[0]=='n')
-    cudaAddExtraConnectivitiesArguments(nabla, numParams);
-}
-
-
-/*****************************************************************************
-  * Dump dans le src des arguments nabla en in comme en out
- *****************************************************************************/
-void cudaDumpNablaArgumentList(nablaMain *nabla, astNode *n, int *numParams){
-  //nprintf(nabla,"\n\t[cudaDumpNablaArgumentList]",NULL);
-  if (n==NULL) return;
-  
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
-  
-  if (n->tokenid=='@') return;
-  
-  //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))    if (*numParams!=0) nprintf(nabla, NULL, ",");
-  
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
-    *numParams+=1;
-    // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL) return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaArgumentList] Variable error\n"));
-    if (strcmp(var->type, "real3")!=0){
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
-      }else{
-        nprintf(nabla, NULL, ",\n\t\t\t\t\t\t\t%s_%s", var->item, n->children->token);
-      }
-    }else{
-      if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0)
-        nprintf(nabla, NULL, NULL);
-      else
-        nprintf(nabla, NULL,  ",\n\t\t\t\t\t\t\t%s_%s", var->item, n->children->token);
-    }
-  }
-  if (n->children != NULL) cudaDumpNablaArgumentList(nabla, n->children, numParams);
-  if (n->next != NULL) cudaDumpNablaArgumentList(nabla, n->next, numParams);
-}
-
-
-
-/*****************************************************************************
-  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
- *****************************************************************************/
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla, astNode *n, bool in_or_out){
+// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+// ****************************************************************************
+void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+                                                astNode *n,
+                                                bool in_or_out){
   //nprintf(nabla,"\n\t[cudaHookDumpNablaParameterList]",NULL);
   if (n==NULL) return;
-  
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) return;
   if (n->tokenid=='@') return;
-
   if (n->tokenid==OUT) in_or_out=false;
   if (n->tokenid==INOUT) in_or_out=false;
-    
   if (n->ruleid==rulenameToId("direct_declarator")){
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     // Si on ne trouve pas de variable, on a rien à faire

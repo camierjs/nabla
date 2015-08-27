@@ -60,7 +60,7 @@ void nOkinaHookDfsForCalls(struct nablaMainStruct *nabla,
           namespace?"Entity::":"",
           fct->name);
   // On va chercher les paramètres standards pour le hdr
-  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
+  nMiddleDumpParameterTypeList(nabla,nabla->entity->hdr, nParams);
   hprintf(nabla, NULL, ");");
 }
 

@@ -42,10 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-static void arcaneDfsForCalls(nablaMain *nabla,
-                              nablaJob *job, astNode *n,
-                              const char *namespace,
-                              astNode *nParams){}
 
 static char* arcaneEntryPointPrefix(nablaMain *nabla,
                                     nablaJob *entry_point){
@@ -171,7 +167,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneAddCallNames,
     arcaneAddArguments,
     arcaneEntryPointPrefix,
-    arcaneDfsForCalls,
+    NULL, // DFS for calls
     NULL, // addExtraParameters
     NULL  // dumpNablaParameterList
   };

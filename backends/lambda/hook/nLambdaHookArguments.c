@@ -43,27 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-/*****************************************************************************
- * Dump d'extra arguments
- *****************************************************************************/
-void nLambdaHookAddExtraArguments(nablaMain *nabla,
-                                  nablaJob *job,
-                                  int *numParams){
-  nprintf(nabla,"\n\t\t/*lambdaAddExtraArguments*/",NULL);
-}
-
-
-
-/*****************************************************************************
- * Dump dans le src des arguments nabla en in comme en out
- *****************************************************************************/
-void nLambdaHookDumpNablaArgumentList(nablaMain *nabla, astNode *n,
-                                      int *numParams){
-  nprintf(nabla,"\n\t\t/*lambdaDumpNablaArgumentList*/",NULL);
-}
-
-
 // ****************************************************************************
 // * lambdaHookReturnFromArgument
 // ****************************************************************************
@@ -75,13 +54,17 @@ void lambdaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
 \n\tReal %s_per_thread[threads];", rtnVariable);
 }
 
+
+// ****************************************************************************
+// * lambdaHookAddArguments
+// ****************************************************************************
 void lambdaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   if (fct->parse.function_call_name!=NULL){
     //nprintf(nabla, "/*ShouldDumpParamsInLambda*/", "/*Arg*/");
     int numParams=1;
     nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    nLambdaHookAddExtraArguments(nabla, called, &numParams);
+    nMiddleArgsAddGlobal(nabla, called, &numParams);
     if (called->nblParamsNode != NULL)
-      nLambdaHookDumpNablaArgumentList(nabla,called->nblParamsNode,&numParams);
+      nMiddleArgsDump(nabla,called->nblParamsNode,&numParams);
   }
 }

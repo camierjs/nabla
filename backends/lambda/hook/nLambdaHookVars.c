@@ -216,8 +216,8 @@ static void lambdaGlobals(nablaMain *nabla){
 // * Temps de la simulation\n\
 // ********************************************************\n\
 Real global_deltat[1];\n\
-int global_iteration;\n\
-double global_time;\n");
+int global_iteration[1];\n\
+double global_time[1];\n");
 }
 
 

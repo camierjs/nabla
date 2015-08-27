@@ -49,6 +49,7 @@
 // * lambdaHookReduction
 // ****************************************************************************
 void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+  int fakeNumParams=0;
   const astNode *item_node = n->children->next->children;
   const astNode *global_var_node = n->children->next->next;
   const astNode *reduction_operation_node = global_var_node->next;
@@ -85,7 +86,10 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
-void %s(void){ // @ %s\n\
+void %s(",item_var_name,global_var_name,job_name);
+  lambdaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
+
+  nprintf(nabla, NULL,"){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
 \tconst int threads = omp_get_max_threads();\n\
 \tReal %s_per_thread[threads];\n\
@@ -101,9 +105,7 @@ void %s(void){ // @ %s\n\
 \t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
 \t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
 \t}\n\
-}\n\n",   item_var_name,global_var_name,
-          job_name,
-          at_single_cst_node->token,
+}\n\n",   at_single_cst_node->token,
           reduction_init,
           global_var_name,
           global_var_name,

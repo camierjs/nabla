@@ -144,16 +144,7 @@ void lambdaHookDfsForCalls(struct nablaMainStruct *nabla,
                              astNode *n,
                              const char *namespace,
                              astNode *nParams){
-  // Maintenant qu'on a tous les called_variables potentielles, on remplit aussi le hdr
-  // On remplit la ligne du hdr
-  hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->call->entryPointPrefix(nabla,fct),
-          fct->return_type,
-          namespace?"Entity::":"",
-          fct->name);
-  // On va chercher les paramètres standards pour le hdr
-  nMiddleDumpParameterTypeList(nabla->entity->hdr, nParams);
-  hprintf(nabla, NULL, ");");
+  nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
 }
 
 
@@ -172,7 +163,7 @@ void lambdaHookExit(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*EXIT*/", "exit(0.0)");
 }
 void lambdaHookTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time");
+  nprintf(nabla, "/*TIME*/", "global_time[0]");
 }
 void lambdaHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");

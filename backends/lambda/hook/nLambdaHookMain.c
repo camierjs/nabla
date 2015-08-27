@@ -46,13 +46,13 @@
  * Backend LAMBDA POSTFIX - Génération du 'main'
 \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
 #define LAMBDA_MAIN_POSTFIX "\n//LAMBDA_MAIN_POSTFIX\
-\n\tglobal_time+=*(double*)&global_deltat[0];\
-\n\tglobal_iteration+=1;\
-\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
+\n\tglobal_time[0]+=*(double*)&global_deltat[0];\
+\n\tglobal_iteration[0]+=1;\
+\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
 \n\t}\
 \tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n\
 \n}\n"
 
 
@@ -69,10 +69,10 @@ static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
 // ****************************************************************************
 // * Dump d'extra connectivity
 // ****************************************************************************
-static void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla,
-                                                  int *numParams){
-  return;
-}
+//static void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla,
+//                                                  int *numParams){
+//  return;
+//}
 
 
 
@@ -149,10 +149,10 @@ int main(int argc, char *argv[]){\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
 \tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
 \t// Initialisation du temps et du deltaT\n\
-\tglobal_time=0.0;\n\
-\tglobal_iteration=1;\n\
+\tglobal_time[0]=0.0;\n\
+\tglobal_iteration[0]=1;\n\
 \tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
+\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);"
 NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainPrefix]");
   fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
@@ -174,23 +174,24 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
   entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
   
-  // Et on rescan afin de dumper
-  for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points;++i){
-     if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
-     if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
-      dbg("%s\n\t[lambdaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+  // Et on rescan afin de dumper, on rajoute les +2 ComputeLoop[End|Begin]
+  for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
+    if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
+    dbg("%s\n\t[lambdaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
         entry_points[i].where);
     // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
-      nprintf(n, NULL,"\
-\n\tgettimeofday(&st, NULL);\n\
-\twhile (global_time<option_stoptime){// && global_iteration!=option_max_iterations){");
+      nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);\n\
+\twhile (global_time[0]<option_stoptime){\
+\t// && global_iteration!=option_max_iterations){");
     }
     
-    // On sync si l'on découvre un temps logique différent
+    // On provoque un parallel->sync
+    // si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])
       nprintf(n, NULL, "\n%s%s",
               is_into_compute_loop?"\t\t":"\t",
@@ -198,34 +199,37 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     last_when=entry_points[i].whens[0];
     
     // Dump de la tabulation et du nom du point d'entrée
-    nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
+    nprintf(n, NULL, "\n%s/*@%f*/%s%s( // ",
             is_into_compute_loop?"\t\t":"\t",
             n->call->parallel->spawn(), 
             entry_points[i].name,
             entry_points[i].whens[0]);
     // Dump des arguments *ou pas*
     if (entry_points[i].stdParamsNode != NULL){
-      //nprintf(n, "/*entry_points[i].stdParamsNode != NULL*/",NULL);
-      //numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
-    }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
+      nprintf(n, NULL,"/*entry_points[i].stdParamsNode != NULL*/");
+      numParams=nMiddleDumpParameterTypeList(n,n->entity->src,
+                                             entry_points[i].stdParamsNode);
+      nprintf(n, NULL,"/*done*/");
+    }else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    nLambdaHookAddExtraArguments(n, &entry_points[i], &numParams);
+    nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      nLambdaHookDumpNablaArgumentList(n,entry_points[i].nblParamsNode,&numParams);
+      nMiddleArgsDump(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-      lambdaAddExtraConnectivitiesArguments(n,&numParams);
+       if (!entry_points[i].reduction)
+         nMiddleArgsAddExtra(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[lambdaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
         nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
       }
-    }else nprintf(n,NULL,"/*NULL_called_variables*/");
+    }//else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
     lambdaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
     //nprintf(n, NULL, "\n");

@@ -344,6 +344,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   int numParams;
   astNode *nFctName;
   astNode *nParams;
+  fct->jobNode=n;
   fct->called_variables=NULL;
   fct->in_out_variables=NULL;
   dbg("\n\n\t[nablaFctFill] ");
@@ -371,8 +372,11 @@ void nMiddleFunctionFill(nablaMain *nabla,
   fct->name_utf8=strdup(nFctName->children->token_utf8);
   //dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
-  nParams=dfsFetch(n->children,rulenameToId("parameter_list"));
-  fct->stdParamsNode=n;
+  
+  // Récupération de la liste des paramètres
+  nParams=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  fct->stdParamsNode=nParams->children;
+  
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
       (fct->scope!=NULL)?fct->scope:"Null",
       (fct->region!=NULL)?fct->region:"Null",
@@ -391,14 +395,15 @@ void nMiddleFunctionFill(nablaMain *nabla,
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           fct->name);
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
-  numParams=nMiddleDumpParameterTypeList(nabla->entity->src, nParams);
+  numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
   nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   // On s'autorise un endroit pour insérer des paramètres
   dbg("\n\t[nablaFctFill] adding ExtraParameters");
   if (nabla->hook->call->addExtraParameters!=NULL && fct->is_an_entry_point)
     nabla->hook->call->addExtraParameters(nabla, fct, &numParams);
   dbg("\n\t[nablaFctFill] launching dfsForCalls");
-  nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
+  if (nabla->hook->call->dfsForCalls)
+    nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");
   for(n=n->children->next;
