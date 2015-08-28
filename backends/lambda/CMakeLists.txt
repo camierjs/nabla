@@ -16,4 +16,4 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
 
 target_link_libraries(NablaLambda NablaLambdaHook)
 
-add_dependencies(NablaLambda Nabla)
+add_dependencies(NablaLambda libNabla)

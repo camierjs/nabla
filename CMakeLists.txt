@@ -16,10 +16,23 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set(NABLA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(NABLA_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
+#########
+# APPLE #
+#########
+if(APPLE)
+  message("APPLE=${APPLE}, setting ABI_UNDERSCORE")
+  set(ABI_UNDERSCORE "_")
+else(APPLE)
+  unset(ABI_UNDERSCORE)
+endif(APPLE)
+
 ###############
 # FLEX, BISON #
 ###############
-info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} subdirectory, looking for ${VT100_FG_YELLOW}BISON${VT100_RESET}, ${VT100_FG_YELLOW}FLEX${VT100_RESET} and ${VT100_FG_YELLOW}CUDA")
+info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} subdirectory, looking for:\
+ ${VT100_FG_YELLOW}BISON${VT100_RESET},\
+ ${VT100_FG_YELLOW}FLEX${VT100_RESET} and\
+ ${VT100_FG_YELLOW}CUDA${VT100_RESET}")
 find_package(BISON)
 info("\t${VT100_FG_MAGENTA}BISON${VT100_RESET} version is ${VT100_BOLD}${BISON_VERSION}${VT100_RESET}")
 find_package(FLEX)
@@ -70,7 +83,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 # Executable, librairie et install #
 ####################################
 add_executable(nabla nabla.c)
-add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
+add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
 ############
 # Backends #
@@ -84,7 +97,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 # Link libraries #
 ##################
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
-target_link_libraries(nabla Nabla ${FLEX_LIBRARIES}
+target_link_libraries(nabla libNabla ${FLEX_LIBRARIES}
   NablaMiddlend 
   NablaArcane NablaCuda NablaLambda NablaOkina
   NablaFrontend NablaMiddlend NablaToolbox)

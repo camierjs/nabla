@@ -7,4 +7,4 @@ set(FRONTEND_C
   nablaDebug.c)
 
 add_library(NablaFrontend ${FRONTEND_C})
-add_dependencies(NablaFrontend Nabla)
+add_dependencies(NablaFrontend libNabla)

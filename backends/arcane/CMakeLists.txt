@@ -44,4 +44,4 @@ set(LIBRARIES_ARCANE_C
   libraries/nArcaneLibMathematica.c)
 
 add_library(NablaArcane ${BACKEND_ARCANE_C} ${LIBRARIES_ARCANE_C})
-add_dependencies(NablaArcane Nabla)
+add_dependencies(NablaArcane libNabla)

@@ -23,12 +23,14 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
 ###############################################
 # get_additional_nabla_files_and_set_Makefile #
 function(get_additional_nabla_files_and_set_Makefile name backend path)
-  #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
-  execute_process(COMMAND find . -name "*.n" -printf "%f "
-    COMMAND sed -e "s/\\(${name}\\.n\\)//g"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
-    OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+   #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
+   execute_process(COMMAND find . -name "*.n"
+		             COMMAND sed -e "s/\\.\\///g"
+		             COMMAND tr "\\n" " "
+                   COMMAND sed -e "s/\\(${name}\\.n\\)//g"
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${name}
+                   OUTPUT_VARIABLE ADDITIONAL_NABLA_FILES
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
   #info("${VT100_FG_GREEN}get_additional_nabla_files: ${ADDITIONAL_NABLA_FILES}${VT100_RESET}")
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${path}/Makefile)
   separate_arguments(ADDITIONAL_NABLA_FILES)
@@ -103,21 +105,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_B
 
 
 ########################################
-# Now scan tests directory to add some #
-# man ls: -X             -> sort alphabetically by entry extension
-#         -F, --classify -> append indicator (one of */=>@|) to entries
-#         -1             -> list one file per line
+# Now scan tests directory to add them #
+# Avoid '.' and 'mesh'                 #
 ########################################
-#execute_process(COMMAND /bin/ls -1XF
-#                COMMAND grep -v mesh
-#                COMMAND sed -e "/.*\\//!d;s/\\///g"
-#                COMMAND tr \\n " "
-#                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#                RESULT_VARIABLE RESULT_NABLA_TESTS
-#                OUTPUT_VARIABLE NABLA_TESTS
-#                OUTPUT_STRIP_TRAILING_WHITESPACE)
-# bash -c "find . -maxdepth 1 -name [^\\.]\\*[^\\(mesh\\)]\\* -type d -printf '%f\\\\;'"
-execute_process(COMMAND find . -maxdepth 1 -type d -name [^.]*[^\(mesh\)]* -printf %f\ 
+execute_process(COMMAND find . -maxdepth 1 -type d -name [^\\.]*[^\(mesh\)]*
+		          COMMAND sed -e "s/\\.\\// /g"
+                COMMAND tr "\\n" " "
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 RESULT_VARIABLE RESULT_NABLA_TESTS
                 OUTPUT_VARIABLE NABLA_TESTS
@@ -128,8 +121,8 @@ endif (${RESULT_NABLA_TESTS})
 separate_arguments(NABLA_TESTS)
 #info("Loading NABLA_TESTS: ${NABLA_TESTS}${VT100_RESET}")
 
-foreach(tst IN ITEMS ${NABLA_TESTS})
-  info("\tFocusing on test ${tst}")
+foreach(tst ${NABLA_TESTS})
+  #info("\tFocusing on test ${tst}")
   string(REGEX MATCH ".*_aleph_index$" ALEPH_INDEX ${tst})
   if (ALEPH_INDEX)
     nabla_add_arcane_test_with_additional_defines(${tst} 1 gen ALEPH_INDEX)

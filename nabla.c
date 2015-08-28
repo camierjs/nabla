@@ -82,7 +82,7 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\t\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\t\tIntel® ICC pragma generation\n\
-\t[1;35m--lambda [36;4mname[0m\tCode generation for the generic C/C++ Lambda target ([5;31mnot yet usable![0m)\n\
+\t[1;35m--lambda [36;4mname[0m\tCode generation for the generic C/C++ Lambda target ([5;31mWork in progress![0m)\n\
 \t[1;35m--cuda [36;4mname[0m\tCode generation for the target CUDA\n\
 \t\t\tCUDA does not yet support all of nabla's system libraries\n\
 \t[1;35m--arcane [36;4mname[0m\tCode generation for the middleware ARCANE\n\
@@ -102,7 +102,8 @@ static char *unique_temporary_file_name=NULL;
 \t\t(setq locale-coding-system 'utf-8)\n\
 \t\t(set-language-environment 'utf-8)\n\
 [1;36mAUTHOR[0m\n\
-\tJean-Sylvain Camier <jean-sylvain.camier@cea.fr>\n\
+\tJean-Sylvain Camier:\t<jean-sylvain.camier@cea.fr>\n\
+\t\t\t\t<camierjs@nabla-lang.org>\n\
 [1;36mBUGS[0m\n\
 \tBugs are to be reported to the above address.\n"
 //\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n

@@ -13,9 +13,11 @@ set(BACKEND_CUDA_C
   nCudaEnum.c
   nCudaVariables.c
   nCudaHeader.c
-  nCudaDump.S
+  ${CMAKE_CURRENT_BINARY_DIR}/nCudaDump.S
   nCudaSimd.c)
 
+configure_file(nCudaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nCudaDump.S)
+ 
 # On spécifie en plus que nccCudaDump.S va utiliser incbin pour se compiler
 set_property(SOURCE nccCudaDump.S 
              PROPERTY OBJECT_DEPENDS 
@@ -36,4 +38,4 @@ target_link_libraries(NablaCuda
   NablaCudaHooks
   NablaCudaMesh)
 
-add_dependencies(NablaCuda Nabla)
+add_dependencies(NablaCuda libNabla)

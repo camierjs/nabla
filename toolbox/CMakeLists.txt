@@ -8,4 +8,4 @@ set(TOOLBOX_C
   nToolsOperators.c)
 
 add_library(NablaToolbox ${TOOLBOX_C})
-add_dependencies(NablaToolbox Nabla)
+add_dependencies(NablaToolbox libNabla)

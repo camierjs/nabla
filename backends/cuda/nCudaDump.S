@@ -40,25 +40,25 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global real3_h
-        .global debug_h
-        .global error_h
-        .global extra_h
-        .global cuMsh_h
-real3_h:
-	     .incbin "real3.h"
-        .byte 0
-debug_h:
-	     .incbin "debug.h"
-        .byte 0
-error_h: 
-	     .incbin "error.h"
-        .byte 0
-extra_h: 
-	     .incbin "extra.h"
-        .byte 0   
-cuMsh_h: 
-	     .incbin "cuMsh.h"
-        .byte 0   
+   //.section ".rodata"
+   .globl ${ABI_UNDERSCORE}real3_h
+   .globl ${ABI_UNDERSCORE}debug_h
+   .globl ${ABI_UNDERSCORE}error_h
+   .globl ${ABI_UNDERSCORE}extra_h
+   .globl ${ABI_UNDERSCORE}cuMsh_h
+${ABI_UNDERSCORE}real3_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/real3.h"
+   .byte 0
+${ABI_UNDERSCORE}debug_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/debug.h"
+   .byte 0
+${ABI_UNDERSCORE}error_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/error.h"
+   .byte 0
+${ABI_UNDERSCORE}extra_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/extra.h"
+   .byte 0   
+${ABI_UNDERSCORE}cuMsh_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/cuMsh.h"
+   .byte 0   
          

@@ -10,7 +10,6 @@ set_property(SOURCE
   PROPERTY OBJECT_DEPENDS 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
-
 configure_file(nLambdaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nLambdaDump.S)
 
 add_library(NablaLambdaDump ${BACKEND_LAMBDA_DUMP_C})

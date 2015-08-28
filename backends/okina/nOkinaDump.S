@@ -40,154 +40,154 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global knDbg_h
-        .global knMsh1D_c
-        .global knMsh3D_c
-        .global knMth_h
-        
-        .global knStdReal_h
-        .global knStdReal3_h
-        .global knStdInteger_h
-        .global knStdTernary_h
-        .global knStdGather_h
-        .global knStdScatter_h
-        .global knStdOStream_h
+   //.section ".rodata"
+	.globl ${ABI_UNDERSCORE}knDbg_h
+	.globl ${ABI_UNDERSCORE}knMsh1D_c
+	.globl ${ABI_UNDERSCORE}knMsh3D_c
+	.globl ${ABI_UNDERSCORE}knMth_h
+	        
+	.globl ${ABI_UNDERSCORE}knStdReal_h
+	.globl ${ABI_UNDERSCORE}knStdReal3_h
+	.globl ${ABI_UNDERSCORE}knStdInteger_h
+	.globl ${ABI_UNDERSCORE}knStdTernary_h
+	.globl ${ABI_UNDERSCORE}knStdGather_h
+	.globl ${ABI_UNDERSCORE}knStdScatter_h
+	.globl ${ABI_UNDERSCORE}knStdOStream_h
 
-        .global knSseReal_h
-        .global knSseReal3_h
-        .global knSseInteger_h
-        .global knSseTernary_h
-        .global knSseGather_h
-        .global knSseScatter_h
-        .global knSseOStream_h
-
-        .global knAvxReal_h
-        .global knAvxReal3_h
-        .global knAvxInteger_h
-        .global knAvxTernary_h
-        .global knAvxGather_h
-        .global knAvx2Gather_h
-        .global knAvxScatter_h
-        .global knAvxOStream_h
+	.globl ${ABI_UNDERSCORE}knSseReal_h
+	.globl ${ABI_UNDERSCORE}knSseReal3_h
+	.globl ${ABI_UNDERSCORE}knSseInteger_h
+	.globl ${ABI_UNDERSCORE}knSseTernary_h
+	.globl ${ABI_UNDERSCORE}knSseGather_h
+	.globl ${ABI_UNDERSCORE}knSseScatter_h
+	.globl ${ABI_UNDERSCORE}knSseOStream_h
+   
+   .globl ${ABI_UNDERSCORE}knAvxReal_h
+   .globl ${ABI_UNDERSCORE}knAvxReal3_h
+   .globl ${ABI_UNDERSCORE}knAvxInteger_h
+   .globl ${ABI_UNDERSCORE}knAvxTernary_h
+   .globl ${ABI_UNDERSCORE}knAvxGather_h
+   .globl ${ABI_UNDERSCORE}knAvx2Gather_h
+   .globl ${ABI_UNDERSCORE}knAvxScatter_h
+   .globl ${ABI_UNDERSCORE}knAvxOStream_h
         
-        .global knMicReal_h
-        .global knMicReal3_h
-        .global knMicInteger_h
-        .global knMicTernary_h
-        .global knMicGather_h
-        .global knMicScatter_h
-        .global knMicOStream_h
+   .globl ${ABI_UNDERSCORE}knMicReal_h
+   .globl ${ABI_UNDERSCORE}knMicReal3_h
+   .globl ${ABI_UNDERSCORE}knMicInteger_h
+   .globl ${ABI_UNDERSCORE}knMicTernary_h
+   .globl ${ABI_UNDERSCORE}knMicGather_h
+   .globl ${ABI_UNDERSCORE}knMicScatter_h
+   .globl ${ABI_UNDERSCORE}knMicOStream_h
         
-knDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/knDbg.h"
-        .byte 0
-knMsh1D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh1D.c"
-        .byte 0
-knMsh3D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh3D.c"
-        .byte 0
-knMth_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/maths/knMth.h"
-        .byte 0
-
-
-        
-knStdReal_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdReal.h"
-        .byte 0
-knStdReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdReal3.h"
-        .byte 0
-knStdInteger_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdInteger.h"
-        .byte 0
-knStdTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdTernary.h"
-        .byte 0
-knStdGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdGather.h"
-        .byte 0
-knStdScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdScatter.h"
-        .byte 0
-knStdOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdOStream.h"
-        .byte 0
+${ABI_UNDERSCORE}knDbg_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/knDbg.h"
+   .byte 0
+${ABI_UNDERSCORE}knMsh1D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh1D.c"
+   .byte 0
+${ABI_UNDERSCORE}knMsh3D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh3D.c"
+   .byte 0
+${ABI_UNDERSCORE}knMth_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/maths/knMth.h"
+   .byte 0
 
 
         
-knSseReal_h:
+${ABI_UNDERSCORE}knStdReal_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdReal.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdReal3_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdReal3.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdInteger_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdInteger.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdTernary_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdTernary.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdGather_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdGather.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdScatter_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdScatter.h"
+   .byte 0
+${ABI_UNDERSCORE}knStdOStream_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/std/knStdOStream.h"
+   .byte 0
+
+
+        
+${ABI_UNDERSCORE}knSseReal_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseReal.h"
         .byte 0
-knSseReal3_h:
+${ABI_UNDERSCORE}knSseReal3_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseReal3.h"
         .byte 0
-knSseInteger_h:
+${ABI_UNDERSCORE}knSseInteger_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseInteger.h"
         .byte 0
-knSseTernary_h: 
+${ABI_UNDERSCORE}knSseTernary_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseTernary.h"
         .byte 0
-knSseGather_h: 
+${ABI_UNDERSCORE}knSseGather_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseGather.h"
         .byte 0
-knSseScatter_h: 
+${ABI_UNDERSCORE}knSseScatter_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseScatter.h"
         .byte 0
-knSseOStream_h: 
+${ABI_UNDERSCORE}knSseOStream_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/knSseOStream.h"
         .byte 0
 
 
         
-knAvxReal_h:
+${ABI_UNDERSCORE}knAvxReal_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxReal.h"
         .byte 0
-knAvxReal3_h:
+${ABI_UNDERSCORE}knAvxReal3_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxReal3.h"
         .byte 0
-knAvxInteger_h:
+${ABI_UNDERSCORE}knAvxInteger_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxInteger.h"
         .byte 0
-knAvxTernary_h: 
+${ABI_UNDERSCORE}knAvxTernary_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxTernary.h"
         .byte 0
-knAvxGather_h: 
+${ABI_UNDERSCORE}knAvxGather_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxGather.h"
         .byte 0
-knAvx2Gather_h: 
+${ABI_UNDERSCORE}knAvx2Gather_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvx2Gather.h"
         .byte 0
-knAvxScatter_h: 
+${ABI_UNDERSCORE}knAvxScatter_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxScatter.h"
         .byte 0
-knAvxOStream_h: 
+${ABI_UNDERSCORE}knAvxOStream_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/knAvxOStream.h"
         .byte 0
 
 
         
-knMicReal_h:
+${ABI_UNDERSCORE}knMicReal_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicReal.h"
         .byte 0
-knMicReal3_h:
+${ABI_UNDERSCORE}knMicReal3_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicReal3.h"
         .byte 0
-knMicInteger_h:
+${ABI_UNDERSCORE}knMicInteger_h:
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicInteger.h"
         .byte 0
-knMicTernary_h: 
+${ABI_UNDERSCORE}knMicTernary_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicTernary.h"
         .byte 0
-knMicGather_h: 
+${ABI_UNDERSCORE}knMicGather_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicGather.h"
         .byte 0
-knMicScatter_h: 
+${ABI_UNDERSCORE}knMicScatter_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicScatter.h"
         .byte 0
-knMicOStream_h: 
+${ABI_UNDERSCORE}knMicOStream_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/knMicOStream.h"
         .byte 0
 

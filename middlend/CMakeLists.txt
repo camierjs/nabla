@@ -19,4 +19,4 @@ set(MIDDLEND_C
   nMiddleLibraries.c)
 
 add_library(NablaMiddlend ${MIDDLEND_C})
-add_dependencies(NablaMiddlend Nabla)
+add_dependencies(NablaMiddlend libNabla)

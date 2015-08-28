@@ -40,42 +40,41 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-        .section ".rodata"
-        .global lambdaDbg_h
-        .global lambdaMsh1D_c
-        .global lambdaMsh3D_c
-
-        .global lambdaReal3_h
-        .global lambdaTernary_h
-        .global lambdaGather_h
-        .global lambdaScatter_h
-        .global lambdaOStream_h
-        
-lambdaDbg_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaDbg.h"
-        .byte 0
-lambdaMsh1D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh1D.c"
-        .byte 0
-lambdaMsh3D_c: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh3D.c"
-        .byte 0
+   //.section ".rodata"
+   .globl ${ABI_UNDERSCORE}lambdaDbg_h
+   .globl ${ABI_UNDERSCORE}lambdaMsh1D_c
+   .globl ${ABI_UNDERSCORE}lambdaMsh3D_c
+   .globl ${ABI_UNDERSCORE}lambdaReal3_h
+   .globl ${ABI_UNDERSCORE}lambdaGather_h
+   .globl ${ABI_UNDERSCORE}lambdaScatter_h
+   .globl ${ABI_UNDERSCORE}lambdaOStream_h
+   .globl ${ABI_UNDERSCORE}lambdaTernary_h
+       
+${ABI_UNDERSCORE}lambdaDbg_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaDbg.h"
+   .byte 0
+${ABI_UNDERSCORE}lambdaMsh1D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh1D.c"
+   .byte 0
+${ABI_UNDERSCORE}lambdaMsh3D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaMsh3D.c"
+   .byte 0
  
 
-lambdaReal3_h:
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaReal3.h"
-        .byte 0
+${ABI_UNDERSCORE}lambdaReal3_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaReal3.h"
+   .byte 0
 
-lambdaTernary_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaTernary.h"
-        .byte 0
-lambdaGather_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaGather.h"
-        .byte 0
-lambdaScatter_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaScatter.h"
-        .byte 0
-lambdaOStream_h: 
-	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaOStream.h"
-        .byte 0
+${ABI_UNDERSCORE}lambdaTernary_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaTernary.h"
+   .byte 0
+${ABI_UNDERSCORE}lambdaGather_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaGather.h"
+   .byte 0
+${ABI_UNDERSCORE}lambdaScatter_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaScatter.h"
+   .byte 0
+${ABI_UNDERSCORE}lambdaOStream_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaOStream.h"
+   .byte 0
 

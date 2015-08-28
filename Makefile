@@ -4,14 +4,23 @@
 CMAKE_ROOT_PATH = /usr/bin
 COMPILER_ROOT_PATH=/usr/bin
 #COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
+COMPILER_POSTFIX=
+
+#########
+# MacOS #
+#########
+#CMAKE_ROOT_PATH=/opt/local/bin
+#COMPILER_ROOT_PATH=/opt/local/bin
+#COMPILER_POSTFIX=-mp-4.9
 
 ####################
 # COMPILER OPTIONS #
+# gcc-mp-4.9 -dM -E - < /dev/null
 ####################
 C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
-export CC  = $(COMPILER_ROOT_PATH)/gcc
-export CXX = $(COMPILER_ROOT_PATH)/g++
+export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
+export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
 export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64
 
 #################
