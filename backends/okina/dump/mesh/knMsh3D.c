@@ -61,13 +61,13 @@ static int comparNodeCellAndCorner(const void *pa, const void *pb){
 }
 
 static double xOf7(const int n){
-  return ((double)(n%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;
+  return ((double)(n%%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;
 }
 static double yOf7(const int n){
-  return ((double)((n/NABLA_NB_NODES_X_AXIS)%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;
+  return ((double)((n/NABLA_NB_NODES_X_AXIS)%%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;
 }
 static double zOf7(const int n){
-  return ((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;
+  return ((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;
 }
 
 static void nabla_ini_node_coords(void){

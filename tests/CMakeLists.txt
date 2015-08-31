@@ -24,7 +24,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
 # get_additional_nabla_files_and_set_Makefile #
 function(get_additional_nabla_files_and_set_Makefile name backend path)
    #info("${VT100_FG_GREEN}WORKING_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/${name}${VT100_RESET}")
-   execute_process(COMMAND find . -name "*.n"
+   execute_process(COMMAND find . -name *.n
 		             COMMAND sed -e "s/\\.\\///g"
 		             COMMAND tr "\\n" " "
                    COMMAND sed -e "s/\\(${name}\\.n\\)//g"
@@ -156,20 +156,30 @@ endif (HYPRE_FOUND)
   nabla_add_arcane_test(shydro 1 run)
   # OK, mais trop de temps:nabla_add_arcane_test(shydro 3 run)
   # OK, mais trop de temps:nabla_add_arcane_test(shydro 4 run)
-endif()
+endif(ARCANE_FOUND)
 
 
 #########################
 # NABLA TESTS FOR OKINA #
 #########################
+set(SIMD_MODES "std sse avx avx2") #mic
+set(PARALLEL_MODES "seq omp") #cilk
+if(APPLE)
+  set(SIMD_MODES "std sse")
+  set(PARALLEL_MODES "seq")
+  endif(APPLE)
+  
+separate_arguments(SIMD_MODES)
+separate_arguments(PARALLEL_MODES)
+
 foreach(parallel seq omp cilk)
-  foreach(simd std sse avx avx2 mic)
+  foreach(simd std sse avx avx2)
     nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
 
-foreach(parallel seq omp) #cilk
-  foreach(simd std sse avx avx2) #mic
+foreach(parallel ${PARALLEL_MODES})
+  foreach(simd ${SIMD_MODES})
     nabla_add_okina_test(lulesh 1 run ${simd} ${parallel})
     nabla_add_okina_test(lulesh 2 run ${simd} ${parallel})
   endforeach()

@@ -221,10 +221,11 @@ int sysPreprocessor(const char *nabla_entity_name,
   // which are deleted along with the directive.
   // Porting to GCC 4.8: to disable the stdc-predef.h preinclude: -ffreestanding or use the -P
   snprintf(gcc_command,size,
-           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > /proc/%d/fd/%d",
+//           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > /proc/%d/fd/%d",
+           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > %s",
            cat_sed_temporary_file_name,
-           getpid(), 
-           unique_temporary_file_fd
+           //getpid(), 
+           unique_temporary_file_name
            );
   dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
   if (system(gcc_command)<0)

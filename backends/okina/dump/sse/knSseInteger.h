@@ -74,8 +74,8 @@ public:
   friend inline integer operator /(const integer &a, const integer &b) {
     return _mm_set_epi32(a[0]/b[0],a[1]/b[1],0,0);
   }
-  friend inline integer operator %(const integer &a, const integer &b) {
-    return _mm_set_epi32(a[0]%b[0],a[1]%b[1],0,0);
+  friend inline integer operator %%(const integer &a, const integer &b) {
+    return _mm_set_epi32(a[0]%%b[0],a[1]%%b[1],0,0);
   }
 
   inline integer& operator +=(const integer &a) { return *this = (integer)_mm_add_epi32(vec,a); }

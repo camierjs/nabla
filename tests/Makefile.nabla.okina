@@ -10,7 +10,7 @@ LOG = -t #-v $(TGT).log
 SIMD_ori_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse4.2 -mno-avx
-SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx 
+SIMD_avx_FLAGS  = -DWARP_BIT=2 -Wa,-q -mavx #-march=native 
 SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
 SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #mic mavx512f
 

@@ -117,13 +117,13 @@ static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
 /***************************************************************************** 
  * primary_expression
  *****************************************************************************/
-void nMiddleCatTillToken(astNode * n, char *dflt){
+void nMiddleCatTillToken(astNode * n, char **dflt){
   if (n==NULL) return;
   if (n->token != NULL){
     dbg("\n\t\t\t[catTillToken] %s", n->token);
     if (n->tokenid != ';'){
-      dflt=realloc(dflt, strlen(dflt)+strlen(n->token));
-      strcat(dflt,n->token);
+      *dflt=realloc(*dflt, strlen(*dflt)+strlen(n->token));
+      strcat(*dflt,n->token);
     }
   }
   if (n->children != NULL) nMiddleCatTillToken(n->children, dflt);
@@ -144,8 +144,8 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsExpression] rule=%s", n->rule);
-  option->dflt=strdup("");
-  nMiddleCatTillToken(n->children, option->dflt);
+  option->dflt=calloc(1024,1);
+  nMiddleCatTillToken(n->children, &option->dflt);
   dbg("\n\t\t[actOptionsExpression] final option->dflt is '%s'", option->dflt);
 }
 

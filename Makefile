@@ -1,21 +1,20 @@
-##############
-# ROOT_PATHS #
-##############
+#######################
+# MacOS||Linux switch #
+#######################
+ifeq ($(shell uname),Darwin)
+CMAKE_ROOT_PATH=/opt/local/bin
+COMPILER_ROOT_PATH=/opt/local/bin
+COMPILER_POSTFIX=-mp-4.9
+else
 CMAKE_ROOT_PATH = /usr/bin
 COMPILER_ROOT_PATH=/usr/bin
 #COMPILER_ROOT_PATH=/usr/local/gcc/4.9.2/bin
 COMPILER_POSTFIX=
-
-#########
-# MacOS #
-#########
-#CMAKE_ROOT_PATH=/opt/local/bin
-#COMPILER_ROOT_PATH=/opt/local/bin
-#COMPILER_POSTFIX=-mp-4.9
+endif
 
 ####################
 # COMPILER OPTIONS #
-# gcc-mp-4.9 -dM -E - < /dev/null
+# gcc -dM -E - < /dev/null
 ####################
 C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
@@ -73,51 +72,47 @@ tstn:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
-tsta:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -R arcane)
 
+# OKINA tests #
 tstoua:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwindAP_run_1_std_seq)
 tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
 tstol:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_std_seq)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_seq)
 
+# LAMBDA tests #
 tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
-tstla:
+tstll:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
-tstlao:
+tstllo:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
 tstlau:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_upwindAP_run_1_seq)
 
-tstalch:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_comd_heat)
 
-
-tstgram:
+# ARCANE tests #
+tstau:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_upwind_gen_1)
+tstagram:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)
-
-tstgad:
+tstagad:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gad_run_1)
-tstcomd:
+tstacomd:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_comd_run_1)
 tstas:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tstas4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
-
 tstal1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
 tstag1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
-
 tsthas:
 	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tsthas4:
 	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
-
 tsts:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_1)
 tsths:
@@ -132,32 +127,7 @@ tstmh:
 tstm4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_4)
 
-tstr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -R run)
-tstro:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_omp)
-tstrc:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R run_cilk)
-tstl4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_4)
-tstl8:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesharcane_run_8)
-tstseq:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_2_std_seq)
-tstmh1:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
-tststd:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_2_std_omp)
-tststd4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_std_omp)
-tstsse:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_sse_omp)
-tstavx:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_avx_omp)
-tstavx2:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_4_avx2_omp)
-tstv:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1 -V)
+# CUDA tests #
 tstcu:
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
