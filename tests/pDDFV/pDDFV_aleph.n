@@ -68,11 +68,22 @@ own outer faces void setRhs𝜕ΩCellValues(void) @ 11.0{
   ℵ rhs addValue(cell_θ,cell(0), value);
 }
 
+
 // ****************************************************************************
 // * RHS, coté Dual
 // ****************************************************************************
+/*nodes ℝ nAreaMeanF(ℝ mean_f){
+  //const ℝ³ coords = coord;
+  foreach cell
+    mean_f+=f(cell_mass_center)*cell_area/nbNode;
+  return mean_f;
+  }*/
 own nodes void setRhsAllNodeValues(void) @ 11.0{
-  Real h=node_is_on_𝜕Ω?g(coord):node_area*f(coord);
+  //option_gao_wu
+  Real h=node_is_on_𝜕Ω?g(coord):
+    option_gao_wu?
+    node_area*node_f_area:
+    node_area*f(coord);
   if (option_hole) assert(h>=0.0);
   ℵ rhs addValue(node_θ,this, h);
 }

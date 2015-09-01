@@ -49,11 +49,12 @@ with ℵ;
 // * Déclaration des options
 // ****************************************************************************
 options{
+  ℝ option_δt_ini               = 1.0;
   Bool option_indirect          = true;
       
   // Option si l'on souhaite utiliser les valeures aux faces
   // ou une moyenne des noeuds
-  Bool option_trial             = true;
+  Bool option_trial             = false;
   Bool option_trial_average     = false;
 
   // Options de debug
@@ -64,7 +65,7 @@ options{
   Bool option_debug_trial_aleph = false;
 
   // Options pour les maillages
-  Bool option_quads             = false;
+  Bool option_quads             = true;
   Bool option_triangles         = false;
 
   Bool option_dag               = false;
@@ -77,14 +78,14 @@ options{
    
   // Options pour les solutions
   Bool option_hole              = false;
-  Bool option_atan              = true;
+  Bool option_atan              = false;
   Bool option_isotropic         = false;
- 
+  Bool option_gao_wu            = true;
   
   // Valeures à l'initialisation
   Real option_k                 = 1.0;
   Real option_θ                 = 0.0;
-  Bool option_spin_θ            = true;
+  Bool option_spin_θ            = false;
   Real option_spin_θ_x          = 2.0;
   Real option_spin_θ_y          = 2.0;  
   Real option_ini_temperature   = 0.0;
@@ -109,6 +110,7 @@ options{
   // PCG=0, BiCGStab=1, BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   Integer alephNumberOfCores    = 0;
   Bool option_aleph_dump_matrix = true;
+  
   // Options de debug
   Bool option_debug_geometry    = false;
   Bool option_debug_solutions   = false;
@@ -117,6 +119,7 @@ options{
   Bool option_debug_aleph_sol   = false;
   Bool option_debug_errors      = false;
 
+  // SLURM options
   Integer option_slurm_tremain  = 300; 
 };
 
@@ -143,6 +146,7 @@ nodes{
   Real node_θ_1m0;
   Real node_θ_kp1mk;
   Real node_area;                // Aires
+  Real node_f_area;              // Aires pondérées par les f
   Real node_sd_id;
   Bool node_is_on_𝜕Ω;
   Real node_exact_solution;

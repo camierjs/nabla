@@ -55,7 +55,10 @@ void dumpExit(void) @ 50.0{
 // * Test for Quit
 // ****************************************************************************
 void testForQuit(void) @ 50.0{
-  if (GlobalIteration >= option_max_iterations) exit;
+/*  if (option_gao_wu){
+    if (time >= 0.5) exit;
+    }else*/
+    if (GlobalIteration >= option_max_iterations) exit;
 }
 
 

@@ -44,13 +44,17 @@
  		 <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="8" prx="1.0">1.0</lx>
-			<ly ny="8" pry="1.0">1.0</ly>
+			<lx nx="20" prx="1.0">1.0</lx>
+			<ly ny="20" pry="1.0">1.0</ly>
 	    </cartesian> 
      </meshgenerator>
    </mesh>
 
    <p-d-d-f-v>
+     <!--option_dtt_ini>0.01</option_dtt_ini--> <!-- 10: 9.285e-01 -->
+     <option_dtt_ini>1.0</option_dtt_ini> <!-- 20: -->
+     <!--option_dtt_ini>0.000625</option_dtt_ini--> <!-- 40: -->
+     
       <!-- Maillage Triangles ou Quads -->
      <option_quads>true</option_quads>
      <option_triangles>false</option_triangles>
@@ -64,28 +68,32 @@
 
      <!-- Options de deformations de maillages-->
      <option_rdq>false</option_rdq>
-     <option_rdq_al>0.4</option_rdq_al>
+     <option_rdq_al>0.3</option_rdq_al>
 
      <option_sncq>false</option_sncq>
      <option_sncq_th>0.25</option_sncq_th>
 
      <!-- Options des solutions Analytiques *ou pas* -->
      <option_hole>false</option_hole>
-     <option_atan>true</option_atan>
+     <option_atan>false</option_atan>
 
+     <!-- Test du 'Parabolic problem with Discontinuous Coefficients -->
+     <option_gao_wu>true</option_gao_wu>
+     
      <!-- Options de l'anisotropisme -->
      <option_isotropic>false</option_isotropic>
-     <option_k>200.0</option_k>
+
+     <option_k>1.0</option_k>
      <option_th>0.0</option_th><!-- 0.52359877559829887308 -->
 
-     <option_spin_th>true</option_spin_th>
+     <option_spin_th>false</option_spin_th>
      <option_spin_th_x>3.0</option_spin_th_x>
      <option_spin_th_y>3.0</option_spin_th_y>
 
      <option_ini_temperature>0.0</option_ini_temperature>
      <option_PartMg_temperature>0.0</option_PartMg_temperature>
      <option_max_iterations>8192</option_max_iterations>
-     <option_picard_ep>1e-5</option_picard_ep>
+     <option_picard_ep>1e-7</option_picard_ep>
 
      <alephEpsilon>1e-10</alephEpsilon>
      <alephMaxIterations>8192</alephMaxIterations>
@@ -93,9 +101,10 @@
      <alephUnderlyingSolver>2</alephUnderlyingSolver>
      <alephPreconditionerMethod>2</alephPreconditionerMethod>
      <alephSolverMethod>3</alephSolverMethod>
-     <alephNumberOfCores>0</alephNumberOfCores> 
+     <alephNumberOfCores>0</alephNumberOfCores>
      <!--  5-3-0 ou x-6-1 -->
      
+     <option_debug_errors>false</option_debug_errors>
      <option_debug_geometry>false</option_debug_geometry>
 
      <option_debug_primal>false</option_debug_primal>
