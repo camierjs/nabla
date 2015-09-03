@@ -50,38 +50,38 @@ class IAlephTopology;
 class AlephTopology: public TraceAccessor{
  public:
   AlephTopology(AlephKernel*);
-  AlephTopology(ITraceMng*,AlephKernel*,Integer,Integer);
+  AlephTopology(ITraceMng*,AlephKernel*,int,int);
   virtual ~AlephTopology();
  public:
-  void create(Integer);
-  void setRowNbElements( IntegerConstArrayView row_nb_element);
-  IntegerConstArrayView ptr_low_up_array();
-  IntegerConstArrayView part();
+  void create(int);
+  void setRowNbElements( vector<int> row_nb_element);
+  vector<int> ptr_low_up_array();
+  vector<int> part();
   IParallelMng* parallelMng();
-  void rowRange(Integer& min_row,Integer& max_row);
+  void rowRange(int& min_row,int& max_row);
  private:
   inline void checkForInit(){
     if (m_has_been_initialized==false)
-      throw FatalErrorException("AlephTopology::create","Has not been yet initialized!");
+      throw std::logic_error("[AlephTopology::create] Has not been yet initialized!");
   }
  public:
-  Integer rowLocalRange(const Integer);
+  int rowLocalRange(const int);
   AlephKernel* kernel(void){return m_kernel;}
-  Integer nb_row_size(void){/*checkForInit();*/ return m_nb_row_size;}
-  Integer nb_row_rank(void){checkForInit(); return m_nb_row_rank;}
-  Integer gathered_nb_row(Integer i){checkForInit(); return m_gathered_nb_row[i];}
-  ArrayView<Integer> gathered_nb_row_elements(void){checkForInit(); return m_gathered_nb_row_elements;}
-  ArrayView<Integer> gathered_nb_setValued(void){checkForInit(); return m_gathered_nb_setValued;}
-  Integer gathered_nb_setValued(Integer i){checkForInit(); return m_gathered_nb_setValued[i];}
+  int nb_row_size(void){/*checkForInit();*/ return m_nb_row_size;}
+  int nb_row_rank(void){checkForInit(); return m_nb_row_rank;}
+  int gathered_nb_row(int i){checkForInit(); return m_gathered_nb_row[i];}
+  vector<int> gathered_nb_row_elements(void){checkForInit(); return m_gathered_nb_row_elements;}
+  vector<int> gathered_nb_setValued(void){checkForInit(); return m_gathered_nb_setValued;}
+  int gathered_nb_setValued(int i){checkForInit(); return m_gathered_nb_setValued[i];}
   bool hasSetRowNbElements(void){return m_has_set_row_nb_elements;}
 
  private:
   AlephKernel* m_kernel;
-  Integer m_nb_row_size; // Nombre de lignes de la matrice réparties sur l'ensemble 
-  Integer m_nb_row_rank; // Nombre de lignes de la matrice vue de mon rang
-  Array<Integer> m_gathered_nb_row; // Indices des lignes par CPU
-  Array<Integer> m_gathered_nb_row_elements;  // nombre d'éléments par ligne
-  Array<Integer> m_gathered_nb_setValued;     // nombre d'éléments setValué par CPU
+  int m_nb_row_size; // Nombre de lignes de la matrice réparties sur l'ensemble 
+  int m_nb_row_rank; // Nombre de lignes de la matrice vue de mon rang
+  vector<int> m_gathered_nb_row; // Indices des lignes par CPU
+  vector<int> m_gathered_nb_row_elements;  // nombre d'éléments par ligne
+  vector<int> m_gathered_nb_setValued;     // nombre d'éléments setValué par CPU
   bool m_created;
   bool m_has_set_row_nb_elements;
   bool m_has_been_initialized;

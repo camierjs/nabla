@@ -86,7 +86,7 @@ void AlephVector::create(void){
     return;
   }
   if (m_kernel->thereIsOthers() && !m_kernel->isAnOther()){
-    m_kernel->world()->broadcast(Array<unsigned long>(1,0x6bdba30al).view(),0);
+    m_kernel->world()->broadcast(vector<unsigned long>(1,0x6bdba30al),0);
   }
   // Si nous sommes dans le cas parallèle, mais que nous ne sommes pas le solver, on se dimensionne localement
   if (m_kernel->isParallel()){// && (!m_participating_in_solver)){
@@ -98,13 +98,13 @@ void AlephVector::create(void){
     debug()<<"\33[1;36m[AlephVector::create] Participating in solver!"<<"\33[0m";
     // Initialisation des buffers du solver
     // On en profite pour initialiser en même temps les indices
-    for(Integer iCpu=0,idx=0;iCpu<m_kernel->size();++iCpu){
+    for(int iCpu=0,idx=0;iCpu<m_kernel->size();++iCpu){
       debug()<<"\33[1;36m[AlephVector::create] m_kernel->rank()="<<m_kernel->rank()<<", m_ranks["<<iCpu<<"]="<<m_ranks[iCpu]<<"\33[0m";
       if (m_kernel->rank()!=m_ranks[iCpu]) continue;
-      Integer nbRowsInCpu=m_kernel->topology()->gathered_nb_row(iCpu+1)-m_kernel->topology()->gathered_nb_row(iCpu);
+      int nbRowsInCpu=m_kernel->topology()->gathered_nb_row(iCpu+1)-m_kernel->topology()->gathered_nb_row(iCpu);
       debug()<<"\33[1;36m[AlephVector::create] Adding nb_row[iCpu="<<iCpu<<"]="<<nbRowsInCpu<<"\33[0m";
-      for(Integer i=0;i<nbRowsInCpu;++i,idx+=1){
-        m_aleph_vector_buffer_idxs.add(m_kernel->ordering()->swap(m_kernel->topology()->gathered_nb_row(iCpu)+i));
+      for(int i=0;i<nbRowsInCpu;++i,idx+=1){
+        m_aleph_vector_buffer_idxs.push_back(m_kernel->ordering()->swap(m_kernel->topology()->gathered_nb_row(iCpu)+i));
         //debug()<<"\33[1;36m[AlephVector::create] idxs:"<<idx<<"="<<m_aleph_vector_buffer_idxs[idx]<<"\33[0m";
       }
     }
@@ -125,16 +125,16 @@ void AlephVector::create(void){
 // ****************************************************************************
 // * setLocalComponents - without global indices
 // ****************************************************************************
-void AlephVector::setLocalComponents(ConstArrayView<double> values){
-  Array<Integer> indexs;
+void AlephVector::setLocalComponents(vector<double> values){
+  vector<int> indexs;
   if (m_bkp_num_values==0){
-    Integer row_offset=0;
+    int row_offset=0;
     if (m_kernel->isInitialized())
        row_offset=m_kernel->topology()->part()[m_kernel->rank()];
     debug()<<"\33[1;36m[AlephVector::setLocalComponents] m_bkp_num_values==0"<<"\33[0m";
     indexs.resize(0);
-    for(Integer i=0,iMx=values.size();i<iMx;i+=1)
-      indexs.add(i+row_offset);
+    for(int i=0,iMx=values.size();i<iMx;i+=1)
+      indexs.push_back(i+row_offset);
   }
   setLocalComponents(values.size(), indexs, values);
 }
@@ -144,9 +144,9 @@ void AlephVector::setLocalComponents(ConstArrayView<double> values){
 // * reSetLocalComponents
 // ****************************************************************************
 void AlephVector::reSetLocalComponents(AlephVector *from){
-  const Integer row_offset=m_kernel->topology()->part()[m_kernel->rank()];
+  const int row_offset=m_kernel->topology()->part()[m_kernel->rank()];
   debug()<<"\33[1;36m[AlephVector::reSetLocalComponents] Patching with row_offset="<<row_offset<<"\33[0m";
-  for(Int32 i=0,mx=from->m_bkp_num_values;i<mx;i+=1)
+  for(int i=0,mx=from->m_bkp_num_values;i<mx;i+=1)
     from->m_bkp_indexs[i]+=row_offset;
   setLocalComponents(from->m_bkp_num_values,from->m_bkp_indexs,from->m_bkp_values);
 }
@@ -155,26 +155,26 @@ void AlephVector::reSetLocalComponents(AlephVector *from){
 // ****************************************************************************
 // * setLocalComponents - standard
 // ****************************************************************************
-void AlephVector::setLocalComponents(Integer num_values,
-												 ConstArrayView<int> indexs,
-												 ConstArrayView<double> values){
+void AlephVector::setLocalComponents(int num_values,
+												 vector<int> indexs,
+												 vector<double> values){
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;36m[AlephVector::setLocalComponents] Trying to setLocalComponents from an uninitialized kernel!\33[0m";
     m_bkp_num_values=num_values;
     debug()<<"\33[1;36m[AlephVector::setLocalComponents] Backuping "<<num_values<<" values and indexes!\33[0m";
-    m_bkp_indexs.copy(indexs);
-    m_bkp_values.copy(values);
+    m_bkp_indexs=indexs;//.copy(indexs);
+    m_bkp_values=values;//.copy(values);
     return;
   }
   if (!m_kernel->isParallel()){
     debug() << "\33[1;36m[AlephVector::setLocalComponents] implementation AlephVectorSet, num_values="<<num_values<<"\33[0m";
-	 m_implementation->AlephVectorSet(values.unguardedBasePointer(),
-                                     indexs.unguardedBasePointer(),
+	 m_implementation->AlephVectorSet(&values[0],
+                                     &indexs[0],
                                      num_values);
     return;
   }
   debug() << "\33[1;36m[AlephVector::setLocalComponents]\33[0m";
-  for( Integer i=0, is=num_values; i<is; ++i ){
+  for( int i=0, is=num_values; i<is; ++i ){
     // Si je suis sur le site de résolution, je place les values dans les 'vals'
     if (m_participating_in_solver && (m_kernel->rank()==m_ranks[m_kernel->rank()])){
       if (!m_kernel->isCellOrdering()){
@@ -210,14 +210,14 @@ void AlephVector::assemble(void){
     return;
   }
   if (m_kernel->thereIsOthers() && !m_kernel->isAnOther())
-    m_kernel->world()->broadcast(Array<unsigned long>(1,0xec7a979fl).view(),0);
+    m_kernel->world()->broadcast(vector<unsigned long>(1,0xec7a979fl),0);
   // Si on est en mode seq, on a rien à faire
   if (!m_kernel->isParallel()) return;
   if (m_participating_in_solver){
 	 // Si je suis le solveur, je recv le reste des vecteurs provenant d'autres coeurs
     debug()<<"\33[1;36m[AlephVector::assemble] m_participating_in_solver"<<"\33[0m";
-	 Integer nbRows;
-    for(Integer iCpu=0,iRows=0;iCpu<m_kernel->size();++iCpu,iRows+=nbRows){
+	 int nbRows;
+    for(int iCpu=0,iRows=0;iCpu<m_kernel->size();++iCpu,iRows+=nbRows){
       nbRows=0;
       if (m_kernel->rank()!=m_ranks[iCpu]) continue;
       // Dans les autres cas, il faut décaler l'offset iRows
@@ -228,7 +228,7 @@ void AlephVector::assemble(void){
               <<" <= "<<iCpu
               <<", offset="<<iRows
               <<" for "<<nbRows<<"\33[0m";
-		m_parallel_requests.add(m_kernel->world()->recv(m_aleph_vector_buffer_vals.subView(iRows,nbRows),
+		m_parallel_requests.push_back(m_kernel->world()->recv(&m_aleph_vector_buffer_vals[iRows],//,nbRows),
                                                       iCpu,
                                                       false));
 	 }
@@ -238,9 +238,9 @@ void AlephVector::assemble(void){
             <<" send "<<m_kernel->rank()
             <<" => "<<m_ranks[m_kernel->rank()]
             <<" for "<<m_aleph_vector_buffer_val.size()<<"\33[0m";
-	 m_parallel_requests.add(m_kernel->world()->send(m_aleph_vector_buffer_val,
-                                                       m_ranks[m_kernel->rank()],
-                                                       false));
+	 m_parallel_requests.push_back(m_kernel->world()->send(m_aleph_vector_buffer_val,
+                                                          m_ranks[m_kernel->rank()],
+                                                          false));
   }
   debug() << "\33[1;36m[AlephVector::assemble] done"<<"\33[0m";
 }
@@ -261,8 +261,8 @@ void AlephVector::assemble_waitAndFill(void){
     return;
   }
   debug() << "\33[1;36m[AlephVector::assemble_waitAndFill] "<<m_index <<" locfill"<<"\33[0m";
-  m_implementation->AlephVectorSet(m_aleph_vector_buffer_vals.unguardedBasePointer(),
-                                   m_aleph_vector_buffer_idxs.unguardedBasePointer(),
+  m_implementation->AlephVectorSet(&m_aleph_vector_buffer_vals.front(),
+                                   &m_aleph_vector_buffer_idxs.front(),
                                    m_aleph_vector_buffer_idxs.size());
   debug() << "\33[1;36m[AlephVector::assemble_waitAndFill] "<<m_index<<" VECTOR ASSEMBLE"<<"\33[0m";
   m_implementation->AlephVectorAssemble();
@@ -280,18 +280,18 @@ void AlephVector::reassemble(void){
             << m_kernel->rank()
             << "<="
             << m_ranks[m_kernel->rank()]<<"\33[0m";
-	 m_parallel_reassemble_requests.add(m_kernel->world()->recv(m_aleph_vector_buffer_val, m_ranks[m_kernel->rank()], false));
+	 m_parallel_reassemble_requests.push_back(m_kernel->world()->recv(m_aleph_vector_buffer_val, m_ranks[m_kernel->rank()], false));
   }
   // Si je suis un site de résolution, je résupère les résultats
   if (m_participating_in_solver){
     // Je récupère déjà les valeurs depuis le vecteur
     debug() << "\33[1;36m[AlephVector::REassemble] J'ai participé, je récupère les résultats depuis l'implémentation"<<"\33[0m";
-    m_implementation->AlephVectorGet(m_aleph_vector_buffer_vals.unguardedBasePointer(),
-                                     m_aleph_vector_buffer_idxs.unguardedBasePointer(),
+    m_implementation->AlephVectorGet(&m_aleph_vector_buffer_vals.front(),
+                                     &m_aleph_vector_buffer_idxs.front(),
                                      m_aleph_vector_buffer_idxs.size());
     // Puis je send les parties des vecteurs aux autres sites
-    Integer nbRows;
-    for(Integer iCpu=0,iRows=0;iCpu<m_kernel->size();++iCpu,iRows+=nbRows){
+    int nbRows;
+    for(int iCpu=0,iRows=0;iCpu<m_kernel->size();++iCpu,iRows+=nbRows){
       nbRows=0;
       if (m_kernel->rank()!=m_ranks[iCpu]) continue;
       nbRows=m_kernel->topology()->gathered_nb_row(iCpu+1)-m_kernel->topology()->gathered_nb_row(iCpu);
@@ -301,7 +301,10 @@ void AlephVector::reassemble(void){
               << " => " << iCpu
               << ", offset=" << iRows
               << " for " << nbRows<<"\33[0m";
-      m_parallel_reassemble_requests.add(m_kernel->world()->send(m_aleph_vector_buffer_vals.view().subView(iRows,nbRows), iCpu, false));
+      m_parallel_reassemble_requests.push_back(
+    m_kernel->world()->send(&m_aleph_vector_buffer_vals[iRows],//nbRows),
+                            iCpu,
+                            false));
     }
   }
 }
@@ -319,14 +322,14 @@ void AlephVector::reassemble_waitAndFill(void){
 
 /******************************************************************************
  *****************************************************************************/
-void AlephVector::getLocalComponents(Integer vector_size,
-												 ConstArrayView<int> global_indice,
-												 ArrayView<double>   vector_values ){
+void AlephVector::getLocalComponents(int vector_size,
+												 vector<int> global_indice,
+												 vector<double> vector_values){
   debug() << "\33[1;36m[AlephVector::getLocalComponents] vector_size="<<vector_size<<"\33[0m";
   if (!m_kernel->isParallel()){
     // En séquentiel, on va piocher les résultats directement
-	 m_implementation->AlephVectorGet(vector_values.unguardedBasePointer(),
-                                     global_indice.unguardedBasePointer(),
+	 m_implementation->AlephVectorGet(&vector_values.front(),
+                                     &global_indice.front(),
                                      vector_size);
     debug() << "\33[1;36m[AlephVector::getLocalComponents] seq done!\33[0m";
     return;
@@ -353,19 +356,19 @@ void AlephVector::getLocalComponents(Integer vector_size,
 // ****************************************************************************
 // * getLocalComponents
 // ****************************************************************************
-void AlephVector::getLocalComponents(Array<double> &vector_values){
-  const Integer vector_size=m_kernel->topology()->nb_row_rank();
+void AlephVector::getLocalComponents(vector<double> &vector_values){
+  const int vector_size=m_kernel->topology()->nb_row_rank();
   vector_values.resize(vector_size);
   m_aleph_vector_buffer_idx.resize(vector_size);
   debug() << "\33[1;36m[getLocalComponents(vector_values)] vector_size="<<vector_size<<"\33[0m";
   if (!m_kernel->isParallel()){
-    for(Integer i=0;i<vector_size;i+=1){
+    for(int i=0;i<vector_size;i+=1){
       m_aleph_vector_buffer_idx[i]=i;
       //debug()<<"\33[1;36mm_aleph_vector_buffer_idx["<<i<<"]="<<m_aleph_vector_buffer_idx[i]<<"\33[0m";
     }
     // En séquentiel, on va piocher les résultats directement
-	 m_implementation->AlephVectorGet(vector_values.unguardedBasePointer(),
-                                     m_aleph_vector_buffer_idx.unguardedBasePointer(),
+	 m_implementation->AlephVectorGet(&vector_values.front(),
+                                     &m_aleph_vector_buffer_idx.front(),
                                      vector_size);
     debug() << "\33[1;36m[getLocalComponents(vector_values)] seq done!\33[0m";
     return;
@@ -392,7 +395,7 @@ void AlephVector::startFilling(){
 
 /******************************************************************************
  *****************************************************************************/
-void AlephVector::writeToFile(const String base_file_name){
+void AlephVector::writeToFile(const string base_file_name){
   debug()<<"\33[1;36m[AlephVector::writeToFile]"<<"\33[0m";
   m_implementation->writeToFile(base_file_name);
 }

@@ -2,6 +2,8 @@ include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
 
 info("\t${VT100_FG_YELLOW}Aleph${VT100_RESET}")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
                   AlephVector.cc   AlephParams.cc
                   AlephTopology.cc AlephOrdering.cc

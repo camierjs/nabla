@@ -62,8 +62,8 @@ AlephTopology::AlephTopology(AlephKernel *kernel): TraceAccessor(kernel->paralle
  *****************************************************************************/
 AlephTopology::AlephTopology(ITraceMng *tm,
                              AlephKernel *kernel,
-                             Integer nb_row_size,
-                             Integer nb_row_rank): TraceAccessor(tm),
+                             int nb_row_size,
+                             int nb_row_rank): TraceAccessor(tm),
                                                    m_kernel(kernel),
                                                    m_nb_row_size(nb_row_size),
                                                    m_nb_row_rank(nb_row_rank),
@@ -85,14 +85,14 @@ AlephTopology::AlephTopology(ITraceMng *tm,
 
   if (m_kernel->isAnOther()){
     debug() << "\33[1;32m\t[AlephTopology::AlephTopology] receiving m_gathered_nb_row"<<"\33[0m";
-    m_kernel->world()->broadcast(m_gathered_nb_row.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_row,0);
     return;
   }
   
   debug() << "\33[1;32m\t[AlephTopology::AlephTopology] Nous nous échangeons les indices locaux des lignes de la matrice"<<"\33[0m";
-  Array<Integer> all_rows;
-  Array<Integer> gathered_nb_row(m_kernel->size());
-  all_rows.add(m_nb_row_rank);
+  vector<int> all_rows;
+  vector<int> gathered_nb_row(m_kernel->size());
+  all_rows.push_back(m_nb_row_rank);
   m_kernel->parallel()->allGather(all_rows,gathered_nb_row);
   for(int iCpu=0;iCpu<m_kernel->size();++iCpu){
     m_gathered_nb_row[iCpu+1]=m_gathered_nb_row[iCpu]+gathered_nb_row[iCpu];
@@ -102,7 +102,7 @@ AlephTopology::AlephTopology(ITraceMng *tm,
 
   if (m_kernel->thereIsOthers() && !m_kernel->isAnOther()){
     debug() << "\33[1;32m\t[AlephTopology::AlephTopology] sending m_gathered_nb_row"<<"\33[0m";
-    m_kernel->world()->broadcast(m_gathered_nb_row.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_row,0);
   }
 }
 
@@ -117,7 +117,7 @@ AlephTopology::~AlephTopology(){
 /******************************************************************************
  * b1e13efe
  *****************************************************************************/
-void AlephTopology::create(Integer setValue_idx){
+void AlephTopology::create(int setValue_idx){
   if (m_created) return;
   m_created=true;
   
@@ -132,18 +132,18 @@ void AlephTopology::create(Integer setValue_idx){
   debug() << "\33[1;32m\t\t\t[AlephTopology::create]"<<"\33[0m";
   if (m_kernel->isAnOther()){
     debug() << "\33[1;32m\t[AlephTopology::create] receiving m_gathered_nb_setValued"<<"\33[0m";
-    m_kernel->world()->broadcast(m_gathered_nb_setValued.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_setValued,0);
     return;
   }
 
   // Nous allons nous échanger tous les setValue_idx
-  Array<Integer> all;
-  all.add(setValue_idx);
+  vector<int> all;
+  all.push_back(setValue_idx);
   m_kernel->parallel()->allGather(all,m_gathered_nb_setValued);
 
   if (m_kernel->thereIsOthers() && !m_kernel->isAnOther()){
     debug() << "\33[1;32m\t[AlephTopology::create] sending m_gathered_nb_setValued"<<"\33[0m";
-    m_kernel->world()->broadcast(m_gathered_nb_setValued.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_setValued,0);
   }
   debug() << "\33[1;32m\t\t\t[AlephTopology::create] done"<<"\33[0m";
 }
@@ -157,7 +157,7 @@ void AlephTopology::create(Integer setValue_idx){
  *     - HYPRE_IJMatrixSetRowSizes
  *     - Trilinos Epetra_CrsMatrix
  *****************************************************************************/
-void AlephTopology::setRowNbElements(IntegerConstArrayView row_nb_element){
+void AlephTopology::setRowNbElements(vector<int> row_nb_element){
   checkForInit();
 
   debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements]"<<"\33[0m";
@@ -172,20 +172,20 @@ void AlephTopology::setRowNbElements(IntegerConstArrayView row_nb_element){
   if (m_kernel->isAnOther()){
     debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] isAnOther from 0"<<"\33[0m";
     traceMng()->flush();
-    m_kernel->world()->broadcast(m_gathered_nb_row_elements.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_row_elements,0);
     debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] done"<<"\33[0m";
     traceMng()->flush();
     return;
   }
 
-  Array<Integer> local_row_nb_element(m_nb_row_rank);
+  vector<int> local_row_nb_element(m_nb_row_rank);
   for( int i=0; i<m_nb_row_rank; ++i)
     local_row_nb_element[i]=row_nb_element[i];
   m_kernel->parallel()->allGatherVariable(local_row_nb_element, m_gathered_nb_row_elements);
 
   if (m_kernel->thereIsOthers() && !m_kernel->isAnOther()){
     debug()<<"\33[1;32m\t\t\t[AlephTopology::setRowNbElements] Sending m_gathered_nb_row_elements of size="<<m_gathered_nb_row_elements.size()<<"\33[0m";
-    m_kernel->world()->broadcast(m_gathered_nb_row_elements.view(),0);
+    m_kernel->world()->broadcast(m_gathered_nb_row_elements,0);
   }
   debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] done"<<"\33[0m";
 }
@@ -193,15 +193,15 @@ void AlephTopology::setRowNbElements(IntegerConstArrayView row_nb_element){
   
 /******************************************************************************
  *****************************************************************************/
-IntegerConstArrayView AlephTopology::ptr_low_up_array(){
+vector<int> AlephTopology::ptr_low_up_array(){
   debug() << "\33[1;32m\t[AlephTopology::ptr_low_up_array]"<<"\33[0m";
-  return IntegerConstArrayView();
+  return vector<int>();
 }
 
 
 /******************************************************************************
  *****************************************************************************/
-IntegerConstArrayView AlephTopology::part(){
+vector<int> AlephTopology::part(){
   checkForInit();
   //debug() << "\33[1;32m\t[AlephTopology::part]"<<"\33[0m";
   return m_gathered_nb_row;
@@ -218,8 +218,8 @@ IParallelMng* AlephTopology::parallelMng(){
 
 /******************************************************************************
  *****************************************************************************/
-void AlephTopology::rowRange(Integer& min_row,Integer& max_row){
-  const Integer rank = m_kernel->rank();
+void AlephTopology::rowRange(int& min_row,int& max_row){
+  const int rank = m_kernel->rank();
   checkForInit();
   debug() << "\33[1;32m\t[AlephTopology::rowRange] rank="<<rank<<"\33[0m";
   min_row = m_gathered_nb_row[rank];
@@ -230,10 +230,10 @@ void AlephTopology::rowRange(Integer& min_row,Integer& max_row){
 
 /******************************************************************************
  *****************************************************************************/
-Integer AlephTopology::rowLocalRange(const Integer index){
-  Integer ilower=-1;
-  Integer iupper=0;
-  Integer range=0;
+int AlephTopology::rowLocalRange(const int index){
+  int ilower=-1;
+  int iupper=0;
+  int range=0;
   checkForInit();
   for( int iCpu=0;iCpu<m_kernel->size();++iCpu){
     if (m_kernel->rank()!=m_kernel->solverRanks(index)[iCpu]) continue;

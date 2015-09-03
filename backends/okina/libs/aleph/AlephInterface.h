@@ -57,8 +57,8 @@ class IAlephTopology: public TraceAccessor{
 public:
   IAlephTopology(ITraceMng* tm,
                  AlephKernel *kernel,
-                 Integer index,
-                 Integer nb_row_size):TraceAccessor(tm),
+                 int index,
+                 int nb_row_size):TraceAccessor(tm),
                                       m_index(index),
                                       m_kernel(kernel),
                                       m_participating_in_solver(kernel->subParallelMng(index)!=NULL){
@@ -73,7 +73,7 @@ public:
   virtual void backupAndInitialize()=0;
   virtual void restore()=0;
 protected:
-  Integer m_index;
+  int m_index;
   AlephKernel *m_kernel;
   bool m_participating_in_solver;
 };
@@ -86,7 +86,7 @@ class IAlephVector: public TraceAccessor{
 public:
   IAlephVector(ITraceMng* tm,
                AlephKernel *kernel,
-               Integer index):TraceAccessor(tm),
+               int index):TraceAccessor(tm),
                               m_index(index),
                               m_kernel(kernel)
   {
@@ -97,12 +97,12 @@ public:
   }
 public:
   virtual void AlephVectorCreate(void)=0;
-  virtual void AlephVectorSet(const double*,const int*,Integer)=0;
+  virtual void AlephVectorSet(const double*,const int*,int)=0;
   virtual int AlephVectorAssemble(void)=0;
-  virtual void AlephVectorGet(double*,const int*,Integer)=0;
-  virtual void writeToFile(const String)=0;
+  virtual void AlephVectorGet(double*,const int*,int)=0;
+  virtual void writeToFile(const string)=0;
 protected:
-  Integer m_index;
+  int m_index;
   AlephKernel *m_kernel;
 };
 
@@ -114,7 +114,7 @@ class IAlephMatrix: public TraceAccessor{
 public:
   IAlephMatrix(ITraceMng* tm,
                AlephKernel *kernel,
-               Integer index):TraceAccessor(tm),
+               int index):TraceAccessor(tm),
                               m_index(index),
                               m_kernel(kernel)
   {
@@ -131,12 +131,12 @@ public:
   virtual int AlephMatrixSolve(AlephVector*,
 										 AlephVector*,
                                AlephVector*,
-										 Integer&,
-										 Real*,
+										 int&,
+										 double*,
 										 AlephParams*)=0;
-  virtual void writeToFile(const String)=0;
+  virtual void writeToFile(const string)=0;
 protected:
-  Integer m_index;
+  int m_index;
   AlephKernel *m_kernel;
 };
 
@@ -149,9 +149,9 @@ public:
   ~IAlephFactory(){
     debug()<<"\33[1;5;34m[~IAlephFactory]"<<"\33[0m";
   }
-  virtual IAlephTopology* GetTopology(AlephKernel *, Integer, Integer)=0;
-  virtual IAlephVector* GetVector(AlephKernel*, Integer)=0;
-  virtual IAlephMatrix* GetMatrix(AlephKernel*, Integer)=0;
+  virtual IAlephTopology* GetTopology(AlephKernel *, int, int)=0;
+  virtual IAlephVector* GetVector(AlephKernel*, int)=0;
+  virtual IAlephMatrix* GetMatrix(AlephKernel*, int)=0;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -166,9 +166,9 @@ class IAlephFactoryImpl{
  public:
   virtual ~IAlephFactoryImpl(){}
   virtual void initialize()=0;
-  virtual IAlephTopology* createTopology(ITraceMng*,AlephKernel*, Integer, Integer)=0;
-  virtual IAlephVector* createVector(ITraceMng*,AlephKernel*, Integer)=0;
-  virtual IAlephMatrix* createMatrix(ITraceMng*,AlephKernel*, Integer)=0;
+  virtual IAlephTopology* createTopology(ITraceMng*,AlephKernel*, int, int)=0;
+  virtual IAlephVector* createVector(ITraceMng*,AlephKernel*, int)=0;
+  virtual IAlephMatrix* createMatrix(ITraceMng*,AlephKernel*, int)=0;
 };
 
 #endif // _ALEPH_INTERFACE_H_

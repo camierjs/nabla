@@ -61,8 +61,8 @@ class AlephParams;
  *****************************************************************************/
 class AlephKernelResults{
  public:
-  Integer m_nb_iteration;
-  Real m_residual_norm[4];
+  int m_nb_iteration;
+  double m_residual_norm[4];
 };
 
 
@@ -97,29 +97,29 @@ public:
  *****************************************************************************/
 class AlephKernel: public TraceAccessor{
  public:
-  AlephKernel(IParallelMng*, Integer, IAlephFactory*, Integer=0, Integer=0, bool=false);
-  AlephKernel(ITraceMng*, ISubDomain*, IAlephFactory*, Integer=0, Integer=0, bool=false);
-  AlephKernel(ISubDomain*,Integer alephUnderlyingSolver=0, Integer alephNumberOfCores=0);
+  AlephKernel(IParallelMng*, int, IAlephFactory*, int=0, int=0, bool=false);
+  AlephKernel(ITraceMng*, ISubDomain*, IAlephFactory*, int=0, int=0, bool=false);
+  AlephKernel(ISubDomain*,int alephUnderlyingSolver=0, int alephNumberOfCores=0);
   ~AlephKernel(void);
   void setup(void);
-  void initialize(Integer, Integer);
+  void initialize(int, int);
   void break_and_return(void);
   AlephVector* createSolverVector(void);
   AlephMatrix* createSolverMatrix(void);
   void postSolver(AlephParams*,AlephMatrix*,AlephVector*,AlephVector*);
   void workSolver(void);  
-  AlephVector* syncSolver(Integer, Integer&, Real*);
+  AlephVector* syncSolver(int, int&, double*);
 
 public:
   IAlephFactory* factory(void){return m_factory;}
   AlephTopology *topology(void){return m_topology;}
   AlephOrdering *ordering(void){return m_ordering;}
   AlephIndexing *indexing(void){return m_indexing;}
-  Integer rank(void){return m_rank;}
-  Integer size(void){return m_size;}
+  int rank(void){return m_rank;}
+  int size(void){return m_size;}
   ISubDomain* subDomain(void){
     if (!m_sub_domain && !m_i_am_an_other)
-      throw FatalErrorException("[AlephKernel::subDomain]", "No sub-domain to work on!");
+      throw std::logic_error("No sub-domain to work on!");
     return m_sub_domain;
   }
   bool isParallel(void){return m_isParallel;}
@@ -128,26 +128,26 @@ public:
   bool isAnOther(void){return m_i_am_an_other;}
   IParallelMng* parallel(void){ return m_parallel;}
   IParallelMng* world(void){ return m_world_parallel;}
-  Integer underlyingSolver(void){return m_underlying_solver;}
+  int underlyingSolver(void){return m_underlying_solver;}
   bool isCellOrdering(void){return m_reorder;}
-  Integer index(void){return m_solver_index;}
+  int index(void){return m_solver_index;}
   bool configured(void){return m_configured;}
-  void mapranks(Array<Integer>&);
-  bool hitranks(Integer, ArrayView<Integer>);
-  Integer nbRanksPerSolver(void){return m_solver_size;}
-  ArrayView<Integer> solverRanks(Integer i){return m_solver_ranks.at(i);}//.view();}
-  IParallelMng* subParallelMng(Integer i){return m_sub_parallel_mng_queue.at(i);}
-  IAlephTopology* getTopologyImplementation(Integer i){
+  void mapranks(vector<int>&);
+  bool hitranks(int, vector<int>);
+  int nbRanksPerSolver(void){return m_solver_size;}
+  vector<int> solverRanks(int i){return m_solver_ranks.at(i);}//.view();}
+  IParallelMng* subParallelMng(int i){return m_sub_parallel_mng_queue.at(i);}
+  IAlephTopology* getTopologyImplementation(int i){
     return m_arguments_queue.at(i)->m_topology_implementation;
   }
 private:
-  IParallelMng *createUnderlyingParallelMng(Integer);
+  IParallelMng *createUnderlyingParallelMng(int);
 private: 
   ISubDomain* m_sub_domain;
   bool m_isParallel;
-  Integer m_rank;
-  Integer m_size;
-  Integer m_world_size;
+  int m_rank;
+  int m_size;
+  int m_world_size;
   bool m_there_are_idles;
   bool m_i_am_an_other;
   IParallelMng* m_parallel;
@@ -158,20 +158,20 @@ private:
   AlephTopology *m_topology;
   AlephOrdering *m_ordering;
   AlephIndexing *m_indexing;
-  Integer m_aleph_vector_idx;
-  const Integer m_underlying_solver;
+  int m_aleph_vector_idx;
+  const int m_underlying_solver;
   const bool m_reorder;
-  Integer m_solver_index;
-  Integer m_solver_size;
+  int m_solver_index;
+  int m_solver_size;
   bool m_solved;
   bool m_has_been_initialized;
   
 private:
-  Array<Array<Integer> > m_solver_ranks;
-  Array<IParallelMng*> m_sub_parallel_mng_queue;
-  Array<AlephMatrix*> m_matrix_queue;
-  Array<AlephKernelArguments*> m_arguments_queue;
-  Array<AlephKernelResults*> m_results_queue;
+  vector<vector<int> > m_solver_ranks;
+  vector<IParallelMng*> m_sub_parallel_mng_queue;
+  vector<AlephMatrix*> m_matrix_queue;
+  vector<AlephKernelArguments*> m_arguments_queue;
+  vector<AlephKernelResults*> m_results_queue;
 };
 
 #endif  

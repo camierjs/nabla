@@ -47,10 +47,10 @@
 // * AlephKernel utilisé par Kappa où l'on met le m_sub_domain à NULL
 // ****************************************************************************
 AlephKernel::AlephKernel(IParallelMng* wpm,
-                         Integer size,
+                         int size,
                          IAlephFactory* factory,
-                         Integer alephUnderlyingSolver,
-                         Integer alephNumberOfCores,
+                         int alephUnderlyingSolver,
+                         int alephNumberOfCores,
                          bool alephOrdering):
   TraceAccessor(wpm->traceMng()),
   m_sub_domain(NULL),
@@ -90,8 +90,8 @@ AlephKernel::AlephKernel(IParallelMng* wpm,
 AlephKernel::AlephKernel(ITraceMng* tm,
                          ISubDomain* sd,
                          IAlephFactory* factory,
-								 Integer alephUnderlyingSolver,
-								 Integer alephNumberOfCores,
+								 int alephUnderlyingSolver,
+								 int alephNumberOfCores,
                          bool alephOrdering):
   TraceAccessor(tm),
   m_sub_domain(sd),
@@ -131,8 +131,8 @@ AlephKernel::AlephKernel(ITraceMng* tm,
 // * Il a en plus des options underlying_solver et number_of_cores
 // *****************************************************************************
 AlephKernel::AlephKernel(ISubDomain* sd,
-								 Integer alephUnderlyingSolver,
-								 Integer alephNumberOfCores):
+								 int alephUnderlyingSolver,
+								 int alephNumberOfCores):
   TraceAccessor(sd->parallelMng()->traceMng()),
   m_sub_domain(sd),
   m_isParallel(sd->parallelMng()->isParallel()),
@@ -191,16 +191,16 @@ void AlephKernel::setup(void){
            << " exceeds in size, reverting to "<<m_size<<"\33[0m";
   }
   if ((m_size%m_solver_size)!=0)
-    throw FatalErrorException("AlephKernel", "Aleph Number of Cores modulo size");
+    throw std::logic_error("[AlephKernel] Aleph Number of Cores modulo size");
   debug()<<"\33[1;31m[AlephKernel] Each solver takes "
          <<m_solver_size<<" site(s)"<<"\33[0m";
   // S'il y a des 'autres, on les tient au courant de la configuration
   if (m_there_are_idles && !m_i_am_an_other){
-    Array<Integer> cfg(0);
-    cfg.add(m_underlying_solver);
-    cfg.add(m_solver_size);
-    cfg.add((m_reorder==true)?1:0);
-    cfg.add(m_size);
+    vector<int> cfg(0);
+    cfg.push_back(m_underlying_solver);
+    cfg.push_back(m_solver_size);
+    cfg.push_back((m_reorder==true)?1:0);
+    cfg.push_back(m_size);
     debug()<<"\33[1;31m[AlephKernel] Sending to others configuration: "<<cfg<<"\33[0m";
     m_world_parallel->broadcast(cfg,0);//.view(),0);
   }
@@ -212,34 +212,34 @@ void AlephKernel::setup(void){
 AlephKernel::~AlephKernel(void){ 
   debug()<<"\33[1;5;31m[~AlephKernel]"<<"\33[0m";
   //delete m_factory;
-  ALEPH_ASSERT((m_topology),("m_topology is NULL")); delete m_topology; m_topology=NULL;
-  ALEPH_ASSERT((m_ordering),("m_ordering is NULL")); delete m_ordering; m_ordering=NULL;
+  assert(m_topology); delete m_topology; m_topology=NULL;
+  assert(m_ordering); delete m_ordering; m_ordering=NULL;
   //ALEPH_ASSERT((m_indexing),("m_indexing is NULL")); delete m_indexing; m_indexing=NULL;
-  for(Integer i=0,iMax=m_results_queue.size(); i<iMax; ++i){
+  for(int i=0,iMax=m_results_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] results (iters,norms) #"<<i<<"\33[0m";
-    ALEPH_ASSERT((m_results_queue.at(i)),("m_results_queue.at(i) is NULL"));
+    assert(m_results_queue.at(i));
     delete m_results_queue.at(i);
-    m_results_queue.setAt(i,NULL); 
+    m_results_queue[i]=NULL;
   }
-  for(Integer i=0,iMax=m_matrix_queue.size(); i<iMax; ++i){
+  for(int i=0,iMax=m_matrix_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] matrix #"<<i<<"\33[0m";
-    ALEPH_ASSERT((m_matrix_queue.at(i)),("m_matrix_queue.at(i) is NULL"));
+    assert(m_matrix_queue.at(i));
     delete m_matrix_queue.at(i);
-    m_matrix_queue.setAt(i,NULL);
+    m_matrix_queue[i]=NULL;
   }
-  for(Integer i=0,iMax=m_arguments_queue.size(); i<iMax; ++i){
+  for(int i=0,iMax=m_arguments_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_x_vector\33[0m";
-    ALEPH_ASSERT((m_arguments_queue.at(i)->m_x_vector),("m_arguments_queue.at(i)->m_x_vector is NULL"));
+    assert(m_arguments_queue.at(i)->m_x_vector);
     delete m_arguments_queue.at(i)->m_x_vector;
     m_arguments_queue.at(i)->m_x_vector=NULL;
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_b_vector\33[0m";
-    ALEPH_ASSERT((m_arguments_queue.at(i)->m_b_vector),("m_arguments_queue.at(i)->m_b_vector is NULL"));
+    assert(m_arguments_queue.at(i)->m_b_vector);
     delete m_arguments_queue.at(i)->m_b_vector;
     m_arguments_queue.at(i)->m_b_vector=NULL;
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"->m_tmp_vector\33[0m";
-    ALEPH_ASSERT((m_arguments_queue.at(i)->m_tmp_vector),("m_arguments_queue.at(i)->m_tmp_vector is NULL"));
+    assert(m_arguments_queue.at(i)->m_tmp_vector);
     delete m_arguments_queue.at(i)->m_tmp_vector;
     m_arguments_queue.at(i)->m_tmp_vector=NULL;
     
@@ -257,16 +257,16 @@ AlephKernel::~AlephKernel(void){
     m_arguments_queue.at(i)->m_params=NULL;*/
     
     debug()<<"\33[1;31m\t[~AlephKernel] arguments #"<<i<<"\33[0m";
-    ALEPH_ASSERT((m_arguments_queue.at(i)),("m_arguments_queue.at(i) is NULL"));
+    assert(m_arguments_queue.at(i));
     delete m_arguments_queue.at(i);
-    m_arguments_queue.setAt(i,NULL);
+    m_arguments_queue[i]=NULL;
   }
-  for(Integer i=0,iMax=m_sub_parallel_mng_queue.size(); i<iMax; ++i){
+  for(int i=0,iMax=m_sub_parallel_mng_queue.size(); i<iMax; ++i){
     debug()<<"\33[1;31m\t[~AlephKernel] sub_parallel_mng #"<<i<<", "<<m_sub_parallel_mng_queue.at(i)<<"\33[0m";
     if (m_sub_parallel_mng_queue.at(i)==NULL) continue;
     // PETSc seems not to like this too much
     //delete m_sub_parallel_mng_queue.at(i);
-    m_sub_parallel_mng_queue.setAt(i,NULL);
+    m_sub_parallel_mng_queue[i]=NULL;
   }
   debug()<<"\33[1;5;31m[~AlephKernel] done"<<"\33[0m";
 }
@@ -275,15 +275,15 @@ AlephKernel::~AlephKernel(void){
 /******************************************************************************
  * d80dee82
 *****************************************************************************/
-void AlephKernel::initialize(Integer global_nb_row,
-                             Integer local_nb_row){
+void AlephKernel::initialize(int global_nb_row,
+                             int local_nb_row){
   //Timer::Action ta(subDomain(),"AlephKernel::initialize");
   if (m_there_are_idles && !m_i_am_an_other){
-    m_world_parallel->broadcast(Array<unsigned long>(1,0xd80dee82l).view(),0);
-    Array<Integer> args(0);
-    args.add(global_nb_row);
-    args.add(local_nb_row);
-    m_world_parallel->broadcast(args.view(),0);
+    m_world_parallel->broadcast(vector<unsigned long>(1,0xd80dee82l),0);
+    vector<int> args(0);
+    args.push_back(global_nb_row);
+    args.push_back(local_nb_row);
+    m_world_parallel->broadcast(args,0);
   }
   debug()<<"\33[1;31m[initialize] Geometry set to "<<global_nb_row
         <<" lines, I see "<<local_nb_row<<" of them"<<"\33[0m";
@@ -299,7 +299,7 @@ void AlephKernel::initialize(Integer global_nb_row,
 *****************************************************************************/
 void AlephKernel::break_and_return(void){
   if (m_there_are_idles && !m_i_am_an_other)
-    m_world_parallel->broadcast(Array<unsigned long>(1,0x4b97b15dl).view(),0);
+    m_world_parallel->broadcast(vector<unsigned long>(1,0x4b97b15dl),0);
 }
 
 
@@ -309,7 +309,7 @@ Mod[Floor[
      mSolverIndex*mSize, (mSolverIndex + 1)*mSize - 1}]/(mSize/
      mSolverSize)], mSize]
 *****************************************************************************/
-void AlephKernel::mapranks(Array<Integer> &ranks){ 
+void AlephKernel::mapranks(vector<int> &ranks){ 
   debug()<<"\33[1;31m[mapranks] mapranks starting @ "
          <<m_solver_index*m_size
          <<", m_size="<<m_size
@@ -327,7 +327,7 @@ void AlephKernel::mapranks(Array<Integer> &ranks){
 
 /******************************************************************************
  *****************************************************************************/
-bool AlephKernel::hitranks(Integer rank, ArrayView<Integer> ranks){
+bool AlephKernel::hitranks(int rank, vector<int> ranks){
   for(int rnk=ranks.size()-1;rnk>=0;rnk-=1)
     if (ranks[rnk]==rank) return true;
   return false;
@@ -336,10 +336,10 @@ bool AlephKernel::hitranks(Integer rank, ArrayView<Integer> ranks){
 
 /******************************************************************************
  *****************************************************************************/
-IParallelMng *AlephKernel::createUnderlyingParallelMng(Integer nb_wanted_sites){ 
+IParallelMng *AlephKernel::createUnderlyingParallelMng(int nb_wanted_sites){ 
   debug()<<"\33[1;31m[createUnderlyingParallelMng] nb_wanted_sites="<<nb_wanted_sites<<"\33[0m";
-  Array<Integer> kept_ranks(0);
-  for(Integer rnk=0; rnk<m_world_size; rnk+=1){
+  vector<int> kept_ranks(0);
+  for(int rnk=0; rnk<m_world_size; rnk+=1){
     if (hitranks(rnk,m_solver_ranks[m_solver_index])){
       kept_ranks.push_back(rnk);
       debug()<<"\33[1;31m[createUnderlyingParallelMng] keeping "<<rnk<<"\33[0m";
@@ -349,7 +349,7 @@ IParallelMng *AlephKernel::createUnderlyingParallelMng(Integer nb_wanted_sites){
   }
   debug()<<"\33[1;31m[createUnderlyingParallelMng] Now createSubParallelMng of size="
         <<kept_ranks.size()<<"\33[0m";
-  IParallelMng *upm=m_world_parallel->createSubParallelMng(kept_ranks.constView());
+  IParallelMng *upm=m_world_parallel->createSubParallelMng(kept_ranks);
   if (!upm){
     debug()<<"\33[1;31m[createUnderlyingParallelMng] not in sub-Comm!"<<"\33[0m";
     return NULL;
@@ -370,7 +370,7 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
   }
     
   if (m_there_are_idles && !m_i_am_an_other)
-    m_world_parallel->broadcast(Array<unsigned long>(1,0xef162166l).view(),0);
+    m_world_parallel->broadcast(vector<unsigned long>(1,0xef162166l),0);
 
   debug()<<"\33[1;31m[createSolverMatrix]\33[0m"<<"\33[0m";
   
@@ -380,8 +380,8 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
     debug()<<"\33[1;31m[createSolverMatrix] UN configured, building Underlying Parallel Managers index="
           <<index()<<"\33[0m";
     traceMng()->flush();
-    m_solver_ranks.add(Array<Integer>(m_world_size));
-    m_solver_ranks[m_solver_index].fill(-1);
+    m_solver_ranks.push_back(vector<int>(m_world_size));
+    m_solver_ranks[m_solver_index].assign(m_solver_ranks[m_solver_index].size(),-1);
     mapranks(m_solver_ranks[m_solver_index]);
     traceMng()->flush();
     IParallelMng* upm=createUnderlyingParallelMng(m_solver_size);
@@ -392,7 +392,7 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
     }else{
       debug()<<"\33[1;31m[createSolverMatrix] upm NULL"<<"\33[0m";
     }
-    m_sub_parallel_mng_queue.add(upm);
+    m_sub_parallel_mng_queue.push_back(upm);
     debug()<<"\33[1;31m[createSolverMatrix] Queuing new kernel arguments: X, B and Tmp with their topolgy"
            <<"\33[0m";
     // On va chercher la topologie avant toute autres choses afin que la bibliothèque
@@ -402,7 +402,7 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
     // On trig le prefix, on fera le postfix apres les solves
     if (underlying_topology!=NULL)
       underlying_topology->backupAndInitialize();
-    m_arguments_queue.add(new AlephKernelArguments(traceMng(),
+    m_arguments_queue.push_back(new AlephKernelArguments(traceMng(),
                                                    new AlephVector(this),  // Vecteur X
                                                    new AlephVector(this),  // Vecteur B
                                                    new AlephVector(this),  // Vecteur tmp (pour l'isAlreadySolved)
@@ -413,9 +413,9 @@ AlephMatrix* AlephKernel::createSolverMatrix(void){
     m_arguments_queue.at(m_solver_index)->m_tmp_vector->create();
     // On initialise la matrice apres la topologies et les vecteurs
     debug()<<"\33[1;31m[createSolverMatrix] Now queuing the matrix\33[0m";
-    m_matrix_queue.add(new AlephMatrix(this));
+    m_matrix_queue.push_back(new AlephMatrix(this));
     debug()<<"\33[1;31m[createSolverMatrix] Now queuing the space for the resolution results\33[0m";
-    m_results_queue.add(new AlephKernelResults());
+    m_results_queue.push_back(new AlephKernelResults());
   }else{
     if (getTopologyImplementation(m_solver_index)!=NULL)
       getTopologyImplementation(m_solver_index)->backupAndInitialize();
@@ -438,7 +438,7 @@ AlephVector* AlephKernel::createSolverVector(void){
     return new AlephVector(this);
   }
   if (m_there_are_idles && !m_i_am_an_other)
-    m_world_parallel->broadcast(Array<unsigned long>(1,0xc4b28f2l).view(),0);
+    m_world_parallel->broadcast(vector<unsigned long>(1,0xc4b28f2l),0);
   m_aleph_vector_idx++;
   if ((m_aleph_vector_idx%2)==0){
 	 debug()<<"\33[1;31m[createSolverVector] Get "<<m_solver_index<<"th X vector\33[0m";
@@ -465,45 +465,45 @@ void AlephKernel::postSolver(AlephParams *params,
   }
 
   if (m_there_are_idles && !m_i_am_an_other){
-    m_world_parallel->broadcast(Array<unsigned long>(1,0xba9488bel).view(),0);
-    Array<Real> real_args(0);
-    real_args.add(params->epsilon());
-    real_args.add(params->alpha());
-    real_args.add(params->minRHSNorm());
-    real_args.add(params->DDMCParameterAmgDiagonalThreshold());
+    m_world_parallel->broadcast(vector<unsigned long>(1,0xba9488bel),0);
+    vector<double> real_args(0);
+    real_args.push_back(params->epsilon());
+    real_args.push_back(params->alpha());
+    real_args.push_back(params->minRHSNorm());
+    real_args.push_back(params->DDMCParameterAmgDiagonalThreshold());
     
-    Array<int> bool_args(0);
-    bool_args.add(params->xoUser());
-    bool_args.add(params->checkRealResidue());
-    bool_args.add(params->printRealResidue());
-    bool_args.add(params->debugInfo());
-    bool_args.add(params->convergenceAnalyse());
-    bool_args.add(params->stopErrorStrategy());
-    bool_args.add(params->writeMatrixToFileErrorStrategy());
-    bool_args.add(params->DDMCParameterListingOutput());
-    bool_args.add(params->printCpuTimeResolution());
-    bool_args.add(params->getKeepSolverStructure());
-    bool_args.add(params->getSequentialSolver());
+    vector<int> bool_args(0);
+    bool_args.push_back(params->xoUser());
+    bool_args.push_back(params->checkRealResidue());
+    bool_args.push_back(params->printRealResidue());
+    bool_args.push_back(params->debugInfo());
+    bool_args.push_back(params->convergenceAnalyse());
+    bool_args.push_back(params->stopErrorStrategy());
+    bool_args.push_back(params->writeMatrixToFileErrorStrategy());
+    bool_args.push_back(params->DDMCParameterListingOutput());
+    bool_args.push_back(params->printCpuTimeResolution());
+    bool_args.push_back(params->getKeepSolverStructure());
+    bool_args.push_back(params->getSequentialSolver());
 
-    Array<Integer> int_args(0);
-    int_args.add(params->maxIter());
-    int_args.add(params->gamma());
-    int_args.add((Integer)params->precond());
-    int_args.add((Integer)params->method());
-    int_args.add((Integer)params->amgCoarseningMethod());
-    int_args.add(params->getOutputLevel());
-    int_args.add(params->getAmgCycle());
-    int_args.add(params->getAmgSolverIter());
-    int_args.add(params->getAmgSmootherIter());
-    int_args.add((Integer)params->getAmgSmootherOption());
-    int_args.add((Integer)params->getAmgCoarseningOption());
-    int_args.add((Integer)params->getAmgCoarseSolverOption());
-    int_args.add((Integer)params->getCriteriaStop());
+    vector<int> int_args(0);
+    int_args.push_back(params->maxIter());
+    int_args.push_back(params->gamma());
+    int_args.push_back((int)params->precond());
+    int_args.push_back((int)params->method());
+    int_args.push_back((int)params->amgCoarseningMethod());
+    int_args.push_back(params->getOutputLevel());
+    int_args.push_back(params->getAmgCycle());
+    int_args.push_back(params->getAmgSolverIter());
+    int_args.push_back(params->getAmgSmootherIter());
+    int_args.push_back((int)params->getAmgSmootherOption());
+    int_args.push_back((int)params->getAmgCoarseningOption());
+    int_args.push_back((int)params->getAmgCoarseSolverOption());
+    int_args.push_back((int)params->getCriteriaStop());
 
     // not broadcasted writeMatrixNameErrorStrategy
-    m_world_parallel->broadcast(real_args.view(),0);
-    m_world_parallel->broadcast(bool_args.view(),0);
-    m_world_parallel->broadcast(int_args.view(),0);
+    m_world_parallel->broadcast(real_args,0);
+    m_world_parallel->broadcast(bool_args,0);
+    m_world_parallel->broadcast(int_args,0);
   }
 
   debug()<<"\33[1;31m[postSolver] Queuing solver "<< m_solver_index<<"\33[0m";
@@ -522,10 +522,10 @@ void AlephKernel::postSolver(AlephParams *params,
  * Ce sont ces arguments qui doivent être remplis
  * bf8d3adf
  *****************************************************************************/
-AlephVector* AlephKernel::syncSolver(Integer gid, Integer& nb_iteration, Real* residual_norm){
+AlephVector* AlephKernel::syncSolver(int gid, int& nb_iteration, double* residual_norm){
   if (m_there_are_idles && !m_i_am_an_other){
-    m_world_parallel->broadcast(Array<unsigned long>(1,0xbf8d3adfl).view(),0);
-    m_world_parallel->broadcast(Array<Integer>(1,gid).view(),0);
+    m_world_parallel->broadcast(vector<unsigned long>(1,0xbf8d3adfl),0);
+    m_world_parallel->broadcast(vector<int>(1,gid),0);
   }
 
   if (!m_solved){

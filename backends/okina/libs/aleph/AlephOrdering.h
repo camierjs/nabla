@@ -46,10 +46,10 @@
 class AlephOrdering: public TraceAccessor{
 public:
   AlephOrdering(AlephKernel*);
-  AlephOrdering(AlephKernel*,Integer,Integer,bool=false);
+  AlephOrdering(AlephKernel*,int,int,bool=false);
   ~AlephOrdering();
 public:
-  inline Integer swap(Integer i){
+  inline int swap(int i){
     if (m_do_swap) return m_swap.at(i);
     return i;
   }
@@ -64,7 +64,7 @@ private:
   bool m_do_swap;
   AlephKernel* m_kernel;
 private:
-  Array<Int64> m_swap;
+  vector<int> m_swap;
 };
 
 #endif  

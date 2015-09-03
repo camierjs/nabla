@@ -60,7 +60,7 @@ AlephFactory::AlephFactory(ITraceMng *tm): IAlephFactory(tm){
   // créé la fabrique correspondante si elle est disponible.
   for(FactoryImplMap::iterator i = m_impl_map.begin(); i!=m_impl_map.end(); ++i ){
     FactoryImpl *implementation=i->second;
-    const String& name = implementation->m_name;
+    const string name = implementation->m_name;
     debug()<<"\33[1;34m\t[AlephFactory] Adding "<<name<<" library..."<<"\33[0m";
     //IAlephFactoryImpl *factory = sb.createInstance(name+"AlephFactory",SB_AllowNull);
     //implementation->m_factory = factory;
@@ -81,16 +81,14 @@ AlephFactory::~AlephFactory(){
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-IAlephFactoryImpl* AlephFactory::_getFactory(Integer solver_index){
+IAlephFactoryImpl* AlephFactory::_getFactory(int solver_index){
   FactoryImplMap::const_iterator ci = m_impl_map.find(solver_index);
   if (ci==m_impl_map.end())
-    throw FatalErrorException("AlephFactory::_getFactory",
-                              "Invalid solver index for aleph factory");
+    throw std::logic_error("[AlephFactory::_getFactory] Invalid solver index for aleph factory");
   FactoryImpl *implementation=ci->second;
   IAlephFactoryImpl* factory = implementation->m_factory;
   if (!factory)
-    throw FatalErrorException("AlephFactory::_getFactory",
-                              "Implementation not available");
+    throw std::logic_error("[AlephFactory::_getFactory] Implementation not available");
   // Si la fabrique de l'implémentation considérée n'a pas
   // été initialisée, on le fait maintenant
   if (!implementation->m_initialized){
@@ -107,8 +105,8 @@ IAlephFactoryImpl* AlephFactory::_getFactory(Integer solver_index){
  * AlephFactory::GetTopology
  *****************************************************************************/
 IAlephTopology* AlephFactory::GetTopology(AlephKernel *kernel,
-                                          Integer index,
-                                          Integer nb_row_size){
+                                          int index,
+                                          int nb_row_size){
   debug()<<"\33[1;34m\t\t[IAlephFactory::GetTopology] Switch="<<kernel->underlyingSolver()<<"\33[0m";
   return _getFactory(kernel->underlyingSolver())->createTopology(traceMng(),
                                                                  kernel,
@@ -121,7 +119,7 @@ IAlephTopology* AlephFactory::GetTopology(AlephKernel *kernel,
  * AlephFactory::GetVector
  *****************************************************************************/
 IAlephVector* AlephFactory::GetVector(AlephKernel *kernel,
-                                      Integer index){
+                                      int index){
   debug()<<"\33[1;34m\t\t[AlephFactory::GetVector] Switch="<<kernel->underlyingSolver()<<"\33[0m";
   return _getFactory(kernel->underlyingSolver())->createVector(traceMng(),
                                                                kernel,
@@ -132,7 +130,7 @@ IAlephVector* AlephFactory::GetVector(AlephKernel *kernel,
  * AlephFactory::GetMatrix
  *****************************************************************************/
 IAlephMatrix* AlephFactory::GetMatrix(AlephKernel *kernel,
-                                      Integer index){
+                                      int index){
   debug()<<"\33[1;34m\t\t[AlephFactory::GetMatrix] Switch="<<kernel->underlyingSolver()<<"\33[0m";
   return _getFactory(kernel->underlyingSolver())->createMatrix(traceMng(),
                                                                kernel,

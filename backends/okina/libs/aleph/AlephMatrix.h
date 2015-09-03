@@ -54,62 +54,62 @@ public:
   ~AlephMatrix();
 public:
   void create(void);
-  void create(IntegerConstArrayView, bool=false);
+  void create(vector<int>, bool=false);
   void create_really(void);
   void reset(void);
-  Integer reIdx(Integer,Array<Int32*>&);
-  void reSetValuesIn(AlephMatrix*,Array<Int32*>&);
-  void reAddValuesIn(AlephMatrix*,Array<Int32*>&);
-  void updateKnownRowCol(Integer,Integer,Real);
-  void rowMapMapCol(Integer,Integer,Real);
-  void addValue(const VariableRef&, const Item&,
-                const VariableRef&, const Item&, const Real);
-  void addValue(const VariableRef&, const ItemEnumerator&,
-                const VariableRef&, const ItemEnumerator&, const Real);
-  void setValue(const VariableRef&, const Item&,
-                const VariableRef&, const Item&, const Real);
-  void setValue(const VariableRef&, const ItemEnumerator&,
-                const VariableRef&, const ItemEnumerator&, const Real);
-  void addValue(Integer,Integer,Real);
-  void setValue(Integer,Integer,Real);
-  void writeToFile(const String);
+  int reIdx(int,vector<int*>&);
+  void reSetValuesIn(AlephMatrix*,vector<int*>&);
+  void reAddValuesIn(AlephMatrix*,vector<int*>&);
+  void updateKnownRowCol(int,int,double);
+  void rowMapMapCol(int,int,double);
+  void addValue(const Variable&, const item&,
+                const Variable&, const item&, const double);
+  void addValue(const Variable&, const item*&,
+                const Variable&, const item*&, const double);
+  void setValue(const Variable&, const item&,
+                const Variable&, const item&, const double);
+  void setValue(const Variable&, const item*&,
+                const Variable&, const item*&, const double);
+  void addValue(int,int,double);
+  void setValue(int,int,double);
+  void writeToFile(const string);
   void startFilling();
   void assemble();
   void assemble_waitAndFill();
-  void reassemble(Integer&, Real*);
-  void reassemble_waitAndFill(Integer&, Real*);
-  void solve(AlephVector*, AlephVector*, Integer&, Real*, AlephParams*,bool=false);
-  void solveNow(AlephVector*, AlephVector*, AlephVector*, Integer&, Real*, AlephParams* );
+  void reassemble(int&, double*);
+  void reassemble_waitAndFill(int&, double*);
+  void solve(AlephVector*, AlephVector*, int&, double*, AlephParams*,bool=false);
+  void solveNow(AlephVector*, AlephVector*, AlephVector*, int&, double*, AlephParams* );
 private:
   AlephKernel* m_kernel;
-  Integer m_index;
-  ArrayView<Integer> m_ranks;
+  int m_index;
+  vector<int> m_ranks;
   bool m_participating_in_solver;
   IAlephMatrix* m_implementation;
 private:
   // Matrice utilisée dans le cas où nous sommes le solveur
-  MultiArray2Int32 m_aleph_matrix_buffer_rows;
-  MultiArray2Int32 m_aleph_matrix_buffer_cols;
-  MultiArray2Real m_aleph_matrix_buffer_vals;
+  vector<vector<int> > m_aleph_matrix_buffer_rows;
+  vector<vector<int> > m_aleph_matrix_buffer_cols;
+  vector<vector<double> > m_aleph_matrix_buffer_vals;
   // Tableaux tampons des setValues
-  Integer m_setValue_idx;
-  Array<Int32> m_setValue_row;
-  Array<Int32> m_setValue_col;
-  Array<Real> m_setValue_val;
+  int m_setValue_idx;
+  vector<int> m_setValue_row;
+  vector<int> m_setValue_col;
+  vector<double> m_setValue_val;
  private:  // Tableaux tampons des addValues
-  typedef std::map<Integer,Integer> colMap;
-  typedef std::map<Integer,colMap*> rowColMap;
+  typedef std::map<int,int> colMap;
+  typedef std::map<int,colMap*> rowColMap;
   rowColMap m_row_col_map;
-  Integer m_addValue_idx;
-  Array<Integer> m_addValue_row;
-  Array<Integer> m_addValue_col;
-  Array<Real> m_addValue_val;
+  int m_addValue_idx;
+  vector<int> m_addValue_row;
+  vector<int> m_addValue_col;
+  vector<double> m_addValue_val;
  private:  // Tableaux des requètes
-  Array<Parallel::Request> m_aleph_matrix_mpi_data_requests;
-  Array<Parallel::Request> m_aleph_matrix_mpi_results_requests;
+  vector<Parallel::Request> m_aleph_matrix_mpi_data_requests;
+  vector<Parallel::Request> m_aleph_matrix_mpi_results_requests;
  private: // Résultats. Placés ici afin de les conserver hors du scope de la fonction les utilisant
-  Array<Int32> m_aleph_matrix_buffer_n_iteration;
-  Array<Real> m_aleph_matrix_buffer_residual_norm;
+  vector<int> m_aleph_matrix_buffer_n_iteration;
+  vector<double> m_aleph_matrix_buffer_residual_norm;
 };
 
 

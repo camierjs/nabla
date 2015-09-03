@@ -55,8 +55,8 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel):TraceAccessor(kernel->parallel
 /******************************************************************************
  *****************************************************************************/
 AlephOrdering::AlephOrdering(AlephKernel *kernel,
-                             Integer global_nb_row,
-                             Integer local_nb_row,
+                             int global_nb_row,
+                             int local_nb_row,
                              bool do_swap):TraceAccessor(kernel->parallel()->traceMng()),
                                            m_do_swap(do_swap),
                                            m_kernel(kernel),
@@ -69,10 +69,10 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel,
   debug()<<"\t[AlephOrdering::AlephOrdering] Ordering!";
   
   if (m_kernel->nbRanksPerSolver()!=1)
-    throw FatalErrorException("AlephOrdering", "Ordering not allowed in parallel");
+    throw std::logic_error("[AlephOrdering] Ordering not allowed in parallel");
   
-  Integer local_nb_cell=m_kernel->subDomain()->defaultMesh()->ownCells().size();
-  Integer total_nb_cell=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_cell);
+  int local_nb_cell=m_kernel->subDomain()->defaultMesh()->ownCells().size();
+  int total_nb_cell=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_cell);
 
   if ((local_nb_cell==local_nb_row)&&(total_nb_cell==global_nb_row)){
     debug()<<"\t[AlephOrdering::AlephOrdering] Now cell ordering";
@@ -86,8 +86,8 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel,
     return;
   }
   
-  Integer local_nb_face=m_kernel->subDomain()->defaultMesh()->ownFaces().size();
-  Integer total_nb_face=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_face);
+  int local_nb_face=m_kernel->subDomain()->defaultMesh()->ownFaces().size();
+  int total_nb_face=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_face);
   if (((local_nb_cell+local_nb_face)==local_nb_row)&&((total_nb_cell+total_nb_face)==global_nb_row)){
     debug()<<"\t[AlephOrdering::AlephOrdering] Now cell+face ordering";
     this->initCellFaceOrder();
@@ -101,8 +101,8 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel,
   }
 
   
-  Integer local_nb_node=m_kernel->subDomain()->defaultMesh()->ownNodes().size();
-  Integer total_nb_node=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_node);
+  int local_nb_node=m_kernel->subDomain()->defaultMesh()->ownNodes().size();
+  int total_nb_node=m_kernel->subDomain()->parallelMng()->reduce(Parallel::ReduceSum,local_nb_node);
   
   if ((((local_nb_cell+local_nb_node))==local_nb_row)&&(((total_nb_cell+total_nb_node))==global_nb_row)){
     debug()<<"\t[AlephOrdering::AlephOrdering] Now (cell+node) ordering";
@@ -117,7 +117,7 @@ AlephOrdering::AlephOrdering(AlephKernel *kernel,
   }
 
   
-  throw FatalErrorException("AlephOrdering", "Could not guess cell||face||cell+face");
+  throw std::logic_error("[AlephOrdering] Could not guess cell||face||cell+face");
 }
 
   
@@ -134,10 +134,10 @@ AlephOrdering::~AlephOrdering(){
 void AlephOrdering::initCellOrder(void){
   debug()<<"\t[AlephOrdering::InitializeCellOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
-  Array<Int64> all;
-  Integer added=0;
-  ENUMERATE_CELL(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
-    all.add(cell->uniqueId().asInt64());
+  vector<int> all;
+  int added=0;
+  ENUMERATE_GROUP(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
+    all.push_back(cell->uniqueId());
     added+=1;
   }
   debug()<<"\t[AlephOrdering::InitializeCellOrder] added="<<added;
@@ -152,12 +152,12 @@ void AlephOrdering::initCellOrder(void){
 void AlephOrdering::initTwiceCellOrder(void){
   debug()<<"\t[AlephOrdering::InitializeTwiceCellOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
-  Array<Int64> all;
-  Integer added=0;
-  ENUMERATE_CELL(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
-    all.add(2*cell->uniqueId().asInt64());
+  vector<int> all;
+  int added=0;
+  ENUMERATE_GROUP(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
+    all.push_back(2*cell->uniqueId());
     added+=1;
-    all.add(2*cell->uniqueId().asInt64()+1);
+    all.push_back(2*cell->uniqueId()+1);
     added+=1;
   }
   debug()<<"\t[AlephOrdering::InitializeTwiceCellOrder] added="<<added;
@@ -171,10 +171,10 @@ void AlephOrdering::initTwiceCellOrder(void){
 void AlephOrdering::initFaceOrder(void){
   debug()<<"\t[AlephOrdering::InitializeFaceOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
   m_swap.resize(m_kernel->topology()->gathered_nb_row(m_kernel->size()));
-  Array<Int64> all;
-  Integer added=0;
-  ENUMERATE_FACE(face,m_kernel->subDomain()->defaultMesh()->ownFaces()){
-    all.add(face->uniqueId().asInt64());
+  vector<int> all;
+  int added=0;
+  ENUMERATE_GROUP(face,m_kernel->subDomain()->defaultMesh()->ownFaces()){
+    all.push_back(face->uniqueId());
     added+=1;
   }
   debug()<<"\t[AlephOrdering::InitializeFaceOrder] added="<<added;
@@ -188,69 +188,69 @@ void AlephOrdering::initFaceOrder(void){
 void AlephOrdering::initCellFaceOrder(void){
   debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
-  Array<Integer> all_cells;
-  Array<Integer> all_faces;
-  Array<Integer> gathered_nb_cells(m_kernel->size());
-  Array<Integer> gathered_nb_faces(m_kernel->size());
-  all_cells.add(m_kernel->subDomain()->defaultMesh()->ownCells().size());
-  all_faces.add(m_kernel->subDomain()->defaultMesh()->ownFaces().size());
+  vector<int> all_cells;
+  vector<int> all_faces;
+  vector<int> gathered_nb_cells(m_kernel->size());
+  vector<int> gathered_nb_faces(m_kernel->size());
+  all_cells.push_back(m_kernel->subDomain()->defaultMesh()->ownCells().size());
+  all_faces.push_back(m_kernel->subDomain()->defaultMesh()->ownFaces().size());
   m_kernel->parallel()->allGather(all_cells,gathered_nb_cells);
   m_kernel->parallel()->allGather(all_faces,gathered_nb_faces);
-/*  for(Integer i=0,N=gathered_nb_cells.size();i<N;++i)
+/*  for(int i=0,N=gathered_nb_cells.size();i<N;++i)
     debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] gathered_nb_cells["<<i<<"]="<<gathered_nb_cells.at(i);
-  for(Integer i=0,N=gathered_nb_faces.size();i<N;++i)
+  for(int i=0,N=gathered_nb_faces.size();i<N;++i)
     debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] gathered_nb_faces["<<i<<"]="<<gathered_nb_faces.at(i);
 */
 
-  Array<Int64> all;
-  Array<Int64> m_swap_cell;
-  ENUMERATE_CELL(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
-    all.add(cell->uniqueId().asInt64());
+  vector<int> all;
+  vector<int> m_swap_cell;
+  ENUMERATE_GROUP(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
+    all.push_back(cell->uniqueId());
   }
   //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] added for cells="<<all.size();
   m_kernel->parallel()->allGatherVariable(all,m_swap_cell);
-/*  for(Integer i=0,N=m_swap_cell.size();i<N;++i)
+/*  for(int i=0,N=m_swap_cell.size();i<N;++i)
     debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] m_swap_cell["<<i<<"]="<<m_swap_cell.at(i);
 */
   all.clear();
-  Array<Int64> m_swap_face;
-  ENUMERATE_FACE(face,m_kernel->subDomain()->defaultMesh()->ownFaces()){
-    all.add(face->uniqueId().asInt64());
+  vector<int> m_swap_face;
+  ENUMERATE_GROUP(face,m_kernel->subDomain()->defaultMesh()->ownFaces()){
+    all.push_back(face->uniqueId());
   }
   //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] added for faces="<<all.size();
   m_kernel->parallel()->allGatherVariable(all,m_swap_face);
-/*  for(Integer i=0,N=m_swap_face.size();i<N;++i)
+/*  for(int i=0,N=m_swap_face.size();i<N;++i)
     debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] m_swap_face["<<i<<"]="<<m_swap_face.at(i);
 */
   
-  Int64 cell_offset=m_swap_cell.size();
+  int cell_offset=m_swap_cell.size();
 //  debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] Now combining cells+faces of size="<<m_swap_cell.size()+m_swap_face.size();
 /*  m_swap.resize(m_swap_cell.size()+m_swap_face.size());
   m_swap.copy(m_swap_cell.constView());
   debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] Shifting faces of "<<m_swap_cell.size();
-  for(Integer i=0,N=m_swap_face.size();i<N;++i)
+  for(int i=0,N=m_swap_face.size();i<N;++i)
     m_swap_face[i]+=cell_offset;
   m_swap.addRange(m_swap_face.constView());
 */
   
   m_swap.resize(m_swap_cell.size()+m_swap_face.size());
   //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] Now combining cells";
-  Integer iCell=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=m_kernel->topology()->gathered_nb_row(i);
-    for(Integer j=0;j<gathered_nb_cells.at(i);++j){
+  int iCell=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=m_kernel->topology()->gathered_nb_row(i);
+    for(int j=0;j<gathered_nb_cells.at(i);++j){
       //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] m_swap["<<offset+j<<"]="<<m_swap_cell.at(iCell);
       m_swap[offset+j]=m_swap_cell.at(iCell);
       iCell+=1;
     }
   }
   //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] Now combining faces";
-  Integer iFace=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=0;
+  int iFace=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=0;
     if (i>0) offset=m_kernel->topology()->gathered_nb_row(i);
     offset+=gathered_nb_cells.at(i);
-    for(Integer j=0;j<gathered_nb_faces.at(i);++j){
+    for(int j=0;j<gathered_nb_faces.at(i);++j){
       //debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] m_swap["<<offset+j<<"]="<<m_swap_face.at(iFace);
       m_swap[offset+j]=cell_offset+m_swap_face.at(iFace);
       iFace+=1;
@@ -258,7 +258,7 @@ void AlephOrdering::initCellFaceOrder(void){
   }
 
 /*  debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] Like it?";
-  for(Integer i=0,N=m_swap.size();i<N;++i){
+  for(int i=0,N=m_swap.size();i<N;++i){
     debug()<<"\t[AlephOrdering::InitializeCellFaceOrder] m_swap["<<i<<"]="<<m_swap.at(i);
     }*/
 }
@@ -273,45 +273,45 @@ void AlephOrdering::initCellFaceOrder(void){
 void AlephOrdering::initCellNodeOrder(void){
   debug()<<"\t[AlephOrdering::InitializeCellNodeOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
-  Array<Integer> all_cells;
-  Array<Integer> all_nodes;
-  Array<Integer> gathered_nb_cells(m_kernel->size());
-  Array<Integer> gathered_nb_nodes(m_kernel->size());
-  all_cells.add(m_kernel->subDomain()->defaultMesh()->ownCells().size());
-  all_nodes.add(m_kernel->subDomain()->defaultMesh()->ownNodes().size());
+  vector<int> all_cells;
+  vector<int> all_nodes;
+  vector<int> gathered_nb_cells(m_kernel->size());
+  vector<int> gathered_nb_nodes(m_kernel->size());
+  all_cells.push_back(m_kernel->subDomain()->defaultMesh()->ownCells().size());
+  all_nodes.push_back(m_kernel->subDomain()->defaultMesh()->ownNodes().size());
   m_kernel->parallel()->allGather(all_cells,gathered_nb_cells);
   m_kernel->parallel()->allGather(all_nodes,gathered_nb_nodes);
 
-  Array<Int64> all;
-  Array<Int64> m_swap_cell;
-  ENUMERATE_CELL(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
-    all.add(cell->uniqueId().asInt64());
+  vector<int> all;
+  vector<int> m_swap_cell;
+  ENUMERATE_GROUP(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
+    all.push_back(cell->uniqueId());
   }
   m_kernel->parallel()->allGatherVariable(all,m_swap_cell);
   all.clear();
-  Array<Int64> m_swap_node;
-  ENUMERATE_NODE(node,m_kernel->subDomain()->defaultMesh()->ownNodes()){
-    all.add(node->uniqueId().asInt64());
+  vector<int> m_swap_node;
+  ENUMERATE_GROUP(node,m_kernel->subDomain()->defaultMesh()->ownNodes()){
+    all.push_back(node->uniqueId());
   }
   m_kernel->parallel()->allGatherVariable(all,m_swap_node);
   
-  Int64 cell_offset=m_swap_cell.size();
+  int cell_offset=m_swap_cell.size();
 
   m_swap.resize(m_swap_cell.size()+m_swap_node.size());
-  Integer iCell=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=m_kernel->topology()->gathered_nb_row(i);
-    for(Integer j=0;j<gathered_nb_cells.at(i);++j){
+  int iCell=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=m_kernel->topology()->gathered_nb_row(i);
+    for(int j=0;j<gathered_nb_cells.at(i);++j){
       m_swap[offset+j]=m_swap_cell.at(iCell);
       iCell+=1;
     }
   }
-  Integer iNode=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=0;
+  int iNode=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=0;
     if (i>0) offset=m_kernel->topology()->gathered_nb_row(i);
     offset+=gathered_nb_cells.at(i);
-    for(Integer j=0;j<gathered_nb_nodes.at(i);++j){
+    for(int j=0;j<gathered_nb_nodes.at(i);++j){
       m_swap[offset+j]=cell_offset+m_swap_node.at(iNode);
       iNode+=1;
     }
@@ -322,47 +322,47 @@ void AlephOrdering::initCellNodeOrder(void){
 void AlephOrdering::initTwiceCellNodeOrder(void){
   debug()<<"\t[AlephOrdering::initTwiceCellNodeOrder] "<<m_kernel->topology()->gathered_nb_row(m_kernel->size());
 
-  Array<Integer> all_cells;
-  Array<Integer> all_nodes;
-  Array<Integer> gathered_nb_cells(m_kernel->size());
-  Array<Integer> gathered_nb_nodes(m_kernel->size());
-  all_cells.add(m_kernel->subDomain()->defaultMesh()->ownCells().size());
-  all_nodes.add(m_kernel->subDomain()->defaultMesh()->ownNodes().size());
+  vector<int> all_cells;
+  vector<int> all_nodes;
+  vector<int> gathered_nb_cells(m_kernel->size());
+  vector<int> gathered_nb_nodes(m_kernel->size());
+  all_cells.push_back(m_kernel->subDomain()->defaultMesh()->ownCells().size());
+  all_nodes.push_back(m_kernel->subDomain()->defaultMesh()->ownNodes().size());
   m_kernel->parallel()->allGather(all_cells,gathered_nb_cells);
   m_kernel->parallel()->allGather(all_nodes,gathered_nb_nodes);
 
-  Array<Int64> all;
-  Array<Int64> m_swap_cell;
-  ENUMERATE_CELL(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
-    all.add(2*cell->uniqueId().asInt64());
-    all.add(2*cell->uniqueId().asInt64()+1);
+  vector<int> all;
+  vector<int> m_swap_cell;
+  ENUMERATE_GROUP(cell,m_kernel->subDomain()->defaultMesh()->ownCells()){
+    all.push_back(2*cell->uniqueId());
+    all.push_back(2*cell->uniqueId()+1);
   }
   m_kernel->parallel()->allGatherVariable(all,m_swap_cell);
   all.clear();
-  Array<Int64> m_swap_node;
-  ENUMERATE_NODE(node,m_kernel->subDomain()->defaultMesh()->ownNodes()){
-    all.add(2*node->uniqueId().asInt64());
-    all.add(2*node->uniqueId().asInt64()+1);
+  vector<int> m_swap_node;
+  ENUMERATE_GROUP(node,m_kernel->subDomain()->defaultMesh()->ownNodes()){
+    all.push_back(2*node->uniqueId());
+    all.push_back(2*node->uniqueId()+1);
   }
   m_kernel->parallel()->allGatherVariable(all,m_swap_node);
   
-  Int64 cell_offset=m_swap_cell.size();
+  int cell_offset=m_swap_cell.size();
 
   m_swap.resize(m_swap_cell.size()+m_swap_node.size());
-  Integer iCell=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=m_kernel->topology()->gathered_nb_row(i);
-    for(Integer j=0;j<gathered_nb_cells.at(i);++j){
+  int iCell=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=m_kernel->topology()->gathered_nb_row(i);
+    for(int j=0;j<gathered_nb_cells.at(i);++j){
       m_swap[offset+j]=m_swap_cell.at(iCell);
       iCell+=1;
     }
   }
-  Integer iNode=0;
-  for(Integer i=0;i<m_kernel->size();++i){
-    Integer offset=0;
+  int iNode=0;
+  for(int i=0;i<m_kernel->size();++i){
+    int offset=0;
     if (i>0) offset=m_kernel->topology()->gathered_nb_row(i);
     offset+=gathered_nb_cells.at(i);
-    for(Integer j=0;j<gathered_nb_nodes.at(i);++j){
+    for(int j=0;j<gathered_nb_nodes.at(i);++j){
       m_swap[offset+j]=cell_offset+m_swap_node.at(iNode);
       iNode+=1;
     }

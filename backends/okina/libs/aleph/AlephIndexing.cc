@@ -62,10 +62,10 @@ AlephIndexing::AlephIndexing(AlephKernel *kernel):
 // ****************************************************************************
 // * updateKnownItems
 // ****************************************************************************
-Int32 AlephIndexing::updateKnownItems(VariableItemInt32 *var_idx,
-                                      const Item &itm){
+int AlephIndexing::updateKnownItems(VariableItemInt *var_idx,
+                                      const item &itm){
   // Dans tous les cas l'adresse est celle-ci
-  m_known_items_all_address.add(&(*var_idx)[itm]);
+  m_known_items_all_address.push_back(&(*var_idx)[itm]);
   // Si l'item ciblé n'est pas à nous, on ne doit pas le compter
   if (itm.isOwn()){
     // On met à jour la case mémoire, et on le rajoute aux owned
@@ -86,27 +86,26 @@ Int32 AlephIndexing::updateKnownItems(VariableItemInt32 *var_idx,
 // ****************************************************************************
 // * findWhichLidFromMapMap
 // ****************************************************************************
-Int32 AlephIndexing::findWhichLidFromMapMap(IVariable *var,
-                                              const Item &itm){
+int AlephIndexing::findWhichLidFromMapMap(IVariable *var,
+                                            const item &itm){
   VarMapIdx::const_iterator iVarMap = m_var_map_idx.find(var);
   // Si la variable n'est même pas encore connue
   // On rajoute une entrée map(map(m_current_idx))
   if (iVarMap==m_var_map_idx.end()){
     //debug()<<"\t\33[33m[findWhichLidFromMapMap] Unknown variable "<<var->name()<<"\33[m";
     traceMng()->flush();
-    String var_idx_name(var->name());
+    string var_idx_name(var->name());
     var_idx_name+="_idx";
-    VariableItemInt32 *var_idx=
-      new VariableItemInt32(VariableBuildInfo(var->mesh(),
-                                              var_idx_name),
+    VariableItemInt *var_idx=
+      new VariableItemInt(//VariableBuildInfo(var->mesh(), var_idx_name),
                             var->itemKind());
     // On rajoute à notre map la variable '_idx' de cette variable
     m_var_map_idx.insert(std::make_pair(var,var_idx));
     // On flush tous les indices potentiels de cette variable
-    var_idx->fill(ALEPH_INDEX_NOT_USED);
+    var_idx->assign(var_idx->size(),ALEPH_INDEX_NOT_USED);
     return updateKnownItems(var_idx,itm);
   }
-  VariableItemInt32 *var_idx = iVarMap->second;
+  VariableItemInt *var_idx = iVarMap->second;
   // Si cet item n'est pas connu de cette variable, on rajoute une entrée
   if ((*var_idx)[itm]==ALEPH_INDEX_NOT_USED){
     //debug()<<"\t\33[33m[findWhichLidFromMapMap] Cet item n'est pas connu de cette variable, on rajoute une entrée\33[m";
@@ -122,21 +121,21 @@ Int32 AlephIndexing::findWhichLidFromMapMap(IVariable *var,
 // ****************************************************************************
 // * get qui trig findWhichLidFromMapMap
 // ****************************************************************************
-Int32 AlephIndexing::get(const VariableRef &variable,
-                         const ItemEnumerator &itm){
+int AlephIndexing::get(const Variable &variable,
+                         const item* &itm){
   return get(variable, *itm);
 }
-Int32 AlephIndexing::get(const VariableRef &variable,
-                         const Item &itm){
+int AlephIndexing::get(const Variable &variable,
+                         const item &itm){
   IVariable *var=variable.variable();
   if (m_kernel->isInitialized())
     return  (*m_var_map_idx.find(var)->second)[itm]-m_kernel->topology()->part()[m_kernel->rank()];
   // On teste de bien travailler sur une variables scalaire
   if (var->dimension()!=1)
-    throw ArgumentException(A_FUNCINFO, "cannot get non-scalar variables!");
+    throw std::invalid_argument(A_FUNCINFO);
   // On vérifie que le type d'item est bien connu
   if (var->itemKind()>=IK_Unknown)
-    throw ArgumentException(A_FUNCINFO, "Unknown Item Kind!");
+    throw std::invalid_argument(A_FUNCINFO);
   //debug()<<"\33[1;33m[AlephIndexing::get] Valid couple, now looking for known idx (uid="<<itm->uniqueId()<<")\33[m";
   return findWhichLidFromMapMap(var,itm);
 }
@@ -146,14 +145,14 @@ Int32 AlephIndexing::get(const VariableRef &variable,
 // * buildIndexesFromAddress
 // ****************************************************************************
 void AlephIndexing::buildIndexesFromAddress(void){
-  const Integer topology_row_offset=m_kernel->topology()->part()[m_kernel->rank()];
+  const int topology_row_offset=m_kernel->topology()->part()[m_kernel->rank()];
   VarMapIdx::const_iterator iVarIdx=m_var_map_idx.begin();
   debug()<<"\33[1;7;33m[buildIndexesFromAddress] Re-inexing variables with offset "<<topology_row_offset<<"\33[m";
   // On ré-indice et synchronise toutes les variables qu'on a pu voir passer
   for(;iVarIdx!=m_var_map_idx.end(); ++iVarIdx){
-    ItemGroup group = iVarIdx->first->itemGroup();
-    VariableItemInt32 *var_idx = iVarIdx->second;
-    ENUMERATE_ITEM(itm,group){
+    items group = iVarIdx->first->itemGroup();
+    VariableItemInt *var_idx = iVarIdx->second;
+    ENUMERATE_GROUP(itm,group){
       // Si cet item n'est pas utilisé, on s'en occupe pas
       if ((*var_idx)[itm]==ALEPH_INDEX_NOT_USED) continue;
       // Sinon on rajoute l'offset
@@ -169,7 +168,7 @@ void AlephIndexing::buildIndexesFromAddress(void){
 // * localKnownItems
 // * Consolidation en nombre des m_known_items_own fonction des items
 // ****************************************************************************
-Integer AlephIndexing::localKnownItems(void){
+int AlephIndexing::localKnownItems(void){
   return m_known_items_own;
 }
 
@@ -181,9 +180,9 @@ void AlephIndexing::nowYouCanBuildTheTopology(AlephMatrix *fromThisMatrix,
                                               AlephVector *fromThisX,
                                               AlephVector *fromThisB){
   // Récupération de la consolidation en nombre des items
-  Integer lki=localKnownItems();
+  int lki=localKnownItems();
   // ReduceSum sur l'ensemble de la topologie
-  Integer gki= m_kernel->parallel()->reduce(Parallel::ReduceSum,lki);
+  int gki= m_kernel->parallel()->reduce(Parallel::ReduceSum,lki);
   debug()<<"\33[1;33m[AlephIndexing::nowYouCanBuildTheTopology] Working with lki="
          <<lki<<", gki="<<gki<<"\33[m";
   // Initialisation du kernel d'Aleph en fonction les locals et globals known items
