@@ -202,13 +202,23 @@ class IParallelMng{
   virtual void allGatherVariable(vector<int> send_buf, vector<int>& recv_buf) =0;
   
   virtual int reduce(Parallel::eReduceType rt,int v) =0;
-
 };
 
 class ISubDomain{
  public:
   virtual IMesh* defaultMesh() =0;
   virtual IParallelMng* parallelMng() =0;
+};
+
+
+// ****************************************************************************
+// * IParallelMng Séquentiel
+// ****************************************************************************
+class sequentialMng:public IParallelMng{
+  bool isParallel() const { return false;}
+  int commRank() const { return 0;}
+  int commSize() const { return 0;}
+  //ITraceMng* traceMng() const =0;
 };
 
 #endif  

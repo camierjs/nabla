@@ -370,10 +370,11 @@ void AlephMatrix::assemble(void){
       }
     }
     {
-      #warning reserve
-      //m_aleph_matrix_buffer_rows.resize(nbValues);
-      //m_aleph_matrix_buffer_cols.reserve(nbValues);
-      //m_aleph_matrix_buffer_vals.reserve(nbValues);
+      // Pour l'instant, on ne sait faire que du séquentiel
+      assert(!m_kernel->isParallel());
+      m_aleph_matrix_buffer_rows.resize(nbValues[0]);
+      m_aleph_matrix_buffer_cols.resize(nbValues[0]);
+      m_aleph_matrix_buffer_vals.resize(nbValues[0]);
     }
   }
   // Si on est pas en //, on a rien d'autre à faire
