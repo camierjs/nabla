@@ -220,9 +220,8 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
-  //if (n->token) nprintf(nabla, NULL, "\n/*[nablaJobParse] token: '%s'*/", n->token);
   if (n->token)
-    dbg("\n[nablaJobParse] token: '%s'?", n->token);
+    dbg("\n\n\t[nablaJobParse] token: '%s'?", n->token);
 
   if (job->parse.got_a_return && job->parse.got_a_return_and_the_semi_colon) return;
    
@@ -284,7 +283,10 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
       && (n->children->ruleid == rulenameToId("nabla_item"))){
     dbg("\n\t[nablaJobParse] C'est le cas primary_expression suivi d'un nabla_item");
     nprintf(nabla, "/*nabla_item*/", "\t%s",
-            nabla->hook->forall->item(job,cnfgem,n->children->children->token[0],job->parse.enum_enum));
+            nabla->hook->forall->item(job,
+                                      cnfgem,
+                                      n->children->children->token[0],
+                                      job->parse.enum_enum));
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une option

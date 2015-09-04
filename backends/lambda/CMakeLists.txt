@@ -13,6 +13,7 @@ add_library(NablaLambda ${BACKEND_LAMBDA_C})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/aleph)
 
 target_link_libraries(NablaLambda NablaLambdaHook)
 

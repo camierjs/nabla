@@ -44,4 +44,3 @@ target_link_libraries(NablaOkina
 add_dependencies(NablaOkina libNabla)
 
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}OKINA${VT100_RESET} libraries:${VT100_RESET}")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/aleph)

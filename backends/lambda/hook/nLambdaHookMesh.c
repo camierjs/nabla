@@ -124,6 +124,7 @@ static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
 \nint cell_next[3*NABLA_NB_CELLS];\
 \nint cell_prev[3*NABLA_NB_CELLS];\
 \nint node_cell_and_corner[2*8*NABLA_NB_NODES];\
+\nvector<Face> faces(NABLA_NB_FACES);\
 \n\n\n");
 }
 
@@ -146,6 +147,12 @@ const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\
 const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
+\n\
+const int NABLA_NB_FACES_X_AXIS = X_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Y_AXIS = Y_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Z_AXIS = Z_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES        = 2*NABLA_NB_CELLS_Z_AXIS*(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n\
+const int NABLA_NB_FACES_WARP   = 2*NABLA_NB_CELLS_Z_AXIS*(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n\
 \n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\

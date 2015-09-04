@@ -90,9 +90,16 @@ tstllo:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
 tstlau:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_upwindAP_run_1_seq)
-
+tstlhg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_gen_1_seq)
+tstlhr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_run_1_seq)
 
 # ARCANE tests #
+tstahg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_gen_1)
+tstahr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_run_1)
 tstau:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_upwind_gen_1)
 tstagram:

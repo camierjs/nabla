@@ -43,8 +43,6 @@
 #ifndef ALEPH_PARAMS_H
 #define ALEPH_PARAMS_H
 
-#include "Aleph.h"
-
 class ITraceMng;
 
 class AlephParams{

@@ -40,6 +40,10 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "Aleph.h"
+#include <map>
+#include <string>
+
 #include "IAlephFactory.h"
 
 

@@ -65,6 +65,7 @@ typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *pos
 static inline char *itemUPCASE(const char *itm){
   if (itm[0]=='c') return "CELLS";
   if (itm[0]=='n') return "NODES";
+  if (itm[0]=='f') return "FACES";
   if (itm[0]=='g') return "GLOBAL";
   dbg("\n\t[itemUPCASE] itm=%s", itm);
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));

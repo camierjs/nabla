@@ -131,13 +131,18 @@ void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
 #define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
 \n\
 #define FOR_EACH_NODE_WARP_CELL(c)\\\n\
-    for(int c=0;c<8;c+=1)\n",
+    for(int c=0;c<8;c+=1)\n\
+\n\
+#define FOR_EACH_FACE(f) /*%s*/for(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES_WARP;f+=1)\n",
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
           parallel_prefix_for_loop, // FOR_EACH_NODE
-          parallel_prefix_for_loop  // FOR_EACH_NODE_WARP
+          parallel_prefix_for_loop, // FOR_EACH_NODE_WARP
+          parallel_prefix_for_loop, // FOR_EACH_FACE
+          parallel_prefix_for_loop  // FOR_EACH_FACE_WARP
           );
 }
 

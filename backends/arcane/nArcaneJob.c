@@ -207,8 +207,8 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
   if (j=='n' && enum_enum=='\0' && itm=='n') return "node";//"/*arcaneItem-n0n*/node";
 
   if (j=='f' && enum_enum=='\0' && itm=='f') return "face";//"/*arcaneItem-f0f*/face";
-  if (isPostfixed!=2 && j=='f' && enum_enum=='\0' && itm=='n') return "face->";//"/*arcaneItem-f0n*/face->";
-  if (isPostfixed==2 && j=='f' && enum_enum=='\0' && itm=='n') return "face->";//"/*arcaneItem-f0n*/face->";
+  if (isPostfixed!=2 && j=='f' && enum_enum=='\0' && itm=='n') return "/*!2f0n*/face->";//"/*arcaneItem-f0n*/face->";
+  if (isPostfixed==2 && j=='f' && enum_enum=='\0' && itm=='n') return "/*2f0n*/face->";//"/*arcaneItem-f0n*/face->";
   if (j=='f' && enum_enum=='\0' && itm=='c') return "face->";//"/*arcaneItem-f0c*/face->";
   //if (j=='f' && enum_enum=='n' && itm=='n') return "/**/";
 
@@ -410,10 +410,10 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 
   case(']'):{
     if (job->parse.turnBracketsToParentheses==true){
-      nprintf(arc, "/*tBktOFF*/", ")]");
+      nprintf(arc, "/*tBktOFF*/", "/*tBktOFF*/)]");
       job->parse.turnBracketsToParentheses=false;
     }else{
-      nprintf(arc, NULL, "]");
+      nprintf(arc, NULL, "/*!tBktOFF*/]");
     }
     nprintf(arc, "/* FlushingIsPostfixed */", NULL);
     job->parse.isPostfixed=0;
@@ -495,7 +495,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   case (THIS):{
     if (support=='c') nprintf(arc, "/*THIS+c*/", "cell");
     if (support=='n') nprintf(arc, "/*THIS+n*/", "node");
-    if (support=='f') nprintf(arc, "/*THIS+f*/", "face");
+    if (support=='f') nprintf(arc, "/*THIS+f*/", "*face");
     if (support=='p') nprintf(arc, "/*THIS+p*/", "particle");
     break;
   }

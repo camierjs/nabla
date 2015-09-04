@@ -40,75 +40,76 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"   
+#ifndef ALEPH_MATRIX_H
+#define ALEPH_MATRIX_H
+#include <map>
+
+class IAlephMatrix;
+
+class AlephMatrix: public TraceAccessor{
+public:
+  AlephMatrix(AlephKernel*);
+  ~AlephMatrix();
+public:
+  void create(void);
+  void create(vector<int>, bool=false);
+  void create_really(void);
+  void reset(void);
+  int reIdx(int,vector<int*>&);
+  void reSetValuesIn(AlephMatrix*,vector<int*>&);
+  void reAddValuesIn(AlephMatrix*,vector<int*>&);
+  void updateKnownRowCol(int,int,double);
+  void rowMapMapCol(int,int,double);
+  void addValue(const Variable&, const item&,
+                const Variable&, const item&, const double);
+  void addValue(const Variable&, const item*&,
+                const Variable&, const item*&, const double);
+  void setValue(const Variable&, const item&,
+                const Variable&, const item&, const double);
+  void setValue(const Variable&, const item*&,
+                const Variable&, const item*&, const double);
+  void addValue(int,int,double);
+  void setValue(int,int,double);
+  void writeToFile(const string);
+  void startFilling();
+  void assemble();
+  void assemble_waitAndFill();
+  void reassemble(int&, double*);
+  void reassemble_waitAndFill(int&, double*);
+  void solve(AlephVector*, AlephVector*, int&, double*, AlephParams*,bool=false);
+  void solveNow(AlephVector*, AlephVector*, AlephVector*, int&, double*, AlephParams* );
+private:
+  AlephKernel* m_kernel;
+  int m_index;
+  vector<int> m_ranks;
+  bool m_participating_in_solver;
+  IAlephMatrix* m_implementation;
+private:
+  // Matrice utilisée dans le cas où nous sommes le solveur
+  vector<vector<int> > m_aleph_matrix_buffer_rows;
+  vector<vector<int> > m_aleph_matrix_buffer_cols;
+  vector<vector<double> > m_aleph_matrix_buffer_vals;
+  // Tableaux tampons des setValues
+  int m_setValue_idx;
+  vector<int> m_setValue_row;
+  vector<int> m_setValue_col;
+  vector<double> m_setValue_val;
+ private:  // Tableaux tampons des addValues
+  typedef std::map<int,int> colMap;
+  typedef std::map<int,colMap*> rowColMap;
+  rowColMap m_row_col_map;
+  int m_addValue_idx;
+  vector<int> m_addValue_row;
+  vector<int> m_addValue_col;
+  vector<double> m_addValue_val;
+ private:  // Tableaux des requètes
+  vector<Parallel::Request> m_aleph_matrix_mpi_data_requests;
+  vector<Parallel::Request> m_aleph_matrix_mpi_results_requests;
+ private: // Résultats. Placés ici afin de les conserver hors du scope de la fonction les utilisant
+  vector<int> m_aleph_matrix_buffer_n_iteration;
+  vector<double> m_aleph_matrix_buffer_residual_norm;
+};
 
 
-// ****************************************************************************
-// * dumpExternalFile
-// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
-// ****************************************************************************
-static char *dumpExternalFile(char *file){
-  return file+NABLA_LICENSE_HEADER;
-}
+#endif  
 
-
-// ****************************************************************************
-// * extern definitions from lambdaDump.S
-// ****************************************************************************
-extern char lambdaItems_c[];
-extern char lambdaDbg_h[];
-extern char lambdaReal3_h[];
-extern char lambdaGather_h[];
-extern char lambdaScatter_h[];
-extern char lambdaOStream_h[];
-extern char lambdaTernary_h[];
-extern char lambdaMsh1D_c[];
-extern char lambdaMsh3D_c[];
-
-
-// ****************************************************************************
-// * lambdaHeader for Std, Avx or Mic
-// ****************************************************************************
-void nLambdaDumpHeaderTypes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal3_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaTernary_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaScatter_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaOStream_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaItems_c));
-}
-
-
-// ****************************************************************************
-// * lambdaHeader for Dbg
-// ****************************************************************************
-void nLambdaDumpHeaderDebug(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
-}
-
-
-// ****************************************************************************
-// * lambdaHeader for Maths
-// ****************************************************************************
-void nLambdaDumpHeaderMaths(nablaMain *nabla){}
-
-
-// ****************************************************************************
-// * lambdaSourceMesh
-// ****************************************************************************
-void nLambdaDumpMesh(nablaMain *nabla){
-  assert(nabla->entity->name);
-  if ((nabla->entity->libraries&(1<<with_real))!=0)
-    fprintf(nabla->entity->src,lambdaMsh1D_c);
-  else
-    fprintf(nabla->entity->src,lambdaMsh3D_c);
-}
-
-
-// ****************************************************************************
-// * lambdaDump in source
-// ****************************************************************************
-void nLambdaDumpSource(nablaMain *nabla){
-  assert(nabla->entity->name);
-  nLambdaDumpMesh(nabla);
-}

@@ -20,7 +20,7 @@ set(BACKEND_LAMBDA_HOOK_C
 
 add_library(NablaLambdaHook ${BACKEND_LAMBDA_HOOK_C})
 
-target_link_libraries(NablaLambdaHook NablaLambdaDump)
+target_link_libraries(NablaLambdaHook NablaLambdaAleph NablaLambdaDump)
 
 add_dependencies(NablaLambdaHook NablaLambda)
 

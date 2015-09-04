@@ -44,15 +44,17 @@
 #include "nabla.tab.h"
 
 
-
+// ****************************************************************************
+// * lambdaHookTurnTokenToOption
+// ****************************************************************************
 void lambdaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o lambda*/", "%s", opt->name);
 }
 
-
-/*****************************************************************************
- * FORALL token switch
- *****************************************************************************/
+  
+// ****************************************************************************
+// * FORALL token switch
+// ****************************************************************************
 static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
@@ -74,7 +76,7 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
   case(FACE):{
     job->parse.enum_enum='f';
     if (job->item[0]=='c')
-      nprintf(job->entity->main, "/*chsf fc*/", "for(cFACE)");
+      nprintf(job->entity->main, "/*chsf fc*/", "for(int f=0;f<4;++f)");
     if (job->item[0]=='n')
       nprintf(job->entity->main, "/*chsf fn*/", "for(nFACE)");
     break;
@@ -88,6 +90,75 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
 }
 
 
+// *****************************************************************************
+// * lambdaHookSwitchAleph
+// *****************************************************************************
+static bool lambdaHookSwitchAleph(astNode *n, nablaJob *job){
+  const nablaMain *nabla=job->entity->main;
+
+  //nprintf(nabla, "/*lambdaHookSwitchAleph*/","/*lambdaHookSwitchAleph*/");
+
+  switch(n->tokenid){
+  case(LIB_ALEPH):{
+    nprintf(nabla, "/*LIB_ALEPH*/","/*LIB_ALEPH*/");
+    return true;
+  }
+  case(ALEPH_RHS):{
+    nprintf(nabla, "/*ALEPH_RHS*/","rhs");
+    // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
+    job->parse.alephKeepExpression=true;
+    return true;
+  }
+  case(ALEPH_LHS):{
+    nprintf(nabla, "/*ALEPH_LHS*/","lhs");
+    // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
+    job->parse.alephKeepExpression=true;
+    return true;
+  }
+  case(ALEPH_MTX):{
+    nprintf(nabla, "/*ALEPH_MTX*/","mtx");
+    return true;
+  }
+  case(ALEPH_RESET):{ nprintf(nabla, "/*ALEPH_RESET*/",".reset()"); break;}
+  case(ALEPH_SOLVE):{ nprintf(nabla, "/*ALEPH_SOLVE*/","alephSolve()"); break;}
+  case(ALEPH_SET):{
+    // Si c'est un vecteur et setValue, on le laisse
+    if (job->parse.alephKeepExpression==true){
+      /**/
+    }else{
+      job->parse.alephKeepExpression=true;
+    }
+    nprintf(nabla, "/*ALEPH_SET*/",".setValue");
+    return true;
+  }
+  case(ALEPH_GET):{
+    // Si c'est un vecteur et getValue, on le laisse pas
+    if (job->parse.alephKeepExpression==true){
+      //job->parse.alephKeepExpression=false;
+    }
+    nprintf(nabla, "/*ALEPH_GET*/",".getValue");
+    return true;
+  }
+  case(ALEPH_ADD_VALUE):{
+    nprintf(nabla, "/*ALEPH_ADD_VALUE*/","/*ALEPH_ADD_VALUE*/");
+    // Si c'est un vecteur et addValue, on le laisse pas
+    if (job->parse.alephKeepExpression==true){
+      job->parse.alephKeepExpression=true;
+    }else{
+      job->parse.alephKeepExpression=true;
+    }
+    nprintf(nabla, "/*ALEPH_ADD_VALUE*/",".addValue");
+    return true;
+  }
+  case(ALEPH_NEW_VALUE):{
+    job->parse.alephKeepExpression=false;
+    nprintf(nabla, "/*ALEPH_NEW_VALUE*/",".newValue");
+    return true;
+  }
+  }
+  return false;
+}
+
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
@@ -99,6 +170,10 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   if (n->token)
     dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
  
+  // On tests si c'est un token Aleph
+  // Si c'est le cas, on a fini
+  if (lambdaHookSwitchAleph(n,job)) return;
+  
   lambdaHookSwitchForall(n,job);
   
   switch(n->tokenid){
@@ -165,21 +240,35 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }    
     // On regarde si on hit un appel de fonction
   case(CALL):{
+    dbg("\n\t[lambdaHookSwitchToken] CALL?!");
+    // S'il y a des appels Aleph derrière, on ne déclenche pas la suite
+    if (n->next)
+      if (n->next->children)
+        if (n->next->children->tokenid==LIB_ALEPH) break;
+    dbg("\n\t[lambdaHookSwitchToken] JOB_CALL");
     nablaJob *foundJob;
     nprintf(nabla, "/*JOB_CALL*/", NULL);
-    char *callName=n->next->children->children->token;
-    nprintf(nabla, "/*got_call*/", NULL);
-    if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
-      if (foundJob->is_a_function!=true){
-        nprintf(nabla, "/*isNablaJob*/", NULL);
-      }else{
-        nprintf(nabla, "/*isNablaFunction*/", NULL);
+    if ( n->next->children->children->token){
+      dbg("\n\t[lambdaHookSwitchToken] JOB_CALL next children children");
+      if (n->next->children->children->token){
+        dbg("\n\t[lambdaHookSwitchToken] JOB_CALL next children children token");
+        char *callName=n->next->children->children->token;
+        nprintf(nabla, "/*got_call*/", NULL);
+        if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
+          if (foundJob->is_a_function!=true){
+            nprintf(nabla, "/*isNablaJob*/", NULL);
+          }else{
+            nprintf(nabla, "/*isNablaFunction*/", NULL);
+          }
+        }else{
+          nprintf(nabla, "/*has not been found*/", NULL);
+        }
       }
-    }else{
-      nprintf(nabla, "/*has not been found*/", NULL);
     }
+    dbg("\n\t[lambdaHookSwitchToken] JOB_CALL done");
     break;
   }
+
   case(END_OF_CALL):{
     nprintf(nabla, "/*ARGS*/", NULL);
     nprintf(nabla, "/*got_args*/", NULL);
@@ -228,8 +317,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case('['):{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) break;
+    if (job->parse.postfix_constant==true && job->parse.variableIsArray==true) break;
     if (job->parse.turnBracketsToParentheses==true)
       nprintf(nabla, NULL, "");
     else
@@ -238,9 +326,13 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(']'):{
+    //nprintf(nabla, NULL, "/*]*/");
     if (job->parse.turnBracketsToParentheses==true){
-      if (job->item[0]=='c') nprintf(nabla, "/*tBktOFF*/", "[c]]");
-      if (job->item[0]=='n') nprintf(nabla, "/*tBktOFF*/", "[c]]");
+      switch  (job->item[0]){
+      case('c'):{nprintf(nabla, NULL, "[c]]"); break;}
+      case('n'):{nprintf(nabla, NULL, "[c]]"); break;}
+      default:{nprintf(nabla, NULL, ")]");}
+      }
       job->parse.turnBracketsToParentheses=false;
     }else{
       nprintf(nabla, NULL, "]");
@@ -302,7 +394,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (THIS):{
     if (cnfgem=='c') nprintf(nabla, "/*token THIS+c*/", "c");
     if (cnfgem=='n') nprintf(nabla, "/*token THIS+n*/", "n");
-    if (cnfgem=='f') nprintf(nabla, "/*token THIS+f*/", "f");
+    if (cnfgem=='f') nprintf(nabla, "/*token THIS+f*/", "faces[f]");
     break;
   }
     
@@ -379,6 +471,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case ('&'):{nprintf(nabla, NULL, "&"); break; }    
   case (';'):{
     job->parse.variableIsArray=false;
+    job->parse.alephKeepExpression=false;
     job->parse.turnBracketsToParentheses=false;
     nprintf(nabla, NULL, ";\n\t\t");
     if (job->parse.function_call_arguments==true){

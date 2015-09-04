@@ -70,9 +70,9 @@ template<typename T> inline ostream& operator<<(ostream& o, const vector<T>& val
 
 class ITraceMng{
 public:
-  virtual void flush() =0;
-  virtual ostream info() =0;
-  virtual ostream debug() =0;
+  void flush();
+  ostream info();
+  ostream debug();
 };
 
 class TraceAccessor{
@@ -116,9 +116,10 @@ typedef vector<item> items;
 
 class IMesh{
  public:
-  virtual items ownCells() =0;
-  virtual items ownFaces() =0;
-  virtual items ownNodes() =0;
+  items ownCells();
+  items ownFaces();
+  items ownNodes();
+  void checkValidMeshFull();
 };
 
 
@@ -145,7 +146,7 @@ public:
   string name() { return "name";}
   T& operator[](items::iterator itm) { return this->at(itm->uniqueId());}
   T& operator[](const item itm) { return this->at(0);}
-  virtual void synchronize();
+  void synchronize(){}
 };
 
 typedef VariableItemT<int> VariableItemInt;
@@ -204,10 +205,15 @@ class IParallelMng{
   virtual int reduce(Parallel::eReduceType rt,int v) =0;
 };
 
+class IApplication{
+  int id;
+};
+
 class ISubDomain{
  public:
-  virtual IMesh* defaultMesh() =0;
-  virtual IParallelMng* parallelMng() =0;
+  IMesh* defaultMesh();
+  IParallelMng* parallelMng();
+  IApplication* application();
 };
 
 

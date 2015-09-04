@@ -40,52 +40,32 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef ALEPH_TOPOLOGY_H
-#define ALEPH_TOPOLOGY_H 
+#ifndef ALEPH_IALEPHFACTORY_H
+#define ALEPH_IALEPHFACTORY_H
 
-#include "Aleph.h"
-
-class IAlephTopology;
-
-class AlephTopology: public TraceAccessor{
- public:
-  AlephTopology(AlephKernel*);
-  AlephTopology(ITraceMng*,AlephKernel*,int,int);
-  virtual ~AlephTopology();
- public:
-  void create(int);
-  void setRowNbElements( vector<int> row_nb_element);
-  vector<int> ptr_low_up_array();
-  vector<int> part();
-  IParallelMng* parallelMng();
-  void rowRange(int& min_row,int& max_row);
+class AlephFactory: public IAlephFactory{
  private:
-  inline void checkForInit(){
-    if (m_has_been_initialized==false)
-      throw std::logic_error("[AlephTopology::create] Has not been yet initialized!");
-  }
+  struct FactoryImpl{
+   public:
+    FactoryImpl(const string& name) : m_factory(0),
+                                      m_name(name),
+                                      m_initialized(false){}
+   public:
+    IAlephFactoryImpl* m_factory;
+    string m_name;
+    bool m_initialized;
+  };
  public:
-  int rowLocalRange(const int);
-  AlephKernel* kernel(void){return m_kernel;}
-  int nb_row_size(void){/*checkForInit();*/ return m_nb_row_size;}
-  int nb_row_rank(void){checkForInit(); return m_nb_row_rank;}
-  int gathered_nb_row(int i){checkForInit(); return m_gathered_nb_row[i];}
-  vector<int> gathered_nb_row_elements(void){checkForInit(); return m_gathered_nb_row_elements;}
-  vector<int> gathered_nb_setValued(void){checkForInit(); return m_gathered_nb_setValued;}
-  int gathered_nb_setValued(int i){checkForInit(); return m_gathered_nb_setValued[i];}
-  bool hasSetRowNbElements(void){return m_has_set_row_nb_elements;}
-
+  AlephFactory(ITraceMng *tm);
+  ~AlephFactory();
+ public:
+  IAlephTopology* GetTopology(AlephKernel *kernel, int index, int nb_row_size);
+  IAlephVector* GetVector(AlephKernel *kernel, int index);
+  IAlephMatrix* GetMatrix(AlephKernel *kernel, int index);
  private:
-  AlephKernel* m_kernel;
-  int m_nb_row_size; // Nombre de lignes de la matrice réparties sur l'ensemble 
-  int m_nb_row_rank; // Nombre de lignes de la matrice vue de mon rang
-  vector<int> m_gathered_nb_row; // Indices des lignes par CPU
-  vector<int> m_gathered_nb_row_elements;  // nombre d'éléments par ligne
-  vector<int> m_gathered_nb_setValued;     // nombre d'éléments setValué par CPU
-  bool m_created;
-  bool m_has_set_row_nb_elements;
-  bool m_has_been_initialized;
+  typedef std::map<int,FactoryImpl*> FactoryImplMap;
+  FactoryImplMap m_impl_map;
+  IAlephFactoryImpl* _getFactory(int solver_index);
 };
 
-#endif  
-
+#endif 

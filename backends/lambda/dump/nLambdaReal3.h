@@ -81,6 +81,7 @@ class __attribute__ ((aligned(8))) real3 {
   friend inline real3 cross(real3 u, real3 v){
     return real3(((u.y*v.z)-(u.z*v.y)), ((u.z*v.x)-(u.x*v.z)), ((u.x*v.y)-(u.y*v.x)));
   }
+  inline real abs2(){return x*x+y*y+z*z;}
 };
 
 #endif //  _LAMBDA_STD_REAL3_H_

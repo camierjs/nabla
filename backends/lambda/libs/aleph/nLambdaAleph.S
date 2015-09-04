@@ -40,78 +40,56 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef ALEPH_MATRIX_H
-#define ALEPH_MATRIX_H
+   .globl ${ABI_UNDERSCORE}AlephStd_h
 
-#include <map>
-#include "Aleph.h"
+   .globl ${ABI_UNDERSCORE}Aleph_h
+   .globl ${ABI_UNDERSCORE}AlephTypesSolver_h
+   .globl ${ABI_UNDERSCORE}AlephParams_h
+   .globl ${ABI_UNDERSCORE}AlephVector_h
+   .globl ${ABI_UNDERSCORE}AlephMatrix_h
+   .globl ${ABI_UNDERSCORE}AlephKernel_h
+   .globl ${ABI_UNDERSCORE}AlephOrdering_h
+   .globl ${ABI_UNDERSCORE}AlephIndexing_h
+   .globl ${ABI_UNDERSCORE}AlephTopology_h
+	.globl ${ABI_UNDERSCORE}AlephInterface_h
+   
+   .globl ${ABI_UNDERSCORE}IAlephFactory_h
+   
+${ABI_UNDERSCORE}AlephStd_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.h"
+   .byte 0
+${ABI_UNDERSCORE}Aleph_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/Aleph.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephTypesSolver_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTypesSolver.h"
+   .byte 0
 
-class IAlephMatrix;
-
-class AlephMatrix: public TraceAccessor{
-public:
-  AlephMatrix(AlephKernel*);
-  ~AlephMatrix();
-public:
-  void create(void);
-  void create(vector<int>, bool=false);
-  void create_really(void);
-  void reset(void);
-  int reIdx(int,vector<int*>&);
-  void reSetValuesIn(AlephMatrix*,vector<int*>&);
-  void reAddValuesIn(AlephMatrix*,vector<int*>&);
-  void updateKnownRowCol(int,int,double);
-  void rowMapMapCol(int,int,double);
-  void addValue(const Variable&, const item&,
-                const Variable&, const item&, const double);
-  void addValue(const Variable&, const item*&,
-                const Variable&, const item*&, const double);
-  void setValue(const Variable&, const item&,
-                const Variable&, const item&, const double);
-  void setValue(const Variable&, const item*&,
-                const Variable&, const item*&, const double);
-  void addValue(int,int,double);
-  void setValue(int,int,double);
-  void writeToFile(const string);
-  void startFilling();
-  void assemble();
-  void assemble_waitAndFill();
-  void reassemble(int&, double*);
-  void reassemble_waitAndFill(int&, double*);
-  void solve(AlephVector*, AlephVector*, int&, double*, AlephParams*,bool=false);
-  void solveNow(AlephVector*, AlephVector*, AlephVector*, int&, double*, AlephParams* );
-private:
-  AlephKernel* m_kernel;
-  int m_index;
-  vector<int> m_ranks;
-  bool m_participating_in_solver;
-  IAlephMatrix* m_implementation;
-private:
-  // Matrice utilisée dans le cas où nous sommes le solveur
-  vector<vector<int> > m_aleph_matrix_buffer_rows;
-  vector<vector<int> > m_aleph_matrix_buffer_cols;
-  vector<vector<double> > m_aleph_matrix_buffer_vals;
-  // Tableaux tampons des setValues
-  int m_setValue_idx;
-  vector<int> m_setValue_row;
-  vector<int> m_setValue_col;
-  vector<double> m_setValue_val;
- private:  // Tableaux tampons des addValues
-  typedef std::map<int,int> colMap;
-  typedef std::map<int,colMap*> rowColMap;
-  rowColMap m_row_col_map;
-  int m_addValue_idx;
-  vector<int> m_addValue_row;
-  vector<int> m_addValue_col;
-  vector<double> m_addValue_val;
- private:  // Tableaux des requètes
-  vector<Parallel::Request> m_aleph_matrix_mpi_data_requests;
-  vector<Parallel::Request> m_aleph_matrix_mpi_results_requests;
- private: // Résultats. Placés ici afin de les conserver hors du scope de la fonction les utilisant
-  vector<int> m_aleph_matrix_buffer_n_iteration;
-  vector<double> m_aleph_matrix_buffer_residual_norm;
-};
-
-
-#endif  
-
+${ABI_UNDERSCORE}AlephParams_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephParams.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephVector_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephVector.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephMatrix_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephMatrix.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephKernel_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephKernel.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephOrdering_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephOrdering.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephIndexing_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephIndexing.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephTopology_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTopology.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephInterface_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephInterface.h"
+   .byte 0
+   
+${ABI_UNDERSCORE}IAlephFactory_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/IAlephFactory.h"
+   .byte 0

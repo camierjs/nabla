@@ -45,11 +45,16 @@
    .globl ${ABI_UNDERSCORE}lambdaMsh1D_c
    .globl ${ABI_UNDERSCORE}lambdaMsh3D_c
    .globl ${ABI_UNDERSCORE}lambdaReal3_h
+   .globl ${ABI_UNDERSCORE}lambdaItems_c
    .globl ${ABI_UNDERSCORE}lambdaGather_h
    .globl ${ABI_UNDERSCORE}lambdaScatter_h
    .globl ${ABI_UNDERSCORE}lambdaOStream_h
    .globl ${ABI_UNDERSCORE}lambdaTernary_h
        
+${ABI_UNDERSCORE}lambdaItems_c:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaItems.c"
+   .byte 0
+
 ${ABI_UNDERSCORE}lambdaDbg_h:
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaDbg.h"
    .byte 0

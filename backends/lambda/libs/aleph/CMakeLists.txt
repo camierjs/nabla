@@ -7,9 +7,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
                   AlephVector.cc   AlephParams.cc
                   AlephTopology.cc AlephOrdering.cc
-                  AlephIndexing.cc AlephFactory.cc)
-
-set(OKINA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+                  AlephIndexing.cc AlephFactory.cc
+                  nLambdaAleph.c ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
+                
+configure_file(nLambdaAleph.S ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
 
 # Looking for PETSc
 find_package(PETSc)
@@ -29,4 +30,9 @@ if (${Trilinos_CONFIG_PATH})
 endif()
 
 
-add_library(NablaOkinaAleph ${ALEPH_SOURCES})
+configure_file(Aleph.h ${CMAKE_CURRENT_BINARY_DIR}/Aleph.h)
+configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h)
+
+add_library(NablaLambdaAleph ${ALEPH_SOURCES})
+
+add_dependencies(NablaLambdaAleph NablaLambdaHook)

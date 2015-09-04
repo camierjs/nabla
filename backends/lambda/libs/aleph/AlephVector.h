@@ -43,8 +43,6 @@
 #ifndef ALEPH_VECTOR_H
 #define ALEPH_VECTOR_H
 
-#include "Aleph.h"
-
 class IAlephVector;
 class AlephTopology;
 class AlephKernel;

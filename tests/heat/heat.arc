@@ -14,14 +14,19 @@
         <group>AllCells</group>
  		</output>
 	</arcane-post-processing>
+   
+   <arcane-checkpoint>
+     <period>0</period>
+     <do-dump-at-end>false</do-dump-at-end>
+   </arcane-checkpoint>
 
    <mesh>
      <meshgenerator>
  		 <cartesian>
 			<nsd>2 2</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="64" prx="1.0">1.0</lx>
-			<ly ny="64" pry="1.0">1.0</ly>
+			<lx nx="4" prx="1.0">1.0</lx>
+			<ly ny="4" pry="1.0">1.0</ly>
 		 </cartesian> 
      </meshgenerator>
    </mesh>
@@ -31,5 +36,15 @@
      <option_ini_temperature>300.0</option_ini_temperature>
      <option_hot_temperature>700.0</option_hot_temperature>
      <option_max_iterations>4</option_max_iterations>
+
+     <alephEpsilon>1.e-10</alephEpsilon>
+     <alephMaxIterations>16384</alephMaxIterations>
+     <!-- DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6 -->
+     <alephPreconditionerMethod>0</alephPreconditionerMethod>
+     <!-- 0:Auto(=Sloop), 1:Sloop, 2:Hypre, 3:Trilinos, 4:Cuda, 5:PETSc -->
+     <alephUnderlyingSolver>2</alephUnderlyingSolver>
+     <!--PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6 -->
+     <alephSolverMethod>3</alephSolverMethod>
+     <alephNumberOfCores>0</alephNumberOfCores>
    </heat>
 </case>

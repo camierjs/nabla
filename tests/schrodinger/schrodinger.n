@@ -335,6 +335,7 @@ own outer faces void setStdRhsEdgesOnBorders(void) in (face edge_density_re,
 // ********************************************************
 void getMatrixAndVectors(void) @ 2.0 { alephInitialize(); }
 
+
 // ****************************************************************************
 // * alphaCells
 // ****************************************************************************

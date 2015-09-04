@@ -121,6 +121,8 @@ char* lambdaHookPostfixEnumerate(nablaJob *job){
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
 char* lambdaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  nprintf(j->entity->main, "/*lambdaHookItem*/", "/*lambdaHookItem*/");
+  //const int isPostfixed = j->parse.isPostfixed;
   if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
   if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
   if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
@@ -130,7 +132,7 @@ char* lambdaHookItem(nablaJob *j, const char job, const char itm, char enum_enum
   if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
   if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/faces[f].";
   nablaError("Could not switch in lambdaHookItem!");
   return NULL;
 }

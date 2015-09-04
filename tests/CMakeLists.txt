@@ -146,6 +146,7 @@ if (ARCANE_FOUND)
   #nabla_add_arcane_test(lulesh 4 run)
   #nabla_add_arcane_test(lulesh 8 run)
 if (HYPRE_FOUND)
+  nabla_add_arcane_test_with_additional_defines(heat 1 run ALEPH_INDEX)
   nabla_add_arcane_test_with_additional_defines(schrodinger 1 run ALEPH_INDEX)
   # OK, mais trop de temps: nabla_add_arcane_test_with_additional_defines(schrodinger 4 run ALEPH_INDEX)
   nabla_add_arcane_test_with_additional_defines(pDDFV 1 run ALEPH_INDEX)
@@ -201,6 +202,9 @@ nabla_add_lambda_test(lulesh 1 run omp)
 
 nabla_add_lambda_test(upwindAP 1 gen seq)
 nabla_add_lambda_test(upwindAP 1 run seq)
+
+nabla_add_lambda_test(heat 1 gen seq)
+nabla_add_lambda_test(heat 1 run seq)
 
 
 ########################

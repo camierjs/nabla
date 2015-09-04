@@ -42,6 +42,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+extern char* lambdaAlephHeader(nablaMain*);
+extern char* lambdaAlephPrivates(void);
+extern void lambdaAlephIni(nablaMain*);
+
+
 /*****************************************************************************
  * Backend LAMBDA POSTFIX - Génération du 'main'
 \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
@@ -156,6 +161,12 @@ int main(int argc, char *argv[]){\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);"
 NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainPrefix]");
+  
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0){
+    fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
+    fprintf(nabla->entity->hdr, "%s", lambdaAlephPrivates());
+  }
+   
   fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
   return NABLA_OK;
 }
@@ -244,6 +255,10 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
   dbg("\n[lambdaMainPostfix] LAMBDA_MAIN_POSTFIX");
   fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
+
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+    lambdaAlephIni(nabla);
+
   //dbg("\n[lambdaMainPostfix] lambdaSourceMesh");
   nLambdaDumpSource(nabla);
   dbg("\n[lambdaMainPostfix] NABLA_OK");

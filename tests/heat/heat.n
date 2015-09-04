@@ -40,26 +40,29 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+// ℝℕℤ²³√½⅓¼⅛
 with ℵ;
 
 // ****************************************************************************
 // * Déclaration des options
 // ****************************************************************************
 options{
-  Bool option_quads             = true;
-  Bool option_triangles         = false;  
-  Real option_deltat            = 0.0001;
-  Real option_ini_temperature   = 300.0;
-  Real option_hot_temperature   = 700.0;
-  Integer option_max_iterations = 8;
+  Bool option_quads          = true;
+  Bool option_triangles      = false;  
+  ℝ option_deltat            = 0.0001;
+  ℝ option_δt_initial        = 0.0;
+  ℝ option_stoptime          = 0.1;
+  ℝ option_ini_temperature   = 300.0;
+  ℝ option_hot_temperature   = 700.0;
+  ℕ option_max_iterations    = 8;
   // Options d'Aleph
-  Real alephEpsilon             = 1.e-10;
-  Integer alephUnderlyingSolver = 1;
-  Integer alephMaxIterations    = 16384;
-  Integer alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
-                                         // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
-  Integer alephSolverMethod     = 0; //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
-  Integer alephNumberOfCores    = 0;
+  ℝ alephEpsilon             = 1.e-10;
+  ℕ alephUnderlyingSolver    = 1;
+  ℕ alephMaxIterations       = 16384;
+  ℕ alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                   // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephSolverMethod     = 0; //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephNumberOfCores    = 0;
   Bool option_aleph_dump_matrix = false;
 };
 
@@ -68,20 +71,20 @@ options{
 // * Déclaration des variables aux mailles
 // ****************************************************************************
 cells{
-  Real θ;
+  ℝ θ;
 };
 
 // ****************************************************************************
 // * Déclaration des variables aux faces
 // ****************************************************************************
 faces{
-  Real bcθ;
-  Real ih2;
+  ℝ bcθ;
+  ℝ ih2;
 };
 
 Real geomFaceLength2(Face f){
-  const Real3 xyz0=coord[f.node(0)];
-  const Real3 xyz1=coord[f.node(1)];
+  const ℝ³ xyz0=coord[f.node(0)];
+  const ℝ³ xyz1=coord[f.node(1)];
   return (xyz0-xyz1).abs2();
 }
 
@@ -93,13 +96,13 @@ void ini(void) @ -10.0{
   δt=option_deltat;
 }
 
-cells void iniCells(void) out (cell cell_temperature) @ -10.0{
+cells void iniCells(void) out (cell θ) @ -10.0{
   θ=option_ini_temperature;
 }
 
-faces void iniFaces(void) out (face face_temperature) @ -10.0{
+faces void iniFaces(void) out (face bcθ, face ih2) @ -10.0{
   bcθ=option_ini_temperature;
-  ih2=1.0/geomFaceLength2(*this);
+  ih2=1.0/geomFaceLength2(this);
 }
 
 own outer faces void iniHotFaces(void) @ -9.9{
@@ -119,30 +122,36 @@ void rhsInit(void) @ 1.0{
   ℵ lhs reset;
 }
 
-own cells void addRhsCellValues(void) @ 1.1{
-  const Real value=θ;
+own cells void addRhsCellValues(void) in (cell θ) @ 1.1{
+  const ℝ value=θ;
   ℵ rhs addValue(θ,this,value);
 }
 
-own outer faces void setRhsFaceValues(void) @ 1.2{
-  const Real value = δt*ih2*bcθ;
-  ℵ rhs addValue(θ, cell(0), value);
+own outer faces void setRhsFaceValues(void) in (cell θ, face ih2, face bcθ) @ 1.2{
+  const ℝ value = δt*ih2*bcθ;
+  ℵ rhs addValue(θ, cell(0), value);  
 }
+
+// ********************************************************
+// * Initialisation ℵ
+// * Could be done as: 'alephInitialize @ 2;'
+// ********************************************************
+void iniAleph(void) @ 2.0 { alephInitialize(); }
 
 // ****************************************************************************
 // * Partie de remplissage de la matrice
 // ****************************************************************************
 
-inner faces void setInnerFacesValues(void) @ 2.1{
-  const Real δtDivSurface = -δt*ih2;
-  if (backCell.isOwn())
+inner faces void setInnerFacesValues(void) in (cell θ, face ih2) @ 2.1{
+  const ℝ δtDivSurface = -δt*ih2;
+  //if (backCell.isOwn())
     ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
-  if (frontCell.isOwn())
+    //if (frontCell.isOwn())
     ℵ matrix setValue(θ,frontCell, θ,backCell, δtDivSurface);
 }
 
-own cells void setCellsValues(void) @ 2.2{
-  Real diagonalTerme=0.0;
+own cells void setCellsValues(void) in (cell θ/*, face ih2*/) @ 2.2{
+  ℝ diagonalTerme=0.0;
   foreach face diagonalTerme += ih2;
   diagonalTerme*=δt;
   diagonalTerme+=1.0;

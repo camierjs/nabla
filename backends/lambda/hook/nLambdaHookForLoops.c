@@ -97,12 +97,15 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   const char *grp=job->scope;   // OWN||ALL
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  dbg("\n\t\t[lambdaHookSelectEnumerate] function?");
   //if (job->xyz!=NULL) return lambdaHookDumpEnumerateXYZ(job);
   if (itm=='\0') return "\n";// function lambdaHookDumpEnumerate\n";
+  dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL%s%s(c";
+  dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
   if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
@@ -110,19 +113,24 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE%s%s(n";
   if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_NODE%s%s(n";
+  dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
   if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNE\n\tFOR_EACH_FACE%s%s(f";
   if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_FACE%s%s(f";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_FACE%s%s(f";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE%s%s(f";
+  dbg("\n\t\t[lambdaHookSelectEnumerate] env?");
   if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s%s(e";
+  dbg("\n\t\t[lambdaHookSelectEnumerate] mat?");
   if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s%s(m";
-  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
 
 char* lambdaHookDumpEnumerate(nablaJob *job){
+  dbg("\n\t[lambdaHookDumpEnumerate]");
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
   const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];

@@ -63,7 +63,7 @@ void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
       nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
     }else{
-      nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
+      //nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
     }
     job->parse.turnBracketsToParentheses=true;
   }else{
@@ -307,11 +307,11 @@ static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
     break;
   }
   case ('n'):{
-    nprintf(arc, "/*NodeVar*/", "[face->node");
+    nprintf(arc, "/*NodeVar*/", "[faces[f].node(");
     break;
   }
   case ('f'):{
-    nprintf(arc, "/*FaceVar*/", "[face]");
+    nprintf(arc, "/*FaceVar*/", "[f]");
     break;
   }
   case ('g'):{
@@ -367,6 +367,12 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
   dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
+
+  // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
+  if (job->parse.alephKeepExpression==true){
+    nprintf(arc, "/*lambdaHookTurnTokenToVariable*/", "%s_%s", var->item, var->name);
+    return var;
+  }
 
   // Set good isDotXYZ
   if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){
