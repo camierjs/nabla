@@ -90,30 +90,34 @@ faces void iniFaces(void) @ -9.5{
                               Real3(0.0, 1.0, 0.0),
                               Real3(0.0, 0.0, 0.0));
   const Real3x3 Md  = Real3x3(Real3(10.0, 3.0, 0.0),
-                              Real3( 3.0, 6.0, 0.0),
+                              Real3( 3.0, 1.0, 0.0),
                               Real3( 0.0, 0.0, 0.0));
-
   // Utilisé pour calculer dans le cas d'option_gao_wu
   // une matrice M pondérée par les aires
   Real3x3 Mk=Real3x3(Real3(0.0, 0.0, 0.0),
                      Real3(0.0, 0.0, 0.0),
                      Real3(0.0, 0.0, 0.0));
-  Real face_area = 0.0;
-  if (nbCell==2){
-    const ℝ³ p=cell_mass_center[backCell];
-    const ℝ³ q=cell_mass_center[frontCell];
-    const ℝ Adqe=geomComputeTriangleArea(d,q,e);
-    const ℝ Adep=geomComputeTriangleArea(d,e,p);
-    Mk+=Adqe*((q.x<0.5)?Mg:Md);
-    Mk+=Adep*((p.x<0.5)?Mg:Md);
-    face_area+=Adqe+Adep;
-  }else{
-    const ℝ³ p=cell_mass_center[0];
-    const ℝ Adep=geomComputeTriangleArea(d,e,p);
-    Mk+=Adep*((p.x<0.5)?Mg:Md);
-    face_area+=Adep;
+  
+  if (option_gao_wu && !option_gao_wu_area)
+    Mk=(s.x<0.5)?Mg:Md;
+  if (option_gao_wu && option_gao_wu_area){
+    Real face_area = 0.0;
+    if (nbCell==2){
+      const ℝ³ p=cell_mass_center[backCell];
+      const ℝ³ q=cell_mass_center[frontCell];
+      const ℝ Adqe=geomComputeTriangleArea(d,q,e);
+      const ℝ Adep=geomComputeTriangleArea(d,e,p);
+      Mk+=Adqe*((q.x<0.5)?Mg:Md);
+      Mk+=Adep*((p.x<0.5)?Mg:Md);
+      face_area+=Adqe+Adep;
+    }else{
+      const ℝ³ p=cell_mass_center[0];
+      const ℝ Adep=geomComputeTriangleArea(d,e,p);
+      Mk+=Adep*((p.x<0.5)?Mg:Md);
+      face_area+=Adep;
+    }
+    Mk/=face_area;
   }
-  Mk/=face_area;
   if (option_gao_wu) M=Mk;
   
   κ=P⊛M⊛Pm1;

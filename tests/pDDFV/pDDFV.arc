@@ -44,8 +44,8 @@
  		 <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="20" prx="1.0">1.0</lx>
-			<ly ny="20" pry="1.0">1.0</ly>
+			<lx nx="10" prx="1.0">1.0</lx>
+			<ly ny="10" pry="1.0">1.0</ly>
 	    </cartesian> 
      </meshgenerator>
    </mesh>
@@ -70,7 +70,7 @@
      <option_rdq>false</option_rdq>
      <option_rdq_al>0.3</option_rdq_al>
 
-     <option_sncq>false</option_sncq>
+     <option_sncq>true</option_sncq>
      <option_sncq_th>0.25</option_sncq_th>
 
      <!-- Options des solutions Analytiques *ou pas* -->
@@ -79,6 +79,8 @@
 
      <!-- Test du 'Parabolic problem with Discontinuous Coefficients -->
      <option_gao_wu>true</option_gao_wu>
+     <option_gao_wu_k>1.0</option_gao_wu_k>
+     <option_gao_wu_area>true</option_gao_wu_area>
      
      <!-- Options de l'anisotropisme -->
      <option_isotropic>false</option_isotropic>
@@ -93,7 +95,7 @@
      <option_ini_temperature>0.0</option_ini_temperature>
      <option_PartMg_temperature>0.0</option_PartMg_temperature>
      <option_max_iterations>8192</option_max_iterations>
-     <option_picard_ep>1e-7</option_picard_ep>
+     <option_picard_ep>1e-6</option_picard_ep>
 
      <alephEpsilon>1e-10</alephEpsilon>
      <alephMaxIterations>8192</alephMaxIterations>

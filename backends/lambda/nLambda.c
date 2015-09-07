@@ -92,7 +92,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"fatal(a,b)","exit(-1)"},
   //{"synchronize(a)",""},//"_Pragma(\"omp barrier\")"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
-  //{"reduce(how,what)","how##ToDouble(what)"},
+  {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration[0]"},
   {"MD_DirX","0"},

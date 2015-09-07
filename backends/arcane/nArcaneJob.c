@@ -495,7 +495,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   case (THIS):{
     if (support=='c') nprintf(arc, "/*THIS+c*/", "cell");
     if (support=='n') nprintf(arc, "/*THIS+n*/", "node");
-    if (support=='f') nprintf(arc, "/*THIS+f*/", "*face");
+    if (support=='f') nprintf(arc, "/*THIS+f*/", "face");
     if (support=='p') nprintf(arc, "/*THIS+p*/", "particle");
     break;
   }

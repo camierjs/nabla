@@ -80,7 +80,10 @@ options{
   Bool option_hole              = false;
   Bool option_atan              = false;
   Bool option_isotropic         = false;
+  
   Bool option_gao_wu            = true;
+  Real option_gao_wu_k          = 2.4; // 1.0, 2.4 || 4.0
+  Bool option_gao_wu_area       = false;
   
   // Valeures à l'initialisation
   Real option_k                 = 1.0;
