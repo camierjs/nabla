@@ -57,7 +57,7 @@ options{
   ℕ option_max_iterations    = 8;
   // Options d'Aleph
   ℝ alephEpsilon             = 1.e-10;
-  ℕ alephUnderlyingSolver    = 1;
+  ℕ alephUnderlyingSolver    = 2;
   ℕ alephMaxIterations       = 16384;
   ℕ alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
                                    // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10

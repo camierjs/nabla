@@ -65,6 +65,27 @@ extern char AlephTopology_h[];
 extern char AlephInterface_h[];
 extern char IAlephFactory_h[];
 
+// *****************************************************************************
+// * lambdaAlephIni
+// *****************************************************************************
+void lambdaAlephIni(nablaMain *main){
+  nablaJob *alephIni=nMiddleJobNew(main->entity);
+  alephIni->is_an_entry_point=true;
+  alephIni->is_a_function=true;
+  alephIni->scope  = strdup("NoScope");
+  alephIni->region = strdup("NoRegion");
+  alephIni->item   = strdup("\0");
+  alephIni->return_type  = strdup("void");
+  alephIni->name   = strdup("alephIni");
+  alephIni->name_utf8 = strdup("ℵIni");
+  alephIni->xyz    = strdup("NoXYZ");
+  alephIni->direction  = strdup("NoDirection");
+  sprintf(&alephIni->at[0],"-123456.0");
+  alephIni->when_index  = 1;
+  alephIni->whens[0] = ENTRY_POINT_init;
+  nMiddleJobAdd(main->entity, alephIni);  
+}
+
 
 // ****************************************************************************
 // *
@@ -84,28 +105,8 @@ char* lambdaAlephHeader(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"/*'AlephInterface_h'*/\n%s",dumpExternalFile(AlephInterface_h));
   fprintf(nabla->entity->hdr,"/*'IAlephFactory_h'*/\n%s",dumpExternalFile(IAlephFactory_h));
   fprintf(nabla->entity->hdr,"/*'nLambdaAleph_h'*/\n%s",dumpExternalFile(nLambdaAleph_h));
-  // On prépare le header de l'entity
+  lambdaAlephIni(nabla);
   return "";
 }
 
 
-// *****************************************************************************
-// * lambdaAlephIni
-// *****************************************************************************
-void lambdaAlephIni(nablaMain *arc){
-  nablaJob *alephInitFunction=nMiddleJobNew(arc->entity);
-  alephInitFunction->is_an_entry_point=true;
-  alephInitFunction->is_a_function=true;
-  alephInitFunction->scope  = strdup("NoScope");
-  alephInitFunction->region = strdup("NoRegion");
-  alephInitFunction->item   = strdup("\0");
-  alephInitFunction->return_type  = strdup("void");
-  alephInitFunction->name   = strdup("alephIni");
-  alephInitFunction->name_utf8 = strdup("ℵIni");
-  alephInitFunction->xyz    = strdup("NoXYZ");
-  alephInitFunction->direction  = strdup("NoDirection");
-  sprintf(&alephInitFunction->at[0],"-huge_valf");
-  alephInitFunction->when_index  = 1;
-  alephInitFunction->whens[0] = ENTRY_POINT_init;
-  nMiddleJobAdd(arc->entity, alephInitFunction);  
-}

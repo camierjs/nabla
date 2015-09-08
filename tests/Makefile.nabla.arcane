@@ -67,11 +67,11 @@ gen1:$(TGT)Module.cc $(NABLA)
 # .n 2 target #
 ###############
 $(TGT)Module.cc:$(TGT_FILE) $(ARC_FILE) $(NABLA)
-	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
 	$(NABLA) $(LOG) --arcane --alone $(TGT) -i $(TGT_FILE)
 
 $(TGT)Module.o:$(TGT)Module.cc
 	$(ARCANE_AXL_EXE) -l c++ $(TGT).axl
+	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
 	$(CXX) -c $(CFLAGS) $(ADDITIONAL_DEFINES) $(TGT)Module.cc -o $(TGT)Module.o
 
 

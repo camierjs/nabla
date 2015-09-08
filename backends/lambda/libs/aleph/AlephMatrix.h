@@ -60,14 +60,14 @@ public:
   void reAddValuesIn(AlephMatrix*,vector<int*>&);
   void updateKnownRowCol(int,int,double);
   void rowMapMapCol(int,int,double);
-  void addValue(const Variable&, const item&,
-                const Variable&, const item&, const double);
-  void addValue(const Variable&, const item*&,
-                const Variable&, const item*&, const double);
-  void setValue(const Variable&, const item&,
-                const Variable&, const item&, const double);
-  void setValue(const Variable&, const item*&,
-                const Variable&, const item*&, const double);
+  void addValue(double*, int,
+                double*, int, double);
+  void addValue(double*, int*,
+                double*, int*, double);
+  void setValue(double*, int,
+                double*, int, double);
+  void setValue(double*, int*,
+                double*, int*, double);
   void addValue(int,int,double);
   void setValue(int,int,double);
   void writeToFile(const string);

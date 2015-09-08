@@ -93,14 +93,11 @@ public:
    const double* jVar, const item* jItmEnum, double value){
    m_aleph_mat->addValue(iVar,iItm,jVar,*jItmEnum,value);t}*/
   
-  void setValue(const Variable &iVar, const item &iItm,
-                const Variable &jVar, const item &jItm,
+  void setValue(double *iVar, int iItm,
+                double *jVar, int jItm,
                 double value){
+    //debug()<<"\33[1;32m[matrix::setValue(...)]\33[0m";
     m_aleph_mat->setValue(iVar,iItm,jVar,jItm,value);
-  }
-  void setValue(const double *iVar, const int iItm,
-                const double *jVar, const int jItm,
-                double value){
   }
   /*
   void setValue(const double* iVar, const item* iItmEnum,
@@ -125,7 +122,10 @@ public:
 // ****************************************************************************
 class AlephRealArray:public vector<double>{
 public:
-  void reset(){resize(0);}
+  void reset(){
+    debug()<<"\33[1;33m[vector::reset]\33[0m";
+    resize(0);
+  }
   void error(){throw std::logic_error("[AlephRealArray] Error");}
   void newValue(double value){
     push_back(value);
@@ -133,8 +133,9 @@ public:
   //void addValue(const double* var, const item* itmEnum, double value){
   //   return addValue(var,*itmEnum,value);
   //}
-  void addValue(const double *var, const int itm, double value){
-    unsigned int idx=0;//m_aleph_kernel->indexing()->get(var,itm);
+  void addValue(double *var, int itm, double value){
+    //debug()<<"\33[1;33m[vector::addValue(...)]\33[0m";
+    unsigned int idx=m_aleph_kernel->indexing()->get(var,itm);
     if(idx==size()){
       resize(idx+1);
       index.push_back(idx);
@@ -146,7 +147,8 @@ public:
   //void setValue(const Variable &var, const item* itmEnum, double value){
   //  return setValue(var,*itmEnum,value);
   //}
-  void setValue(const double *var, const int itm, double value){
+  void setValue(double *var, int itm, double value){
+    //debug()<<"\33[1;33m[vector::setValue(...)]\33[0m";
     //int topology_row_offset=0;
     unsigned int idx=0;//m_aleph_kernel->indexing()->get(var,itm)-topology_row_offset;
     if(idx==size()){
@@ -157,7 +159,8 @@ public:
       this->at(idx)=value;
     }
   }
-  double getValue(const double *var, int itmEnum){
+  double getValue(double *var, int itmEnum){
+    debug()<<"\33[1;33m[vector::getValue]\33[0m";
     return 0.0;//at(m_aleph_kernel->indexing()->get(var,*itmEnum));
   }
 public:
@@ -175,27 +178,39 @@ AlephParams *m_aleph_params;
 AlephMatrix *m_aleph_mat;
 AlephVector *m_aleph_rhs;
 AlephVector *m_aleph_sol;
+
 vector<int> vector_indexs;
 vector<double> vector_zeroes;
+
 AlephRealArray lhs;
 AlephRealArray rhs;
 AlephRealMatrix mtx;
 
-ISubDomain sub_domain;
-ISubDomain* subDomain(){return &sub_domain;}
 
-IMesh thisMesh;
-IMesh* mesh(){return &thisMesh;}
+// ****************************************************************************
+// * Globals for Simulation
+// ****************************************************************************
+IMesh *thisMesh=new IMesh(NABLA_NB_CELLS_X_AXIS,NABLA_NB_CELLS_Y_AXIS,NABLA_NB_CELLS_Z_AXIS);
 
-ITraceMng trcMng;
-ITraceMng* traceMng(){return &trcMng;}
+ITraceMng *thisTraceMng=new ITraceMng();
+
+SequentialMng *thisParallelMng=new SequentialMng(thisTraceMng);
+
+ISubDomain *thisSubDomain=new ISubDomain(thisMesh,thisParallelMng);
+
+
+IMesh* mesh(void){return thisMesh;}
+ITraceMng* traceMng(void){return thisTraceMng;}
+ISubDomain* subDomain(void){return thisSubDomain;}
 
 
 // ****************************************************************************
 // * Forward Declarations
 // ****************************************************************************
 void alephInitialize(void){
+  info()<<"\33[1;31m[alephInitialize] createSolverMatrix\33[0m";
   m_aleph_mat=m_aleph_kernel->createSolverMatrix();
+  debug()<<"\33[1;31m[alephInitialize] createSolverVector\33[0m";
   m_aleph_rhs=m_aleph_kernel->createSolverVector();
   m_aleph_sol=m_aleph_kernel->createSolverVector();
   m_aleph_mat->create();
@@ -209,22 +224,28 @@ void alephInitialize(void){
 // ****************************************************************************
 // * alephIni
 // ****************************************************************************
-void alephIni(void){
+void alephIni(real3*, double*, double *, int *){ // we have to match args & params
 #ifndef ALEPH_INDEX
+  debug()<<"\33[1;31m[alephIni] NO ALEPH_INDEX\33[0m";
+  //#warning NO ALEPH_INDEX
   // Pourrait être enlevé, mais est encore utilisé dans le test DDVF sans auto-index
   vector_indexs.resize(0);
   vector_zeroes.resize(0);
   rhs.resize(0);
   mesh()->checkValidMeshFull();
-  m_aleph_factory=NULL;//new AlephFactory(subDomain()->application(),traceMng());
+  m_aleph_factory=new AlephFactory(//subDomain()->application(),
+                                   traceMng());
   m_aleph_kernel=new AlephKernel(traceMng(), subDomain(), m_aleph_factory,
                                  alephUnderlyingSolver,
                                  alephNumberOfCores,
                                  false);//options()->alephMatchSequential());");
 #else
+  debug()<<"\33[1;31m[alephIni] with ALEPH_INDEX\33[0m";
+  //#warning ALEPH_INDEX
   m_aleph_kernel=new AlephKernel(subDomain(),
                                  alephUnderlyingSolver,
                                  alephNumberOfCores);
+  debug()<<"\33[1;31m[alephIni] Kernel set, setting rhs,lhs&mtx!\33[0m";
   rhs.m_aleph_kernel=m_aleph_kernel;
   lhs.m_aleph_kernel=m_aleph_kernel;
   mtx.m_aleph_kernel=m_aleph_kernel;
@@ -266,12 +287,14 @@ void alephIni(void){
 // ****************************************************************************
 // * alephAddValue
 // ****************************************************************************
-void alephAddValue(const Variable &rowVar, const item rowItm,
-                   const Variable &colVar, const item colItm, double val){
+void alephAddValue(double *rowVar, int rowItm,
+                   double *colVar, int colItm, double val){
+  debug()<<"\33[1;31m[alephAddValue(...)]\33[0m";
   m_aleph_mat->addValue(rowVar,rowItm,colVar,colItm,val);
 }
 
 void alephAddValue(int i, int j, double val){
+  debug()<<"\33[1;31m[alephAddValue(i,j,val)]\33[0m";
   m_aleph_mat->addValue(i,j,val);
 }
 
@@ -282,10 +305,12 @@ void alephAddValue(int i, int j, double val){
 void alephRhsSet(int row, double value){
   const int kernel_rank = m_aleph_kernel->rank();
   const int rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];
+  debug()<<"\33[1;31m[alephRhsSet(row,val)]\33[0m";
   rhs[row-rank_offset]=value;
 }
 
-void alephRhsSet(const Variable &var, const item itm, double value){
+void alephRhsSet(double *var, int itm, double value){
+  debug()<<"\33[1;31m[alephRhsSet(...)]\33[0m";
   rhs[m_aleph_kernel->indexing()->get(var,itm)]=value;
 }
 
@@ -296,6 +321,7 @@ void alephRhsSet(const Variable &var, const item itm, double value){
 double alephRhsGet(int row){
   const int kernel_rank = m_aleph_kernel->rank();
   const register int rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];
+  debug()<<"\33[1;31m[alephRhsGet]\33[0m";
   return rhs[row-rank_offset];
 }
 
@@ -306,7 +332,31 @@ double alephRhsGet(int row){
 void alephRhsAdd(int row, double value){
   const int kernel_rank = m_aleph_kernel->rank();
   const int rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];
+  debug()<<"\33[1;31m[alephRhsAdd]\33[0m";
   rhs[row-rank_offset]+=value;
+}
+
+
+// ****************************************************************************
+// * alephSolveWithoutIndex
+// ****************************************************************************
+void alephSolveWithoutIndex(void){
+  int nb_iteration;
+  double residual_norm[4];
+  debug()<<"\33[1;31m[alephSolveWithoutIndex]\33[0m";
+  m_aleph_mat->assemble();
+  m_aleph_rhs->setLocalComponents(rhs);
+  m_aleph_rhs->assemble();
+  vector_zeroes.resize(rhs.size());
+  vector_zeroes.assign(rhs.size(),0.0);
+  m_aleph_sol->setLocalComponents(vector_zeroes);
+  m_aleph_sol->assemble();
+  m_aleph_mat->solve(m_aleph_sol, m_aleph_rhs, nb_iteration, &residual_norm[0], m_aleph_params, true);
+  AlephVector *solution=m_aleph_kernel->syncSolver(0,nb_iteration,&residual_norm[0]);
+  info() << "Solved in \33[7m" << nb_iteration << "\33[m iterations,"
+         << "residuals=[\33[1m" << residual_norm[0] <<"\33[m,"<< residual_norm[3]<<"]";
+  lhs.reset(); lhs.resize(rhs.size()); //lhs.fill(0.0);
+  solution->getLocalComponents(lhs);
 }
 
 
@@ -314,6 +364,7 @@ void alephRhsAdd(int row, double value){
 // * alephSolve
 // ****************************************************************************
 void alephSolve(void){
+  debug()<<"\33[1;31m[alephSolve]\33[0m";
 #ifndef ALEPH_INDEX
   int nb_iteration;
   double residual_norm[4];
@@ -331,26 +382,4 @@ void alephSolve(void){
 #else
   alephSolveWithoutIndex();
 #endif
-}
-
-
-// ****************************************************************************
-// * alephSolveWithoutIndex
-// ****************************************************************************
-void alephSolveWithoutIndex(void){
-  int nb_iteration;
-  double residual_norm[4];
-  m_aleph_mat->assemble();
-  m_aleph_rhs->setLocalComponents(rhs);
-  m_aleph_rhs->assemble();
-  vector_zeroes.resize(rhs.size());
-  vector_zeroes.assign(rhs.size(),0.0);
-  m_aleph_sol->setLocalComponents(vector_zeroes);
-  m_aleph_sol->assemble();
-  m_aleph_mat->solve(m_aleph_sol, m_aleph_rhs, nb_iteration, &residual_norm[0], m_aleph_params, true);
-  AlephVector *solution=m_aleph_kernel->syncSolver(0,nb_iteration,&residual_norm[0]);
-  info() << "Solved in \33[7m" << nb_iteration << "\33[m iterations,"
-         << "residuals=[\33[1m" << residual_norm[0] <<"\33[m,"<< residual_norm[3]<<"]";
-  lhs.reset(); lhs.resize(rhs.size()); //lhs.fill(0.0);
-  solution->getLocalComponents(lhs);
 }

@@ -85,7 +85,7 @@ function(NABLA_ADD_LAMBDA_TEST name nb_proc cmd parallel)
   set(subpath ${nb_proc}/${cmd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
   add_test(NAME nabla_lambda_${name}_${cmd}_${nb_proc}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
-	 COMMAND /bin/sh -c "PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
+	 COMMAND /bin/sh -c "ADDITIONAL_DEFINES=-DALEPH_INDEX PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_LAMBDA_TEST)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.lambda)
  

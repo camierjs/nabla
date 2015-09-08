@@ -126,14 +126,14 @@ void AlephMatrix::reset(void){
 /*!
  * \brief addValue à partir d'arguments en IVariables, items et double
  *****************************************************************************/
-void AlephMatrix::addValue(const Variable &rowVar, const item* &rowItm,
-                           const Variable &colVar, const item* &colItm,
-                           const double val){
+void AlephMatrix::addValue(double *rowVar, int* rowItm,
+                           double *colVar, int* colItm,
+                           double val){
   addValue(rowVar,*rowItm,colVar,*colItm,val);
 }
-void AlephMatrix::addValue(const Variable &rowVar, const item &rowItm,
-                           const Variable &colVar, const item &colItm,
-                           const double val){
+void AlephMatrix::addValue(double *rowVar, int rowItm,
+                           double *colVar, int colItm,
+                           double val){
   int row=m_kernel->indexing()->get(rowVar,rowItm);
   int col=m_kernel->indexing()->get(colVar,colItm);
   if (m_kernel->isInitialized()){
@@ -210,9 +210,9 @@ void AlephMatrix::addValue(int row, int col, double val){
 /*!
  * \brief setValue à partir d'arguments en IVariables, item* et double
  */
-void AlephMatrix::setValue(const Variable &rowVar, const item* &rowItm,
-                           const Variable &colVar, const item* &colItm,
-                           const double val){
+void AlephMatrix::setValue(double *rowVar, int* rowItm,
+                           double *colVar, int* colItm,
+                           double val){
   setValue(rowVar,*rowItm,colVar,*colItm,val);
 }
 
@@ -220,9 +220,9 @@ void AlephMatrix::setValue(const Variable &rowVar, const item* &rowItm,
 /*!
  * \brief setValue à partir d'arguments en IVariables, items et double
  */
-void AlephMatrix::setValue(const Variable &rowVar, const item &rowItm,
-                           const Variable &colVar, const item &colItm,
-                           const double val){
+void AlephMatrix::setValue(double *rowVar, int rowItm,
+                           double *colVar, int colItm,
+                           double val){
   int row=m_kernel->indexing()->get(rowVar,rowItm);
   int col=m_kernel->indexing()->get(colVar,colItm);
   //debug()<<"[AlephMatrix::setValue] dof #"<<m_setValue_idx<<" ["<<row<<","<<col<<"]="<<val;

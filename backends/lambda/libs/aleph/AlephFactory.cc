@@ -46,7 +46,7 @@
 
 #include "IAlephFactory.h"
 
-
+//class HypreAlephFactoryImpl;
 
 /******************************************************************************
  * IAlephFactory::IAlephFactory
@@ -64,10 +64,12 @@ AlephFactory::AlephFactory(ITraceMng *tm): IAlephFactory(tm){
   // créé la fabrique correspondante si elle est disponible.
   for(FactoryImplMap::iterator i = m_impl_map.begin(); i!=m_impl_map.end(); ++i ){
     FactoryImpl *implementation=i->second;
-    const string name = implementation->m_name;
+    const string name = implementation->m_name+"AlephFactory";
     debug()<<"\33[1;34m\t[AlephFactory] Adding "<<name<<" library..."<<"\33[0m";
     //IAlephFactoryImpl *factory = sb.createInstance(name+"AlephFactory",SB_AllowNull);
     //implementation->m_factory = factory;
+    #error dynamic_cast instance
+//    implementation->m_factory = dynamic_cast<IAlephFactoryImpl*>(HypreAlephFactoryImpl);
   }
   debug()<<"\33[1;34m\t[AlephFactory] done"<<"\33[0m";
 }

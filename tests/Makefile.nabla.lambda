@@ -13,7 +13,7 @@ PARALLEL_cilk_FLAGS = -fcilkplus
 
 CXX = ${CMAKE_CXX_COMPILER}
 #CXX = mpc_g++
-CFLAGS = -save-temps -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS)
+CFLAGS = -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 LIB_ALEPH = ${LAMBDA_ALEPH_LIB}
 
@@ -33,9 +33,10 @@ $(TGT).cc: $(TGT_FILE) $(NABLA)
 	$(NABLA) $(LOG) --lambda $(TGT) --std --$(PARALLEL) -i $(TGT_FILE) #--$(COLORS)
 
 $(TGT).o:$(TGT).cc $(TGT_FILE)
-	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
+	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
+#@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
 	$(CXX) -fopenmp $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH)
 
 cln:

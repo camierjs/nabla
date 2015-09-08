@@ -142,10 +142,6 @@ int main(int argc, char *argv[]){\n\
 \tfloat cputime=0.0;\n\
 \tstruct timeval st, et;\n\
 \t//int iteration=1;\n\
-#ifdef __AVX__\n\
-#endif\n\
-#if defined(__MIC__)||defined(__AVX512F__)\n\
-#endif\n\
 \tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
 \tnabla_ini_variables();\n\
 \tnabla_ini_node_coords();\n\
@@ -157,7 +153,7 @@ int main(int argc, char *argv[]){\n\
 \tglobal_time[0]=0.0;\n\
 \tglobal_iteration[0]=1;\n\
 \tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);"
+\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
 NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainPrefix]");
   
@@ -199,6 +195,8 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 \t// && global_iteration!=option_max_iterations){");
     }
     
+    if (i==13) nprintf(n, NULL,"\n\texit(0);\n"); // ComputeLoopBegin en i==4
+
     // On provoque un parallel->sync
     // si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])
@@ -252,9 +250,6 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
   dbg("\n[lambdaMainPostfix] LAMBDA_MAIN_POSTFIX");
   fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
-
-  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
-    lambdaAlephIni(nabla);
 
   //dbg("\n[lambdaMainPostfix] lambdaSourceMesh");
   nLambdaDumpSource(nabla);

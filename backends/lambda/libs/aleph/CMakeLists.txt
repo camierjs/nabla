@@ -23,6 +23,10 @@ if(PETSc_FOUND)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/petsc)
 endif()
 
+if(HYPRE_FOUND)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hypre)
+endif()
+
 # Looking for TRILINOS
 find_path(Trilinos_CONFIG_PATH TrilinosConfig.cmake ${Trilinos_ROOT_PATH}/lib/cmake/Trilinos)
 if (${Trilinos_CONFIG_PATH})

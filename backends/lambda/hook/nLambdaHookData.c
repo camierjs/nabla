@@ -341,7 +341,7 @@ static void lambdaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
     break;
   }
   case ('n'):{
-    nprintf(arc, "/*NodeVar*/", NULL); // NODE variable
+    nprintf(arc, "/*NodeVar*/", "/*lambdaHookTurnTokenToVariableForStdFunction*/"); // NODE variable
     break;
   }
   case ('f'):{

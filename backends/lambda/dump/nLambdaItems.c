@@ -47,15 +47,18 @@ class Cell;
 class Face;
 class Node;
 
+
 // ****************************************************************************
 // *
 // ****************************************************************************
 class Face{
  public:
-  int node(int id);
-  int cell(int id);
-  int backCell(void);
-  int frontCell(void);
+ Face():nodes(2),cells(2){}
+ public:
+  int node(int id){ return nodes.at(id); }
+  int cell(int id){ return cells.at(id); }
+  int backCell(void) { return cells.at(0); }
+  int frontCell(void) { return cells.at(1); }
  private:
   int uid;
   vector<int> nodes;
@@ -68,6 +71,8 @@ class Face{
 // ****************************************************************************
 class Node{
  public:
+ Node():faces(4),cells(4){}
+ public:
   int uid;
   vector<int> faces;
   vector<int> cells;
@@ -78,23 +83,12 @@ class Node{
 // *
 // ****************************************************************************
 class Cell{
+ Cell():faces(4),nodes(4){}
  public:
-  int face(int id);
+  int face(int id){return faces.at(id); }
+ private:
   vector<int> faces;
   vector<int> nodes;
 };
-
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-int Face::node(int id){ return nodes.at(id); }
-int Face::cell(int id) { return cells.at(id); }
-
-int Face::backCell(void) { return cells.at(0); }
-int Face::frontCell(void) { return cells.at(1); }
-
-int Cell::face(int id) {return faces.at(id); }
 
 #endif //_LAMBDA_ITEMS_H_

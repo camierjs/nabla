@@ -68,42 +68,38 @@ template<typename T> inline ostream& operator<<(ostream& o, const vector<T>& val
   return o;
 }
 
-class ITraceMng{
-public:
-  void flush(){}
-  ostream info();
-  ostream debug();
-};
+class ITraceMng{ public: void flush(){std::cout.flush();}};
 
 class TraceAccessor{
 public:
-  TraceAccessor(ITraceMng* m){}
-  //virtual ~TraceAccessor()
+  TraceAccessor(ITraceMng* m):m_trace(m){}
 public:
   ITraceMng* traceMng() const { return m_trace;}
-  ostream& info() const { return std::cout;}
-  ostream& debug() const { return std::cout;}
-  ostream& warning() const { return std::cout;}
+  ostream& out() const { std::cout.flush();std::cout<<"\n";return std::cout;}
+  ostream& info() const { return out();}
+  ostream& debug() const { return out();}
+  ostream& warning() const { return out();}
  private:
   ITraceMng* m_trace;
 };
 
 
 // ****************************************************************************
-// * Items & Mesh Stuff
+// * Item, Item's' & Mesh Stuff
 // ****************************************************************************
 enum eItemKind{
   IK_Node     = 0,
   IK_Edge     = 1,
   IK_Face     = 2,
   IK_Cell     = 3,
-  IK_DualNode = 4,
-  IK_Link     = 5,
-  IK_Particle = 6,
-  IK_Unknown  = 7
+  IK_Particle = 4,
+  IK_Unknown  = 5
 };
 
 class item{
+public:
+  item():uid(0){}
+  item(int id):uid(id){}
 public:
   bool isOwn() const { return true; }
   int uniqueId(){ return uid;}
@@ -114,15 +110,35 @@ private:
 typedef vector<item> items;
 
 #define ENUMERATE_GROUP(name,itms) \
-  for(items::iterator name(itms.begin()); name!=itms.end(); ++name )
+  for(items::iterator name(itms.begin());name!=itms.end();++name)
 
+
+// ****************************************************************************
+// * Mesh class
+// ****************************************************************************
 class IMesh{
- public:
+public:
+  IMesh(int x, int y, int z):size_x(x),
+                             size_y(y),
+                             size_z(z),
+                             uid_idx(0)
+  {
+    cells.resize(x*y*z);
+    faces.resize(x*y*z);
+    nodes.resize((x+1)*(y+1)*(z+1));
+  }
+public:
+  int size(){ return size_x*size_y*size_z; }
   items ownCells() { return cells;}
   items ownFaces() { return faces;}
   items ownNodes() { return nodes;}
   void checkValidMeshFull(){}
+public:
+  int size_x;
+  int size_y;
+  int size_z;
 private:
+  int uid_idx;
   items cells;
   items faces;
   items nodes;
@@ -132,7 +148,7 @@ private:
 // ****************************************************************************
 // * Variables Stuff
 // ****************************************************************************
-class IVariable{
+/*class IVariable{
 public:
   virtual int dimension() const =0;
   virtual items itemGroup() const =0;
@@ -156,7 +172,7 @@ public:
 };
 
 typedef VariableItemT<int> VariableItemInt;
-
+*/
 
 // ****************************************************************************
 // * Parallel Stuff
@@ -188,7 +204,7 @@ class IParallelMng{
   virtual int commSize() const =0;
   virtual ITraceMng* traceMng() const =0;
 
-  virtual IParallelMng* worldParallelMng() const =0;
+  virtual IParallelMng* worldParallelMng() =0;
   virtual IParallelMng* createSubParallelMng(vector<int> kept_ranks) =0;
 
   virtual void broadcast(vector<int> send_buf,int rank) =0;
@@ -211,29 +227,80 @@ class IParallelMng{
   virtual int reduce(Parallel::eReduceType rt,int v) =0;
 };
 
-class IApplication{
-  int id;
-};
-
 class ISubDomain{
+public:
+  ISubDomain(IMesh *m,
+             IParallelMng *p):m_mesh(m),
+                              m_parallel_mg(p){}
  public:
   IMesh* defaultMesh(){return m_mesh;}
   IParallelMng* parallelMng(){ return m_parallel_mg;}
-  IApplication* application();
 private:
-  IParallelMng *m_parallel_mg;
   IMesh *m_mesh;
+  IParallelMng *m_parallel_mg;
 };
-
 
 // ****************************************************************************
 // * IParallelMng Séquentiel
 // ****************************************************************************
-class sequentialMng:public IParallelMng{
+class SequentialMng:public IParallelMng{
+public:
+  SequentialMng(ITraceMng *t):m_trace_mng(t){}
+public:
   bool isParallel() const { return false;}
-  int commRank() const { return 0;}
-  int commSize() const { return 0;}
-  //ITraceMng* traceMng() const =0;
+  int commRank() const { std::cout<<"\n\t\33[1;36m SequentialMng::commRank \33[0m"; return 1;}
+  int commSize() const { std::cout<<"\n\t\33[1;36m SequentialMng::commSize \33[0m"; return 1;}
+  ITraceMng* traceMng() const { return m_trace_mng;}
+  IParallelMng* worldParallelMng() {
+    //throw std::logic_error("SequentialMng::worldParallelMng");
+    return this;
+  }
+  IParallelMng* createSubParallelMng(vector<int> kept_ranks){
+    //throw std::logic_error("SequentialMng::createSubParallelMng");
+    return this;
+  }
+
+  void broadcast(vector<int> send_buf,int rank) {throw std::logic_error("SequentialMng::");}
+  void broadcast(vector<double> send_buf,int rank) {throw std::logic_error("SequentialMng::");}
+  void broadcast(vector<long unsigned int> send_buf,int rank) {throw std::logic_error("SequentialMng::");}
+  
+  Parallel::Request recv(vector<int> values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  Parallel::Request recv(double* values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  Parallel::Request recv(vector<double> values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  
+  Parallel::Request send(vector<int> values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  Parallel::Request send(double* values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  Parallel::Request send(vector<double> values,int rank,bool is_blocking) {
+    throw std::logic_error("SequentialMng::");
+    return Parallel::Request();
+  }
+  
+  void waitAllRequests(vector<Parallel::Request> rvalues) {throw std::logic_error("SequentialMng::");}
+  
+  void allGather(vector<int> send_buf,vector<int> recv_buf) {throw std::logic_error("SequentialMng::");}
+  void allGatherVariable(vector<int> send_buf, vector<int>& recv_buf) {throw std::logic_error("SequentialMng::");}
+  
+  int reduce(Parallel::eReduceType rt,int v){
+    //throw std::logic_error("SequentialMng::");
+    return v;
+  }
+private:
+  ITraceMng *m_trace_mng;
 };
 
 #endif  
