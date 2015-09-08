@@ -16,7 +16,7 @@ set(BACKEND_OKINA_C
   ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
 
 # On spécifie en plus que nOkinaDump.S va utiliser incbin pour se compiler
-set_property(SOURCE nOkinaDump.S 
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S 
              PROPERTY OBJECT_DEPENDS 
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/*.*
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/*.*

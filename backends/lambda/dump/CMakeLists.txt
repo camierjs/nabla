@@ -6,7 +6,7 @@ set(BACKEND_LAMBDA_DUMP_C
 
 # On spécifie en plus que nLambdaDump.S va utiliser incbin pour se compiler
 set_property(SOURCE
-  nLambdaDump.S 
+  ${CMAKE_CURRENT_BINARY_DIR}/nLambdaDump.S 
   PROPERTY OBJECT_DEPENDS 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 

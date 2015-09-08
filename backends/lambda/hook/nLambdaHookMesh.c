@@ -48,7 +48,7 @@
 // ****************************************************************************
 void nLambdaHookMeshPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainMeshPrefix]");
-  fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
+  //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
 }
 
 

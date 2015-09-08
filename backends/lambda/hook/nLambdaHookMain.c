@@ -43,7 +43,6 @@
 #include "nabla.h"
 
 extern char* lambdaAlephHeader(nablaMain*);
-extern char* lambdaAlephPrivates(void);
 extern void lambdaAlephIni(nablaMain*);
 
 
@@ -162,10 +161,8 @@ int main(int argc, char *argv[]){\n\
 NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainPrefix]");
   
-  if ((nabla->entity->libraries&(1<<with_aleph))!=0){
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
     fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
-    fprintf(nabla->entity->hdr, "%s", lambdaAlephPrivates());
-  }
    
   fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
   return NABLA_OK;

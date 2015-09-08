@@ -70,8 +70,10 @@
      <option_rdq>false</option_rdq>
      <option_rdq_al>0.3</option_rdq_al>
 
-     <option_sncq>true</option_sncq>
+     <option_sncq>false</option_sncq>
      <option_sncq_th>0.25</option_sncq_th>
+     
+     <option_kershaw>true</option_kershaw>
 
      <!-- Options des solutions Analytiques *ou pas* -->
      <option_hole>false</option_hole>

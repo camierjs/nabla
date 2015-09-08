@@ -109,3 +109,65 @@ nodes void stronglyNonConvexQuads(void) @ -20.0 if (option_sncq and option_quads
   coord.x+=Δ;
   coord.y+=Δ;
 }
+
+
+// *****************************************************************************
+// * Maillage de Kershaw
+// *****************************************************************************
+ℕ zone(const ℝ x, const ℝ y){
+  if (x<=0.2 && y<=0.5) return 1;
+  if (x<=0.4 && y<=0.5) return 2;
+  if (x<=0.6 && y<=0.5) return 3;
+  if (x<=0.8 && y<=0.5) return 4;
+  if (x<=1.0 && y<=0.5) return 5;
+
+  if (x<=0.2 && y>0.5) return 6;
+  if (x<=0.4 && y>0.5) return 7;
+  if (x<=0.6 && y>0.5) return 8;
+  if (x<=0.8 && y>0.5) return 9;
+  if (x<=1.0 && y>0.5) return 10;
+  return 0;
+}
+
+ℝ affine(ℝ a, ℝ x) {return a*x;}
+ℝ constant(ℝ a) {return a;}
+
+ℝ zDownUp(ℕ z, ℕ j, ℕ half_n, ℝ origine, Bool cst, ℝ a, ℝ x, const ℕ color){
+  const ℝ std_height = 0.5;
+  const ℝ new_height = std_height+((cst)?0.1*constant(a):affine(a,x-origine));
+  const ℝ height_each = new_height/half_n;
+  const ℝ Δ = ((ℝ)j)*height_each;
+  debug()<<"\t\t\t\33["<<color<<"m[kershaw] Zone"<<z<<" x="<<x
+        <<", new_height here="<<new_height
+        <<", height_each="<<height_each
+        <<", delta="<<Δ<<"\33[m";
+  return Δ;
+}
+
+nodes void kershaw(void) @ -18.0 if (option_kershaw and option_quads){
+  const ℝ x=coord.x;
+  const ℝ y=coord.y;
+  const ℕ z=zone(x,y);
+  const ℕ nid=uid+1;
+  const ℕ n=sqrtl(globalNbNodes);
+  const ℕ half_n=½*(n-1);
+  const ℕ j=uid/n;
+  const ℕ i=uid%n;
+
+  debug()<<"\t\t\33[33m[kershaw] #"<<nid<<" @"<<coord
+        <<" is ["<<i<<","<<j<<"] "
+        << "in zone"<<z<<"\33[m";
+  
+  if (z==1) coord.y=zDownUp(z,j,half_n,0.1,false,3.0,coord.x,35);
+  if (z==2) coord.y=zDownUp(z,j,half_n,0.3,true,3.0,coord.x,32);
+  if (z==3) coord.y=zDownUp(z,j,half_n,0.5,false,-3.0,coord.x,31);
+  if (z==4) coord.y=zDownUp(z,j,half_n,0.7,false,3.0,coord.x,35);
+  if (z==5) coord.y=zDownUp(z,j,half_n,0.9,false,-3.0,coord.x,31);
+
+  if (z==6) coord.y=1.0-zDownUp(z,half_n-j+half_n,half_n,0.1,false,-3.0,coord.x,35);
+  if (z==7) coord.y=1.0-zDownUp(z,half_n-j+half_n,half_n,0.3,true,-3.0,coord.x,32);
+  if (z==8) coord.y=1.0-zDownUp(z,half_n-j+half_n,half_n,0.5,false,3.0,coord.x,31);
+  if (z==9) coord.y=1.0-zDownUp(z,half_n-j+half_n,half_n,0.7,false,-3.0,coord.x,35);
+  if (z==10)coord.y=1.0-zDownUp(z,half_n-j+half_n,half_n,0.9,false,3.0,coord.x,31);
+ 
+ }

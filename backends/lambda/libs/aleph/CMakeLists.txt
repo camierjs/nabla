@@ -1,6 +1,6 @@
 include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
 
-info("\t${VT100_FG_YELLOW}Aleph${VT100_RESET}")
+info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_MAGENTA}LIBRARY${VT100_RESET}: LAMBDA/${VT100_BOLD}${VT100_FG_MAGENTA}ALEPH${VT100_RESET}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -11,6 +11,11 @@ set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
                   nLambdaAleph.c ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
                 
 configure_file(nLambdaAleph.S ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
+                
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S 
+  PROPERTY OBJECT_DEPENDS 
+  ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
+
 
 # Looking for PETSc
 find_package(PETSc)
@@ -36,3 +41,5 @@ configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h
 add_library(NablaLambdaAleph ${ALEPH_SOURCES})
 
 add_dependencies(NablaLambdaAleph NablaLambdaHook)
+
+set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaLambdaAleph.a PARENT_SCOPE)

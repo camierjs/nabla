@@ -40,68 +40,11 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-   .globl ${ABI_UNDERSCORE}nLambdaAleph_h
-   
-   .globl ${ABI_UNDERSCORE}AlephStd_h
-   .globl ${ABI_UNDERSCORE}AlephStd_c
 
-   .globl ${ABI_UNDERSCORE}Aleph_h
-   .globl ${ABI_UNDERSCORE}AlephTypesSolver_h
-   .globl ${ABI_UNDERSCORE}AlephParams_h
-   .globl ${ABI_UNDERSCORE}AlephVector_h
-   .globl ${ABI_UNDERSCORE}AlephMatrix_h
-   .globl ${ABI_UNDERSCORE}AlephKernel_h
-   .globl ${ABI_UNDERSCORE}AlephOrdering_h
-   .globl ${ABI_UNDERSCORE}AlephIndexing_h
-   .globl ${ABI_UNDERSCORE}AlephTopology_h
-	.globl ${ABI_UNDERSCORE}AlephInterface_h
-   
-   .globl ${ABI_UNDERSCORE}IAlephFactory_h
-   
-${ABI_UNDERSCORE}nLambdaAleph_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaAleph.h"
-   .byte 0
 
-   
-${ABI_UNDERSCORE}AlephStd_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.cc"
-   .byte 0
-${ABI_UNDERSCORE}AlephStd_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.h"
-   .byte 0
-   
-${ABI_UNDERSCORE}Aleph_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/Aleph.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephTypesSolver_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTypesSolver.h"
-   .byte 0
-
-${ABI_UNDERSCORE}AlephParams_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephParams.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephVector_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephVector.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephMatrix_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephMatrix.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephKernel_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephKernel.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephOrdering_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephOrdering.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephIndexing_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephIndexing.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephTopology_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTopology.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephInterface_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephInterface.h"
-   .byte 0
-   
-${ABI_UNDERSCORE}IAlephFactory_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/IAlephFactory.h"
-   .byte 0
+// ****************************************************************************
+// * Other needed stuff
+// ****************************************************************************
+int backCell(int f){ return 0;}
+int frontCell(int f){ return 0;}
+void synchronize(double*){}

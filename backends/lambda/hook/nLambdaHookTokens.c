@@ -352,7 +352,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (BACKCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "face->backCell()");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "backCell(f)");
     break;
   }
   case (BACKCELLUID):{
@@ -362,7 +362,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "face->frontCell()");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "frontCell(f)");
     break;
   }
   case (FRONTCELLUID):{

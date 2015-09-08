@@ -15,6 +15,7 @@ CXX = ${CMAKE_CXX_COMPILER}
 #CXX = mpc_g++
 CFLAGS = -save-temps -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS)
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
+LIB_ALEPH = ${LAMBDA_ALEPH_LIB}
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -35,7 +36,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) -fopenmp $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP)
+	$(CXX) -fopenmp $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

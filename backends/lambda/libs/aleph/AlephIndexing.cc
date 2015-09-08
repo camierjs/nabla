@@ -63,7 +63,7 @@ AlephIndexing::AlephIndexing(AlephKernel *kernel):
 // * updateKnownItems
 // ****************************************************************************
 int AlephIndexing::updateKnownItems(VariableItemInt *var_idx,
-                                      const item &itm){
+                                    const item &itm){
   // Dans tous les cas l'adresse est celle-ci
   m_known_items_all_address.push_back(&(*var_idx)[itm]);
   // Si l'item ciblé n'est pas à nous, on ne doit pas le compter

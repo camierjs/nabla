@@ -70,20 +70,22 @@ template<typename T> inline ostream& operator<<(ostream& o, const vector<T>& val
 
 class ITraceMng{
 public:
-  void flush();
+  void flush(){}
   ostream info();
   ostream debug();
 };
 
 class TraceAccessor{
 public:
-  TraceAccessor(ITraceMng* m);
-  virtual ~TraceAccessor();
+  TraceAccessor(ITraceMng* m){}
+  //virtual ~TraceAccessor()
 public:
-  ITraceMng* traceMng() const;
-  ostream info() const;
-  ostream debug() const;
-  ostream warning() const;
+  ITraceMng* traceMng() const { return m_trace;}
+  ostream& info() const { return std::cout;}
+  ostream& debug() const { return std::cout;}
+  ostream& warning() const { return std::cout;}
+ private:
+  ITraceMng* m_trace;
 };
 
 
@@ -116,10 +118,14 @@ typedef vector<item> items;
 
 class IMesh{
  public:
-  items ownCells();
-  items ownFaces();
-  items ownNodes();
-  void checkValidMeshFull();
+  items ownCells() { return cells;}
+  items ownFaces() { return faces;}
+  items ownNodes() { return nodes;}
+  void checkValidMeshFull(){}
+private:
+  items cells;
+  items faces;
+  items nodes;
 };
 
 
@@ -142,7 +148,7 @@ public:
 template <typename T>
 class VariableItemT:public vector<T>{
 public:
-  VariableItemT(eItemKind ik);
+  VariableItemT(eItemKind ik){}
   string name() { return "name";}
   T& operator[](items::iterator itm) { return this->at(itm->uniqueId());}
   T& operator[](const item itm) { return this->at(0);}
@@ -211,9 +217,12 @@ class IApplication{
 
 class ISubDomain{
  public:
-  IMesh* defaultMesh();
-  IParallelMng* parallelMng();
+  IMesh* defaultMesh(){return m_mesh;}
+  IParallelMng* parallelMng(){ return m_parallel_mg;}
   IApplication* application();
+private:
+  IParallelMng *m_parallel_mg;
+  IMesh *m_mesh;
 };
 
 

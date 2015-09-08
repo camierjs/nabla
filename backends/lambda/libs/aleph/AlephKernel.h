@@ -97,7 +97,7 @@ class AlephKernel: public TraceAccessor{
  public:
   AlephKernel(IParallelMng*, int, IAlephFactory*, int=0, int=0, bool=false);
   AlephKernel(ITraceMng*, ISubDomain*, IAlephFactory*, int=0, int=0, bool=false);
-  AlephKernel(ISubDomain*,int alephUnderlyingSolver=0, int alephNumberOfCores=0);
+  AlephKernel(ISubDomain*,int=0, int=0);
   ~AlephKernel(void);
   void setup(void);
   void initialize(int, int);

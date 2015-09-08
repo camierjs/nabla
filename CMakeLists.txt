@@ -92,6 +92,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
+#info("root LAMBDA_ALEPH_LIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_LIB}${VT100_RESET}")
 
 ##################
 # Link libraries #

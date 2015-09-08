@@ -75,6 +75,8 @@ options{
   
   Bool option_rdq               = false;
   Real option_rdq_α             = 0.3;
+  
+  Bool option_kershaw           = false;
    
   // Options pour les solutions
   Bool option_hole              = false;

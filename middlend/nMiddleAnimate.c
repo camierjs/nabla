@@ -73,11 +73,14 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
   
   // Parse du code préprocessé et lance les hooks associés
   nMiddleGrammar(root,nabla);
-  
+
+  // Rapidement on place dans le header les variables et options
+  // qui pourront etre utilisées par d'autres dump
+  nabla->hook->vars->prefix(nabla);
+
   nabla->hook->main->varInitKernel(nabla);
   nabla->hook->main->prefix(nabla);
   
-  nabla->hook->vars->prefix(nabla);
   
   nabla->hook->mesh->prefix(nabla);
   nabla->hook->main->preInit(nabla);
