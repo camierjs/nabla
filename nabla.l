@@ -253,7 +253,6 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 ">?="					{ return tok(&yylval, MAX_ASSIGN);}
 "?="					{ return tok(&yylval, NULL_ASSIGN);}
 
-
 ">>"					{ return tok(&yylval, RSH_OP);}
 "<<"					{ return tok(&yylval, LSH_OP);}
 "++"					{ return tok(&yylval, INC_OP);}

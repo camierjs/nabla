@@ -55,10 +55,10 @@ class Face{
  public:
  Face():nodes(2),cells(2){}
  public:
-  int node(int id){ return nodes.at(id); }
-  int cell(int id){ return cells.at(id); }
-  int backCell(void) { return cells.at(0); }
-  int frontCell(void) { return cells.at(1); }
+  int node(int id){ return id; }
+  int cell(int id){ return id; }
+  int backCell(void) { return 0; }
+  int frontCell(void) { return 1; }
  private:
   int uid;
   vector<int> nodes;

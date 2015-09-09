@@ -159,14 +159,15 @@ void AlephTopology::create(int setValue_idx){
  *****************************************************************************/
 void AlephTopology::setRowNbElements(vector<int> row_nb_element){
   checkForInit();
-
-  debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements]"<<"\33[0m";
+  
+  
   if (m_has_set_row_nb_elements) return;
   m_has_set_row_nb_elements=true;
   debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements]"<<"\33[0m";
   
   // Nous allons nous échanger les nombre d'éléments par lignes
-  debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] resize m_gathered_nb_row_elements to "<<m_nb_row_size<<"\33[0m";
+  debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] resize m_gathered_nb_row_elements to "
+          <<m_nb_row_size<<"\33[0m";
   m_gathered_nb_row_elements.resize(m_nb_row_size);
   
   if (m_kernel->isAnOther()){
@@ -175,6 +176,13 @@ void AlephTopology::setRowNbElements(vector<int> row_nb_element){
     m_kernel->world()->broadcast(m_gathered_nb_row_elements,0);
     debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] done"<<"\33[0m";
     traceMng()->flush();
+    return;
+  }
+  
+  if (!m_kernel->isParallel()){
+    debug() << "\33[1;32m\t\t\t[AlephTopology::setRowNbElements] SEQ, returning\33[0m";
+    for( int i=0; i<m_nb_row_rank; ++i)
+      m_gathered_nb_row_elements[i]=row_nb_element[i];
     return;
   }
 

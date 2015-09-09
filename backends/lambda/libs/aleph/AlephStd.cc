@@ -41,10 +41,13 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+static int rng(void){
+  return drand48()*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS;
+}
 
 // ****************************************************************************
 // * Other needed stuff
 // ****************************************************************************
-int backCell(int f){ return 0;}
-int frontCell(int f){ return 0;}
+int backCell(int f){ return rng();}
+int frontCell(int f){ return rng();}
 void synchronize(double*){}

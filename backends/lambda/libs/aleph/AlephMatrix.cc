@@ -303,7 +303,7 @@ void AlephMatrix::assemble(void){
   // Si le kernel n'est pas initialisé, on ne fait toujours rien
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;32m[AlephMatrix::assemble] Trying to assemble a matrix"
-           <<"from an uninitialized kernel!\33[0m";
+           <<" from an uninitialized kernel!\33[0m";
     return;
   }
   // Si aucun [set|add]Value n'a été perçu, ce n'est pas normal
@@ -320,8 +320,8 @@ void AlephMatrix::assemble(void){
       m_setValue_row[k]=m_addValue_row[k];
       m_setValue_col[k]=m_addValue_col[k];
       m_setValue_val[k]=m_addValue_val[k];
-      /*debug()<<"\t\33[32m[AlephMatrix::assemble] setValue ("<<m_setValue_row[k]
-        <<","<<m_setValue_col[k]<<")="<<m_setValue_val[k]<<"\33[0m";*/
+      debug()<<"\t\33[32m[AlephMatrix::assemble] setValue ("<<m_setValue_row[k]
+        <<","<<m_setValue_col[k]<<")="<<m_setValue_val[k]<<"\33[0m";
       m_setValue_idx+=1;
     }
   }

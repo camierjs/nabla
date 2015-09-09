@@ -195,7 +195,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 \t// && global_iteration!=option_max_iterations){");
     }
     
-    if (i==13) nprintf(n, NULL,"\n\texit(0);\n"); // ComputeLoopBegin en i==4
+    //if (i==13) nprintf(n, NULL,"\n\texit(0);\n"); // ComputeLoopBegin en i==4
 
     // On provoque un parallel->sync
     // si l'on découvre un temps logique différent

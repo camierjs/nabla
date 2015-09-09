@@ -96,7 +96,10 @@ public:
   void setValue(double *iVar, int iItm,
                 double *jVar, int jItm,
                 double value){
-    //debug()<<"\33[1;32m[matrix::setValue(...)]\33[0m";
+    /*debug()<<"\33[1;32m[matrix::setValue("
+           <<"iVar @ 0x"<<iVar<<" ["<<iItm<<"], "
+           <<"jVar @ 0x"<<jVar<<" ["<<jItm<<"], "
+           <<"value="<<value<<")]\33[0m";*/
     m_aleph_mat->setValue(iVar,iItm,jVar,jItm,value);
   }
   /*
@@ -134,8 +137,8 @@ public:
   //   return addValue(var,*itmEnum,value);
   //}
   void addValue(double *var, int itm, double value){
-    //debug()<<"\33[1;33m[vector::addValue(...)]\33[0m";
     unsigned int idx=m_aleph_kernel->indexing()->get(var,itm);
+    //debug()<<"\33[1;33m[vector::addValue["<<idx<<"]\33[0m";
     if(idx==size()){
       resize(idx+1);
       index.push_back(idx);
@@ -208,16 +211,18 @@ ISubDomain* subDomain(void){return thisSubDomain;}
 // * Forward Declarations
 // ****************************************************************************
 void alephInitialize(void){
-  info()<<"\33[1;31m[alephInitialize] createSolverMatrix\33[0m";
+  info()<<"\33[1;37m[alephInitialize] createSolverMatrix\33[0m";
   m_aleph_mat=m_aleph_kernel->createSolverMatrix();
-  debug()<<"\33[1;31m[alephInitialize] createSolverVector\33[0m";
+  debug()<<"\33[1;37m[alephInitialize] RHS createSolverVector\33[0m";
   m_aleph_rhs=m_aleph_kernel->createSolverVector();
+  debug()<<"\33[1;37m[alephInitialize] SOL createSolverVector\33[0m";
   m_aleph_sol=m_aleph_kernel->createSolverVector();
   m_aleph_mat->create();
   m_aleph_rhs->create();
   m_aleph_sol->create();
   m_aleph_mat->reset();
   mtx.m_aleph_mat=m_aleph_mat;
+  debug()<<"\33[1;37m[alephInitialize] done\33[0m";
 }
 
 
@@ -226,26 +231,26 @@ void alephInitialize(void){
 // ****************************************************************************
 void alephIni(real3*, double*, double *, int *){ // we have to match args & params
 #ifndef ALEPH_INDEX
-  debug()<<"\33[1;31m[alephIni] NO ALEPH_INDEX\33[0m";
+  debug()<<"\33[1;37;45m[alephIni] NO ALEPH_INDEX\33[0m";
   //#warning NO ALEPH_INDEX
   // Pourrait être enlevé, mais est encore utilisé dans le test DDVF sans auto-index
   vector_indexs.resize(0);
   vector_zeroes.resize(0);
   rhs.resize(0);
   mesh()->checkValidMeshFull();
-  m_aleph_factory=new AlephFactory(//subDomain()->application(),
-                                   traceMng());
-  m_aleph_kernel=new AlephKernel(traceMng(), subDomain(), m_aleph_factory,
+  m_aleph_factory=new AlephFactory(traceMng());
+  m_aleph_kernel=new AlephKernel(traceMng(), subDomain(),
+                                 m_aleph_factory,
                                  alephUnderlyingSolver,
                                  alephNumberOfCores,
-                                 false);//options()->alephMatchSequential());");
+                                 false);
 #else
-  debug()<<"\33[1;31m[alephIni] with ALEPH_INDEX\33[0m";
+  debug()<<"\33[1;37;45m[alephIni] with ALEPH_INDEX\33[0m";
   //#warning ALEPH_INDEX
   m_aleph_kernel=new AlephKernel(subDomain(),
                                  alephUnderlyingSolver,
                                  alephNumberOfCores);
-  debug()<<"\33[1;31m[alephIni] Kernel set, setting rhs,lhs&mtx!\33[0m";
+  debug()<<"\33[1;37;45m[alephIni] Kernel set, setting rhs,lhs&mtx!\33[0m";
   rhs.m_aleph_kernel=m_aleph_kernel;
   lhs.m_aleph_kernel=m_aleph_kernel;
   mtx.m_aleph_kernel=m_aleph_kernel;
@@ -281,6 +286,7 @@ void alephIni(real3*, double*, double *, int *){ // we have to match args & para
                     false,                          // keep_solver_structure
                     false,                          // sequential_solver
                     TypesSolver::RB);               // criteria_stop");
+  debug()<<"\33[1;37;45m[alephIni] done!\33[0m";
 }
 
 

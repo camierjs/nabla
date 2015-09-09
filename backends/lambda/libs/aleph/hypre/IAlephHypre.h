@@ -1,8 +1,6 @@
 #ifndef LAMBDA_ALEPH_INTERFACE_HYPRE_H
 #define LAMBDA_ALEPH_INTERFACE_HYPRE_H
 
-//#include </usr/include/openmpi/mpi.h>
-
 #define HAVE_MPI
 #define MPI_COMM_SUB MPI_COMM_WORLD // (*(MPI_Comm*)(m_kernel->subParallelMng(m_index)->getMPICommunicator()))
 #define OMPI_SKIP_MPICXX
@@ -220,15 +218,15 @@ class AlephMatrixHypre: public IAlephMatrix{
       if (m_kernel->rank()!=m_kernel->solverRanks(m_index)[iCpu]) continue;
       if (ilower==-1) ilower=m_kernel->topology()->gathered_nb_row(iCpu);
       iupper=m_kernel->topology()->gathered_nb_row(iCpu+1)-1;
-      //debug() << "[AlephMatrixHypre::AlephMatrixCreate] ilower="<<ilower;
-      //debug() << "[AlephMatrixHypre::AlephMatrixCreate] iupper="<<iupper;
+      debug() << "[AlephMatrixHypre::AlephMatrixCreate] ilower="<<ilower;
+      debug() << "[AlephMatrixHypre::AlephMatrixCreate] iupper="<<iupper;
     }
     debug()<<"[AlephMatrixHypre::AlephMatrixCreate] ilower="<<ilower<<", iupper="<<iupper;
 
     int jlower=ilower;//0;
     int jupper=iupper;//m_kernel->topology()->gathered_nb_row(m_kernel->size())-1;
     debug()<<"[AlephMatrixHypre::AlephMatrixCreate] jlower="<<jlower<<", jupper="<<jupper;
-
+    
     hypreCheck("HYPRE_IJMatrixCreate",
                HYPRE_IJMatrixCreate(MPI_COMM_SUB,
                                     ilower, iupper,
@@ -237,6 +235,7 @@ class AlephMatrixHypre: public IAlephMatrix{
 
     debug()<<"[AlephMatrixHypre::AlephMatrixCreate] HYPRE IJMatrixSetObjectType";
     HYPRE_IJMatrixSetObjectType(m_hypre_ijmatrix,HYPRE_PARCSR);
+    
     debug()<<"[AlephMatrixHypre::AlephMatrixCreate] HYPRE IJMatrixSetRowSizes";
     HYPRE_IJMatrixSetRowSizes(m_hypre_ijmatrix,
                               (HYPRE_Int*)&m_kernel->topology()->gathered_nb_row_elements()[0]);
@@ -840,48 +839,26 @@ class AlephMatrixHypre: public IAlephMatrix{
   HYPRE_ParCSRMatrix m_hypre_parmatrix; 
 };
 
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-class HypreAlephFactoryImpl: //public AbstractService,
-                             public IAlephFactoryImpl{
+class HypreAlephFactoryImpl: public IAlephFactoryImpl{
 public:
-  HypreAlephFactoryImpl()://const ServiceBuildInfo& sbi):
-    //AbstractService(sbi),
-    m_IAlephVectors(0),
-    m_IAlephMatrixs(0){}
-  ~HypreAlephFactoryImpl(){
-    std::cout << "\33[1;5;31m[~HypreAlephFactoryImpl]\33[0m";
-    for(int i=0,iMax=m_IAlephVectors.size(); i<iMax; ++i)
-      delete m_IAlephVectors.at(i);
-    for(int i=0,iMax=m_IAlephMatrixs.size(); i<iMax; ++i)
-      delete m_IAlephMatrixs.at(i);
-  }
+  HypreAlephFactoryImpl();
+  ~HypreAlephFactoryImpl();
 public:
-  virtual void initialize() {}
-  
+  virtual void initialize();
   virtual IAlephTopology* createTopology(ITraceMng* tm,
                                          AlephKernel* kernel,
                                          int index,
-                                         int nb_row_size){
-    return NULL;
-  }
-
+                                         int nb_row_size);
   virtual IAlephVector* createVector(ITraceMng* tm,
                                      AlephKernel* kernel,
-                                     int index){
-    IAlephVector *new_vector=new AlephVectorHypre(tm,kernel,index);
-    m_IAlephVectors.push_back(new_vector);
-    return new_vector;
-  }
-
+                                     int index);
   virtual IAlephMatrix* createMatrix(ITraceMng* tm,
                                      AlephKernel* kernel,
-                                     int index){
-    IAlephMatrix *new_matrix=new AlephMatrixHypre(tm,kernel,index);
-    m_IAlephMatrixs.push_back(new_matrix);
-    return new_matrix;
-  }
+                                     int index);
 private:
   vector<IAlephVector*> m_IAlephVectors;
   vector<IAlephMatrix*> m_IAlephMatrixs;

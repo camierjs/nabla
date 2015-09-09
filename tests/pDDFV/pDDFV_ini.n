@@ -122,7 +122,7 @@ faces void iniFaces(void) @ -9.5{
   
   κ=P⊛M⊛Pm1;
   face_unique_id=uid;
-  face_sd_id=this->owner();
+  face_sd_id=(this).owner();
   face_θ=option_ini_temperature;
   face_exact_solution=exact_solution(s);
   face_is_on_𝜕Ω=false;

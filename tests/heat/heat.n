@@ -54,7 +54,7 @@ options{
   ℝ option_stoptime          = 0.1;
   ℝ option_ini_temperature   = 300.0;
   ℝ option_hot_temperature   = 700.0;
-  ℕ option_max_iterations    = 8;
+  ℕ option_max_iterations    = 1;
   // Options d'Aleph
   ℝ alephEpsilon             = 1.e-10;
   ℕ alephUnderlyingSolver    = 2;
@@ -85,6 +85,8 @@ faces{
 Real geomFaceLength2(Face f){
   const ℝ³ xyz0=coord[f.node(0)];
   const ℝ³ xyz1=coord[f.node(1)];
+  //info()<<"\nf.node(0)="<<f.node(0)<<", f.node(1)="<<f.node(1)<<"\n";
+  //info()<<"\nyxyz0="<<xyz0<<", yxyz1="<<xyz1<<"\n";
   return (xyz0-xyz1).abs2();
 }
 
@@ -129,7 +131,7 @@ own cells void addRhsCellValues(void) in (cell θ) @ 1.1{
 
 own outer faces void setRhsFaceValues(void) in (cell θ, face ih2, face bcθ) @ 1.2{
   const ℝ value = δt*ih2*bcθ;
-  ℵ rhs addValue(θ, cell(0), value);  
+  ℵ rhs addValue(θ, cell(0), value);
 }
 
 // ********************************************************
@@ -144,7 +146,8 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 
 inner faces void setInnerFacesValues(void) in (cell θ, face ih2) @ 2.1{
   const ℝ δtDivSurface = -δt*ih2;
-  //if (backCell.isOwn())
+  //info()<<"\n[setInnerFacesValues] backCell="<<backCell;
+//if (backCell.isOwn())
     ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
     //if (frontCell.isOwn())
     ℵ matrix setValue(θ,frontCell, θ,backCell, δtDivSurface);

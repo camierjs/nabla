@@ -196,7 +196,6 @@ void AlephIndexing::nowYouCanBuildTheTopology(AlephMatrix *fromThisMatrix,
   // On peut maintenant créer le triplet (matrice,lhs,rhs)
   debug()<<"\33[1;33m[AlephIndexing::nowYouCanBuildTheTopology] asking kernel for a Matrix\33[m";
   AlephMatrix *firstMatrix=m_kernel->createSolverMatrix();  
-  exit(0);
   debug()<<"\33[1;33m[AlephIndexing::nowYouCanBuildTheTopology] asking kernel for a RHS Vector\33[m";
   AlephVector *firstRhsVector=m_kernel->createSolverVector();
   debug()<<"\33[1;33m[AlephIndexing::nowYouCanBuildTheTopology] asking kernel for a LHS Vector\33[m";

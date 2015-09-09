@@ -139,16 +139,16 @@ own inner faces void iInnerTrialAvg(void) @ 1.0 if (option_indirect &&
   // Pour chaque face en vis-à-vis, on calcul les contributions des diamants
   // Les quatres possibles pour quads sont QE, DQ, PD ou EP
   if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", QE\33[m";
-  okQE=iTrialLoopAvg(dbg, *this, κ, n(Q,E), S, &pjQE, &pkQE, &αQE, &βQE, &AQE);
+  okQE=iTrialLoopAvg(dbg, this, κ, n(Q,E), S, &pjQE, &pkQE, &αQE, &βQE, &AQE);
   
   if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", DQ\33[m";
-  okDQ=iTrialLoopAvg(dbg, *this, κ, n(D,Q), S, &pjDQ, &pkDQ, &αDQ, &βDQ, &ADQ);
+  okDQ=iTrialLoopAvg(dbg, this, κ, n(D,Q), S, &pjDQ, &pkDQ, &αDQ, &βDQ, &ADQ);
   
   if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", PD\33[m";
-  okPD=iTrialLoopAvg(dbg, *this, κ, n(P,D), S, &pjPD, &pkPD, &αPD, &βPD, &APD);
+  okPD=iTrialLoopAvg(dbg, this, κ, n(P,D), S, &pjPD, &pkPD, &αPD, &βPD, &APD);
   
   if (dbg) info()<<"\33[37m[trialFluxes] Face "<<nid0<<"-"<<nid1<<", EP\33[m";
-  okEP=iTrialLoopAvg(dbg, *this, κ, n(E,P), S, &pjEP, &pkEP, &αEP, &βEP, &AEP);
+  okEP=iTrialLoopAvg(dbg, this, κ, n(E,P), S, &pjEP, &pkEP, &αEP, &βEP, &AEP);
   assert(okQE && okDQ && okPD && okEP);
   if (okQE){
     const Real α=αQE;

@@ -270,16 +270,16 @@ own inner faces void iInerDual(void) @ 1.0 if (option_indirect){
   
   if (dbg) info()<<"\33[32mLooking for \33[1mTail SQ:\33[m";
   okTailQ = iDualLoop(dbg,node(0),κ,νsq,d,&jq,&kq,&pjq,&pkq,&adq,&bdq,
-                     &tail_face_uid_q, &tail_face_swap_q,*this,true);
+                     &tail_face_uid_q, &tail_face_swap_q,this,true);
   if (dbg) info()<<"\33[32mLooking for \33[1mTail SP:\33[m";
   okTailP = iDualLoop(dbg,node(0),κ,νsp,d,&jp,&k_p,&pjp,&pkp,&adp,&bdp,
-                     &tail_face_uid_p, &tail_face_swap_p,*this,false);
+                     &tail_face_uid_p, &tail_face_swap_p,this,false);
   if (dbg) info()<<"\33[32mLooking for \33[1mHead SQ:\33[m";
   okHeadQ = iDualLoop(dbg,node(1),κ,-νsq,e,&lq,&mq,&plq,&pmq,&aeq,&beq,
-                     &head_face_uid_q, &head_face_swap_q,*this,true);
+                     &head_face_uid_q, &head_face_swap_q,this,true);
   if (dbg) info()<<"\33[32mLooking for \33[1mHead SP:\33[m";
   okHeadP = iDualLoop(dbg,node(1),κ,-νsp,e,&lp,&mp,&plp,&pmp,&aep,&bep,
-                     &head_face_uid_p, &head_face_swap_p,*this,false);
+                     &head_face_uid_p, &head_face_swap_p,this,false);
  
   // On compose les résultats
   okPlus = okTailQ || okHeadQ;

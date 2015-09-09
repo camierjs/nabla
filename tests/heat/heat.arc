@@ -35,7 +35,7 @@
      <option_deltat>0.001</option_deltat>
      <option_ini_temperature>300.0</option_ini_temperature>
      <option_hot_temperature>700.0</option_hot_temperature>
-     <option_max_iterations>4</option_max_iterations>
+     <option_max_iterations>1</option_max_iterations>
 
      <alephEpsilon>1.e-10</alephEpsilon>
      <alephMaxIterations>16384</alephMaxIterations>

@@ -45,8 +45,8 @@
 #include <string>
 
 #include "IAlephFactory.h"
+extern IAlephFactoryImpl* fetchHypre(void);
 
-//class HypreAlephFactoryImpl;
 
 /******************************************************************************
  * IAlephFactory::IAlephFactory
@@ -54,22 +54,23 @@
 AlephFactory::AlephFactory(ITraceMng *tm): IAlephFactory(tm){
   // Liste des implémentations possibles.
   // 0 est le choix automatique qui doit aller vers une des bibliothèques suivantes:
-  m_impl_map.insert(std::make_pair(1,new FactoryImpl("Sloop")));
+  //m_impl_map.insert(std::make_pair(1,new FactoryImpl("Sloop")));
   m_impl_map.insert(std::make_pair(2,new FactoryImpl("Hypre")));
-  m_impl_map.insert(std::make_pair(3,new FactoryImpl("Trilinos")));
-  m_impl_map.insert(std::make_pair(4,new FactoryImpl("Cuda")));
-  m_impl_map.insert(std::make_pair(5,new FactoryImpl("PETSc")));
+  //m_impl_map.insert(std::make_pair(3,new FactoryImpl("Trilinos")));
+  //m_impl_map.insert(std::make_pair(4,new FactoryImpl("Cuda")));
+  //m_impl_map.insert(std::make_pair(5,new FactoryImpl("PETSc")));
   //ServiceBuilder<IAlephFactoryImpl> sb(app);
   // Pour chaque implémentation possible,
   // créé la fabrique correspondante si elle est disponible.
   for(FactoryImplMap::iterator i = m_impl_map.begin(); i!=m_impl_map.end(); ++i ){
     FactoryImpl *implementation=i->second;
-    const string name = implementation->m_name+"AlephFactory";
-    debug()<<"\33[1;34m\t[AlephFactory] Adding "<<name<<" library..."<<"\33[0m";
+    const string name=i->second->m_name;
+    const string implName = name+"AlephFactoryImpl";//implementation->m_name+"AlephFactory";
+    debug()<<"\33[1;34m\t[AlephFactory] Adding "<<implName<<" library..."<<"\33[0m";
     //IAlephFactoryImpl *factory = sb.createInstance(name+"AlephFactory",SB_AllowNull);
     //implementation->m_factory = factory;
-    #error dynamic_cast instance
-//    implementation->m_factory = dynamic_cast<IAlephFactoryImpl*>(HypreAlephFactoryImpl);
+//#error dynamic_cast instance
+    implementation->m_factory = fetchHypre();//dynamic_cast<IAlephFactoryImpl*>(new HypreAlephFactoryImpl());
   }
   debug()<<"\33[1;34m\t[AlephFactory] done"<<"\33[0m";
 }

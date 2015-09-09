@@ -80,7 +80,7 @@ void lambdaAlephIni(nablaMain *main){
   alephIni->name_utf8 = strdup("ℵIni");
   alephIni->xyz    = strdup("NoXYZ");
   alephIni->direction  = strdup("NoDirection");
-  sprintf(&alephIni->at[0],"-123456.0");
+  sprintf(&alephIni->at[0],"-huge_valf");
   alephIni->when_index  = 1;
   alephIni->whens[0] = ENTRY_POINT_init;
   nMiddleJobAdd(main->entity, alephIni);  

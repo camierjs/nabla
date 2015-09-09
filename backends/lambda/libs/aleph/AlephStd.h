@@ -248,7 +248,7 @@ public:
   SequentialMng(ITraceMng *t):m_trace_mng(t){}
 public:
   bool isParallel() const { return false;}
-  int commRank() const { std::cout<<"\n\t\33[1;36m SequentialMng::commRank \33[0m"; return 1;}
+  int commRank() const { std::cout<<"\n\t\33[1;36m SequentialMng::commRank \33[0m"; return 0;}
   int commSize() const { std::cout<<"\n\t\33[1;36m SequentialMng::commSize \33[0m"; return 1;}
   ITraceMng* traceMng() const { return m_trace_mng;}
   IParallelMng* worldParallelMng() {

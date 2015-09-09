@@ -133,6 +133,9 @@ public:\n\
 \tdouble getValue(const VariableRef &var, ItemEnumerator &itmEnum){\n\
 \t\treturn at(m_aleph_kernel->indexing()->get(var,*itmEnum));\n\
 }\n\
+\tdouble getValue(const VariableRef &var, Item itm){\n\
+\t\treturn at(m_aleph_kernel->indexing()->get(var,itm));\n\
+}\n\
 public:\n\
 \tIntegerArray index;\n\
 \tAlephKernel *m_aleph_kernel;\n\

@@ -15,7 +15,9 @@ CXX = ${CMAKE_CXX_COMPILER}
 #CXX = mpc_g++
 CFLAGS = -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
-LIB_ALEPH = ${LAMBDA_ALEPH_LIB}
+LIB_ALEPH = ${LAMBDA_ALEPH_LIB} ${LAMBDA_ALEPH_HYPRE_LIB} 
+LIB_HYPRE = /usr/local/hypre/lib/libHYPRE.a #-Wl,-rpath,/usr/local/hypre/lib 
+LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -37,7 +39,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 
 $(TGT):$(TGT).o $(TGT_FILE)
 #@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
-	$(CXX) -fopenmp $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH)
+	$(CXX) -fopenmp $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
@@ -45,7 +47,9 @@ cln:
 gen1:$(TGT).cc
 #	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
+#OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
+#	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
+	./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
 #OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
 	./$(TGT)_$(MESH)_$(PARALLEL)

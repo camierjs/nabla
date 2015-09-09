@@ -261,22 +261,22 @@ own inner faces void iInnerTrial(void) @ 1.0 if (option_trial &&
   // Pour chaque face en vis-à-vis, on calcul les contributions des diamants
   // Les quatres possibles pour quads sont QE, DQ, PD ou EP
   if (dbg) info()<<"\33[37m[iInnerTrial] Face \33[7m"<<nid0<<"\33[0;37m->"<<nid1<<", QE\33[m";
-  okQETail=iTrialLoop(dbg, *this,      κ,  n(Q,E), &pfQE, &pgQE, &apQE, &bpQE, &ApQE, &face_ahead);
+  okQETail=iTrialLoop(dbg, this,      κ,  n(Q,E), &pfQE, &pgQE, &apQE, &bpQE, &ApQE, &face_ahead);
   if (dbg) info()<<"\33[37m[iInnerTrial] Face "<<nid0<<"->\33[7m"<<nid1<<"\33[0;37m, QE\33[m";
   okQEHead=iTrialLoop(dbg, face_ahead, κ, -n(Q,E), &phQE, &piQE, &aqQE, &bqQE, &AqQE, &face_ahead);
   
   if (dbg) info()<<"\33[37m[iInnerTrial] Face \33[7m"<<nid0<<"\33[0;37m->"<<nid1<<", DQ\33[m";
-  okDQTail=iTrialLoop(dbg, *this,      κ,  n(D,Q), &pfDQ, &pgDQ, &apDQ, &bpDQ, &ApDQ, &face_ahead);
+  okDQTail=iTrialLoop(dbg, this,      κ,  n(D,Q), &pfDQ, &pgDQ, &apDQ, &bpDQ, &ApDQ, &face_ahead);
   if (dbg) info()<<"\33[37m[iInnerTrial] Face "<<nid0<<"->\33[7m"<<nid1<<"\33[0;37m, DQ\33[m";
   okDQHead=iTrialLoop(dbg, face_ahead, κ, -n(D,Q), &phDQ, &piDQ, &aqDQ, &bqDQ, &AqDQ, &face_ahead);
   
   if (dbg) info()<<"\33[37m[iInnerTrial] Face \33[7m"<<nid0<<"\33[0;37m->"<<nid1<<", PD\33[m";
-  okPDTail=iTrialLoop(dbg, *this,      κ,  n(P,D), &pfPD, &pgPD, &apPD, &bpPD, &ApPD, &face_ahead);
+  okPDTail=iTrialLoop(dbg, this,      κ,  n(P,D), &pfPD, &pgPD, &apPD, &bpPD, &ApPD, &face_ahead);
   if (dbg) info()<<"\33[37m[iInnerTrial] Face "<<nid0<<"->\33[7m"<<nid1<<"\33[0;37m, PD\33[m";
   okPDHead=iTrialLoop(dbg, face_ahead, κ, -n(P,D), &phPD, &piPD, &aqPD, &bqPD, &AqPD, &face_ahead);
   
   if (dbg) info()<<"\33[37m[iInnerTrial] Face \33[7m"<<nid0<<"\33[0;37m->"<<nid1<<", EP\33[m";
-  okEPTail=iTrialLoop(dbg, *this,      κ,  n(E,P), &pfEP, &pgEP, &apEP, &bpEP, &ApEP, &face_ahead);
+  okEPTail=iTrialLoop(dbg, this,      κ,  n(E,P), &pfEP, &pgEP, &apEP, &bpEP, &ApEP, &face_ahead);
   if (dbg) info()<<"\33[37m[iInnerTrial] Face "<<nid0<<"->\33[7m"<<nid1<<"\33[0;37m, EP\33[m";
   okEPHead=iTrialLoop(dbg, face_ahead, κ, -n(E,P), &phEP, &piEP, &aqEP, &bqEP, &AqEP, &face_ahead);
 
@@ -486,7 +486,7 @@ inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
   // Quart QE
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxTail] Aleph Matrix Trial Quart QE\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(1),frontCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(1),frontCell);
   if (interior_trial_tail[0]){
       fatal("Not yet here");
     ℵ matrix addValue(face_θ,this, cell_θ,frontCell, -q0value);
@@ -498,7 +498,7 @@ inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
   // Quart DQ
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxTail] Aleph Matrix Trial Quart DQ\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(0),frontCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(0),frontCell);
   if (interior_trial_tail[1]){
       fatal("Not yet here");
     ℵ matrix addValue(face_θ,this, node_θ,node(0),   -q1value);
@@ -510,7 +510,7 @@ inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
   // Quart PD
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxTail] Aleph Matrix Trial Quart PD\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(0),backCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(0),backCell);
   if (interior_trial_tail[2]){
       fatal("Not yet here");
     ℵ matrix addValue(face_θ,this, cell_θ,backCell, -q2value);
@@ -522,7 +522,7 @@ inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
   // Quart EP
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxTail] Aleph Matrix Trial Quart EP\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(1),backCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(1),backCell);
   if (interior_trial_tail[3]){
       fatal("Not yet here");
     ℵ matrix addValue(face_θ,this, node_θ,node(1),  -q3value);
@@ -566,7 +566,7 @@ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
   // Quart QE
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxHead] Aleph Matrix Trial Quart QE\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(1),frontCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(1),frontCell);
   if (fNbCells(f)==2){
     ℵ matrix addValue(face_θ,f, face_θ,f, q0value);
     if (interior_trial_head[0]){
@@ -584,7 +584,7 @@ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
   // Quart DQ
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxHead] Aleph Matrix Trial Quart DQ\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(0),frontCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(0),frontCell);
   if (fNbCells(f)==2){
     ℵ matrix addValue(face_θ,f, face_θ,f, q1value);
     if (interior_trial_head[1]){
@@ -602,7 +602,7 @@ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
   // Quart PD
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxHead] Aleph Matrix Trial Quart PD\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(0),backCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(0),backCell);
   if (fNbCells(f)==2){
     ℵ matrix addValue(face_θ,f, face_θ,f, q2value);
     if (interior_trial_head[2]){
@@ -620,7 +620,7 @@ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
   // Quart EP
   if (option_debug_trial)
     info()<<"\t\t\t\t\33[36m[iTrialMtxHead] Aleph Matrix Trial Quart EP\33[m";
-  f=iLoopOnThisNodeToFindForeHeadFace(false,*this,node(1),backCell);
+  f=iLoopOnThisNodeToFindForeHeadFace(false,this,node(1),backCell);
   if (fNbCells(f)==2){
     ℵ matrix addValue(face_θ,f, face_θ,f, q3value);
     if (interior_trial_head[3]){

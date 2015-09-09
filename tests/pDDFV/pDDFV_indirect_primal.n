@@ -137,7 +137,7 @@ own outer faces void iOuterPrimal(void) @ 1.0 if (option_indirect){
   if (dbg) info()<<"\33[32m[iOuterPrimal] \tNde="<<Nde<<"\33[m";
   if (dbg) info()<<"\33[32m[iOuterPrimal] \tns="<<ns<<"\33[m";
   {
-    const Bool ok=iPrimalLoop(dbg,cell(0),κ,ns,p,&f,&g,&pf,&pg,&ap,&bp,*this);
+    const Bool ok=iPrimalLoop(dbg,cell(0),κ,ns,p,&f,&g,&pf,&pg,&ap,&bp,this);
     const Real Ap=geomComputeTriangleArea(p,f,g);
     assert(ok); // Vérification et calcul des flux
     assert(Ap>0.0);
@@ -172,8 +172,8 @@ own inner faces void iInnerPrimal(void) @ 1.0 if (option_indirect){
   if (dbg) info()<<"\33[37m[iInnerPrimal] \tS="<<s<<"\33[m";
   if (dbg) info()<<"\33[37m[iInnerPrimal] \tns="<<ns<<"\33[m";
   {
-    const Bool okBack=iPrimalLoop(dbg, (backCell),κ, ns,p,&f,&g,&pf,&pg,&ap,&bp,*this);
-    const Bool okFrnt=iPrimalLoop(dbg,(frontCell),κ,-ns,q,&h,&i,&ph,&pi,&aq,&bq,*this);
+    const Bool okBack=iPrimalLoop(dbg, (backCell),κ, ns,p,&f,&g,&pf,&pg,&ap,&bp,this);
+    const Bool okFrnt=iPrimalLoop(dbg,(frontCell),κ,-ns,q,&h,&i,&ph,&pi,&aq,&bq,this);
     const Real Ap=geomComputeTriangleArea(p,f,g);
     const Real Aq=geomComputeTriangleArea(q,h,i);
     const Real λsp_num=aq*ph+bq*pi;

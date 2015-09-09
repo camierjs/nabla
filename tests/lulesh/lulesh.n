@@ -292,7 +292,7 @@ void timeIncrement(void) @ 0.1 {
   const ℝ δτ = (option_dtfixed <= 0.0)?(GlobalIteration != 1)?new_δt:old_δt:old_δt;
   const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
-  δt = reduce(ReduceMin, scaled_δt);
+  δt = scaled_δt ;
   //δt = (GlobalIteration>1)?1.0-07;
   //δt = (GlobalIteration==2)?1.199999999999999892758e-07;
   //δt = (GlobalIteration==3)?1.439999999999999924249e-07;

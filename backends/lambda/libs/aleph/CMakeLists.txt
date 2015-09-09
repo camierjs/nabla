@@ -25,6 +25,7 @@ endif()
 
 if(HYPRE_FOUND)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hypre)
+  set(ALEPH_HYPRE_LIB ${HYPRE_LIB} PARENT_SCOPE)
 endif()
 
 # Looking for TRILINOS

@@ -11,3 +11,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(NablaLambdaAlephHYPRE IAlephHypre.cc)
 
 add_dependencies(NablaLambdaAlephHYPRE NablaLambdaAleph)
+
+set(HYPRE_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaLambdaAlephHYPRE.a PARENT_SCOPE)
