@@ -64,15 +64,21 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
   nabla->hook->vars->init(nabla);
   nabla->hook->source->open(nabla);
   nabla->hook->source->include(nabla);
+
+  // Le header
   nabla->hook->header->open(nabla);
   nabla->hook->header->prefix(nabla);
   nabla->hook->header->include(nabla);
   nabla->hook->header->dump(nabla);
-  nabla->hook->header->enums(nabla);
-  nabla->hook->mesh->core(nabla);
-  
+
   // Parse du code préprocessé et lance les hooks associés
+  // On en profite pour dumper dans le header les forwards des fonctions
   nMiddleGrammar(root,nabla);
+
+  // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
+  nabla->hook->mesh->core(nabla);
+  // Les ENUMERATES dépendent pour l'instant des definitions du maillages
+  nabla->hook->header->enums(nabla);
 
   // Rapidement on place dans le header les variables et options
   // qui pourront etre utilisées par d'autres dump

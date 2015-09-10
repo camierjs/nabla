@@ -132,7 +132,7 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
 char* lambdaHookDumpEnumerate(nablaJob *job){
   dbg("\n\t[lambdaHookDumpEnumerate]");
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
-  const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
+  const char *warping="";//job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];
   char str[NABLA_MAX_FILE_NAME];
   dbg("\n\t[lambdaHookDumpEnumerate] Preparing:");

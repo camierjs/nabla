@@ -62,7 +62,7 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_WARP_CELL(c)");
+    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_CELL(c)");
     break;
   }
   case(NODE):{
@@ -165,7 +165,8 @@ static bool lambdaHookSwitchAleph(astNode *n, nablaJob *job){
 void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
-  
+  const char forall=job->parse.enum_enum;
+
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
   if (n->token)
     dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
@@ -178,6 +179,14 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
     
+  case (DIESE):{
+    //nprintf(nabla, "/*DIESE*/", "/*DIESE*/");
+    if (cnfgem=='c' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    if (cnfgem=='n' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    if (cnfgem=='f' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    break;
+  }
+
   case (MATERIAL):{
     nprintf(nabla, "/*MATERIAL*/", "/*MATERIAL*/");
     break;

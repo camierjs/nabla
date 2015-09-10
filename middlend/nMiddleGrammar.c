@@ -139,6 +139,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
     nMiddleLibraries(n,nabla->entity);
     dbg("\n\t[nablaMiddlendParseAndHook] library done");
+    dbg("\n\t[nablaMiddlendParseAndHook] nabla->entity->libraries=0x%X",nabla->entity->libraries);
   }
 
   //////////////////////////////

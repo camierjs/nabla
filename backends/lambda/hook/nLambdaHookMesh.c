@@ -44,29 +44,12 @@
 
 
 // ****************************************************************************
-// * Backend LAMBDA - Allocation de la connectivité du maillage
-// ****************************************************************************
-void nLambdaHookMeshPrefix(nablaMain *nabla){
-  dbg("\n[lambdaMainMeshPrefix]");
-  //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
-}
-
-
-// ****************************************************************************
-// * nLambdaHookMeshPostfix
-// ****************************************************************************
-void nLambdaHookMeshPostfix(nablaMain *nabla){
-  dbg("\n[lambdaMainMeshPostfix]");
-}
-
-
-// ****************************************************************************
 // * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
 static void nLambdaHookMesh1DConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
-// * MESH CONNECTIVITY\n\
+// * MESH CONNECTIVITY (1D)\n\
 // ********************************************************\
 \nint cell_node[2*NABLA_NB_CELLS];\
 \nint node_cell[2*NABLA_NB_NODES];\
@@ -85,17 +68,17 @@ static void nLambdaHookMesh1DConnectivity(nablaMain *nabla){
 static void nLambdaHookMesh1D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * MESH GENERATION\n\
+// * MESH GENERATION (1D)\n\
 // ********************************************************\n\
 const int NABLA_NODE_PER_CELL = 2;\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Y_AXIS = 0;\n\
-const int NABLA_NB_NODES_Z_AXIS = 0;\n\
+const int NABLA_NB_NODES_Y_AXIS = 1;\n\
+const int NABLA_NB_NODES_Z_AXIS = 1;\n\
 \n\
 const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Y_AXIS = 0;\n\
-const int NABLA_NB_CELLS_Z_AXIS = 0;\n\
+const int NABLA_NB_CELLS_Y_AXIS = 1;\n\
+const int NABLA_NB_CELLS_Z_AXIS = 1;\n\
 \n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = 0.0;\n\
@@ -116,7 +99,7 @@ const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS);");
 static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
 // ********************************************************\n\
-// * MESH CONNECTIVITY\n\
+// * MESH CONNECTIVITY (3D)\n\
 // ********************************************************\
 \nint cell_node[8*NABLA_NB_CELLS];\
 \nint node_cell[8*NABLA_NB_NODES];\
@@ -133,10 +116,10 @@ static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
 // * okinaMesh
 // * Adding padding for simd too 
 // ****************************************************************************
-void nLambdaHookMesh3D(nablaMain *nabla){
+static void nLambdaHookMesh3D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * MESH GENERATION\n\
+// * MESH GENERATION (3D)\n\
 // ********************************************************\n\
 const int NABLA_NODE_PER_CELL = 8;\
 \n\
@@ -167,14 +150,34 @@ const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS);");
 }
 
 
+// ****************************************************************************
+// * Backend LAMBDA - Allocation de la connectivité du maillage
+// ****************************************************************************
+void nLambdaHookMeshPrefix(nablaMain *nabla){
+  dbg("\n[lambdaMainMeshPrefix]");
+  //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
+
+}
+
 
 // ****************************************************************************
 // * nLambdaHookMeshCore
 // ****************************************************************************
 void nLambdaHookMeshCore(nablaMain *nabla){
+ dbg("\n[nLambdaHookMeshCore]");
+  dbg("\n[nLambdaHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
   // Mesh structures and functions depends on the ℝ library that can be used
-  if (isWithLibrary(nabla,with_real))
+  if (isWithLibrary(nabla,with_real)){
     nLambdaHookMesh1D(nabla);
-  else
+  }else{
     nLambdaHookMesh3D(nabla);
+  }
+}
+
+
+// ****************************************************************************
+// * nLambdaHookMeshPostfix
+// ****************************************************************************
+void nLambdaHookMeshPostfix(nablaMain *nabla){
+  dbg("\n[nLambdaHookMeshPostfix]");
 }

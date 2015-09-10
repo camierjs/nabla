@@ -155,8 +155,9 @@ void nUtf8(char **bkp){
     *bkp=strdup("np1"); 
     return;
   }  
+  // By skipping, we can: strncmp(n->children->token,"ℵ",3)
   /*if (*(unsigned int*)p==0x00b584e2) { // "ℵ"
-    dbg("\n[nUtf8] hits single ℵ ");
+    //dbg("\n[nUtf8] hits single ℵ ");
     *bkp=strdup("aleph"); 
     return;
     }*/
@@ -225,7 +226,8 @@ void nUtf8(char **bkp){
       p+=3; // 𝝏 = Partial → 'Part'
     }
     // Aleph ℵ
-    if (p3c(p,0xb584e2,"Ale")) p+=2; // ℵ = Alef  → 'Ale'
+    // By skipping, we can: strncmp(n->children->token,"ℵ",3)
+    //if (p3c(p,0xb584e2,"Ale")) p+=2; // ℵ = Alef  → 'Ale'
     // Fractions
     if (p2s(p,0xbdc2,"0.5",bkp)) p+=1;       // ½
     if (p2s(p,0xbcc2,"0.25",bkp)) p+=1;      // ¼

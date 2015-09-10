@@ -75,7 +75,7 @@ int AlephIndexing::updateKnownItems(vector<int> *var_idx,
     (*var_idx)[itm]=m_current_idx;
     m_known_items_own+=1;
   }else{
-    debug()<< "\t\t\33[33m[AlephIndexing::updateKnownItems] is NOT ours"<<"\33[m";
+    //debug()<< "\t\t\33[33m[AlephIndexing::updateKnownItems] is NOT ours"<<"\33[m";
     (*var_idx)[itm]=m_current_idx;
   }
   // Maintenant, on peut incrémenter l'index de ligne

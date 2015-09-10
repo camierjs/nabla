@@ -163,8 +163,8 @@ public:
     }
   }
   double getValue(double *var, int itmEnum){
-    debug()<<"\33[1;33m[vector::getValue]\33[0m";
-    return 0.0;//at(m_aleph_kernel->indexing()->get(var,*itmEnum));
+    //debug()<<"\33[1;33m[vector::getValue]\33[0m";
+    return 0.0;//at(m_aleph_kernel->indexing()->get(var,itmEnum));
   }
 public:
   vector<int> index;

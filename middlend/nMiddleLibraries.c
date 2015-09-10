@@ -57,25 +57,29 @@ bool isWithLibrary(nablaMain *nabla, with_library lib){
 // * nMiddleLibrariesSwitch
 // ****************************************************************************
 static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
+
+  //dbg("\n\t[nMiddleLibrariesSwitch] token= %s",n->children->token);
   if (strncmp(n->children->token,"ℵ",3)==0){
-    dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
+    dbg("\n\t[nMiddleLibrariesSwitch] ALEPH single_library hit!");
     entity->libraries|=(1<<with_aleph);
+    dbg("\n\t[nMiddleLibrariesSwitch] Alephlibrary=0x%X",entity->libraries);
     return;
   }
 
   if (strncmp(n->children->token,"Real",4)==0){
-    dbg("\n\t[nablaLibraries] Real single_library hit!");
+    dbg("\n\t[nMiddleLibrariesSwitch] Real single_library hit!");
     entity->libraries|=(1<<with_real);
+    dbg("\n\t[nMiddleLibrariesSwitch] Real library=0x%X",entity->libraries);
     return;
   }
 
   switch(n->children->token[2]){
     
-  case ('e'):{ // AL[E]PH || ℵ -(p3c)-> Al[e]
+    /*case ('e'):{ // AL[E]PH || ℵ -(p3c)-> Al[e]
     dbg("\n\t[nablaLibraries] ALEPH single_library hit!");
     entity->libraries|=(1<<with_aleph);
     break;
-  }
+    }*/
     
   case ('i'):{ // MP[I] || MA[I]L
     switch (n->children->token[1]){

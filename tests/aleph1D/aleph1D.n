@@ -19,7 +19,7 @@ options{
   ℝ α=0.5;
   // Yet required options for Okina
   ℝ option_δt_initial = 0.1;
-  ℝ option_stoptime = 1.0;
+  ℝ option_stoptime = 0.1;
   // Options d'Aleph
   ℝ alephEpsilon             = 1.e-10;
   ℕ alephUnderlyingSolver    = 2;
@@ -38,7 +38,7 @@ options{
 // * Cell Variables
 // ****************************************************************************
 cells{
-  ℝ Ω, Δ;
+  ℝ Ω, Δ,λ;
 };
 
 
@@ -84,6 +84,11 @@ void iniGlobals(void) @ -5.0{
   ∀ node Δ+=coord;
   Δ*=½;
 }
+∀ cells void iniCellλ(void) out (/*node coord,*/ cell λ) @ -5.0 {
+  λ=1.0;
+  ∀ node λ+=(λ>0.0)?-λ-coord:coord;
+  //info()<<" L"<<c<<"="<<λ;
+}
 
 ∀ cells void iniCellΩ(void) in (cell Δ) out (cell Ω) @ -4.0 {
   Ω=αIniΩ(0.0,Δ);
@@ -116,8 +121,14 @@ cells void addRhsCellValues(void) in (cell Ω) @ 1.1{
 
 nodes void setRhsNodeValues(void) in (/*cell Ω,*/node Φω) @ 1.2{
   const ℝ value = δt*Φω;
-  ∀ cell
-      ℵ rhs addValue(Ω, /*that*/c, value);
+  info()<<"[setRhsNodeValues] n="<<n;
+  ∀ cell{
+    if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    info()<<"\t[setRhsNodeValues] c="<<c<<", node_cell="<< cell(#);//node_cell[nc];
+    //info()<<"[setRhsNodeValues] xs_node_cell(c)="<<xs_node_cell(c);
+    //info()<<"\t[setRhsNodeValues] xs_node_cell(c)="<<xs_node_cell(c);
+    ℵ rhs addValue(Ω, cell(#), value);
+  }
 }
 
 
@@ -136,18 +147,25 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
   ∀ cell Φω = (Δ>coord)?Ω;
 }
 
+
+// ****************************************************************************
+// * Fill our matrix
+// ****************************************************************************
 nodes void setInnerNodesValues(void) in (/*cell Ω,*/ node Φω) @ 2.1{
-  ∀ cell
-    ℵ matrix setValue(Ω, cell(0), Ω, cell(1),1.0);
+  const ℝ value=Φω*δt²;
+  if (cell(0)<0) continue;
+  if (cell(1)<0) continue;
+  ℵ matrix setValue(Ω, cell(0), Ω, cell(1), value);
 }
 
 cells void setCellsValues(void) in (cell Ω/*, node Φω*/) @ 2.2{
   ℝ diagonalTerme=0.0;
-  foreach node diagonalTerme += Φω;
+  ∀ node diagonalTerme += Φω;
   diagonalTerme*=δt;
   diagonalTerme+=1.0;
   ℵ matrix setValue(Ω,this, Ω,this, diagonalTerme);
 }
+
 
 // ****************************************************************************
 // * Aleph Solve
@@ -167,8 +185,9 @@ own cells void getCellResults(void) out (cell Ω) @ 4.1{
 // * Test for Quit
 // ****************************************************************************
 void tstForQuit(void) @ 4.0 {
-  printf("\n\t[testForQuit] GlobalIteration =%d,\
- time=%f, delta_t=%f", GlobalIteration, time,(double)δt);
+  info()<<"\n\t[testForQuit] Iteration ="<<GlobalIteration
+        <<", time="<<time
+        <<", delta_t="<<δt;
   if ((time<(option_stoptime-δt))) return;
   exit;
 }
