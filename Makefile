@@ -100,6 +100,8 @@ tstlag:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_gen_1_seq)
 
 # ARCANE tests #
+tstaag:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aleph1D_gen_1)
 tstahg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_gen_1)
 tstahr:

@@ -205,6 +205,8 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
   if (j=='n' && enum_enum=='f'  && itm=='n') return "f->";//"/*arcaneItem-nfn*/f->";
   if (j=='n' && enum_enum=='f'  && itm=='c') return "f->";//"/*arcaneItem-nfc*/f->";
   if (j=='n' && enum_enum=='\0' && itm=='n') return "node";//"/*arcaneItem-n0n*/node";
+  if (j=='n' && enum_enum=='c'  && itm=='c') return "c->"; // !! to fix for aleph1D run (not just gen)
+  if (j=='n' && enum_enum=='\0'  && itm=='c') return "c->"; // !! same warning !!
 
   if (j=='f' && enum_enum=='\0' && itm=='f') return "face";//"/*arcaneItem-f0f*/face";
   if (isPostfixed!=2 && j=='f' && enum_enum=='\0' && itm=='n') return "/*!2f0n*/face->";//"/*arcaneItem-f0n*/face->";
@@ -214,7 +216,7 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
 
   if (j=='p' && enum_enum=='\0' && itm=='c') return "particle->";
   printf("j=%c itm=%c enum_enum=%c",j,itm,enum_enum);
-  nablaError("Could not distinguish arcaneItem!");
+  nablaError("Could not distinguish item!");
   return NULL;
 }
 
