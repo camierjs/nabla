@@ -100,8 +100,11 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"MD_DirZ","2"},
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
+  {"xs_node_cell(c)", "0"},//node_cell[2*n+c]"},
   {NULL,NULL}
 };
+
+#warning xs_*_* for node and cells to do
 
 const char* nLambdaHeaderForwards[]={NULL};
 

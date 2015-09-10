@@ -79,15 +79,15 @@ int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
   char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
   FILE *cat_sed_temporary_file=NULL;
   
-  printf("%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
+  printf("\r%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
   dbg("\n[nToolFileCatAndHackIncludes] cat_sed_temporary_file_name is %s",
       cat_sed_temporary_file_name);
   
   cat_sed_temporary_file=fopen(cat_sed_temporary_file_name,"w");
   
-  for(nabla_file_name=strtok(dup_list_of_nabla_files, " ");
-      nabla_file_name!=NULL;
-      nabla_file_name=strtok(NULL, " ")){
+  for(nabla_file_name=strtok(dup_list_of_nabla_files, " ");      
+      /*test*/ nabla_file_name!=NULL;
+      /*incr*/ nabla_file_name=strtok(NULL, " ")){
     fprintf(cat_sed_temporary_file,"# 1 \"%s\"\n",nabla_file_name);
     FILE *nabla_FILE=fopen(nabla_file_name,"r");
     // Now copying .n file to our tmp one

@@ -72,4 +72,3 @@ cells void geom_computeNormal_Triangle(void) @ -20.0,24.0 if (option_triangles){
   CQs[2].z = 0.0;
   absCQs[2]=CQs[2].abs();
 }
-

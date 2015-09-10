@@ -481,7 +481,7 @@ void nMiddleJobFill(nablaMain *nabla,
 
   if (!job->parse.got_a_return)
     nprintf(nabla, NULL, "}");// de l'ENUMERATE
-  nprintf(nabla, NULL, "\n}");// du job
+  nprintf(nabla, NULL, "\n}\n");// du job, on rajoute un \n pour les preproc possibles
   dbg("\n\t[nablaJobFill] done");
 }
 

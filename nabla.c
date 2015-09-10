@@ -117,13 +117,19 @@ static char *unique_temporary_file_name=NULL;
 // * nabla_error
 // * int vsprintf(char *str, const char *format, va_list ap);
 // ****************************************************************************
-void nablaError(const char *format,...){
+void nablaErrorVariadic(const char *file,
+                        const int line,
+                        const char *format,...){
   va_list args;
   va_start(args, format);
   //error_at_line(!0,0,nabla_input_file, yylineno-1, format,args);
   fflush(stdout);
-  vfprintf(stdout,format,args);
+  fflush(stderr);
+  fprintf(stderr,"\r%s:%d:%d: error: ",file,line,yylineno-1);
+  vfprintf(stderr,format,args);
+  fprintf(stderr,"\n");
   va_end(args);
+  exit(-1);
 }
 
 
@@ -132,7 +138,7 @@ void nablaError(const char *format,...){
 // ****************************************************************************
 void yyerror(astNode **root, char *error){
   fflush(stdout);
-  printf("\n%s:%d: %s\n",nabla_input_file,yylineno-1, error);
+  printf("\r%s:%d: %s\n",nabla_input_file,yylineno-1, error);
 }
 
 
@@ -214,17 +220,18 @@ int sysPreprocessor(const char *nabla_entity_name,
   
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
-  // This might be useful when running the preprocessor on something that is not C code,
-  // and will be sent to a program which might be confused by the linemarkers.
-  // -C  Do not discard comments.
-  // All comments are passed through to the output file, except for comments in processed directives,
-  // which are deleted along with the directive.
+  //    This might be useful when running the preprocessor on something that is not C code,
+  //    and will be sent to a program which might be confused by the linemarkers.
+  //
+  // -C Do not discard comments.
+  //    All comments are passed through to the output file, except for comments in processed directives,
+  //    which are deleted along with the directive.
+  //
   // Porting to GCC 4.8: to disable the stdc-predef.h preinclude: -ffreestanding or use the -P
   snprintf(gcc_command,size,
-//           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > /proc/%d/fd/%d",
-           "gcc -ffreestanding -std=c99 -P -C -E -Wall -x c %s > %s",
+           // Il faut garder les linemarkers afin de metre à jour 'nabla_input_file' dans nabla.y
+           "gcc -ffreestanding -std=c99 -C -E -Wall -x c %s > %s",
            cat_sed_temporary_file_name,
-           //getpid(), 
            unique_temporary_file_name
            );
   dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
@@ -245,7 +252,7 @@ void nablaPreprocessor(char *nabla_entity_name,
                        char *list_of_nabla_files,
                        char *unique_temporary_file_name,
                        const int unique_temporary_file_fd){
-  printf("%s:1: is our temporary file\n",unique_temporary_file_name);
+  printf("\r%s:1: is our temporary file\n",unique_temporary_file_name);
   if (sysPreprocessor(nabla_entity_name,
                       list_of_nabla_files,
                       unique_temporary_file_name,
@@ -501,7 +508,7 @@ int main(int argc, char * argv[]){
                    interface_name,
                    specific_path,
                    service_name)!=NABLA_OK)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[nabla] nablaParsing error\n"));
+    exit(NABLA_ERROR);
   //#warning unlinked unique_temporary_file_name
   nToolUnlink(unique_temporary_file_name);
   return NABLA_OK;

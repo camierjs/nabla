@@ -204,7 +204,12 @@ nabla_add_lambda_test(upwindAP 1 gen seq)
 nabla_add_lambda_test(upwindAP 1 run seq)
 
 nabla_add_lambda_test(heat 1 gen seq)
-nabla_add_lambda_test(heat 1 run seq)
+if (HYPRE_FOUND)
+ nabla_add_lambda_test(heat 1 run seq)
+endif (HYPRE_FOUND)
+
+nabla_add_lambda_test(aleph1D 1 gen seq)
+nabla_add_lambda_test(aleph1D 1 run seq)
 
 
 ########################

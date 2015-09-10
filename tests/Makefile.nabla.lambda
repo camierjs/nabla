@@ -6,7 +6,7 @@ SIMD = std
 PARALLEL = seq
 SIMD_std_FLAGS  = -DNO_SSE2 -mno-avx 
 
-LOG = -t -v $(TGT).log
+LOG = #-t -v $(TGT).log
 
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus

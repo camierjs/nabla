@@ -104,7 +104,18 @@ char* lambdaAlephHeader(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"/*'AlephTopology_h'*/\n%s",dumpExternalFile(AlephTopology_h));
   fprintf(nabla->entity->hdr,"/*'AlephInterface_h'*/\n%s",dumpExternalFile(AlephInterface_h));
   fprintf(nabla->entity->hdr,"/*'IAlephFactory_h'*/\n%s",dumpExternalFile(IAlephFactory_h));
-  fprintf(nabla->entity->hdr,"/*'nLambdaAleph_h'*/\n%s",dumpExternalFile(nLambdaAleph_h));
+
+  char str[NABLA_MAX_FILE_NAME];
+  str[0]=0;
+  // Et on rajoute les variables globales
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->item, "global")!=0) continue;
+    strcat(str, (var->type[0]=='r')?",real*":(var->type[0]=='i')?",int*":"/*Unknown type*/");
+  }
+  
+  fprintf(nabla->entity->hdr, dumpExternalFile(nLambdaAleph_h),
+          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
+          str);
   lambdaAlephIni(nabla);
   return "";
 }

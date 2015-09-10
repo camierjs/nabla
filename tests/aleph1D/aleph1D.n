@@ -1,0 +1,175 @@
+// ****************************************************************************
+// αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ ℵ
+// ∀ ℝℕℤ ²³√½⅓¼⅛
+// ****************************************************************************
+with ℝ, ℵ;
+
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ Χmin = 0.0;
+  ℝ Χmax = 1.125;
+  // Numerical options
+  ℝ σ=3.0;
+  ℝ ε=2.0;
+  ℝ β=1.0;
+  ℝ α=0.5;
+  // Yet required options for Okina
+  ℝ option_δt_initial = 0.1;
+  ℝ option_stoptime = 1.0;
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-10;
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 16384;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephPreconditionerMethod = 2;
+  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephSolverMethod     = 0; 
+  ℕ alephNumberOfCores    = 0;
+  Bool option_aleph_dump_matrix = false;
+};
+
+
+// **************************************************************************
+// * Cell Variables
+// ****************************************************************************
+cells{
+  ℝ Ω, Δ;
+};
+
+
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+nodes{
+  ℝ Φω;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+};
+
+
+// ****************************************************************************
+// * Analytics Functions
+// ****************************************************************************
+ℝ αIniΩ(ℝ t, ℝ x){ return α*exp(x-t); }
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+void iniGlobals(void) @ -5.0{
+  δx=(Χmax-Χmin)/X_EDGE_ELEMS;
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+}
+
+
+
+// ****************************************************************************
+// * iniCell[Δ&Ω]
+// ****************************************************************************
+∀ cells void iniCellΔ(void) out (/*node coord,*/ cell Δ) @ -5.0 {
+  Δ=0.0;
+  ∀ node Δ+=coord;
+  Δ*=½;
+}
+
+∀ cells void iniCellΩ(void) in (cell Δ) out (cell Ω) @ -4.0 {
+  Ω=αIniΩ(0.0,Δ);
+}
+
+∀ nodes void iniNodeΦω(void) in (cell Δ) out (node Φω) @ -4.0 {
+  Φω=1.0;
+}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0 {
+  printf("\n\t\t\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+}
+
+
+void rhsInit(void) @ 1.0{
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
+
+
+cells void addRhsCellValues(void) in (cell Ω) @ 1.1{
+  const ℝ value=Ω;
+  ℵ rhs addValue(Ω,this,value);
+}
+
+
+nodes void setRhsNodeValues(void) in (/*cell Ω,*/node Φω) @ 1.2{
+  const ℝ value = δt*Φω;
+  ∀ cell
+      ℵ rhs addValue(Ω, /*that*/c, value);
+}
+
+
+// ********************************************************
+// * Initialisation ℵ
+// * Could be done as: 'alephInitialize @ 2;'
+// ********************************************************
+void iniAleph(void) @ 2.0 { alephInitialize(); }
+
+
+// ****************************************************************************
+// * Compute Flux
+// ****************************************************************************
+∀ nodes void computeFluxU(void) /*in (cell U,Δ)*/ out (node Φω) @ 1.5{
+  Φω=0;
+  ∀ cell Φω = (Δ>coord)?Ω;
+}
+
+nodes void setInnerNodesValues(void) in (/*cell Ω,*/ node Φω) @ 2.1{
+  ∀ cell
+    ℵ matrix setValue(Ω, cell(0), Ω, cell(1),1.0);
+}
+
+cells void setCellsValues(void) in (cell Ω/*, node Φω*/) @ 2.2{
+  ℝ diagonalTerme=0.0;
+  foreach node diagonalTerme += Φω;
+  diagonalTerme*=δt;
+  diagonalTerme+=1.0;
+  ℵ matrix setValue(Ω,this, Ω,this, diagonalTerme);
+}
+
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
+
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+own cells void getCellResults(void) out (cell Ω) @ 4.1{
+  Ω=ℵ lhs getValue(Ω, this);
+}
+
+
+// ****************************************************************************
+// * Test for Quit
+// ****************************************************************************
+void tstForQuit(void) @ 4.0 {
+  printf("\n\t[testForQuit] GlobalIteration =%d,\
+ time=%f, delta_t=%f", GlobalIteration, time,(double)δt);
+  if ((time<(option_stoptime-δt))) return;
+  exit;
+}
+
