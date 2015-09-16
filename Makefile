@@ -73,7 +73,9 @@ tstn:
 tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
 
+###############
 # OKINA tests #
+###############
 tstoua:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwindAP_run_1_std_seq)
 tstou:
@@ -81,7 +83,9 @@ tstou:
 tstol:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_seq)
 
+################
 # LAMBDA tests #
+################
 tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
 tstll:
@@ -97,9 +101,12 @@ tstlhr:
 tstlar:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
 tstlag:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_gen_1_seq)
+tstldr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_deflex_run_1_seq)
 
+################
 # ARCANE tests #
+################
 tstaag:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aleph1D_gen_1)
 tstahg:
@@ -140,7 +147,9 @@ tstmh:
 tstm4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_4)
 
+##############
 # CUDA tests #
+##############
 tstcu:
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)

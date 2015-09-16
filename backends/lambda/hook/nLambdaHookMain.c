@@ -95,7 +95,7 @@ NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain *nabla){
 // ******************************************************************************\n\
 void nabla_ini_variables(void){");
   // Variables aux noeuds
-  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
+  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE(n){");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='n') continue;
     if (strcmp(var->name, "coord")==0) continue;
@@ -106,7 +106,7 @@ void nabla_ini_variables(void){");
   }
   nprintf(nabla,NULL,"\n\t}");  
   // Variables aux mailles real
-  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
+  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL(c){");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='c') continue;
     if (var->dim==0){
@@ -115,7 +115,7 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
     }else{
-      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
+      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_NODE(n)");
       nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
@@ -206,11 +206,13 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     last_when=entry_points[i].whens[0];
     
     // Dump de la tabulation et du nom du point d'entrée
+    //nprintf(n, NULL, "\n%s/*@%f*/%s%s( // ",
+    //#warning f or s?
     nprintf(n, NULL, "\n%s/*@%f*/%s%s( // ",
             is_into_compute_loop?"\t\t":"\t",
-            n->call->parallel->spawn(), 
-            entry_points[i].name,
-            entry_points[i].whens[0]);
+            entry_points[i].whens[0],
+            n->call->parallel->spawn(),
+            entry_points[i].name);
     // Dump des arguments *ou pas*
     if (entry_points[i].stdParamsNode != NULL){
       nprintf(n, NULL,"/*entry_points[i].stdParamsNode != NULL*/");

@@ -79,16 +79,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_
 #######################################
 # NABLA TEST MACRO FOR LAMBDA BACKEND #
 #######################################
-function(NABLA_ADD_LAMBDA_TEST name nb_proc cmd parallel)
+function(nabla_add_lambda_test_with_defines name nb_proc cmd parallel defines nb_particles)
   info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_MAGENTA}lambda${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${parallel}${VT100_RESET}")
   set(backend lambda)
   set(subpath ${nb_proc}/${cmd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
   add_test(NAME nabla_lambda_${name}_${cmd}_${nb_proc}_${parallel} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
-	 COMMAND /bin/sh -c "ADDITIONAL_DEFINES=-DALEPH_INDEX PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
-endfunction(NABLA_ADD_LAMBDA_TEST)
+	 COMMAND /bin/sh -c "ADDITIONAL_DEFINES='${defines} -DNB_PARTICLES=${nb_particles}' PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
+endfunction(nabla_add_lambda_test_with_defines)
+
+function(nabla_add_lambda_test name nb_proc cmd parallel)
+   nabla_add_lambda_test_with_defines(${name} ${nb_proc} ${cmd} ${parallel} -DALEPH_INDEX 0)
+endfunction(nabla_add_lambda_test)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.lambda)
- 
+
 
 #####################################
 # NABLA TEST MACRO FOR CUDA BACKEND #
@@ -210,6 +215,8 @@ endif (HYPRE_FOUND)
 
 nabla_add_lambda_test(aleph1D 1 gen seq)
 nabla_add_lambda_test(aleph1D 1 run seq)
+
+nabla_add_lambda_test_with_defines(deflex 1 run seq -DNO_DEFINES 100000)
 
 
 ########################

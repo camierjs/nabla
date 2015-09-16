@@ -59,14 +59,16 @@ typedef enum {
 typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth);
 
 
-/***************************************************************************** 
- * Upcase de la chaîne donnée en argument
- *****************************************************************************/
+// ****************************************************************************
+// * Upcase de la chaîne donnée en argument
+// * Utilisé lors des déclarations des Variables
+// ****************************************************************************
 static inline char *itemUPCASE(const char *itm){
   if (itm[0]=='c') return "CELLS";
   if (itm[0]=='n') return "NODES";
   if (itm[0]=='f') return "FACES";
   if (itm[0]=='g') return "GLOBAL";
+  if (itm[0]=='p') return "PARTICLES";
   dbg("\n\t[itemUPCASE] itm=%s", itm);
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;
@@ -108,16 +110,16 @@ static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
   if (strncmp(var->name,"coord",5)==0){
     if ((nabla->entity->libraries&(1<<with_real))!=0){
       fprintf(nabla->entity->hdr,
-              "\nreal/*3*/ node_coord[NABLA_NB_NODES_WARP];");
+              "\nreal/*3*/ node_coord[NABLA_NB_NODES];");
       return NABLA_OK;
     }
   }
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s_WARP];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s];",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s_WARP];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s];",
             postfix?"real":var->type,
             var->item,var->name,
             postfix?postfix:"",

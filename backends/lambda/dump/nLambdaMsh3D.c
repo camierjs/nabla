@@ -76,7 +76,7 @@ static void nabla_ini_node_coords(void){
   dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
   assert((NABLA_NB_CELLS %% 1)==0);
     
-  for(int iNode=0; iNode<NABLA_NB_NODES_WARP; iNode+=1){
+  for(int iNode=0; iNode<NABLA_NB_NODES; iNode+=1){
     const int n=iNode;
     Real x,y,z;
 #if defined(__MIC__)||defined(__AVX512F__)
@@ -212,7 +212,7 @@ static void nabla_ini_node_coords(void){
 
 __attribute__((unused)) static void verifCoords(void){
   dbg(DBG_INI,"\nVérification des coordonnés des noeuds");
-  FOR_EACH_NODE_WARP(n){
+  FOR_EACH_NODE(n){
     dbg(DBG_INI,"\n%%d:",n);
     dbgReal3(DBG_INI,node_coord[n]);
   }

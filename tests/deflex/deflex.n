@@ -1,0 +1,192 @@
+with ℝ;
+
+// ****************************************************************************
+// αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀ ℝℕℤ ²³√½⅓¼⅛
+// ****************************************************************************
+
+const ℝ π=3.1415926535897932384626433832795028841971693993751;
+
+const ℕ binMax=100;
+ℝ histo[binMax];
+ℝ Θbinning[binMax];
+
+ofstream histoData("/tmp/histo.data");
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  // Paramètres d'entrée
+  ℝ option_νδt = 0.05; // Fréquence de collision x pas de temps
+  Bool option_particle_frame = true;
+  // Numerical options
+  ℝ option_ε_frame_change = 1.0e-15;
+  ℝ option_Γα = 1.0+0.5;
+  ℝ option_Γβ = 2.0;
+  // Yet required options for backend
+  ℝ option_δt_initial = 0.0001;
+  ℝ option_stoptime = 1.0;
+};
+
+
+// **************************************************************************
+// * Forward declaration
+// ****************************************************************************
+void iniRandom(double,double);
+double gamma_rand(void);
+
+
+// **************************************************************************
+// * Particles Variables
+// ****************************************************************************
+cells /*particles*/{
+  // Repère du laboratoire
+  ℝ αLab,βLab,γLab; // Cosinus directeurs
+  // Repère de la particule
+  ℝ θ,cosθ,sinθ;
+  ℝ φ;
+  ℝ α,β,γ;
+};
+
+
+// **************************************************************************
+// * Globals
+// ****************************************************************************
+//global{  ℝ seed;};
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+void iniHisto(void) @ -5.0 {
+  const ℝ binMaxf=(ℝ)binMax;
+  info()<<"binMaxf="<<binMaxf;
+  
+  for(int i=1;i<binMax;i+=1){
+    const ℝ ir=(ℝ)i;
+    histo[i]=0.0;
+    Θbinning[i]=2.0*π*(ir-1.0)/(binMaxf-1.0);
+    //info()<<"binning["<<i<<"]="<<Θbinning[i]<<", ir="<<ir;
+  }      
+}
+
+void iniRandom(void) @ -5.0 {
+  iniRandom(option_Γα,option_Γβ);
+  //info()<<"\n"<<gamma_rand();
+}
+
+void iniGlobals(void) @ -5.0{
+  δt=option_δt_initial;
+  printf("\n\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+}
+
+
+// ****************************************************************************
+// * initialization α, β et γ dans le repère du labo
+// ****************************************************************************
+∀ cells /*particles*/ void ini_αβγ(void) out (cell α,β,γ) @ -5.0 if (option_particle_frame) {
+  α=1.0;
+  β=γ=0.0;
+ }
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+
+
+void dbgLoop(void) @ 1.0 {
+  printf("\n[36m[Loop] #%3d, time=%f[m", GlobalIteration,time);
+}
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+∀ cells /*particles*/ void particleFrameSampling(void) out (cell θ,cosθ,sinθ,φ) @ 2.0 {
+  Bool rejet=true;
+  while (rejet){
+    // On utilise la même graine & générateur pour toutes les particules
+    // Attention à la reproductibilité
+    const ℝ rnd = gamma_rand();
+    const ℝ rnd01 = drand48();
+    θ=√(2.0*option_νδt*rnd);
+    sinθ=sin(θ);
+    rejet=(θ>π)||(sinθ<rnd01*θ);
+  }
+  //info()<<"["<<uid<<"] theta="<<θ;
+  cosθ=cos(θ);
+  φ=2.0*π*drand48();
+}
+
+
+∀ cells /*particles*/ void diagnosticSpectrum(void) @ 2.5 if (option_particle_frame){
+  ℕ j=0;
+  while(θ>Θbinning[j]) j+=1;
+  assert(j<100);
+  histo[j-1]+=1;
+ }
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+∀ cells /*particles*/ void computeCosines(void)
+  in (cell cosθ,sinθ,φ)
+  out (cell α,β,γ) @ 3.0 if (!option_particle_frame){
+  //const ℝ μ = -1.0 + 2.0*drand48();
+  //α = ;
+  //β = ;
+  //γ = ;
+}
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+∀ cells /*particles*/ void changeFrameFromeParticleToLab(void)
+  in (cell α,β,γ) inout (cell αLab,βLab,γLab) @ 4.0 if (!option_particle_frame){
+  const ℝ denom = 1.0-αLab²;
+  if (abs(denom)>=option_ε_frame_change){
+    const ℝ sqrtDenom = √(denom);
+    const ℝ unsSqrtDenom = 1./sqrtDenom;
+    const ℝ αp = α*αLab-γ*sqrtDenom;
+    const ℝ βp = α*βLab+(αLab*βLab*γ-γLab*β)*unsSqrtDenom;
+    const ℝ γp = α*γLab+(αLab*βLab*γ+βLab*β)*unsSqrtDenom;
+    αLab = αp;
+    βLab = βp;
+    γLab = γp;
+  }else{
+    αLab = α*αLab;
+    // A revoir !!
+    βLab = γ;
+    γLab = β;
+  }
+}
+
+
+// ****************************************************************************
+// * Test for quit
+// ****************************************************************************
+void tstForQuit(void) @ 4.0 {
+  //printf("\n\t[testForQuit] Iteration=%d, time=%f, delta_t=%f", GlobalIteration, time,δt);
+  //if (time<option_stoptime) return;
+  //printf("\n[7m[tstForQuit] Quit![m");
+  {
+    ℝ sum=0.0;
+    for(int i=0;i<binMax;i+=1)
+      sum+=histo[i];
+    for(int i=0;i<binMax;i+=1){
+      const ℝ value = histo[i]/sum;
+      printf(" %f",value);
+      histoData << "\t" << value;
+    }
+    printf("\n[7m[tstForQuit] Sum=%f[m\n\r",sum);
+    //assert(sum==nbParticle);
+  }
+  exit;
+}
+

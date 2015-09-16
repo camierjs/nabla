@@ -74,6 +74,7 @@ void nToolUnlink(char *pathname){
 int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
                                 const char *cat_sed_temporary_file_name){
   size_t size;
+  #warning BUFSIZ pour les anciens compilos/stations ?
   char buf[BUFSIZ];
   char *pointer_that_matches=NULL;
   char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
@@ -90,6 +91,7 @@ int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
       /*incr*/ nabla_file_name=strtok(NULL, " ")){
     fprintf(cat_sed_temporary_file,"# 1 \"%s\"\n",nabla_file_name);
     FILE *nabla_FILE=fopen(nabla_file_name,"r");
+    assert(nabla_FILE);
     // Now copying .n file to our tmp one
     while ((size=fread(buf, 1, BUFSIZ, nabla_FILE))){
       //printf("\n\tbuf: '%s'",buf);
@@ -100,8 +102,9 @@ int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
       }
       fwrite(buf, 1, size, cat_sed_temporary_file);
     }
+    assert(fclose(nabla_FILE)==0);
   }
-  fclose(cat_sed_temporary_file);
+  assert(fclose(cat_sed_temporary_file)==0);
   free(dup_list_of_nabla_files);
   return NABLA_OK;
 }

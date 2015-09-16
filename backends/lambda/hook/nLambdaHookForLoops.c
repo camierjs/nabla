@@ -101,6 +101,7 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   //if (job->xyz!=NULL) return lambdaHookDumpEnumerateXYZ(job);
   if (itm=='\0') return "\n";// function lambdaHookDumpEnumerate\n";
   dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
+  if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE%s%s(p";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
@@ -132,12 +133,11 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
 char* lambdaHookDumpEnumerate(nablaJob *job){
   dbg("\n\t[lambdaHookDumpEnumerate]");
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
-  const char *warping="";//job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];
   char str[NABLA_MAX_FILE_NAME];
   dbg("\n\t[lambdaHookDumpEnumerate] Preparing:");
   dbg("\n\t[lambdaHookDumpEnumerate]\t\tforall=%s",forall);
-  dbg("\n\t[lambdaHookDumpEnumerate]\t\twarping=%s",warping);
+  //dbg("\n\t[lambdaHookDumpEnumerate]\t\twarping=%s",warping);
 
   // On prépare le format grace à la partie du forall,
   // on rajoute l'extension suivant si on a une returnVariable
@@ -150,7 +150,7 @@ char* lambdaHookDumpEnumerate(nablaJob *job){
     if (sprintf(format,"%s%%s%%s)",forall)<=0)
       nablaError("Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
-                warping,       // _WARP or not
+                "", // warping
                 ompLambdaLocal, // _SHARED or not
                 ",",           //ompLambdaLocalVariableComa,
                 ompLambdaReturnVariableWitoutPerThread)<=0)
@@ -163,7 +163,7 @@ char* lambdaHookDumpEnumerate(nablaJob *job){
       nablaError("Could not patch format!");
     dbg("\n[lambdaHookDumpEnumerate] format=%s",format);
     if (sprintf(str,format,
-                warping,
+                "", // warping
                 "",
                 "")<=0)
       nablaError("Could not patch warping within ENUMERATE!");

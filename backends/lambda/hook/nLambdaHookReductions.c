@@ -95,7 +95,7 @@ void %s(",item_var_name,global_var_name,job_name);
 \tReal %s_per_thread[threads];\n\
 \tdbgFuncIn();\n\
 \tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
-\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
+\tFOR_EACH_%s_SHARED(%s,reduction_init){\n\
 \t\tconst int tid = omp_get_thread_num();\n\
 \t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
 \t}\n\

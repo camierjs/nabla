@@ -104,8 +104,8 @@ int main(void){\n\
 #define CUDA_MAIN_POSTINIT "\n\t}\n\n\
 \tgettimeofday(&et, NULL);\n\
 \tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);\n\
-"
+\tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);"
+
 
 /*****************************************************************************
  * Backend CUDA POSTFIX - Génération du 'main'
@@ -349,6 +349,10 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \n\t\t//cudaFuncSetCacheConfig(...); \
 \n\t\tCUDA_HANDLE_ERROR(cudaDeviceSynchronize());\
 \n\t\tgettimeofday(&st, NULL);\
+\n\t\tcudaEvent_t timer_start, timer_stop;\
+\n\t\tcudaEventCreate(&timer_start);\
+\n\t\tcudaEventCreate(&timer_stop);\
+\n\t\tcudaEventRecord( timer_start );\
 \n\t\t//while (new_delta_t>=0. && iteration<option_max_iterations){//host_time<=OPTION_TIME_END){\
 \n\t\twhile(host_time<option_stoptime && iteration<option_max_iterations){\
 \n\t\t\t//printf(\"\\nITERATION %%d\", iteration);\
@@ -421,7 +425,13 @@ NABLA_STATUS nccCudaMain(nablaMain *n){
 \n\t\t\t//if (new_delta_t>=0.) printf(\"\\n\\t[#%%d] \\r\",iteration);\
 \n\t\t\tif (new_delta_t>=0.) printf(\"\\n\\t[#%%d] time=%%.21e, delta_t=%%.21e\\r\", iteration, host_time, new_delta_t);\
 \n\t\t\titeration+=1;\
-\n\t\t}");
+\n\t\t}\
+\n\tfloat elapsed_time;\
+\n\tcudaEventRecord( timer_stop );\
+\n\tcudaEventSynchronize( timer_stop);\
+\n\tcudaEventElapsedTime( &elapsed_time, timer_start, timer_stop );\
+\n\telapsed_time*=1.e-3f;\
+\n\tprintf(\"\\n\\tElapsed Time = %%8.4e seconds\",elapsed_time);");
   return NABLA_OK;
 }
 

@@ -62,8 +62,8 @@ char *nLambdaParallelOpenMPSpawn(void){
 // * OpenMP for loop
 // ****************************************************************************
 char *nLambdaParallelOpenMPLoop(struct nablaMainStruct *n){
-  return "\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)\")\\\n";
-  //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS_WARP,NABLA_NB_NODES)\")\\\n";
+  return "\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
+  //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
 }
 
 

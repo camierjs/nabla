@@ -47,7 +47,9 @@
 // * CALLS
 // ****************************************************************************
 const static nWhatWith nLambdaHeaderDefines[]={
-  {"NABLA_NB_GLOBAL_WARP","1"},
+  {"NABLA_NB_GLOBAL","1"},
+  {"Bool", "bool"},
+  {"Integer", "int"},
   {"real", "Real"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},

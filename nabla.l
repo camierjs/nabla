@@ -44,7 +44,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include <stdio.h>
-//#define YY_SKIP_YYWRAP
+#define YY_SKIP_YYWRAP
+  int yywrap(void){
+    // return 0; if we switch nabla input file
+    return 1;
+  }
   extern int yylineno;
   extern bool typedef_hit;
   extern bool direct_declarator_hit;

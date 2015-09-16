@@ -96,7 +96,7 @@ info("root LAMBDA_ALEPH_HYPRE_LIBLIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_HYPRE_
 # Link libraries #
 ##################
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
-target_link_libraries(nabla libNabla ${FLEX_LIBRARIES}
+target_link_libraries(nabla libNabla # without yywrap, no need to link with ${FLEX_LIBRARIES}
   NablaMiddlend 
   NablaArcane NablaCuda NablaLambda NablaOkina
   NablaFrontend NablaMiddlend NablaToolbox)
