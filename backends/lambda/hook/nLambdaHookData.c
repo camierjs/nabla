@@ -115,23 +115,24 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
  * Prépare le nom de la variable
  *****************************************************************************/
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  if (!job->parse.selection_statement_in_compound_statement){
-    nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-  }else{
-    nprintf(nabla,NULL,"/*%s*/",var->type);
-    if (strcmp(var->type,"real")==0)
-      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
-    if (strcmp(var->type,"int")==0)
-      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
-    if (strcmp(var->type,"real3")==0)
-      nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);
-    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
-  }    
-  if (strcmp(var->type,"real3")!=0){
-    //nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
-    return;
-  }
-  return;
+  nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
+//  if (!job->parse.selection_statement_in_compound_statement){
+//    nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
+//  }else{
+//    nprintf(nabla,NULL,"/*%s*/",var->type);
+//    if (strcmp(var->type,"real")==0)
+//      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
+//    if (strcmp(var->type,"int")==0)
+//      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
+//    if (strcmp(var->type,"real3")==0)
+//      nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);
+//    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
+//  }    
+//  if (strcmp(var->type,"real3")!=0){
+//    //nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
+//    return;
+//  }
+//  return;
 }
 
 
@@ -318,7 +319,50 @@ static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] CELLS job lambdaHookTurnTokenToVariableForFaceJob\n"));
+  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] FACES job lambdaHookTurnTokenToVariableForFaceJob\n"));
+  }
+}
+
+
+// ***************************************************************************
+// * Tokens to variables 'PARTICLE Job' switch
+// ***************************************************************************
+static void lambdaHookTurnTokenToVariableForParticleJob(nablaMain *nabla,
+                                                        nablaVariable *var,
+                                                        nablaJob *job){
+  const char cnfg=job->item[0];
+  //char enum_enum=job->parse.enum_enum;
+  //int isPostfixed=job->parse.isPostfixed;
+
+  // Preliminary pertinence test
+  if (cnfg != 'p') return;
+  nprintf(nabla, "/*ParticleJob*/", NULL);
+  
+  // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
+  if (var->item[0]!='g') nvar(nabla,var,job);
+  
+  switch (var->item[0]){
+  case ('c'):{
+    exit(NABLA_ERROR|fprintf(stderr,"lambdaHookTurnTokenToVariableForParticleJob for cell"));
+    break;
+  }
+  case ('n'):{
+    exit(NABLA_ERROR|fprintf(stderr,"lambdaHookTurnTokenToVariableForParticleJob for cell"));
+    break;
+  }
+  case ('f'):{
+    exit(NABLA_ERROR|fprintf(stderr,"lambdaHookTurnTokenToVariableForParticleJob for cell"));
+    break;
+  }
+  case ('p'):{
+    nprintf(nabla, NULL, "[p]");
+    break;
+  }
+  case ('g'):{
+    nprintf(nabla, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
+    break;
+  }
+  default:exit(NABLA_ERROR|fprintf(stderr, "\nPARTICLE job lambdaHookTurnTokenToVariableForParticleJob\n"));
   }
 }
 
@@ -397,8 +441,12 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
   // Check whether there's job for a face job
   lambdaHookTurnTokenToVariableForFaceJob(arc,var,job);
   
-  // Check whether there's job for a face job
+  // Check whether there's job for a standard function
   lambdaHookTurnTokenToVariableForStdFunction(arc,var,job);
+
+  // Check whether there's job for a standard function
+  lambdaHookTurnTokenToVariableForParticleJob(arc,var,job);
+  
   return var;
 }
 

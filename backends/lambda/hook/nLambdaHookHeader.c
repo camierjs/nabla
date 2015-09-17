@@ -115,6 +115,8 @@ void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
 /*********************************************************\n\
  * Forward enumerates\n\
  *********************************************************/\n\
+#define FOR_EACH_PARTICLE(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
+\n\
 #define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
 \n\
@@ -130,6 +132,7 @@ void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
 //#define FOR_EACH_NODE_CELL(c) for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\
 \n\
 #define FOR_EACH_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES;f+=1)\n",
+          parallel_prefix_for_loop, // FOR_EACH_PARTICLE
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_NODE
           parallel_prefix_for_loop  // FOR_EACH_FACE

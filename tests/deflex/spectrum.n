@@ -1,0 +1,32 @@
+
+// ****************************************************************************
+// * iniHisto
+// ****************************************************************************
+void iniHisto(void) @ -5.0 {
+  const ℝ binMaxf=(ℝ)binMax;
+  info()<<"[7;37m[iniHisto][m";
+  //info()<<"binMaxf="<<binMaxf;
+  for(int i=0;i<binMax;i+=1){
+    const ℝ ir=(ℝ)i;
+    const ℝ Θbinmax = 4.0*√(4.0*option_νδt); // 4.0 * la vitesse thermique (arbitraire)
+    histo[i]=0.0;
+    Θbinning[i]=Θbinmax*ir/binMaxf;
+    //info()<<"binning["<<i<<"]="<<Θbinning[i]<<", ir="<<ir;
+  }      
+}
+
+
+// ****************************************************************************
+// * diagnosticSpectrum
+// ****************************************************************************
+void diagnosticSpectrum(ℝ θ){
+  ℕ j=0;
+  while(θ>Θbinning[j]){
+    j+=1;
+    if (j==100) break;
+    assert(j<100);
+  }
+  if (j<100) histo[j]+=1;
+  else histo[99]+=1; // On les garde pour vérifier la somme finale
+}
+

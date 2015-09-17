@@ -128,7 +128,8 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // Règle de définitions des preprocs 
   /////////////////////////////////////
   if (n->ruleid == rulenameToId("preproc")){
-    nprintf(nabla, NULL, "%s\n", n->children->token);
+    // We do not want preprocs declarations up to source file
+    //nprintf(nabla, NULL, "%s\n", n->children->token);
     dbg("\n\t[nablaMiddlendParseAndHook] preproc '%s'", n->children->token);
   }
   

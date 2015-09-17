@@ -88,7 +88,7 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
 \n\
-const int NABLA_NB_PARTICLES    = NB_PARTICLES;\n\
+int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
 ");
   nLambdaHookMesh1DConnectivity(nabla);
 }
@@ -145,7 +145,7 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*N
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
 \n\
-const int NABLA_NB_PARTICLES    = NB_PARTICLES;\n\
+int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 ");
   nLambdaHookMesh3DConnectivity(nabla);
 }

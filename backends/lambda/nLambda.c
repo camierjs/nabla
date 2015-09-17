@@ -59,7 +59,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  {"norm(u)","::fabs(u)"},
+  //{"norm(u)","::fabs(u)"},
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
@@ -92,9 +92,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"ReduceMaxToDouble(a)","a"},
   {"knAt(a)",""},
   {"fatal(a,b)","exit(-1)"},
-  //{"synchronize(a)",""},//"_Pragma(\"omp barrier\")"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
-  //{"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
   {"GlobalIteration", "global_iteration[0]"},
   {"MD_DirX","0"},
@@ -197,9 +195,10 @@ const static nHookMesh nLHookMesh={
   
 // Hooks pour les variables
 const static nHookVars nLHookVars={
-  nLambdaHookVarsInit,
+  nLambdaHookVariablesInit,
   nLambdaHookVariablesPrefix,
-  nLambdaHookVariablesPostfix
+  nLambdaHookVariablesMalloc,
+  nLambdaHookVariablesFree
 };  
 
 // Hooks pour le main

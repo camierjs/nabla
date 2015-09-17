@@ -99,9 +99,9 @@ void nLambdaDumpHeaderMaths(nablaMain *nabla){}
 void nLambdaDumpMesh(nablaMain *nabla){
   assert(nabla->entity->name);
   if ((nabla->entity->libraries&(1<<with_real))!=0)
-    fprintf(nabla->entity->src,lambdaMsh1D_c);
+    fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh1D_c));
   else
-    fprintf(nabla->entity->src,lambdaMsh3D_c);
+    fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh3D_c));
 }
 
 

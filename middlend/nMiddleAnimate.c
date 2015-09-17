@@ -86,7 +86,8 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
 
   nabla->hook->main->varInitKernel(nabla);
   nabla->hook->main->prefix(nabla);
-  
+  nabla->hook->vars->malloc(nabla);
+
   
   nabla->hook->mesh->prefix(nabla);
   nabla->hook->main->preInit(nabla);
@@ -99,8 +100,8 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
   
   nabla->hook->header->postfix(nabla); 
   nabla->hook->mesh->postfix(nabla);
-  nabla->hook->vars->postfix(nabla);
   nabla->hook->main->postfix(nabla);
+  nabla->hook->vars->free(nabla);
 
   return NABLA_OK;
 }

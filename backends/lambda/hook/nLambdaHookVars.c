@@ -43,8 +43,6 @@
 #include "nabla.h"
 
 
-
-
 /***************************************************************************** 
  * enums pour les différents dumps à faire: déclaration, malloc et free
  *****************************************************************************/
@@ -64,25 +62,35 @@ typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *pos
 // * Utilisé lors des déclarations des Variables
 // ****************************************************************************
 static inline char *itemUPCASE(const char *itm){
-  if (itm[0]=='c') return "CELLS";
-  if (itm[0]=='n') return "NODES";
-  if (itm[0]=='f') return "FACES";
-  if (itm[0]=='g') return "GLOBAL";
-  if (itm[0]=='p') return "PARTICLES";
+  if (itm[0]=='c') return "NABLA_NB_CELLS";
+  if (itm[0]=='n') return "NABLA_NB_NODES";
+  if (itm[0]=='f') return "NABLA_NB_FACES";
+  if (itm[0]=='g') return "NABLA_NB_GLOBAL";
+  if (itm[0]=='p') return "NABLA_NB_PARTICLES";
   dbg("\n\t[itemUPCASE] itm=%s", itm);
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;
 }
 
 
-/***************************************************************************** 
- * Dump d'un MALLOC d'une variables dans le fichier source
- *****************************************************************************/
+// ****************************************************************************
+// * Dump d'un MALLOC d'une variables dans le fichier source
+// * void *malloc(size_t size);
+// ****************************************************************************
 static NABLA_STATUS lambdaGenerateSingleVariableMalloc(nablaMain *nabla,
                                                     nablaVariable *var,
                                                     char *postfix,
                                                     char *depth){
-  nprintf(nabla,"\n\t// lambdaGenerateSingleVariableMalloc",NULL);
+  // Pour l'instant, on ne teste que sur les variables particulaires
+  if (var->item[0]!='p') return NABLA_OK;
+  nprintf(nabla,NULL,"\n\t// lambdaGenerateSingleVariableMalloc %s",var->name);
+  if (var->dim==0)
+    fprintf(nabla->entity->src,"\n\t%s_%s=(%s*)malloc(sizeof(%s)*%s);",
+            var->item,
+            var->name,
+            var->type,
+            var->type,
+            itemUPCASE(var->item));
   return NABLA_OK;
 }
 
@@ -94,7 +102,11 @@ static NABLA_STATUS lambdaGenerateSingleVariableFree(nablaMain *nabla,
                                                   nablaVariable *var,
                                                   char *postfix,
                                                   char *depth){  
-  nprintf(nabla,"\n\t// lambdaGenerateSingleVariableFree",NULL);
+  if (var->item[0]!='p') return NABLA_OK;
+  nprintf(nabla,NULL,"\n\t// lambdaGenerateSingleVariableFree %s",var->name);
+  if (var->dim==0)
+    fprintf(nabla->entity->src,"\n\tfree(%s_%s);",
+            var->item, var->name);
   return NABLA_OK;
 }
 
@@ -103,10 +115,9 @@ static NABLA_STATUS lambdaGenerateSingleVariableFree(nablaMain *nabla,
  * Dump d'une variables dans le fichier
  *****************************************************************************/
 static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
-                                              nablaVariable *var,
-                                              char *postfix,
-                                              char *depth){  
-  nprintf(nabla,"\n\t// lambdaGenerateSingleVariable",NULL);
+                                                 nablaVariable *var,
+                                                 char *postfix,
+                                                 char *depth){  
   if (strncmp(var->name,"coord",5)==0){
     if ((nabla->entity->libraries&(1<<with_real))!=0){
       fprintf(nabla->entity->hdr,
@@ -114,12 +125,19 @@ static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
       return NABLA_OK;
     }
   }
+  // Dans le cas d'une particule, on test le malloc
+  if (var->item[0]=='p'){
+    fprintf(nabla->entity->hdr,"\n%s *%s_%s%s%s;",
+            postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"");
+    return NABLA_OK;
+  }
+  //nprintf(nabla,NULL,"\n\t// lambdaGenerateSingleVariable");
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[NABLA_NB_%s];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[%s];",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*%s];",
             postfix?"real":var->type,
             var->item,var->name,
             postfix?postfix:"",
@@ -150,7 +168,7 @@ static NABLA_STATUS lambdaGenericVariableDim1(nablaMain *nabla, nablaVariable *v
   //char depth[]="[0]";
   dbg("\n[lambdaGenerateVariableDim1] variable %s", var->name);
   //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1) fDump(nabla, var, NULL, depth);
-  fDump(nabla, var, NULL, "/*8*/");
+  fDump(nabla, var, NULL, "/*NABLA_NODE_PER_CELL*/");
   return NABLA_OK;
 }
 
@@ -183,7 +201,10 @@ static NABLA_STATUS lambdaGenericVariable(nablaMain *nabla, nablaVariable *var, 
 }
 
 
-void nLambdaHookVarsInit(nablaMain *nabla){
+// ****************************************************************************
+// * Initialisation des besoins vis-à-vis des variables (globales)
+// ****************************************************************************
+void nLambdaHookVariablesInit(nablaMain *nabla){
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, iteration);
@@ -225,21 +246,20 @@ double global_time[1];\n");
 
 
 
-/***************************************************************************** 
- * Dump des variables
- *****************************************************************************/
+// ****************************************************************************
+// * Dump des variables dans le header
+// * Utile pour les variables static, par exemple
+// ****************************************************************************
 void nLambdaHookVariablesPrefix(nablaMain *nabla){
-  nablaVariable *var;
-
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * Variables\n\
 // ********************************************************");
-  for(var=nabla->variables;var!=NULL;var=var->next){
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
     if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_DECLARATION))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
-    if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_MALLOC))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
+    //if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_MALLOC))==NABLA_ERROR)
+    //exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
   }
   lambdaOptions(nabla);
   lambdaGlobals(nabla);
@@ -247,13 +267,33 @@ void nLambdaHookVariablesPrefix(nablaMain *nabla){
 
 
 // ****************************************************************************
+// * Malloc des variables
+// ****************************************************************************
+void nLambdaHookVariablesMalloc(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * Malloc Variables\n\
+\t// ********************************************************");
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_MALLOC))==NABLA_ERROR)
+      exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
+  }
+}
+
+
+// ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void nLambdaHookVariablesPostfix(nablaMain *nabla){
-  nablaVariable *var;
-  for(var=nabla->variables;var!=NULL;var=var->next)
+void nLambdaHookVariablesFree(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+// ********************************************************\n\
+// * Free Variables\n\
+// ********************************************************\n\
+void nabla_free_variables(void){");
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next)
     if (lambdaGenericVariable(nabla, var, witch2func(LAMBDA_VARIABLES_FREE))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaVariables] Error with variable %s\n", var->name));
+  fprintf(nabla->entity->src,"\n}\n");
 }
 
 

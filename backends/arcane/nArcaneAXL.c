@@ -220,7 +220,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     if (entry_point[i].ifAfterAt!=NULL){
       dbg("\n\t[nccAxlGenerator] dumpIfAfterAt!");
       fprintf(arc->entity->hdr, "if (");
-      nMiddleDumpIfAfterAt(entry_point[i].ifAfterAt, arc);
+      nMiddleDumpIfAfterAt(entry_point[i].ifAfterAt, arc, true);
       fprintf(arc->entity->hdr, ") ");
     }
     fprintf(arc->entity->hdr, "%s();}", entry_point[i].name);

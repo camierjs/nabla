@@ -108,14 +108,15 @@ NABLA_STATUS nLambdaHookMainPostInit(nablaMain*);
 NABLA_STATUS nLambdaHookMain(nablaMain*);
 NABLA_STATUS nLambdaHookMainPostfix(nablaMain*);
 
+void nLambdaHookVariablesInit(nablaMain*);
 void nLambdaHookVariablesPrefix(nablaMain*);
-void nLambdaHookVariablesPostfix(nablaMain*);
+void nLambdaHookVariablesMalloc(nablaMain*);
+void nLambdaHookVariablesFree(nablaMain*);
 
 void nLambdaHookMeshPrefix(nablaMain*);
 void nLambdaHookMeshCore(nablaMain*);
 void nLambdaHookMeshPostfix(nablaMain*);
 
-void nLambdaHookVarsInit(nablaMain*);
 
 void lambdaHookIteration(struct nablaMainStruct*);
 void lambdaHookExit(struct nablaMainStruct*);

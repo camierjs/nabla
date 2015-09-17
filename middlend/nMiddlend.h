@@ -233,7 +233,7 @@ void nMiddleScanForNablaJobParameter(astNode*,int,nablaMain*);
 void nMiddleScanForNablaJobAtConstant(astNode*,nablaMain*);
 char nMiddleScanForNablaJobForallItem(astNode*);
 void nMiddleScanForIfAfterAt(astNode*,nablaJob*,nablaMain*);
-void nMiddleDumpIfAfterAt(astNode*,nablaMain*);
+void nMiddleDumpIfAfterAt(astNode*,nablaMain*,bool);
 int nMiddleDumpParameterTypeList(nablaMain*,FILE*,astNode*);
 nablaJob *nMiddleJobNew(nablaEntity*);
 nablaJob *nMiddleJobAdd(nablaEntity*,nablaJob*);

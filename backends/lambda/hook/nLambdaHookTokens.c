@@ -285,7 +285,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(PREPROCS):{
-    nprintf(nabla, "/*PREPROCS*/", "\n%s\n",n->token);
+    //nprintf(nabla, "/*PREPROCS*/", "\n%s\n",n->token);
     break;
   }
     
@@ -417,9 +417,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
-    if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(c)");
-    if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(n)");
-
+    nprintf(nabla, "/*uniqueId c*/", "%c",cnfgem);
+    //if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(c)");
+    //if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(n)");
+    //if (cnfgem=='f') nprintf(nabla, "/*uniqueId n*/", "(f)");
+    //if (cnfgem=='p') nprintf(nabla, "/*uniqueId n*/", "(p)");
     break;
   }
   case (AT):{ nprintf(nabla, "/*knAt*/", "; knAt"); break; }

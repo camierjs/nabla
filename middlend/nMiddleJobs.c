@@ -186,18 +186,28 @@ void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla
 
 // *****************************************************************************
 // * dumpIfAfterAt
+// * A simplifier!
 // ****************************************************************************
-void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla){
+void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
   //if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL))
   if (n->token!=NULL){
     if (nMiddleOptionFindName(nabla->options, n->token)!=NULL){
-      hprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()", n->token);
+      if (dump_in_header){
+        hprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()", n->token);
+      }else{
+        //nprintf(nabla, "/*dumpIfAfterAt+Option*/", "/*%s*/",n->token);
+        nMiddleTurnTokenToOption(n,nabla);
+      }
+      //nprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()/*%s*/", n->token, nMiddleTurnTokenToOption(n,nabla));
     }else{
-      hprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
+      if (dump_in_header)
+        hprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
+      else
+        nprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
     }
   }
-  if(n->children != NULL) nMiddleDumpIfAfterAt(n->children,nabla);
-  if(n->next != NULL) nMiddleDumpIfAfterAt(n->next,nabla);
+  if(n->children != NULL) nMiddleDumpIfAfterAt(n->children,nabla,dump_in_header);
+  if(n->next != NULL) nMiddleDumpIfAfterAt(n->next,nabla,dump_in_header);
 }
 
 

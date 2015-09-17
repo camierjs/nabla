@@ -741,9 +741,9 @@ constant_expression
 compound_statement
 : start_scope end_scope {rhs;}
 | start_scope statement_list end_scope {rhs;}
-| start_scope declaration_list end_scope {rhs;}
-| start_scope declaration_list statement_list end_scope {rhs;}
-| start_scope statement_list declaration_list statement_list end_scope {rhs;}
+//| start_scope declaration_list end_scope {rhs;}
+//| start_scope declaration_list statement_list end_scope {rhs;}
+//| start_scope statement_list declaration_list statement_list end_scope {rhs;}
 ;
 expression_statement
 : ';'{rhs;}
@@ -785,6 +785,7 @@ statement
 | selection_statement {rhs;}
 | iteration_statement {rhs;}
 | jump_statement {rhs;}
+| declaration {rhs;}
 ;
 statement_list
 : statement {rhs;}

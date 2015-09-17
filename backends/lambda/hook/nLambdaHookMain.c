@@ -46,6 +46,48 @@ extern char* lambdaAlephHeader(nablaMain*);
 extern void lambdaAlephIni(nablaMain*);
 
 
+// ****************************************************************************
+// * Backend LAMBDA PREFIX - Génération du 'main'
+// * look at c++/4.7/bits/ios_base.h for cout options
+// ****************************************************************************
+#define LAMBDA_MAIN_PREFIX "\n\n\n\
+static void nabla_ini_node_coords(void);\n\
+static void nabla_free_variables(void);\n\
+\n\
+// ******************************************************************************\n \
+// * Main d'Lambda\n\
+// ******************************************************************************\n\
+int main(int argc, char *argv[]){\n\
+\tfloat cputime=0.0;\n\
+\tstruct timeval st, et;\n\
+\t//int iteration=1;\n\
+\tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
+\t//nabla_malloc_variables();\n\
+\t//nabla_ini_variables();\n\
+\t//assert(argc>=2);\n\
+\tif (argc==1)\n\
+\t\tNABLA_NB_PARTICLES=1000;\n\
+\telse\n\
+\t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
+\tnabla_ini_node_coords();\n\
+\t// Initialisation de la précision du cout\n\
+\tstd::cout.precision(21);\n\
+\t//std::cout.setf(std::ios::floatfield);\n\
+\tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
+\t// Initialisation du temps et du deltaT\n\
+\tglobal_time[0]=0.0;\n\
+\tglobal_iteration[0]=1;\n\
+\tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
+\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
+NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
+  dbg("\n[lambdaMainPrefix]");
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+    fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
+  return NABLA_OK;
+}
+
+
 /*****************************************************************************
  * Backend LAMBDA POSTFIX - Génération du 'main'
 \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
@@ -57,6 +99,7 @@ extern void lambdaAlephIni(nablaMain*);
 \tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n\
+\tnabla_free_variables();\n\
 \treturn 0;\n\
 \n}\n"
 
@@ -94,6 +137,16 @@ NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain *nabla){
 // * Kernel d'initialisation des variables\n\
 // ******************************************************************************\n\
 void nabla_ini_variables(void){");
+  // Variables Particulaires
+  nprintf(nabla,NULL,"\n\tFOR_EACH_PARTICLE(p){");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='p') continue;
+    nprintf(nabla,NULL,"\n\t\t%s_%s[p]=",var->item,var->name);
+    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+    if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+  }
+  nprintf(nabla,NULL,"\n\t}");  
   // Variables aux noeuds
   nprintf(nabla,NULL,"\n\tFOR_EACH_NODE(n){");
   for(var=nabla->variables;var!=NULL;var=var->next){
@@ -116,7 +169,7 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
     }else{
       nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_NODE(n)");
-      nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
+      nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
@@ -124,43 +177,6 @@ void nabla_ini_variables(void){");
   }
   nprintf(nabla,NULL,"\n\t}");
   nprintf(nabla,NULL,"\n}");
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
-// * Backend LAMBDA PREFIX - Génération du 'main'
-// * look at c++/4.7/bits/ios_base.h for cout options
-// ****************************************************************************
-#define LAMBDA_MAIN_PREFIX "\n\n\n\
-static void nabla_ini_node_coords(void);\n\
-\n\
-// ******************************************************************************\n \
-// * Main d'Lambda\n\
-// ******************************************************************************\n\
-int main(int argc, char *argv[]){\n\
-\tfloat cputime=0.0;\n\
-\tstruct timeval st, et;\n\
-\t//int iteration=1;\n\
-\tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
-\tnabla_ini_variables();\n\
-\tnabla_ini_node_coords();\n\
-\t// Initialisation de la précision du cout\n\
-\tstd::cout.precision(21);\n\
-\t//std::cout.setf(std::ios::floatfield);\n\
-\tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
-\t// Initialisation du temps et du deltaT\n\
-\tglobal_time[0]=0.0;\n\
-\tglobal_iteration[0]=1;\n\
-\tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
-NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
-  dbg("\n[lambdaMainPrefix]");
-  
-  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
-    fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
-   
-  fprintf(nabla->entity->src, LAMBDA_MAIN_PREFIX);
   return NABLA_OK;
 }
 
@@ -183,10 +199,12 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
     if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
     if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
+    
     dbg("%s\n\t[lambdaMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
         entry_points[i].name,
         entry_points[i].whens[0],
         entry_points[i].where);
+    
     // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
@@ -194,13 +212,21 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 \twhile (global_time[0]<option_stoptime){\
 \t// && global_iteration!=option_max_iterations){");
     }
+
+    // \n ou if d'un IF after '@'
+    if (entry_points[i].ifAfterAt!=NULL){
+      dbg("\n\t[nLambdaHookMain] dumpIfAfterAt!");
+      nprintf(n, NULL, "\n\t\tif (");
+      nMiddleDumpIfAfterAt(entry_points[i].ifAfterAt, n,false);
+      nprintf(n, NULL, ") ");
+    }else nprintf(n, NULL, "\n");
     
     //if (i==13) nprintf(n, NULL,"\n\texit(0);\n"); // ComputeLoopBegin en i==4
 
     // On provoque un parallel->sync
     // si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])
-      nprintf(n, NULL, "\n%s%s",
+      nprintf(n, NULL, "%s%s",
               is_into_compute_loop?"\t\t":"\t",
               n->call->parallel->sync());
     last_when=entry_points[i].whens[0];
@@ -215,11 +241,11 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
             entry_points[i].name);
     // Dump des arguments *ou pas*
     if (entry_points[i].stdParamsNode != NULL){
-      nprintf(n, NULL,"/*entry_points[i].stdParamsNode != NULL*/");
+      //nprintf(n, NULL,"/*entry_points[i].stdParamsNode != NULL*/");
       numParams=nMiddleDumpParameterTypeList(n,n->entity->src,
                                              entry_points[i].stdParamsNode);
-      nprintf(n, NULL,"/*done*/");
-    }else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
+      //nprintf(n, NULL,"/*done*/");
+    }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
     nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
@@ -227,7 +253,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
       nMiddleArgsDump(n,entry_points[i].nblParamsNode,&numParams);
-    }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
+    } //else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
@@ -265,10 +291,37 @@ NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
 /*****************************************************************************
  * Backend LAMBDA INIT - Génération du 'main'
  *****************************************************************************/
-#define LAMBDA_MAIN_PREINIT "\n\t//LAMBDA_MAIN_PREINIT"
+#define LAMBDA_MAIN_PREINIT "\n\n\t//LAMBDA_MAIN_PREINIT\n\
+\tnabla_ini_variables();\n"
 NABLA_STATUS nLambdaHookMainPreInit(nablaMain *nabla){
   dbg("\n[lambdaMainPreInit]");
   fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
+  return NABLA_OK;
+}
+
+
+/*****************************************************************************
+ * lambdaMainVarInitKernel
+ *****************************************************************************/
+NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain *nabla){
+  nablaVariable *var;
+  dbg("\n[lambdaMainVarInitCall]");
+  nprintf(nabla,NULL,"\n\
+\t// ***************************************************************************\n\
+\t// * nLambdaHookMainVarInitCall\n\
+\t// ***************************************************************************\n");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    continue;
+    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
+            var->name,
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
   return NABLA_OK;
 }
 
@@ -282,25 +335,3 @@ NABLA_STATUS nLambdaHookMainPostInit(nablaMain *nabla){
   fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
   return NABLA_OK;
 }
-
-
-/*****************************************************************************
- * lambdaMainVarInitKernel
- *****************************************************************************/
-NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[lambdaMainVarInitCall]");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-  return NABLA_OK;
-}
-

@@ -92,7 +92,8 @@ typedef struct nHookMeshStruct{
 typedef struct nHookVarsStruct{
   void (*init)(struct nablaMainStruct *);  
   void (*prefix)(struct nablaMainStruct *);  
-  void (*postfix)(struct nablaMainStruct *);  
+  void (*malloc)(struct nablaMainStruct *);  
+  void (*free)(struct nablaMainStruct *);  
 } nHookVars;
 
 
