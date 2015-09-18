@@ -23,10 +23,26 @@ void diagnosticSpectrum(ℝ θ){
   ℕ j=0;
   while(θ>Θbinning[j]){
     j+=1;
-    if (j==100) break;
-    assert(j<100);
+    if (j==binMax) return;
   }
-  if (j<100) histo[j]+=1;
-  else histo[99]+=1; // On les garde pour vérifier la somme finale
+  histo[j]+=1;
 }
 
+
+// ****************************************************************************
+// * diagnosticSpectrum
+// ****************************************************************************
+void dumpSpectrum(void){
+  ℝ sum=0.0;
+  for(int i=0;i<binMax;i+=1)
+    sum+=histo[i];
+  for(int i=0;i<binMax-1;i+=1){
+    const ℝ value = histo[i]/sum;
+    const ℝ x = ½*(Θbinning[i]+Θbinning[i+1]);
+    const ℝ y = value/(Θbinning[i+1]-Θbinning[i]);
+    printf(" %f",y);
+    histoData << "\t" << x << "\t" << y;
+  }
+  printf("\n[7m[tstForQuit] Sum=%f[m\n\r",sum);
+  //assert(sum==(ℝ)NABLA_NB_PARTICLES);
+}
