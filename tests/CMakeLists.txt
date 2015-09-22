@@ -173,7 +173,7 @@ set(PARALLEL_MODES "seq omp") #cilk
 if(APPLE)
   set(SIMD_MODES "std sse")
   set(PARALLEL_MODES "seq")
-  endif(APPLE)
+endif(APPLE)
   
 separate_arguments(SIMD_MODES)
 separate_arguments(PARALLEL_MODES)
@@ -223,9 +223,11 @@ nabla_add_lambda_test_with_defines(deflex 1 run seq -DNO_DEFINES 100000)
 # NABLA TESTS FOR CUDA #
 ########################
 nabla_add_cuda_test(gram 1 gen)
+nabla_add_cuda_test(nvknl 1 gen)
 nabla_add_cuda_test(lulesh 1 gen)
 nabla_add_cuda_test(mhydro 1 gen)
 if(CUDA_FOUND)
   #nabla_add_cuda_test(mhydro 1 run)
   nabla_add_cuda_test(lulesh 1 run)
+  nabla_add_cuda_test(nvknl 1 run)
 endif()
