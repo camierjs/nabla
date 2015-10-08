@@ -84,4 +84,6 @@ class __attribute__ ((aligned(8))) real3 {
   inline real abs2(){return x*x+y*y+z*z;}
 };
 
+inline real norm(real u){ return ::fabs(u);}
+
 #endif //  _LAMBDA_STD_REAL3_H_

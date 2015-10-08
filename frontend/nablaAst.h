@@ -76,9 +76,9 @@ astNode *astNewNodeRule(const char*, unsigned int);
 astNode *astAddChild(astNode*, astNode*);
 astNode *astAddNext(astNode*, astNode*);
 
-NABLA_STATUS astTreeSave(const char *treeFileName, astNode *root);
-void getInOutPutsNodes(FILE *fOut, astNode *n, char *color);
-void getInOutPutsEdges(FILE *fOut, astNode *n, int inout, char *nName1, char* nName2);
+NABLA_STATUS astTreeSave(const char*, astNode*);
+void getInOutPutsNodes(FILE*, astNode *n, char *color);
+void getInOutPutsEdges(FILE*, astNode *n, int inout, char *nName1, char* nName2);
 
 void dfsUtf8(astNode*);
 

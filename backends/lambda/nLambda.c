@@ -59,7 +59,6 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  //{"norm(u)","::fabs(u)"},
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},

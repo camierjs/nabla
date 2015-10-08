@@ -138,8 +138,8 @@ public:
   //}
   void addValue(double *var, int itm, double value){
     unsigned int idx=m_aleph_kernel->indexing()->get(var,itm);
-    //debug()<<"\33[1;33m[vector::addValue["<<idx<<"]\33[0m";
-    if(idx==size()){
+    debug()<<"\33[1;33m[vector::addValue["<<idx<<"]\33[0m";
+    if (idx==size()){
       resize(idx+1);
       index.push_back(idx);
       this->at(idx)=value;

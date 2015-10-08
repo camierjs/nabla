@@ -1,0 +1,8 @@
+// Fake iniRandom and gamma_rand in ∇ for ctest to pass
+
+void iniRandom(ℝ α, ℝ β){}
+
+
+ℝ gamma_rand(void){
+  return drand48(); // Should be Gamma on
+}

@@ -1,0 +1,40 @@
+
+//Test 1 for linear advection (smooth data)
+ℝ U_condlimi(ℝ x,ℝ t){
+  return -ε + exp(-t/ε²) + ε/(2*tau-1)*exp(-2*tau*t/ε²) ;
+}
+
+
+// Test 2 for linear  advection (discontinuous data)
+ℝ P_condlimi(ℝ x,ℝ t){
+  return  x*(1+ exp(-2*tau*t/ε²)) ;
+}
+
+ℝ T_condini(ℝ x){
+  return 0.0;  
+}
+  
+
+ℝ T_condlimi(ℝ x){
+  return 0.0;//-sigma*x;
+}
+
+  
+ℝ P_condini(ℝ x,ℝ t){   
+  return 2*x*(x-1) ; 
+}
+
+ℝ U_condini(ℝ x,ℝ t){
+  return 0; //(x+1)*exp(-sigma*t);
+}
+    
+  
+ 
+  
+ℝ f_sigma(ℝ x){
+  return sigma;
+  //if (x<0.5-δx) return 0.0;
+  //if (x>=0.5) return 1.0;
+  //assert(false);// Jamais on doit passer par ici
+  //return 0.0;
+}

@@ -46,8 +46,20 @@
 // ****************************************************************************
 // * ostream stuffs
 // ****************************************************************************
-inline std::ostream& info(){std::cout.flush();std::cout<<"\n";return std::cout;}
-inline std::ostream& debug(){std::cout.flush();std::cout<<"\n";return std::cout;}
+std::ostream& info(){
+  std::cout.flush();
+  std::cout<<"\n";
+  return std::cout;
+}
+
+std::ofstream devNull("/dev/null");
+
+std::ostream& debug(){
+  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return devNull;
+  std::cout.flush();
+  std::cout<<"\n";
+  return std::cout;
+}
 
 // ****************************************************************************
 // * REALS_3

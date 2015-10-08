@@ -66,7 +66,7 @@ AlephIndexing::AlephIndexing(AlephKernel *kernel):
 // ****************************************************************************
 int AlephIndexing::updateKnownItems(vector<int> *var_idx,
                                     const int itm){
-  //debug()<<"\t\33[33m[updateKnownItems] itm="<<itm<<"\33[m";
+  debug()<<"\t\33[33m[updateKnownItems] itm="<<itm<<"\33[m";
   // Dans tous les cas l'adresse est celle-ci
   m_known_items_all_address.push_back(&(*var_idx)[itm]);
   // Si l'item ciblé n'est pas à nous, on ne doit pas le compter
@@ -75,7 +75,7 @@ int AlephIndexing::updateKnownItems(vector<int> *var_idx,
     (*var_idx)[itm]=m_current_idx;
     m_known_items_own+=1;
   }else{
-    //debug()<< "\t\t\33[33m[AlephIndexing::updateKnownItems] is NOT ours"<<"\33[m";
+    debug()<< "\t\t\33[33m[AlephIndexing::updateKnownItems] is NOT ours"<<"\33[m";
     (*var_idx)[itm]=m_current_idx;
   }
   // Maintenant, on peut incrémenter l'index de ligne
@@ -99,22 +99,24 @@ int AlephIndexing::findWhichLidFromMapMap(double *var, const int itm){
     debug()<<"\t\33[33m[findWhichLidFromMapMap] On rajoute à notre map la variable '_idx' de cette variable\33[m";
     //string var_idx_name("var");//var->name());
     //var_idx_name+="_idx";
-    vector<int> *var_idx=new vector<int>(subDomain()->defaultMesh()->size());//VariableBuildInfo(var->mesh(), var_idx_name),
-    //   var->itemKind());
+    #warning Cell|Node|Faces Variable? for size!
+    vector<int> *var_idx=new vector<int>(subDomain()->defaultMesh()->size()+1);
+    // var->itemKind());
     // On rajoute à notre map la variable '_idx' de cette variable
     m_var_map_idx.insert(std::make_pair(var,var_idx));
     // On flush tous les indices potentiels de cette variable
     var_idx->assign(var_idx->size(),ALEPH_INDEX_NOT_USED);
     return updateKnownItems(var_idx,itm);
   }
+  debug()<<"\t\33[33m[findWhichLidFromMapMap] KNOWN variable *var @"<<var<<"\33[m";
   vector<int> *var_idx = iVarMap->second;
   // Si cet item n'est pas connu de cette variable, on rajoute une entrée
   if ((*var_idx)[itm]==ALEPH_INDEX_NOT_USED){
-    //debug()<<"\t\33[33m[findWhichLidFromMapMap] Cet item n'est pas connu de cette variable, on rajoute une entrée\33[m";
+    debug()<<"\t\33[33m[findWhichLidFromMapMap] Cet item n'est pas connu de cette variable, on rajoute une entrée\33[m";
     traceMng()->flush();
     return updateKnownItems(var_idx,itm);
   }
-  //debug()<<"\t\33[33m[AlephIndexing::findWhichLidFromMapMap] hits row #\33[1;32m"<<(*var_idx)[itm]<<"\33[m";
+  debug()<<"\t\33[33m[AlephIndexing::findWhichLidFromMapMap] hits row #\33[1;32m"<<(*var_idx)[itm]<<"\33[m";
   traceMng()->flush();
   return (*var_idx)[itm];
 }

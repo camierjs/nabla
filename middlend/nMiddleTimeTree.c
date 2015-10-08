@@ -82,6 +82,7 @@ static char *color(const char item){
   case 'c': return "palegreen";
   case 'n': return "palegoldenrod";
   case 'f': return "paleturquoise";
+  case 'p': return "orchid1";
   case '\0': return "palevioletred";
   default: return "red";
   }
@@ -112,7 +113,8 @@ static char *filled(const bool is_a_function){
 // * timeTreeSaveMathematica
 // *****************************************************************************
 static void timeTreeSaveMathematica(FILE *fTreeOutput, nablaJob *job,
-                                    int number_of_entry_points){
+                                    int number_of_entry_points,
+                                    int optionDumpTree){
   dbg("\n[timeTreeSaveNodes] number_of_entry_points=%d", number_of_entry_points);
   if (number_of_entry_points==0){
     dbg("\n[timeTreeSaveNodes] returning");
@@ -128,7 +130,7 @@ static void timeTreeSaveMathematica(FILE *fTreeOutput, nablaJob *job,
             filled(job[i].is_a_function),
             shape(job[i].is_a_function),
             color(job[i].item[0]),
-            job[i].name_utf8);
+            (optionDumpTree==OPTION_TIME_DOT_MMA)?"":job[i].name_utf8);
   }
 
   fprintf(fTreeOutput,"\n");
@@ -151,8 +153,9 @@ static void timeTreeSaveMathematica(FILE *fTreeOutput, nablaJob *job,
     for(n=j;n<k;n+=1){
       const char *nJobName=job[n].name;
       const char *nJobWhen=strKillMinusDot(whenName("", job[n].whens[0]));
-      fprintf(fTreeOutput,"\n\tnode_%s_%s -> node_%s_%s;",
-              iJobName,iJobWhen, nJobName,nJobWhen);
+      fprintf(fTreeOutput,"\n\tnode_%s_%s -> node_%s_%s [arrowsize=0.3,penwidth=0.15];",
+              iJobName,iJobWhen,
+              nJobName,nJobWhen);      
     }
   }
 }
@@ -281,21 +284,23 @@ static NABLA_STATUS timeTreeSaveEdges(FILE *fTreeOutput, astNode *l, astNode *fa
 /*****************************************************************************
  * timeTreeSave
  *****************************************************************************/
-NABLA_STATUS nMiddleTimeTreeSave(nablaMain *nabla, nablaJob *jobs, int number_of_entry_points){
+NABLA_STATUS nMiddleTimeTreeSave(nablaMain *nabla,
+                                 nablaJob *jobs,
+                                 int number_of_entry_points){
   FILE *dotFile;
   char fileName[NABLA_MAX_FILE_NAME];
   dbg("\n[timeTreeSave] Saving time tree for %s", nabla->name);
   sprintf(fileName, "%s.time.dot", nabla->name);
   // Saving tree file
   if ((dotFile=fopen(fileName, "w")) == 0) return NABLA_ERROR|dbg("[timeTreeSave] fopen ERROR");
-  fprintf(dotFile, "digraph {");
+  fprintf(dotFile, "digraph {\n\tedge[arrowhead=open];");
   dbg("\n[timeTreeSave] timeTreeSaveNodes");
-  timeTreeSaveMathematica(dotFile,jobs,number_of_entry_points);
+  timeTreeSaveMathematica(dotFile,jobs,number_of_entry_points, nabla->optionDumpTree);
   //timeTreeSaveNodes(dotFile,jobs,number_of_entry_points,true);
   //timeTreeSaveNodes(dotFile,jobs,number_of_entry_points,false);
   //timeTreeSaveEdges(dotFile, jobs);
   //fprintf(dotFile, "\n\t//Start [shape=Mdiamond];\n\t//End [shape=Msquare];");
-  fprintf(dotFile, "\n\tnode_ComputeLoopEnd_inf -> node_ComputeLoopBegin_0d00;");
+  fprintf(dotFile, "\n\tnode_ComputeLoopEnd_inf -> node_ComputeLoopBegin_0d00 [penwidth=1.0];");
   fprintf(dotFile, "\n}\n");
   fclose(dotFile);
   return NABLA_OK;

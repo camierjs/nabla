@@ -30,7 +30,7 @@ NV_ARCH = -arch=sm_30 #  -gencode arch=compute_30,code=sm_30
 #NV_ARCH = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_37,code=sm_37 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_50,code=compute_50
 NV = $(NV_PATH)/bin/nvcc
 #-ccbin g++
-NVFLAGS = -O3 $(MESH_FLAGS) #-m64 -shared $(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
+NVFLAGS = -O3 $(MESH_FLAGS) $(NV_ARCH) #-m64 -shared $(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
 NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
 NV_INCLUDE = -I. -I$(NV_PATH)/include
 

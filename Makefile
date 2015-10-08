@@ -100,6 +100,8 @@ tstlhr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_run_1_seq)
 tstlar:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
+tstlbg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_amber_run_1_seq)
 tstlag:
 tstldr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_deflex_run_1_seq)
@@ -107,6 +109,10 @@ tstldr:
 ################
 # ARCANE tests #
 ################
+tstasw:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_swirl_gen_1)
+tstabg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_amber_gen_1)
 tstaag:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aleph1D_gen_1)
 tstahg:
@@ -152,10 +158,10 @@ tstm4:
 ##############
 tstcu:
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_gen_1)
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
+#	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
-#	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
 
 ############
 # CLEANING #

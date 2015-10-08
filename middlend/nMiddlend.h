@@ -210,7 +210,7 @@ typedef struct nablaMainStruct{
   char *interface_name; // Arcane specific
   char *interface_path; // Arcane specific
   char *service_name;   // Arcane specific
-  bool optionDumpTree;
+  int optionDumpTree;
   struct nHooksStruct *hook;
   struct nCallsStruct *call;
 } nablaMain;
@@ -281,7 +281,7 @@ void nMiddleGrammar(astNode*,nablaMain*);
 void nMiddleInsertSpace(nablaMain*,astNode*);
 
 // nMiddle
-int nMiddleSwitch(astNode*,const bool,const char*,
+int nMiddleSwitch(astNode*,const int,const char*,
                   const BACKEND_SWITCH,
                   const BACKEND_COLORS,
                   char*,char*,char*);

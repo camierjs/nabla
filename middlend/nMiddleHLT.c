@@ -181,7 +181,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   // On trie afin d'avoir tous les points d'entrée
   qsort(entry_points,number_of_entry_points,sizeof(nablaJob),nMiddleComparEntryPoints);
 
-  if (nabla->optionDumpTree)
+  if (nabla->optionDumpTree!=0)
     nMiddleTimeTreeSave(nabla, entry_points, i);
   
   return entry_points;

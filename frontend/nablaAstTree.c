@@ -103,7 +103,8 @@ NABLA_STATUS astTreeSave(const char *nabla_entity_name, astNode *root){
   if ((fDot=fopen(fName, "w")) == 0) return NABLA_ERROR|dbg("[nccTreeSave] fopen ERROR");
   fprintf(fDot, "digraph {\nordering=out;\n\tnode [style = filled, shape = circle];");
   astTreeSaveNodes(fDot, root, 0);
-  if (astTreeSaveEdges(fDot, root->children, root) not_eq NABLA_OK) return NABLA_ERROR|dbg("[nccTreeSave] ERROR");
+  if (astTreeSaveEdges(fDot, root->children, root) not_eq NABLA_OK)
+    return NABLA_ERROR|dbg("[nccTreeSave] ERROR");
   fprintf(fDot, "\n}\n");
   fclose(fDot);
   return NABLA_OK;

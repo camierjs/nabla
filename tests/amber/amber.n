@@ -1,0 +1,114 @@
+with ℝ, ℵ;
+
+// αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀
+// ℝℕℤ
+// ²³√½⅓¼⅛
+
+ofstream output("schema1.plot");
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ option_a = 1.0;
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
+  ℕ test = 1;
+  ℕ test2 = 1;
+  ℝ pi =atan(1)*4;  
+  ℕ time_steps = 0.0005;
+  ℝ final_time = 5.0;
+  ℝ sigma=1.0;  
+  //ℝ Delta_t=0.0005;  
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.000010;
+  ℝ option_stoptime=0.2;//0.2;//10.
+  ℝ tau =1.0;    
+  ℝ ε = 0.1;   
+  ℝ CFL =2.0;
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-10;
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 16384;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephPreconditionerMethod = 2;
+  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephSolverMethod     = 0; 
+  ℕ alephNumberOfCores    = 0;
+  Bool option_aleph_dump_matrix = true;     
+};
+
+// **************************************************************************
+// * Node Variables
+// ****************************************************************************
+cells{  
+  ℝ cU;
+  ℝ cP;
+  ℝ cp1P;
+  ℝ cp1U;  
+  ℝ cT; 
+  ℝ cp1T;
+  ℝ center;
+  ℝ cM;
+  ℝ cV,cW;
+};
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+nodes{
+  ℝ nU,nV,nW,nT;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+  //ℝ Integrale;
+  ℝ n_time;
+  ℝ iδx;
+};
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+void iniGlobals(void) @ -5.0{
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
+  //δt=(1-CFL)*(ε²/(2*tau))*(log(tau)+log(1+ δx/ε)) + CFL*0.75*ε*δx;
+   δt=ε*CFL*δx;
+  iδx=1./δx;
+  n_time=0; 
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0 {
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+}
+
+
+// ****************************************************************************
+// * Test for Quit & Dump Solution Found
+// ****************************************************************************
+void tstForQuit(void) @ 4.0 {
+  printf("\n\t[testForQuit] GlobalIteration=%d, time=%f, delta_t=%f",
+         GlobalIteration, time,(double)δt);
+
+  if ((time<(option_stoptime-δt))) return;
+ 
+  exit;
+}
+
+

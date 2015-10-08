@@ -99,7 +99,9 @@ typedef enum {
 //  BACKEND_COLOR_OKINA_SOA      = 1<<(16),
 //  BACKEND_COLOR_OKINA_AOS      = 1<<(17),
   BACKEND_COLOR_GCC            = 1<<(16),
-  BACKEND_COLOR_ICC            = 1<<(17)
+  BACKEND_COLOR_ICC            = 1<<(17),
+  OPTION_TIME_DOT_STD          = 1<<(18),
+  OPTION_TIME_DOT_MMA          = 1<<(19)
 } BACKEND_COLORS;
 
 

@@ -1,0 +1,128 @@
+void rhsInit(void) @ 1.1{
+  debug() << "[rhsInit] pre rhs.size()=" << rhs.size();
+  ℵ rhs reset;
+  ℵ lhs reset;
+  debug() << "[rhsInit] post rhs.size()=" << rhs.size();
+}
+
+cells void addRhsV(void) in (cell cV,cW,cT) @ 1.2{
+  const ℝ cValue=cV;
+  const ℝ cWalue=cW;
+  const ℝ cTalue=cT;
+  debug()<< "[addRhsV] cell["<<uid<<"]";
+  ℵ rhs addValue(cV,this,cValue);
+  ℵ rhs addValue(cW,this,cWalue);
+  ℵ rhs addValue(cT,this,cTalue);
+}
+
+/*outer*/ nodes void addRhsBCLeft(void) in (node nV) @ 1.21{
+  if (n!=0) continue;
+  const ℝ nValue=nV;
+  ℵ rhs addValue(nV,this,nValue);
+}
+  
+/*outer*/ nodes void addRhsBCRight(void) in (node nW) @ 1.22{
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  const ℝ nWalue=nW;
+  ℵ rhs addValue(nW,this,nWalue);
+}
+
+
+// ********************************************************
+// * Initialisation ℵ
+// ********************************************************
+void iniAleph(void) @ 2.0 { alephInitialize(); }
+
+
+// ****************************************************************************
+// * Fill our matrix
+// ****************************************************************************
+cells void setMtxA(void) @ 2.1{
+  const ℝ e1 = 0.5*tau*δt/(ε² + 2*tau*δt);
+  const ℝ δtSx = δt/(ε*δx);
+  const ℝ M= ε/(2*ε + sigma*δx);
+  const ℝ value1=(1 +e1 + δtSx);
+  const ℝ value2=(e1-(sigma*M*δt)/(ε));
+  
+  ℵ matrix setValue(cV,this, cV,this, value1);
+  ℵ matrix setValue(cV,this, cW,this, value2);
+  ℵ matrix setValue(cV,this, cT,this, -e1);
+
+  ℵ matrix setValue(cW,this, cV,this, value2 );
+  ℵ matrix setValue(cW,this, cW,this, value1);
+  ℵ matrix setValue(cW,this, cT,this, -e1);
+
+  ℵ matrix setValue(cT,this, cV,this, -2.0*e1);
+  ℵ matrix setValue(cT,this, cW,this, -2.0*e1);
+  ℵ matrix setValue(cT,this, cT,this, 1.0+e1);
+}
+
+nodes void setMtxNodesV(void) @ 2.2{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(ε*δx);
+  const ℝ M= ε/(2*ε + sigma*δx);
+  ∀ cell{
+    if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    // Filtrer ordre croissant
+    ℵ matrix setValue(cV, cell(1), cV, cell(0), -2.0*M*δtSx);
+  }
+}
+nodes void setMtxNodesW(void) @ 2.2{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(ε*δx);
+  const ℝ M= ε/(2*ε + sigma*δx);
+  ∀ cell{
+    if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    // Filtrer ordre de?croissant
+    ℵ matrix setValue(cW, cell(0), cW, cell(1), -2.0*M*δtSx );
+  }
+}
+
+/*outer*/ nodes void setMtxNodesWBCLeft(void) in (/*cell cV*/node nV) @ 2.21{
+  if (n!=0) continue;
+  const ℝ δtSx = δt/(ε*δx);
+  const ℝ M= ε/(2*ε + sigma*δx);
+  debug()<< "[setMtxNodesWBCLeft]";
+  ∀ cell{
+    if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    ℵ matrix setValue(nV, this, cV, cell(#), -2.0*M*δtSx);
+  }
+}
+
+/*outer*/ nodes void setMtxNodesWBCRight(void) in (/*cell cW*/node nW) @ 2.21{
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(ε*δx);
+  const ℝ M= ε/(2*ε + sigma*δx);
+  debug()<< "[setMtxNodesWBCRight]";
+  ∀ cell{
+    if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    ℵ matrix setValue(nW, this, cW, cell(#), -2.0*M*δtSx);
+  }
+}
+
+
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 3.0 {
+  ℵ solve;
+}
+
+
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+cells void getCellResultsV(void) out (cell cV,cW,cT) @ 3.1{
+  cV=ℵ lhs getValue(cV, this);
+  cW=ℵ lhs getValue(cW, this);
+  cT=ℵ lhs getValue(cT, this);
+}
+
+nodes void getNodeResults(void) @ 3.2{
+  if ((n==0)||(n==(NABLA_NB_NODES-1))){
+    nV=ℵ lhs getValue(nV,this);
+    debug()<<"[getNodeResults] nV["<<uid<<"]="<<nV;
+  }
+}

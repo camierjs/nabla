@@ -49,12 +49,19 @@
 #include <iostream>
 #include <exception>
 #include <stdexcept>
+#include <sstream>
+#include <fstream>
 
 #define A_FUNCINFO __PRETTY_FUNCTION__
 
 using std::ostream;
+using std::ofstream;
 using std::string;
-using std::vector; 
+using std::vector;
+
+extern std::ofstream devNull;
+extern std::ostream& debug();
+extern std::ostream& info();
 
 
 // ****************************************************************************
@@ -75,10 +82,7 @@ public:
   TraceAccessor(ITraceMng* m):m_trace(m){}
 public:
   ITraceMng* traceMng() const { return m_trace;}
-  ostream& out() const { std::cout.flush();std::cout<<"\n";return std::cout;}
-  ostream& info() const { return out();}
-  ostream& debug() const { return out();}
-  ostream& warning() const { return out();}
+  ostream& warning() const { return info();}
  private:
   ITraceMng* m_trace;
 };
@@ -248,8 +252,8 @@ public:
   SequentialMng(ITraceMng *t):m_trace_mng(t){}
 public:
   bool isParallel() const { return false;}
-  int commRank() const { std::cout<<"\n\t\33[1;36m SequentialMng::commRank \33[0m"; return 0;}
-  int commSize() const { std::cout<<"\n\t\33[1;36m SequentialMng::commSize \33[0m"; return 1;}
+  int commRank() const {debug()<<"\n\t\33[1;36m SequentialMng::commRank \33[0m"; return 0;}
+  int commSize() const {debug()<<"\n\t\33[1;36m SequentialMng::commSize \33[0m"; return 1;}
   ITraceMng* traceMng() const { return m_trace_mng;}
   IParallelMng* worldParallelMng() {
     //throw std::logic_error("SequentialMng::worldParallelMng");

@@ -146,7 +146,7 @@ void yyerror(astNode **root, char *error){
 // * Nabla Parsing
 // ****************************************************************************
 NABLA_STATUS nablaParsing(const char *nabla_entity_name,
-                          const bool optionDumpTree,
+                          const int optionDumpTree,
                           char *npFileName,
                           const BACKEND_SWITCH backend,
                           const BACKEND_COLORS colors,
@@ -166,7 +166,7 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   fclose (yyin);
   dbg("\n[nablaParsing] On scan l'arbre pour transformer les tokens en UTF8");
   dfsUtf8(root);
-  if (optionDumpTree){
+  if (optionDumpTree!=0){
     dbg("\n[nablaParsing] On dump l'arbre créé");
     astTreeSave(nabla_entity_name, root);
   }
@@ -269,7 +269,7 @@ int main(int argc, char * argv[]){
   int c;
   BACKEND_SWITCH backend=BACKEND_VOID;
   BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
-  bool optionDumpTree=false;
+  int optionDumpTree=0;
   char *nabla_entity_name=NULL;
   int longindex=0;
   char *interface_name=NULL;
@@ -298,6 +298,7 @@ int main(int argc, char * argv[]){
     //{"aos",no_argument,NULL,BACKEND_COLOR_OKINA_AOS},
        {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
        {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
+    {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
     {NULL,0,NULL,0}
   };
   // Set our nabla_error_print_progname for emacs to be able to visit
@@ -314,8 +315,13 @@ int main(int argc, char * argv[]){
       // * Standard OPTIONS
       // ************************************************************      
     case 't': // DUMP tree option
-      optionDumpTree=true;
+      optionDumpTree=OPTION_TIME_DOT_STD;
       dbg("\n[nabla] Command line specifies to dump the tree");
+      break;
+
+    case OPTION_TIME_DOT_MMA:
+      optionDumpTree=OPTION_TIME_DOT_MMA;
+      dbg("\n[nabla] Command line specifies to dump the MMA tree");
       break;
 
     case 'v': // DEBUG MANAGEMENT
