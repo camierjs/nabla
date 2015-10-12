@@ -152,8 +152,8 @@ public:
   //}
   void setValue(double *var, int itm, double value){
     //debug()<<"\33[1;33m[vector::setValue(...)]\33[0m";
-    //int topology_row_offset=0;
-    unsigned int idx=0;//m_aleph_kernel->indexing()->get(var,itm)-topology_row_offset;
+    int topology_row_offset=0;
+    unsigned int idx=m_aleph_kernel->indexing()->get(var,itm)-topology_row_offset;
     if(idx==size()){
       resize(idx+1);
       index.push_back(idx);
@@ -164,7 +164,7 @@ public:
   }
   double getValue(double *var, int itmEnum){
     //debug()<<"\33[1;33m[vector::getValue]\33[0m";
-    return 0.0;//at(m_aleph_kernel->indexing()->get(var,itmEnum));
+    return at(m_aleph_kernel->indexing()->get(var,itmEnum));
   }
 public:
   vector<int> index;
