@@ -20,7 +20,8 @@ C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
 export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
 export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
-export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64
+#export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64:${LD_LIBRARY_PATH}
+
 
 #################
 # CMAKE OPTIONS #

@@ -17,7 +17,7 @@ CFLAGS = -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(ME
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 LIB_ALEPH = ${LAMBDA_ALEPH_LIB} ${LAMBDA_ALEPH_HYPRE_LIB}
 # A mettre lors du configure
-LIB_HYPRE = /usr/local/hypre/lib/libHYPRE.a #-Wl,-rpath,/usr/local/hypre/lib 
+LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
 
 export X_EDGE_ELEMS = $(MESH)

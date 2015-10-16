@@ -1,11 +1,17 @@
 include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
 
 find_path(HYPRE_INCLUDE_DIR HYPRE.h ${HYPRE_ROOT}/include)
-find_library(HYPRE_LIB HYPRE ${HYPRE_ROOT}/lib)
+
+# We are looking for libHYPRE.a (sequential!)
+find_library(HYPRE_LIB libHYPRE.a ${HYPRE_ROOT}/lib NO_DEFAULT_PATH)
 
 set(HYPRE_FOUND "NO" )
-if(HYPRE_INCLUDE_DIR)
-  if(HYPRE_LIB)
-    set(HYPRE_FOUND "YES" )
-  endif()
-endif()
+
+if(HYPRE_INCLUDE_DIR AND HYPRE_LIB)
+  info("\t${VT100_FG_MAGENTA}HYPRE_INCLUDE_DIR${VT100_RESET} has been set to ${HYPRE_INCLUDE_DIR}${VT100_RESET}")
+  info("\t${VT100_FG_MAGENTA}HYPRE_LIB${VT100_RESET} has been set to ${HYPRE_LIB}${VT100_RESET}")
+  set(HYPRE_FOUND "YES" )
+else(HYPRE_INCLUDE_DIR AND HYPRE_LIB)
+  set(HYPRE_LIB "")
+  info("\t${VT100_FG_MAGENTA}HYPRE_LIB${VT100_RESET} has been set to ${HYPRE_LIB}${VT100_RESET}")
+endif(HYPRE_INCLUDE_DIR AND HYPRE_LIB)

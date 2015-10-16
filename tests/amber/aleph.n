@@ -120,9 +120,14 @@ cells void getCellResultsV(void) out (cell cV,cW,cT) @ 3.1{
   cT=ℵ lhs getValue(cT, this);
 }
 
-nodes void getNodeResults(void) @ 3.2{
-  if ((n==0)||(n==(NABLA_NB_NODES-1))){
-    nV=ℵ lhs getValue(nV,this);
-    debug()<<"[getNodeResults] nV["<<uid<<"]="<<nV;
-  }
+nodes void getNodeResultsV(void) out (node nV) @ 3.2{
+  if (n!=0) continue;
+  nV=ℵ lhs getValue(nV,this);
+  debug()<<"[getNodeResults] nV["<<uid<<"]="<<nV;
+}
+
+nodes void getNodeResultsW(void) out (node nW) @ 3.2{
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  nW=ℵ lhs getValue(nW,this);
+  debug()<<"[getNodeResults] nW["<<uid<<"]="<<nW;
 }
