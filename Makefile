@@ -110,6 +110,10 @@ tstldr:
 ################
 # ARCANE tests #
 ################
+tstadg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_gen_1)
+tstadr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_1)
 tstasw:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_swirl_gen_1)
 tstabg:

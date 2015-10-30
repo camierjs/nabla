@@ -1,0 +1,313 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DESROZIER Sylvain - Sylvain.Dezrosier@ifpen.fr            //
+//                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
+//                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+with ℵ;
+#include "assert.h"
+
+// ****************************************************************************
+// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ∀ ℝℕℤ √∛ ½⅓¼⅛ 𝜕ℵ∂
+// * ⋅⨯⤫⊗⨂⊛
+// * ²³ⁿ⁺¹
+// * ∞
+// ****************************************************************************
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ option_boundary_Xmin_pressure = 0.0;
+  ℝ option_boundary_Xmax_pressure = 1.0;
+  
+  ℝ option_ini_porosity = 1.0;
+  ℝ option_ini_permeability = 1.0;
+  ℝ option_ini_oil_density = 1.0;
+  ℝ option_ini_water_density = 1.0;
+  ℝ option_ini_oil_viscosity = 1.0;
+  ℝ option_ini_water_viscosity = 1.0;
+    
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.0001;
+  ℝ option_stoptime   = 0.001;
+
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-12;
+  // 0=auto, 1:sloop, 2:hypre, 3:CUDA, 4:trilinos, 5: PETSc
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 1024;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephPreconditionerMethod = 2;
+  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephSolverMethod     = 0;
+  ℕ alephNumberOfCores    = 0;
+  ℾ option_aleph_dump_matrix = false;     
+};
+
+
+// **************************************************************************
+// * Cell Variables
+// ****************************************************************************
+cells{
+  ℝ³ cell_center;
+  ℝ cell_measure;
+  ℝ pressure;
+  ℝ water_saturation;
+  ℝ water_saturation_local;
+  ℝ oil_saturation;
+  ℝ oil_saturation_local;
+  ℝ water_density;
+  ℝ oil_density;
+  ℝ water_viscosity;
+  ℝ oil_viscosity;
+  ℝ water_relative_permeability;
+  ℝ oil_relative_permeability;
+  ℝ water_mobility;
+  ℝ oil_mobility;
+  ℝ total_mobility;
+  ℝ porosity;
+  ℝ³⨯ℝ³ permeability;
+};
+
+
+// ****************************************************************************
+// * Face Variables
+// ****************************************************************************
+faces{
+  ℝ³ face_center;
+  ℝ face_measure;
+  ℝ³ face_normal;
+  ℝ transmissivity;
+  ℝ total_velocity;
+};
+
+
+// ****************************************************************************
+// * Functions
+// ****************************************************************************
+ℝ krw(ℝ Sw) { return Sw;}
+ℝ kro(ℝ So) { return So;}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0 {
+  info()<<"\33[7m[Loop] #"<<GlobalIteration<<", time="<<time<<"\33[m";
+}
+
+∀ cells void computeOilRelativePermeability(void)
+  in (cell oil_saturation)
+  out (cell oil_relative_permeability) @ 1.0 {
+  oil_relative_permeability = kro(oil_saturation);
+}
+
+∀ cells void computeWaterRelativePermeability(void)
+  in (cell water_saturation)
+  out (cell water_relative_permeability) @ 1.0 {
+  water_relative_permeability = krw(water_saturation);
+}
+
+∀ cells void computeOilMobility(void)
+  in (cell oil_relative_permeability, oil_viscosity)
+  out (cell oil_mobility) @ 2.0 {
+  assert(oil_viscosity>0.0);
+  oil_mobility = oil_relative_permeability/oil_viscosity;
+}
+
+∀ cells void computeWaterMobility(void)
+  in (cell water_relative_permeability, water_viscosity)
+  out (cell water_mobility) @ 2.0 {
+  assert(water_viscosity>0.0);
+  water_mobility = water_relative_permeability/water_viscosity;
+}
+
+∀ cells void computeTotalMobility(void)
+  in (cell water_mobility,
+      cell oil_mobility)
+  out (cell total_mobility) @ 3.0 {
+  total_mobility = water_mobility + oil_mobility;
+}
+
+// *******************************************************
+// * computePressure in aleph.n inserted here @ [4.0,5.0[
+// *******************************************************
+
+∀ inner faces void computeInnerTotalVelocity(void)
+  in (face transmissivity,
+      cell total_mobility, pressure)
+  out (face total_velocity) @ 5.0 {
+  if (!(this).isOwn()) continue;
+  //info()<<"[computeInnerTotalVelocity] face @ face_center="<<face_center;
+  const ℝ mobility = ½*(total_mobility[backCell]+total_mobility[frontCell]);
+  total_velocity = transmissivity*mobility*(pressure[backCell]-pressure[frontCell]);
+}
+
+∀ outer faces void computeOuterTotalVelocity(void) @ 5.0 {
+  if (!(this).isOwn()) continue;
+  if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
+  info()<<"[computeOuterTotalVelocity] face @ face_center="<<face_center;
+  const ℝ boundary_pressure =
+    (face_center.x==0.0)?option_boundary_Xmin_pressure:
+    (face_center.x==1.0)?option_boundary_Xmax_pressure:∞;
+  total_velocity = transmissivity*total_mobility[0]*(pressure[0]-boundary_pressure);
+  total_velocity *= ((this).isSubDomainBoundaryOutside()) ? 1.0 : -1.0;
+  info()<<"[computeOuterTotalVelocity] isSubDomainBoundaryOutside: "<<(this).isSubDomainBoundaryOutside();
+}
+
+void syncTotalVelocity(void) @ 5.1 {
+  synchronize(total_velocity);
+}
+
+
+// *************************************
+// * Now computeExplicitWaterSaturation
+// *************************************
+∀ cells void dupWaterSaturationTolocal(void)
+  in (cell water_saturation) out (cell water_saturation_local) {
+  water_saturation_local=water_saturation;
+}
+
+∀ inner faces void computeInnerExplicitWaterSaturation(void)
+  in (face total_velocity,
+      cell water_mobility,total_mobility)
+  out (cell water_saturation_local) {
+  const ℝ velocity = total_velocity;
+  const ℝ wfrac_flow = (velocity > 0.) ?
+    water_mobility[frontCell]/total_mobility[frontCell]:
+    water_mobility[backCell]/total_mobility[backCell];
+  const ℝ tmp = velocity * wfrac_flow * δt;
+  water_saturation_local[frontCell] -= tmp/(cell_measure[frontCell]*porosity[frontCell]);
+  water_saturation_local[backCell]  += tmp/(cell_measure[backCell]*porosity[backCell]);
+}
+
+∀ own outer faces void computeOuterExplicitWaterSaturation(void)
+  in (face total_velocity,
+      cell water_mobility,total_mobility)
+  out (cell water_saturation_local) {
+  if (!(this).isOwn()) continue;
+  if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
+  const ℝ velocity = ((this).isSubDomainBoundaryOutside())?total_velocity:-total_velocity;
+  const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
+  if (velocity < 0.) {
+    // Injection d'huile
+    const ℝ local_water_mobility = krw(0.) / water_viscosity[0];
+    const ℝ local_oil_mobility = krw(1.) / oil_viscosity[0];
+    const ℝ mobility = local_water_mobility + local_oil_mobility;
+    const ℝ wfrac_flow = water_mobility[0] / mobility;
+    water_saturation_local[0] -= wfrac_flow * tmp;
+  } else {
+    const ℝ wfrac_flow = water_mobility[0] / total_mobility[0];
+    water_saturation_local[0] -= wfrac_flow * tmp;
+  }
+}
+
+∀ cells ℾ needSmallerTimeStep(ℾ value) {//@ 6.5{
+  if ((water_saturation > 1.0) || (water_saturation < 0.0)){
+    error()<< "[needSmallerTimeStep] water_saturation["<<uid<<"]="<<water_saturation;
+    value|=true;
+  }
+  return value;
+}
+
+∀ cells void dupWaterSaturationLocalToTn(void)
+  in (cell water_saturation,oil_saturation)
+  out (cell oil_saturation_tn) {
+  water_saturation = water_saturation_local;
+}
+  
+void computeExplicitWaterSaturation(void) @ 6.0 {
+  for(int i=0;;i+=1){
+    dupWaterSaturationTolocal();
+    computeInnerExplicitWaterSaturation();
+    computeOuterExplicitWaterSaturation();
+    if (needSmallerTimeStep(false)){
+      info()<< "[computeExplicitWaterSaturation] Redoing with a smaller time step: "<<δt;
+      δt=δt/2.;
+      if (δt<=1.0e-5) break;
+    }else{
+      info()<< "[computeExplicitWaterSaturation] ok";
+      break;
+    }
+  }
+  dupWaterSaturationLocalToTn();
+}
+
+void syncWaterSaturation(void) @ 6.9 {
+  synchronize(water_saturation);
+}
+
+∀ cells void computeOilSaturation(void)
+  in (cell water_saturation)
+  out( cell oil_saturation) @ 7.0 {
+  oil_saturation = 1. - water_saturation;
+}
+
+
+
+// ****************************************************************************
+// * Test for Quit & adjust time step
+// ****************************************************************************
+void computeNextTimeStep(void) @ 10.0 {
+  info()<<"[computeNextTimeStep] GlobalIteration="<<GlobalIteration
+        <<", time="<<time
+        <<", delta_t="<<δt;
+  if (GlobalIteration==2) exit;
+  if(time >= option_stoptime) exit;
+/*
+  if(δt >= option_stoptime-time) {
+    info() << "- simulation finished";
+    δt = option_stoptime - time;
+    exit;
+  } else {
+    info() << "- increase time step";
+    const ℝ factor = 1.0;
+    info() << "  - time steps : " << GlobalIteration;
+    info() << "  - ponderation factor (max is 1) : " << factor;
+    δt = max(1., min(1.5, factor))*δt;
+    }*/
+}
+
+// entry-point exit

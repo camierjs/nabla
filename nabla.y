@@ -883,13 +883,20 @@ at_constant
 // ∇ jobs definitions //
 ////////////////////////
 nabla_job_prefix: nabla_family {rhs;} | FORALL nabla_family {rhs;};
+//nabla_job_decl: declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}| IDENTIFIER {rhs;};
 nabla_job_definition
-: nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant IF '(' constant_expression ')' compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement {compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);}
+: nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7);}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8);}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9);}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant IF '(' constant_expression ')' compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10);}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement
+{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);}
 ;
 
 

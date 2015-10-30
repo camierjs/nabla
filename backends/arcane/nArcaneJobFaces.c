@@ -121,7 +121,7 @@ char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
       scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   
   //if (resolve && forall_cell) return "/*ff:rc*/";
-  //if (resolve && forall_node) return "/*ff:rn*/";
+  if (resolve && forall_node) return "/*ff:rn*/[face]";
   //if (resolve && forall_face) return "/*ff:rf*/";
   if (resolve && forall_none) return "/*ff:r0*/[face]";
   

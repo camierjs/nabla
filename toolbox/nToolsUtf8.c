@@ -140,18 +140,28 @@ void nUtf8(char **bkp){
   if (p==NULL) return;
   //dbg("\n[nUtf8] '%s'",p);
   
-  if (*(unsigned int*)p==0x0074b4ce) { // "δt"
+  if (strcmp(p,"δt")==0) { // "δt"
     //dbg("\n[nUtf8] hits deltat!");
     *bkp=strdup("deltat"); 
     return;
   }
-  if (*(unsigned int*)p==0xc29d84e2) { // ℝ³: 84e2 c29d (00b3)!
-    dbg("\n[nUtf8] hits Real^3!");
+  if (strcmp(p,"ℝ³⨯ℝ³")==0) { // ℝ³⨯ℝ³: 84e2 c29d e2b3 afa8 84e2 c29d 00b3
+    //dbg("\n[nUtf8] hits (Real^3)x(Real^3)!");
+    *bkp=strdup("Real3x3"); 
+    return;
+  }  
+  if (strcmp(p,"ℝ³")==0) { // ℝ³: 84e2 c29d 00b3!
+    //dbg("\n[nUtf8] hits Real^3!");
     *bkp=strdup("Real3"); 
     return;
   }  
+  if (strcmp(p,"ℾ")==0) { 
+    //dbg("\n[nUtf8] hits Bool!");
+    *bkp=strdup("Bool"); 
+    return;
+  }  
   if (strcmp(p,"ⁿ⁺¹")==0) {
-    dbg("\n[nUtf8] hits 'ⁿ⁺¹'!");
+    //dbg("\n[nUtf8] hits 'ⁿ⁺¹'!");
     *bkp=strdup("np1"); 
     return;
   }  

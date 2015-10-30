@@ -141,10 +141,12 @@ __asm__           { return tok(&yylval, ASM);}
 "particles"			{ return tok(&yylval, PARTICLES);}
 "options"		   { return tok(&yylval, OPTIONS);}
 
-"ℝ"			      { return tok(&yylval, REAL);}
+"ℝ³⨯ℝ³"	         { return tok(&yylval, REAL3x3);}
 "ℝ³"			      { return tok(&yylval, REAL3);}
+"ℝ"			      { return tok(&yylval, REAL);}
 "ℤ"		         { return tok(&yylval, INTEGER);}
 "ℕ"		         { return tok(&yylval, NATURAL);}
+"ℾ"		         { return tok(&yylval, BOOL);}
 
 "size_t"			   { return tok(&yylval, SIZE_T);}
 "Bool"			   { return tok(&yylval, BOOL);}
