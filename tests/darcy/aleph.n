@@ -77,7 +77,8 @@ void computePressureRhsInit(void) @ 4.0{
   const ℝ value = transmissivity*(total_mobility[0]);
   const ℝ boundary_pressure =
     (face_center.x==0.0)?option_boundary_Xmin_pressure:
-    (face_center.x==1.0)?option_boundary_Xmax_pressure:∞;
+    (face_center.x==1.0)?option_boundary_Xmax_pressure:-∞;
+  assert(boundary_pressure>=0.0);
   ℵ matrix addValue(pressure,cell(0), pressure,cell(0), +value);
   ℵ rhs addValue(pressure,cell(0),value*boundary_pressure);
 }
@@ -88,6 +89,7 @@ void solvePressure(void) @ 4.4 { ℵ solve; }
 
 ∀ own cells void getCellPressure(void) out (cell pressure) @ 4.5{
   pressure=ℵ lhs getValue(pressure, this);
+  assert(pressure>=0.0);
   //info()<<"[getCellPressure] pressure["<<uid<<"]="<<pressure;
 }
 

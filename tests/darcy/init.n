@@ -53,6 +53,10 @@ void init(void) @ -20.0{
    δt=option_δt_initial;
 }
 
+∀ cells void initCellUid(void) in (node coord) out (cell cell_uid) @ -10.0 {
+  cell_uid=uid;
+}
+
 ∀ cells void initCellCenters(void) in (node coord) out (cell cell_center) @ -10.0 {
   //if (uid==0) info()<<"[initCellCenters]";
   cell_center=0;

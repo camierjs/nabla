@@ -1,4 +1,4 @@
 set(ARCANE_ROOT /usr/local/arcane/testing)
 set(Trilinos_ROOT_PATH /usr/local/trilinos/11.12.1)
 set(HYPRE_ROOT /usr/local/hypre)
-set(ICET_ROOT /usr/local/iceT/2.1.1-ompi)
+set(ICET_ROOT /usr/local/iceT)

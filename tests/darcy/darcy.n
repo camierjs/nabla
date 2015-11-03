@@ -58,6 +58,7 @@ with ℵ;
 // * Options
 // ****************************************************************************
 options{
+  ℝ ε = 1.0e-16;
   ℝ option_boundary_Xmin_pressure = 0.0;
   ℝ option_boundary_Xmax_pressure = 1.0;
   
@@ -67,13 +68,13 @@ options{
   ℝ option_ini_water_density = 1.0;
   ℝ option_ini_oil_viscosity = 1.0;
   ℝ option_ini_water_viscosity = 1.0;
-    
+  
   // Yet required options for Okina 
-  ℝ option_δt_initial = 0.0001;
-  ℝ option_stoptime   = 0.001;
+  ℝ option_δt_initial = 0.001;
+  ℝ option_stoptime   = 0.01;
 
   // Options d'Aleph
-  ℝ alephEpsilon             = 1.e-12;
+  ℝ alephEpsilon             = 1.e-15;
   // 0=auto, 1:sloop, 2:hypre, 3:CUDA, 4:trilinos, 5: PETSc
   ℕ alephUnderlyingSolver    = 2;
   ℕ alephMaxIterations       = 1024;
@@ -91,6 +92,7 @@ options{
 // * Cell Variables
 // ****************************************************************************
 cells{
+  ℕ cell_uid;
   ℝ³ cell_center;
   ℝ cell_measure;
   ℝ pressure;
@@ -180,21 +182,36 @@ void dbgLoop(void) @ 1.0 {
       cell total_mobility, pressure)
   out (face total_velocity) @ 5.0 {
   if (!(this).isOwn()) continue;
-  //info()<<"[computeInnerTotalVelocity] face @ face_center="<<face_center;
+  //debug()<<"[computeInnerTotalVelocity] face @ face_center="<<face_center;
   const ℝ mobility = ½*(total_mobility[backCell]+total_mobility[frontCell]);
-  total_velocity = transmissivity*mobility*(pressure[backCell]-pressure[frontCell]);
+  const ℝ diff_pressure = pressure[backCell]-pressure[frontCell];
+  const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<10.0*ε)?0.0:diff_pressure;
+  debug()<<"[computeInnerTotalVelocity]"
+        << " transmissivity="<<transmissivity
+        <<", mobility="<<mobility
+        <<", diff_pressure_unglitched="<<diff_pressure_unglitched;
+  total_velocity = transmissivity*mobility*diff_pressure_unglitched;
+  debug()<<"[computeInnerTotalVelocity] total_velocity="<<total_velocity;
 }
 
 ∀ outer faces void computeOuterTotalVelocity(void) @ 5.0 {
   if (!(this).isOwn()) continue;
   if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
-  info()<<"[computeOuterTotalVelocity] face @ face_center="<<face_center;
+  //debug()<<"[computeOuterTotalVelocity] face @ face_center="<<face_center;
   const ℝ boundary_pressure =
     (face_center.x==0.0)?option_boundary_Xmin_pressure:
-    (face_center.x==1.0)?option_boundary_Xmax_pressure:∞;
-  total_velocity = transmissivity*total_mobility[0]*(pressure[0]-boundary_pressure);
+    (face_center.x==1.0)?option_boundary_Xmax_pressure:-∞;
+  assert(boundary_pressure>=0.0);
+  const ℝ diff_pressure = pressure[0]-boundary_pressure;
+  const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<ε)?0.0:diff_pressure;
+  debug()<<"[computeOuterTotalVelocity]"
+        << " transmissivity="<<transmissivity
+        <<", mobility="<<total_mobility[0]
+        <<", diff_pressure_unglitched="<<diff_pressure_unglitched;
+  total_velocity = transmissivity*total_mobility[0]*diff_pressure_unglitched;
   total_velocity *= ((this).isSubDomainBoundaryOutside()) ? 1.0 : -1.0;
-  info()<<"[computeOuterTotalVelocity] isSubDomainBoundaryOutside: "<<(this).isSubDomainBoundaryOutside();
+  debug()<<"[computeOuterTotalVelocity] total_velocity="<<total_velocity;
+  //debug()<<"[computeOuterTotalVelocity] isSubDomainBoundaryOutside: "<<(this).isSubDomainBoundaryOutside();
 }
 
 void syncTotalVelocity(void) @ 5.1 {
@@ -218,43 +235,67 @@ void syncTotalVelocity(void) @ 5.1 {
   const ℝ wfrac_flow = (velocity > 0.) ?
     water_mobility[frontCell]/total_mobility[frontCell]:
     water_mobility[backCell]/total_mobility[backCell];
+  const ℝ dt=δt;
   const ℝ tmp = velocity * wfrac_flow * δt;
-  water_saturation_local[frontCell] -= tmp/(cell_measure[frontCell]*porosity[frontCell]);
-  water_saturation_local[backCell]  += tmp/(cell_measure[backCell]*porosity[backCell]);
+  const ℝ tmpf = tmp/(cell_measure[frontCell]*porosity[frontCell]);
+  const ℝ tmpb = tmp/(cell_measure[backCell]*porosity[backCell]);
+  debug()<< "velocity="<<velocity<<", wfrac_flow="<<wfrac_flow<<", deltat="<<dt;
+  debug()<< "[computeInnerExplicitWaterSaturation]"
+        << " [frontCell]="<<water_saturation_local[frontCell]
+        <<", [backCell]="<<water_saturation_local[backCell];
+  debug()<< "[computeInnerExplicitWaterSaturation]"
+        << " tmp="<<tmp << ", tmpf="<<tmpf << ", tmpb="<<tmpb;
+  water_saturation_local[frontCell] -= tmpf;
+  water_saturation_local[backCell]  += tmpb;
+  debug()<< "[computeInnerExplicitWaterSaturation]"
+        << " [frontCell]="<<water_saturation_local[frontCell]
+        <<", [backCell]="<<water_saturation_local[backCell];
+  debug()<< "\33[35m[computeInnerExplicitWaterSaturation] Face "<<backCell->localId()<<"->"<<frontCell->localId()<<"\33[m";
+      
 }
 
 ∀ own outer faces void computeOuterExplicitWaterSaturation(void)
   in (face total_velocity,
       cell water_mobility,total_mobility)
   out (cell water_saturation_local) {
-  if (!(this).isOwn()) continue;
+  //if (!(this).isOwn()) continue;
   if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
   const ℝ velocity = ((this).isSubDomainBoundaryOutside())?total_velocity:-total_velocity;
   const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
-  if (velocity < 0.) {
+  debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Face "<<backCell->localId()<<"->"<<frontCell->localId()<<" velocity="<<velocity<<"\33[m";
+  //debug()<< "[computeOuterExplicitWaterSaturation] water_saturation["<<uid<<"]="<<water_saturation;
+  if (velocity < 0.0) {
     // Injection d'huile
+    debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Injection d'huile\33[m";
     const ℝ local_water_mobility = krw(0.) / water_viscosity[0];
     const ℝ local_oil_mobility = krw(1.) / oil_viscosity[0];
     const ℝ mobility = local_water_mobility + local_oil_mobility;
     const ℝ wfrac_flow = water_mobility[0] / mobility;
-    water_saturation_local[0] -= wfrac_flow * tmp;
+    #warning += vs -= for water_saturation_local in computeOuterExplicitWaterSaturation
+    water_saturation_local[0] += wfrac_flow * tmp;
   } else {
+    debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Injection d'?\33[m";
     const ℝ wfrac_flow = water_mobility[0] / total_mobility[0];
     water_saturation_local[0] -= wfrac_flow * tmp;
   }
 }
 
+∀ cells void dumpWaterSaturation(void){
+  info()<< "[dumpWaterSaturation] water_saturation_local["<<uid<<"]="<<water_saturation_local;
+}
+
 ∀ cells ℾ needSmallerTimeStep(ℾ value) {//@ 6.5{
-  if ((water_saturation > 1.0) || (water_saturation < 0.0)){
-    error()<< "[needSmallerTimeStep] water_saturation["<<uid<<"]="<<water_saturation;
+  if ((water_saturation_local > 1.0) || (water_saturation_local < 0.0)){
+    //warning()<< "[needSmallerTimeStep] water_saturation["<<uid<<"]="<<water_saturation_local;
+    //printf(".");
     value|=true;
   }
   return value;
 }
 
 ∀ cells void dupWaterSaturationLocalToTn(void)
-  in (cell water_saturation,oil_saturation)
-  out (cell oil_saturation_tn) {
+  in (cell water_saturation_local)
+  out (cell water_saturation) {
   water_saturation = water_saturation_local;
 }
   
@@ -263,12 +304,12 @@ void computeExplicitWaterSaturation(void) @ 6.0 {
     dupWaterSaturationTolocal();
     computeInnerExplicitWaterSaturation();
     computeOuterExplicitWaterSaturation();
+    //dumpWaterSaturation();
     if (needSmallerTimeStep(false)){
-      info()<< "[computeExplicitWaterSaturation] Redoing with a smaller time step: "<<δt;
+      info()<< "\33[31m[computeExplicitWaterSaturation] Redoing with a smaller time step: "<<δt<<"\33[m";
       δt=δt/2.;
-      if (δt<=1.0e-5) break;
     }else{
-      info()<< "[computeExplicitWaterSaturation] ok";
+      //info()<< "\33[31m[computeExplicitWaterSaturation] ok\33[m";
       break;
     }
   }
@@ -291,23 +332,12 @@ void syncWaterSaturation(void) @ 6.9 {
 // * Test for Quit & adjust time step
 // ****************************************************************************
 void computeNextTimeStep(void) @ 10.0 {
-  info()<<"[computeNextTimeStep] GlobalIteration="<<GlobalIteration
+  debug()<<"[computeNextTimeStep] GlobalIteration="<<GlobalIteration
         <<", time="<<time
         <<", delta_t="<<δt;
-  if (GlobalIteration==2) exit;
-  if(time >= option_stoptime) exit;
-/*
-  if(δt >= option_stoptime-time) {
-    info() << "- simulation finished";
-    δt = option_stoptime - time;
-    exit;
-  } else {
-    info() << "- increase time step";
-    const ℝ factor = 1.0;
-    info() << "  - time steps : " << GlobalIteration;
-    info() << "  - ponderation factor (max is 1) : " << factor;
-    δt = max(1., min(1.5, factor))*δt;
-    }*/
+  const ℝ factor = 1.125;
+  δt = max(1., min(1.5, factor))*δt;
+  if (time >= option_stoptime) exit;
 }
 
 // entry-point exit

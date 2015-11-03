@@ -22,12 +22,12 @@ export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
 export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
 #export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64:${LD_LIBRARY_PATH}
 
-
 #################
 # CMAKE OPTIONS #
 #################
 CMAKE = $(CMAKE_ROOT_PATH)/cmake
 CTEST = $(CMAKE_ROOT_PATH)/ctest
+HYODA = /usr/local/arcane/testing/bin/hyoda
 
 #########
 # PATHS #
@@ -114,6 +114,8 @@ tstadg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_gen_1)
 tstadr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_1)
+tstadrh:
+	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_darcy_run_1)
 tstasw:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_swirl_gen_1)
 tstabg:
@@ -141,20 +143,20 @@ tstal1:
 tstag1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
 tsthas:
-	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
+	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tsthas4:
-	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
+	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
 tsts:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_1)
 tsths:
-	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_sethi_run_1)
+	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_sethi_run_1)
 tsts4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_4)
 
 tstm:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
 tstmh:
-	(cd $(BUILD_PATH)/tests && /usr/local/arcane/testing/bin/hyoda $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
+	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
 tstm4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_4)
 
