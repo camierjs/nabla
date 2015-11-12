@@ -5,7 +5,7 @@
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
-//                 DESROZIER Sylvain - Sylvain.Dezrosier@ifpen.fr            //
+//                 DESROZIERS Sylvain - Sylvain.Dezrosiers@ifpen.fr          //
 //                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
 //                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
 //                                                                           //
@@ -53,35 +53,27 @@ void init(void) @ -20.0{
    δt=option_δt_initial;
 }
 
-∀ cells void initCellUid(void) in (node coord) out (cell cell_uid) @ -10.0 {
+∀ cells void initCellUid(void) out (cell cell_uid) @ -10.0 {
   cell_uid=uid;
 }
 
-∀ cells void initCellCenters(void) in (node coord) out (cell cell_center) @ -10.0 {
-  //if (uid==0) info()<<"[initCellCenters]";
+∀ cells void initCellCenters(void)
+  in (node coord) out (cell cell_center) @ -10.0 {
   cell_center=0;
   ∀ node cell_center += coord;
   cell_center/=nbNode;
 }
 
-∀ cells void initCellMeasures(void) in (node coord) out (cell cell_measure) @ -9.0 {
-  const ℝ³ s = coord[0];
-  const ℝ³ c = cell_center;
-  const ℝ³ h = c-s;
-  const ℝ x = 2.0*h.x;
-  const ℝ y = 2.0*h.y;
-  const ℝ z = 2.0*h.z;
-  cell_measure=x*y*z;
-  //info()<<"[initCellMeasures] cell_measure["<<uid<<"]="<<cell_measure;
-}
-
-∀ faces void initFaceCenters(void) in (node coord) out (face face_center) @ -10.0 {
+∀ faces void initFaceCenters(void)
+  in (node coord) out (face face_center) @ -10.0 {
   face_center=0;
   ∀ node face_center += coord;
   face_center /= nbNode;
 }
 
-∀ faces void initFaceMeasures(void) in (node coord) out (face face_measure) @ -10.0 {
+∀ faces void initFaceMeasures(void)
+  in (node coord)
+  out (face face_measure) @ -10.0 {
   const ℝ³ s0 = coord[0];
   const ℝ³ s1 = coord[1];
   const ℝ³ s2 = coord[2];
@@ -90,7 +82,8 @@ void init(void) @ -20.0{
   face_measure=½*norm(a⨯b);
 }
 
-∀ faces void initFaceNormal(void) out (face face_normal) @ -10.0 {
+∀ faces void initFaceNormal(void)
+  out (face face_normal) @ -10.0 {
   const ℝ³ s0 = coord[0];
   const ℝ³ s1 = coord[1];
   const ℝ³ s2 = coord[2];
@@ -98,6 +91,17 @@ void init(void) @ -20.0{
   const ℝ³ b = s2-s0;
   const ℝ³ axb=a⨯b;
   face_normal=axb/norm(axb);
+}
+
+∀ cells void initCellMeasures(void)
+  in (node coord) out (cell cell_measure) @ -9.0 {
+  const ℝ³ s = coord[0];
+  const ℝ³ c = cell_center;
+  const ℝ³ h = c-s;
+  const ℝ x = 2.0*h.x;
+  const ℝ y = 2.0*h.y;
+  const ℝ z = 2.0*h.z;
+  cell_measure=x*y*z;
 }
 
 ∀ cells void initPorosity(void) out (cell porosity) @ -10.0 {
@@ -173,8 +177,3 @@ void init(void) @ -20.0{
   const ℝ tau  = fabs(t0+t1)?(t0*t1/(t0+t1))*cos2:0.0;
   transmissivity = tau;
 }
-
-void initSyncCellTransmissivity(void) @ -8.0 {
-  synchronize(transmissivity);
-}
-

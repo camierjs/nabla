@@ -83,6 +83,8 @@ tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
 tstol:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_seq)
+tstoa:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_aecjs_gen_1)
 
 ################
 # LAMBDA tests #
@@ -110,10 +112,14 @@ tstldr:
 ################
 # ARCANE tests #
 ################
+tstaeg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aecjs_gen_1)
 tstadg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_gen_1)
 tstadr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_1)
+tstadr4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_4)
 tstadrh:
 	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_darcy_run_1)
 tstasw:
@@ -126,6 +132,8 @@ tstahg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_gen_1)
 tstahr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_run_1)
+tstahr4:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_run_4)
 tstau:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_upwind_gen_1)
 tstagram:

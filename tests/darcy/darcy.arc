@@ -9,19 +9,21 @@
    <mesh>
      <meshgenerator>
  		 <cartesian>
-			<nsd>4 1 0</nsd>
+			<nsd>4 1 1</nsd>
+         <!-- '0.0' doit concorder avec darcy.n:option_boundary_Xmin! -->
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="20" prx="1.0">1.0</lx>
-			<ly ny="20" pry="1.0">1.0</ly>
+         <!-- '1.0' doit concorder avec darcy.n:option_boundary_Xmax! -->
+			<lx nx="10" prx="1.0">1.0</lx>
+			<ly ny="10" pry="1.0">1.0</ly>
 			<lz nz="1" prz="1.0">0.1</lz>
 		 </cartesian> 
      </meshgenerator>
    </mesh>
    
    <arcane-post-processing>
-     <save-init>1</save-init>
-     <end-execution-output>1</end-execution-output>
-	  <output-period>10</output-period>
+     <save-init>0</save-init>
+     <end-execution-output>0</end-execution-output>
+	  <output-period>0</output-period>
      <output>      
        <!--group>AllFaces</group>
        <variable>face_face_measure</variable>
@@ -30,7 +32,7 @@
       
        <group>AllCells</group>
        <!--variable>cell_cell_uid</variable-->
-       <!--variable>cell_pressure</variable-->
+       <variable>cell_pressure</variable>
        
        <!--variable>cell_porosity</variable>
        <variable>cell_total_mobility</variable-->
@@ -54,7 +56,7 @@
 
   <darcy>
     <option_dtt_initial>0.0001</option_dtt_initial>
-    <option_stoptime>0.1</option_stoptime>
+    <option_stoptime>0.02</option_stoptime>
     
     <option_ini_porosity>1.0</option_ini_porosity>
     <option_ini_permeability>1.0</option_ini_permeability>

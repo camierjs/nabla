@@ -44,48 +44,53 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-void computePressureRhsInit(void) @ 4.0{
-  alephInitialize();
-  ℵ rhs reset;
-  ℵ lhs reset;
+void syncGeom(void)@-9.9{
+  synchronize(face_normal);
+  synchronize(face_measure);
+  synchronize(face_center);
+  synchronize(cell_center);
 }
 
-∀ own cells void computePressureRhs(void) in (cell pressure) @ 4.1 {
-  ℵ rhs addValue(pressure,this,0.0);
+
+void syncCellMeasures(void)@-8.9{
+  synchronize(cell_measure);
 }
 
-∀ inner faces void computeInnerPressure(void) out (cell pressure) @ 4.2 {
-  const ℝ value = ½*transmissivity*
-    (total_mobility[backCell]+total_mobility[frontCell]);
-  if (backCell.isOwn()){
-    ℵ matrix addValue(pressure,backCell, pressure,backCell,  +value);
-    ℵ matrix addValue(pressure,backCell, pressure,frontCell, -value);
-  }
-  if (frontCell.isOwn()){
-    ℵ matrix addValue(pressure,frontCell, pressure,frontCell, +value);
-    ℵ matrix addValue(pressure,frontCell, pressure,backCell,  -value);
-  } 
+void syncInitWO(void)@-9.9{
+  synchronize(oil_density);
+  synchronize(water_density);
+  synchronize(oil_saturation);
+  synchronize(water_saturation);
 }
 
-∀ own outer faces void computeOuterPressure(void)
-  in (face face_center) out (cell pressure) @ 4.3 {
-  if ((face_center.x!=option_bc_Xmin)&&
-      (face_center.x!=option_bc_Xmax)) continue;
-  const ℝ value = transmissivity*(total_mobility[0]);
-  const ℝ boundary_pressure =
-    (face_center.x==option_bc_Xmin)?option_bc_Xmin_pressure:
-    (face_center.x==option_bc_Xmax)?option_bc_Xmax_pressure:-∞;
-  assert(boundary_pressure>=0.0);
-  if (!(cell(0).isOwn())) continue;
-  ℵ matrix addValue(pressure,cell(0), pressure,cell(0), +value);
-  ℵ rhs addValue(pressure,cell(0),value*boundary_pressure);
+
+void initSyncCellTransmissivity(void) @ -8.0 {
+  synchronize(transmissivity);
 }
 
-void solvePressure(void) @ 4.4 { ℵ solve; }
 
-∀ own cells void getCellPressure(void) out (cell pressure) @ 4.5{
-  pressure=ℵ lhs getValue(pressure, this);
-  assert(pressure>=0.0);
+void syncTotalMobility(void) @ 3.01 {
+  synchronize(oil_relative_permeability);
+  synchronize(water_relative_permeability);
+  synchronize(oil_mobility);
+  synchronize(water_mobility);
+  synchronize(total_mobility);
 }
 
+void syncPressure(void) @ 4.6 {
+  synchronize(pressure);
+}
+
+
+void syncTotalVelocity(void) @ 5.1 {
+  synchronize(total_velocity);
+}
+
+void syncSaturation(void) @ 7.1 {
+  synchronize(oil_saturation);
+  synchronize(water_saturation);
+}
+
+void syncWaterSaturation(void) @ 6.1 {
+  synchronize(water_saturation);
+}

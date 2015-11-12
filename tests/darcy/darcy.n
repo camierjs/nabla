@@ -5,7 +5,7 @@
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
-//                 DESROZIER Sylvain - Sylvain.Dezrosier@ifpen.fr            //
+//                 DESROZIERS Sylvain - Sylvain.Dezrosiers@ifpen.fr          //
 //                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
 //                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
 //                                                                           //
@@ -50,7 +50,7 @@ with ℵ;
 // * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
 // * ∀ ℝℕℤ √∛ ½⅓¼⅛ 𝜕ℵ∂
 // * ⋅⨯⤫⊗⨂⊛
-// * ²³ⁿ⁺¹
+// * ⁾ⁱ²³ⁿ⁺¹
 // * ∞
 // ****************************************************************************
 
@@ -58,23 +58,23 @@ with ℵ;
 // * Options
 // ****************************************************************************
 options{
-  ℝ ε = 1.0e-16;
-  ℝ option_boundary_Xmin_pressure = 0.0;
-  ℝ option_boundary_Xmax_pressure = 1.0;
-  
+  ℝ ε = 1.e-16;
+  ℾ option_debug = false;
+  ℝ option_bc_Xmin = 0.0;
+  ℝ option_bc_Xmax = 1.0;
+  ℝ option_bc_Xmin_pressure = 0.0;
+  ℝ option_bc_Xmax_pressure = 1.0;
   ℝ option_ini_porosity = 1.0;
   ℝ option_ini_permeability = 1.0;
   ℝ option_ini_oil_density = 1.0;
   ℝ option_ini_water_density = 1.0;
   ℝ option_ini_oil_viscosity = 1.0;
   ℝ option_ini_water_viscosity = 1.0;
-  
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
   ℝ option_stoptime   = 0.01;
-
   // Options d'Aleph
-  ℝ alephEpsilon             = 1.e-15;
+  ℝ alephEpsilon             = 1.e-17;
   // 0=auto, 1:sloop, 2:hypre, 3:CUDA, 4:trilinos, 5: PETSc
   ℕ alephUnderlyingSolver    = 2;
   ℕ alephMaxIterations       = 1024;
@@ -83,10 +83,10 @@ options{
   ℕ alephPreconditionerMethod = 2;
   // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   ℕ alephSolverMethod     = 0;
-  ℕ alephNumberOfCores    = 0;
+  // Je ramène tout sur un coeur car mon installation d'HYPRE est séquentielle
+  ℕ alephNumberOfCores    = 1; 
   ℾ option_aleph_dump_matrix = false;     
 };
-
 
 // **************************************************************************
 // * Cell Variables
@@ -113,7 +113,6 @@ cells{
   ℝ³⨯ℝ³ permeability;
 };
 
-
 // ****************************************************************************
 // * Face Variables
 // ****************************************************************************
@@ -125,19 +124,19 @@ faces{
   ℝ total_velocity;
 };
 
-
 // ****************************************************************************
 // * Functions
 // ****************************************************************************
-ℝ krw(ℝ Sw) { return Sw;}
-ℝ kro(ℝ So) { return So;}
+ℝ krw(ℝ Sw) { return Sw²;}
+ℝ kro(ℝ So) { return So²;}
 
 
 // ****************************************************************************
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void dbgLoop(void) @ 1.0 {
-  info()<<"\33[7m[Loop] #"<<GlobalIteration<<", time="<<time<<"\33[m";
+  info()<<"\33[7m[Loop] #"<<GlobalIteration
+        <<", time="<<time<<"\33[m";
 }
 
 ∀ cells void computeOilRelativePermeability(void)
@@ -155,14 +154,14 @@ void dbgLoop(void) @ 1.0 {
 ∀ cells void computeOilMobility(void)
   in (cell oil_relative_permeability, oil_viscosity)
   out (cell oil_mobility) @ 2.0 {
-  assert(oil_viscosity>0.0);
+  assert(oil_viscosity>=0.0);
   oil_mobility = oil_relative_permeability/oil_viscosity;
 }
 
 ∀ cells void computeWaterMobility(void)
   in (cell water_relative_permeability, water_viscosity)
   out (cell water_mobility) @ 2.0 {
-  assert(water_viscosity>0.0);
+  assert(water_viscosity>=0.0);
   water_mobility = water_relative_permeability/water_viscosity;
 }
 
@@ -177,156 +176,38 @@ void dbgLoop(void) @ 1.0 {
 // * computePressure in aleph.n inserted here @ [4.0,5.0[
 // *******************************************************
 
-∀ inner faces void computeInnerTotalVelocity(void)
+∀ own inner faces void computeInnerTotalVelocity(void)
   in (face transmissivity,
       cell total_mobility, pressure)
   out (face total_velocity) @ 5.0 {
-  if (!(this).isOwn()) continue;
-  //debug()<<"[computeInnerTotalVelocity] face @ face_center="<<face_center;
   const ℝ mobility = ½*(total_mobility[backCell]+total_mobility[frontCell]);
   const ℝ diff_pressure = pressure[backCell]-pressure[frontCell];
   const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<10.0*ε)?0.0:diff_pressure;
-  debug()<<"[computeInnerTotalVelocity]"
-        << " transmissivity="<<transmissivity
-        <<", mobility="<<mobility
-        <<", diff_pressure_unglitched="<<diff_pressure_unglitched;
   total_velocity = transmissivity*mobility*diff_pressure_unglitched;
-  debug()<<"[computeInnerTotalVelocity] total_velocity="<<total_velocity;
 }
 
-∀ outer faces void computeOuterTotalVelocity(void) @ 5.0 {
-  if (!(this).isOwn()) continue;
-  if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
-  //debug()<<"[computeOuterTotalVelocity] face @ face_center="<<face_center;
+∀ own outer faces void computeOuterTotalVelocity(void) @ 5.0 {
+  if ((face_center.x!=option_bc_Xmin)&&
+      (face_center.x!=option_bc_Xmax)) continue;
   const ℝ boundary_pressure =
-    (face_center.x==0.0)?option_boundary_Xmin_pressure:
-    (face_center.x==1.0)?option_boundary_Xmax_pressure:-∞;
+    (face_center.x==option_bc_Xmin)?option_bc_Xmin_pressure:
+    (face_center.x==option_bc_Xmax)?option_bc_Xmax_pressure:-∞;
   assert(boundary_pressure>=0.0);
   const ℝ diff_pressure = pressure[0]-boundary_pressure;
   const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<ε)?0.0:diff_pressure;
-  debug()<<"[computeOuterTotalVelocity]"
-        << " transmissivity="<<transmissivity
-        <<", mobility="<<total_mobility[0]
-        <<", diff_pressure_unglitched="<<diff_pressure_unglitched;
   total_velocity = transmissivity*total_mobility[0]*diff_pressure_unglitched;
   total_velocity *= ((this).isSubDomainBoundaryOutside()) ? 1.0 : -1.0;
-  debug()<<"[computeOuterTotalVelocity] total_velocity="<<total_velocity;
-  //debug()<<"[computeOuterTotalVelocity] isSubDomainBoundaryOutside: "<<(this).isSubDomainBoundaryOutside();
 }
 
-void syncTotalVelocity(void) @ 5.1 {
-  synchronize(total_velocity);
-}
-
-
-// *************************************
-// * Now computeExplicitWaterSaturation
-// *************************************
-∀ cells void dupWaterSaturationTolocal(void)
-  in (cell water_saturation) out (cell water_saturation_local) {
-  water_saturation_local=water_saturation;
-}
-
-∀ inner faces void computeInnerExplicitWaterSaturation(void)
-  in (face total_velocity,
-      cell water_mobility,total_mobility)
-  out (cell water_saturation_local) {
-  const ℝ velocity = total_velocity;
-  const ℝ wfrac_flow = (velocity > 0.) ?
-    water_mobility[frontCell]/total_mobility[frontCell]:
-    water_mobility[backCell]/total_mobility[backCell];
-  const ℝ dt=δt;
-  const ℝ tmp = velocity * wfrac_flow * δt;
-  const ℝ tmpf = tmp/(cell_measure[frontCell]*porosity[frontCell]);
-  const ℝ tmpb = tmp/(cell_measure[backCell]*porosity[backCell]);
-  debug()<< "velocity="<<velocity<<", wfrac_flow="<<wfrac_flow<<", deltat="<<dt;
-  debug()<< "[computeInnerExplicitWaterSaturation]"
-        << " [frontCell]="<<water_saturation_local[frontCell]
-        <<", [backCell]="<<water_saturation_local[backCell];
-  debug()<< "[computeInnerExplicitWaterSaturation]"
-        << " tmp="<<tmp << ", tmpf="<<tmpf << ", tmpb="<<tmpb;
-  water_saturation_local[frontCell] -= tmpf;
-  water_saturation_local[backCell]  += tmpb;
-  debug()<< "[computeInnerExplicitWaterSaturation]"
-        << " [frontCell]="<<water_saturation_local[frontCell]
-        <<", [backCell]="<<water_saturation_local[backCell];
-  debug()<< "\33[35m[computeInnerExplicitWaterSaturation] Face "<<backCell->localId()<<"->"<<frontCell->localId()<<"\33[m";
-      
-}
-
-∀ own outer faces void computeOuterExplicitWaterSaturation(void)
-  in (face total_velocity,
-      cell water_mobility,total_mobility)
-  out (cell water_saturation_local) {
-  //if (!(this).isOwn()) continue;
-  if ((face_center.x!=0.0)&&(face_center.x!=1.0)) continue;
-  const ℝ velocity = ((this).isSubDomainBoundaryOutside())?total_velocity:-total_velocity;
-  const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
-  debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Face "<<backCell->localId()<<"->"<<frontCell->localId()<<" velocity="<<velocity<<"\33[m";
-  //debug()<< "[computeOuterExplicitWaterSaturation] water_saturation["<<uid<<"]="<<water_saturation;
-  if (velocity < 0.0) {
-    // Injection d'huile
-    debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Injection d'huile\33[m";
-    const ℝ local_water_mobility = krw(0.) / water_viscosity[0];
-    const ℝ local_oil_mobility = krw(1.) / oil_viscosity[0];
-    const ℝ mobility = local_water_mobility + local_oil_mobility;
-    const ℝ wfrac_flow = water_mobility[0] / mobility;
-    #warning += vs -= for water_saturation_local in computeOuterExplicitWaterSaturation
-    water_saturation_local[0] += wfrac_flow * tmp;
-  } else {
-    debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Injection d'?\33[m";
-    const ℝ wfrac_flow = water_mobility[0] / total_mobility[0];
-    water_saturation_local[0] -= wfrac_flow * tmp;
-  }
-}
-
-∀ cells void dumpWaterSaturation(void){
-  info()<< "[dumpWaterSaturation] water_saturation_local["<<uid<<"]="<<water_saturation_local;
-}
-
-∀ cells ℾ needSmallerTimeStep(ℾ value) {//@ 6.5{
-  if ((water_saturation_local > 1.0) || (water_saturation_local < 0.0)){
-    //warning()<< "[needSmallerTimeStep] water_saturation["<<uid<<"]="<<water_saturation_local;
-    //printf(".");
-    value|=true;
-  }
-  return value;
-}
-
-∀ cells void dupWaterSaturationLocalToTn(void)
-  in (cell water_saturation_local)
-  out (cell water_saturation) {
-  water_saturation = water_saturation_local;
-}
-  
-void computeExplicitWaterSaturation(void) @ 6.0 {
-  for(int i=0;;i+=1){
-    dupWaterSaturationTolocal();
-    computeInnerExplicitWaterSaturation();
-    computeOuterExplicitWaterSaturation();
-    //dumpWaterSaturation();
-    if (needSmallerTimeStep(false)){
-      info()<< "\33[31m[computeExplicitWaterSaturation] Redoing with a smaller time step: "<<δt<<"\33[m";
-      δt=δt/2.;
-    }else{
-      //info()<< "\33[31m[computeExplicitWaterSaturation] ok\33[m";
-      break;
-    }
-  }
-  dupWaterSaturationLocalToTn();
-}
-
-void syncWaterSaturation(void) @ 6.9 {
-  synchronize(water_saturation);
-}
+// *******************************************************
+// * computeWaterSaturation inserted here @ [6.0,7.0[
+// *******************************************************
 
 ∀ cells void computeOilSaturation(void)
   in (cell water_saturation)
   out( cell oil_saturation) @ 7.0 {
-  oil_saturation = 1. - water_saturation;
+  oil_saturation = 1.0 - water_saturation;
 }
-
-
 
 // ****************************************************************************
 // * Test for Quit & adjust time step
@@ -336,8 +217,6 @@ void computeNextTimeStep(void) @ 10.0 {
         <<", time="<<time
         <<", delta_t="<<δt;
   const ℝ factor = 1.125;
-  δt = max(1., min(1.5, factor))*δt;
+  δt = factor*δt;
   if (time >= option_stoptime) exit;
 }
-
-// entry-point exit
