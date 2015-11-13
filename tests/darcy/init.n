@@ -72,8 +72,7 @@ void init(void) @ -20.0{
 }
 
 ∀ faces void initFaceMeasures(void)
-  in (node coord)
-  out (face face_measure) @ -10.0 {
+  in (node coord) out (face face_measure) @ -10.0 {
   const ℝ³ s0 = coord[0];
   const ℝ³ s1 = coord[1];
   const ℝ³ s2 = coord[2];

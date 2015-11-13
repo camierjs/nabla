@@ -105,9 +105,10 @@ tstlar:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
 tstlbg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_amber_run_1_seq)
-tstlag:
-tstldr:
+tstlxr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_deflex_run_1_seq)
+tstldr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_darcy_run_1_seq)
 
 ################
 # ARCANE tests #

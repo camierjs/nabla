@@ -44,51 +44,12 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-void syncGeom(void)@-9.9{
-  synchronize(face_normal);
-  synchronize(face_measure);
-  synchronize(face_center);
-  synchronize(cell_center);
-}
-
-
-void syncCellMeasures(void)@-8.9{
-  synchronize(cell_measure);
-}
-
-void syncInitWO(void)@-9.9{
-  synchronize(oil_density);
-  synchronize(water_density);
-  synchronize(oil_saturation);
-  synchronize(water_saturation);
-}
-
-
-void initSyncCellTransmissivity(void) @ -8.0 {
-  synchronize(transmissivity);
-}
-
-
-void syncTotalMobility(void) @ 3.01 {
-  synchronize(oil_relative_permeability);
-  synchronize(water_relative_permeability);
-  synchronize(oil_mobility);
-  synchronize(water_mobility);
-  synchronize(total_mobility);
-}
-
 void syncPressure(void) @ 4.6 {
   synchronize(pressure);
 }
 
-
 void syncTotalVelocity(void) @ 5.1 {
   synchronize(total_velocity);
-}
-
-void syncSaturation(void) @ 7.1 {
-  synchronize(oil_saturation);
-  synchronize(water_saturation);
 }
 
 void syncWaterSaturation(void) @ 6.1 {

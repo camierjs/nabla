@@ -12,10 +12,10 @@
 			<nsd>4 1 1</nsd>
          <!-- '0.0' doit concorder avec darcy.n:option_boundary_Xmin! -->
 			<origine>0.0 0.0 0.0</origine>
-         <!-- '1.0' doit concorder avec darcy.n:option_boundary_Xmax! -->
-			<lx nx="10" prx="1.0">1.0</lx>
-			<ly ny="10" pry="1.0">1.0</ly>
-			<lz nz="1" prz="1.0">0.1</lz>
+         <!-- '100.0' doit concorder avec darcy.n:option_boundary_Xmax! -->
+			<lx nx="100" prx="1.0">100.0</lx>
+			<ly ny="100" pry="1.0">100.0</ly>
+			<lz nz="1" prz="1.0">0.01</lz>
 		 </cartesian> 
      </meshgenerator>
    </mesh>

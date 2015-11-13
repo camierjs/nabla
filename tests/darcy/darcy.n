@@ -61,7 +61,7 @@ options{
   ℝ ε = 1.e-16;
   ℾ option_debug = false;
   ℝ option_bc_Xmin = 0.0;
-  ℝ option_bc_Xmax = 1.0;
+  ℝ option_bc_Xmax = 100.0; // A faire concorder avec .arc: <lx nx="100" prx="1.0">100.0</lx>
   ℝ option_bc_Xmin_pressure = 0.0;
   ℝ option_bc_Xmax_pressure = 1.0;
   ℝ option_ini_porosity = 1.0;
@@ -72,19 +72,23 @@ options{
   ℝ option_ini_water_viscosity = 1.0;
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime   = 0.01;
+  ℝ option_stoptime = 0.01;
   // Options d'Aleph
-  ℝ alephEpsilon             = 1.e-17;
+  // ! l'ε a l'air d'être très sensible
+  // Ici, en ramenat en sęquentiel
+  // ET en réordonnant les lignes 'comme en séquentiel',
+  // on recale séquentiel et parallèle
+  ℝ alephEpsilon = 1.e-16;
   // 0=auto, 1:sloop, 2:hypre, 3:CUDA, 4:trilinos, 5: PETSc
-  ℕ alephUnderlyingSolver    = 2;
-  ℕ alephMaxIterations       = 1024;
+  ℕ alephUnderlyingSolver = 2; // Ici Hypre
+  ℕ alephMaxIterations = 1024;
   // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
   // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
-  ℕ alephPreconditionerMethod = 2;
+  ℕ alephPreconditionerMethod = 2; // Ici AMG
   // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
-  ℕ alephSolverMethod     = 0;
+  ℕ alephSolverMethod = 0; // PCG
   // Je ramène tout sur un coeur car mon installation d'HYPRE est séquentielle
-  ℕ alephNumberOfCores    = 1; 
+  ℕ alephNumberOfCores = 1;
   ℾ option_aleph_dump_matrix = false;     
 };
 
@@ -182,7 +186,7 @@ void dbgLoop(void) @ 1.0 {
   out (face total_velocity) @ 5.0 {
   const ℝ mobility = ½*(total_mobility[backCell]+total_mobility[frontCell]);
   const ℝ diff_pressure = pressure[backCell]-pressure[frontCell];
-  const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<10.0*ε)?0.0:diff_pressure;
+  const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<ε)?0.0:diff_pressure;
   total_velocity = transmissivity*mobility*diff_pressure_unglitched;
 }
 

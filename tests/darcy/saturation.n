@@ -53,8 +53,7 @@
 }
 
 ∀ inner faces void computeInnerExplicitWaterSaturation(void)
-  in (face total_velocity,
-      cell water_mobility,total_mobility)
+  in (face total_velocity, cell water_mobility,total_mobility)
   out (cell water_saturation_local) {
   const ℝ velocity = total_velocity;
   const ℝ wfrac_flow = (velocity > 0.) ?
