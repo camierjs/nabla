@@ -152,10 +152,17 @@ NABLA_STATUS nccArcaneEntityIncludes(nablaEntity *entity){
 #include <arcane/utils/ArcanePrecomp.h>\n\
 #include <arcane/utils/ArcaneGlobal.h>\n\
 #include <arcane/IItemFamily.h>\n\
+#include <arcane/utils/String.h>\n\
+#include <arcane/utils/StringBuilder.h>\n\
 #include <arcane/utils/OStringStream.h>\n\
 #include <arcane/utils/TraceAccessor.h>\n\
 #include <arcane/utils/TraceClassConfig.h>\n\
-#include <arcane/IMesh.h>");
+#include <arcane/IMesh.h>\n\
+#include <arcane/ArcaneTypes.h>\n\
+#include <arcane/IEntryPoint.h>\n\
+#include <arcane/IEntryPointMng.h>\n\
+#include <arcane/IParallelMng.h>\n\
+");
   // Mais ça encore, ne nous intéresse pas dans le cas d'un service
   if (isAnArcaneModule(entity->main))
     fprintf(target_file, "\n\
@@ -288,7 +295,6 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
   if (isAnArcaneService(entity->main)) return NABLA_OK;
   for(;job!=NULL;job=job->next){
-    if (job->stdParamsNode==NULL) continue;
     if (job->is_a_function){
       fprintf(entity->hdr, "\n\t virtual ");
       nMiddleFunctionDumpHeader(entity->hdr, job->jobNode);
@@ -298,9 +304,13 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
     // Cela se fait aussi lors de la génération de l'axl afin de pouvoir traiter les @ -4,4
     dbg("\n\t[nccArcaneEntityVirtuals] virtuals for job %s", job->name);
     // On remplit la ligne du fichier HDR
-    //assert(job->returnType->children!=NULL);
-    fprintf(entity->hdr, "\n\tvirtual %s %s(", job->returnTypeNode->children->token, job->name);
-    nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);
+    // Si c'est une réduction, on fait moins
+    if (strstr(job->name, "arcaneReduction_")!=NULL)
+      fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
+    else
+      fprintf(entity->hdr, "\n\tvirtual %s %s(", job->returnTypeNode->children->token, job->name);
+    if (job->stdParamsNode!=NULL)
+      nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);    
     // Les entry points ne prennent pas d'arguments dans Arcane
     //actFunctionDumpHdr(entity->hdr, job->params);
     fprintf(entity->hdr, ");");

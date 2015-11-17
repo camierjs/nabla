@@ -88,9 +88,9 @@
   in (face total_velocity,
       cell water_mobility,total_mobility)
   out (cell water_saturation_local) @ WATER_SATURATION_HLT/3.0 {
-  if ((face_center.x!=option_bc_Xmin)&&
+  if ((face_center.x!=option_bc_Xmin) &&
       (face_center.x!=option_bc_Xmax)) continue;
-  const ℝ velocity = ((this).isSubDomainBoundaryOutside())?total_velocity:-total_velocity;
+  const ℝ velocity = ((this).isSubDomainBoundaryOutside())?-total_velocity:+total_velocity;
   const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
   if (velocity < 0.0) { // Injection d'huile
     const ℝ local_water_mobility = krw(0.0) / water_viscosity[0];
@@ -110,28 +110,44 @@ void flushRedoWithASmallerTimeStep(void) @ WATER_SATURATION_HLT/4.0 {
 }
 
 
+∀ cells void dumpWaterSaturationLocal(void)
+  in (cell water_saturation_local) @ WATER_SATURATION_HLT/4.1 {
+  const ℝ water_saturation_local_unglitched =
+    (fabs(water_saturation_local)<10.0*ε)?0.0:water_saturation_local;  
+  debug()<< "\33[33m[dumpWaterSaturation] water_saturation_local_unglitched["
+        << uid<<"]="<<water_saturation_local_unglitched<<"\33[m";
+}
+
 ∀ cells water_saturation_min <?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
 ∀ cells water_saturation_max >?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
 
 
 void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
-  if ((water_saturation_max < 1.0) && (water_saturation_min > 0.0))
+  /*info()<< "\33[36m[computeExplicitWaterSaturation] "
+        << "water_saturation_min="<<water_saturation_min
+        << ", water_saturation_max="<<water_saturation_max
+        <<"\33[m";*/
+  printf("*I-darcy      \33[36m[computeExplicitWaterSaturation] water_saturation: min=%.15f, max=%.15f\33[m\n", water_saturation_min, water_saturation_max);
+  if ((water_saturation_max <= 1.0) && (water_saturation_min >= 0.0))
     redo_with_a_smaller_time_step=1;
-  info()<< "\33[31m[computeExplicitWaterSaturation] "
-        << "Redoing with a smaller time step: "<<δt<<"\33[m";
-  δt=½*δt;
+  else{
+    info()<< "\33[31m[computeExplicitWaterSaturation] "
+          << "Redoing with a smaller time step: "<<δt<<"\33[m";
+    δt=½*δt;
+  }
 }
 
 
 ∀ cells void dupWaterSaturationLocalToTn(void)
   in (cell water_saturation_local)
-  out (cell water_saturation) @ WATER_SATURATION_HLT/7.0
+  out (cell water_saturation) @ WATER_SATURATION_HLT/7.0   
   if (redo_with_a_smaller_time_step==1) {
+    if (uid==0)
+      info()<< "\33[33m[dupWaterSaturationLocalToTn] !\33[m";
     water_saturation = water_saturation_local;
 }
 
 
 void testForQuitSaturation(void) @ WATER_SATURATION_HLT/8.0 {
-  if (redo_with_a_smaller_time_step)
-    exit;
+  if (redo_with_a_smaller_time_step==1) exit;
 }

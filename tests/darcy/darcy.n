@@ -63,7 +63,7 @@ options{
   ℝ ε = 1.e-16;
   ℾ option_debug = false;
   ℝ option_bc_Xmin = 0.0;
-  ℝ option_bc_Xmax = 100.0; // A faire concorder avec .arc: <lx nx="100" prx="1.0">100.0</lx>
+  ℝ option_bc_Xmax = 1.0; // A faire concorder avec .arc: <lx nx="100" prx="1.0">100.0</lx>
   ℝ option_bc_Xmin_pressure = 0.0;
   ℝ option_bc_Xmax_pressure = 1.0;
   ℝ option_ini_porosity = 1.0;

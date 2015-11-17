@@ -109,6 +109,8 @@ NABLA_STATUS nccArcMain(nablaMain*);
 NABLA_STATUS nccArcConfigHeader(nablaMain*);
 NABLA_STATUS nccArcConfigFooter(nablaMain*);
 
+void nArcaneHLTInit(nablaMain*);
+char* nccAxlGeneratorEntryPointWhenName(double when);
 NABLA_STATUS nccAxlGenerateHeader(nablaMain*);
 
 NABLA_STATUS nccAxlGenerator(nablaMain*);
@@ -170,4 +172,7 @@ char *particleJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nab
 
 char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
 
+void nArcaneHLTEntryPoint(nablaMain *arc,
+                          nablaJob *entry_point,
+                          int number_of_entry_points,double);
 #endif // _NABLA_ARCANE_H_

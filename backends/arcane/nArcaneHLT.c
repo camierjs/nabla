@@ -40,25 +40,76 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_TOOLS_H_
-#define _NABLA_TOOLS_H_
+#include "nabla.h"
 
-char *toolStrDownCase(const char*);
 
-char *toolStrUpCase(const char*);
+// *****************************************************************************
+// * 
+// *****************************************************************************
+void nArcaneHLTInit(nablaMain *arc){
+  nablaJob *hltInitFunction=nMiddleJobNew(arc->entity);
+  hltInitFunction->is_an_entry_point=true;
+  hltInitFunction->is_a_function=true;
+  hltInitFunction->scope  = strdup("NoScope");
+  hltInitFunction->region = strdup("NoRegion");
+  hltInitFunction->item   = strdup("\0");
+  hltInitFunction->return_type  = strdup("void");
+  hltInitFunction->name   = strdup("hltIni");
+  hltInitFunction->name_utf8 = strdup("hltIni");
+  hltInitFunction->xyz    = strdup("NoXYZ");
+  hltInitFunction->direction  = strdup("NoDirection");
+  sprintf(&hltInitFunction->at[0],"-huge_valf");
+  hltInitFunction->when_index  = 1;
+  hltInitFunction->whens[0] = ENTRY_POINT_init;
+  nMiddleJobAdd(arc->entity, hltInitFunction);
+}
 
-char *trQuote(const char*);
-
-char *op2name(char*);
-
-void nUtf8(char**);
-
-int nablaMakeTempFile(const char*,char**);
-
-void nUtf8SupThree(char **);
-
-void nToolUnlink(char *);
-
-int nToolFileCatAndHackIncludes(const char*,const char*);
-
-#endif // _NABLA_TOOLS_H_
+  
+// *****************************************************************************
+// * nccAxlGeneratorHLTEntryPoint
+// *****************************************************************************
+void nArcaneHLTEntryPoint(nablaMain *arc,
+                          nablaJob *entry_point,
+                          int number_of_entry_points,
+                          double hlt_dive_when){
+  FILE *hdr=arc->entity->hdr;
+  fprintf(hdr, "\n\t//nccAxlGeneratorHLTEntryPoint");
+  // Voici les booléens d'exit & probe du dive HLT
+  fprintf(hdr, "\n\tBool m_hlt_dive=false;");
+  fprintf(hdr, "\n\tBool m_hlt_exit=false;");
+  // Voici les points d'entrées de notre dive
+  fprintf(hdr, "\n\tArray<IEntryPoint*> m_hlt_entry_points;");
+  // Voici la fonction qui sera appelée lors du premier 'dive'
+  fprintf(hdr, "\n\tvoid hltDive_at_%s(){\n\
+      //info()<<\"[1;33mm_hlt_entry_points size=\"<<m_hlt_entry_points.size()<<\"[m\";\n\
+      m_hlt_dive = true;\n\
+      m_hlt_exit = false;\n\
+      for(;!m_hlt_exit;){\n\
+         for(Integer i=0, s=m_hlt_entry_points.size(); i<s; ++i){\n\
+            info()<<\"[1;33m\"<<\"\tHLT launching: '\"<<m_hlt_entry_points.at(i)->name()<<\"'[m\";\n\
+            m_hlt_entry_points.at(i)->executeEntryPoint();\n\
+            //traceMng()->flush();\n\
+         }\n\
+      }\n\
+     m_hlt_dive = false;\n\
+   }", nccAxlGeneratorEntryPointWhenName(hlt_dive_when));
+  // Et voici la fonction d'init du HLT
+  fprintf(hdr, "\n\
+   void hltIni(){\n\
+      __attribute__((unused)) IEntryPointMng *entry_point_mng=subDomain()->entryPointMng();\n\
+      __attribute__((unused)) IEntryPoint* entry_point;");
+  for(int i=0;i<number_of_entry_points+2;i+=1){
+    if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
+    if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
+    const int HLT_depth=entry_point[i].when_depth;
+    if (HLT_depth==0) continue;
+    const double when=entry_point[i].whens[0];
+    //const char *whenName=nccAxlGeneratorEntryPointWhenName(when);  
+    fprintf(hdr, "\
+      entry_point=entry_point_mng->findEntryPoint(StringBuilder(\"%s@%f\"));\n\
+      ARCANE_ASSERT((entry_point!=0),(\"nccAxlGeneratorHLTEntryPoint\"));\n\
+      m_hlt_entry_points.add(entry_point);\n",
+            entry_point[i].name,when);
+  }
+  fprintf(hdr, "}\n");
+}

@@ -41,6 +41,8 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "nabla.tab.h"
+#include "frontend/nablaAst.h"
 
 
 static char* arcaneEntryPointPrefix(nablaMain *nabla,
@@ -51,7 +53,12 @@ static void arcaneIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
 }
 static void arcaneExit(nablaMain *nabla){
-  nprintf(nabla, "/*EXIT*/", "subDomain()->timeLoopMng()->stopComputeLoop(true)");
+  nprintf(nabla, "/*EXIT*/","{\n\
+if (m_hlt_dive){\n\
+   m_hlt_exit=true;\n\
+}else{\n\
+   subDomain()->timeLoopMng()->stopComputeLoop(true);\n\
+}}");
 }
 static void arcaneTime(nablaMain *nabla){
   nprintf(nabla, "/*TIME*/", "subDomain()->commonVariables().globalTime()");
@@ -101,8 +108,76 @@ bool isAnArcaneService(nablaMain *middlend){
 char *nArcanePragmaGccIvdep(void){ return ""; }
 char *nArcanePragmaGccAlign(void){ return ""; }
 
-static void arcaneHookReduction(nablaMain *middlend, astNode *n){
-//#warning Reduction is not yet implemented in Arcane backend
+
+// ****************************************************************************
+// *arcaneHookReduction
+// ****************************************************************************
+static void arcaneHookReduction(nablaMain *nabla, astNode *n){
+  //int fakeNumParams=0;
+  const astNode *item_node = n->children->next->children;
+  const astNode *global_var_node = n->children->next->next;
+  const astNode *reduction_operation_node = global_var_node->next;
+  const astNode *item_var_node = reduction_operation_node->next;
+  astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
+  assert(at_single_cst_node!=NULL);
+  char *global_var_name = global_var_node->token;
+  char *item_var_name = item_var_node->token;
+  // Préparation du nom du job
+  char job_name[NABLA_MAX_FILE_NAME];
+  job_name[0]=0;
+  strcat(job_name,"arcaneReduction_");
+  strcat(job_name,global_var_name);
+  // Rajout du job de reduction
+  nablaJob *redjob = nMiddleJobNew(nabla->entity);
+  redjob->is_an_entry_point=true;
+  redjob->is_a_function=false;
+  redjob->scope  = strdup("NoGroup");
+  redjob->region = strdup("NoRegion");
+  redjob->item   = strdup(item_node->token);
+  redjob->return_type  = strdup("void");
+  redjob->name   = strdup(job_name);
+  redjob->name_utf8 = strdup(job_name);
+  redjob->xyz    = strdup("NoXYZ");
+  redjob->direction  = strdup("NoDirection");
+  // Init flush
+  redjob->when_index = 0;
+  redjob->whens[0] = 0.0;
+  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
+  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
+  nMiddleStoreWhen(redjob,nabla,NULL);
+  assert(redjob->when_index>0);
+  dbg("\n\t[arcaneHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+  
+  nMiddleJobAdd(nabla->entity, redjob);
+  const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
+  const double reduction_init = min_reduction?1.0e20:-1.0e20;
+  const char* mix = min_reduction?"in":"ax";
+  // Génération de code associé à ce job de réduction
+  nablaVariable *var=nMiddleVariableFind(nabla->variables, item_var_name);
+  const char cnf=var->item[0];
+  assert(var!=NULL);
+  nprintf(nabla, NULL, "\n\n\
+// ******************************************************************************\n\
+// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
+// ******************************************************************************\n\
+void %s%s::%s(){\n",
+          item_var_name,
+          global_var_name,
+          nabla->name,
+          isAnArcaneModule(nabla)?"Module":"Service",
+          job_name);
+  
+  nprintf(nabla, NULL, "\n\tm_global_%s=%f;\n",global_var_name,reduction_init);
+  if (cnf=='c') nprintf(nabla, NULL, "\tENUMERATE_CELL(cell,ownCells()){");
+  if (cnf=='n') nprintf(nabla, NULL, "\tENUMERATE_NODE(node,ownNodes()){");
+  nprintf(nabla, NULL, "\n\t\tm_global_%s=::fm%s(m_global_%s(),m_%s_%s[%s]);",
+          global_var_name,mix,global_var_name,
+          var->item,item_var_name,var->item);
+  nprintf(nabla, NULL, "\n\t}");
+  
+  nprintf(nabla, NULL, "\n\
+   m_global_%s=mpi_reduce(Parallel::ReduceM%s,m_global_%s());\n}\n\n",
+          global_var_name,mix,global_var_name);
 }
 
 // Typedefs, Defines & Forwards
@@ -310,6 +385,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
       nccArcLibSlurmIni(middlend);
     }
   }
+  nArcaneHLTInit(middlend);
   
   dbg("\n[nccArcane] AXL generation");
   if (nccAxlGenerator(middlend)!=NABLA_OK) printf("error: in AXL generation!\n");

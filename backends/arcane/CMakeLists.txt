@@ -9,6 +9,7 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_ARCANE_C
   nArcane.c
   nArcaneAXL.c
+  nArcaneHLT.c
   nArcaneJob.c
   nArcaneMain.c
   nArcaneSimd.c
