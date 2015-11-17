@@ -108,7 +108,11 @@ static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
 \nint cell_next[3*NABLA_NB_CELLS];\
 \nint cell_prev[3*NABLA_NB_CELLS];\
 \nint node_cell_and_corner[2*8*NABLA_NB_NODES];\
+\nint face_cell[2*NABLA_NB_FACES];\
+\nint face_node[2*NABLA_NB_NODES];\
 \nvector<Face> faces(NABLA_NB_FACES);\
+\nvector<Cell> cells(NABLA_NB_CELLS);\
+\nvector<Node> nodes(NABLA_NB_NODES);\
 \n\n\n");
 }
 

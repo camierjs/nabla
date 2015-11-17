@@ -85,5 +85,24 @@ class __attribute__ ((aligned(8))) real3 {
 };
 
 inline real norm(real u){ return ::fabs(u);}
+//inline real operator*(double d, real u){ return d*u;}
+
+
+// ****************************************************************************
+// * real3x3 
+// ****************************************************************************
+class __attribute__ ((aligned(8))) real3x3 {
+ public:
+  __attribute__ ((aligned(8))) struct real3 x;
+  __attribute__ ((aligned(8))) struct real3 y;
+  __attribute__ ((aligned(8))) struct real3 z;
+  inline real3x3(){ x=0.0; y=0.0; z=0.0;}
+  inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
+
+  friend inline real3 opProdTensVec(real3x3 t,real3 v){
+    return real3(dot3(t.x,v),dot3(t.y,v),dot3(t.z,v));
+  }
+ 
+};
 
 #endif //  _LAMBDA_STD_REAL3_H_

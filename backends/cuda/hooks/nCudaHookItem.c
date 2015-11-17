@@ -47,6 +47,9 @@
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
+char* nCudaHookSysPrefix(void){ return ""; }
+char* nCudaHookSysPostfix(void){ return ""; }
+
 char* nCudaHookPrevCell(void){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }

@@ -116,7 +116,9 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_NODE%s%s(n";
   dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
   if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNE\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNER\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp==NULL && rgn[0]=='o') return "//#warning Should be OUTER ALL\n\tFOR_EACH_FACE%s%s(f";
+  // ! Tester grp==NULL avant ces prochains:
   if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "//#warning Should be OWN\n\tFOR_EACH_FACE%s%s(f";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_FACE%s%s(f";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "//#warning Should be INNER OWN\n\tFOR_EACH_FACE%s%s(f";

@@ -91,7 +91,7 @@ tstoa:
 ################
 tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
-tstll:
+tstllr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
 tstllo:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
@@ -177,6 +177,7 @@ tstcu:
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
 #	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
+#	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_gen_1)
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
 
 ############

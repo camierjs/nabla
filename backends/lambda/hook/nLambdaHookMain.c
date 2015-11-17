@@ -167,6 +167,8 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
     }else{
       nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_NODE(n)");
       nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
@@ -190,6 +192,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
   int i,numParams,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
+  int HLT_depth=0;
   
   dbg("\n[lambdaMain]");
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
@@ -212,7 +215,19 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 \twhile (global_time[0]<option_stoptime){\
 \t// && global_iteration!=option_max_iterations){");
     }
-
+    
+    if (entry_points[i].when_depth==(HLT_depth+1)){
+      nprintf(n, NULL, "\n\n\t// DIVING in HLT!");
+      nprintf(n, NULL, "\n\tdo{");
+      HLT_depth=entry_points[i].when_depth;
+    }
+    if (entry_points[i].when_depth==(HLT_depth-1)){
+      nprintf(n, NULL, "\n\t// Poping from HLT!");
+      #warning HWed 'redo_with_a_smaller_time_step'
+      nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==0);\n");
+      HLT_depth=entry_points[i].when_depth;
+    }
+    
     // \n ou if d'un IF after '@'
     if (entry_points[i].ifAfterAt!=NULL){
       dbg("\n\t[nLambdaHookMain] dumpIfAfterAt!");

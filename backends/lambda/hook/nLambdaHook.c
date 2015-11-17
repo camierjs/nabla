@@ -67,7 +67,13 @@ char *lambdaHookPragmaGccAlign(void){ return ""; }
 
 
 // ****************************************************************************
-// * Prev Cell
+// * System Prefix
+// ****************************************************************************
+char* lambdaHookSysPrefix(void){ return ""; }
+
+
+// ****************************************************************************
+// * System Prev Cell
 // ****************************************************************************
 char* lambdaHookPrevCell(void){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+c+0],";
@@ -75,11 +81,17 @@ char* lambdaHookPrevCell(void){
 
 
 // ****************************************************************************
-// * Next Cell
+// * System Next Cell
 // ****************************************************************************
 char* lambdaHookNextCell(void){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+c+0],";
 }
+
+
+// ****************************************************************************
+// * System Postfix
+// ****************************************************************************
+char* lambdaHookSysPostfix(void){ return ")"; }
 
 
 // ****************************************************************************
@@ -133,8 +145,9 @@ char* lambdaHookItem(nablaJob *j, const char job, const char itm, char enum_enum
   if (job=='n' && enum_enum=='\0' && itm=='c') return "/*chi-n0c*/xs_node_";
   if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
   if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/faces[f].";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/xs_face_";
+  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==false) return "/*chi-f0c*/cells_xs_face_";
+  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==true)  return "/*chi-f0c*/xs_face_";
   nablaError("Could not switch in lambdaHookItem!");
   return NULL;
 }

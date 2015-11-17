@@ -56,8 +56,10 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->is_a_function=false;
   job->scope=job->region=job->item=job->name=job->xyz=job->direction=NULL;
   job->at[0]=0;
-  job->when_index=0;
-  for(i=0;i<32;++i)
+  job->when_sign=1.0;// permet de gérer les '-' pour les '@'
+  job->when_index=0; // permet de gérer les ',' pour les '@'
+  job->when_depth=0; // permet de spécifier la hiérarchie des '@'
+  for(i=0;i<NABLA_JOB_WHEN_MAX;++i)
     job->whens[i]=HUGE_VAL;
   job->jobNode=NULL;
   job->returnTypeNode=NULL;
@@ -160,15 +162,17 @@ void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
 // ****************************************************************************
 // * scanForNablaJobAtConstant
 // ****************************************************************************
-void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *arc){
+void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=AT) continue;
-    dbg("\n\t[scanForNablaJobAtConstant] %s ", n->token);
     // Si ce Nabla Job a un 'AT', c'est qu'il faut renseigner les .config et .axl
-    nablaJob *entry_point=nMiddleJobLast(arc->entity->jobs);
+    nablaJob *entry_point=nMiddleJobLast(nabla->entity->jobs);
+    dbg("\n\t[scanForNablaJobAtConstant] entry_point '%s', token: '%s'", entry_point->name, n->token);
     entry_point->is_an_entry_point=true;      
-    nMiddleAtConstantParse(n->next->children,arc,entry_point->at);
-    nMiddleStoreWhen(arc,entry_point->at);
+    dbg("\n\t[scanForNablaJobAtConstant] dfsDumpToken:"); dfsDumpToken(n->next->children);
+    entry_point->whens[entry_point->when_index]=0.0;
+    nMiddleAtConstantParse(entry_point,n->next->children,nabla,NULL);//entry_point->at);
+    nMiddleStoreWhen(entry_point, nabla, NULL);//entry_point->at);
     return;
   }
 }
@@ -184,28 +188,58 @@ void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla
   }
 }
 
+
+// *****************************************************************************
+// * static dumpIfAfterAt functions
+// * A cleaner!
+// ****************************************************************************
+static void dumpIfAfterAtFormat(astNode *n, nablaMain *nabla, bool dump_in_header,char *info, char *format){
+  if (dump_in_header)
+    hprintf(nabla, info, format, n->token);
+  else nprintf(nabla, info, format, n->token);
+}
+//static void dumpIfAfterAtToken(astNode *n, nablaMain *nabla, bool dump_in_header){
+//  if (dump_in_header)
+//    hprintf(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
+//  else
+//    nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
+//}
+static void dumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
+// #warning LAMBDA vs ARCANE in middlend!
+  if (!dump_in_header){ // LAMBDA ici
+    nablaVariable *var=NULL;
+    if ((var=nMiddleVariableFind(nabla->variables, n->token))!=NULL){
+      nprintf(nabla, NULL, " global_%s[0] ", n->token);
+    }else nprintf(nabla, NULL, " %s ", n->token);
+    return;
+  }
+  // ARCANE ici
+  nablaVariable *var=NULL;
+  char *info=NULL;
+  char *format=NULL;
+  if (n->token) dbg("\n\t[dumpIfAfterAt] token='%s' ", n->token);
+  // Si on hit une option
+  if (nMiddleOptionFindName(nabla->options, n->token)!=NULL){
+    info="/*dumpIfAfterAt+Option*/";
+//#warning HOOK NEEDED HERE!
+    format="options()->%s()";
+  }
+  // Si on hit une variable
+  if ((var=nMiddleVariableFind(nabla->variables, n->token))!=NULL){
+    info="/*dumpIfAfterAt+Variable*/";
+    format="m_global_%s()";
+  }
+  // On choisit le format ou pas
+  if (info!=NULL)
+    dumpIfAfterAtFormat(n,nabla,dump_in_header,info,format);
+  //else dumpIfAfterAtToken(n,nabla,dump_in_header);
+}
+
 // *****************************************************************************
 // * dumpIfAfterAt
-// * A simplifier!
 // ****************************************************************************
 void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
-  //if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL))
-  if (n->token!=NULL){
-    if (nMiddleOptionFindName(nabla->options, n->token)!=NULL){
-      if (dump_in_header){
-        hprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()", n->token);
-      }else{
-        //nprintf(nabla, "/*dumpIfAfterAt+Option*/", "/*%s*/",n->token);
-        nMiddleTurnTokenToOption(n,nabla);
-      }
-      //nprintf(nabla, "/*dumpIfAfterAt+Option*/", "options()->%s()/*%s*/", n->token, nMiddleTurnTokenToOption(n,nabla));
-    }else{
-      if (dump_in_header)
-        hprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
-      else
-        nprintf(nabla, "/*dumpIfAfterAt*/", " %s ", n->token);
-    }
-  }
+  if (n->token!=NULL) dumpIfAfterAt(n,nabla,dump_in_header);
   if(n->children != NULL) nMiddleDumpIfAfterAt(n->children,nabla,dump_in_header);
   if(n->next != NULL) nMiddleDumpIfAfterAt(n->next,nabla,dump_in_header);
 }

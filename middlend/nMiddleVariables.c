@@ -141,6 +141,39 @@ nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
 }
 
 
+static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
+                                         int tokenid,
+                                         char **prefix,
+                                         char **system,
+                                         char **postfix){
+  switch(tokenid){
+  case(NEXTCELL):{
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->nextCell();
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(PREVCELL):{
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->prevCell();
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(BACKCELL):{
+    *prefix=strdup("");
+    *system=strdup("");
+    *postfix=strdup("");
+    return;
+  }
+  case(FRONTCELL):{
+    *prefix=strdup("");
+    *system=strdup("");
+    *postfix=strdup("");
+    return;
+  }
+  default:return;
+  }
+}
 
 /*
  * 0 il faut continuer
@@ -152,16 +185,16 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
                                                          const char cnf,
                                                          char enum_enum){
   // On cherche la primary_expression coté gauche du premier postfix_expression
-  dbg("\n\t[nablaVariable] Looking for 'primary_expression':");
+  dbg("\n\t[nMiddleVariables] Looking for 'primary_expression':");
   astNode *primary_expression=dfsFetch(n->children,rulenameToId("primary_expression"));
   // On va chercher l'éventuel 'nabla_item' après le '['
-  dbg("\n\t[nablaVariable] Looking for 'nabla_item':");
+  dbg("\n\t[nMiddleVariables] Looking for 'nabla_item':");
   astNode *nabla_item=dfsFetch(n->children->next->next,rulenameToId("nabla_item"));
   // On va chercher l'éventuel 'nabla_system' après le '['
-  dbg("\n\t[nablaVariable] Looking for 'nabla_system':");
+  dbg("\n\t[nMiddleVariables] Looking for 'nabla_system':");
   astNode *nabla_system=dfsFetch(n->children->next->next,rulenameToId("nabla_system"));
   
-  dbg("\n\t[nablaVariable] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
+  dbg("\n\t[nMiddleVariables] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
       (primary_expression!=NULL)?primary_expression->token:"NULL",
       (nabla_item!=NULL)?nabla_item->token:"NULL",
       (nabla_system!=NULL)?nabla_system->token:"NULL");
@@ -189,13 +222,20 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
         return postfixed_nabla_variable_with_item;
       }
       if (nabla_item==NULL && nabla_system!=NULL){
-        // Et elle est postfixée avec un nabla_system
-        char *hookPrev=nabla->hook->xyz->prevCell();
-        char *hookNext=nabla->hook->xyz->nextCell();
-        char *hookNextPrev=(nabla_system->tokenid==NEXTCELL)?hookNext:hookPrev;
-        nprintf(nabla, "/*is_system*/", "%s%s_%s",
-                (nabla->backend==BACKEND_ARCANE)?"m_":hookNextPrev,
-                var->item, var->name);
+        dbg("\n\t[nMiddleVariables] Et elle est postfixée avec un nabla_system");
+        char *prefix=NULL;
+        char *system=NULL;
+        char *postfix=NULL;
+        nMiddleVariablesSystemSwitch(nabla,nabla_system->tokenid,&prefix,&system,&postfix);
+        assert(prefix); assert(system); assert(postfix);
+        dbg("\n\t[nMiddleVariables] prefix='%s'",prefix);
+        dbg("\n\t[nMiddleVariables] system='%s'",system);
+        dbg("\n\t[nMiddleVariables] postfix='%s'",postfix);
+        nprintf(nabla, "/*is_system*/", "%s%s%s_%s%s",
+                prefix,
+                system,
+                var->item, var->name,
+                postfix);
         nabla->hook->token->system(nabla_system,nabla,cnf,enum_enum);
         nprintf(nabla, "/*EndOf: is_system*/", "",NULL);
         // Variable postfixée par un mot clé system (prev/next, ...)

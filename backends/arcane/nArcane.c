@@ -134,8 +134,10 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     nccArcIncludes
   };
   nHookXyz nablaArcaneXyzHooks={
+    nccArcSystemPrefix,
     nccArcPrevCell,
-    nccArcNextCell
+    nccArcNextCell,
+    nccArcSystemPostfix
   };
   const nHookForAll nArcaneHookForAll={
     arcaneHookPrefixEnumerate,

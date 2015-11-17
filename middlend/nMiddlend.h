@@ -132,9 +132,11 @@ typedef struct nablaJobStruct{
   char *name_utf8;
   char *xyz;
   char *direction;
-  char at[256]; // Buffer de construction
+  char at[NABLA_JOB_WHEN_MAX]; // Buffer de construction
   int when_index;
-  double whens[64];
+  double when_sign;
+  int when_depth;
+  double whens[NABLA_JOB_WHEN_MAX];
   char *where;
   astNode *jobNode;
   astNode *returnTypeNode;
@@ -294,8 +296,8 @@ int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 void nMiddleItems(astNode*,int,nablaMain*);
 
 // nMiddleHLT: @ + When[s]
-void nMiddleAtConstantParse(astNode*,nablaMain*,char*);
-void nMiddleStoreWhen(nablaMain*,char*);
+void nMiddleAtConstantParse(nablaJob*,astNode*,nablaMain*,char*);
+void nMiddleStoreWhen(nablaJob*,nablaMain*,char*);
 int nMiddleComparEntryPoints(const void*,const void*);
 int nMiddleNumberOfEntryPoints(nablaMain*);
 nablaJob* nMiddleEntryPointsSort(nablaMain*,int);

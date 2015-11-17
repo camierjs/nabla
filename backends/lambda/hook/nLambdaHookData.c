@@ -52,16 +52,16 @@ void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
                                          nablaVariable *var,
                                          char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits variable");
-  if (  (cnfg=='c' && var->item[0]=='n')
-      ||(cnfg=='c' && var->item[0]=='f')
+  if (  /*(cnfg=='c' && var->item[0]=='n')
+          ||*/(cnfg=='c' && var->item[0]=='f')
       ||(cnfg=='n' && var->item[0]!='n')            
       ||(cnfg=='f' && var->item[0]!='f')
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
     if (!job->parse.selection_statement_in_compound_statement){
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
+      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*tB2P: %c %c*/", cnfg, var->item[0]);
+      //nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
     }else{
       //nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
     }
@@ -86,7 +86,7 @@ void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
  *****************************************************************************/
 void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
-  char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
+  //char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger
   if (n->tokenid == SID)           nprintf(arc, "/*chs*/", "[subDomain()->subDomainId()]");
   if (n->tokenid == THIS)          nprintf(arc, "/*chs THIS*/", NULL);
@@ -95,12 +95,16 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   //if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
   if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException");
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[%s->backCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[%s->backCell().uniqueId()]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[%s->frontCell().uniqueId()]",itm);
-  if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");
-  if (n->tokenid == PREVCELL)      nprintf(arc, NULL, ")");
+
+  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[faces[f].backCell()]",itm[0]);
+  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[faces[f].backCell().uniqueId()]",itm);
+  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[faces[f].frontCell()]",itm[0]);
+  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[faces[f].frontCell().uniqueId()]",itm);
+  
+  // NEXTCELL/PREVCELL sont traité en amont avec les gatherk_and_zero_neg_ones
+  //if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");
+  //if (n->tokenid == PREVCELL)      nprintf(arc, NULL, ")");
+  
   if (n->tokenid == NEXTNODE)      nprintf(arc, NULL, "[n])+nextNode))");
   if (n->tokenid == PREVNODE)      nprintf(arc, NULL, "[n])-prevNode))");
   if (n->tokenid == PREVLEFT)      nprintf(arc, "/*chs PREVLEFT*/", "[cn.previousLeft()]");
@@ -207,12 +211,12 @@ static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
     if (enum_enum=='n') nprintf(arc, "/*n*/", "[cell_node[n*NABLA_NB_CELLS+c]]");
     if (isPostfixed!=2 && enum_enum=='\0'){
       if (job->parse.postfix_constant==true)
-        nprintf(arc, "/*NodeVar + postfix_constant*/", "[");
-      else
-        nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
+        nprintf(arc, NULL, "/*NodeVar + postfix_constant*/[");
+      else nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
     }
-    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
+    //if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
     if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
+    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "/*p2&0*/");
     break;
   }
   case ('f'):{
@@ -302,13 +306,14 @@ static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
             "%s",
             ((var->dim==0)?
              ((enum_enum=='\0')?
-              (isPostfixed==2)?"[":"[face->cell"
+              (isPostfixed==2)?"[faces[f].iCell(":"[face->cell"
               :"[c")
              :"[cell][node->cell")); 
     break;
   }
   case ('n'):{
-    nprintf(arc, "/*NodeVar*/", "[faces[f].node(");
+    if (isPostfixed!=2) nprintf(arc, "/*NodeVar*/", "[xs_face_node(n)]");
+    else nprintf(arc, "/*NodeVar*/", "[xs_face_node(");
     break;
   }
   case ('f'):{
@@ -414,7 +419,7 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
   if (job->parse.alephKeepExpression==true){
-    nprintf(arc, "/*lambdaHookTurnTokenToVariable*/", "%s_%s", var->item, var->name);
+    nprintf(arc, "/*lambdaHookTurnTokenToVariable*/", "/*aleph*/%s_%s", var->item, var->name);
     return var;
   }
 

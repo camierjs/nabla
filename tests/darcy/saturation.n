@@ -44,17 +44,34 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+
+/*void computeExplicitWaterSaturation(void) @ 6.0 {
+  for(;;){
+    dupWaterSaturationTolocal();
+    computeInnerExplicitWaterSaturation();
+    computeOuterExplicitWaterSaturation();
+    const ℕ reduced = mpi_reduce(ReduceMax,needSmallerTimeStep(0));
+    if (reduced==0) break;
+    info()<< "\33[31m[computeExplicitWaterSaturation] "
+          << "Redoing with a smaller time step: "<<δt<<"\33[m";
+    δt=½*δt;    
+  }
+  dupWaterSaturationLocalToTn();
+  }*/
+
+
 // *************************************
 // * Now computeExplicitWaterSaturation
 // *************************************
 ∀ cells void dupWaterSaturationTolocal(void)
-  in (cell water_saturation) out (cell water_saturation_local) {
+  in (cell water_saturation) out (cell water_saturation_local) @ 6.0/1.0 {
   water_saturation_local=water_saturation;
 }
 
+
 ∀ inner faces void computeInnerExplicitWaterSaturation(void)
   in (face total_velocity, cell water_mobility,total_mobility)
-  out (cell water_saturation_local) {
+  out (cell water_saturation_local) @ WATER_SATURATION_HLT/2.0 {
   const ℝ velocity = total_velocity;
   const ℝ wfrac_flow = (velocity > 0.) ?
     water_mobility[frontCell]/total_mobility[frontCell]:
@@ -66,10 +83,11 @@
   water_saturation_local[backCell]  += tmpb;
 }
 
+
 ∀ own outer faces void computeOuterExplicitWaterSaturation(void)
   in (face total_velocity,
       cell water_mobility,total_mobility)
-  out (cell water_saturation_local) {
+  out (cell water_saturation_local) @ WATER_SATURATION_HLT/3.0 {
   if ((face_center.x!=option_bc_Xmin)&&
       (face_center.x!=option_bc_Xmax)) continue;
   const ℝ velocity = ((this).isSubDomainBoundaryOutside())?total_velocity:-total_velocity;
@@ -86,29 +104,34 @@
   }
 }
 
-∀ own cells ℕ needSmallerTimeStep(ℕ value) {//@ 6.5{
-  if ((water_saturation_local > 1.0) || (water_saturation_local < 0.0)){
-    value|=1;
-  }
-  return value;
+
+void flushRedoWithASmallerTimeStep(void) @ WATER_SATURATION_HLT/4.0 {
+  redo_with_a_smaller_time_step = 0;
 }
+
+
+∀ cells water_saturation_min <?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
+∀ cells water_saturation_max >?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
+
+
+void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
+  if ((water_saturation_max < 1.0) && (water_saturation_min > 0.0))
+    redo_with_a_smaller_time_step=1;
+  info()<< "\33[31m[computeExplicitWaterSaturation] "
+        << "Redoing with a smaller time step: "<<δt<<"\33[m";
+  δt=½*δt;
+}
+
 
 ∀ cells void dupWaterSaturationLocalToTn(void)
   in (cell water_saturation_local)
-  out (cell water_saturation) {
-  water_saturation = water_saturation_local;
+  out (cell water_saturation) @ WATER_SATURATION_HLT/7.0
+  if (redo_with_a_smaller_time_step==1) {
+    water_saturation = water_saturation_local;
 }
-  
-void computeExplicitWaterSaturation(void) @ 6.0 {
-  for(;;){
-    dupWaterSaturationTolocal();
-    computeInnerExplicitWaterSaturation();
-    computeOuterExplicitWaterSaturation();
-    const ℕ reduced = mpi_reduce(ReduceMax,needSmallerTimeStep(0));
-    if (reduced==0) break;
-    info()<< "\33[31m[computeExplicitWaterSaturation] "
-          << "Redoing with a smaller time step: "<<δt<<"\33[m";
-    δt=½*δt;    
-  }
-  dupWaterSaturationLocalToTn();
+
+
+void testForQuitSaturation(void) @ WATER_SATURATION_HLT/8.0 {
+  if (redo_with_a_smaller_time_step)
+    exit;
 }

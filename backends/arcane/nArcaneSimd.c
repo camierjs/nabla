@@ -63,17 +63,25 @@ char* nccArcScatter(nablaVariable* var){
 
 
 // ****************************************************************************
+// * nHookXyz pre/post fix
+// ****************************************************************************
+char* nccArcSystemPrefix(void){ return "m_"; }
+char* nccArcSystemPostfix(void){ return ""; }
+
+
+// ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
 char* nccArcPrevCell(void){
-  return "prevCell";
+  return "";//prevCell";
 }
+
 
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
 char* nccArcNextCell(void){
-  return "nextCell";
+  return "";//nextCell";
 }
 
 char* nccArcIncludes(void){return "";}

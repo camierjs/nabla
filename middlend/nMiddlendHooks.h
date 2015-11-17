@@ -45,8 +45,10 @@
 
 // Structure des hooks utilisé pour la gestion des directions
 typedef struct nHookXyzStruct{
+  char* (*prefix)(void);
   char* (*prevCell)(void);
   char* (*nextCell)(void);
+  char* (*postfix)(void);
 } nHookXyz;
 
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
@@ -129,7 +131,7 @@ typedef struct nHookGrammarStruct{
   // Génération d'un kernel associé à un support
   void (*job)(struct nablaMainStruct*, astNode*);
   // Génération d'un kernel associé à une reduction
-  void (*reduction)(struct nablaMainStruct *, astNode *);
+  void (*reduction)(struct nablaMainStruct*, astNode*);
   // Should be removed: Hook pour transformer les variables à returner
   bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
   // Hook returnFromArgument for OKINA and OMP

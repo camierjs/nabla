@@ -93,12 +93,16 @@ static void actItemDirectDeclarator(astNode * n, void *generic_arg){
 static void actItemNablaItems(astNode * n, void *generic_arg){
   nablaMain *arc=(nablaMain*)generic_arg;
   nablaVariable *variable =nMiddleVariableLast(arc->variables);
-  dbg("\n\t\t[actItemNablaItems] %s", n->children->token);
+  const char cfgn=variable->item[0];
+  dbg("\n\t\t[actItemNablaItems] variable '%s' on '%s' array of [%s]",
+      variable->name, variable->item, n->children->token);
   // Si on tombe sur un nabla_item ici, c'est que c'est un tableau à la dimension de cet item
   variable->dim=1;
   variable->size=0;
-  if (n->children->tokenid==CELLS) variable->size=8;
-  if (n->children->tokenid==NODES) variable->size=8;
+  if (cfgn=='n'&& n->children->tokenid==CELLS) variable->size=8; // node_var[cells]: tied @ 8 (hex mesh)
+  if (cfgn=='f'&& n->children->tokenid==CELLS) variable->size=2; // face_var[cells]: backCell & frontCell
+//#warning cell_var[nodes]: tied @ 8 (hex mesh), should depend on domension
+  if (cfgn=='c'&& n->children->tokenid==NODES) variable->size=8; // cell_var[nodes]: tied @ 8 (hex mesh), should depend on dimension
   if (n->children->tokenid==FACES) variable->size=8;
   if (n->children->tokenid==PARTICLES) variable->size=8;
   if (n->children->tokenid==MATERIALS) variable->size=8;

@@ -79,6 +79,9 @@ char* nOkinaSseScatter(nablaVariable*);
 char* nOkinaAvxScatter(nablaVariable*);
 char* nOkinaMicScatter(nablaVariable*);
 
+char* nOkinaHookSysPrefix(void);
+char* nOkinaHookSysPostfix(void);
+
 char* nOkinaStdPrevCell(void);
 char* nOkinaSsePrevCell(void);
 char* nOkinaAvxPrevCell(void);

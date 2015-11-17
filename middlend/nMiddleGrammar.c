@@ -211,6 +211,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     const astNode *item_node = reduction_operation_node->next;
     char *global_var_name = global_node->token;
     char *item_var_name = item_node->token;
+    dbg("\n\n////////////////////////////////////");
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     dbg("\n\t[nablaMiddlendParseAndHook] Checking for global variable '%s'", global_var_name);
     const nablaVariable *global_var = nMiddleVariableFind(nabla->variables, global_var_name);
@@ -221,7 +222,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     // item_var must not be 'global'
     assert(item_var->item[0]!='g');
     // Reduction operation is for now MIN
-    assert(reduction_operation_node->tokenid==MIN_ASSIGN);
+    //assert(reduction_operation_node->tokenid==MIN_ASSIGN);
     // Having done these sanity checks, let's pass the rest of the generation to the backends
     nabla->hook->grammar->reduction(nabla,n);
     dbg("\n\t[nablaMiddlendParseAndHook] reduction done");

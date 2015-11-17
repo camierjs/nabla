@@ -81,6 +81,7 @@ void getInOutPutsNodes(FILE*, astNode *n, char *color);
 void getInOutPutsEdges(FILE*, astNode *n, int inout, char *nName1, char* nName2);
 
 void dfsUtf8(astNode*);
+void dfsDumpToken(astNode*);
 
 void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc);
 char *dfsFetchFirst(astNode *n, int ruleid);

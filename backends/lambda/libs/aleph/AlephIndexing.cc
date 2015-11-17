@@ -99,7 +99,7 @@ int AlephIndexing::findWhichLidFromMapMap(double *var, const int itm){
     debug()<<"\t\33[33m[findWhichLidFromMapMap] On rajoute à notre map la variable '_idx' de cette variable\33[m";
     //string var_idx_name("var");//var->name());
     //var_idx_name+="_idx";
-    #warning Cell|Node|Faces Variable? for size!
+    //#warning Cell|Node|Faces Variable? for size!
     vector<int> *var_idx=new vector<int>(subDomain()->defaultMesh()->size()+1);
     // var->itemKind());
     // On rajoute à notre map la variable '_idx' de cette variable

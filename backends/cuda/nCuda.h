@@ -46,6 +46,8 @@
 char *nCudaHookBits(void);
 char* nCudaHookGather(nablaJob*,nablaVariable*,enum_phase);
 char* nCudaHookScatter(nablaVariable*);
+char* nCudaHookSysPrefix(void);
+char* nCudaHookSysPostfix(void);
 char* nCudaHookPrevCell(void);
 char* nCudaHookNextCell(void);
 char* nCudaHookIncludes(void);
@@ -95,7 +97,7 @@ void nCudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
 void nCudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
 void nCudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void nCudaHookReduction(struct nablaMainStruct*,astNode *);
+void nCudaHookReduction(struct nablaMainStruct*,astNode*);
 
 void nCudaHookIteration(struct nablaMainStruct*);
 void nCudaHookExit(struct nablaMainStruct*);

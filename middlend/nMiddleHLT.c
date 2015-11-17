@@ -45,40 +45,64 @@
 
 
 // ****************************************************************************
+// *
+// ****************************************************************************
+static void dumpAtEndofAt(nablaJob *job, char *at, char *token){
+  job->whens[job->when_index]+=
+    job->when_sign*atof(token)*pow(10.0,-job->when_depth*NABLA_JOB_WHEN_HLT_FACTOR);
+  dbg("\n\t\t[nMiddleAtConstantParse/dumpAtEndofAt] HLT level #%d => %f ",
+      job->when_depth,
+      job->whens[job->when_index]);
+}
+
+
+// ****************************************************************************
 // * nablaAtConstantParse
 // ****************************************************************************
-void nMiddleAtConstantParse(astNode * n, nablaMain *nabla, char *at){
+void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla, char *at){
+  // On évite les parenthèses rajoutée lors du parsing .y 'at_constant'
+  if (n->tokenid == '-') {job->when_sign*=-1.0;}
   if (n->tokenid == '(') goto skip;
   if (n->tokenid == ')') goto skip;
+  if (n->tokenid == '/') {
+    // On s'enfonce dans la hiérarchie
+    job->when_depth+=1;
+    // On sauvegarde là où en ętait
+    //job->whens[job->when_index]=atof(at);
+    dbg("\n\t\t[nMiddleAtConstantParse] job->whens[%d]=%f",
+        job->when_index,
+        job->whens[job->when_index]);
+    // On flush le 'at' actuel
+    //at=strdup("");
+    goto skip;
+  }
   // Vérification que l'on ne déborde pas
   if (yyTranslate(n->tokenid)!=yyUndefTok()){
     // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point
     if (yyNameTranslate(n->tokenid) == ',') {
-      nMiddleStoreWhen(nabla,at);
+      nMiddleStoreWhen(job,nabla,at);
       goto skip;
     }
   }
-  if (n->token != NULL ){
-    char *goto_end_of_at=at;
-    while(*goto_end_of_at!=0)goto_end_of_at++;
-    sprintf(goto_end_of_at, "%s", n->token);
-    dbg("'%s' ", at);
-  }
+  if (n->token != NULL )
+    dumpAtEndofAt(job,at,n->token);
  skip:
-  if (n->children != NULL) nMiddleAtConstantParse(n->children, nabla, at);
-  if (n->next != NULL) nMiddleAtConstantParse(n->next, nabla, at);
+  if (n->children != NULL) nMiddleAtConstantParse(job,n->children, nabla, at);
+  if (n->next != NULL) nMiddleAtConstantParse(job,n->next, nabla, at);
 }
 
 
 /*****************************************************************************
  * nablaStoreWhen
  *****************************************************************************/
-void nMiddleStoreWhen(nablaMain *nabla, char *at){
-  nablaJob *entry_point=nMiddleJobLast(nabla->entity->jobs);
-  entry_point->whens[entry_point->when_index]=atof(at);
-  dbg("\n\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->when_index]);
+void nMiddleStoreWhen(nablaJob *job,nablaMain *nabla, char *at){
+  nablaJob *entry_point=job;//nMiddleJobLast(nabla->entity->jobs);
+  //entry_point->whens[entry_point->when_index]=atof(at);
+  //dbg("\n\t\t[nablaStoreWhen] @=\"%s\" ", at);
+  dbg("\n\t\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->when_index]);
   entry_point->when_index+=1;
-  *at=0;
+  entry_point->whens[entry_point->when_index]=0.0;
+//*at=0;
 }
 
 
@@ -158,6 +182,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
       assert(job->name_utf8!=NULL);
       entry_points[i].name_utf8=job->name_utf8;
       entry_points[i].whens[0]=job->whens[j];
+      entry_points[i].when_depth=job->when_depth;
       // Pas utilisé, on passe après par la fonctionnccAxlGeneratorEntryPointWhere
       if (entry_points[i].whens[0]>ENTRY_POINT_compute_loop)
         entry_points[i].where=strdup("compute-loop");

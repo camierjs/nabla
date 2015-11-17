@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // See the LICENSE file for details.
-with ℝ;
+//with ℝ;
 
-ofstream stream("timing.stream");
+//ofstream stream("timing.stream");
 
 /*int a;
 
@@ -83,6 +83,7 @@ __timer_t t;
 
 
 cells{
+  Real alpha;
   Real v;
   Real e,volo;
 };
@@ -95,12 +96,12 @@ global{
   Real alpha_global;
 };
 
-void ini(void) @ -10.0{}
+/*void ini(void) @ -10.0{}
 
 ∀ cells void iniCells(void) in (cell e,v)
   out (cell volo) @ 8.0 {
   volo += e*v;
-}
+  }*/
 
 
 /*∀ nodes void loop(void) in (node u) @ 1.0 {
@@ -116,4 +117,4 @@ void ini(void) @ -10.0{}
   ∀ node τVolume += coord⋅cqs;
   }*/
 
-//∀ cells alpha_global <?= alpha @ 12.11;
+∀ cells alpha_global <?= alpha @ 12.11;

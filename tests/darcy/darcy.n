@@ -45,6 +45,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 with ℵ;
 #include "assert.h"
+#define WATER_SATURATION_HLT 6.0
+
 
 // ****************************************************************************
 // * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
@@ -121,12 +123,24 @@ cells{
 // * Face Variables
 // ****************************************************************************
 faces{
-  ℝ³ face_center;
   ℝ face_measure;
+  ℝ³ face_center;
   ℝ³ face_normal;
   ℝ transmissivity;
   ℝ total_velocity;
+  ℝ face_water_saturation[cells];
 };
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℕ redo_with_a_smaller_time_step;
+  ℝ water_saturation_min;
+  ℝ water_saturation_max;
+};
+
 
 // ****************************************************************************
 // * Functions
@@ -190,7 +204,8 @@ void dbgLoop(void) @ 1.0 {
   total_velocity = transmissivity*mobility*diff_pressure_unglitched;
 }
 
-∀ own outer faces void computeOuterTotalVelocity(void) @ 5.0 {
+∀ own outer faces void computeOuterTotalVelocity(void)
+  in (face face_center, cell pressure) out (face total_velocity) @ 5.0 {
   if ((face_center.x!=option_bc_Xmin)&&
       (face_center.x!=option_bc_Xmax)) continue;
   const ℝ boundary_pressure =
@@ -204,7 +219,7 @@ void dbgLoop(void) @ 1.0 {
 }
 
 // *******************************************************
-// * computeWaterSaturation inserted here @ [6.0,7.0[
+// * computeWaterSaturation inserted here @ WATER_SATURATION_HLT/*
 // *******************************************************
 
 ∀ cells void computeOilSaturation(void)

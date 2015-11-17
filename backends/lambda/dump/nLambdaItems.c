@@ -51,15 +51,34 @@ class Node;
 // ****************************************************************************
 // *
 // ****************************************************************************
+class Cell{
+ public:
+ Cell():faces(4),nodes(4){}
+ public:
+  int face(int id){return faces.at(id); }
+  bool isOwn(){return true;}
+ private:
+  vector<int> faces;
+  vector<int> nodes;
+};
+
+
+// ****************************************************************************
+// *
+// ****************************************************************************
 class Face{
  public:
  Face():nodes(2),cells(2){}
  public:
   int node(int id){ return id; }
-  int cell(int id){ return id; }
+  Cell cell(int id){ return fake_xs_cell[id]; }
+  int iCell(int id){ return id; }
   int backCell(void) { return 0; }
   int frontCell(void) { return 1; }
+  int nbNode(void) { return 2; }
+  bool isSubDomainBoundaryOutside(void) { return false; }
  private:
+  Cell fake_xs_cell[2];
   int uid;
   vector<int> nodes;
   vector<int> cells;
@@ -76,19 +95,6 @@ class Node{
   int uid;
   vector<int> faces;
   vector<int> cells;
-};
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-class Cell{
- Cell():faces(4),nodes(4){}
- public:
-  int face(int id){return faces.at(id); }
- private:
-  vector<int> faces;
-  vector<int> nodes;
 };
 
 #endif //_LAMBDA_ITEMS_H_

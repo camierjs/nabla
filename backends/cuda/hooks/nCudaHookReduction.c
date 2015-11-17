@@ -85,7 +85,8 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->when_index  = 1;
   redjob->whens[0] = atof(at_single_cst_node->token);
   nMiddleJobAdd(nabla->entity, redjob);
-  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
+  const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
+  const double reduction_init = min_reduction?HUGE_VAL:-HUGE_VAL;
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
@@ -96,6 +97,11 @@ __global__ void %s(", item_var_name, global_var_name, job_name);
   nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(tcid);\n\
-\t/**global_%s=*/ReduceMinToDouble((double)(cell_%s[tcid]));\n\
-}\n\n", item_var_name,at_single_cst_node->token, reduction_init,global_var_name,item_var_name);
+\t/**global_%s=*/Reduce%sToDouble((double)(cell_%s[tcid]));\n\
+}\n\n", item_var_name,
+          at_single_cst_node->token,
+          reduction_init,
+          global_var_name,
+          min_reduction?"Min":"Max",
+          item_var_name);
 }

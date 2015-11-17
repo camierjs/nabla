@@ -95,8 +95,8 @@ void init(void) @ -20.0{
 ∀ cells void initCellMeasures(void)
   in (node coord) out (cell cell_measure) @ -9.0 {
   const ℝ³ s = coord[0];
-  const ℝ³ c = cell_center;
-  const ℝ³ h = c-s;
+  const ℝ³ center = cell_center;
+  const ℝ³ h = center-s;
   const ℝ x = 2.0*h.x;
   const ℝ y = 2.0*h.y;
   const ℝ z = 2.0*h.z;

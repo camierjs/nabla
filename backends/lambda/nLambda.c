@@ -51,6 +51,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"Bool", "bool"},
   {"Integer", "int"},
   {"real", "Real"},
+  //{"real3x3", "Real3x3"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
@@ -100,6 +101,9 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
   {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
+  {"xs_face_cell(c)", "face_cell[f*2+c]"},
+  {"xs_face_node(n)", "face_node[f*2+n]"},
+  {"cells_xs_face_cell(c)", "cells[face_cell[f*2+c]]"},
   {NULL,NULL}
 };
 
@@ -109,6 +113,7 @@ const nWhatWith nLambdaHeaderTypedef[]={
   {"int","integer"},
   {"double","real"},
   {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
@@ -157,8 +162,10 @@ nCalls nLambdaCalls={
 // * HOOKS
 // ****************************************************************************
 const static nHookXyz lambdaXyzHooks={
+  lambdaHookSysPrefix,
   lambdaHookPrevCell,
-  lambdaHookNextCell
+  lambdaHookNextCell,
+  lambdaHookSysPostfix
 };
 
 const static nHookPragma lambdaPragmaICCHooks ={

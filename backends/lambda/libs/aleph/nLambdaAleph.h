@@ -93,6 +93,15 @@ public:
    const double* jVar, const item* jItmEnum, double value){
    m_aleph_mat->addValue(iVar,iItm,jVar,*jItmEnum,value);t}*/
   
+  void addValue(double *iVar, int iItm,
+                double *jVar, int jItm,
+                double value){
+    /*debug()<<"\33[1;32m[matrix::setValue("
+           <<"iVar @ 0x"<<iVar<<" ["<<iItm<<"], "
+           <<"jVar @ 0x"<<jVar<<" ["<<jItm<<"], "
+           <<"value="<<value<<")]\33[0m";*/
+    m_aleph_mat->addValue(iVar,iItm,jVar,jItm,value);
+  }
   void setValue(double *iVar, int iItm,
                 double *jVar, int jItm,
                 double value){

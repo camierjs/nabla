@@ -131,6 +131,16 @@ astNode *dfsFetch(astNode *n, int ruleid){
 
 
 // ****************************************************************************
+// 
+// ****************************************************************************
+void dfsDumpToken(astNode *n){
+  if (n->token!=NULL) dbg("%s",n->token);
+  if (n->children != NULL) dfsDumpToken(n->children);
+  if (n->next != NULL) dfsDumpToken(n->next);
+}
+
+
+// ****************************************************************************
 // * DFS scan until tokenid is found
 // ****************************************************************************
 astNode *dfsFetchTokenId(astNode *n, int tokenid){

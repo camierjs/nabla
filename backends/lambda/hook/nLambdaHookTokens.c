@@ -117,6 +117,7 @@ static bool lambdaHookSwitchAleph(astNode *n, nablaJob *job){
   }
   case(ALEPH_MTX):{
     nprintf(nabla, "/*ALEPH_MTX*/","mtx");
+    job->parse.alephKeepExpression=true;
     return true;
   }
   case(ALEPH_RESET):{ nprintf(nabla, "/*ALEPH_RESET*/",".reset()"); break;}
@@ -335,7 +336,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(']'):{
-    //nprintf(nabla, NULL, "/*]*/");
+    nprintf(nabla, NULL, "/*]*/");
     if (job->parse.turnBracketsToParentheses==true){
       switch  (job->item[0]){
       case('c'):{nprintf(nabla, NULL, "[c]]"); break;}
@@ -361,8 +362,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (BACKCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "backCell(f)");
-    break;
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
+      nprintf(nabla, NULL, "faces[f].backCell()");     
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
+      nprintf(nabla, NULL, "cells[faces[f].backCell()]");
+  break;
   }
   case (BACKCELLUID):{
     if (cnfgem=='f')
@@ -371,7 +375,10 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "frontCell(f)");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
+      nprintf(nabla, NULL, "cells[faces[f].frontCell()]");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
+      nprintf(nabla, NULL, "faces[f].frontCell()");
     break;
   }
   case (FRONTCELLUID):{
@@ -387,7 +394,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.enum_enum=='\0' && cnfgem=='n') nprintf(nabla, NULL, "node->nbCell()");
     break;
   }    
-  case (NBNODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "8/*cell->nbNode()*/"); break; }    
+  case (NBNODE):{
+    if (cnfgem=='c') nprintf(nabla, NULL, "8/*cell->nbNode()*/");
+    if (cnfgem=='f') nprintf(nabla, NULL, "faces[f].nbNode()");
+    break;
+  }    
     //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}

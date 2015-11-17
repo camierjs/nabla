@@ -49,8 +49,12 @@ void nLambdaHookSourceInclude(nablaMain*);
 char* lambdaHookBits(void);
 char* lambdaHookGather(nablaJob*,nablaVariable*,enum_phase);
 char* lambdaHookScatter(nablaVariable*);
+
+char* lambdaHookSysPrefix(void);
 char* lambdaHookPrevCell(void);
 char* lambdaHookNextCell(void);
+char* lambdaHookSysPostfix(void);
+
 char* lambdaHookIncludes(void);
 
 char* lambdaHookFilterGather(nablaJob*);

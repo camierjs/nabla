@@ -407,10 +407,10 @@ declaration_specifiers
 | type_qualifier {rhs;}
 ;
 
-declaration_list
-: declaration {rhs;}
-| declaration_list declaration {rhs;}
-;
+//declaration_list
+//: declaration {rhs;}
+//| declaration_list declaration {rhs;}
+//;
 
 
 /////////////////
@@ -797,10 +797,11 @@ statement_list
 // ∇ functions //
 /////////////////
 function_definition
-: declaration_specifiers declarator declaration_list compound_statement {rhs;}
-| declaration_specifiers declarator declaration_list AT at_constant compound_statement {rhs;}
-| declaration_specifiers declarator compound_statement {rhs;}
+//: declaration_specifiers declarator declaration_list compound_statement {rhs;}
+//| declaration_specifiers declarator declaration_list AT at_constant compound_statement {rhs;}
+: declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
+//| declaration_specifiers declarator AT at_constant IF '(' constant_expression ')' compound_statement {rhs;}
 ;
 
 
@@ -874,9 +875,14 @@ at_single_constant
 | '-' R_CONSTANT {rhs;}
 | '+' R_CONSTANT {rhs;}
 ;
+at_tree_constant
+: at_single_constant {rhs;}
+| at_single_constant '/' at_single_constant {rhs;}
+;
 at_constant
-: at_single_constant {Yp1p($$,$1);}
-| at_constant ',' at_single_constant {Yp3p($$,$1,$2,$3);};
+// On rajoute des parenthèses que l'on enlevera lors du DFS nMiddleAtConstantParse
+: at_tree_constant {Yp1p($$,$1);} 
+| at_constant ',' at_tree_constant {Yp3p($$,$1,$2,$3);};
 
 
 ////////////////////////
@@ -903,8 +909,10 @@ nabla_job_definition
 ////////////////////////
 // ∇ single reduction //
 ////////////////////////
-nabla_reduction:
-FORALL nabla_items IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;};
+nabla_reduction
+: FORALL nabla_items IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+| FORALL nabla_items IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+;
 
 
 /////////////////

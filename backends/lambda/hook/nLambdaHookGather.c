@@ -109,13 +109,49 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 
 
 // ****************************************************************************
+// * Gather for Faces
+// ****************************************************************************
+static char* lambdaHookGatherFaces(nablaJob *job,
+                                   nablaVariable* var,
+                                   enum_phase phase){
+  // Phase de déclaration
+  if (phase==enum_phase_declaration){
+    return "";//strdup("int nw;");
+  }
+  return "";
+  /*// Phase function call
+  char gather[1024];
+  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+nw=n;\n\t\t\t\
+gatherFromFaces_%sk%s(node_cell[8*nw+c],\n\
+%s\
+         %s_%s%s,\n\t\t\t\
+         &gathered_%s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"real":"real3",
+           var->item,
+           var->name,
+           strcmp(var->type,"real")==0?"real":"real3",
+           strcmp(var->type,"real")==0?"":"3",
+           var->dim==0?"":"Array8",
+           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
+           var->item,
+           var->name,
+           strcmp(var->type,"real")==0?"":"",
+           var->item,
+           var->name);
+           return strdup(gather);*/
+}
+
+
+// ****************************************************************************
 // * Gather switch
 // ****************************************************************************
 char* lambdaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return lambdaHookGatherCells(job,var,phase);
   if (itm=='n') return lambdaHookGatherNodes(job,var,phase);
-  nablaError("Could not distinguish job item in lambdaStdGather!");
+  if (itm=='f') return lambdaHookGatherFaces(job,var,phase);
+  nablaError("Could not distinguish job item in lambdaStdGather for job '%s'!", job->name);
   return NULL;
 }
 
@@ -174,7 +210,8 @@ char* lambdaHookFilterGather(nablaJob *job){
     nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
     if (real_variable==NULL)
       nablaError("Could not find real variable from gathered variables!");
-    real_variable->is_gathered=true;
+#warning is_gathered tied to false!
+    real_variable->is_gathered=false;//true;
   }
   job->parse.iGather+=1;
   return strdup(gathers);

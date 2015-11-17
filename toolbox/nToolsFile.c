@@ -74,7 +74,7 @@ void nToolUnlink(char *pathname){
 int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
                                 const char *cat_sed_temporary_file_name){
   size_t size;
-  #warning BUFSIZ pour les anciens compilos/stations ?
+//#warning BUFSIZ pour les anciens compilos/stations ?
   char buf[BUFSIZ];
   char *pointer_that_matches=NULL;
   char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);

@@ -151,6 +151,8 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #define NABLA_LICENSE_HEADER 3360
 #define NABLA_MAX_FILE_NAME 8192
 #define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
+#define NABLA_JOB_WHEN_MAX 64
+#define NABLA_JOB_WHEN_HLT_FACTOR 4
 
 #include "frontend/nFrontend.h"
 

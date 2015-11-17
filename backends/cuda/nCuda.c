@@ -143,8 +143,10 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   };
 
   const nHookXyz nCudaXyzHooks={
+    nCudaHookSysPrefix,
     nCudaHookPrevCell,
-    nCudaHookNextCell
+    nCudaHookNextCell,
+    nCudaHookSysPostfix
   };
   
   const nHookForAll nCudaHookForAll={

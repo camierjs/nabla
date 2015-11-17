@@ -54,7 +54,7 @@ char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaV
   const int resolve = job->parse.isPostfixed!=2;
   dbg("\n\t\t[functionGlobalVar] name=%s, scalar=%d, resolve=%d",var->name, scalar,resolve);
   //nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de récupérer les m_global_...()
-  if (left_of_assignment_operator || !scalar) return "";
+  if (left_of_assignment_operator || !scalar) return "/*global_*/";
   return "()";
 }
 

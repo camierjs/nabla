@@ -86,15 +86,13 @@
   debug()<< "[computeInnerExplicitWaterSaturation]"
         << " [frontCell]="<<water_saturation_local[frontCell]
         <<", [backCell]="<<water_saturation_local[backCell];
-  debug()<< "\33[35m[computeInnerExplicitWaterSaturation] Face "
-  << backCell->localId()<<"->"<<frontCell->localId()<<"\33[m"; 
+  //debug()<< "\33[35m[computeInnerExplicitWaterSaturation] Face " << backCell->localId()<<"->"<<frontCell->localId()<<"\33[m"; 
 }
 
 ∀ own outer faces void dumpComputeOuterExplicitWaterSaturation(void){
   if ((face_center.x!=option_bc_Xmin)&&
       (face_center.x!=option_bc_Xmax)) continue;
-  debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Face "
-         <<backCell->localId()<<"->"<<frontCell->localId()<<"\33[m";
+  //debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Face " <<backCell->localId()<<"->"<<frontCell->localId()<<"\33[m";
 }
 
 ∀ own cells void dumpWaterSaturation(void) {//@ 7.0 {

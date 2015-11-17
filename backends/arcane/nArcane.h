@@ -46,6 +46,9 @@
 char *nccArcBits(void);
 char* nccArcGather(nablaJob*,nablaVariable* var, enum_phase phase);
 char* nccArcScatter(nablaVariable* var);
+
+char* nccArcSystemPrefix(void);
+char* nccArcSystemPostfix(void);
 char* nccArcPrevCell(void);
 char* nccArcNextCell(void);
 char* nccArcIncludes(void);

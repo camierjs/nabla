@@ -139,23 +139,31 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   };
   // Définition des hooks des directions
   const nHookXyz nablaOkinaXyzStdHooks={
+    nOkinaHookSysPrefix,
     nOkinaStdPrevCell,
-    nOkinaStdNextCell
+    nOkinaStdNextCell,
+    nOkinaHookSysPostfix
   };
   // Définition des hooks des directions
   const nHookXyz nablaOkinaXyzSseHooks={
+    nOkinaHookSysPrefix,
     nOkinaSsePrevCell,
-    nOkinaSseNextCell
+    nOkinaSseNextCell,
+    nOkinaHookSysPostfix
   };
   // Définition des hooks pour le mode AVX
   const nHookXyz nablaOkinaXyzAvxHooks={
+    nOkinaHookSysPrefix,
     nOkinaAvxPrevCell,
-    nOkinaAvxNextCell
+    nOkinaAvxNextCell,
+    nOkinaHookSysPostfix
   };
   // Définition des hooks pour le mode MIC
   const nHookXyz nablaOkinaXyzMicHooks={ 
+    nOkinaHookSysPrefix,
     nOkinaMicPrevCell,
-    nOkinaMicNextCell
+    nOkinaMicNextCell,
+    nOkinaHookSysPostfix
   };
   // Définition des calls pour Cilk+
   const nCallParallel okinaCilkCalls={
