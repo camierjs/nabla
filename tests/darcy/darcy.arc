@@ -56,7 +56,7 @@
 
   <darcy>
     <option_dtt_initial>0.0001</option_dtt_initial>
-    <option_stoptime>0.02</option_stoptime>
+    <option_stoptime>0.0001</option_stoptime>
     
     <option_ini_porosity>1.0</option_ini_porosity>
     <option_ini_permeability>1.0</option_ini_permeability>

@@ -146,6 +146,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneHookPostfixEnumerate
   };
   const nHookToken nArcaneHookToken={
+    arcaneHookTokenPrefix,
     arcaneHookSwitchToken,
     arcaneHookTurnTokenToVariable,
     arcaneTurnTokenToOption,
@@ -154,7 +155,8 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneExit,
     arcaneTime,
     arcaneFatal,
-    arcaneHookTurnBracketsToParentheses
+    arcaneHookTurnBracketsToParentheses,
+    arcaneHookTokenPostfix
   };
 
   const nHookGrammar hookGrammar={

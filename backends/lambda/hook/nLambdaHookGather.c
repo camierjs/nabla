@@ -116,30 +116,25 @@ static char* lambdaHookGatherFaces(nablaJob *job,
                                    enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration){
-    return "";//strdup("int nw;");
+    return strdup("int nw;");
   }
-  return "";
-  /*// Phase function call
+  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-nw=n;\n\t\t\t\
-gatherFromFaces_%sk%s(node_cell[8*nw+c],\n\
-%s\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
-           return strdup(gather);*/
+  snprintf(gather, 1024, "\
+\n\t\t\t%s gathered_%s_%s=%s(0.0);\
+\n\t\t\tnw=n;\
+\n\t\t\tgatherFromFaces_%sk%s(node_cell[8*nw+f],\
+\n\t\t\t\t\t%s\
+\n\t\t\t\t\t%s_%s,\
+\n\t\t\t\t\t&gathered_%s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"real":"real3", var->item, var->name, // ligne #1
+           strcmp(var->type,"real")==0?"real":"real3", strcmp(var->type,"real")==0?"":"3", // ligne #3
+           var->dim==0?"":"Array8", // fin ligne #3
+           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+f],\n\t\t\t", // ligne #4
+           var->item, var->name, // ligne #5
+           var->item, var->name  // ligne #6
+           );
+           return strdup(gather);
 }
 
 
@@ -210,8 +205,7 @@ char* lambdaHookFilterGather(nablaJob *job){
     nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
     if (real_variable==NULL)
       nablaError("Could not find real variable from gathered variables!");
-#warning is_gathered tied to false!
-    real_variable->is_gathered=false;//true;
+    real_variable->is_gathered=true;
   }
   job->parse.iGather+=1;
   return strdup(gathers);

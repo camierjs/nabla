@@ -66,6 +66,18 @@ inline real gatherk_and_zero_neg_ones(const int a, real *data){
 inline void gatherFromNode_k(const int a, real *data, real *gthr){
   *gthr=gatherk_and_zero_neg_ones(a,data);
 }
+inline void gatherFromFace_k(const int a, real *data, real *gthr){
+  *gthr=gatherk_and_zero_neg_ones(a,data);
+}
+
+
+inline real3 gather3k_and_zero_neg_ones(const int a, real3 *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+inline void gatherFromFaces_3k(const int a, real3 *data, real3 *gthr){
+  *gthr=gather3k_and_zero_neg_ones(a,data);
+}
 
 
 /******************************************************************************

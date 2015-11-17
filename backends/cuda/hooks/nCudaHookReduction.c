@@ -50,7 +50,8 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *global_var_node = n->children->next->next;
   const astNode *reduction_operation_node = global_var_node->next;
   astNode *item_var_node = reduction_operation_node->next;
-  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
+  astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
+  assert(at_single_cst_node!=NULL);
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
   // Préparation du nom du job
@@ -70,23 +71,25 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->name_utf8 = strdup(job_name);
   redjob->xyz    = strdup("NoXYZ");
   redjob->direction  = strdup("NoDirection");
-  //redjob->nblParamsNode=item_var_node;
-  //nablaVariable *item_var=nablaVariableFind(nabla,item_var_name);
-  //assert(item_var!=NULL);
   redjob->called_variables=nMiddleVariableNew(nabla);
   redjob->called_variables->item=strdup("cell");
   redjob->called_variables->name=item_var_name;
   // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
   redjob->reduction = true;
   redjob->reduction_name = strdup(global_var_name);
-  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[cudaHookReduction] @ %s",at_single_cst_node->token);
-  sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->when_index  = 1;
-  redjob->whens[0] = atof(at_single_cst_node->token);
+
+    // Init flush
+  redjob->when_index = 0;
+  redjob->whens[0] = 0.0;
+  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
+  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
+  nMiddleStoreWhen(redjob,nabla,NULL);
+  assert(redjob->when_index>0);
+  dbg("\n\t[cudaHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
-  const double reduction_init = min_reduction?HUGE_VAL:-HUGE_VAL;
+  const double reduction_init = min_reduction?1.0e20:-1.0e20;
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\

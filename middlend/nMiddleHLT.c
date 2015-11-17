@@ -80,6 +80,7 @@ void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla, char *at
   if (yyTranslate(n->tokenid)!=yyUndefTok()){
     // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point
     if (yyNameTranslate(n->tokenid) == ',') {
+      job->when_sign=1.0;
       nMiddleStoreWhen(job,nabla,at);
       goto skip;
     }

@@ -157,6 +157,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   };
   
   const nHookToken nCudaHookToken={
+    nCudaHookTokenPrefix,
     nCudaHookSwitchToken,
     nCudaHookTurnTokenToVariable,
     nCudaHookTurnTokenToOption,
@@ -165,7 +166,8 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     nCudaHookExit,
     nCudaHookTime,
     nCudaHookFatal,
-    nCudaHookTurnBracketsToParentheses
+    nCudaHookTurnBracketsToParentheses,
+    nCudaHookTokenPostfix
   };
   
   const nHookGrammar nCudaHookGrammar={

@@ -52,7 +52,8 @@ void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *global_var_node = n->children->next->next;
   const astNode *reduction_operation_node = global_var_node->next;
   const astNode *item_var_node = reduction_operation_node->next;
-  const astNode *at_single_cst_node = item_var_node->next->next->children->next->children;
+  astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
+  assert(at_single_cst_node!=NULL);
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
   // Préparation du nom du job
@@ -72,17 +73,24 @@ void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->name_utf8 = strdup(job_name);
   redjob->xyz    = strdup("NoXYZ");
   redjob->direction  = strdup("NoDirection");
-  assert(at_single_cst_node->parent->ruleid==rulenameToId("at_single_constant"));
-  dbg("\n\t[nOkinaHookReduction] @ %s",at_single_cst_node->token);
-  sprintf(&redjob->at[0],at_single_cst_node->token);
-  redjob->when_index  = 1;
-  redjob->whens[0] = atof(at_single_cst_node->token);
+  // Init flush
+  redjob->when_index  = 0;
+  redjob->whens[0] =0.0;
+  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
+  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
+  nMiddleStoreWhen(redjob,nabla,NULL);
+  assert(redjob->when_index>0);
+  dbg("\n\t[nOkinaHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+
   nMiddleJobAdd(nabla->entity, redjob);
-  const double reduction_init = (reduction_operation_node->tokenid==MIN_ASSIGN)?1.0e20:0.0;
+  const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
+  const double reduction_init = min_reduction?1.0e20:-1.0e20;
+  const char* mix = min_reduction?"in":"ax";
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
-// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
+// * Kernel de reduction de la variable\n\
+// * '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 void %s(void){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
@@ -92,29 +100,31 @@ void %s(void){ // @ %s\n\
 \tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
 \tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
 \t\tconst int tid = omp_get_thread_num();\n\
-\t\t%s_per_thread[tid] = min(%s_%s[%s],%s_per_thread[tid]);\n\
+\t\t%s_per_thread[tid] = m%s(%s_%s[%s],\n\
+\t\t\t\t\t\t\t\t\t\t\t\t\t%s_per_thread[tid]);\n\
 \t}\n\
 \tglobal_%s[0]=reduction_init;\n\
 \tfor (int i=0; i<threads; i+=1){\n\
 \t\tconst Real real_global_%s=global_%s[0];\n\
-\t\tglobal_%s[0]=(ReduceMinToDouble(%s_per_thread[i])<ReduceMinToDouble(real_global_%s))?\n\
-\t\t\t\t\t\t\t\t\tReduceMinToDouble(%s_per_thread[i]):ReduceMinToDouble(real_global_%s);\n\
+\t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])<ReduceM%sToDouble(real_global_%s))?\n\
+\t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
 \t}\n\
-}\n\n",   item_var_name,global_var_name,
-          job_name,
-          at_single_cst_node->token,
-          reduction_init,
-          global_var_name,
-          global_var_name,
-          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
+}\n\n",   item_var_name,global_var_name, // '%s' vers la globale '%s'
+          job_name, // %s(void)
+          at_single_cst_node->token, // @ %s
+          reduction_init, // %e
+          global_var_name, // %s_per_thread
+          global_var_name, // %s_per_thread
+          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL", // FOR_EACH_%s_WARP_SHARED
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?", // (%s
+          global_var_name,mix, // %s_per_thread & m%s
           (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
           item_var_name,
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name,
-          global_var_name,global_var_name,global_var_name
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?", // %s_%s[%s]
+          global_var_name, // %s_per_thread
+          global_var_name, // global_%s
+          global_var_name,global_var_name, // real_global_%s=global_%s
+          global_var_name,mix,global_var_name,mix,global_var_name, // avant dernière ligne
+          mix,global_var_name,mix,global_var_name // dernière
           );  
 }

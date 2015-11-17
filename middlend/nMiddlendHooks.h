@@ -111,6 +111,7 @@ typedef struct nHookForAllStruct{
 } nHookForAll;
 
 typedef struct nHookTokenStruct{
+  char* (*prefix)(struct nablaMainStruct *);  
   // Gestion des différentes actions pour un job
   void (*svvitch)(astNode*, nablaJob*);
   // Transformation de tokens en variables selon l'ENUMERATE_*
@@ -123,6 +124,7 @@ typedef struct nHookTokenStruct{
   void (*time)(struct nablaMainStruct*);
   void (*fatal)(struct nablaMainStruct*);
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char);
+  char* (*postfix)(struct nablaMainStruct *);  
 } nHookToken;
 
 typedef struct nHookGrammarStruct{

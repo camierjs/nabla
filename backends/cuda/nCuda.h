@@ -109,6 +109,9 @@ void nCudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 char* nCudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
 void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
 
+char* nCudaHookTokenPrefix(nablaMain*);
+char* nCudaHookTokenPostfix(nablaMain*);
+
 char *nCudaPragmaGccIvdep(void);
 char *nCudaPragmaGccAlign(void);
 char* cudaGather(nablaJob*);

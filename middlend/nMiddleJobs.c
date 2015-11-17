@@ -196,14 +196,15 @@ void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla
 static void dumpIfAfterAtFormat(astNode *n, nablaMain *nabla, bool dump_in_header,char *info, char *format){
   if (dump_in_header)
     hprintf(nabla, info, format, n->token);
-  else nprintf(nabla, info, format, n->token);
+  else
+    nprintf(nabla, info, format, n->token);
 }
-//static void dumpIfAfterAtToken(astNode *n, nablaMain *nabla, bool dump_in_header){
-//  if (dump_in_header)
-//    hprintf(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
-//  else
-//    nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
-//}
+static void dumpIfAfterAtToken(astNode *n, nablaMain *nabla, bool dump_in_header){
+  if (dump_in_header)
+    hprintf(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
+  else
+    nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
+}
 static void dumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
 // #warning LAMBDA vs ARCANE in middlend!
   if (!dump_in_header){ // LAMBDA ici
@@ -232,7 +233,7 @@ static void dumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
   // On choisit le format ou pas
   if (info!=NULL)
     dumpIfAfterAtFormat(n,nabla,dump_in_header,info,format);
-  //else dumpIfAfterAtToken(n,nabla,dump_in_header);
+  else dumpIfAfterAtToken(n,nabla,dump_in_header);
 }
 
 // *****************************************************************************

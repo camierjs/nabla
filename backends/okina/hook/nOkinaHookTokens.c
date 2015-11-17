@@ -43,6 +43,15 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+// ****************************************************************************
+// * nOkinaHookTokenPrefix
+// ****************************************************************************
+char* nOkinaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
+
+// ****************************************************************************
+// * nOkinaHookTokenPostfix
+// ****************************************************************************
+char* nOkinaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 // ****************************************************************************
 // * FORALL token switch

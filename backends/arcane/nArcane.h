@@ -144,6 +144,8 @@ void arcaneHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *arcaneHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void arcaneHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char);
 void arcaneHookSystem(astNode*,nablaMain*, const char, char);
+char* arcaneHookTokenPrefix(nablaMain*);
+char* arcaneHookTokenPostfix(nablaMain*);
 
 // Transformations
 char *cellJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);

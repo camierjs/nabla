@@ -56,7 +56,6 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
   assert(at_single_cst_node!=NULL);
-//item_var_node->next->next->children->next->children;
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
   // Préparation du nom du job
@@ -87,7 +86,7 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
-  const double reduction_init = min_reduction?1.0e20:-10e20;
+  const double reduction_init = min_reduction?1.0e20:-1.0e20;
   const char* mix = min_reduction?"in":"ax";
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\

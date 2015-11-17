@@ -69,7 +69,7 @@ char *lambdaHookPragmaGccAlign(void){ return ""; }
 // ****************************************************************************
 // * System Prefix
 // ****************************************************************************
-char* lambdaHookSysPrefix(void){ return ""; }
+char* lambdaHookSysPrefix(void){ return "/*lambdaHookSysPrefix*/"; }
 
 
 // ****************************************************************************
@@ -91,7 +91,7 @@ char* lambdaHookNextCell(void){
 // ****************************************************************************
 // * System Postfix
 // ****************************************************************************
-char* lambdaHookSysPostfix(void){ return ")"; }
+char* lambdaHookSysPostfix(void){ return "/*lambdaHookSysPostfix*/)"; }
 
 
 // ****************************************************************************

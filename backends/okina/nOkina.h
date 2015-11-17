@@ -207,6 +207,9 @@ void nOkinaArgsDumpNablaDebugFunctionFromOut(nablaMain*, astNode*,bool);
 void nOkinaHookParamsAddExtra(nablaMain*, nablaJob*, int*);
 void nOkinaHookParamsDumpList(nablaMain*, nablaJob*, astNode*, int*);
 
+char* nOkinaHookTokenPrefix(nablaMain*);
+char* nOkinaHookTokenPostfix(nablaMain*);
+
 // nOkina
 NABLA_STATUS nOkina(nablaMain*, astNode*, const char*);
 

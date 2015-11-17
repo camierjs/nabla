@@ -51,7 +51,6 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"Bool", "bool"},
   {"Integer", "int"},
   {"real", "Real"},
-  //{"real3x3", "Real3x3"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
@@ -226,6 +225,7 @@ const static nHookForAll nLHookForAll={
 };
 
 const static nHookToken nLHookToken={
+  lambdaHookTokenPrefix,
   lambdaHookSwitchToken,
   lambdaHookTurnTokenToVariable,
   lambdaHookTurnTokenToOption,
@@ -234,7 +234,8 @@ const static nHookToken nLHookToken={
   lambdaHookExit,
   lambdaHookTime,
   lambdaHookFatal,
-  lambdaHookTurnBracketsToParentheses
+  lambdaHookTurnBracketsToParentheses,
+  lambdaHookTokenPostfix,
 };
 
 const static nHookGrammar hookGrammar={

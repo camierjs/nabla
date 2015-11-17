@@ -140,6 +140,10 @@ char* lambdaHookDumpEnumerateXYZ(nablaJob*);
 char* lambdaHookDumpEnumerate(nablaJob*);
 char* lambdaHookPostfixEnumerate(nablaJob*);
 char* lambdaHookItem(nablaJob*,const char, const char, char);
+
+char* lambdaHookTokenPrefix(nablaMain*);
+char* lambdaHookTokenPostfix(nablaMain*);
+
 void lambdaHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void lambdaHookSystem(astNode*,nablaMain*,const char,char);

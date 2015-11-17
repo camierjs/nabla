@@ -45,6 +45,17 @@
 
 
 // ****************************************************************************
+// * lambdaHookTokenPrefix
+// ****************************************************************************
+char* lambdaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
+
+// ****************************************************************************
+// * lambdaHookTokenPostfix
+// ****************************************************************************
+char* lambdaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+
+
+// ****************************************************************************
 // * lambdaHookTurnTokenToOption
 // ****************************************************************************
 void lambdaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
@@ -336,12 +347,13 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(']'):{
-    nprintf(nabla, NULL, "/*]*/");
+    nprintf(nabla, NULL, "/*swTkn ']'*/");
     if (job->parse.turnBracketsToParentheses==true){
       switch  (job->item[0]){
-      case('c'):{nprintf(nabla, NULL, "[c]]"); break;}
-      case('n'):{nprintf(nabla, NULL, "[c]]"); break;}
-      default:{nprintf(nabla, NULL, ")]");}
+      case('c'):{nprintf(nabla, NULL, "/*c*/]]"); break;}
+        //case('c'):{nprintf(nabla, NULL, "/*c*/[c]]"); break;}
+      case('n'):{nprintf(nabla, NULL, "/*n*/[c]]"); break;}
+      default:{nprintf(nabla, NULL, "/*]?*/)]");}
       }
       job->parse.turnBracketsToParentheses=false;
     }else{
@@ -505,8 +517,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   default:{
+    //if (n->token!=NULL) nprintf(nabla, NULL, "%s/*?*/ ", n->token);
     if (n->token!=NULL) nprintf(nabla, NULL, "%s ", n->token);
-    //if (n->token!=NULL) nprintf(nabla, NULL, "/*default*/%s ", n->token);
     break;
   }
   }

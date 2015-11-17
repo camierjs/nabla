@@ -223,7 +223,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     }
     if (entry_points[i].when_depth==(HLT_depth-1)){
       nprintf(n, NULL, "\n\t// Poping from HLT!");
-      #warning HWed 'redo_with_a_smaller_time_step'
+//#warning HWed 'redo_with_a_smaller_time_step'
       nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==0);\n");
       HLT_depth=entry_points[i].when_depth;
     }

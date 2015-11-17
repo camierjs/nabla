@@ -200,6 +200,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookEnumeratePostfix
   };
   const nHookToken nOkinaHookToken={
+    nOkinaHookTokenPrefix,
     nOkinaHookTokenSwitch,
     nOkinaHookVariablesTurnTokenToVariable,
     nOkinaHookTurnTokenToOption,
@@ -208,7 +209,8 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookExit,
     nOkinaHookTime,
     nOkinaHookFatal,
-    nOkinaHookVariablesTurnBracketsToParentheses
+    nOkinaHookVariablesTurnBracketsToParentheses,
+    nOkinaHookTokenPostfix,
   };
   const nHookGrammar nOkinaHookGrammar={
     nOkinaHookFunction,

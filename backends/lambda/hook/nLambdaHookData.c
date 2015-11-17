@@ -44,27 +44,29 @@
 #include "nabla.tab.h"
 
 
-/***************************************************************************** 
- * Traitement des transformations '[', '(' & ''
- *****************************************************************************/
+// ****************************************************************************
+// * Traitement des transformations '[', '(' & ''
+// * This function should be killed
+// ****************************************************************************
 void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
                                          nablaJob *job,
                                          nablaVariable *var,
                                          char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits variable");
-  if (  /*(cnfg=='c' && var->item[0]=='n')
-          ||*/(cnfg=='c' && var->item[0]=='f')
+  if (  (cnfg=='c' && var->item[0]=='n')
+      ||(cnfg=='c' && var->item[0]=='f')
       ||(cnfg=='n' && var->item[0]!='n')            
       ||(cnfg=='f' && var->item[0]!='f')
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
     if (!job->parse.selection_statement_in_compound_statement){
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*tB2P: %c %c*/", cnfg, var->item[0]);
+      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*b2p !if: %c%c*/", cnfg, var->item[0]);
       //nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
     }else{
       //nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
     }
+    nprintf(nabla, NULL,"/*b2p@true*/");
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -119,7 +121,7 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
  * Prépare le nom de la variable
  *****************************************************************************/
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
+  nprintf(nabla, NULL, "/*nvar(*/%s_%s/*)*/", var->item, var->name);
 //  if (!job->parse.selection_statement_in_compound_statement){
 //    nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
 //  }else{
@@ -183,7 +185,7 @@ static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
   // Preliminary pertinence test
   if (cnfg != 'c') return;
   
-  //nprintf(arc, "/*CellJob*/","/*CellJob*/");
+  nprintf(arc, "/*CellJob*/","/*CellJob*/");
   
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if ((job->parse.function_call_arguments==true)&&(var->dim==1)){
@@ -216,7 +218,12 @@ static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
     }
     //if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
     if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
-    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "/*p2&0*/");
+    if (isPostfixed==2 && enum_enum=='\0') {
+      if (job->parse.postfix_constant==true){
+        nprintf(arc, NULL, "/*NodeVar + postfix_constant*/[");
+      }else
+        nprintf(arc, "/*NodeVar 2&0*/", "/*p2&0*/[cell_node[");
+    }
     break;
   }
   case ('f'):{
@@ -246,17 +253,17 @@ static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 
   // Preliminary pertinence test
   if (cnfg != 'n') return;
-  nprintf(arc, "/*NodeJob*/",NULL);
+  nprintf(arc, NULL, "/*NodeJob*/");
 
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if (var->item[0]!='g') nvar(arc,var,job);
 
   switch (var->item[0]){
   case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[c][c");
+    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "/*var->dim!=0*/[c][c");
     if (enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (enum_enum=='c' && (!isWithLibrary(arc,with_real)))  nprintf(arc, "/*CellVar c*/", "[c]");
+    if (enum_enum=='c' && (!isWithLibrary(arc,with_real)))  nprintf(arc, "/*CellVar c*/", "/*nc*/[c]");
     if (enum_enum=='c' && isWithLibrary(arc,with_real))  nprintf(arc, "/*CellVar c*/", "[node_cell[2*n+c]]");
     //if (enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[c]");
     if (enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
@@ -415,6 +422,7 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
   nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
+  
   dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle

@@ -148,27 +148,31 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
                                          char **postfix){
   switch(tokenid){
   case(NEXTCELL):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL");
     *prefix=nabla->hook->xyz->prefix();
     *system=nabla->hook->xyz->nextCell();
     *postfix=nabla->hook->xyz->postfix();
     return;
   }
   case(PREVCELL):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL");
     *prefix=nabla->hook->xyz->prefix();
     *system=nabla->hook->xyz->prevCell();
     *postfix=nabla->hook->xyz->postfix();
     return;
   }
   case(BACKCELL):{
-    *prefix=strdup("");
+    dbg("\n\t[nMiddleVariablesSystemSwitch] BACKCELL");
+    *prefix=nabla->hook->token->prefix(nabla);
     *system=strdup("");
-    *postfix=strdup("");
+    *postfix=nabla->hook->token->postfix(nabla);
     return;
   }
   case(FRONTCELL):{
-    *prefix=strdup("");
+    dbg("\n\t[nMiddleVariablesSystemSwitch] FRONTCELL");
+    *prefix=nabla->hook->token->prefix(nabla);
     *system=strdup("");
-    *postfix=strdup("");
+    *postfix=nabla->hook->token->postfix(nabla);
     return;
   }
   default:return;
