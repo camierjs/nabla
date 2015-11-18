@@ -71,6 +71,9 @@ static void nLambdaHookMesh1D(nablaMain *nabla){
 // * MESH GENERATION (1D)\n\
 // ********************************************************\n\
 const int NABLA_NODE_PER_CELL = 2;\
+const int NABLA_CELL_PER_NODE = 2;\
+const int NABLA_CELL_PER_FACE = 0;\
+const int NABLA_NODE_PER_FACE = 0;\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = 1;\n\
@@ -84,9 +87,11 @@ const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = 0.0;\n\
 const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
 \n\
-const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
-const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
-const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
+const int NABLA_NB_NODES      = (NABLA_NB_NODES_X_AXIS);\n\
+const int NABLA_NODES_PADDING = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
+const int NABLA_NB_CELLS      = (NABLA_NB_CELLS_X_AXIS);\n\
+\n\
+const int NABLA_NB_FACES         = 0;\n\
 \n\
 int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
 ");
@@ -102,17 +107,14 @@ static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH CONNECTIVITY (3D)\n\
 // ********************************************************\
-\nint cell_node[8*NABLA_NB_CELLS];\
-\nint node_cell[8*NABLA_NB_NODES];\
-\nint node_cell_corner[8*NABLA_NB_NODES];\
+\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
+\nint node_cell[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint node_cell_corner[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
 \nint cell_next[3*NABLA_NB_CELLS];\
 \nint cell_prev[3*NABLA_NB_CELLS];\
-\nint node_cell_and_corner[2*8*NABLA_NB_NODES];\
-\nint face_cell[2*NABLA_NB_FACES];\
-\nint face_node[2*NABLA_NB_NODES];\
-\nvector<Face> faces(NABLA_NB_FACES);\
-\nvector<Cell> cells(NABLA_NB_CELLS);\
-\nvector<Node> nodes(NABLA_NB_NODES);\
+\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint face_cell[NABLA_CELL_PER_FACE*NABLA_NB_FACES];\
+\nint face_node[NABLA_NODE_PER_FACE*NABLA_NB_FACES];\
 \n\n\n");
 }
 
@@ -127,6 +129,9 @@ static void nLambdaHookMesh3D(nablaMain *nabla){
 // * MESH GENERATION (3D)\n\
 // ********************************************************\n\
 const int NABLA_NODE_PER_CELL = 8;\
+const int NABLA_CELL_PER_NODE = 8;\
+const int NABLA_CELL_PER_FACE = 2;\
+const int NABLA_NODE_PER_FACE = 4;\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
@@ -136,10 +141,14 @@ const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
 \n\
-const int NABLA_NB_FACES_X_AXIS = X_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Y_AXIS = Y_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Z_AXIS = Z_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES        = 2*NABLA_NB_CELLS_Z_AXIS*(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n\
+const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Z_INNER = (Z_EDGE_ELEMS-1)*X_EDGE_ELEMS*Y_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+const int NABLA_NB_FACES_Z_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;\n\
+const int NABLA_NB_FACES         = NABLA_NB_FACES_Z_INNER+NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER\
++NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER+NABLA_NB_FACES_Z_OUTER;\n\
 \n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\

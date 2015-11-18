@@ -51,6 +51,7 @@ char* nCudaHookPrefixEnumerate(nablaJob *job){
   //if (j->xyz==NULL) return "// void ENUMERATE prefix";
   //nprintf(job->entity->main, "\n\t/*cudaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
   if (itm=='c'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
+  if (itm=='f'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_FACE_THREAD(tfid);";
   if (itm=='c'  && strcmp(job->return_type,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
   if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
   if (itm=='\0' && job->is_an_entry_point

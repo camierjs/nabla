@@ -91,6 +91,7 @@ includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 "for"					{ return tok(&yylval, FOR);}
 "goto"				{ return tok(&yylval, GOTO);}
 "if"					{ return tok(&yylval, IF);}
+"is"					{ return tok(&yylval, IS);}
 "inline" 			{ return tok(&yylval, INLINE);}
 "int"					{ return tok(&yylval, INT);}
 "long"				{ return tok(&yylval, LONG);}

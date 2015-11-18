@@ -167,6 +167,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
     nCudaHookTime,
     nCudaHookFatal,
     nCudaHookTurnBracketsToParentheses,
+    cudaHookIsTest,
     nCudaHookTokenPostfix
   };
   

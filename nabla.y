@@ -80,6 +80,7 @@ extern char *last_identifier;
 %token TYPEDEF_NAME
 %token GLOBAL RESTRICT ALIGNED
 %token ATTRIBUTE ASM // GNU_VA_LIST
+%token IS IS_OP_INI IS_OP_END
 
  // MATHS tokens
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
@@ -683,9 +684,19 @@ equality_expression
 | equality_expression EEQ_OP relational_expression {rhs;}
 | equality_expression NEQ_OP relational_expression {rhs;}
 ;
-and_expression
+is_test
+: IS OWN {rhs;}
+| IS INNER {rhs;}
+| IS OUTER {rhs;}
+| IS IDENTIFIER {rhs;}
+;
+is_expression
 : equality_expression {rhs;}
-| and_expression '&' equality_expression {rhs;}
+| is_expression is_test {YopYop(IS_OP_INI,IS_OP_END);}
+;
+and_expression
+: is_expression {rhs;}
+| and_expression '&' is_expression {rhs;}
 ;
 exclusive_or_expression
 : and_expression {rhs;}
@@ -1232,4 +1243,100 @@ inline void rhsAddVariadic(astNode **lhs,int yyn,int yynrhs,...){
     astAddNext(first,next);
   }
   va_end(args);
+}
+
+
+// *****************************************************************************
+// * rhsYSandwich
+// *****************************************************************************
+inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
+                         int left_token,
+                         int right_token){
+  // Nombre d'éléments dans notre RHS
+  const int yynrhs = yyr2[yyn];
+  // Le first est le nouveau noeud que l'on va insérer
+  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  // On prépare le token de gauche à rajouter
+  astNode *left=astNewNode();
+  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->tokenid=left_token;
+  // Le next pointe pour l'instant sur le premier noeud en argument
+  astNode *next=yyvsp[(0+1)-(yynrhs)];
+  // On prépare le token de droite à rajouter
+  astNode *right=astNewNode();
+  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->tokenid=right_token;
+  // Dans le cas où il n'y en a qu'un, le sandwich est différent:
+  if (yynrhs==1){
+    astAddChild(first,left);
+    astAddNext(left,next);
+    astAddNext(next,right);
+    return;
+  }
+  // S'il y en a plus qu'un, on déroule les boucles
+  astAddChild(first,left);
+  astAddNext(left,next);
+  // On saute le premier et s'arrète avant le dernier
+  for(int i=1;i<yynrhs-1;i+=1){
+    //printf("[1;33m[rhsYSandwich] \t for\n[m");
+    first=next;
+    next=yyvsp[(i+1)-(yynrhs)];
+    astAddNext(first,next);
+  }
+  // On récupère le dernier
+  astNode *tail=yyvsp[0];
+  // Et on sandwich
+  astAddNext(next,tail);
+  astAddNext(tail,right);
+  //printf("[1;33m[rhsYSandwich] done[m\n");
+}
+
+
+  
+// *****************************************************************************
+// * Variadic rhsYSandwich
+// *****************************************************************************
+inline void rhsYSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
+                                 int left_token,
+                                 int right_token, ...){
+  va_list args;
+  va_start(args, right_token);
+  //printf("[1;33m[rhsYSandwich] yynrhs=%d\n[m",yynrhs);
+  // Le first est le nouveau noeud que l'on va insérer
+  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  // On prépare le token de gauche à rajouter
+  astNode *left=astNewNode();
+  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->tokenid=left_token;
+  // Le next pointe pour l'instant sur le premier noeud en argument
+  astNode *next=va_arg(args,astNode*);
+  // On prépare le token de droite à rajouter
+  astNode *right=astNewNode();
+  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->tokenid=right_token;
+  // Dans le cas où il n'y en a qu'un, le sandwich est différent:
+  if (yynrhs==1){
+    astAddChild(first,left);
+    astAddNext(left,next);
+    astAddNext(next,right);
+    va_end(args);
+    return;
+  }
+  // S'il y en a plus qu'un, on déroule les boucles
+  astAddChild(first,left);
+  astAddNext(left,next);
+  // On saute le premier et s'arrète avant le dernier
+  for(int i=1;i<yynrhs-1;i+=1){
+    //printf("[1;33m[rhsYSandwich] \t for\n[m");
+    first=next;
+    next=va_arg(args,astNode*);
+    astAddNext(first,next);
+  }
+  // On récupère le dernier
+  astNode *tail=va_arg(args,astNode*);
+  // Et on sandwich
+  astAddNext(next,tail);
+  astAddNext(tail,right);
+  va_end(args);  
+  //printf("[1;33m[rhsYSandwich] done[m\n");
 }

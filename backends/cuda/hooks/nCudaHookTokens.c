@@ -43,6 +43,33 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+static void lambdaHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
+  const astNode* isNode = dfsFetchTokenId(n->next,IS);
+  assert(isNode);
+  const char *token2function = isNode->next->token;
+  assert(token2function);
+  if (isNode->next->tokenid==OWN)
+    nprintf(nabla, "/*IS_OP_INI*/", "_isOwn_(");
+  else
+    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(", token2function);
+  // Et on purge le token pour pas qu'il soit parsé
+  isNode->next->token[0]=0;
+}
+//static void lambdaHookIsTestIs(nablaMain *nabla, nablaJob *job, astNode *n){}
+static void lambdaHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
+  nprintf(nabla, "/*IS_OP_END*/", ")");
+}
+// *****************************************************************************
+// *
+// *****************************************************************************
+void cudaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+  assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
+  if (token==IS_OP_INI) lambdaHookIsTestIni(nabla,job,n);
+  if (token==IS) return;
+  if (token==IS_OP_END) lambdaHookIsTestEnd(nabla,job,n);
+}
+
+
 // ****************************************************************************
 // * cudaHookTokenPrefix
 // ****************************************************************************

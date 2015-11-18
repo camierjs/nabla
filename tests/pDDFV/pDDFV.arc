@@ -73,19 +73,19 @@
      <option_sncq>false</option_sncq>
      <option_sncq_th>0.25</option_sncq_th>
      
-     <option_kershaw>true</option_kershaw>
+     <option_kershaw>false</option_kershaw>
 
      <!-- Options des solutions Analytiques *ou pas* -->
      <option_hole>false</option_hole>
      <option_atan>false</option_atan>
 
      <!-- Test du 'Parabolic problem with Discontinuous Coefficients -->
-     <option_gao_wu>true</option_gao_wu>
+     <option_gao_wu>false</option_gao_wu>
      <option_gao_wu_k>1.0</option_gao_wu_k>
      <option_gao_wu_area>true</option_gao_wu_area>
      
      <!-- Options de l'anisotropisme -->
-     <option_isotropic>false</option_isotropic>
+     <option_isotropic>true</option_isotropic>
 
      <option_k>1.0</option_k>
      <option_th>0.0</option_th><!-- 0.52359877559829887308 -->

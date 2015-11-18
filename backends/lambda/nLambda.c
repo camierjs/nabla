@@ -90,6 +90,8 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"ReduceMinToDouble(a)","a"},
   {"ReduceMaxToDouble(a)","a"},
   {"knAt(a)",""},
+  //{"_isOwn_(item)","true"},  // aux cells
+  //{"_isSubDomainBoundaryOutside_(item)","true"},   // aux faces
   {"fatal(a,b)","exit(-1)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
@@ -99,10 +101,9 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"MD_DirZ","2"},
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
-  {"xs_face_cell(c)", "face_cell[f*2+c]"},
-  {"xs_face_node(n)", "face_node[f*2+n]"},
-  {"cells_xs_face_cell(c)", "cells[face_cell[f*2+c]]"},
+  {"xs_node_cell(c)", "node_cell[n*NABLA_CELL_PER_NODE+c]"},
+  {"xs_face_cell(c)", "face_cell[f*NABLA_CELL_PER_FACE+c]"},
+  {"xs_face_node(n)", "face_node[f*NABLA_NODE_PER_FACE+n]"},
   {NULL,NULL}
 };
 
@@ -235,7 +236,8 @@ const static nHookToken nLHookToken={
   lambdaHookTime,
   lambdaHookFatal,
   lambdaHookTurnBracketsToParentheses,
-  lambdaHookTokenPostfix,
+  lambdaHookIsTest,
+  lambdaHookTokenPostfix
 };
 
 const static nHookGrammar hookGrammar={

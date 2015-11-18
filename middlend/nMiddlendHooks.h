@@ -124,7 +124,8 @@ typedef struct nHookTokenStruct{
   void (*time)(struct nablaMainStruct*);
   void (*fatal)(struct nablaMainStruct*);
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char);
-  char* (*postfix)(struct nablaMainStruct *);  
+  void (*isTest)(nablaMain*,nablaJob*,astNode*,int);
+  char* (*postfix)(nablaMain*);  
 } nHookToken;
 
 typedef struct nHookGrammarStruct{

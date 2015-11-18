@@ -43,6 +43,8 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+void okinaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){}
+
 // ****************************************************************************
 // * nOkinaHookTokenPrefix
 // ****************************************************************************

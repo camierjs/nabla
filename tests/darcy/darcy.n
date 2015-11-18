@@ -61,7 +61,7 @@ with ℵ;
 // ****************************************************************************
 options{
   ℝ ε = 1.e-16;
-  ℾ option_debug = false;
+  ℾ option_debug = true;
   ℝ option_bc_Xmin = 0.0;
   ℝ option_bc_Xmax = 1.0; // A faire concorder avec .arc: <lx nx="100" prx="1.0">100.0</lx>
   ℝ option_bc_Xmin_pressure = 0.0;
@@ -74,7 +74,7 @@ options{
   ℝ option_ini_water_viscosity = 1.0;
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime = 0.01;
+  ℝ option_stoptime = 0.001;
   // Options d'Aleph
   // ! l'ε a l'air d'être très sensible
   // Ici, en ramenat en sęquentiel
@@ -215,7 +215,7 @@ void dbgLoop(void) @ 1.0 {
   const ℝ diff_pressure = pressure[0]-boundary_pressure;
   const ℝ diff_pressure_unglitched = (fabs(diff_pressure)<ε)?0.0:diff_pressure;
   total_velocity = transmissivity*total_mobility[0]*diff_pressure_unglitched;
-  total_velocity *= ((this).isSubDomainBoundaryOutside()) ? 1.0 : -1.0;
+  total_velocity *= ((this) is isSubDomainBoundaryOutside) ? 1.0 : -1.0;
 }
 
 // *******************************************************

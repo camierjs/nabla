@@ -100,7 +100,7 @@ static void nabla_ini_node_coords(void){
     dbgReal3(DBG_INI,node_coord[iNode]);
   }
   verifCoords();
-
+  
   dbg(DBG_INI,"\nOn associe à chaque maille ses noeuds");
   int node_bid,cell_uid,iCell=0;
   for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
@@ -130,6 +130,7 @@ static void nabla_ini_node_coords(void){
       }
     }
   }
+
   dbg(DBG_INI,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
   dbg(DBG_INI,"\nOn flush le nombre de mailles attachées à ce noeud");
 
@@ -167,6 +168,34 @@ static void nabla_ini_node_coords(void){
     for(int c=0;c<8;++c)
       node_cell_corner[8*n+c]=node_cell_and_corner[2*(8*n+c)+1];
 
+  
+  /*dbg(DBG_INI,"\nOn associe à chaque maille ses faces");
+  int face_bid,iFace=0;
+  iCell=0;
+  for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
+    for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
+      for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iFace+=1,iCell+=1){
+        cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
+        face_bid=iFace;
+        dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d", iCell,iX,iY,iZ,cell_uid);
+        cell_face[0*NABLA_NB_CELLS+iCell] = face_bid + 0;
+        cell_face[1*NABLA_NB_CELLS+iCell] = face_bid + 1;
+        cell_face[2*NABLA_NB_CELLS+iCell] = face_bid + 2;
+        cell_face[3*NABLA_NB_CELLS+iCell] = face_bid + 3;
+        cell_face[4*NABLA_NB_CELLS+iCell] = face_bid + 4;
+        cell_face[5*NABLA_NB_CELLS+iCell] = face_bid + 5;
+        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
+            cell_face[0*NABLA_NB_CELLS+iCell],
+            cell_face[1*NABLA_NB_CELLS+iCell],
+            cell_face[2*NABLA_NB_CELLS+iCell],
+            cell_face[3*NABLA_NB_CELLS+iCell],
+            cell_face[4*NABLA_NB_CELLS+iCell],
+            cell_face[5*NABLA_NB_CELLS+iCell]);
+      }
+    }
+    }*/
+
+  
   //verifConnectivity();
   verifCorners();
   

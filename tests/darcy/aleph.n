@@ -58,11 +58,11 @@ void computePressureRhsInit(void) @ 4.0{
 ∀ inner faces void computeInnerPressure(void) out (cell pressure) @ 4.2 {
   const ℝ value = ½*transmissivity*
     (total_mobility[backCell]+total_mobility[frontCell]);
-  if (backCell.isOwn()){
+  if (backCell is own){
     ℵ matrix addValue(pressure,backCell, pressure,backCell,  +value);
     ℵ matrix addValue(pressure,backCell, pressure,frontCell, -value);
   }
-  if (frontCell.isOwn()){
+  if (frontCell is own){
     ℵ matrix addValue(pressure,frontCell, pressure,frontCell, +value);
     ℵ matrix addValue(pressure,frontCell, pressure,backCell,  -value);
   } 
@@ -77,7 +77,7 @@ void computePressureRhsInit(void) @ 4.0{
     (face_center.x==option_bc_Xmin)?option_bc_Xmin_pressure:
     (face_center.x==option_bc_Xmax)?option_bc_Xmax_pressure:-∞;
   assert(boundary_pressure>=0.0);
-  if (!(cell(0).isOwn())) continue;
+  if (!(cell(0) is own)) continue;
   ℵ matrix addValue(pressure,cell(0), pressure,cell(0), +value);
   ℵ rhs addValue(pressure,cell(0),value*boundary_pressure);
 }

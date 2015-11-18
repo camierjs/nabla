@@ -109,6 +109,8 @@ tstlxr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_deflex_run_1_seq)
 tstldr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_darcy_run_1_seq)
+tstlgg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_gram_gen_1)
 
 ################
 # ARCANE tests #
@@ -151,7 +153,7 @@ tstas4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
 tstal1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
-tstag1:
+tstagr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
 tsthas:
 	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_1)

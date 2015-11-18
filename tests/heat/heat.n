@@ -82,13 +82,13 @@ faces{
   ℝ ih2;
 };
 
-Real geomFaceLength2(Face f){
+/*Real geomFaceLength2(Face f){
   const ℝ³ xyz0=coord[f.node(0)];
   const ℝ³ xyz1=coord[f.node(1)];
   //info()<<"\nf.node(0)="<<f.node(0)<<", f.node(1)="<<f.node(1)<<"\n";
   //info()<<"\nyxyz0="<<xyz0<<", yxyz1="<<xyz1<<"\n";
   return (xyz0-xyz1).abs2();
-}
+  }*/
 
 // ****************************************************************************
 // * Partie d'initialisation ]-∞,-0[
@@ -103,8 +103,11 @@ cells void iniCells(void) out (cell θ) @ -10.0{
 }
 
 faces void iniFaces(void) out (face bcθ, face ih2) @ -10.0{
+  const ℝ³ s0=coord[0];
+  const ℝ³ s1=coord[1];
+  const ℝ f_length = norm(s0-s1);
+  ih2=1.0/f_length; // geomFaceLength2(this);
   bcθ=option_ini_temperature;
-  ih2=1.0/geomFaceLength2(this);
 }
 
 own outer faces void iniHotFaces(void) @ -9.9{

@@ -155,6 +155,8 @@ void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,cha
 void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
 void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
+void lambdaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
 nHooks *nLambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_H_

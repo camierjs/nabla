@@ -191,6 +191,8 @@ char* nOkinaHookScatter(nablaJob*);
 // hooks/nOkinaHookToken
 void nOkinaHookTokenSwitch(astNode*, nablaJob*);
 
+void okinaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
 // mesh/nOkinaMesh
 void nOkinaMeshPrefix(nablaMain*);
 void nOkinaMeshPostfix(nablaMain*);

@@ -56,9 +56,11 @@
 // * Forward declarations
 // ****************************************************************************
 void rhsAdd(astNode**,int,astNode**);
-void rhsAddVariadic(astNode**,int,int,...);
-
+void rhsYSandwich(astNode**,int,astNode**,int,int);
 void rhsTailSandwich(astNode**,int,int,int,astNode**);
+
+void rhsAddVariadic(astNode**,int,int,...);
+void rhsYSandwichVariadic(astNode**,int,int,int,int,...);
 void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 
@@ -95,6 +97,11 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Tail Sandwich
 // * printf("[1;33mYp2p=%d[m\n",yyr2[yyn]);
 // *****************************************************************************
+#define YopYop(leftToken,rightToken)\
+  rhsYSandwich(&yyval,yyn,yyvsp,leftToken,rightToken)
+#define YopYopVariadic(leftToken,rightToken, ...)                             \
+  rhsYSandwichVariadic(&yyval,yyn,yyr2[yyn],leftToken,rightToken, __VA_ARGS__)
+
 #define tailSandwich(leftToken,rightToken,n, ...)                       \
   rhsTailSandwichVariadic(&yyval,yyn,n,leftToken,rightToken, __VA_ARGS__)
 

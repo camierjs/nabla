@@ -43,58 +43,18 @@
 #ifndef _LAMBDA_ITEMS_H_
 #define _LAMBDA_ITEMS_H_
 
-class Cell;
-class Face;
-class Node;
+// aux cells
+bool _isOwn_(int c){
+  if (c>=0) return true;
+  assert(c>=0);
+  return false;
+}
 
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-class Cell{
- public:
- Cell():faces(4),nodes(4){}
- public:
-  int face(int id){return faces.at(id); }
-  bool isOwn(){return true;}
- private:
-  vector<int> faces;
-  vector<int> nodes;
-};
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-class Face{
- public:
- Face():nodes(2),cells(2){}
- public:
-  int node(int id){ return id; }
-  Cell cell(int id){ return fake_xs_cell[id]; }
-  int iCell(int id){ return id; }
-  int backCell(void) { return 0; }
-  int frontCell(void) { return 1; }
-  int nbNode(void) { return 2; }
-  bool isSubDomainBoundaryOutside(void) { return false; }
- private:
-  Cell fake_xs_cell[2];
-  int uid;
-  vector<int> nodes;
-  vector<int> cells;
-};
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-class Node{
- public:
- Node():faces(4),cells(4){}
- public:
-  int uid;
-  vector<int> faces;
-  vector<int> cells;
-};
+// aux faces
+bool _isSubDomainBoundaryOutside_(int f){
+  assert(f>=0);
+  if (f>=0) return true;
+  return false;
+}
 
 #endif //_LAMBDA_ITEMS_H_

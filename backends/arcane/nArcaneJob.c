@@ -230,11 +230,16 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   const char forall=job->parse.enum_enum;
   
   if (n->tokenid!=0)
-    dbg("\n\t[arcaneHookSwitchToken] n->token=%s", n->token);
+    dbg("\n\t[arcaneHookSwitchToken] n->token=%s (id:%d)", n->token, n->tokenid);
 
   // Dump des tokens possibles
   switch(n->tokenid){
-        
+    
+    // 'is_test' est traité dans le hook 'arcaneHookIsTest'
+  case (IS): break;
+  case (IS_OP_INI): break;
+  case (IS_OP_END): break;
+  
   case(PREPROCS):{
     nprintf(arc, "/*PREPROCS*/","/*PREPROCS*/");
     break;

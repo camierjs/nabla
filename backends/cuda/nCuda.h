@@ -112,6 +112,8 @@ void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*
 char* nCudaHookTokenPrefix(nablaMain*);
 char* nCudaHookTokenPostfix(nablaMain*);
 
+void cudaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
 char *nCudaPragmaGccIvdep(void);
 char *nCudaPragmaGccAlign(void);
 char* cudaGather(nablaJob*);

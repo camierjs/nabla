@@ -60,15 +60,18 @@ void init(void) @ -20.0{
 ∀ cells void initCellCenters(void)
   in (node coord) out (cell cell_center) @ -10.0 {
   cell_center=0;
-  ∀ node cell_center += coord;
+  ∀ node cell_center+=coord;
   cell_center/=nbNode;
 }
 
 ∀ faces void initFaceCenters(void)
   in (node coord) out (face face_center) @ -10.0 {
   face_center=0;
-  ∀ node face_center += coord;
-  face_center /= nbNode;
+  ∀ node {
+    info()<<"[initFaceCenters] coord[#"<<#<<"]="<<coord;
+    face_center+=coord;
+  }
+  face_center/=nbNode;
 }
 
 ∀ faces void initFaceMeasures(void)

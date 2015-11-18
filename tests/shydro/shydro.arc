@@ -10,7 +10,7 @@
   </main>
 
   <arcane-post-processing>
-    <save-init>1</save-init>
+    <save-init>0</save-init>
 	 <output-period>0</output-period>
     <output-history-period>0</output-history-period>
     <end-execution-output>0</end-execution-output>
@@ -25,7 +25,7 @@
   </arcane-checkpoint>
 
   <mesh>
-    <meshgenerator><sod><x>64</x><y>8</y><z>8</z></sod></meshgenerator>
+    <meshgenerator><sod><x>16</x><y>4</y><z>4</z></sod></meshgenerator>
  	 <initialisation>
 		<variable nom="cell_density" valeur="1." groupe="ZG" />
 		<variable nom="cell_pressure" valeur="1." groupe="ZG" />

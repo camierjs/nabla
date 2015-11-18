@@ -368,7 +368,12 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
       return;
     }
   }
-  
+
+  // Gestion du 'is_test', IS_OP_INI & IS_OP_END
+  if (n->tokenid == IS_OP_INI) nabla->hook->token->isTest(nabla,job,n,IS_OP_INI);
+  if (n->tokenid == IS_OP_END) nabla->hook->token->isTest(nabla,job,n,IS_OP_END);
+  if (n->ruleid == rulenameToId("is_test")) nabla->hook->token->isTest(nabla,job,n,IS);
+
   // On fait le switch des tokens
   nabla->hook->token->svvitch(n, job);
 

@@ -44,13 +44,32 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+∀ own nodes void dumpNodeCoords(void) @ -20.0 if (option_debug){
+    info()<<"[dumpNodeCoords] node_coord["<<uid<<"]="<<coord;
+}
+
+∀ own cells void dumpInitCellCenter(void) @ -9.9 if (option_debug){
+    info()<<"[initCellCenters] cell_center["<<uid<<"]="<<cell_center;
+}
 ∀ own cells void dumpInitCellMeasures(void) @ -8.9 if (option_debug){
     info()<<"[initCellMeasures] cell_measure["<<uid<<"]="<<cell_measure;
 }
 
+
+
+∀ own faces void dumpFaceCenters(void) @ -8.0 if (option_debug){
+    info()<<"[dumpFaceCenters] face_center["<<uid<<"]="<<face_center;
+}
+
+
+
 ∀ own faces void dumpTransmissivityFaces(void) @ -7.9999 if (option_debug){
     info()<<"[dumpTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
 }
+
+
+
+
 
 ∀ own cells void dumpTotalMobility(void)  @ 3.02 if (option_debug){
     info()<<"[dumpTotalMobility] total_mobility["<<uid<<"]="<<total_mobility;

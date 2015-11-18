@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){\n\
 \tfloat cputime=0.0;\n\
 \tstruct timeval st, et;\n\
 \t//int iteration=1;\n\
-\tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
+\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n\
 \t//nabla_malloc_variables();\n\
 \t//nabla_ini_variables();\n\
 \t//assert(argc>=2);\n\

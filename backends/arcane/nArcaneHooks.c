@@ -45,6 +45,24 @@
 
 extern bool adrs_it;
 
+
+// ****************************************************************************
+// * arcaneHookIsTest
+// ****************************************************************************
+void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+  // Arcane, traite le test en 'objets'
+  if (token!=IS) return;
+  assert(n->children && n->children->next && n->children->next->token);
+  const char *token2function = n->children->next->token;
+  if (n->children->next->tokenid==OWN)
+    nprintf(nabla, NULL, "/*IS*/.isOwn()");
+  else
+    nprintf(nabla, NULL, "/*IS*/.%s()", token2function);
+  // Et on purge le token pour pas qu'il soit parsé
+  n->children->next->token[0]=0;
+}
+
+
 // ****************************************************************************
 // * nArcaneHookTokenPrefix
 // ****************************************************************************

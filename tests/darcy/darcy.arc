@@ -13,9 +13,9 @@
          <!-- '0.0' doit concorder avec darcy.n:option_boundary_Xmin! -->
 			<origine>0.0 0.0 0.0</origine>
          <!-- '1.0' doit concorder avec darcy.n:option_boundary_Xmax! -->
-			<lx nx="10" prx="1.0">1.0</lx>
-			<ly ny="10" pry="1.0">1.0</ly>
-			<lz nz="1" prz="1.0">0.1</lz>
+			<lx nx="4" prx="1.0">1.0</lx>
+			<ly ny="4" pry="1.0">1.0</ly>
+			<lz nz="4" prz="1.0">1.0</lz>
 		 </cartesian> 
      </meshgenerator>
    </mesh>
@@ -23,7 +23,7 @@
    <arcane-post-processing>
      <save-init>0</save-init>
      <end-execution-output>0</end-execution-output>
-	  <output-period>1</output-period>
+	  <output-period>0</output-period>
      <output>      
        <!--group>AllFaces</group>
        <variable>face_face_measure</variable>
@@ -56,7 +56,7 @@
 
   <darcy>
     <option_dtt_initial>0.001</option_dtt_initial>
-    <option_stoptime>0.1</option_stoptime>
+    <option_stoptime>0.001</option_stoptime>
     
     <option_ini_porosity>1.0</option_ini_porosity>
     <option_ini_permeability>1.0</option_ini_permeability>

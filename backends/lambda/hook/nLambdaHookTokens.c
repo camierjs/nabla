@@ -43,6 +43,33 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+static void lambdaHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
+  const astNode* isNode = dfsFetchTokenId(n->next,IS);
+  assert(isNode);
+  const char *token2function = isNode->next->token;
+  assert(token2function);
+  if (isNode->next->tokenid==OWN)
+    nprintf(nabla, "/*IS_OP_INI*/", "_isOwn_(");
+  else
+    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(", token2function);
+  // Et on purge le token pour pas qu'il soit parsé
+  isNode->next->token[0]=0;
+}
+//static void lambdaHookIsTestIs(nablaMain *nabla, nablaJob *job, astNode *n){}
+static void lambdaHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
+  nprintf(nabla, "/*IS_OP_END*/", ")");
+}
+
+// *****************************************************************************
+// *
+// *****************************************************************************
+void lambdaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+  assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
+  if (token==IS_OP_INI) lambdaHookIsTestIni(nabla,job,n);
+  if (token==IS) return;
+  if (token==IS_OP_END) lambdaHookIsTestEnd(nabla,job,n);
+}
+
 
 // ****************************************************************************
 // * lambdaHookTokenPrefix
@@ -67,7 +94,9 @@ void lambdaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt)
 // * FORALL token switch
 // ****************************************************************************
 static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
-  // Preliminary pertinence test
+  const char cnfg=job->item[0];
+
+// Preliminary pertinence test
   if (n->tokenid != FORALL) return;
   // Now we're allowed to work
   switch(n->next->children->tokenid){
@@ -80,8 +109,11 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
     job->parse.enum_enum='n';
     if ((job->entity->libraries&(1<<with_real))!=0) // Iteration 1D
       nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
-    else
-      nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
+    else{
+      assert(cnfg=='c'||cnfg=='f');
+      if (cnfg=='c') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_CELL;++n)");
+      if (cnfg=='f') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_FACE;++n)");
+    }
     break;
   }
   case(FACE):{
@@ -191,6 +223,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
     
+    // 'is_test' est traité dans le hook 'lambdaHookIsTest'
+  case (IS): break;
+  case (IS_OP_INI): break;
+  case (IS_OP_END): break;
+
   case (DIESE):{
     //nprintf(nabla, "/*DIESE*/", "/*DIESE*/");
     if (cnfgem=='c' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
@@ -347,12 +384,12 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(']'):{
-    nprintf(nabla, NULL, "/*swTkn ']'*/");
+    //nprintf(nabla, NULL, "/*swTkn ']'*/");
     if (job->parse.turnBracketsToParentheses==true){
       switch  (job->item[0]){
-      case('c'):{nprintf(nabla, NULL, "/*c*/]]"); break;}
-        //case('c'):{nprintf(nabla, NULL, "/*c*/[c]]"); break;}
-      case('n'):{nprintf(nabla, NULL, "/*n*/[c]]"); break;}
+      case('c'):{nprintf(nabla, NULL, "]]"); break;}
+      case('n'):{nprintf(nabla, NULL, "]]"); break;}
+      case('f'):{nprintf(nabla, NULL, "]]"); break;}
       default:{nprintf(nabla, NULL, "/*]?*/)]");}
       }
       job->parse.turnBracketsToParentheses=false;
@@ -375,9 +412,9 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "faces[f].backCell()");     
+      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+0]");     
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "cells[faces[f].backCell()]");
+      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+0]");
   break;
   }
   case (BACKCELLUID):{
@@ -388,9 +425,9 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "cells[faces[f].frontCell()]");
+      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+1]");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "faces[f].frontCell()");
+      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+1]");
     break;
   }
   case (FRONTCELLUID):{
@@ -407,8 +444,9 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }    
   case (NBNODE):{
-    if (cnfgem=='c') nprintf(nabla, NULL, "8/*cell->nbNode()*/");
-    if (cnfgem=='f') nprintf(nabla, NULL, "faces[f].nbNode()");
+    assert(cnfgem=='c' || cnfgem=='f');
+    if (cnfgem=='c') nprintf(nabla, NULL, "NABLA_NODE_PER_CELL");
+    if (cnfgem=='f') nprintf(nabla, NULL, "NABLA_NODE_PER_FACE");
     break;
   }    
     //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
@@ -426,7 +464,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (THIS):{
     if (cnfgem=='c') nprintf(nabla, "/*token THIS+c*/", "c");
     if (cnfgem=='n') nprintf(nabla, "/*token THIS+n*/", "n");
-    if (cnfgem=='f') nprintf(nabla, "/*token THIS+f*/", "faces[f]");
+    if (cnfgem=='f') nprintf(nabla, "/*token THIS+f*/", "f");
     break;
   }
     
@@ -523,4 +561,3 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
   }
 }
-

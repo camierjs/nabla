@@ -231,6 +231,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneTime,
     arcaneFatal,
     arcaneHookTurnBracketsToParentheses,
+    arcaneHookIsTest,
     arcaneHookTokenPostfix
   };
 

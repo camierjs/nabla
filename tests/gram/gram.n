@@ -117,4 +117,9 @@ global{
   ∀ node τVolume += coord⋅cqs;
   }*/
 
-∀ cells alpha_global <?= alpha @ 12.11;
+∀ faces void loop(void) in (node u) @ 1.0 {
+  if (0==1){}
+  if (backCell is own){}
+}
+
+//∀ cells alpha_global <?= alpha @ 12.11;

@@ -206,6 +206,7 @@ nabla_add_okina_test(aecjs 1 gen std seq)
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
+nabla_add_lambda_test(gram 1 gen seq)
 nabla_add_lambda_test(lulesh 1 gen seq)
 nabla_add_lambda_test(lulesh 1 run seq)
 nabla_add_lambda_test(lulesh 1 run omp)

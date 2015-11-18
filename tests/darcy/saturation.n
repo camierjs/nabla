@@ -44,22 +44,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-/*void computeExplicitWaterSaturation(void) @ 6.0 {
-  for(;;){
-    dupWaterSaturationTolocal();
-    computeInnerExplicitWaterSaturation();
-    computeOuterExplicitWaterSaturation();
-    const ℕ reduced = mpi_reduce(ReduceMax,needSmallerTimeStep(0));
-    if (reduced==0) break;
-    info()<< "\33[31m[computeExplicitWaterSaturation] "
-          << "Redoing with a smaller time step: "<<δt<<"\33[m";
-    δt=½*δt;    
-  }
-  dupWaterSaturationLocalToTn();
-  }*/
-
-
 // *************************************
 // * Now computeExplicitWaterSaturation
 // *************************************
@@ -90,7 +74,7 @@
   out (cell water_saturation_local) @ WATER_SATURATION_HLT/3.0 {
   if ((face_center.x!=option_bc_Xmin) &&
       (face_center.x!=option_bc_Xmax)) continue;
-  const ℝ velocity = ((this).isSubDomainBoundaryOutside())?-total_velocity:+total_velocity;
+  const ℝ velocity = ((this) is isSubDomainBoundaryOutside)?-total_velocity:+total_velocity;
   const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
   if (velocity < 0.0) { // Injection d'huile
     const ℝ local_water_mobility = krw(0.0) / water_viscosity[0];
