@@ -98,10 +98,10 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException");
 
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[face_cell[f*NABLA_CELL_PER_FACE+0]]",itm[0]);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[f*NABLA_CELL_PER_FACE+0]]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[f*NABLA_CELL_PER_FACE+1]]",itm[0]);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[f*NABLA_CELL_PER_FACE+1]]",itm);
+  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]",itm[0]);
+  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]",itm);
+  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]",itm[0]);
+  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]",itm);
   
   // NEXTCELL/PREVCELL sont traité en amont avec les gatherk_and_zero_neg_ones
   //if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");
@@ -315,14 +315,14 @@ static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
             "%s",
             ((var->dim==0)?
              ((enum_enum=='\0')?
-              (isPostfixed==2)?"[face_cell[f*NABLA_CELL_PER_FACE+":"[face->cell"
+              (isPostfixed==2)?"[face_cell[f+NABLA_NB_FACES*":"[face->cell"
               :"[c")
              :"[cell][node->cell")); 
     break;
   }
   case ('n'):{
     if (isPostfixed!=2) nprintf(arc, "/*NodeVar*/", "[face_node(n)]");
-    else nprintf(arc, "/*NodeVar*/", "[face_node[f*NABLA_NODE_PER_FACE+");
+    else nprintf(arc, "/*NodeVar*/", "[face_node[f+NABLA_NB_FACES*");
     break;
   }
   case ('f'):{

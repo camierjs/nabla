@@ -59,7 +59,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  {"DBG_MODE", "(false)"},
+  {"DBG_MODE", "(true)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
   {"DBG_CELL_VOLUME", "0x0001ul"},
@@ -99,11 +99,15 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_CELL_PER_NODE+c]"},
-  {"xs_face_cell(c)", "face_cell[f*NABLA_CELL_PER_FACE+c]"},
-  {"xs_face_node(n)", "face_node[f*NABLA_NODE_PER_FACE+n]"},
+  {"xs_node_cell(c)", "node_cell[n+NABLA_NB_NODES*c]"},
+  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
+  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}
 };
 

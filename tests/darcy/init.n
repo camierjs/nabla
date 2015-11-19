@@ -68,7 +68,7 @@ void init(void) @ -20.0{
   in (node coord) out (face face_center) @ -10.0 {
   face_center=0;
   ∀ node {
-    info()<<"[initFaceCenters] coord[#"<<#<<"]="<<coord;
+    //info()<<"[initFaceCenters] coord[#"<<#<<"]="<<coord;
     face_center+=coord;
   }
   face_center/=nbNode;
@@ -143,11 +143,15 @@ void init(void) @ -20.0{
   in (cell cell_center,permeability,
       face face_center, face_normal)
   out (face transmissivity) @ -9.0 {
+  //if (this is isInner) continue;
   const ℝ³ nF = face_normal;
+  //info()<<"[initOuterCellTransmissivity] nF["<<uid<<"]="<<nF;
   const ℝ³ C0 = cell_center[0];
+  //info()<<"[initOuterCellTransmissivity] C0["<<uid<<"]="<<C0;
   const ℝ³ CF = face_center;
   const ℝ³ s0F = CF-C0;
   const ℝ d0F1 = s0F⋅s0F;
+  //info()<<"[initOuterCellTransmissivity] d0F1["<<uid<<"]="<<d0F1;
   const ℝ d0F2 = fabs(s0F⋅nF);
   const ℝ³⨯ℝ³ k0 = permeability[0];
   const ℝ nFnF =  nF⋅nF;
@@ -156,10 +160,12 @@ void init(void) @ -20.0{
   transmissivity = tau*cos2;
 }
 
+void exitHere(void)@-8.0{exit;}
+
 ∀ inner faces void initInnerCellTransmissivity(void)
   in (cell cell_center,permeability,
       face face_center, face_normal)
-  out (face transmissivity) @ -9.0 {
+  out (face transmissivity) @ -7.0 {
   const ℝ³ nF = face_normal;
   const ℝ³ C0 = cell_center[backCell];
   const ℝ³ C1 = cell_center[frontCell];

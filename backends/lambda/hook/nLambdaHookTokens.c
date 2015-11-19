@@ -412,9 +412,9 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+0]");     
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");     
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+0]");
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");
   break;
   }
   case (BACKCELLUID):{
@@ -425,9 +425,9 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+1]");
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "face_cell[f*NABLA_CELL_PER_FACE+1]");
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
     break;
   }
   case (FRONTCELLUID):{

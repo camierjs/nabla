@@ -44,27 +44,37 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-∀ own nodes void dumpNodeCoords(void) @ -20.0 if (option_debug){
+∀ own nodes void dumpNodeCoords(void) {//@ -20.0 if (option_debug){
     info()<<"[dumpNodeCoords] node_coord["<<uid<<"]="<<coord;
 }
 
-∀ own cells void dumpInitCellCenter(void) @ -9.9 if (option_debug){
+∀ own cells void dumpInitCellCenter(void) {//@ -9.9 if (option_debug){
     info()<<"[initCellCenters] cell_center["<<uid<<"]="<<cell_center;
 }
-∀ own cells void dumpInitCellMeasures(void) @ -8.9 if (option_debug){
+∀ own cells void dumpInitCellMeasures(void) {//@ -8.9 if (option_debug){
     info()<<"[initCellMeasures] cell_measure["<<uid<<"]="<<cell_measure;
 }
 
 
 
-∀ own faces void dumpFaceCenters(void) @ -8.0 if (option_debug){
+∀ own faces void dumpFaceCenters(void) {//@ -8.0 if (option_debug){
     info()<<"[dumpFaceCenters] face_center["<<uid<<"]="<<face_center;
+}
+∀ own faces void dumpFaceMeasure(void) {//@ -8.0 if (option_debug){
+    info()<<"[dumpFaceMeasure] face_measure["<<uid<<"]="<<face_measure;
+}
+∀ own faces void dumpFaceNormal(void) {//@ -8.0 if (option_debug){
+    info()<<"[dumpFaceNormal] face_normal["<<uid<<"]="<<norm(face_normal);
 }
 
 
 
-∀ own faces void dumpTransmissivityFaces(void) @ -7.9999 if (option_debug){
-    info()<<"[dumpTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
+
+∀ outer faces void dumpOuterTransmissivityFaces(void) @ -8.0 if (option_debug){
+    info()<<"[dumpOuterTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
+}
+∀ inner faces void dumpInnerTransmissivityFaces(void) {//@ -8.0 if (option_debug){
+    info()<<"[dumpInnerTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
 }
 
 

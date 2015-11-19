@@ -40,35 +40,372 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+
+
 // ****************************************************************************
-// * nabla_ini_node_coords
+// * Forward declarations
 // ****************************************************************************
 static void verifCoords(void);
 static void verifCorners(void);
 static void verifNextPrev(void);
 static void verifConnectivity(void);
+static int comparNodeCell(const void*, const void*);
+static int comparNodeCellAndCorner(const void*, const void*);
+static double xOf7(const int);
+static double yOf7(const int);
+static double zOf7(const int);
+static int lg2(int p){
+  int i=0;
+  for(;p!=(0ull);++i,p>>=(1ull));
+  return i;
+}
 
+// ****************************************************************************
+// * Connectivité cell->node
+// ****************************************************************************
+static void nabla_ini_cell_node(void){
+  dbg(DBG_INI,"\nOn associe à chaque maille ses noeuds");
+  int iCell=0;
+  for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
+    for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
+      for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
+        const int cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
+        const int node_bid=iX + iY*NABLA_NB_NODES_X_AXIS + iZ*NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
+        dbg(DBG_OFF,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d",
+            iCell,iX,iY,iZ,cell_uid,node_bid);
+        cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
+        cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
+        cell_node[2*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS + 1;
+        cell_node[3*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS + 0;
+        cell_node[4*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
+        cell_node[5*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS +1 ;
+        cell_node[6*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS+1;
+        cell_node[7*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS;
+        dbg(DBG_OFF,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
+            cell_node[0*NABLA_NB_CELLS+iCell],
+            cell_node[1*NABLA_NB_CELLS+iCell],
+            cell_node[2*NABLA_NB_CELLS+iCell],
+            cell_node[3*NABLA_NB_CELLS+iCell],
+            cell_node[4*NABLA_NB_CELLS+iCell],
+            cell_node[5*NABLA_NB_CELLS+iCell],
+            cell_node[6*NABLA_NB_CELLS+iCell],
+            cell_node[7*NABLA_NB_CELLS+iCell]);
+      }
+    }
+  }
+}
+
+ 
+// ****************************************************************************
+// * Connectivité cell->next et cell->prev
+// ****************************************************************************
+static void nabla_ini_cell_next_prev(void){
+ dbg(DBG_OFF,"\nOn associe à chaque maille ses next et prev");
+  // On met des valeurs négatives afin que le gatherk_and_zero_neg_ones puisse les reconaitre
+  // Dans la direction X
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    cell_prev[MD_DirX*NABLA_NB_CELLS+i] = i-1 ;
+    cell_next[MD_DirX*NABLA_NB_CELLS+i] = i+1 ;
+  }
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    if ((i%%NABLA_NB_CELLS_X_AXIS)==0){
+      cell_prev[MD_DirX*NABLA_NB_CELLS+i] = -33333333 ;
+      cell_next[MD_DirX*NABLA_NB_CELLS+i+NABLA_NB_CELLS_X_AXIS-1] = -44444444 ;
+    }
+  }
+  // Dans la direction Y
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    cell_prev[MD_DirY*NABLA_NB_CELLS+i] = i-NABLA_NB_CELLS_X_AXIS ;
+    cell_next[MD_DirY*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_X_AXIS ;
+  }
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    if ((i%%(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))<NABLA_NB_CELLS_Y_AXIS){
+      cell_prev[MD_DirY*NABLA_NB_CELLS+i] = -55555555 ;
+      cell_next[MD_DirY*NABLA_NB_CELLS+i+
+                (NABLA_NB_CELLS_X_AXIS-1)*NABLA_NB_CELLS_Y_AXIS] = -66666666 ;
+    }
+  }
+  // Dans la direction Z
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    cell_prev[MD_DirZ*NABLA_NB_CELLS+i] = i-NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS ;
+    cell_next[MD_DirZ*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS ;
+  }
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    if (i<(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)){
+      cell_prev[MD_DirZ*NABLA_NB_CELLS+i] = -77777777 ;
+      cell_next[MD_DirZ*NABLA_NB_CELLS+i+
+                (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)*(NABLA_NB_CELLS_Z_AXIS-1)] = -88888888 ;
+    }
+  }
+  verifNextPrev(); 
+}
+// ****************************************************************************
+// * Vérification: Connectivité cell->next et cell->prev
+// ****************************************************************************
+__attribute__((unused)) static void verifNextPrev(void){
+ for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    dbg(DBG_OFF,"\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
+        cell_prev[MD_DirX*NABLA_NB_CELLS+i],
+        i,
+        cell_next[MD_DirX*NABLA_NB_CELLS+i]);
+  }
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    dbg(DBG_OFF,"\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
+        cell_prev[MD_DirY*NABLA_NB_CELLS+i],
+        i,
+        cell_next[MD_DirY*NABLA_NB_CELLS+i]);
+  }
+  for (int i=0; i<NABLA_NB_CELLS; ++i) {
+    dbg(DBG_OFF,"\nNext/Prev(Z) for cells %%d <- #%%d -> %%d: ",
+        cell_prev[MD_DirZ*NABLA_NB_CELLS+i],
+        i,
+        cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
+  }
+}
+
+
+// ****************************************************************************
+// * Connectivité node->cell et node->corner
+// ****************************************************************************
+static void nabla_ini_node_cell(void){
+  dbg(DBG_OFF,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
+  dbg(DBG_OFF,"\nOn flush le nombre de mailles attachées à ce noeud");
+  for(int n=0;n<NABLA_NB_NODES;n+=1){
+    for(int c=0;c<8;++c){
+      node_cell[8*n+c]=-1;
+      node_cell_corner[8*n+c]=-1;
+      node_cell_and_corner[2*(8*n+c)+0]=-1;//cell
+      node_cell_and_corner[2*(8*n+c)+1]=-1;//corner
+    }
+  }  
+  for(int c=0;c<NABLA_NB_CELLS;c+=1){
+    dbg(DBG_OFF,"\nFocusing on cell %%d",c);
+    for(int n=0;n<8;n++){
+      const int iNode = cell_node[n*NABLA_NB_CELLS+c];
+      dbg(DBG_OFF,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
+      // les 8 emplacements donnent l'offset jusqu'aux mailles
+      // node_corner a une structure en 8*NABLA_NB_NODES
+      node_cell[8*iNode+n]=c;
+      node_cell_corner[8*iNode+n]=n;
+      node_cell_and_corner[2*(8*iNode+n)+0]=c;//cell
+      node_cell_and_corner[2*(8*iNode+n)+1]=n;//corner
+    }
+  }
+  // On va maintenant trier les connectivités node->cell pour assurer l'associativité
+  // void qsort(void *base, size_t nmemb, size_t size,
+  //            int (*compar)(const void *, const void *));
+  for(int n=0;n<NABLA_NB_NODES;n+=1){
+    qsort(&node_cell[8*n],8,sizeof(int),comparNodeCell);
+    qsort(&node_cell_and_corner[2*8*n],8,2*sizeof(int),comparNodeCellAndCorner);
+  }
+  // And we come back to set our node_cell_corner
+  for(int n=0;n<NABLA_NB_NODES;n+=1)
+    for(int c=0;c<8;++c)
+      node_cell_corner[8*n+c]=node_cell_and_corner[2*(8*n+c)+1];
+  //verifConnectivity();
+  //verifCorners();
+}
+// ****************************************************************************
+// * qsort compare fonction for a Node and a Cell
+// ****************************************************************************
 static int comparNodeCell(const void *a, const void *b){
   return (*(int*)a)>(*(int*)b);
 }
-
+// ****************************************************************************
+// * qsort compare fonction for a Node, Cell and Corner
+// ****************************************************************************
 static int comparNodeCellAndCorner(const void *pa, const void *pb){
   int *a=(int*)pa;
   int *b=(int*)pb;
   return a[0]>b[0];
 }
+// ****************************************************************************
+// * Vérification: Connectivité node->cell et node->corner
+// ****************************************************************************
+__attribute__((unused)) static void verifConnectivity(void){
+  dbg(DBG_INI,"\nVérification des connectivité des noeuds");
+  FOR_EACH_NODE(n){
+    dbg(DBG_INI,"\nFocusing on node %%d",n);
+    FOR_EACH_NODE_CELL(c){
+      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
+      dbg(DBG_INI,", and node_%%d knows cell %%d",n,node_cell_and_corner[2*nc+0]);
+    }
+  }
+}
+__attribute__((unused)) static void verifCorners(void){
+  dbg(DBG_INI,"\nVérification des coins des noeuds");
+  FOR_EACH_NODE(n){
+    dbg(DBG_INI,"\nFocusing on node %%d",n);
+    FOR_EACH_NODE_CELL(c){
+      if (node_cell_corner[nc]==-1) continue;
+      dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
+      //dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
+    }
+  }
+}
 
-static double xOf7(const int n){
-  return ((double)(n%%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;
+
+// ****************************************************************************
+// * Connectivité face->cell
+// ****************************************************************************
+static void nabla_ini_face_cell(void){
+  dbg(DBG_INI,"\n[1;33mOn associe a chaque maille ses faces:[m");
+  int iFace=0;
+  for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
+    for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
+      for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++){
+        const int cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
+        dbg(DBG_INI,"\n\tCell #[1;36m%%d[m @ %%dx%%dx%%d:",cell_uid,iX,iY,iZ);
+
+        if (iX<NABLA_NB_CELLS_X_AXIS-1){
+          if (iX==0){
+            face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Negt|MD_DirX;
+            face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Negt|MD_DirX);
+            dbg(DBG_INI," %%d-X->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+          {
+            face_cell[0*NABLA_NB_FACES+iFace] =     (cell_uid<<MD_Shift)|MD_Plus|MD_DirX;
+            face_cell[1*NABLA_NB_FACES+iFace] = ((cell_uid+1)<<MD_Shift)|MD_Plus|MD_DirX;
+            dbg(DBG_INI," %%d-X->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+        }else{
+          face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Plus|MD_DirX;
+          face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Plus|MD_DirX);
+          dbg(DBG_INI," %%d-X->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+          iFace+=1;
+        }
+        
+        if (iZ<NABLA_NB_CELLS_Z_AXIS-1){
+          if (iZ==0){
+            face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Negt|MD_DirZ;
+            face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Negt|MD_DirZ);
+            dbg(DBG_INI," %%d-Z->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+          {
+            face_cell[0*NABLA_NB_FACES+iFace] =                                                 (cell_uid<<MD_Shift)|MD_Plus|MD_DirZ;
+            face_cell[1*NABLA_NB_FACES+iFace] = ((cell_uid + NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)<<MD_Shift)|MD_Plus|MD_DirZ;
+            dbg(DBG_INI," %%d-Z->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+        }else{
+          face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Plus|MD_DirZ;
+          face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Plus|MD_DirZ);
+          dbg(DBG_INI," %%d-Z->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+          iFace+=1;
+        }
+ 
+        if (iY<NABLA_NB_CELLS_Y_AXIS-1){
+          if (iY==0){
+            face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Negt|MD_DirY;
+            face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Negt|MD_DirY);
+            dbg(DBG_INI," %%d-Y->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+          {
+            face_cell[0*NABLA_NB_FACES+iFace] =                           (cell_uid<<MD_Shift)|MD_Plus|MD_DirY;
+            face_cell[1*NABLA_NB_FACES+iFace] = ((cell_uid + NABLA_NB_CELLS_X_AXIS)<<MD_Shift)|MD_Plus|MD_DirY;
+            dbg(DBG_INI," %%d-Y->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+            iFace+=1;
+          }
+        }else{
+          face_cell[0*NABLA_NB_FACES+iFace] = (cell_uid<<MD_Shift)|MD_Plus|MD_DirY;
+          face_cell[1*NABLA_NB_FACES+iFace] = -(MD_Plus|MD_DirY);
+          dbg(DBG_INI," %%d-Y->%%d",face_cell[0*NABLA_NB_FACES+iFace], face_cell[1*NABLA_NB_FACES+iFace]);
+          iFace+=1;
+        }
+      }
+    }
+  }
+  dbg(DBG_INI,"\n\tiFace=%%d",iFace);
 }
-static double yOf7(const int n){
-  return ((double)((n/NABLA_NB_NODES_X_AXIS)%%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;
-}
-static double zOf7(const int n){
-  return ((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;
+// ****************************************************************************
+// * On les a shifté pour connaitre les directions, on flush les positifs
+// ****************************************************************************
+void nabla_ini_shift_back_face_cell(void){
+  for(int f=0;f<NABLA_NB_FACES;f+=1){
+    if (face_cell[0*NABLA_NB_FACES+f]>0) face_cell[0*NABLA_NB_FACES+f]>>=MD_Shift;
+    if (face_cell[1*NABLA_NB_FACES+f]>0) face_cell[1*NABLA_NB_FACES+f]>>=MD_Shift;
+ }
 }
 
-static void nabla_ini_node_coords(void){
+
+// ****************************************************************************
+// * Connectivité face->node
+// ****************************************************************************
+static const char* i2XYZ(const int i){
+  const int c=i&MD_Mask;
+  //dbg(DBG_INI,"\n\t\t[33m[i2XYZ] i=%%d, Shift=%%d, c=%%d[m",i,MD_Shift,c);
+  if (c==(MD_Plus|MD_DirX)) return strdup("x+");
+  if (c==(MD_Negt|MD_DirX)) return strdup("x-");
+  if (c==(MD_Plus|MD_DirY)) return strdup("y+");
+  if (c==(MD_Negt|MD_DirY)) return strdup("y-");
+  if (c==(MD_Plus|MD_DirZ)) return strdup("z+");
+  if (c==(MD_Negt|MD_DirZ)) return strdup("z-");
+  fprintf(stderr,"[i2XYZ] Error, could not distinguish XYZ!");
+  exit(-1);
+  return NULL;
+}
+static const char* c2XYZ(const int c){
+  char str[16];
+  if (c==-(MD_Negt|MD_DirX)) return strdup("[1;31mX-[m");
+  // Attention, ici: 0=>8 est printé en X+ => 1x+, mais c'est bien '0x+=>1x+'
+  if (c==-(MD_Plus|MD_DirX)) return strdup("[1;31mX+[m");
+  if (c==-(MD_Negt|MD_DirY)) return strdup("[1;31mY-[m");
+  if (c==-(MD_Plus|MD_DirY)) return strdup("[1;31mY+[m");
+  if (c==-(MD_Negt|MD_DirZ)) return strdup("[1;31mZ-[m");
+  if (c==-(MD_Plus|MD_DirZ)) return strdup("[1;31mZ+[m");
+  if (snprintf(str,16,"%%d%%s",c>>MD_Shift,i2XYZ(c))<0) fprintf(stderr,"c2XYZ!");
+  return strdup(str);
+}
+static void setFWithTheseNodes(const int f, const int c,
+                               const int n0, const int n1,
+                               const int n2, const int n3){
+  face_node[0*NABLA_NB_FACES+f]=cell_node[n0*NABLA_NB_CELLS+c];
+  face_node[1*NABLA_NB_FACES+f]=cell_node[n1*NABLA_NB_CELLS+c];
+  face_node[2*NABLA_NB_FACES+f]=cell_node[n2*NABLA_NB_CELLS+c];
+  face_node[3*NABLA_NB_FACES+f]=cell_node[n3*NABLA_NB_CELLS+c];
+}
+static void nabla_ini_face_node(void){
+  dbg(DBG_OFF,"\n[1;33mOn associe a chaque faces ses noeuds:[m");
+  // On flush toutes les connectivités face_noeuds
+  for(int f=0;f<NABLA_NB_FACES;f+=1)
+    for(int n=0;n<NABLA_NODE_PER_FACE;++n)
+      face_node[n*NABLA_NB_FACES+f]=-1;
+  
+  for(int f=0;f<NABLA_NB_FACES;f+=1){
+    const int backCell=face_cell[0*NABLA_NB_FACES+f];
+    const int frontCell=face_cell[1*NABLA_NB_FACES+f];
+    dbg(DBG_OFF,"\n\tFace #[1;36m%%d[m: %%d => %%d, ",f, backCell, frontCell);
+    dbg(DBG_OFF,"\t%%s => %%s: ", c2XYZ(backCell), c2XYZ(frontCell));
+    // On va travailler avec sa backCell
+    const int c=backCell>>MD_Shift;
+    const int d=backCell &MD_Mask;
+    dbg(DBG_OFF,"\t%%d ", c);
+    assert(c>=0);
+    if (d==(MD_Plus|MD_DirX)) { setFWithTheseNodes(f,c,1,2,5,6); continue; }
+    if (d==(MD_Negt|MD_DirX)) { setFWithTheseNodes(f,c,0,3,4,7); continue; }
+    if (d==(MD_Plus|MD_DirY)) { setFWithTheseNodes(f,c,2,3,6,7); continue; }
+    if (d==(MD_Negt|MD_DirY)) { setFWithTheseNodes(f,c,0,1,4,5); continue; }
+    if (d==(MD_Plus|MD_DirZ)) { setFWithTheseNodes(f,c,4,5,6,7); continue; }
+    if (d==(MD_Negt|MD_DirZ)) { setFWithTheseNodes(f,c,0,1,2,3); continue; }
+    fprintf(stderr,"[nabla_ini_face_node] Error!");
+    exit(-1);
+    //for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)
+    //  dbg(DBG_INI,"%%d ", cell_node[n*NABLA_NB_CELLS+c]);
+  }
+  for(int f=0;f<NABLA_NB_FACES;f+=1)
+    for(int n=0;n<NABLA_NODE_PER_FACE;++n)
+      assert(face_node[n*NABLA_NB_FACES+f]>=0);  
+}
+
+
+// ****************************************************************************
+// * Initialisation des coordonnées
+// ****************************************************************************
+static void nabla_ini_node_coord(void){
   dbgFuncIn();
   dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= 1...");
   assert((NABLA_NB_NODES_Y_AXIS >= 1));
@@ -97,148 +434,22 @@ static void nabla_ini_node_coords(void){
     z=set(zOf7(n));
 #endif
     node_coord[iNode]=Real3(x,y,z);
-    dbgReal3(DBG_INI,node_coord[iNode]);
+    //dbgReal3(DBG_INI,node_coord[iNode]);
   }
-  verifCoords();
-  
-  dbg(DBG_INI,"\nOn associe à chaque maille ses noeuds");
-  int node_bid,cell_uid,iCell=0;
-  for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
-    for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
-      for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
-        cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
-        node_bid=iX + iY*NABLA_NB_NODES_X_AXIS + iZ*NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
-        dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d",
-            iCell,iX,iY,iZ,cell_uid,node_bid);
-        cell_node[0*NABLA_NB_CELLS+iCell] = node_bid;
-        cell_node[1*NABLA_NB_CELLS+iCell] = node_bid + 1;
-        cell_node[2*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS + 1;
-        cell_node[3*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS + 0;
-        cell_node[4*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;
-        cell_node[5*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS +1 ;
-        cell_node[6*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS+1;
-        cell_node[7*NABLA_NB_CELLS+iCell] = node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS + NABLA_NB_NODES_X_AXIS;
-        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
-            cell_node[0*NABLA_NB_CELLS+iCell],
-            cell_node[1*NABLA_NB_CELLS+iCell],
-            cell_node[2*NABLA_NB_CELLS+iCell],
-            cell_node[3*NABLA_NB_CELLS+iCell],
-            cell_node[4*NABLA_NB_CELLS+iCell],
-            cell_node[5*NABLA_NB_CELLS+iCell],
-            cell_node[6*NABLA_NB_CELLS+iCell],
-            cell_node[7*NABLA_NB_CELLS+iCell]);
-      }
-    }
-  }
-
-  dbg(DBG_INI,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
-  dbg(DBG_INI,"\nOn flush le nombre de mailles attachées à ce noeud");
-
-  for(int n=0;n<NABLA_NB_NODES;n+=1){
-    for(int c=0;c<8;++c){
-      node_cell[8*n+c]=-1;
-      node_cell_corner[8*n+c]=-1;
-      node_cell_and_corner[2*(8*n+c)+0]=-1;//cell
-      node_cell_and_corner[2*(8*n+c)+1]=-1;//corner
-    }
-  }
-  
-  for(int c=0;c<NABLA_NB_CELLS;c+=1){
-    dbg(DBG_INI,"\nFocusing on cells %%d",c);
-    for(int n=0;n<8;n++){
-      const int iNode = cell_node[n*NABLA_NB_CELLS+c];
-      dbg(DBG_INI,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
-      // les 8 emplacements donnent l'offset jusqu'aux mailles
-      // node_corner a une structure en 8*NABLA_NB_NODES
-      node_cell[8*iNode+n]=c;
-      node_cell_corner[8*iNode+n]=n;
-      node_cell_and_corner[2*(8*iNode+n)+0]=c;//cell
-      node_cell_and_corner[2*(8*iNode+n)+1]=n;//corner
-    }
-  }
-  // On va maintenant trier les connectivités node->cell pour assurer l'associativité
-  // void qsort(void *base, size_t nmemb, size_t size,
-  //                          int (*compar)(const void *, const void *));
-  for(int n=0;n<NABLA_NB_NODES;n+=1){
-    qsort(&node_cell[8*n],8,sizeof(int),comparNodeCell);
-    qsort(&node_cell_and_corner[2*8*n],8,2*sizeof(int),comparNodeCellAndCorner);
-  }
-  // And we come back to set our node_cell_corner
-  for(int n=0;n<NABLA_NB_NODES;n+=1)
-    for(int c=0;c<8;++c)
-      node_cell_corner[8*n+c]=node_cell_and_corner[2*(8*n+c)+1];
-
-  
-  /*dbg(DBG_INI,"\nOn associe à chaque maille ses faces");
-  int face_bid,iFace=0;
-  iCell=0;
-  for(int iZ=0;iZ<NABLA_NB_CELLS_Z_AXIS;iZ++){
-    for(int iY=0;iY<NABLA_NB_CELLS_Y_AXIS;iY++){
-      for(int iX=0;iX<NABLA_NB_CELLS_X_AXIS;iX++,iFace+=1,iCell+=1){
-        cell_uid=iX + iY*NABLA_NB_CELLS_X_AXIS + iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;
-        face_bid=iFace;
-        dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d", iCell,iX,iY,iZ,cell_uid);
-        cell_face[0*NABLA_NB_CELLS+iCell] = face_bid + 0;
-        cell_face[1*NABLA_NB_CELLS+iCell] = face_bid + 1;
-        cell_face[2*NABLA_NB_CELLS+iCell] = face_bid + 2;
-        cell_face[3*NABLA_NB_CELLS+iCell] = face_bid + 3;
-        cell_face[4*NABLA_NB_CELLS+iCell] = face_bid + 4;
-        cell_face[5*NABLA_NB_CELLS+iCell] = face_bid + 5;
-        dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d", iCell,
-            cell_face[0*NABLA_NB_CELLS+iCell],
-            cell_face[1*NABLA_NB_CELLS+iCell],
-            cell_face[2*NABLA_NB_CELLS+iCell],
-            cell_face[3*NABLA_NB_CELLS+iCell],
-            cell_face[4*NABLA_NB_CELLS+iCell],
-            cell_face[5*NABLA_NB_CELLS+iCell]);
-      }
-    }
-    }*/
-
-  
-  //verifConnectivity();
-  verifCorners();
-  
-  dbg(DBG_INI,"\nOn associe à chaque maille ses next et prev");
-  // On met des valeurs négatives afin que le gatherk_and_zero_neg_ones puisse les reconaitre
-  // Dans la direction X
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    cell_prev[MD_DirX*NABLA_NB_CELLS+i] = i-1 ;
-    cell_next[MD_DirX*NABLA_NB_CELLS+i] = i+1 ;
-  }
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%%NABLA_NB_CELLS_X_AXIS)==0){
-      cell_prev[MD_DirX*NABLA_NB_CELLS+i] = -33333333 ;
-      cell_next[MD_DirX*NABLA_NB_CELLS+i+NABLA_NB_CELLS_X_AXIS-1] = -44444444 ;
-    }
-  }
-  // Dans la direction Y
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    cell_prev[MD_DirY*NABLA_NB_CELLS+i] = i-NABLA_NB_CELLS_X_AXIS ;
-    cell_next[MD_DirY*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_X_AXIS ;
-  }
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if ((i%%(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))<NABLA_NB_CELLS_Y_AXIS){
-      cell_prev[MD_DirY*NABLA_NB_CELLS+i] = -55555555 ;
-      cell_next[MD_DirY*NABLA_NB_CELLS+i+(NABLA_NB_CELLS_X_AXIS-1)*NABLA_NB_CELLS_Y_AXIS] = -66666666 ;
-    }
-  }
-  // Dans la direction Z
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    cell_prev[MD_DirZ*NABLA_NB_CELLS+i] = i-NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS ;
-    cell_next[MD_DirZ*NABLA_NB_CELLS+i] = i+NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS ;
-  }
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    if (i<(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)){
-      cell_prev[MD_DirZ*NABLA_NB_CELLS+i] = -77777777 ;
-      cell_next[MD_DirZ*NABLA_NB_CELLS+i+(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)*(NABLA_NB_CELLS_Z_AXIS-1)] = -88888888 ;
-    }
-  }
-  verifNextPrev(); 
-  dbg(DBG_INI,"\nIni done");
+  //verifCoords();
 }
-
-
+static double xOf7(const int n){
+  return ((double)(n%%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;
+}
+static double yOf7(const int n){
+  return ((double)((n/NABLA_NB_NODES_X_AXIS)%%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;
+}
+static double zOf7(const int n){
+  return ((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;
+}
+// ****************************************************************************
+// * Vérification des coordonnées
+// ****************************************************************************
 __attribute__((unused)) static void verifCoords(void){
   dbg(DBG_INI,"\nVérification des coordonnés des noeuds");
   FOR_EACH_NODE(n){
@@ -246,48 +457,18 @@ __attribute__((unused)) static void verifCoords(void){
     dbgReal3(DBG_INI,node_coord[n]);
   }
 }
- 
 
-__attribute__((unused)) static void verifConnectivity(void){
-  dbg(DBG_INI,"\nVérification des connectivité des noeuds");
-  FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
-    FOR_EACH_NODE_CELL(c){
-      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
-      dbg(DBG_INI,", and node_%%d knows cell %%d",n,node_cell_and_corner[2*nc+0]);
-    }
-  }
-}
 
-__attribute__((unused)) static void verifCorners(void){
-  dbg(DBG_INI,"\nVérification des coins des noeuds");
-  FOR_EACH_NODE(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
-    FOR_EACH_NODE_CELL(c){
-      if (node_cell_corner[nc]==-1) continue;
-      dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,node_cell_corner[nc],node_cell[nc]);
-      //dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
-    }
-  }
-}
-
-__attribute__((unused)) static void verifNextPrev(void){
- for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirX*NABLA_NB_CELLS+i],
-        i,
-        cell_next[MD_DirX*NABLA_NB_CELLS+i]);
-  }
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirY*NABLA_NB_CELLS+i],
-        i,
-        cell_next[MD_DirY*NABLA_NB_CELLS+i]);
-  }
-  for (int i=0; i<NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(Z) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirZ*NABLA_NB_CELLS+i],
-        i,
-        cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
-  }
+// ****************************************************************************
+// * nabla_ini_connectivity
+// ****************************************************************************
+static void nabla_ini_connectivity(void){
+  nabla_ini_node_coord();
+  nabla_ini_cell_node();
+  nabla_ini_cell_next_prev();
+  nabla_ini_node_cell();
+  nabla_ini_face_cell();
+  nabla_ini_face_node();
+  nabla_ini_shift_back_face_cell();
+  dbg(DBG_INI,"\nIni done");
 }

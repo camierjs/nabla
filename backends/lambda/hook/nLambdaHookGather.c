@@ -123,7 +123,7 @@ static char* lambdaHookGatherFaces(nablaJob *job,
   snprintf(gather, 1024, "\
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\
 \n\t\t\tnw=n;\
-\n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NODE_PER_FACE*nw+f],\
+\n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NB_FACES*nw+f],\
 \n\t\t\t\t\t%s\
 \n\t\t\t\t\t%s_%s,\
 \n\t\t\t\t\t&gathered_%s_%s);\n\t\t\t",

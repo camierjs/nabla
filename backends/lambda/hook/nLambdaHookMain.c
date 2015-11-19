@@ -51,7 +51,7 @@ extern void lambdaAlephIni(nablaMain*);
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
 #define LAMBDA_MAIN_PREFIX "\n\n\n\
-static void nabla_ini_node_coords(void);\n\
+static void nabla_ini_connectivity(void);\n\
 static void nabla_free_variables(void);\n\
 \n\
 // ******************************************************************************\n \
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]){\n\
 \t\tNABLA_NB_PARTICLES=1000;\n\
 \telse\n\
 \t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
-\tnabla_ini_node_coords();\n\
+\tnabla_ini_connectivity();\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(21);\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
