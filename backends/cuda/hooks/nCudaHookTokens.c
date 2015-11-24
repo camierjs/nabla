@@ -93,14 +93,14 @@ static void cudaHookSwitchForall(astNode *n, nablaJob *job){
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_CELL(c)//for(int i=0;i<8;i+=1)");
+    nprintf(job->entity->main, "/*chsf c*/", "for(int i=0;i<8;i+=1)");
     break;
   }
   case(NODE):{
     job->parse.enum_enum='n';
     assert(cnfg=='c'||cnfg=='f');
-    if (cnfg=='c') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_CELL;++n)");
-    if (cnfg=='f') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_FACE;++n)");
+    if (cnfg=='c') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
+    if (cnfg=='f') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<4;++n)");
     //nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
     break;
   }
