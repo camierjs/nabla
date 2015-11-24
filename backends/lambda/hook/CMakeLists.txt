@@ -9,8 +9,8 @@ set(BACKEND_LAMBDA_HOOK_C
   nLambdaHookTokens.c
   nLambdaHookSource.c
   nLambdaHookGather.c
+  nLambdaHookForAll.c
   nLambdaHookScatter.c
-  nLambdaHookForLoops.c
   nLambdaHookArguments.c
   nLambdaHookParameters.c
   nLambdaHookReductions.c

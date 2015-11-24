@@ -86,7 +86,7 @@ void nArcaneHLTEntryPoint(nablaMain *arc,
       m_hlt_exit = false;\n\
       for(;!m_hlt_exit;){\n\
          for(Integer i=0, s=m_hlt_entry_points.size(); i<s; ++i){\n\
-            info()<<\"[1;33m\"<<\"\tHLT launching: '\"<<m_hlt_entry_points.at(i)->name()<<\"'[m\";\n\
+            debug()<<\"[1;33m\"<<\"\tHLT launching: '\"<<m_hlt_entry_points.at(i)->name()<<\"'[m\";\n\
             m_hlt_entry_points.at(i)->executeEntryPoint();\n\
             //traceMng()->flush();\n\
          }\n\

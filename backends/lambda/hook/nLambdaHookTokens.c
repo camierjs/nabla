@@ -478,11 +478,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
   case (UID):{
+    if (job->parse.enum_enum=='n'  && cnfgem=='f'){
+      nprintf(nabla, NULL, "face_node[n*NABLA_NB_FACES+f]");
+      break;
+    }
     nprintf(nabla, "/*uniqueId c*/", "%c",cnfgem);
-    //if (cnfgem=='c') nprintf(nabla, "/*uniqueId c*/", "(c)");
-    //if (cnfgem=='n') nprintf(nabla, "/*uniqueId n*/", "(n)");
-    //if (cnfgem=='f') nprintf(nabla, "/*uniqueId n*/", "(f)");
-    //if (cnfgem=='p') nprintf(nabla, "/*uniqueId n*/", "(p)");
     break;
   }
   case (AT):{ nprintf(nabla, "/*knAt*/", "; knAt"); break; }

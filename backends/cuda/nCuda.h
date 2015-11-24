@@ -100,7 +100,7 @@ void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 void nCudaHookReduction(struct nablaMainStruct*,astNode*);
 
 void nCudaHookIteration(struct nablaMainStruct*);
-void nCudaHookExit(struct nablaMainStruct*);
+void nCudaHookExit(struct nablaMainStruct*,nablaJob*);
 void nCudaHookTime(struct nablaMainStruct*);
 void nCudaHookFatal(struct nablaMainStruct*);
 void nCudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);

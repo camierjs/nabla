@@ -75,7 +75,6 @@ void nLambdaDumpHeaderTypes(nablaMain *nabla){
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaScatter_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaOStream_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaItems_c));
 }
 
 
@@ -102,6 +101,7 @@ void nLambdaDumpMesh(nablaMain *nabla){
     fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh1D_c));
   else
     fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh3D_c));
+  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaItems_c));
 }
 
 

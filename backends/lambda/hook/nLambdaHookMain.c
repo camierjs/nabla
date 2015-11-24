@@ -71,11 +71,11 @@ int main(int argc, char *argv[]){\n\
 \t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
 \tnabla_ini_connectivity();\n\
 \t// Initialisation de la précision du cout\n\
-\tstd::cout.precision(21);\n\
+\tstd::cout.precision(14);//21, 14 pour Arcane\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
 \tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
 \t// Initialisation du temps et du deltaT\n\
-\tglobal_time[0]=0.0;\n\
+\tglobal_time[0]=set1(option_dtt_initial);// Arcane fait comme cela! 0.0;\n\
 \tglobal_iteration[0]=1;\n\
 \tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
@@ -192,7 +192,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
   int i,numParams,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
-  int HLT_depth=0;
+  n->HLT_depth=0;
   
   dbg("\n[lambdaMain]");
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
@@ -216,16 +216,16 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 \t// && global_iteration!=option_max_iterations){");
     }
     
-    if (entry_points[i].when_depth==(HLT_depth+1)){
+    if (entry_points[i].when_depth==(n->HLT_depth+1)){
       nprintf(n, NULL, "\n\n\t// DIVING in HLT!");
       nprintf(n, NULL, "\n\tdo{");
-      HLT_depth=entry_points[i].when_depth;
+      n->HLT_depth=entry_points[i].when_depth;
     }
-    if (entry_points[i].when_depth==(HLT_depth-1)){
+    if (entry_points[i].when_depth==(n->HLT_depth-1)){
       nprintf(n, NULL, "\n\t// Poping from HLT!");
-//#warning HWed 'redo_with_a_smaller_time_step'
-      nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==0);\n");
-      HLT_depth=entry_points[i].when_depth;
+#warning HWed 'redo_with_a_smaller_time_step'
+      nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==1);\n");
+      n->HLT_depth=entry_points[i].when_depth;
     }
     
     // \n ou if d'un IF after '@'
@@ -236,8 +236,6 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
       nprintf(n, NULL, ") ");
     }else nprintf(n, NULL, "\n");
     
-    //if (i==13) nprintf(n, NULL,"\n\texit(0);\n"); // ComputeLoopBegin en i==4
-
     // On provoque un parallel->sync
     // si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])

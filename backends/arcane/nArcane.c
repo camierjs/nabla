@@ -52,7 +52,7 @@ static char* arcaneEntryPointPrefix(nablaMain *nabla,
 static void arcaneIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
 }
-static void arcaneExit(nablaMain *nabla){
+static void arcaneExit(nablaMain *nabla,nablaJob *job){
   nprintf(nabla, "/*EXIT*/","{\n\
 if (m_hlt_dive){\n\
    m_hlt_exit=true;\n\

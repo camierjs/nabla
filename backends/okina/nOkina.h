@@ -150,18 +150,18 @@ void nOkinaHookVariablesTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVa
 
 // hooks/nOkinaHooks
 void nOkinaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char* namespace,astNode*);
-char* nOkinaHookEntryPointPrefix(struct nablaMainStruct *, nablaJob *);
-void nOkinaHookIteration(struct nablaMainStruct *);
-void nOkinaHookExit(struct nablaMainStruct *);
-void nOkinaHookTime(struct nablaMainStruct *);
-void nOkinaHookFatal(struct nablaMainStruct *);
-void nOkinaHookAddCallNames(struct nablaMainStruct *,nablaJob *,astNode *);
-void nOkinaHookAddArguments(struct nablaMainStruct *,nablaJob *);
-void nOkinaHookTurnTokenToOption(struct nablaMainStruct *,nablaOption *);
-void nOkinaHookLibraries(astNode *, nablaEntity *);
+char* nOkinaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
+void nOkinaHookIteration(struct nablaMainStruct*);
+void nOkinaHookExit(struct nablaMainStruct*, nablaJob*);
+void nOkinaHookTime(struct nablaMainStruct*);
+void nOkinaHookFatal(struct nablaMainStruct*);
+void nOkinaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+void nOkinaHookAddArguments(struct nablaMainStruct*,nablaJob*);
+void nOkinaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+void nOkinaHookLibraries(astNode *, nablaEntity*);
 void nOkinaHookJob(nablaMain*, astNode*);
-bool nOkinaHookPrimaryExpressionToReturn(nablaMain *, nablaJob *, astNode *);
-void nOkinaHookReturnFromArgument(nablaMain *, nablaJob *);
+bool nOkinaHookPrimaryExpressionToReturn(nablaMain*, nablaJob*, astNode*);
+void nOkinaHookReturnFromArgument(nablaMain*, nablaJob*);
 
 // hooks/nOkinaHookReduction
 void nOkinaHookReduction(struct nablaMainStruct*, astNode*);

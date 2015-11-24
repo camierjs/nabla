@@ -48,7 +48,7 @@
 /*****************************************************************************
  * Fonction prefix à l'ENUMERATE_*
  *****************************************************************************/
-char* lambdaHookPrefixEnumerate(nablaJob *job){
+char* lambdaHookForAllPrefix(nablaJob *job){
   char prefix[NABLA_MAX_FILE_NAME];
   //const nablaMain* nabla=job->entity->main;
               
@@ -101,38 +101,38 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   //if (job->xyz!=NULL) return lambdaHookDumpEnumerateXYZ(job);
   if (itm=='\0') return "\n";// function lambdaHookDumpEnumerate\n";
   dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
-  if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE%s%s(p";
-  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "//#warning Should be OWN\n\tFOR_EACH_CELL%s%s(c";
+  if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE%s(p";
+  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s(c";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL%s(c";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER cells\n\tFOR_EACH_CELL%s(c";
+  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_CELL%s(c";
   dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
-  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNER\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "//#warning Should be OWN\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "//#warning Should be ALL\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "//#warning Should be INNER OWN\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_NODE%s%s(n";
+  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s(n";
+  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER nodes\n\tFOR_EACH_NODE%s(n";
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_NODE%s(n";
+  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "\n\tFOR_EACH_NODE%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER nodes\n\tFOR_EACH_NODE%s(n";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE%s(n";
   dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
-  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "//#warning Should be INNER\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp==NULL && rgn[0]=='o') return "//#warning Should be OUTER ALL\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s(f";
+  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "\n\tFOR_EACH_INNER_FACE%s(f";
+  if (itm=='f' && grp==NULL && rgn[0]=='o')   return "\n\tFOR_EACH_OUTER_FACE%s(f";
   // ! Tester grp==NULL avant ces prochains:
-  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "//#warning Should be OWN\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "//#warning Should be INNER OWN\n\tFOR_EACH_FACE%s%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_FACE%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "\n\tFOR_EACH_OWN_OUTER_FACE%s(f";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "\n\tFOR_EACH_OWN_INNER_FACE%s(f";
   dbg("\n\t\t[lambdaHookSelectEnumerate] env?");
-  if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s%s(e";
+  if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s(e";
   dbg("\n\t\t[lambdaHookSelectEnumerate] mat?");
-  if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s%s(m";
+  if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s(m";
   dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }
 
 
-char* lambdaHookDumpEnumerate(nablaJob *job){
+char* lambdaHookForAllDump(nablaJob *job){
   dbg("\n\t[lambdaHookDumpEnumerate]");
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
   char format[NABLA_MAX_FILE_NAME];
@@ -149,12 +149,10 @@ char* lambdaHookDumpEnumerate(nablaJob *job){
     const char *ompLambdaReturnVariableWitoutPerThread=lambdaHookReturnVariableNameForOpenMPWitoutPerThread(job);
     //const char *ompLambdaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
     //const char *ompLambdaLocalVariableName=job->parse.returnFromArgument?ompLambdaReturnVariable:"";
-    if (sprintf(format,"%s%%s%%s)",forall)<=0)
+    if (sprintf(format,"%s,%%s)",forall)<=0)
       nablaError("Could not patch format!");
-    if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
-                "", // warping
+    if (sprintf(str,format,    // FOR_EACH_XXX%s(
                 ompLambdaLocal, // _SHARED or not
-                ",",           //ompLambdaLocalVariableComa,
                 ompLambdaReturnVariableWitoutPerThread)<=0)
       nablaError("Could not patch warping within ENUMERATE!");
   }else{
@@ -177,9 +175,71 @@ char* lambdaHookDumpEnumerate(nablaJob *job){
 /*****************************************************************************
  * Fonction produisant l'ENUMERATE_* avec XYZ
  *****************************************************************************/
-char* lambdaHookDumpEnumerateXYZ(nablaJob *job){
+__attribute__((unused)) static char* lambdaHookDumpEnumerateXYZ(nablaJob *job){
   //char *xyz=job->xyz;// Direction
   //nprintf(job->entity->main, "\n\t/*lambdaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
   return "// lambdaHookDumpEnumerateXYZ has xyz drctn";
 }
 
+
+// **************************************************************************** 
+// * Traitement des tokens NABLA ITEMS
+// ****************************************************************************
+char* lambdaHookForAllItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  nprintf(j->entity->main, "/*lambdaHookItem*/", "/*lambdaHookItem*/");
+  //const int isPostfixed = j->parse.isPostfixed;
+  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (job=='n' && enum_enum=='c'  && itm=='c') return "/*chi-ncc*/xs_node_";
+  if (job=='n' && enum_enum=='\0' && itm=='c') return "/*chi-n0c*/xs_node_";
+  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/xs_face_";
+  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==false) return "/*chi-f0c*/xs_face_";
+  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==true)  return "/*chi-f0c*/xs_face_";
+  nablaError("Could not switch in lambdaHookItem!");
+  return NULL;
+}
+
+
+// ****************************************************************************
+// * Fonction postfix à l'ENUMERATE_*
+// ****************************************************************************
+char* lambdaHookForAllPostfix(nablaJob *job){
+  if (job->is_a_function) return "";
+  if (job->item[0]=='\0') return "// job lambdaHookPostfixEnumerate\n";
+
+  // Si un 'scope' a été trouvé, et qu'il corepond à un 'own',
+  // On le traite pour l'instant en ne faisant rien: on est en  multi-thread
+  if (job->scope&&!strcmp(job->scope,"own")) return "";// Should test OWN here!\n";
+
+  if (job->region && !strcmp(job->region,"inner")){
+    //if (job->item[0]=='c') return "// Should test INNER cells here!\n";
+    if (job->item[0]=='f') return "// Should test INNER faces here!\n";
+    //if (job->item[0]=='n') return "// Should test INNER nodes here!\n";
+  }
+
+  if (job->region && !strcmp(job->region,"outer")){
+    //if (job->item[0]=='c') return "// Should test INNER cells here!\n";
+    if (job->item[0]=='f') return "// Should test OUTER faces here!\n";
+    //if (job->item[0]=='n') return "// Should test INNER nodes here!\n";
+  }
+  
+  if (job->xyz==NULL) return lambdaHookFilterGather(job);
+  if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
+\t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int __attribute__((unused)) max_z = NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_x = NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+\t\tconst int delta_y = 1;\n\
+\t\tconst int delta_z = NABLA_NB_CELLS_Y_AXIS;\n\
+\t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
+\t\tconst int __attribute__((unused)) prevCell=delta;\n\
+\t\tconst int __attribute__((unused)) nextCell=delta;\n";
+  nablaError("Could not switch in lambdaHookPostfixEnumerate!");
+  return NULL;
+}

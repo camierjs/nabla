@@ -85,7 +85,7 @@ void nOkinaHookIteration(struct nablaMainStruct *nabla){
 // ****************************************************************************
 // * nOkinaHookExit
 // ****************************************************************************
-void nOkinaHookExit(struct nablaMainStruct *nabla){
+void nOkinaHookExit(struct nablaMainStruct *nabla, nablaJob *job){
   nprintf(nabla, "/*EXIT*/", "exit(0.0)");
 }
 

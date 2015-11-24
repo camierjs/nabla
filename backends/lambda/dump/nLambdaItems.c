@@ -53,7 +53,13 @@ bool _isOwn_(int c){
 // aux faces
 bool _isSubDomainBoundaryOutside_(int f){
   assert(f>=0);
-  if (f>=0) return true;
+  assert(face_cell[0*NABLA_NB_FACES+f]>=0);
+  assert(face_cell[1*NABLA_NB_FACES+f]<=0);
+  dbg(DBG_OFF,"\n\t[isSubDomainBoundaryOutside] %%d->%%d",
+      face_cell[0*NABLA_NB_FACES+f],
+      face_cell[1*NABLA_NB_FACES+f]);
+  // On ne retourne true que quand la direction est 'X+'
+  if (face_cell[1*NABLA_NB_FACES+f]==0) return true;
   return false;
 }
 

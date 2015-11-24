@@ -45,74 +45,78 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 ∀ own nodes void dumpNodeCoords(void) {//@ -20.0 if (option_debug){
-    info()<<"[dumpNodeCoords] node_coord["<<uid<<"]="<<coord;
+  info()<<"[dumpNodeCoords] node_coord["<<uid<<"]="<<coord;
 }
+
+
+∀ faces void initFaceUid(void) out (cell face_uid) {//@ -10.0 if (option_debug){
+  face_uid=uid;
+  printf("\n\33[36mface_uid=%d:",uid);
+  ∀ node printf(" %d",uid);
+  printf("\33[m");
+}
+
 
 ∀ own cells void dumpInitCellCenter(void) {//@ -9.9 if (option_debug){
-    info()<<"[initCellCenters] cell_center["<<uid<<"]="<<cell_center;
+  info()<<"[initCellCenters] cell_center["<<uid<<"]="<<cell_center;
 }
 ∀ own cells void dumpInitCellMeasures(void) {//@ -8.9 if (option_debug){
-    info()<<"[initCellMeasures] cell_measure["<<uid<<"]="<<cell_measure;
+  info()<<"[initCellMeasures] cell_measure["<<uid<<"]="<<cell_measure;
 }
-
 
 
 ∀ own faces void dumpFaceCenters(void) {//@ -8.0 if (option_debug){
-    info()<<"[dumpFaceCenters] face_center["<<uid<<"]="<<face_center;
+  info()<<"[dumpFaceCenters] face_center["<<uid<<"]="<<face_center;
 }
 ∀ own faces void dumpFaceMeasure(void) {//@ -8.0 if (option_debug){
-    info()<<"[dumpFaceMeasure] face_measure["<<uid<<"]="<<face_measure;
+  info()<<"[dumpFaceMeasure] face_measure["<<uid<<"]="<<face_measure;
 }
 ∀ own faces void dumpFaceNormal(void) {//@ -8.0 if (option_debug){
-    info()<<"[dumpFaceNormal] face_normal["<<uid<<"]="<<norm(face_normal);
+  info()<<"[dumpFaceNormal] face_normal["<<uid<<"]="<<norm(face_normal);
 }
 
 
-
-
-∀ outer faces void dumpOuterTransmissivityFaces(void) @ -8.0 if (option_debug){
-    info()<<"[dumpOuterTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
+∀ outer faces void dumpOuterTransmissivityFaces(void) {//@ -8.0 if (option_debug){
+  info()<<"[dumpOuterTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
 }
 ∀ inner faces void dumpInnerTransmissivityFaces(void) {//@ -8.0 if (option_debug){
-    info()<<"[dumpInnerTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
+  info()<<"[dumpInnerTransmissivityFaces] transmissivity["<<uid<<"]="<<transmissivity;
 }
-
-
-
 
 
 ∀ own cells void dumpTotalMobility(void)  @ 3.02 if (option_debug){
     info()<<"[dumpTotalMobility] total_mobility["<<uid<<"]="<<total_mobility;
 }
 
-∀ own cells void dumpPressureRhs(void) @ 4.11 if (option_debug){
+∀ own cells void dumpPressureRhs(void) {//@ 4.11 if (option_debug){
   info()<<"[computePressureRhs] rhs addValue pressure["<<uid<<"]";
 }
 
 ∀ own cells void dumpCellPressure(void) @ 4.51 if (option_debug){
-  info()<<"[getCellPressure] pressure["<<uid<<"]="<<pressure;
+    info()<<"[getCellPressure] pressure["<<uid<<"]="<<pressure;
+    //printf("\n[getCellPressure] pressure[%d]=%.14e",uid,pressure);
 }
 
 ∀ own inner faces void dumpComputeInnerTotalVelocity(void)
-  in (face transmissivity, cell total_mobility) @ 5.01 if (option_debug){
-    debug()<<"[dumpComputeInnerTotalVelocity]"
+  in (face transmissivity, cell total_mobility) {//@ 5.01 if (option_debug){
+    info()<<"[dumpComputeInnerTotalVelocity]"
            << " transmissivity="<<transmissivity;
-    debug()<<"[dumpComputeInnerTotalVelocity] total_velocity="<<total_velocity;
+    info()<<"[dumpComputeInnerTotalVelocity] total_velocity="<<total_velocity;
   }
 
-∀ own outer faces void dumpComputeOuterTotalVelocity(void) @ 5.01 if (option_debug){
+∀ own outer faces void dumpComputeOuterTotalVelocity(void) {//@ 5.01 if (option_debug){
   if ((face_center.x!=option_bc_Xmin)&&
       (face_center.x!=option_bc_Xmax)) continue;
-  debug()<<"[computeOuterTotalVelocity] total_velocity="<<total_velocity;
+  info()<<"[computeOuterTotalVelocity] total_velocity="<<total_velocity;
 }
 
-∀ own faces void dumpTotalVelocity(void) @ 5.201 if (option_debug){
+∀ own faces void dumpTotalVelocity(void) {//@ 5.201 if (option_debug){
   info()<<"[dumpTotalVelocity] total_velocity["<<uid<<"]="<<total_velocity;
 }
 
 
 ∀ inner faces void dumpComputeInnerExplicitWaterSaturation(void){
-  debug()<< "[computeInnerExplicitWaterSaturation]"
+  info()<< "[computeInnerExplicitWaterSaturation]"
         << " [frontCell]="<<water_saturation_local[frontCell]
         <<", [backCell]="<<water_saturation_local[backCell];
   //debug()<< "\33[35m[computeInnerExplicitWaterSaturation] Face " << backCell->localId()<<"->"<<frontCell->localId()<<"\33[m"; 
@@ -124,7 +128,7 @@
   //debug()<< "\33[36m[computeOuterExplicitWaterSaturation] Face " <<backCell->localId()<<"->"<<frontCell->localId()<<"\33[m";
 }
 
-∀ own cells void dumpWaterSaturation(void) {//@ 7.0 {
+∀ own cells void dumpWaterSaturation(void) @ 7.0 if (option_debug){
   info()<< "[dumpWaterSaturation] water_saturation["<<uid<<"]="<<water_saturation;
 }
 

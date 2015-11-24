@@ -264,7 +264,7 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     }
 
     if (n->tokenid == EXIT){
-      nabla->hook->token->exit(nabla);
+      nabla->hook->token->exit(nabla,fct);
       break;
     }
 

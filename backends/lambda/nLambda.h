@@ -123,7 +123,7 @@ void nLambdaHookMeshPostfix(nablaMain*);
 
 
 void lambdaHookIteration(struct nablaMainStruct*);
-void lambdaHookExit(struct nablaMainStruct*);
+void lambdaHookExit(struct nablaMainStruct*,nablaJob*);
 void lambdaHookTime(struct nablaMainStruct*);
 void lambdaHookFatal(struct nablaMainStruct*);
 void lambdaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
@@ -135,11 +135,12 @@ void lambdaHookFunctionName(nablaMain*);
 void lambdaHookFunction(nablaMain*, astNode*);
 void lambdaHookJob(nablaMain*, astNode*);
 void lambdaHookLibraries(astNode*, nablaEntity*);
-char* lambdaHookPrefixEnumerate(nablaJob*);
-char* lambdaHookDumpEnumerateXYZ(nablaJob*);
-char* lambdaHookDumpEnumerate(nablaJob*);
-char* lambdaHookPostfixEnumerate(nablaJob*);
-char* lambdaHookItem(nablaJob*,const char, const char, char);
+
+char* lambdaHookForAllPrefix(nablaJob*);
+//char* lambdaHookDumpEnumerateXYZ(nablaJob*);
+char* lambdaHookForAllDump(nablaJob*);
+char* lambdaHookForAllPostfix(nablaJob*);
+char* lambdaHookForAllItem(nablaJob*,const char, const char, char);
 
 char* lambdaHookTokenPrefix(nablaMain*);
 char* lambdaHookTokenPostfix(nablaMain*);

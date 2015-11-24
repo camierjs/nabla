@@ -107,52 +107,6 @@ void lambdaHookFunction(nablaMain *nabla, astNode *n){
 }
 
 
-/*****************************************************************************
- * Fonction postfix à l'ENUMERATE_*
- *****************************************************************************/
-char* lambdaHookPostfixEnumerate(nablaJob *job){
-  if (job->is_a_function) return "";
-  if (job->item[0]=='\0') return "// job lambdaHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return lambdaHookFilterGather(job);
-  if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
-\t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
-\t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
-\t\tconst int __attribute__((unused)) max_z = NABLA_NB_CELLS_Z_AXIS;\n\
-\t\tconst int delta_x = NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
-\t\tconst int delta_y = 1;\n\
-\t\tconst int delta_z = NABLA_NB_CELLS_Y_AXIS;\n\
-\t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
-\t\tconst int __attribute__((unused)) prevCell=delta;\n\
-\t\tconst int __attribute__((unused)) nextCell=delta;\n";
-  nablaError("Could not switch in lambdaHookPostfixEnumerate!");
-  return NULL;
-}
-
-
-/***************************************************************************** 
- * Traitement des tokens NABLA ITEMS
- *****************************************************************************/
-char* lambdaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
-  nprintf(j->entity->main, "/*lambdaHookItem*/", "/*lambdaHookItem*/");
-  //const int isPostfixed = j->parse.isPostfixed;
-  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
-  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
-  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
-  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (job=='n' && enum_enum=='c'  && itm=='c') return "/*chi-ncc*/xs_node_";
-  if (job=='n' && enum_enum=='\0' && itm=='c') return "/*chi-n0c*/xs_node_";
-  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
-  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/xs_face_";
-  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==false) return "/*chi-f0c*/xs_face_";
-  if (job=='f' && enum_enum=='\0' && itm=='c' && j->parse.alephKeepExpression==true)  return "/*chi-f0c*/xs_face_";
-  nablaError("Could not switch in lambdaHookItem!");
-  return NULL;
-}
-
-
 // ****************************************************************************
 // * Dump des variables appelées
 // ****************************************************************************
@@ -176,8 +130,11 @@ char* lambdaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_
 void lambdaHookIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "lambda_iteration()");
 }
-void lambdaHookExit(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*EXIT*/", "exit(0.0)");
+void lambdaHookExit(struct nablaMainStruct *nabla, nablaJob *job){
+  if (job->when_depth==0)
+    nprintf(nabla, "/*EXIT*/", "/*lambdaHookExit*/exit(0.0)");
+  else
+    nprintf(nabla, "/*EXIT*/", "//redo_with_a_smaller_time_step, skipping");    
 }
 void lambdaHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "global_time[0]");

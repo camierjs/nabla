@@ -59,8 +59,6 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
   ///////////////////////////////////////////////////////////
   // Partie des hooks à remonter à termes dans le middlend //
   ///////////////////////////////////////////////////////////
-  //call(nabla,nabla->hook->prefix);
-  
   nabla->hook->vars->init(nabla);
   nabla->hook->source->open(nabla);
   nabla->hook->source->include(nabla);

@@ -125,13 +125,19 @@ void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
 /*#define FOR_EACH_CELL_NODE(n)\\\n\
   %sfor(int cn=c;cn>=c;--cn)\\\n\
     for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)\n\
-*/\n                                                                    \
+*/\n\
 #define FOR_EACH_NODE(n) /*prefix*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
 \n\
 //#define FOR_EACH_NODE_CELL(c) for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\
 \n\
-#define FOR_EACH_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES;f+=1)\n",
+#define FOR_EACH_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_INNER_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OUTER_FACE(f) /*prefix*/for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+// Pour l'instant un étant que multi-threadé, les 'own' sont les 'all'\n\
+#define FOR_EACH_OWN_INNER_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OWN_OUTER_FACE(f) /*prefix*/for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+",
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_NODE

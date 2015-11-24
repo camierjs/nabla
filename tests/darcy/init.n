@@ -160,7 +160,6 @@ void init(void) @ -20.0{
   transmissivity = tau*cos2;
 }
 
-void exitHere(void)@-8.0{exit;}
 
 ∀ inner faces void initInnerCellTransmissivity(void)
   in (cell cell_center,permeability,
@@ -185,3 +184,5 @@ void exitHere(void)@-8.0{exit;}
   const ℝ tau  = fabs(t0+t1)?(t0*t1/(t0+t1))*cos2:0.0;
   transmissivity = tau;
 }
+
+//void exitHere(void) @ -7.0{exit;}

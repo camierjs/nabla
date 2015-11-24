@@ -50,7 +50,7 @@ with ℵ;
 
 // ****************************************************************************
 // * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
-// * ∀ ℝℕℤ √∛ ½⅓¼⅛ 𝜕ℵ∂
+// * ∀ ℝℕℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂
 // * ⋅⨯⤫⊗⨂⊛
 // * ⁾ⁱ²³ⁿ⁺¹
 // * ∞
@@ -61,7 +61,7 @@ with ℵ;
 // ****************************************************************************
 options{
   ℝ ε = 1.e-16;
-  ℾ option_debug = true;
+  ℾ option_debug = false;
   ℝ option_bc_Xmin = 0.0;
   ℝ option_bc_Xmax = 1.0; // A faire concorder avec .arc: <lx nx="100" prx="1.0">100.0</lx>
   ℝ option_bc_Xmin_pressure = 0.0;
@@ -74,7 +74,7 @@ options{
   ℝ option_ini_water_viscosity = 1.0;
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime = 0.001;
+  ℝ option_stoptime = 0.01;
   // Options d'Aleph
   // ! l'ε a l'air d'être très sensible
   // Ici, en ramenat en sęquentiel
@@ -123,6 +123,7 @@ cells{
 // * Face Variables
 // ****************************************************************************
 faces{
+  ℝ face_uid;
   ℝ face_measure;
   ℝ³ face_center;
   ℝ³ face_normal;
@@ -152,9 +153,11 @@ global{
 // ****************************************************************************
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
-void dbgLoop(void) @ 1.0 {
-  info()<<"\33[7m[Loop] #"<<GlobalIteration
-        <<", time="<<time<<"\33[m";
+void infoLoop(void) @ 1.0 {
+  info()<<"\n\33[7m*** ITERATION #"<<GlobalIteration
+        <<", TIME "<<time
+        <<", DELTAT "<<δt
+        <<" ***\33[m";
 }
 
 ∀ cells void computeOilRelativePermeability(void)

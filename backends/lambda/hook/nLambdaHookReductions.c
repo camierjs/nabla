@@ -88,6 +88,7 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
   const double reduction_init = min_reduction?1.0e20:-1.0e20;
   const char* mix = min_reduction?"in":"ax";
+  const char* min_or_max_operation = min_reduction?"<":">";
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
@@ -109,7 +110,7 @@ void %s(",item_var_name,global_var_name,job_name);
 \tglobal_%s[0]=reduction_init;\n\
 \tfor (int i=0; i<threads; i+=1){\n\
 \t\tconst Real real_global_%s=global_%s[0];\n\
-\t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])<ReduceM%sToDouble(real_global_%s))?\n\
+\t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])%sReduceM%sToDouble(real_global_%s))?\n\
 \t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
 \t}\n\
 }\n\n",   at_single_cst_node->token, // @ %s
@@ -124,7 +125,7 @@ void %s(",item_var_name,global_var_name,job_name);
           (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
           global_var_name,
           global_var_name,global_var_name,global_var_name, // global_%s & real_global_%s & global_%s
-          global_var_name,mix,global_var_name,mix,global_var_name,
+          global_var_name,mix,global_var_name,min_or_max_operation,mix,global_var_name,
           mix,global_var_name,mix,global_var_name
           );  
 }

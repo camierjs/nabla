@@ -213,6 +213,7 @@ typedef struct nablaMainStruct{
   char *interface_path; // Arcane specific
   char *service_name;   // Arcane specific
   int optionDumpTree;
+  int HLT_depth;
   struct nHooksStruct *hook;
   struct nCallsStruct *call;
 } nablaMain;

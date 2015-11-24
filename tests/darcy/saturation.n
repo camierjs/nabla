@@ -90,15 +90,15 @@
 
 
 void flushRedoWithASmallerTimeStep(void) @ WATER_SATURATION_HLT/4.0 {
-  redo_with_a_smaller_time_step = 0;
+  redo_with_a_smaller_time_step = 1;
 }
 
 
 ∀ cells void dumpWaterSaturationLocal(void)
-  in (cell water_saturation_local) @ WATER_SATURATION_HLT/4.1 {
+  in (cell water_saturation_local) @ WATER_SATURATION_HLT/4.1 if (option_debug) {
   const ℝ water_saturation_local_unglitched =
     (fabs(water_saturation_local)<10.0*ε)?0.0:water_saturation_local;  
-  debug()<< "\33[33m[dumpWaterSaturation] water_saturation_local_unglitched["
+  info()<< "\33[33m[dumpWaterSaturation] water_saturation_local_unglitched["
         << uid<<"]="<<water_saturation_local_unglitched<<"\33[m";
 }
 
@@ -107,13 +107,17 @@ void flushRedoWithASmallerTimeStep(void) @ WATER_SATURATION_HLT/4.0 {
 
 
 void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
-  /*info()<< "\33[36m[computeExplicitWaterSaturation] "
+  //const ℝ rrε = remainder(water_saturation_max,1.0);
+  info()<< "\33[36m[computeExplicitWaterSaturation] "
         << "water_saturation_min="<<water_saturation_min
         << ", water_saturation_max="<<water_saturation_max
-        <<"\33[m";*/
-  printf("*I-darcy      \33[36m[computeExplicitWaterSaturation] water_saturation: min=%.15f, max=%.15f\33[m\n", water_saturation_min, water_saturation_max);
+    //<< " "<<remainder(water_saturation_max,1.0)/ε
+    //<< " "<<rrε 
+        <<"\33[m";
+    //printf("\n*I-darcy      \33[36m[computeExplicitWaterSaturation] water_saturation: min=%.15f, max=%.15f\33[m\n", water_saturation_min, water_saturation_max);
   if ((water_saturation_max <= 1.0) && (water_saturation_min >= 0.0))
-    redo_with_a_smaller_time_step=1;
+    //if ((rrε <= 0.0) && (water_saturation_min >= 0.0))
+    redo_with_a_smaller_time_step=0;
   else{
     info()<< "\33[31m[computeExplicitWaterSaturation] "
           << "Redoing with a smaller time step: "<<δt<<"\33[m";
@@ -125,13 +129,15 @@ void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
 ∀ cells void dupWaterSaturationLocalToTn(void)
   in (cell water_saturation_local)
   out (cell water_saturation) @ WATER_SATURATION_HLT/7.0   
-  if (redo_with_a_smaller_time_step==1) {
-    if (uid==0)
-      info()<< "\33[33m[dupWaterSaturationLocalToTn] !\33[m";
+  if (redo_with_a_smaller_time_step==0) {
+    //if (uid==0) info()<< "\33[33m[dupWaterSaturationLocalToTn] !\33[m";
     water_saturation = water_saturation_local;
 }
 
 
 void testForQuitSaturation(void) @ WATER_SATURATION_HLT/8.0 {
-  if (redo_with_a_smaller_time_step==1) exit;
+  if (redo_with_a_smaller_time_step==0){
+    //info()<< "\33[33m[testForQuitSaturation] Now exit from this HLT level!\33[m";
+    exit;
+  }
 }

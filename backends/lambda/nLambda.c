@@ -223,10 +223,10 @@ const static nHookMain nLHookMain={
 };  
 
 const static nHookForAll nLHookForAll={
-  lambdaHookPrefixEnumerate,
-  lambdaHookDumpEnumerate,
-  lambdaHookItem,
-  lambdaHookPostfixEnumerate
+  lambdaHookForAllPrefix,
+  lambdaHookForAllDump,
+  lambdaHookForAllItem,
+  lambdaHookForAllPostfix
 };
 
 const static nHookToken nLHookToken={

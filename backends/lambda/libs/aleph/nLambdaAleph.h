@@ -220,7 +220,7 @@ ISubDomain* subDomain(void){return thisSubDomain;}
 // * Forward Declarations
 // ****************************************************************************
 void alephInitialize(void){
-  info()<<"\33[1;37m[alephInitialize] createSolverMatrix\33[0m";
+  debug()<<"\33[1;37m[alephInitialize] createSolverMatrix\33[0m";
   m_aleph_mat=m_aleph_kernel->createSolverMatrix();
   debug()<<"\33[1;37m[alephInitialize] RHS createSolverVector\33[0m";
   m_aleph_rhs=m_aleph_kernel->createSolverVector();

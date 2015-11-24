@@ -120,7 +120,7 @@ typedef struct nHookTokenStruct{
   void (*option)(struct nablaMainStruct*,nablaOption*);
   void (*system)(astNode*, struct nablaMainStruct*, const char, char);
   void (*iteration)(struct nablaMainStruct*);
-  void (*exit)(struct nablaMainStruct*);
+  void (*exit)(struct nablaMainStruct*,nablaJob*);
   void (*time)(struct nablaMainStruct*);
   void (*fatal)(struct nablaMainStruct*);
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char);
