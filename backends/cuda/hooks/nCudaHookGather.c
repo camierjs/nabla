@@ -97,6 +97,30 @@ gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
   return strdup(gather);
 }
 
+// ****************************************************************************
+// * Gather for Faces
+// ****************************************************************************
+static char* cudaGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase){
+  // Phase de déclaration
+  if (phase==enum_phase_declaration) return "";
+  // Phase function call
+  char gather[1024];
+  snprintf(gather, 1024, "\
+\n\t\t\t%s gathered_%s_%s=%s(0.0);\
+\n\t\t\tnw=n;\
+\n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NB_FACES*nw+f],\
+\n\t\t\t\t\t%s\
+\n\t\t\t\t\t%s_%s,\
+\n\t\t\t\t\t&gathered_%s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"real":"real3", var->item, var->name, // ligne #1
+           strcmp(var->type,"real")==0?"real":"real3", strcmp(var->type,"real")==0?"":"3", // ligne #3
+           var->dim==0?"":"Array8", // fin ligne #3
+           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+f],\n\t\t\t", // ligne #4
+           var->item, var->name, // ligne #5
+           var->item, var->name  // ligne #6
+           );
+  return strdup(gather);
+}
 
 // ****************************************************************************
 // * Gather switch
@@ -105,7 +129,8 @@ char* nCudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return cudaGatherCells(job,var,phase);
   if (itm=='n') return cudaGatherNodes(job,var,phase);
-  //error(!0,0,"Could not distinguish job item in okinaStdGather!");
+  if (itm=='f') return cudaGatherFaces(job,var,phase);
+  nablaError("Could not distinguish job item inGather!");
   return NULL;
 }
 

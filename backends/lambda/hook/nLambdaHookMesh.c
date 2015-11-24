@@ -51,12 +51,14 @@ static void nLambdaHookMesh1DConnectivity(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH CONNECTIVITY (1D)\n\
 // ********************************************************\
-\nint cell_node[2*NABLA_NB_CELLS];\
-\nint node_cell[2*NABLA_NB_NODES];\
-\nint node_cell_corner[2*NABLA_NB_NODES];\
+\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
+\nint node_cell[NABLA_NODE_PER_CELL*NABLA_NB_NODES];\
+\nint node_cell_corner[NABLA_NODE_PER_CELL*NABLA_NB_NODES];\
 \nint cell_next[1*NABLA_NB_CELLS];\
 \nint cell_prev[1*NABLA_NB_CELLS];\
-\nint node_cell_and_corner[2*2*NABLA_NB_NODES];\
+\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint *face_cell=NULL;\
+\nint *face_node=NULL;\
 \n\n\n");
 }
 

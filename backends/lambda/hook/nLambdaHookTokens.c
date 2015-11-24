@@ -212,8 +212,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   const char forall=job->parse.enum_enum;
 
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
-  if (n->token)
-    dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
+  //if (n->token) dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
  
   // On tests si c'est un token Aleph
   // Si c'est le cas, on a fini
@@ -375,7 +374,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case('['):{
-    if (job->parse.postfix_constant==true && job->parse.variableIsArray==true) break;
+    if (job->parse.postfix_constant==true &&
+        job->parse.variableIsArray==true) break;
     if (job->parse.turnBracketsToParentheses==true)
       nprintf(nabla, NULL, "");
     else
@@ -411,8 +411,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case (BACKCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");     
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' &&
+        job->parse.alephKeepExpression==true) nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");     
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
       nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");
   break;

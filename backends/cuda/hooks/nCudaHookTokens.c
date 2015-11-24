@@ -82,30 +82,32 @@ char* nCudaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 
 
-/*****************************************************************************
- * FORALL token switch
- *****************************************************************************/
+// ****************************************************************************
+// * FORALL token switch
+// ****************************************************************************
 static void cudaHookSwitchForall(astNode *n, nablaJob *job){
+  const char cnfg=job->item[0];
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
   // Now we're allowed to work
   switch(n->next->children->tokenid){
   case(CELL):{
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "for(int i=0;i<8;i+=1)");
+    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_CELL(c)//for(int i=0;i<8;i+=1)");
     break;
   }
   case(NODE):{
     job->parse.enum_enum='n';
-    nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
+    assert(cnfg=='c'||cnfg=='f');
+    if (cnfg=='c') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_CELL;++n)");
+    if (cnfg=='f') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_FACE;++n)");
+    //nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<8;++n)");
     break;
   }
   case(FACE):{
     job->parse.enum_enum='f';
-    if (job->item[0]=='c')
-      nprintf(job->entity->main, "/*chsf fc*/", "for(cFACE)");
-    if (job->item[0]=='n')
-      nprintf(job->entity->main, "/*chsf fn*/", "for(nFACE)");
+    if (job->item[0]=='c') nprintf(job->entity->main, "/*chsf fc*/", "for(cFACE)");
+    if (job->item[0]=='n') nprintf(job->entity->main, "/*chsf fn*/", "for(nFACE)");
     break;
   }
   }
@@ -117,22 +119,108 @@ static void cudaHookSwitchForall(astNode *n, nablaJob *job){
 }
 
 
+// *****************************************************************************
+// * cudaHookSwitchAleph
+// *****************************************************************************
+static bool cudaHookSwitchAleph(astNode *n, nablaJob *job){
+  const nablaMain *nabla=job->entity->main;
+
+  //nprintf(nabla, "/*cudaHookSwitchAleph*/","/*cudaHookSwitchAleph*/");
+
+  switch(n->tokenid){
+  case(LIB_ALEPH):{
+    nprintf(nabla, "/*LIB_ALEPH*/","/*LIB_ALEPH*/");
+    return true;
+  }
+  case(ALEPH_RHS):{
+    nprintf(nabla, "/*ALEPH_RHS*/","rhs");
+    // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
+    job->parse.alephKeepExpression=true;
+    return true;
+  }
+  case(ALEPH_LHS):{
+    nprintf(nabla, "/*ALEPH_LHS*/","lhs");
+    // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
+    job->parse.alephKeepExpression=true;
+    return true;
+  }
+  case(ALEPH_MTX):{
+    nprintf(nabla, "/*ALEPH_MTX*/","mtx");
+    job->parse.alephKeepExpression=true;
+    return true;
+  }
+  case(ALEPH_RESET):{ nprintf(nabla, "/*ALEPH_RESET*/",".reset()"); break;}
+  case(ALEPH_SOLVE):{ nprintf(nabla, "/*ALEPH_SOLVE*/","alephSolve()"); break;}
+  case(ALEPH_SET):{
+    // Si c'est un vecteur et setValue, on le laisse
+    if (job->parse.alephKeepExpression==true){
+      /**/
+    }else{
+      job->parse.alephKeepExpression=true;
+    }
+    nprintf(nabla, "/*ALEPH_SET*/",".setValue");
+    return true;
+  }
+  case(ALEPH_GET):{
+    // Si c'est un vecteur et getValue, on le laisse pas
+    if (job->parse.alephKeepExpression==true){
+      //job->parse.alephKeepExpression=false;
+    }
+    nprintf(nabla, "/*ALEPH_GET*/",".getValue");
+    return true;
+  }
+  case(ALEPH_ADD_VALUE):{
+    nprintf(nabla, "/*ALEPH_ADD_VALUE*/","/*ALEPH_ADD_VALUE*/");
+    // Si c'est un vecteur et addValue, on le laisse pas
+    if (job->parse.alephKeepExpression==true){
+      job->parse.alephKeepExpression=true;
+    }else{
+      job->parse.alephKeepExpression=true;
+    }
+    nprintf(nabla, "/*ALEPH_ADD_VALUE*/",".addValue");
+    return true;
+  }
+  case(ALEPH_NEW_VALUE):{
+    job->parse.alephKeepExpression=false;
+    nprintf(nabla, "/*ALEPH_NEW_VALUE*/",".newValue");
+    return true;
+  }
+  }
+  return false;
+}
+
+
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
 void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
+  const char forall=job->parse.enum_enum;
 
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/", n->token);
+  
+  // On tests si c'est un token Aleph
+  // Si c'est le cas, on a fini
+  if (cudaHookSwitchAleph(n,job)) return;
 
-  //nprintf(nabla, "/*cudaHookSwitchToken*/", NULL);
   cudaHookSwitchForall(n,job);
   
-  //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%d",n->tokenid);
-  //nprintf(nabla, "/*cudaHookSwitchToken switch*/", "%s",n->token);
   // Dump des tokens possibles
   switch(n->tokenid){
+ 
+    // 'is_test' est traité dans le hook 'lambdaHookIsTest'
+  case (IS): break;
+  case (IS_OP_INI): break;
+  case (IS_OP_END): break;
+    
+  case (DIESE):{
+    //nprintf(nabla, "/*DIESE*/", "/*DIESE*/");
+    if (cnfgem=='c' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    if (cnfgem=='n' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    if (cnfgem=='f' && forall!='\0') nprintf(nabla, NULL, "%c", forall);
+    break;
+  }
     
   case (MIN_ASSIGN):{
     nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/");
@@ -167,19 +255,32 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   }    
     // On regarde si on hit un appel de fonction
   case(CALL):{
+    dbg("\n\t[cudaHookSwitchToken] CALL?!");
+    // S'il y a des appels Aleph derrière, on ne déclenche pas la suite
+    if (n->next)
+      if (n->next->children)
+        if (n->next->children->tokenid==LIB_ALEPH) break;
+    dbg("\n\t[cudaHookSwitchToken] JOB_CALL");
     nablaJob *foundJob;
     nprintf(nabla, "/*JOB_CALL*/", NULL);
-    char *callName=n->next->children->children->token;
-    nprintf(nabla, "/*got_call*/", NULL);
-    if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
-      if (foundJob->is_a_function!=true){
-        nprintf(nabla, "/*isNablaJob*/", NULL);
-      }else{
-        nprintf(nabla, "/*isNablaFunction*/", NULL);
+    if ( n->next->children->children->token){
+      dbg("\n\t[cudaHookSwitchToken] JOB_CALL next children children");
+      if (n->next->children->children->token){
+        dbg("\n\t[cudaHookSwitchToken] JOB_CALL next children children token");
+        char *callName=n->next->children->children->token;
+        nprintf(nabla, "/*got_call*/", NULL);
+        if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
+          if (foundJob->is_a_function!=true){
+            nprintf(nabla, "/*isNablaJob*/", NULL);
+          }else{
+            nprintf(nabla, "/*isNablaFunction*/", NULL);
+          }
+        }else{
+          nprintf(nabla, "/*has not been found*/", NULL);
+        }
       }
-    }else{
-      nprintf(nabla, "/*has not been found*/", NULL);
     }
+    dbg("\n\t[cudaHookSwitchToken] JOB_CALL done");
     break;
   }
   case(END_OF_CALL):{
@@ -226,8 +327,8 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case('['):{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) break;
+    if (job->parse.postfix_constant==true &&
+        job->parse.variableIsArray==true) break;
     if (job->parse.turnBracketsToParentheses==true)
       nprintf(nabla, NULL, "");
     else
@@ -262,7 +363,10 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   case (BACKCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "face->backCell()");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
+    nprintf(nabla, NULL, "face->backCell()");
     break;
   }
   case (BACKCELLUID):{
@@ -272,7 +376,10 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
   }
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
-    if (job->parse.enum_enum=='\0' && cnfgem=='f') nprintf(nabla, NULL, "face->frontCell()");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
+    if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
+      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
     break;
   }
   case (FRONTCELLUID):{

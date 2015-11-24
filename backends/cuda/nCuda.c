@@ -157,11 +157,11 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   };
   
   const nHookToken nCudaHookToken={
-    nCudaHookTokenPrefix,
-    nCudaHookSwitchToken,
-    nCudaHookTurnTokenToVariable,
-    nCudaHookTurnTokenToOption,
-    nCudaHookSystem,
+    nCudaHookTokenPrefix, // prefix
+    nCudaHookSwitchToken, // svvitch
+    nCudaHookTurnTokenToVariable, // variable
+    nCudaHookTurnTokenToOption, // option
+    nCudaHookSystem, // system
     nCudaHookIteration,
     nCudaHookExit,
     nCudaHookTime,

@@ -128,7 +128,7 @@ void dbgLoop(void) @ 1.0 {
   inout (particle αLab,βLab,γLab) @ 4.0 if (!option_particle_frame){
   const ℝ denom = 1.0-αLab²;
   if (uid==0) info()<<"[7;37m[changeFrameFromeParticleToLab][m";
-  if (abs(denom)>=option_ε_frame_change){
+  if (fabs(denom)>=option_ε_frame_change){
     const ℝ sqrtDenom = √(denom);
     const ℝ unsSqrtDenom = 1./sqrtDenom;
     const ℝ αp = α*αLab-γ*sqrtDenom;

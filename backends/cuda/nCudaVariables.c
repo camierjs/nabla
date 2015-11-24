@@ -50,7 +50,9 @@
 static inline char *itemUPCASE(const char *itm){
   if (itm[0]=='c') return "CELLS";
   if (itm[0]=='n') return "NODES";
+  if (itm[0]=='f') return "FACES";
   if (itm[0]=='g') return "GLOBAL";
+  if (itm[0]=='p') return "PARTICLES";
   dbg("\n\t[itemUPCASE] itm=%s", itm);
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;

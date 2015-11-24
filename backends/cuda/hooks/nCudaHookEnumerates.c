@@ -79,28 +79,38 @@ char* nCudaHookDumpEnumerateXYZ(nablaJob *job){
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
 char* nCudaHookDumpEnumerate(nablaJob *job){
+  //nprintf(job->entity->main, NULL, "/*nCudaHookDumpEnumerate*/");
+  //dbg("\n\t\t[nCudaHookDumpEnumerate]\n"); fflush(stdout);
   char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  //dbg("\n\t\t[nCudaHookDumpEnumerate] itm=%c", itm);
   //if (job->xyz!=NULL) return cudaHookDumpEnumerateXYZ(job);
   if (itm=='\0') return "// function cudaHookDumpEnumerate\n";
-  if (itm=='c' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL_WARP(c)";
-  if (itm=='n' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_NODE_WARP(n)";
-  if (itm=='f' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "//#warning Should be OUTER OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE_WARP(f)";
-  if (itm=='e' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_ENV_WARP(e)";
-  if (itm=='m' && grp==NULL && rgn==NULL)     return "";//FOR_EACH_MAT_WARP(m)";
+  
+  if (itm=='c' && grp==NULL && rgn==NULL) return "";//FOR_EACH_CELL_WARP(c)";
+  if (itm=='c' && grp!=NULL && grp[0]=='o' && rgn==NULL) return "#warning Should be OWN\n";
+  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER\n";
+  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER\n";
+  
+  if (itm=='n' && grp==NULL && rgn==NULL) return "";//FOR_EACH_NODE_WARP(n)";
+  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "#warning Should be INNER\n";
+  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "#warning Should be OUTER\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER OWN\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER OWN\n";
+  
+  if (itm=='f' && grp==NULL && rgn==NULL) return "";//FOR_EACH_FACE_WARP(f)";
+  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "#warning Should be OUTER\n";
+  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "#warning Should be INNER\n";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER OWN\n";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER OWN\n";
+  
+  if (itm=='e' && grp==NULL && rgn==NULL) return "";//FOR_EACH_ENV_WARP(e)";
+  if (itm=='m' && grp==NULL && rgn==NULL) return "";//FOR_EACH_MAT_WARP(m)";
+  
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }

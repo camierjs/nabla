@@ -59,7 +59,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"store(u,_u)", "(*u=_u)"},
   {"load(u)", "(*u)"},
   {"zero()", "0.0"},
-  {"DBG_MODE", "(true)"},
+  {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_INI)"},
   {"DBG_OFF", "0x0000ul"},
   {"DBG_CELL_VOLUME", "0x0001ul"},
@@ -105,7 +105,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"MD_Mask","7"}, // [sign,..]
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n+NABLA_NB_NODES*c]"},
+  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},//"node_cell[n+NABLA_NB_NODES*c]"},
   {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
   {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}

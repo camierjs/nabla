@@ -3,12 +3,8 @@
 // ****************************************************************************
 ∀ cells void iniCellCenter(void) out (/*node coord,*/ cell center) @ -5.0 {
   center=0.0;
-  ∀ node {
-    center+=coord;
-  }
-  center *= 0.5;
-  //info()<<"[iniMnoeud] sigma*x="<<nM << "coord="<<coord ;
-  // info()<<"[iniMnoeud]  coord="<<center ;          
+  ∀ node center+=coord;
+  center *= ½;        
 }
 
 
@@ -19,10 +15,6 @@
   cM = (sigma/ε)*center; 
 }
 
-
- void iniTime(void) @ -5.0 {
-  n_time=0; 
-}
 
 // ****************************************************************************
 // * incell B1

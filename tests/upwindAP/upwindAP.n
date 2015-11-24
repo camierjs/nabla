@@ -35,7 +35,7 @@ cells{
   ℝ F;
   // invariants de Riemann: u=E+F &  v=E-F
   ℝ U, V;
-  ℝ Um1, Vp1;
+  //ℝ Um1, Vp1;
   // nos variables à l'itération 'n+1'
   ℝ Vⁿ⁺¹, Uⁿ⁺¹;
   ℝ Δ; // cell center
@@ -150,13 +150,13 @@ void dbgLoop(void) @ 1.0 {
 // * Advance Computation
 // ****************************************************************************
 ∀ cells void Unp1(void) in (cell U, cell V/*, node fluxV*/) out (cell Uⁿ⁺¹) @ 2.0 {
-  ℝ Um1;
+  ℝ Um1=0;
   ∀ node Um1 = (Δ>coord)?fluxU;
   Uⁿ⁺¹=(1.0-stability())*U+δt/(ε*δx)*Um1+σ*δt/(2.0*ε²)*V;
 }
 
 ∀ cells void Vnp1(void) in (cell U, cell V) out (cell Vⁿ⁺¹) @ 2.0 {
-  ℝ Vp1;
+  ℝ Vp1=0;
   ∀ node Vp1 = (Δ<coord)?fluxV;
   Vⁿ⁺¹=(1.0-stability())*V+δt/(ε*δx)*Vp1+σ*δt/(2.0*ε²)*U;
 }

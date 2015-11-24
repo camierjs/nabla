@@ -374,8 +374,10 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if (n->tokenid == IS_OP_END) nabla->hook->token->isTest(nabla,job,n,IS_OP_END);
   if (n->ruleid == rulenameToId("is_test")) nabla->hook->token->isTest(nabla,job,n,IS);
 
-  // On fait le switch des tokens
+  // On fait le switch du token
+  //dbg("\n\t[nablaJobParse] On fait le switch du token!");
   nabla->hook->token->svvitch(n, job);
+  //dbg("\n\t[nablaJobParse] done!");
 
   // On continue en s'enfonçant
   if (n->children != NULL)

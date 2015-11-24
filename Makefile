@@ -179,19 +179,20 @@ tstm4:
 ##############
 tstugg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
-
 tstumg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
-
 tstulg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_gen_1)
 tstulr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
-
 tstukg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_gen_1)
 tstukr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
+
+tstudr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_darcy_gen_1)
+
 
 ############
 # CLEANING #
