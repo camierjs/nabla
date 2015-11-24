@@ -47,11 +47,14 @@
  * Fonction prefix à l'ENUMERATE_*
  *****************************************************************************/
 char* nCudaHookPrefixEnumerate(nablaJob *job){
-  const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  const char rgn=(job->region!=NULL)?job->region[0]:0;  // INNER, OUTER
   //if (j->xyz==NULL) return "// void ENUMERATE prefix";
   //nprintf(job->entity->main, "\n\t/*cudaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
   if (itm=='c'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
   if (itm=='f'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_FACE_THREAD(tfid);";
+  if (itm=='f'  && rgn=='i' && strcmp(job->return_type,"void")==0) return "CUDA_INI_INNER_FACE_THREAD(tfid);";
+  if (itm=='f'  && rgn=='o' && strcmp(job->return_type,"void")==0) return "CUDA_INI_OUTER_FACE_THREAD(tfid);";
   if (itm=='c'  && strcmp(job->return_type,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
   if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
   if (itm=='\0' && job->is_an_entry_point
@@ -89,24 +92,24 @@ char* nCudaHookDumpEnumerate(nablaJob *job){
   if (itm=='\0') return "// function cudaHookDumpEnumerate\n";
   
   if (itm=='c' && grp==NULL && rgn==NULL) return "";//FOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp!=NULL && grp[0]=='o' && rgn==NULL) return "#warning Should be OWN\n";
+  if (itm=='c' && grp!=NULL && grp[0]=='o' && rgn==NULL) return "";
   if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER\n";
   if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER\n";
   
   if (itm=='n' && grp==NULL && rgn==NULL) return "";//FOR_EACH_NODE_WARP(n)";
   if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "#warning Should be INNER\n";
   if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "#warning Should be OUTER\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "";
   if (itm=='n' && grp!=NULL && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER OWN\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER OWN\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER\n";
   
   if (itm=='f' && grp==NULL && rgn==NULL) return "";//FOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "#warning Should be OUTER\n";
-  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "#warning Should be INNER\n";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER OWN\n";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER OWN\n";
+  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "";
+  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "";
+  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "";
   
   if (itm=='e' && grp==NULL && rgn==NULL) return "";//FOR_EACH_ENV_WARP(e)";
   if (itm=='m' && grp==NULL && rgn==NULL) return "";//FOR_EACH_MAT_WARP(m)";

@@ -75,6 +75,7 @@ options{
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
   ℝ option_stoptime = 0.01;
+  ℕ option_max_iterations = -1;
   // Options d'Aleph
   // ! l'ε a l'air d'être très sensible
   // Ici, en ramenat en sęquentiel
@@ -154,10 +155,9 @@ global{
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void infoLoop(void) @ 1.0 {
-  info()<<"\n\33[7m*** ITERATION #"<<GlobalIteration
-        <<", TIME "<<time
-        <<", DELTAT "<<δt
-        <<" ***\33[m";
+  //info()<<"\n\33[7m*** ITERATION #"<<GlobalIteration<<", TIME "<<time<<", DELTAT "<<δt<<" ***\33[m";
+  printf("\n\33[7m*** ITERATION #%d, TIME %f, DELTAT=%f ***\33[m",GlobalIteration,time,δt);
+ 
 }
 
 ∀ cells void computeOilRelativePermeability(void)
@@ -235,9 +235,7 @@ void infoLoop(void) @ 1.0 {
 // * Test for Quit & adjust time step
 // ****************************************************************************
 void computeNextTimeStep(void) @ 10.0 {
-  debug()<<"[computeNextTimeStep] GlobalIteration="<<GlobalIteration
-        <<", time="<<time
-        <<", delta_t="<<δt;
+  //debug()<<"[computeNextTimeStep] GlobalIteration="<<GlobalIteration <<", time="<<time <<", delta_t="<<δt;
   const ℝ factor = 1.125;
   δt = factor*δt;
   if (time >= option_stoptime) exit;

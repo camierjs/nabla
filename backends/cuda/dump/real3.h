@@ -41,15 +41,13 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-//#pragma pack(push,8)
-
-
 // ****************************************************************************
 // * REAL DEFINITION
 // ****************************************************************************
 class __attribute__ ((aligned(8))) real {
-public:
+ public:
   double d;
+ public:
   // Constructors
   __device__ inline Real(): d(0.0){}
   __device__ inline Real(double f):d(f){}
@@ -57,7 +55,7 @@ public:
   
   // Convertors
   __device__ inline operator double() const { return d; }
-
+  
   // Arithmetic operators
   friend __device__ inline real operator+(const real &a, const real& b) { return __dadd_rn(a,b); }
   friend __device__ inline real operator-(const real &a, const real& b) { return __dsub_rn(a,b); }
@@ -94,11 +92,11 @@ public:
 // * REAL3 DEFINITION
 // ****************************************************************************
 class __attribute__ ((aligned(8))) real3 {
-public:
+ public:
   real x;
   real y;
   real z;
-
+ public:
   // Constructors
   __device__ inline Real3(): x(0.0), y(0.0), z(0.0){}
   __device__ inline Real3(double f):x(f), y(f), z(f){}
@@ -243,6 +241,24 @@ public:
     const Real z=__dsub_rn(__dmul_rn(u.x,v.y),__dmul_rn(u.y,v.x));
     return real3(x,y,z);
   }
+  __device__ friend inline real norm(real3 u){ return square_root(dot3(u,u));}
+};
+//inline real norm(real u){ return ::fabs(u);}
+
+
+// ****************************************************************************
+// * real3x3 
+// ****************************************************************************
+class __attribute__ ((aligned(8))) real3x3 {
+ public:
+  __attribute__ ((aligned(8))) struct real3 x;
+  __attribute__ ((aligned(8))) struct real3 y;
+  __attribute__ ((aligned(8))) struct real3 z;
+  __device__ inline real3x3(){ x=0.0; y=0.0; z=0.0;}
+  __device__ inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
+  __device__ friend inline real3 opProdTensVec(real3x3 t,real3 v){
+    return real3(dot3(t.x,v),dot3(t.y,v),dot3(t.z,v));
+  }
 };
 
 
@@ -271,7 +287,22 @@ __device__ inline real gatherk_and_zero_neg_ones(const int a, real *data){
 __device__ inline void gatherFromNode_k(const int a, real *data, real *gthr){
   *gthr=gatherk_and_zero_neg_ones(a,data);
 }
+__device__ inline void gatherFromFace_k(const int a, real *data, real *gthr){
+  *gthr=gatherk_and_zero_neg_ones(a,data);
+}
 
+__device__ inline void gatherFromFace_3ki(const int a, real3 *data, real3 *gthr,int i){
+  const double *p=(double *)data;
+    const double value=(a<0)?0.0:p[3*8*a+i];
+  if (i==0) gthr->x=value;
+  if (i==1) gthr->y=value;
+  if (i==2) gthr->z=value;
+}
+__device__ inline void gatherFromFace_3k(const int a, real3 *data, real3 *gthr){
+  gatherFromFace_3ki(a,data,gthr,1);
+  gatherFromFace_3ki(a,data,gthr,2);
+  gatherFromFace_3ki(a,data,gthr,3);
+}
 __device__ inline void gatherFromNode_3kiArray8(const int a, const int corner,
                                                 real3 *data, real3 *gthr, int i){
   const double *p=(double *)data;

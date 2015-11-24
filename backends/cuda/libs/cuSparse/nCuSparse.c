@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
 // Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
@@ -40,35 +40,59 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
 
 // ****************************************************************************
-// * ERROR HANDLING
+// * dumpExternalFile
+// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
 // ****************************************************************************
-static inline void HandleError( const cudaError_t err,
-                                const char *file,
-                                const int line,
-                                const int exit_status){
-  if (err != cudaSuccess) {
-    printf("\33[1;33m\t%%s in file %%s at line %%d\33[m\n",
-           cudaGetErrorString( err ), file, line);
-    if (exit_status==EXIT_SUCCESS)
-      printf("\33[1;33m\tThis error has been told not to be fatal here, exiting quietly!\33[m\n");
-    exit( exit_status );
-  }
+static char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
 }
-#define CUDA_HANDLE_ERROR(err) (HandleError(err, __FILE__, __LINE__, EXIT_FAILURE)) 
-#define CUDA_HANDLE_ERROR_WITH_SUCCESS(err) (HandleError(err, __FILE__, __LINE__, EXIT_SUCCESS)) 
+
+// ****************************************************************************
+// * extern definitions from nCudaDump.S
+// ****************************************************************************
+extern char cuSparse_h[];
+
+// *****************************************************************************
+// * cuSparseIni
+// *****************************************************************************
+static void cuSparseIni(nablaMain *nabla){
+  nablaJob *alephIni=nMiddleJobNew(nabla->entity);
+  alephIni->is_an_entry_point=true;
+  alephIni->is_a_function=true;
+  alephIni->scope  = strdup("NoScope");
+  alephIni->region = strdup("NoRegion");
+  alephIni->item   = strdup("\0");
+  alephIni->return_type  = strdup("void");
+  alephIni->name   = strdup("cuSparseIni");
+  alephIni->name_utf8 = strdup("ℵIni");
+  alephIni->xyz    = strdup("NoXYZ");
+  alephIni->direction  = strdup("NoDirection");
+  sprintf(&alephIni->at[0],"-huge_valf");
+  alephIni->when_index  = 1;
+  alephIni->whens[0] = ENTRY_POINT_init;
+  nMiddleJobAdd(nabla->entity, alephIni);  
+}
 
 
-static inline void cudaCheckLastKernel(const char *errorMessage,
-                                       const char *file,
-                                       const int line){
-  const cudaError_t err = cudaGetLastError();
-  if (cudaSuccess != err){
-    printf("\33[1;33m\t%%s (error #%%i): cudaGetLastError() threw '%%s' in file %%d at line %%s.\n",
-           errorMessage, (int)err, cudaGetErrorString(err),file, line);
-    cudaDeviceReset();
-    exit(EXIT_FAILURE);
+// ****************************************************************************
+// *
+// ****************************************************************************
+char* cuSparseHeader(nablaMain *nabla){
+  cuSparseIni(nabla);
+  
+  char str[NABLA_MAX_FILE_NAME];
+  str[0]=0;
+  // Et on rajoute les variables globales
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->item, "global")!=0) continue;
+    strcat(str, (var->type[0]=='r')?",real*":(var->type[0]=='i')?",int*":"/*Unknown type*/");
   }
+  fprintf(nabla->entity->hdr, dumpExternalFile(cuSparse_h),
+          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
+          str);
+
+  return "";
 }
-#define CUDA_CHECK_LAST_KERNEL(msg) (cudaCheckLastKernel(msg, __FILE__, __LINE__)) 

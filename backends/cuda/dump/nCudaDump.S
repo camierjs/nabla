@@ -40,59 +40,30 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
+   //.section ".rodata"
+   .globl ${ABI_UNDERSCORE}real3_h
+   .globl ${ABI_UNDERSCORE}debug_h
+   .globl ${ABI_UNDERSCORE}error_h
+   .globl ${ABI_UNDERSCORE}extra_h
+   .globl ${ABI_UNDERSCORE}meshs_h
+   .globl ${ABI_UNDERSCORE}items_h
 
-// ***************************************************************************** 
-// * 
-// *****************************************************************************
-extern char real3_h[];
-void cudaHeaderReal3(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,real3_h+NABLA_LICENSE_HEADER);
-}
-
-extern char extra_h[];
-void cudaHeaderExtra(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,extra_h+NABLA_LICENSE_HEADER);
-}
-
-extern char cuMsh_h[];
-void cudaHeaderMesh(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,cuMsh_h+NABLA_LICENSE_HEADER);
-}
-
-extern char error_h[];
-void cudaHeaderHandleErrors(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,error_h);
-}
-
-extern char debug_h[];
-__attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
-  nablaVariable *var;
-  fprintf(nabla->entity->hdr,debug_h+NABLA_LICENSE_HEADER);
-  hprintf(nabla,NULL,"\n\n\
-// *****************************************************************************\n \
-// * Debug macro functions\n\
-// *****************************************************************************");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->item, "global")==0) continue;
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    //continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-    continue;
-    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-}
-
+${ABI_UNDERSCORE}real3_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/real3.h"
+   .byte 0
+${ABI_UNDERSCORE}debug_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/debug.h"
+   .byte 0
+${ABI_UNDERSCORE}error_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/error.h"
+   .byte 0
+${ABI_UNDERSCORE}extra_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/extra.h"
+   .byte 0   
+${ABI_UNDERSCORE}meshs_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/meshs.h"
+   .byte 0   
+${ABI_UNDERSCORE}items_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/items.h"
+   .byte 0   
+         

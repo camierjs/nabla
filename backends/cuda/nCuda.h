@@ -74,6 +74,7 @@ void cudaHeaderExtra(nablaMain*);
 void cudaHeaderMesh(nablaMain*);
 void cudaHeaderHandleErrors(nablaMain*);
 void cudaHeaderDebug(nablaMain*);
+void cudaHeaderItems(nablaMain*);
 
 void cudaMesh(nablaMain*);
 void cudaMeshConnectivity(nablaMain*);

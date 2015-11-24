@@ -40,7 +40,6 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-
 int host_cell_node[8*NABLA_NB_CELLS];
 int host_node_cell[8*NABLA_NB_NODES];
 int host_node_cell_corner[8*NABLA_NB_NODES];

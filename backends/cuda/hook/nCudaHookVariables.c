@@ -130,15 +130,15 @@ static void nCudaHookTurnTokenToVariableForCellJob(nablaMain *arc,
       if (job->parse.postfix_constant==true)
         nprintf(arc, "/*NodeVar + postfix_constant*/", "[");
       else
-        nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
+        nprintf(arc, "/*NodeVar 0*/", "[xs_cell_node(");
     }
-    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
+    if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[xs_cell_node(");
     if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
     break;
   }
   case ('f'):{
     nvar(arc,var,job);
-    if (enum_enum=='f') nprintf(arc, "/*FaceVar*/", "[f]");
+    if (enum_enum=='f') nprintf(arc, "/*FaceVar*/", "/*cellJob+f*/[tfid]");
     if (enum_enum=='\0') nprintf(arc, "/*FaceVar*/", "[cell->face");
     break;
   }
@@ -187,7 +187,7 @@ static void nCudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     break;
   }
   case ('f'):{
-    if (enum_enum=='f')  nprintf(arc, "/*FaceVar f*/", "[f]");
+    if (enum_enum=='f')  nprintf(arc, "/*FaceVar f*/", "[tfid]");
     if (enum_enum=='\0') nprintf(arc, "/*FaceVar 0*/", "[face]");
     break;
   }
@@ -215,23 +215,24 @@ static void nCudaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
   nprintf(arc, "/*FaceJob*/", NULL);
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if (var->item[0]!='g') nvar(arc,var,job);
+  
   switch (var->item[0]){
   case ('c'):{
     nprintf(arc, "/*CellVar*/",
             "%s",
             ((var->dim==0)?
              ((enum_enum=='\0')?
-              (isPostfixed==2)?"[":"[face->cell"
+              (isPostfixed==2)?"[face_cell[tfid+NABLA_NB_FACES*":""
               :"[c")
              :"[cell][node->cell")); 
     break;
   }
   case ('n'):{
-    nprintf(arc, "/*NodeVar*/", "[face->node");
+    nprintf(arc, "/*NodeVar*/", "[face_node[tfid+NABLA_NB_FACES*");
     break;
   }
   case ('f'):{
-    nprintf(arc, "/*FaceVar*/", "[face]");
+    nprintf(arc, "/*FaceVar*/", "/*FaceVar*/[tfid]");
     break;
   }
   case ('g'):{

@@ -52,6 +52,8 @@ char* nCudaHookIncludes(void){return "";}
 // ****************************************************************************
 const nWhatWith nCudaHookTypedef[]={
   {"int","integer"},
+  {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
@@ -63,8 +65,8 @@ const nWhatWith nCudaHookTypedef[]={
 const nWhatWith nCudaHookDefines[]={
   {"Real3","real3"},
   {"Real","real"},
-  //{"real","double"},
   {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
+  {"ReduceMaxToDouble(what)","reduce_max_kernel(global_device_shared_reduce_results,what)"},
   {"norm","fabs"},
   {"rabs","fabs"},
   {"square_root","sqrt"},
@@ -75,7 +77,6 @@ const nWhatWith nCudaHookDefines[]={
   {"opMul(u,v)", "(u*v)"},
   {"opScaMul(a,b)","dot3(a,b)"},
   {"opVecMul(a,b)","cross3(a,b)"},
-  //{"opTernary(cond,ifStatement,elseStatement)","((cond)?ifStatement:elseStatement)"},
   {"knAt(a)",""},
   {"fatal(a,b)","cudaThreadExit()"},
   {"synchronize(a)",""},
@@ -83,6 +84,8 @@ const nWhatWith nCudaHookDefines[]={
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
+  {"xs_cell_node(n)", "cell_node[tcid*NABLA_NODE_PER_CELL+n]"},
+  {"xs_face_cell(c)", "face_cell[tfid+NABLA_NB_FACES*c]"},
   {NULL,NULL}
 };
 

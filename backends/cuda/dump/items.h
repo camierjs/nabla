@@ -40,25 +40,20 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-   //.section ".rodata"
-   .globl ${ABI_UNDERSCORE}real3_h
-   .globl ${ABI_UNDERSCORE}debug_h
-   .globl ${ABI_UNDERSCORE}error_h
-   .globl ${ABI_UNDERSCORE}extra_h
-   .globl ${ABI_UNDERSCORE}cuMsh_h
-${ABI_UNDERSCORE}real3_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/real3.h"
-   .byte 0
-${ABI_UNDERSCORE}debug_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/debug.h"
-   .byte 0
-${ABI_UNDERSCORE}error_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/error.h"
-   .byte 0
-${ABI_UNDERSCORE}extra_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/extra.h"
-   .byte 0   
-${ABI_UNDERSCORE}cuMsh_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/cuMsh.h"
-   .byte 0   
-         
+
+// aux cells
+bool _isOwn_(int c){
+  if (c>=0) return true;
+  assert(c>=0);
+  return false;
+}
+
+// aux faces
+bool _isSubDomainBoundaryOutside_(int f){
+  assert(f>=0);
+  assert(face_cell[0*NABLA_NB_FACES+f]>=0);
+  assert(face_cell[1*NABLA_NB_FACES+f]<=0);
+  // On ne retourne true que quand la direction est 'X+'
+  if (face_cell[1*NABLA_NB_FACES+f]==0) return true;
+  return false;
+}

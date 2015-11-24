@@ -90,8 +90,6 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"ReduceMinToDouble(a)","a"},
   {"ReduceMaxToDouble(a)","a"},
   {"knAt(a)",""},
-  //{"_isOwn_(item)","true"},  // aux cells
-  //{"_isSubDomainBoundaryOutside_(item)","true"},   // aux faces
   {"fatal(a,b)","exit(-1)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
@@ -105,7 +103,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"MD_Mask","7"}, // [sign,..]
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},//"node_cell[n+NABLA_NB_NODES*c]"},
+  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
   {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
   {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}

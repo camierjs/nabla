@@ -40,35 +40,81 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
 
 // ****************************************************************************
-// * ERROR HANDLING
+// * dumpExternalFile
+// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
 // ****************************************************************************
-static inline void HandleError( const cudaError_t err,
-                                const char *file,
-                                const int line,
-                                const int exit_status){
-  if (err != cudaSuccess) {
-    printf("\33[1;33m\t%%s in file %%s at line %%d\33[m\n",
-           cudaGetErrorString( err ), file, line);
-    if (exit_status==EXIT_SUCCESS)
-      printf("\33[1;33m\tThis error has been told not to be fatal here, exiting quietly!\33[m\n");
-    exit( exit_status );
-  }
+static char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
 }
-#define CUDA_HANDLE_ERROR(err) (HandleError(err, __FILE__, __LINE__, EXIT_FAILURE)) 
-#define CUDA_HANDLE_ERROR_WITH_SUCCESS(err) (HandleError(err, __FILE__, __LINE__, EXIT_SUCCESS)) 
 
 
-static inline void cudaCheckLastKernel(const char *errorMessage,
-                                       const char *file,
-                                       const int line){
-  const cudaError_t err = cudaGetLastError();
-  if (cudaSuccess != err){
-    printf("\33[1;33m\t%%s (error #%%i): cudaGetLastError() threw '%%s' in file %%d at line %%s.\n",
-           errorMessage, (int)err, cudaGetErrorString(err),file, line);
-    cudaDeviceReset();
-    exit(EXIT_FAILURE);
-  }
+// ****************************************************************************
+// * extern definitions from nCudaDump.S
+// ****************************************************************************
+extern char real3_h[];
+extern char extra_h[];
+extern char meshs_h[];
+extern char error_h[];
+extern char debug_h[];
+extern char items_h[];
+
+
+// ***************************************************************************** 
+// * 
+// *****************************************************************************
+void cudaHeaderItems(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(items_h));
 }
-#define CUDA_CHECK_LAST_KERNEL(msg) (cudaCheckLastKernel(msg, __FILE__, __LINE__)) 
+
+void cudaHeaderReal3(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(real3_h));
+}
+
+void cudaHeaderExtra(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(extra_h));
+}
+
+void cudaHeaderMesh(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  fprintf(nabla->entity->hdr,dumpExternalFile(meshs_h));
+}
+
+void cudaHeaderHandleErrors(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,dumpExternalFile(error_h));
+}
+
+__attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
+  nablaVariable *var;
+  fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
+  hprintf(nabla,NULL,"\n\n\
+// *****************************************************************************\n\
+// * Debug macro functions\n\
+// * unused?\n\
+// *****************************************************************************\n");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->item, "global")==0) continue;
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    //continue;
+    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+    continue;
+    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
+  hprintf(nabla,NULL,"\n");
+}
+

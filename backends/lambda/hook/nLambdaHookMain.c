@@ -270,7 +270,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
-       if (!entry_points[i].reduction)
+      if (!entry_points[i].reduction)
          nMiddleArgsAddExtra(n,&numParams);
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[lambdaMain] Et on rajoute les called_variables en paramètre d'appel");

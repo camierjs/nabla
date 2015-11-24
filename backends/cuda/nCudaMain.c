@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+extern char* cuSparseHeader(nablaMain *);
+
 
 /*****************************************************************************
  * Backend CUDA PREFIX - Génération du 'main'
@@ -145,6 +147,8 @@ void gpuEnum(void){\n\
  *****************************************************************************/
 NABLA_STATUS nccCudaMainPrefix(nablaMain *nabla){
   dbg("\n[nccCudaMainPrefix]");
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+    fprintf(nabla->entity->hdr, "%s", cuSparseHeader(nabla));
   fprintf(nabla->entity->src, CUDA_MAIN_PREFIX);
   return NABLA_OK;
 }
@@ -169,89 +173,6 @@ NABLA_STATUS nccCudaMainPreInit(nablaMain *nabla){
 // * #warning Formal parameter space overflowed (256 bytes max)
 // *****************************************************************************/
 NABLA_STATUS nccCudaMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
-/*
-NABLA_STATUS nccCudaMainVarInitKernel(nablaMain *nabla){
-  int i,iVar;
-  nablaVariable *var;
-  dbg("\n[nccCudaMainVarInit]");
-  nprintf(nabla,NULL,"\n\n\
-// ******************************************************************************\n\
-// * Kernel d'initialisation des variables aux NOEUDS\n\
-// ******************************************************************************\n\
-__global__ void nabla_ini_node_variables(");
-  // Variables aux noeuds
-  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='n') continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"%sReal *",(iVar!=0)?", ":"");
-    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"%sReal3 *",(iVar!=0)?", ":"");
-    if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"%sinteger *",(iVar!=0)?", ":"");
-    nprintf(nabla,NULL,"%s_%s",var->item,var->name);
-    iVar+=1;
-  }
-  nprintf(nabla,NULL,"){\n\tCUDA_INI_NODE_THREAD(tnid);");
-  // Variables aux noeuds
-  nprintf(nabla,NULL,"\n\t{");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='n') continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t\t%s_%s[tnid]=",var->item,var->name);
-    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
-    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"Real3(0.0);");
-    if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0.0;");
-  }
-  nprintf(nabla,NULL,"\n\t}");  
-  nprintf(nabla,NULL,"\n}");
-
- 
-  nprintf(nabla,NULL,"\n\n\
-// ******************************************************************************\n\
-// * Kernel d'initialisation des variables aux MAILLES\n\
-// ******************************************************************************\n\
-  __global__ void nabla_ini_cell_variables(");
-  // Variables aux mailles
-//  #warning Formal parameter space overflowed (256 bytes max)
-  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='c') continue;
-    if (var->dim==0){
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"%sReal *",(iVar!=0)?", ":"");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"%sReal3 *",(iVar!=0)?", ":"");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"%sinteger *",(iVar!=0)?", ":"");
-      nprintf(nabla,NULL,"%s_%s",var->item,var->name);
-    }else{
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"%sReal *",(iVar!=0)?", ":"");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"%sReal3 *",(iVar!=0)?", ":"");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"%sinteger *",(iVar!=0)?", ":"");
-      nprintf(nabla,NULL,"%s_%s",var->item,var->name);
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,NULL);
-    }
-    iVar+=1;
-  }
-  nprintf(nabla,NULL,"){\n\tCUDA_INI_CELL_THREAD(tcid);");
-  // Variables aux mailles real
-  nprintf(nabla,NULL,"\n{");
-  for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='c') continue;
-    if (var->dim==0){
-      nprintf(nabla,NULL,"\n\t\t%s_%s[tcid]=",var->item,var->name);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"Real3(0.0);");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0.0;");
-    }else{
-      nprintf(nabla,NULL,"\n\t\t");
-      for(i=0;i<8;i++)
-        nprintf(nabla,NULL,"%s_%s[tcid+%d]=",var->item,var->name,i);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"Real3(0.0);");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0.0;");
-    }
-    iVar+=1;
-    if (iVar==16)break;
-  }
-  nprintf(nabla,NULL,"\n\t}");
-  nprintf(nabla,NULL,"\n}");
-  return NABLA_OK;
-}*/
 
 
 /*****************************************************************************
@@ -259,32 +180,7 @@ __global__ void nabla_ini_node_variables(");
  *****************************************************************************/
 NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
   nablaVariable *var;
-  dbg("\n[nccCudaMainVarInitCall]");
-
-  // We now use memset 0 to calloc things
-  /*{
-    int iVar;
-    // Variables aux noeuds
-    nprintf(nabla,NULL,"\n\t\tnabla_ini_node_variables<<<dimNodeGrid,dimJobBlock>>>(");
-    for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-      if (var->item[0]!='n') continue;
-      if (strcmp(var->name, "coord")==0) continue;
-      nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
-      iVar+=1;
-    }
-    nprintf(nabla,NULL,");");
-  
-    // Variables aux mailles
-    nprintf(nabla,NULL,"\n\t\tnabla_ini_cell_variables<<<dimCellGrid,dimJobBlock>>>(");
-    for(iVar=0,var=nabla->variables;var!=NULL;var=var->next){
-      if (var->item[0]!='c') continue;
-      nprintf(nabla,NULL,"%s%s_%s",(iVar!=0)?", ":"",var->item,var->name);
-      iVar+=1;
-      //if (iVar==16) break;
-    }
-    nprintf(nabla,NULL,");");
-  }*/
-  
+  dbg("\n[nccCudaMainVarInitCall]"); 
   //nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (strcmp(var->name, "deltat")==0) continue;
@@ -302,7 +198,6 @@ NABLA_STATUS nccCudaMainVarInitCall(nablaMain *nabla){
             (var->dim==0)?"0":"1",
             var->name);
   }
-  
   return NABLA_OK;
 }
 

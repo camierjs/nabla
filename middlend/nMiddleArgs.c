@@ -136,6 +136,10 @@ void nMiddleParamsAddExtra(nablaMain *nabla, int *numParams){
   *numParams+=1;
   nprintf(nabla, NULL, ",\n\t\tint *cell_next");
   *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *face_cell");
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n\t\tint *face_node");
+  *numParams+=1;
 }
 
 
@@ -154,6 +158,10 @@ void nMiddleArgsAddExtra(nablaMain *nabla, int *numParams){
   nprintf(nabla, NULL, ",\n%scell_prev",tabs);
   *numParams+=1;
   nprintf(nabla, NULL, ",\n%scell_next",tabs);
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n%sface_cell",tabs);
+  *numParams+=1;
+  nprintf(nabla, NULL, ",\n%sface_node",tabs);
   *numParams+=1;
 }
 

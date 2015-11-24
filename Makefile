@@ -189,9 +189,10 @@ tstukg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_gen_1)
 tstukr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
-
-tstudr:
+tstudg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_darcy_gen_1)
+tstudr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_darcy_run_1)
 
 
 ############

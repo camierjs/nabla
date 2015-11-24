@@ -47,17 +47,30 @@ void cudaDefineEnumerates(nablaMain *nabla){
 /*********************************************************\n\
  * Forward enumerates\n\
  *********************************************************/\n\
-#define CUDA_INI_CELL_THREAD(tid) \\\n\
+#define CUDA_INI_CELL_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
-  if ( tid>=NABLA_NB_CELLS) return;\n\
+  if (tid>=NABLA_NB_CELLS) return;\n\
 \n\
 #define CUDA_INI_CELL_THREAD_RETURN_REAL(tid) \\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
-  if ( tid>=NABLA_NB_CELLS) return -1.0;\n\
+  if (tid>=NABLA_NB_CELLS) return -1.0;\n\
 \n\
 #define CUDA_INI_NODE_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
-  if ( tid>=NABLA_NB_NODES) return;\n\
+  if (tid>=NABLA_NB_NODES) return;\n\
+\n\
+#define CUDA_INI_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_FACES) return;\n\
+\n\
+#define CUDA_INI_INNER_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_FACES_INNER) return;\n\
+\n\
+#define CUDA_INI_OUTER_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid<NABLA_NB_FACES_INNER) return;\\\n\
+  if (tid>=(NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER)) return;\n\
 \n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)\n\
 \n\

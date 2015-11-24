@@ -98,10 +98,10 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException");
 
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]",itm[0]);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]",itm[0]);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]",itm);
+  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]");
+  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]");
+  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
+  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
   
   // NEXTCELL/PREVCELL sont traité en amont avec les gatherk_and_zero_neg_ones
   //if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");

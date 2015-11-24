@@ -223,14 +223,6 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   iteration->item=strdup("global");
   iteration->type=strdup("integer");
   iteration->name=strdup("iteration");
-
-  // Rajout de la variable globale 'time'
-  /*nablaVariable *time = nablaVariableNew(nabla);
-  nablaVariableAdd(nabla, time);
-  time->axl_it=false;
-  time->item=strdup("global");
-  time->type=strdup("real");
-  time->name=strdup("time");*/
   
   // Rajout de la variable globale 'min_array'
   // Pour la réduction aux blocs
@@ -267,6 +259,7 @@ NABLA_STATUS nccCuda(nablaMain *nabla,
   cudaHeaderReal3(nabla);
   cudaHeaderExtra(nabla);
   cudaHeaderMesh(nabla);
+  cudaHeaderItems(nabla);
 
   // Dump dans le fichier source
   nCudaInlines(nabla);

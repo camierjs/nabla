@@ -76,7 +76,7 @@ char* nCudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum)
   if (j=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
   if (j=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (j=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/xs_face_";
   nablaError("Could not switch in cudaHookItem!");
   return NULL;
 }
@@ -113,7 +113,7 @@ void nCudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVa
  *****************************************************************************/
 void nCudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
-  char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
+  //char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger
   if (n->tokenid == SID)           nprintf(arc, "/*chs*/", "[subDomain()->subDomainId()]");
   if (n->tokenid == THIS)          nprintf(arc, "/*chs THIS*/", NULL);
@@ -122,10 +122,12 @@ void nCudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum)
   //if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
   if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException]");
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[%s->backCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[%s->backCell().uniqueId()]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[%s->frontCell().uniqueId()]",itm);
+  
+  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[face_cell[tfid+NABLA_NB_FACES*0]]");
+  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[tfid+NABLA_NB_FACES*0]]");
+  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[tfid+NABLA_NB_FACES*1]]");
+  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[tfid+NABLA_NB_FACES*1]]");
+  
   if (n->tokenid == NEXTCELL)      nprintf(arc, "/*chs NEXTCELL*/", ")");
   if (n->tokenid == PREVCELL)      nprintf(arc, "/*chs PREVCELL*/", ")");
   if (n->tokenid == NEXTNODE)      nprintf(arc, "/*chs NEXTNODE*/", "[nextNode]");

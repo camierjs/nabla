@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _LAMBDA_STD_REAL3_H_
-#define _LAMBDA_STD_REAL3_H_
+#ifndef _LAMBDA_REAL3_H_
+#define _LAMBDA_REAL3_H_
 
 // ****************************************************************************
 // * real3
@@ -105,4 +105,4 @@ class __attribute__ ((aligned(8))) real3x3 {
  
 };
 
-#endif //  _LAMBDA_STD_REAL3_H_
+#endif //  _LAMBDA_REAL3_H_
