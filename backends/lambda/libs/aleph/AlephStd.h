@@ -229,6 +229,7 @@ class IParallelMng{
   virtual void allGatherVariable(vector<int> send_buf, vector<int>& recv_buf) =0;
   
   virtual int reduce(Parallel::eReduceType rt,int v) =0;
+  virtual double reduce(Parallel::eReduceType rt,double v) =0;
 };
 
 class ISubDomain{
@@ -300,6 +301,12 @@ public:
   void allGatherVariable(vector<int> send_buf, vector<int>& recv_buf) {throw std::logic_error("SequentialMng::");}
   
   int reduce(Parallel::eReduceType rt,int v){
+    debug()<<"\t[SequentialMng::reduce] (int)v="<<v;
+    //throw std::logic_error("SequentialMng::");
+    return v;
+  }
+  double reduce(Parallel::eReduceType rt,double v){
+    debug()<<"\t[SequentialMng::reduce] (double) v="<<v;
     //throw std::logic_error("SequentialMng::");
     return v;
   }

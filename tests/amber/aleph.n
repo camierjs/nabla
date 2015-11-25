@@ -10,7 +10,7 @@ cells void addRhsV(void) in (cell cV,cW,cT) @ 1.2{
   const ℝ cValue=cV;
   const ℝ cWalue=cW;
   const ℝ cTalue=cT;
-  //info()<< "[addRhsV] cell["<<uid<<"]: cV="<<cV<<", cW="<<cW<<", cT="<<cT;
+  info()<< "[addRhsV] cell["<<uid<<"]: cV="<<cV<<", cW="<<cW<<", cT="<<cT;
   ℵ rhs addValue(cV,this,cValue);
   ℵ rhs addValue(cW,this,cWalue);
   ℵ rhs addValue(cT,this,cTalue);
@@ -19,14 +19,15 @@ cells void addRhsV(void) in (cell cV,cW,cT) @ 1.2{
 /*outer*/ nodes void addRhsBCLeft(void) in (node nV) @ 1.21{
   if (n!=0) continue;
   const ℝ nValue=nV;
-  //info()<< "[addRhsBCLeft] node["<<uid<<"]: nV="<<nV;
+  //info()<< "[addRhsBCLeft] node["<<uid<<"]: nValue="<<nValue;
   ℵ rhs addValue(nV,this,nValue);
 }
   
 /*outer*/ nodes void addRhsBCRight(void) in (node nW) @ 1.22{
   if (n!=(NABLA_NB_NODES-1)) continue;
+  //const ℝ t=global_time[0];
   const ℝ nWalue=nW;
-  //info()<< "[addRhsBCRight] node["<<uid<<"]: nW="<<nW;
+  //info()<< "[addRhsBCRight] node["<<uid<<"]: nWalue="<<nWalue;
   //assert(uid<NABLA_NB_NODES);
   ℵ rhs addValue(nW,this,nWalue);
   //info()<< "[addRhsBCRight] done";
@@ -37,12 +38,12 @@ cells void addRhsV(void) in (cell cV,cW,cT) @ 1.2{
 // * Fill our matrix
 // ****************************************************************************
 cells void setMtxA(void) @ 2.1{
-  //info()<< "[setMtxA] cell #"<<uid;
-  const ℝ e1 = ½*tau*δt/(ε² + 2.0*tau*δt);
+  const ℝ e1 = ½*τ*δt/(ε²+2.0*τ*δt);
   const ℝ δtSx = δt/(ε*δx);
-  const ℝ M= ε/(2.0*ε + sigma*δx);
-  const ℝ value1=(1.0 +e1 + δtSx);
-  const ℝ value2=(e1-(sigma*M*δt)/(ε));
+  const ℝ M = ε/(2.0*ε+σ*δx);
+  const ℝ value1 = 1.0+e1+δtSx;
+  const ℝ value2 = e1-σ*M*δt/ε;
+  //info()<< "[setMtxA] cell #"<<uid<<", e1="<<e1;
   
   ℵ matrix setValue(cV,this, cV,this, value1);
   ℵ matrix setValue(cV,this, cW,this, value2);
@@ -54,17 +55,17 @@ cells void setMtxA(void) @ 2.1{
 
   ℵ matrix setValue(cT,this, cV,this, -2.0*e1);
   ℵ matrix setValue(cT,this, cW,this, -2.0*e1);
-  ℵ matrix setValue(cT,this, cT,this, 1.0+e1);
+  ℵ matrix setValue(cT,this, cT,this,  1.0+e1);
 }
 
 nodes void setMtxNodesV(void) @ 2.2{
   if (n==0) continue;
   if (n==(NABLA_NB_NODES-1)) continue;
   //info()<< "[setMtxNodesV] V inner #"<<uid;
-  const ℝ δtSx = δt/(ε*δx);
-  const ℝ M= ε/(2*ε + sigma*δx);
   ∀ cell{
     if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    const ℝ δtSx = δt/(ε*δx);
+    const ℝ M = ε/(2.0*ε+σ*δx);
     // Filtrer ordre croissant
     //assert(cell(0)<NABLA_NB_CELLS);
     //assert(cell(1)<NABLA_NB_CELLS);
@@ -76,36 +77,36 @@ nodes void setMtxNodesW(void) @ 2.2{
   if (n==0) continue;
   if (n==(NABLA_NB_NODES-1)) continue;
   //info()<< "[setMtxNodesW] W inner #"<<uid;
-  const ℝ δtSx = δt/(ε*δx);
-  const ℝ M= ε/(2*ε + sigma*δx);
   ∀ cell{
     if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    const ℝ δtSx = δt/(ε*δx);
+    const ℝ M = ε/(2.0*ε+σ*δx);
     // Filtrer ordre decroissant
     //assert(cell(0)<NABLA_NB_CELLS);
     //assert(cell(1)<NABLA_NB_CELLS);
-    ℵ matrix setValue(cW, cell(0), cW, cell(1), -2.0*M*δtSx );
+    ℵ matrix setValue(cW, cell(0), cW, cell(1), -2.0*M*δtSx);
   }
   //info()<< "[setMtxNodesW] done";
 }
 
 /*outer*/ nodes void setMtxNodesWBCLeft(void) in (/*cell cV*/node nV) @ 2.21{
   if (n!=0) continue;
-  const ℝ δtSx = δt/(ε*δx);
-  const ℝ M= ε/(2*ε + sigma*δx);
   //info()<< "[setMtxNodesWBCLeft]";
   ∀ cell{
     if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    const ℝ δtSx = δt/(ε*δx);
+    const ℝ M= ε/(2.0*ε+σ*δx);
     ℵ matrix setValue(nV, this, cV, cell(#), -2.0*M*δtSx);
   }
 }
 
 /*outer*/ nodes void setMtxNodesWBCRight(void) in (/*cell cW*/node nW) @ 2.21{
   if (n!=(NABLA_NB_NODES-1)) continue;
-  const ℝ δtSx = δt/(ε*δx);
-  const ℝ M= ε/(2*ε + sigma*δx);
   //info()<< "[setMtxNodesWBCRight]";
   ∀ cell{
     if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
+    const ℝ δtSx = δt/(ε*δx);
+    const ℝ M= ε/(2.0*ε+σ*δx);
     ℵ matrix setValue(nW, this, cW, cell(#), -2.0*M*δtSx);
   }
 }
@@ -127,6 +128,7 @@ cells void getCellResultsV(void) out (cell cV,cW,cT) @ 3.1{
   cV=ℵ lhs getValue(cV, this);
   cW=ℵ lhs getValue(cW, this);
   cT=ℵ lhs getValue(cT, this);
+  //info()<<"[getCellResultsV] #"<<uid<<", cV="<<cV<<", cW="<<cW<<", cT="<<cT;
 }
 
 nodes void getNodeResultsV(void) out (node nV) @ 3.2{

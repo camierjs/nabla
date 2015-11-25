@@ -63,7 +63,7 @@ options{
                                    // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
   ℕ alephSolverMethod     = 0; //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   ℕ alephNumberOfCores    = 0;
-  Bool option_aleph_dump_matrix = false;
+  Bool option_aleph_dump_matrix = true;
 };
 
 

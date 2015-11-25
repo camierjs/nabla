@@ -335,7 +335,7 @@ void alephRhsSet(double *var, int itm, double value){
 // ****************************************************************************
 double alephRhsGet(int row){
   const int kernel_rank = m_aleph_kernel->rank();
-  const register int rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];
+  const int rank_offset=m_aleph_kernel->topology()->part()[kernel_rank];
   debug()<<"\33[1;31m[alephRhsGet]\33[0m";
   return rhs[row-rank_offset];
 }
@@ -366,7 +366,12 @@ void alephSolveWithoutIndex(void){
   vector_zeroes.assign(rhs.size(),0.0);
   m_aleph_sol->setLocalComponents(vector_zeroes);
   m_aleph_sol->assemble();
-  m_aleph_mat->solve(m_aleph_sol, m_aleph_rhs, nb_iteration, &residual_norm[0], m_aleph_params, true);
+  m_aleph_mat->solve(m_aleph_sol,
+                     m_aleph_rhs,
+                     nb_iteration,
+                     &residual_norm[0],
+                     m_aleph_params,
+                     true);
   AlephVector *solution=m_aleph_kernel->syncSolver(0,nb_iteration,&residual_norm[0]);
   info() << "Solved in \33[7m" << nb_iteration << "\33[m iterations,"
          << "residuals=[\33[1m" << residual_norm[0] <<"\33[m,"<< residual_norm[3]<<"]";

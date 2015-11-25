@@ -187,9 +187,12 @@ public:
                                                                   &bfr_val[0]));
     for(HYPRE_Int i=0;i<jSize;++i){
       const double abs_val = ::fabs(bfr_val[i]);
+      debug()<<"\t[AlephVectorHypre::norm_max] abs_val="<<abs_val;
       if (abs_val > normInf) normInf = abs_val;
     }
+    debug()<<"\t[AlephVectorHypre::norm_max] normInf="<<normInf;
     normInf=m_kernel->subParallelMng(m_index)->reduce(Parallel::ReduceMax,normInf);
+    debug()<<"\t[AlephVectorHypre::norm_max] reduced normInf="<<normInf;
     return normInf;
   }
 
