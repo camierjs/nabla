@@ -40,26 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-
-
-/*****************************************************************************
- * Génération d'un kernel associé à un support
- *****************************************************************************/
-void nCudaHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, job);
-  nMiddleJobFill(nabla,job,n,NULL);
-  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
-  if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
-    exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
-}
-
-
-/*****************************************************************************
- * Cuda libraries
- *****************************************************************************/
-void nCudaHookLibraries(astNode * n, nablaEntity *entity){
-  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
-}
-
+   .globl ${ABI_UNDERSCORE}cuSolver_h
+   
+${ABI_UNDERSCORE}cuSolver_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuSolver.h"
+   .byte 0

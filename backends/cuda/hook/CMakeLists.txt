@@ -1,16 +1,24 @@
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: CUDA/${VT100_BOLD}${VT100_FG_YELLOW}HOOK${VT100_RESET}")
 set(BACKEND_CUDA_HOOKS_C
+  nCudaHook.c
+  nCudaHookArgs.c
+  nCudaHookMain.c
+  nCudaHookVars.c
+  nCudaHookMesh.c
+  nCudaHookData.c
+  nCudaHookHeader.c
+  nCudaHookTokens.c
+  nCudaHookSource.c
+  nCudaHookGather.c
+  nCudaHookForAll.c
+  nCudaHookScatter.c
+  nCudaHookParameters.c
+  nCudaHookReduction.c
+
   nCudaHookDiffraction.c
   nCudaHookFunction.c
   nCudaHookItem.c
-  nCudaHookReduction.c
-  nCudaHookScatter.c
-  nCudaHookVariables.c
-  nCudaHookEnumerates.c
-  nCudaHookGather.c
-  nCudaHookParams.c
-  nCudaHooks.c
-  nCudaHookTokens.c)
+  )
 
 add_library(NablaCudaHook ${BACKEND_CUDA_HOOKS_C})
 

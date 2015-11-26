@@ -43,7 +43,7 @@
 #include "nabla.h"
 
 extern char* lambdaAlephHeader(nablaMain*);
-extern void lambdaAlephIni(nablaMain*);
+//extern void lambdaAlephIni(nablaMain*);
 
 
 // ****************************************************************************
@@ -112,18 +112,6 @@ static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
                                                          bool in_or_out){
   nprintf(nabla,"\n\t\t/*lambdaDumpNablaDebugFunctionFromOutArguments*/",NULL);
 }
-
-
-// ****************************************************************************
-// * Dump d'extra connectivity
-// ****************************************************************************
-//static void lambdaAddExtraConnectivitiesArguments(nablaMain *nabla,
-//                                                  int *numParams){
-//  return;
-//}
-
-
-
 
 /*****************************************************************************
  * lambdaMainVarInitKernel

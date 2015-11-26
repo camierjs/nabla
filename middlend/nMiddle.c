@@ -123,9 +123,14 @@ int nMiddleSwitch(astNode *root,
   // Switching between our possible backends:
   switch (backend){
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
-  case BACKEND_CUDA:   return nccCuda(nabla,root,nabla_entity_name);
+    // The CUDA backend now uses nMiddleBackendAnimate
+    // Hook structures are filled by the backend    
+  case BACKEND_CUDA:   {
+    nabla->hook=nCuda(nabla,root);
+    return nMiddleBackendAnimate(nabla,root);
+  }
   case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
-    // The Lambda backend now uses nMiddleBackendAnimate
+    // The LAMBDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend
   case BACKEND_LAMBDA: {
     nabla->hook=nLambda(nabla);

@@ -43,52 +43,20 @@
 #include "nabla.h"
 
 // ****************************************************************************
-// * nMiddleBackendAnimate
+// * nCudaHookSourceOpen
 // ****************************************************************************
-//#warning nMiddleBackendAnimate a simplifier
-NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
-  ///////////////////////////////////////////////////////////
-  // Partie des hooks à remonter à termes dans le middlend //
-  ///////////////////////////////////////////////////////////
-  nabla->hook->vars->init(nabla);
-  nabla->hook->source->open(nabla);
-  nabla->hook->source->include(nabla);
-
-  // Le header
-  nabla->hook->header->open(nabla);
-  nabla->hook->header->prefix(nabla);
-  nabla->hook->header->include(nabla);
-  nabla->hook->header->dump(nabla);
-
-  // Parse du code préprocessé et lance les hooks associés
-  // On en profite pour dumper dans le header les forwards des fonctions
-  nMiddleGrammar(root,nabla);
-
-  // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
-  nabla->hook->mesh->core(nabla);
-  // Les ENUMERATES dépendent pour l'instant des definitions du maillages
-  nabla->hook->header->enums(nabla);
-
-  // Rapidement on place dans le header les variables et options
-  // qui pourront etre utilisées par d'autres dump
-  nabla->hook->vars->prefix(nabla);
-
-  nabla->hook->main->varInitKernel(nabla);
-  nabla->hook->main->prefix(nabla);
-  nabla->hook->vars->malloc(nabla);
-  
-  nabla->hook->mesh->prefix(nabla);
-  nabla->hook->main->preInit(nabla);
-  nabla->hook->main->varInitCall(nabla);
-  nabla->hook->main->main(nabla);
-  nabla->hook->main->postInit(nabla);
-  
-  // Partie POSTFIX  
-  nabla->hook->header->postfix(nabla); 
-  nabla->hook->mesh->postfix(nabla);
-  nabla->hook->main->postfix(nabla);
-  nabla->hook->vars->free(nabla);
-
-  return NABLA_OK;
+void nCudaHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source du entity
+  sprintf(srcFileName, "%sEntity.cu", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
+  
+// ****************************************************************************
+// * cudaInclude
+// ****************************************************************************
+void nCudaHookSourceInclude(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
+}

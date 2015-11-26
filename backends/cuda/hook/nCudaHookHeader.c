@@ -44,110 +44,129 @@
 
 
 // ****************************************************************************
-// * nLambdaHookHeaderOpen
+// * nCudaHookHeaderOpen
 // ****************************************************************************
-void nLambdaHookHeaderOpen(nablaMain *nabla){
+void nCudaHookHeaderOpen(nablaMain *nabla){
   char hdrFileName[NABLA_MAX_FILE_NAME];
   // Ouverture du fichier header
-  sprintf(hdrFileName, "%s.h", nabla->name);
+  sprintf(hdrFileName, "%sEntity.h", nabla->name);
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
 
+
 // ****************************************************************************
-// * lambdaHeaderIncludes
+// *
 // ****************************************************************************
-void nLambdaHookHeaderIncludes(nablaMain *nabla){
+void nCudaHookHeaderIncludes(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
 // *****************************************************************************\n\
-// * Lambda includes\n\
+// * Includes\n\
 // *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
+#include <iostream>\n\
+#include <cstdio>\n\
+#include <cstdlib>\n\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
+#include <assert.h>\n\
 #include <string.h>\n\
 #include <vector>\n\
 #include <math.h>\n\
 #include <assert.h>\n\
 #include <stdarg.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-using namespace std;\n\
-// Next are dump from nabla->parallel->includes()\n\%s",
-          nabla->call->simd->includes(),
-          nabla->call->parallel->includes());
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+#include <cuda_runtime.h>\n\
+cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
+   if (cudaSuccess==cudaMalloc(devPtr,size))\n\
+      return cudaMemset(*devPtr,0,size);\n\
+   return cudaErrorMemoryAllocation;\n\
+}\n");
+//  #warning CUDA Cartesian here
+  fprintf(nabla->entity->hdr,"\n\n\
+// *****************************************************************************\n\
+// * Cartesian stuffs\n\
+// *****************************************************************************\n\
+#define MD_DirX 0\n#define MD_DirY 1\n#define MD_DirZ 2\n\
+//#warning empty libCartesianInitialize\n\
+//__device__ void libCartesianInitialize(void){}\n");
+}
+
+// ****************************************************************************
+// * nCudaHookHeaderDump
+// ****************************************************************************
+void nCudaHookHeaderDump(nablaMain *nabla){
+  assert(nabla->entity->name);
+//  nCudaDumpHeaderTypes(nabla);
+//  nCudaDumpHeaderDebug(nabla);
+//  nCudaDumpHeaderMaths(nabla);
 }
 
 
 // ****************************************************************************
-// * nLambdaHookHeaderDump
-// ****************************************************************************
-void nLambdaHookHeaderDump(nablaMain *nabla){
-  assert(nabla->entity->name);
-  nLambdaDumpHeaderTypes(nabla);
-  nLambdaDumpHeaderDebug(nabla);
-  nLambdaDumpHeaderMaths(nabla);
-}
-
-// ****************************************************************************
-// * lambdaHeaderPrefix
-// ****************************************************************************
-void nLambdaHookHeaderPrefix(nablaMain *nabla){
-  assert(nabla->entity->name);
+// *
+//*****************************************************************************
+void nCudaHookHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
-          "#ifndef __LAMBDA_%s_H__\n#define __LAMBDA_%s_H__",
-          nabla->entity->name,
-          nabla->entity->name);
+          "#ifndef __CUDA_%s_H__\n#define __CUDA_%s_H__",
+          nabla->entity->name,nabla->entity->name);
 }
+
 
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
-void nLambdaHookHeaderDefineEnumerates(nablaMain *nabla){
-  const char *parallel_prefix_for_loop=nabla->call->parallel->loop(nabla);
+void nCudaHookDefineEnumerates(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
  * Forward enumerates\n\
  *********************************************************/\n\
-#define FOR_EACH_PARTICLE(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
+#define CUDA_INI_CELL_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_CELLS) return;\n\
 \n\
-#define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
-#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
+#define CUDA_INI_CELL_THREAD_RETURN_REAL(tid) \\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_CELLS) return -1.0;\n\
 \n\
-#define FOR_EACH_CELL_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
+#define CUDA_INI_NODE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_NODES) return;\n\
 \n\
-/*#define FOR_EACH_CELL_NODE(n)\\\n\
-  %sfor(int cn=c;cn>=c;--cn)\\\n\
-    for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)\n\
-*/\n\
-#define FOR_EACH_NODE(n) /*prefix*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
-#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
+#define CUDA_INI_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_FACES) return;\n\
 \n\
-//#define FOR_EACH_NODE_CELL(c) for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\
+#define CUDA_INI_INNER_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_FACES_INNER) return;\n\
 \n\
-#define FOR_EACH_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES;f+=1)\n\
-#define FOR_EACH_INNER_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
-#define FOR_EACH_OUTER_FACE(f) /*prefix*/for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
-// Pour l'instant un étant que multi-threadé, les 'own' sont les 'all'\n\
-#define FOR_EACH_OWN_INNER_FACE(f) /*prefix*/for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
-#define FOR_EACH_OWN_OUTER_FACE(f) /*prefix*/for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
-",
-          parallel_prefix_for_loop, // FOR_EACH_PARTICLE
-          parallel_prefix_for_loop, // FOR_EACH_CELL
-          parallel_prefix_for_loop, // FOR_EACH_NODE
-          parallel_prefix_for_loop  // FOR_EACH_FACE
-          );
+#define CUDA_INI_OUTER_FACE_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid<NABLA_NB_FACES_INNER) return;\\\n\
+  if (tid>=(NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER)) return;\n\
+\n\
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)\n\
+\n\
+#define FOR_EACH_CELL_WARP(c) \n\
+\n\
+#define FOR_EACH_NODE_WARP(n) \n\
+\n\
+#define CUDA_INI_FUNCTION_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid!=0) return;\n\
+\n\
+#define CUDA_LAUNCHER_FUNCTION_THREAD(tid)\\\n\
+  const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
+  if (tid>=NABLA_NB_CELLS) return;\n");
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
-void nLambdaHookHeaderPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n#endif // __LAMBDA_%s_H__\n",nabla->entity->name);
+// ****************************************************************************
+// *
+//*****************************************************************************
+void nCudaHookHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n#endif // __CUDA_%s_H__\n",nabla->entity->name);
 }
+

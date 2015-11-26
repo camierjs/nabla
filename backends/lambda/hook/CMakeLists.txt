@@ -1,6 +1,7 @@
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: LAMBDA/${VT100_BOLD}${VT100_FG_YELLOW}HOOK${VT100_RESET}")
 set(BACKEND_LAMBDA_HOOK_C
   nLambdaHook.c
+  nLambdaHookArgs.c
   nLambdaHookMain.c
   nLambdaHookVars.c
   nLambdaHookMesh.c
@@ -11,7 +12,6 @@ set(BACKEND_LAMBDA_HOOK_C
   nLambdaHookGather.c
   nLambdaHookForAll.c
   nLambdaHookScatter.c
-  nLambdaHookArguments.c
   nLambdaHookParameters.c
   nLambdaHookReductions.c
   nLambdaHookParallelCilk.c

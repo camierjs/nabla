@@ -43,7 +43,7 @@
 #include "nabla.h"
 
 
-void cudaMesh(nablaMain *nabla){
+static void nCudaHookMesh3D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH GENERATION (3D)\n\
@@ -86,9 +86,9 @@ void cudaMesh(nablaMain *nabla){
 
 
 /*****************************************************************************
- * Backend CUDA - GÈnÈration de la connectivitÈ du maillage cotÈ header
+ * Backend CUDA - G√©n√©ration de la connectivit√© du maillage cot√© header
  *****************************************************************************/
-void cudaMeshConnectivity(nablaMain *nabla){
+static void nLambdaHookMesh3DDeviceVariables(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH CONNECTIVITY\n\
@@ -107,12 +107,12 @@ __builtin_align__(8) int *face_node;\n\
 
 
 /*****************************************************************************
- * Backend CUDA - GÈnÈration de la connectivitÈ du maillage cotÈ main
+ * Backend CUDA - G√©n√©ration de la connectivit√© du maillage cot√© main
  *****************************************************************************/
-void nccCudaMainMeshConnectivity(nablaMain *nabla){
+void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->src,"\n\n\
 /******************************************************************************\n\
- * Kernel d'initialisation du maillage ‡-la-SOD\n\
+ * Kernel d'initialisation du maillage √†-la-SOD\n\
  ******************************************************************************/\n\
 __global__ void nabla_ini_node_coords(int *node_cell,\n\
                                       int *node_cell_corner,\n\
@@ -160,19 +160,20 @@ __global__ void nabla_ini_cell_connectivity(int *cell_node){\n\
   cell_node[tcid+7*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+0;\n}\n",
           "Real3 *node_coord",
           "\tnode_coord[tnid]=Real3(dx,dy,dz);");
+  nLambdaHookMesh3DDeviceVariables(nabla);
 }
 
 
 
 /*****************************************************************************
- * Backend CUDA - Allocation de la connectivitÈ du maillage
+ * Backend CUDA - Allocation de la connectivit√© du maillage
  *****************************************************************************/
-void nccCudaMainMeshPrefix(nablaMain *nabla){
+void nCudaHookMeshPrefix(nablaMain *nabla){
   dbg("\n[nccCudaMainMeshPrefix]");
   fprintf(nabla->entity->src,"\n\n\
-\t// Allocation cotÈ CUDA des connectivitÈs aux mailles\n\
+\t// Allocation cot√© CUDA des connectivit√©s aux mailles\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&cell_node, 8*NABLA_NB_CELLS*sizeof(int)));\n\
-\t// Allocation cotÈ CUDA des connectivitÈs aux noeuds\n\
+\t// Allocation cot√© CUDA des connectivit√©s aux noeuds\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell, 8*NABLA_NB_NODES*sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell_corner, 8*NABLA_NB_NODES*sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&node_cell_corner_idx, NABLA_NB_NODES*sizeof(int)));\n\
@@ -186,17 +187,24 @@ void nccCudaMainMeshPrefix(nablaMain *nabla){
 }
 
 
-void nccCudaMainMeshPostfix(nablaMain *nabla){
-  dbg("\n[nccCudaMainMeshPostfix]");
-  fprintf(nabla->entity->src,"\n\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_node));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner_idx));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_next));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_prev));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(face_cell));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(face_node));\n\
-\t//CUDA_HANDLE_ERROR(cudaFree(node_cell_and_corner));\n\
-");
+// ****************************************************************************
+// * nCudaHookMeshCore
+// ****************************************************************************
+void nCudaHookMeshCore(nablaMain *nabla){
+ dbg("\n[nCudaHookMeshCore]");
+  dbg("\n[nCudaHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
+  // Mesh structures and functions depends on the ‚Ñù library that can be used
+  if (isWithLibrary(nabla,with_real)){
+    //nCudaHookMesh1D(nabla);
+  }else{
+    nCudaHookMesh3D(nabla);
+  }
+}
+
+
+// ****************************************************************************
+// * nCudaHookMeshPostfix
+// ****************************************************************************
+void nCudaHookMeshPostfix(nablaMain *nabla){
+  dbg("\n[nCudaHookMeshPostfix]");
 }

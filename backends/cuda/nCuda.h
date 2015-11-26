@@ -56,13 +56,40 @@ extern const nWhatWith nCudaHookTypedef[];
 extern const nWhatWith nCudaHookDefines[];
 extern const char* nCudaHookForwards[];
 
-NABLA_STATUS nccCudaMainPrefix(nablaMain*);
-NABLA_STATUS nccCudaMainPreInit(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitKernel(nablaMain*);
-NABLA_STATUS nccCudaMainVarInitCall(nablaMain*);
-NABLA_STATUS nccCudaMainPostInit(nablaMain*);
-NABLA_STATUS nccCudaMain(nablaMain*);
-NABLA_STATUS nccCudaMainPostfix(nablaMain*);
+
+void nCudaHookHeaderDump(nablaMain *nabla);
+void nCudaHookHeaderOpen(nablaMain *nabla);
+void nCudaHookHeaderIncludes(nablaMain *nabla);
+void nCudaHookHeaderPrefix(nablaMain *nabla);
+void nCudaHookDefineEnumerates(nablaMain *nabla);
+void nCudaHookHeaderPostfix(nablaMain *nabla);
+
+void nCudaHookSourceOpen(nablaMain *nabla);
+void nCudaHookSourceInclude(nablaMain *nabla);
+
+void nCudaHookMeshPrefix(nablaMain *nabla);
+void nCudaHookMeshCore(nablaMain *nabla);
+void nCudaHookMeshPostfix(nablaMain *nabla);
+
+void nCudaHookVariablesInit(nablaMain *nabla);
+void nCudaHookVariablesPrefix(nablaMain *nabla);
+void nCudaHookVariablesPostfix(nablaMain *nabla);
+void nCudaHookVariablesMalloc(nablaMain *nabla);
+void nCudaHookVariablesFree(nablaMain *nabla);
+
+
+NABLA_STATUS nCudaHookMainPrefix(nablaMain*);
+NABLA_STATUS nCudaHookMainPreInit(nablaMain*);
+NABLA_STATUS nCudaHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS nCudaHookMainVarInitCall(nablaMain*);
+NABLA_STATUS nCudaHookMainCore(nablaMain*);
+NABLA_STATUS nCudaHookMainPostInit(nablaMain*);
+NABLA_STATUS nCudaHookMainPostfix(nablaMain*);
+
+
+
+
+
 
 void nCudaInlines(nablaMain*);
 void cudaDefineEnumerates(nablaMain*);
@@ -115,8 +142,8 @@ char* nCudaHookTokenPostfix(nablaMain*);
 
 void cudaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
-char *nCudaPragmaGccIvdep(void);
-char *nCudaPragmaGccAlign(void);
+char *nCudaHookPragmaGccIvdep(void);
+char *nCudaHookPragmaGccAlign(void);
 char* cudaGather(nablaJob*);
 char* cudaScatter(nablaJob*);
 
@@ -129,7 +156,7 @@ void cudaAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
 void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
 void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
 
-NABLA_STATUS nccCuda(nablaMain*,astNode*,const char*);
+nHooks *nCuda(nablaMain*, astNode*);
 
 #endif // _NABLA_CUDA_H_
  

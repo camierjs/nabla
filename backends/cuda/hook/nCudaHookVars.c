@@ -43,20 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-/***************************************************************************** 
- * Upcase de la chaîne donnée en argument
- *****************************************************************************/
-static inline char *itemUPCASE(const char *itm){
-  if (itm[0]=='c') return "CELLS";
-  if (itm[0]=='n') return "NODES";
-  if (itm[0]=='f') return "FACES";
-  if (itm[0]=='g') return "GLOBAL";
-  if (itm[0]=='p') return "PARTICLES";
-  dbg("\n\t[itemUPCASE] itm=%s", itm);
-  exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
-  return NULL;
-}
-
 
 /***************************************************************************** 
  * enums pour les différents dumps à faire: déclaration, malloc et free
@@ -70,6 +56,21 @@ typedef enum {
 
 // Pointeur de fonction vers une qui dump ce que l'on souhaite
 typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth);
+
+
+/***************************************************************************** 
+ * Upcase de la chaîne donnée en argument
+ *****************************************************************************/
+static inline char *itemUPCASE(const char *itm){
+  if (itm[0]=='c') return "CELLS";
+  if (itm[0]=='n') return "NODES";
+  if (itm[0]=='f') return "FACES";
+  if (itm[0]=='g') return "GLOBAL";
+  if (itm[0]=='p') return "PARTICLES";
+  dbg("\n\t[itemUPCASE] itm=%s", itm);
+  exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
+  return NULL;
+}
 
 
 /***************************************************************************** 
@@ -238,10 +239,35 @@ double host_time;\n");
 }
 
 
+
+// ****************************************************************************
+// * Initialisation des besoins vis-à-vis des variables (globales)
+// ****************************************************************************
+void nCudaHookVariablesInit(nablaMain *nabla){
+  // Rajout de la variable globale 'iteration'
+  nablaVariable *iteration = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, iteration);
+  iteration->axl_it=false;
+  iteration->item=strdup("global");
+  iteration->type=strdup("integer");
+  iteration->name=strdup("iteration");
+
+  // Rajout de la variable globale 'min_array'
+  // Pour la réduction aux blocs
+  nablaVariable *device_shared_reduce_results = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, device_shared_reduce_results);
+  device_shared_reduce_results->axl_it=false;
+  device_shared_reduce_results->item=strdup("global");
+  device_shared_reduce_results->type=strdup("real");
+  device_shared_reduce_results->name=strdup("device_shared_reduce_results");
+
+}
+
+
 /***************************************************************************** 
  * Dump des variables
  *****************************************************************************/
-void cudaVariablesPrefix(nablaMain *nabla){
+void nCudaHookVariablesPrefix(nablaMain *nabla){
   nablaVariable *var;
 
   fprintf(nabla->entity->hdr,"\n\n\
@@ -259,11 +285,36 @@ void cudaVariablesPrefix(nablaMain *nabla){
 }
 
 
-void cudaVariablesPostfix(nablaMain *nabla){
+// ****************************************************************************
+// * Variables Postfix
+// ****************************************************************************
+void nCudaHookVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
   for(var=nabla->variables;var!=NULL;var=var->next)
     if (cudaGenericVariable(nabla, var, witch2func(CUDA_VARIABLES_FREE))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[cudaVariables] Error with variable %s\n", var->name));
+}
+
+// ****************************************************************************
+// * Malloc des variables
+// ****************************************************************************
+void nCudaHookVariablesMalloc(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * Malloc Variables\n\
+\t// ********************************************************");
+}
+
+
+// ****************************************************************************
+// * Variables Postfix
+// ****************************************************************************
+void nCudaHookVariablesFree(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+// ********************************************************\n\
+// * Free Variables\n\
+// ********************************************************\n\
+void nabla_free_variables(void){");
 }
 
 
@@ -272,9 +323,12 @@ void cudaVariablesPostfix(nablaMain *nabla){
 // *****************************************************************************
 // * Ajout des variables d'un job trouvé depuis une fonction @ée
 // *****************************************************************************
-void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **variables){
+void cudaAddNablaVariableList(nablaMain *nabla,
+                              astNode *n,
+                              nablaVariable **variables){
   if (n==NULL) return;
-  if (n->tokenid!=0) dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
+  if (n->tokenid!=0)
+    dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
 
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) {
@@ -289,12 +343,17 @@ void cudaAddNablaVariableList(nablaMain *nabla, astNode *n, nablaVariable **vari
     
   if (n->ruleid==rulenameToId("direct_declarator")){
     dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",n->children->token);
-    nablaVariable *hit=nMiddleVariableFind(nabla->variables, n->children->token);
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss", hit->name, hit->item);
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",
+        n->children->token);
+    nablaVariable *hit=nMiddleVariableFind(nabla->variables,
+                                           n->children->token);
+    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss",
+        hit->name, hit->item);
     // Si on ne trouve pas de variable, c'est pas normal
     if (hit == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
+      return exit(NABLA_ERROR|
+                  fprintf(stderr,
+                          "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
     dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
     nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
     if (allready_here!=NULL){

@@ -1,4 +1,4 @@
- ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
 // Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
@@ -42,57 +42,36 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-// ****************************************************************************
-// * dumpExternalFile
-// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
-// ****************************************************************************
-static char *dumpExternalFile(char *file){
-  return file+NABLA_LICENSE_HEADER;
-}
+char *nCudaHookBits(void){return "Not relevant here";}
+char* nCudaHookIncludes(void){return "";}
+
 
 // ****************************************************************************
-// * extern definitions from nCudaDump.S
+// * cudaPragmas
 // ****************************************************************************
-extern char cuSparse_h[];
+char *nCudaHookPragmaGccIvdep(void){ return ""; }
+char *nCudaHookPragmaGccAlign(void){ return "__align__(8)"; }
 
-// *****************************************************************************
-// * cuSparseIni
-// *****************************************************************************
-static void cuSparseIni(nablaMain *nabla){
-  nablaJob *alephIni=nMiddleJobNew(nabla->entity);
-  alephIni->is_an_entry_point=true;
-  alephIni->is_a_function=true;
-  alephIni->scope  = strdup("NoScope");
-  alephIni->region = strdup("NoRegion");
-  alephIni->item   = strdup("\0");
-  alephIni->return_type  = strdup("void");
-  alephIni->name   = strdup("cuSparseIni");
-  alephIni->name_utf8 = strdup("ℵIni");
-  alephIni->xyz    = strdup("NoXYZ");
-  alephIni->direction  = strdup("NoDirection");
-  sprintf(&alephIni->at[0],"-huge_valf");
-  alephIni->when_index  = 1;
-  alephIni->whens[0] = ENTRY_POINT_init;
-  nMiddleJobAdd(nabla->entity, alephIni);  
+
+
+
+/*****************************************************************************
+ * Génération d'un kernel associé à un support
+ *****************************************************************************/
+void nCudaHookJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
+  if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
+    exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
 }
 
 
-// ****************************************************************************
-// *
-// ****************************************************************************
-char* cuSparseHeader(nablaMain *nabla){
-  cuSparseIni(nabla);
-  
-  char str[NABLA_MAX_FILE_NAME];
-  str[0]=0;
-  // Et on rajoute les variables globales
-  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->item, "global")!=0) continue;
-    strcat(str, (var->type[0]=='r')?",real*":(var->type[0]=='i')?",int*":"/*Unknown type*/");
-  }
-  fprintf(nabla->entity->hdr, dumpExternalFile(cuSparse_h),
-          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
-          str);
-
-  return "";
+/*****************************************************************************
+ * Cuda libraries
+ *****************************************************************************/
+void nCudaHookLibraries(astNode * n, nablaEntity *entity){
+  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
 }
+
