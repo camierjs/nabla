@@ -236,7 +236,7 @@ static NABLA_STATUS cudaGenericVariable(nablaMain *nabla,
 // ****************************************************************************
 // * Initialisation des besoins vis-à-vis des variables (globales)
 // ****************************************************************************
-void cudaHookVariablesInit(nablaMain *nabla){
+void cuHookVariablesInit(nablaMain *nabla){
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, iteration);
@@ -258,14 +258,14 @@ void cudaHookVariablesInit(nablaMain *nabla){
 
 
 // **************************************************************************** 
-// * cudaHookVariablesPrefix
+// * cuHookVariablesPrefix
 // ****************************************************************************
-void cudaHookVariablesPrefix(nablaMain *nabla){
+void cuHookVariablesPrefix(nablaMain *nabla){
   nablaOption *opt;
   nablaVariable *var;
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * cudaHookVariablesPrefix\n\
+// * cuHookVariablesPrefix\n\
 // ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (cudaGenericVariable(nabla,
@@ -303,11 +303,11 @@ double host_time;\n");
 // ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void cudaHookVariablesPostfix(nablaMain *nabla){
+void cuHookVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * cudaHookVariablesPostfix\n\
+// * cuHookVariablesPostfix\n\
 // ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next)
     if (cudaGenericVariable(nabla,
@@ -322,11 +322,11 @@ void cudaHookVariablesPostfix(nablaMain *nabla){
 // ****************************************************************************
 // * Malloc des variables
 // ****************************************************************************
-void cudaHookVariablesMalloc(nablaMain *nabla){
+void cuHookVariablesMalloc(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
-\t// * cudaHookVariablesMalloc\n\
+\t// * cuHookVariablesMalloc\n\
 \t// ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next){
     if (cudaGenericVariable(nabla,
@@ -343,10 +343,10 @@ void cudaHookVariablesMalloc(nablaMain *nabla){
 // ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void cudaHookVariablesFree(nablaMain *nabla){
+void cuHookVariablesFree(nablaMain *nabla){
   fprintf(nabla->entity->src,"\n\
 // ********************************************************\n\
-// * cudaHookVariablesFree\n\
+// * cuHookVariablesFree\n\
 // ********************************************************\n\
 void nabla_free_variables(void){}");
 }

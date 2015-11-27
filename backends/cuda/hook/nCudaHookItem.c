@@ -47,10 +47,10 @@
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* cudaHookSysPrefix(void){ return ""; }
-char* cudaHookSysPostfix(void){ return ""; }
+char* cuHookSysPrefix(void){ return ""; }
+char* cuHookSysPostfix(void){ return ""; }
 
-char* cudaHookPrevCell(void){
+char* cuHookPrevCell(void){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }
 
@@ -58,7 +58,7 @@ char* cudaHookPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* cudaHookNextCell(void){
+char* cuHookNextCell(void){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
 }
 
@@ -66,7 +66,7 @@ char* cudaHookNextCell(void){
 /***************************************************************************** 
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
-char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
+char* cuHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
   if (j=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
   if (j=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
   if (j=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
@@ -77,7 +77,7 @@ char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
   if (j=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
   if (j=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
   if (j=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/xs_face_";
-  nablaError("Could not switch in cudaHookItem!");
+  nablaError("Could not switch in cuHookItem!");
   return NULL;
 }
 
@@ -85,7 +85,7 @@ char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
 /***************************************************************************** 
  * Traitement des transformations '[', '(' & ''
  *****************************************************************************/
-void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
+void cuHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits Cuda variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
@@ -99,9 +99,9 @@ void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVar
   }else{
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_X*/", NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Y*/", NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cudaHookTurnBracketsToParentheses_Z*/", NULL);
+    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*cuHookTurnBracketsToParentheses_X*/", NULL);
+    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*cuHookTurnBracketsToParentheses_Y*/", NULL);
+    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*cuHookTurnBracketsToParentheses_Z*/", NULL);
     job->parse.isDotXYZ=0;
     job->parse.turnBracketsToParentheses=false;
   }
@@ -111,7 +111,7 @@ void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVar
 /***************************************************************************** 
  * Traitement des tokens SYSTEM
  *****************************************************************************/
-void cudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
+void cuHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   //char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger

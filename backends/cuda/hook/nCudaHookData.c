@@ -79,7 +79,7 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 /*****************************************************************************
  * Tokens to gathered  variables
  *****************************************************************************/
-static bool cudaHookTurnTokenToGatheredVariable(nablaMain *arc,
+static bool cuHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                 nablaVariable *var,
                                                 nablaJob *job){
   //nprintf(arc, NULL, "/*gathered variable?*/");
@@ -91,7 +91,7 @@ static bool cudaHookTurnTokenToGatheredVariable(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'CELL Job' switch
  *****************************************************************************/
-static void cudaHookTurnTokenToVariableForCellJob(nablaMain *arc,
+static void cuHookTurnTokenToVariableForCellJob(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
   const char cnfg=job->item[0];
@@ -155,7 +155,7 @@ static void cudaHookTurnTokenToVariableForCellJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'NODE Job' switch
  *****************************************************************************/
-static void cudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
+static void cuHookTurnTokenToVariableForNodeJob(nablaMain *arc,
                                                    nablaVariable *var,
                                                    nablaJob *job){
   const char cnfg=job->item[0];
@@ -204,7 +204,7 @@ static void cudaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'FACE Job' switch
  *****************************************************************************/
-static void cudaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
+static void cuHookTurnTokenToVariableForFaceJob(nablaMain *arc,
                                                    nablaVariable *var,
                                                    nablaJob *job){
   const char cnfg=job->item[0];
@@ -248,7 +248,7 @@ static void cudaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
 /*****************************************************************************
  * Tokens to variables 'Std Function' switch
  *****************************************************************************/
-static void cudaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
+static void cuHookTurnTokenToVariableForStdFunction(nablaMain *arc,
                                                        nablaVariable *var,
                                                        nablaJob *job){
   const char cnfg=job->item[0];
@@ -283,14 +283,14 @@ static void cudaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
 /*****************************************************************************
  * Transformation de tokens en variables Cuda selon les contextes dans le cas d'un '[Cell|node]Enumerator'
  *****************************************************************************/
-nablaVariable *cudaHookTurnTokenToVariable(astNode * n,
+nablaVariable *cuHookTurnTokenToVariable(astNode * n,
                                             nablaMain *arc,
                                             nablaJob *job){
   nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
   
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
-  dbg("\n\t[cudaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
+  dbg("\n\t[cuHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
 
   // Set good isDotXYZ
   if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){
@@ -299,19 +299,19 @@ nablaVariable *cudaHookTurnTokenToVariable(astNode * n,
     //job->parse.diffracting=true;
     //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
   }
-  //nprintf(arc, NULL, "\n\t/*cudaHookTurnTokenToVariable::isDotXYZ=%d*/", job->parse.isDotXYZ);
+  //nprintf(arc, NULL, "\n\t/*cuHookTurnTokenToVariable::isDotXYZ=%d*/", job->parse.isDotXYZ);
   
    // Check whether this variable is being gathered
-  if (cudaHookTurnTokenToGatheredVariable(arc,var,job)){
+  if (cuHookTurnTokenToGatheredVariable(arc,var,job)){
     return var;
   }
   // Check whether there's job for a cell job
-  cudaHookTurnTokenToVariableForCellJob(arc,var,job);
+  cuHookTurnTokenToVariableForCellJob(arc,var,job);
   // Check whether there's job for a node job
-  cudaHookTurnTokenToVariableForNodeJob(arc,var,job);
+  cuHookTurnTokenToVariableForNodeJob(arc,var,job);
   // Check whether there's job for a face job
-  cudaHookTurnTokenToVariableForFaceJob(arc,var,job);
+  cuHookTurnTokenToVariableForFaceJob(arc,var,job);
   // Check whether there's job for a face job
-  cudaHookTurnTokenToVariableForStdFunction(arc,var,job);
+  cuHookTurnTokenToVariableForStdFunction(arc,var,job);
   return var;
 }

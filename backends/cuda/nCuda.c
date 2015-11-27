@@ -97,10 +97,10 @@ const nFwdDefTypes cudaHeader={
 };
 
 const static nCallSimd cudaSimdCalls={
-  cudaHookBits,
-  cudaHookGather,
-  cudaHookScatter,
-  cudaHookIncludes
+  cuHookBits,
+  cuHookGather,
+  cuHookScatter,
+  cuHookIncludes
 };
 
 nCalls cudaCalls={
@@ -112,112 +112,112 @@ nCalls cudaCalls={
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-const nHookXyz cudaXyzHooks={
-  cudaHookSysPrefix,
-  cudaHookPrevCell,
-  cudaHookNextCell,
-  cudaHookSysPostfix
+const nHookXyz cuHookXyz={
+  cuHookSysPrefix,
+  cuHookPrevCell,
+  cuHookNextCell,
+  cuHookSysPostfix
 };
 
-const static nHookPragma cudaPragmaGCCHooks={
-  cudaHookPragmaGccAlign
+const static nHookPragma cuHookPragma={
+  cuHookPragmaGccAlign
 };
 
-const static nHookHeader cudaHookHeader={
-  cudaHookHeaderDump,
-  cudaHookHeaderOpen,
-  cudaHookHeaderEnumerates,
-  cudaHookHeaderPrefix,
-  cudaHookHeaderIncludes,
-  cudaHookHeaderPostfix
+const static nHookHeader cuHookHeader={
+  cuHookHeaderDump,
+  cuHookHeaderOpen,
+  cuHookHeaderEnumerates,
+  cuHookHeaderPrefix,
+  cuHookHeaderIncludes,
+  cuHookHeaderPostfix
 };
 
 // Hooks pour le source
-const static nHookSource cudaHookSource={
-  cudaHookSourceOpen,
-  cudaHookSourceInclude
+const static nHookSource cuHookSource={
+  cuHookSourceOpen,
+  cuHookSourceInclude
 };
   
 // Hooks pour le maillage
-const static nHookMesh cudaHookMesh={
-  cudaHookMeshPrefix,
-  cudaHookMeshCore,
-  cudaHookMeshPostfix
+const static nHookMesh cuHookMesh={
+  cuHookMeshPrefix,
+  cuHookMeshCore,
+  cuHookMeshPostfix
 };
   
 // Hooks pour les variables
-const static nHookVars cudaHookVars={
-  cudaHookVariablesInit,
-  cudaHookVariablesPrefix,
-  cudaHookVariablesMalloc,
-  cudaHookVariablesFree
+const static nHookVars cuHookVars={
+  cuHookVariablesInit,
+  cuHookVariablesPrefix,
+  cuHookVariablesMalloc,
+  cuHookVariablesFree
 };  
 
 // Hooks pour le main
-const static nHookMain cudaHookMain={
-  cudaHookMainPrefix,
-  cudaHookMainPreInit,
-  cudaHookMainVarInitKernel,
-  cudaHookMainVarInitCall,
-  cudaHookMainCore,
-  cudaHookMainPostInit,
-  cudaHookMainPostfix
+const static nHookMain cuHookMain={
+  cuHookMainPrefix,
+  cuHookMainPreInit,
+  cuHookMainVarInitKernel,
+  cuHookMainVarInitCall,
+  cuHookMainCore,
+  cuHookMainPostInit,
+  cuHookMainPostfix
 };  
 
   
-const static nHookForAll cudaHookForAll={
-  cudaHookForAllPrefix,
-  cudaHookForAllDump,
-  cudaHookForAllItem,
-  cudaHookForAllPostfix
+const static nHookForAll cuHookForAll={
+  cuHookForAllPrefix,
+  cuHookForAllDump,
+  cuHookForAllItem,
+  cuHookForAllPostfix
 };
 
-const static nHookToken cudaHookToken={
-  cudaHookTokenPrefix, // prefix
-  cudaHookSwitchToken, // svvitch
-  cudaHookTurnTokenToVariable, // variable
-  cudaHookTurnTokenToOption, // option
-  cudaHookSystem, // system
-  cudaHookIteration,
-  cudaHookExit,
-  cudaHookTime,
-  cudaHookFatal,
-  cudaHookTurnBracketsToParentheses,
-  cudaHookIsTest,
-  cudaHookTokenPostfix
+const static nHookToken cuHookToken={
+  cuHookTokenPrefix, // prefix
+  cuHookSwitchToken, // svvitch
+  cuHookTurnTokenToVariable, // variable
+  cuHookTurnTokenToOption, // option
+  cuHookSystem, // system
+  cuHookIteration,
+  cuHookExit,
+  cuHookTime,
+  cuHookFatal,
+  cuHookTurnBracketsToParentheses,
+  cuHookIsTest,
+  cuHookTokenPostfix
 };
 
-const static nHookGrammar cudaHookGrammar={
-  cudaHookFunction,
-  cudaHookJob,
-  cudaHookReduction,
+const static nHookGrammar cuHookGrammar={
+  cuHookFunction,
+  cuHookJob,
+  cuHookReduction,
   NULL, // primary_expression_to_return
   NULL // returnFromArgument
 };
   
   
-const static nHookCall cudaHookCall={
-  cudaHookAddCallNames,
-  cudaHookAddArguments,
-  cudaHookEntryPointPrefix,
-  cudaHookDfsForCalls,
-  cudaHookAddExtraParameters,
-  cudaHookDumpNablaParameterList
+const static nHookCall cuHookCall={
+  cuHookAddCallNames,
+  cuHookAddArguments,
+  cuHookEntryPointPrefix,
+  cuHookDfsForCalls,
+  cuHookAddExtraParameters,
+  cuHookDumpNablaParameterList
 };
 
 
-static nHooks cudaHooks={
-  &cudaHookForAll,
-  &cudaHookToken,
-  &cudaHookGrammar,
-  &cudaHookCall,
-  &cudaXyzHooks,
-  &cudaPragmaGCCHooks,
-  &cudaHookHeader,
-  &cudaHookSource,
-  &cudaHookMesh,
-  &cudaHookVars,
-  &cudaHookMain
+static nHooks cuHooks={
+  &cuHookForAll,
+  &cuHookToken,
+  &cuHookGrammar,
+  &cuHookCall,
+  &cuHookXyz,
+  &cuHookPragma,
+  &cuHookHeader,
+  &cuHookSource,
+  &cuHookMesh,
+  &cuHookVars,
+  &cuHookMain
 };
 
 
@@ -226,5 +226,5 @@ static nHooks cudaHooks={
 // ****************************************************************************
 nHooks *cuda(nablaMain *nabla, const astNode *root){
   nabla->call=&cudaCalls;
-  return &cudaHooks;
+  return &cuHooks;
 }

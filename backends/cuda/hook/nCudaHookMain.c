@@ -81,11 +81,11 @@ int main(void){\n\
 // ****************************************************************************
 // * nccCudaMainPrefix
 // ****************************************************************************
-NABLA_STATUS cudaHookMainPrefix(nablaMain *nabla){
+NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
   dbg("\n[nccCudaMainPrefix]");
   fprintf(nabla->entity->src, CUDA_MAIN_PREFIX);
-//#warning cudaHookMeshConnectivity
-  cudaHookMeshConnectivity(nabla);
+//#warning cuHookMeshConnectivity
+  cuHookMeshConnectivity(nabla);
   return NABLA_OK;
 }
 
@@ -109,7 +109,7 @@ NABLA_STATUS cudaHookMainPrefix(nablaMain *nabla){
 // ****************************************************************************
 // * nccCudaMainPreInit
 // ****************************************************************************
-NABLA_STATUS cudaHookMainPreInit(nablaMain *nabla){
+NABLA_STATUS cuHookMainPreInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPreInit]");
   //if ((nabla->colors&BACKEND_COLOR_SOA)!=BACKEND_COLOR_SOA)
     fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coord");
@@ -123,14 +123,14 @@ NABLA_STATUS cudaHookMainPreInit(nablaMain *nabla){
 // * We now calloc things, so this init is now anymore usefull
 // * #warning Formal parameter space overflowed (256 bytes max)
 // ****************************************************************************
-NABLA_STATUS cudaHookMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
+NABLA_STATUS cuHookMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
 
 
 
 // ****************************************************************************
 // * nccCudaMainVarInitCall
 // ****************************************************************************
-NABLA_STATUS cudaHookMainVarInitCall(nablaMain *nabla){
+NABLA_STATUS cuHookMainVarInitCall(nablaMain *nabla){
   nablaVariable *var;
   dbg("\n[nccCudaMainVarInitCall]"); 
   //nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
@@ -157,7 +157,7 @@ NABLA_STATUS cudaHookMainVarInitCall(nablaMain *nabla){
 // ****************************************************************************
 // * nccCudaMain
 // ****************************************************************************
-NABLA_STATUS cudaHookMainCore(nablaMain *n){
+NABLA_STATUS cuHookMainCore(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
   int i,numParams,number_of_entry_points;
@@ -231,7 +231,7 @@ NABLA_STATUS cudaHookMainCore(nablaMain *n){
 
     
     nprintf(n, NULL, ");");
-    cudaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
+    cuDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
 
     if (entry_points[i].reduction==true){
       nprintf(n, NULL,"\
@@ -280,7 +280,7 @@ NABLA_STATUS cudaHookMainCore(nablaMain *n){
 \tgettimeofday(&et, NULL);\n\
 \tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);"
-NABLA_STATUS cudaHookMainPostInit(nablaMain *nabla){
+NABLA_STATUS cuHookMainPostInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPostInit]");
   fprintf(nabla->entity->src, CUDA_MAIN_POSTINIT);
   return NABLA_OK;
@@ -319,7 +319,7 @@ void gpuEnum(void){\n\
 // ****************************************************************************
 // * nccCudaMainPostfix
 // ****************************************************************************
-NABLA_STATUS cudaHookMainPostfix(nablaMain *nabla){
+NABLA_STATUS cuHookMainPostfix(nablaMain *nabla){
   dbg("\n[nccCudaMainMeshPostfix]");
   fprintf(nabla->entity->src,"\n\n\
 \tCUDA_HANDLE_ERROR(cudaFree(cell_node));\n\

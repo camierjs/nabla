@@ -47,10 +47,10 @@
 // ****************************************************************************
 // * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
 // ****************************************************************************
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+void cuDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
                                                 astNode *n,
                                                 bool in_or_out){
-  //nprintf(nabla,"\n\t[cudaHookDumpNablaParameterList]",NULL);
+  //nprintf(nabla,"\n\t[cuHookDumpNablaParameterList]",NULL);
   if (n==NULL) return;
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) return;
@@ -75,6 +75,6 @@ void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
               var->name);
     }
   }
-  cudaDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
-  cudaDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
+  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
+  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
 }

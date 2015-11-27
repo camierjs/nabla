@@ -43,7 +43,7 @@
 #include "nabla.h"
 
 
-static void cudaHookMesh3D(nablaMain *nabla){
+static void cuHookMesh3D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH GENERATION (3D)\n\
@@ -106,16 +106,16 @@ __builtin_align__(8) int *face_node;\n\
 
 
 // ****************************************************************************
-// * cudaHookMeshPrefix
+// * cuHookMeshPrefix
 // ****************************************************************************
-void cudaHookMeshPrefix(nablaMain *nabla){
-  dbg("\n[cudaHookMeshPrefix]");
-  dbg("\n[cudaHookMeshPrefix] nabla->entity->libraries=0x%X",nabla->entity->libraries);
+void cuHookMeshPrefix(nablaMain *nabla){
+  dbg("\n[cuHookMeshPrefix]");
+  dbg("\n[cuHookMeshPrefix] nabla->entity->libraries=0x%X",nabla->entity->libraries);
   // Mesh structures and functions depends on the ℝ library that can be used
   if (isWithLibrary(nabla,with_real)){
-    //cudaHookMesh1D(nabla);
+    //cuHookMesh1D(nabla);
   }else{
-    cudaHookMesh3D(nabla);
+    cuHookMesh3D(nabla);
     nLambdaHookMesh3DDeviceVariables(nabla);
   }
 }
@@ -183,9 +183,9 @@ __global__ void nabla_ini_cell_connectivity(int *cell_node){\n\
 
 
 // ****************************************************************************
-// * cudaHookMeshCore
+// * cuHookMeshCore
 // ****************************************************************************
-void cudaHookMeshCore(nablaMain *nabla){
+void cuHookMeshCore(nablaMain *nabla){
   nLambdaHookMesh3DConnectivity(nabla);
 }
 
@@ -193,7 +193,7 @@ void cudaHookMeshCore(nablaMain *nabla){
 // ****************************************************************************
 // * Backend CUDA - Allocation de la connectivité du maillage
 // ****************************************************************************
-void cudaHookMeshConnectivity(nablaMain *nabla){
+void cuHookMeshConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->src,"\n\n\
 \t// Allocation coté CUDA des connectivités aux mailles\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&cell_node, 8*NABLA_NB_CELLS*sizeof(int)));\n\
@@ -212,8 +212,8 @@ void cudaHookMeshConnectivity(nablaMain *nabla){
 
 
 // ****************************************************************************
-// * cudaHookMeshPostfix
+// * cuHookMeshPostfix
 // ****************************************************************************
-void cudaHookMeshPostfix(nablaMain *nabla){
-  dbg("\n[cudaHookMeshPostfix]");
+void cuHookMeshPostfix(nablaMain *nabla){
+  dbg("\n[cuHookMeshPostfix]");
 }

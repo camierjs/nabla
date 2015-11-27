@@ -134,7 +134,6 @@ void lambdaHookJob(nablaMain*, astNode*);
 void lambdaHookLibraries(astNode*, nablaEntity*);
 
 char* lambdaHookForAllPrefix(nablaJob*);
-//char* lambdaHookDumpEnumerateXYZ(nablaJob*);
 char* lambdaHookForAllDump(nablaJob*);
 char* lambdaHookForAllPostfix(nablaJob*);
 char* lambdaHookForAllItem(nablaJob*,const char, const char, char);

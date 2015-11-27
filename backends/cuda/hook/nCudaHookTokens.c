@@ -62,7 +62,7 @@ static void lambdaHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
 // *****************************************************************************
 // *
 // *****************************************************************************
-void cudaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+void cuHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
   assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
   if (token==IS_OP_INI) lambdaHookIsTestIni(nabla,job,n);
   if (token==IS) return;
@@ -71,21 +71,21 @@ void cudaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
 
 
 // ****************************************************************************
-// * cudaHookTokenPrefix
+// * cuHookTokenPrefix
 // ****************************************************************************
-char* cudaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
+char* cuHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
 
 // ****************************************************************************
-// * cudaHookTokenPostfix
+// * cuHookTokenPostfix
 // ****************************************************************************
-char* cudaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+char* cuHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 
 
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static void cudaHookSwitchForall(astNode *n, nablaJob *job){
+static void cuHookSwitchForall(astNode *n, nablaJob *job){
   const char cnfg=job->item[0];
   // Preliminary pertinence test
   if (n->tokenid != FORALL) return;
@@ -120,12 +120,12 @@ static void cudaHookSwitchForall(astNode *n, nablaJob *job){
 
 
 // *****************************************************************************
-// * cudaHookSwitchAleph
+// * cuHookSwitchAleph
 // *****************************************************************************
-static bool cudaHookSwitchAleph(astNode *n, nablaJob *job){
+static bool cuHookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
-  //nprintf(nabla, "/*cudaHookSwitchAleph*/","/*cudaHookSwitchAleph*/");
+  //nprintf(nabla, "/*cuHookSwitchAleph*/","/*cuHookSwitchAleph*/");
 
   switch(n->tokenid){
   case(LIB_ALEPH):{
@@ -193,7 +193,7 @@ static bool cudaHookSwitchAleph(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void cudaHookSwitchToken(astNode *n, nablaJob *job){
+void cuHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   const char forall=job->parse.enum_enum;
@@ -202,9 +202,9 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   
   // On tests si c'est un token Aleph
   // Si c'est le cas, on a fini
-  if (cudaHookSwitchAleph(n,job)) return;
+  if (cuHookSwitchAleph(n,job)) return;
 
-  cudaHookSwitchForall(n,job);
+  cuHookSwitchForall(n,job);
   
   // Dump des tokens possibles
   switch(n->tokenid){
@@ -257,18 +257,18 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
   }    
     // On regarde si on hit un appel de fonction
   case(CALL):{
-    dbg("\n\t[cudaHookSwitchToken] CALL?!");
+    dbg("\n\t[cuHookSwitchToken] CALL?!");
     // S'il y a des appels Aleph derrière, on ne déclenche pas la suite
     if (n->next)
       if (n->next->children)
         if (n->next->children->tokenid==LIB_ALEPH) break;
-    dbg("\n\t[cudaHookSwitchToken] JOB_CALL");
+    dbg("\n\t[cuHookSwitchToken] JOB_CALL");
     nablaJob *foundJob;
     nprintf(nabla, "/*JOB_CALL*/", NULL);
     if ( n->next->children->children->token){
-      dbg("\n\t[cudaHookSwitchToken] JOB_CALL next children children");
+      dbg("\n\t[cuHookSwitchToken] JOB_CALL next children children");
       if (n->next->children->children->token){
-        dbg("\n\t[cudaHookSwitchToken] JOB_CALL next children children token");
+        dbg("\n\t[cuHookSwitchToken] JOB_CALL next children children token");
         char *callName=n->next->children->children->token;
         nprintf(nabla, "/*got_call*/", NULL);
         if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
@@ -282,7 +282,7 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
         }
       }
     }
-    dbg("\n\t[cudaHookSwitchToken] JOB_CALL done");
+    dbg("\n\t[cuHookSwitchToken] JOB_CALL done");
     break;
   }
   case(END_OF_CALL):{
@@ -312,11 +312,11 @@ void cudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/","{\n\t\t\t");
-    nprintf(nabla, "/*cudaGather*/", "%s",cudaHookFilterGather(job));
+    nprintf(nabla, "/*cudaGather*/", "%s",cuHookFilterGather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*cudaScatter*/", "%s",cudaHookFilterScatter(job));
+    nprintf(nabla, "/*cudaScatter*/", "%s",cuHookFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/","\n\t\t}\n\t");
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* cudaGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration) return "";
   // Phase function call
@@ -70,7 +70,7 @@ gather%sk(cell_node[n*NABLA_NB_CELLS+tcid],\n\t\t\t\
 // ****************************************************************************
 // * Gather for Nodes
 // ****************************************************************************
-static char* cudaGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration) return "";
   // Phase function call
@@ -100,7 +100,7 @@ gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
 // ****************************************************************************
 // * Gather for Faces
 // ****************************************************************************
-static char* cudaGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase){
   // Phase de déclaration
   if (phase==enum_phase_declaration) return "";
   // Phase function call
@@ -124,11 +124,11 @@ static char* cudaGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* cudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* cuHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return cudaGatherCells(job,var,phase);
-  if (itm=='n') return cudaGatherNodes(job,var,phase);
-  if (itm=='f') return cudaGatherFaces(job,var,phase);
+  if (itm=='c') return cuGatherCells(job,var,phase);
+  if (itm=='n') return cuGatherNodes(job,var,phase);
+  if (itm=='f') return cuGatherFaces(job,var,phase);
   nablaError("Could not distinguish job item inGather!");
   return NULL;
 }
@@ -142,7 +142,7 @@ char* cudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* cudaHookFilterGather(nablaJob *job){
+char* cuHookFilterGather(nablaJob *job){
   int i;
   char gathers[1024];
   nablaVariable *var;
@@ -156,7 +156,7 @@ char* cudaHookFilterGather(nablaJob *job){
   if (job->parse.selection_statement_in_compound_statement){
     //nprintf(job->entity->main,
     //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!cudaGather*/");
+    //"/*if=>!cuGather*/");
     //return "";
   }
   
@@ -170,8 +170,8 @@ char* cudaHookFilterGather(nablaJob *job){
 
   // On filtre suivant s'il y a des forall
   for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// cudaGather enum_enum=%c", job->parse.enum_enum);
+    //nprintf(job->entity->main, NULL, "\n\t\t// cuGather on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// cuGather enum_enum=%c", job->parse.enum_enum);
     if (job->parse.enum_enum=='\0') continue;
     filteredNbToGather+=1;
   }

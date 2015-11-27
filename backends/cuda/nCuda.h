@@ -43,127 +43,99 @@
 #ifndef _NABLA_CUDA_H_
 #define _NABLA_CUDA_H_
 
-void cudaHookSourceOpen(nablaMain *nabla);
-void cudaHookSourceInclude(nablaMain *nabla);
+void cuHookSourceOpen(nablaMain *nabla);
+void cuHookSourceInclude(nablaMain *nabla);
 
-char *cudaHookBits(void);
-char* cudaHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* cudaHookScatter(nablaVariable*);
+char *cuHookBits(void);
+char* cuHookGather(nablaJob*,nablaVariable*,enum_phase);
+char* cuHookScatter(nablaVariable*);
 
-char* cudaHookSysPrefix(void);
-char* cudaHookSysPostfix(void);
-char* cudaHookPrevCell(void);
-char* cudaHookNextCell(void);
+char* cuHookSysPrefix(void);
+char* cuHookSysPostfix(void);
+char* cuHookPrevCell(void);
+char* cuHookNextCell(void);
 
-char* cudaHookIncludes(void);
+char* cuHookIncludes(void);
 
-char* cudaHookFilterGather(nablaJob*);
-char* cudaHookFilterScatter(nablaJob*);
+char* cuHookFilterGather(nablaJob*);
+char* cuHookFilterScatter(nablaJob*);
 
-void cudaHookReduction(struct nablaMainStruct*,astNode*);
-void cudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-//void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
-void cudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+void cuHookReduction(struct nablaMainStruct*,astNode*);
+void cuHookAddArguments(struct nablaMainStruct*,nablaJob*);
+void cuHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
-char *cudaHookPragmaGccIvdep(void);
-char *cudaHookPragmaGccAlign(void);
+char* cuHookPragmaGccIvdep(void);
+char* cuHookPragmaGccAlign(void);
 
 // Hooks: Header
-void cudaHookHeaderDump(nablaMain*);
-void cudaHookHeaderOpen(nablaMain*);
-void cudaHookHeaderEnumerates(nablaMain*);
-void cudaHookHeaderPrefix(nablaMain*);
-void cudaHookHeaderPostfix(nablaMain*);
-void cudaHookHeaderIncludes(nablaMain*);
+void cuHookHeaderDump(nablaMain*);
+void cuHookHeaderOpen(nablaMain*);
+void cuHookHeaderEnumerates(nablaMain*);
+void cuHookHeaderPrefix(nablaMain*);
+void cuHookHeaderPostfix(nablaMain*);
+void cuHookHeaderIncludes(nablaMain*);
 
 // Dump into Header & Source
-//void nLambdaDumpSource(nablaMain*);
-void cudaHeaderTypes(nablaMain*);
-void cudaHeaderReal3(nablaMain*);
-void cudaHeaderExtra(nablaMain*);
-void cudaHeaderMesh(nablaMain*);
-void cudaHeaderHandleErrors(nablaMain*);
-void cudaHeaderDebug(nablaMain*);
-void cudaHeaderItems(nablaMain*);
-//void nLambdaDumpMesh(nablaMain*);
+void cuHeaderTypes(nablaMain*);
+void cuHeaderReal3(nablaMain*);
+void cuHeaderExtra(nablaMain*);
+void cuHeaderMesh(nablaMain*);
+void cuHeaderHandleErrors(nablaMain*);
+void cuHeaderDebug(nablaMain*);
+void cuHeaderItems(nablaMain*);
 
-NABLA_STATUS cudaHookMainPrefix(nablaMain*);
-NABLA_STATUS cudaHookMainPreInit(nablaMain*);
-NABLA_STATUS cudaHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS cudaHookMainVarInitCall(nablaMain*);
-NABLA_STATUS cudaHookMainCore(nablaMain*);
-NABLA_STATUS cudaHookMainPostInit(nablaMain*);
-NABLA_STATUS cudaHookMainPostfix(nablaMain*);
+NABLA_STATUS cuHookMainPrefix(nablaMain*);
+NABLA_STATUS cuHookMainPreInit(nablaMain*);
+NABLA_STATUS cuHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS cuHookMainVarInitCall(nablaMain*);
+NABLA_STATUS cuHookMainCore(nablaMain*);
+NABLA_STATUS cuHookMainPostInit(nablaMain*);
+NABLA_STATUS cuHookMainPostfix(nablaMain*);
 
-void cudaHookVariablesInit(nablaMain*);
-void cudaHookVariablesPrefix(nablaMain*);
-void cudaHookVariablesPostfix(nablaMain*);
-void cudaHookVariablesMalloc(nablaMain*);
-void cudaHookVariablesFree(nablaMain*);
+void cuHookVariablesInit(nablaMain*);
+void cuHookVariablesPrefix(nablaMain*);
+void cuHookVariablesPostfix(nablaMain*);
+void cuHookVariablesMalloc(nablaMain*);
+void cuHookVariablesFree(nablaMain*);
 
-void cudaHookMeshPrefix(nablaMain*);
-void cudaHookMeshCore(nablaMain*);
-void cudaHookMeshPostfix(nablaMain*);
-void cudaHookMeshConnectivity(nablaMain*);
+void cuHookMeshPrefix(nablaMain*);
+void cuHookMeshCore(nablaMain*);
+void cuHookMeshPostfix(nablaMain*);
+void cuHookMeshConnectivity(nablaMain*);
 
-void cudaHookIteration(struct nablaMainStruct*);
-void cudaHookExit(struct nablaMainStruct*,nablaJob*);
-void cudaHookTime(struct nablaMainStruct*);
-void cudaHookFatal(struct nablaMainStruct*);
-void cudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-//bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
-char* cudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void cudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+void cuHookIteration(struct nablaMainStruct*);
+void cuHookExit(struct nablaMainStruct*,nablaJob*);
+void cuHookTime(struct nablaMainStruct*);
+void cuHookFatal(struct nablaMainStruct*);
+void cuHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+char* cuHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
+void cuHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
 
-void cudaHookFunctionName(nablaMain*);
-void cudaHookFunction(nablaMain*,astNode*);
-void cudaHookJob(nablaMain*,astNode*);
-void cudaHookLibraries(astNode*,nablaEntity*);
+void cuHookFunctionName(nablaMain*);
+void cuHookFunction(nablaMain*,astNode*);
+void cuHookJob(nablaMain*,astNode*);
+void cuHookLibraries(astNode*,nablaEntity*);
 
-char* cudaHookForAllPrefix(nablaJob*);
-char* cudaHookForAllDumpXYZ(nablaJob*);
-char* cudaHookForAllDump(nablaJob*);
-char* cudaHookForAllPostfix(nablaJob*);
-char* cudaHookForAllItem(nablaJob*,const char,const char,char);
+char* cuHookForAllPrefix(nablaJob*);
+char* cuHookForAllDumpXYZ(nablaJob*);
+char* cuHookForAllDump(nablaJob*);
+char* cuHookForAllPostfix(nablaJob*);
+char* cuHookForAllItem(nablaJob*,const char,const char,char);
 
-char* cudaHookTokenPrefix(nablaMain*);
-char* cudaHookTokenPostfix(nablaMain*);
+char* cuHookTokenPrefix(nablaMain*);
+char* cuHookTokenPostfix(nablaMain*);
 
-void cudaHookSwitchToken(astNode*,nablaJob*);
-nablaVariable *cudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void cudaHookSystem(astNode*,nablaMain*,const char,char);
-void cudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void cudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void cudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+void cuHookSwitchToken(astNode*,nablaJob*);
+nablaVariable *cuHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void cuHookSystem(astNode*,nablaMain*,const char,char);
+void cuHookAddExtraParameters(nablaMain*, nablaJob*, int*);
+void cuHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
+void cuHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
-//void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
-//void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
+void cuHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
+void cuHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
-void cudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-
-void cudaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
-
-
-/*
-void cudaInlines(nablaMain*);
-void cudaDefineEnumerates(nablaMain*);
-void cudaVariablesPrefix(nablaMain*);
-void cudaVariablesPostfix(nablaMain*);
-
-void cudaMesh(nablaMain*);
-void cudaMeshConnectivity(nablaMain*);
-void nccCudaMainMeshConnectivity(nablaMain*);
-void nccCudaMainMeshPrefix(nablaMain*);
-void nccCudaMainMeshPostfix(nablaMain*);
-
-// Pour dumper les arguments necessaire dans le main
-void cudaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void cudaAddExtraArguments(nablaMain*, nablaJob*,int*);
-void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
-void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
-*/
-
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
+void cuDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
 nHooks *cuda(nablaMain*, const astNode*);
 

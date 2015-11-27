@@ -44,7 +44,7 @@
 #include "nabla.tab.h"
 
 
-void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
   int fakeNumParams=0;
   const astNode *item_node = n->children->next->children;
   const astNode *global_var_node = n->children->next->next;
@@ -85,7 +85,7 @@ void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
   nMiddleStoreWhen(redjob,nabla,NULL);
   assert(redjob->when_index>0);
-  dbg("\n\t[cudaHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+  dbg("\n\t[cuHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
 
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
@@ -96,7 +96,7 @@ void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 __global__ void %s(", item_var_name, global_var_name, job_name);
-  cudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
+  cuHookAddExtraParameters(nabla,redjob,&fakeNumParams);
   nprintf(nabla, NULL,",real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(tcid);\n\

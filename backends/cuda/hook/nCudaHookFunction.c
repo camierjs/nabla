@@ -43,27 +43,27 @@
 #include "nabla.h"
 
 
-void cudaHookIteration(struct nablaMainStruct *nabla){
+void cuHookIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "cuda_iteration()");
 }
 
 
-void cudaHookExit(struct nablaMainStruct *nabla,nablaJob *job){
+void cuHookExit(struct nablaMainStruct *nabla,nablaJob *job){
   nprintf(nabla, "/*EXIT*/", "cudaExit(global_deltat)");
 }
 
 
-void cudaHookTime(struct nablaMainStruct *nabla){
+void cuHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "*global_time");
 }
 
 
-void cudaHookFatal(struct nablaMainStruct *nabla){
+void cuHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
 
 
-void cudaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
+void cuHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
@@ -81,7 +81,7 @@ void cudaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n
 }
 
 
-void cudaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
+void cuHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
   // En Cuda, par contre il faut les y mettre
   if (fct->parse.function_call_name!=NULL){
     nprintf(nabla, "/*ShouldDumpParamsIcuda*/", "/*cudaAddArguments*/");
@@ -95,12 +95,12 @@ void cudaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
 }
 
 
-void cudaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+void cuHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o cuda*/", "%s", opt->name);
 }
 
 
-char* cudaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
+char* cuHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
   if (entry_point->is_an_entry_point) return "__global__";
   return "__device__ inline";
 }
@@ -108,7 +108,7 @@ char* cudaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_po
 /***************************************************************************** 
  * 
  *****************************************************************************/
-void cudaHookDfsForCalls(struct nablaMainStruct *nabla,
+void cuHookDfsForCalls(struct nablaMainStruct *nabla,
                          nablaJob *fct, astNode *n,
                          const char *namespace,
                          astNode *nParams){
@@ -119,7 +119,7 @@ void cudaHookDfsForCalls(struct nablaMainStruct *nabla,
 /*****************************************************************************
  * Hook pour dumper le nom de la fonction
  *****************************************************************************/
-void cudaHookFunctionName(nablaMain *arc){
+void cuHookFunctionName(nablaMain *arc){
   //nprintf(arc, NULL, "%sEntity::", arc->name);
 }
 
@@ -127,7 +127,7 @@ void cudaHookFunctionName(nablaMain *arc){
 /*****************************************************************************
  * Génération d'un kernel associé à une fonction
  *****************************************************************************/
-void cudaHookFunction(nablaMain *nabla, astNode *n){
+void cuHookFunction(nablaMain *nabla, astNode *n){
   nablaJob *fct=nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, fct);
   nMiddleFunctionFill(nabla,fct,n,NULL);

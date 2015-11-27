@@ -42,15 +42,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char *cudaHookBits(void){return "Not relevant here";}
-char* cudaHookIncludes(void){return "";}
+char *cuHookBits(void){return "Not relevant here";}
+char* cuHookIncludes(void){return "";}
 
 
 // ****************************************************************************
 // * cudaPragmas
 // ****************************************************************************
-char *cudaHookPragmaGccIvdep(void){ return ""; }
-char *cudaHookPragmaGccAlign(void){ return "__align__(8)"; }
+char *cuHookPragmaGccIvdep(void){ return ""; }
+char *cuHookPragmaGccAlign(void){ return "__align__(8)"; }
 
 
 
@@ -58,20 +58,20 @@ char *cudaHookPragmaGccAlign(void){ return "__align__(8)"; }
 /*****************************************************************************
  * Génération d'un kernel associé à un support
  *****************************************************************************/
-void cudaHookJob(nablaMain *nabla, astNode *n){
+void cuHookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,NULL);
   // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
   if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
-    exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookJob] Error with return type which is not void\n"));
+    exit(NABLA_ERROR|fprintf(stderr, "\n[cuHookJob] Error with return type which is not void\n"));
 }
 
 
 /*****************************************************************************
  * Cuda libraries
  *****************************************************************************/
-void cudaHookLibraries(astNode * n, nablaEntity *entity){
+void cuHookLibraries(astNode * n, nablaEntity *entity){
   fprintf(entity->src, "\n/*lib %s*/",n->children->token);
 }
 

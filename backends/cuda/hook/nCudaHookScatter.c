@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* cudaHookScatter(nablaVariable* var){
+char* cuHookScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
@@ -70,7 +70,7 @@ static void cudaFlushRealVariable(nablaJob *job, nablaVariable *var){
 // ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
-char* cudaHookFilterScatter(nablaJob *job){
+char* cuHookFilterScatter(nablaJob *job){
   int i;
   char scatters[1024];
   nablaVariable *var;

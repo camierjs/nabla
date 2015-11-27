@@ -65,31 +65,31 @@ extern char items_h[];
 // ***************************************************************************** 
 // * 
 // *****************************************************************************
-void cudaHeaderItems(nablaMain *nabla){
+void cuHeaderItems(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(items_h));
 }
 
-void cudaHeaderReal3(nablaMain *nabla){
+void cuHeaderReal3(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(real3_h));
 }
 
-void cudaHeaderExtra(nablaMain *nabla){
+void cuHeaderExtra(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(extra_h));
 }
 
-void cudaHeaderMesh(nablaMain *nabla){
+void cuHeaderMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(meshs_h));
 }
 
-void cudaHeaderHandleErrors(nablaMain *nabla){
+void cuHeaderHandleErrors(nablaMain *nabla){
   fprintf(nabla->entity->hdr,dumpExternalFile(error_h));
 }
 
-__attribute__((unused)) void cudaHeaderDebug(nablaMain *nabla){
+__attribute__((unused)) void cuHeaderDebug(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
   hprintf(nabla,NULL,"\n\n\
