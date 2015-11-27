@@ -165,7 +165,7 @@ void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
 
 void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
-nHooks *cuda(nablaMain*, astNode*);
+nHooks *cuda(nablaMain*, const astNode*);
 
 #endif // _NABLA_CUDA_H_
  

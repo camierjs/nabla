@@ -277,7 +277,7 @@ static nHooks nLambdaHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-nHooks *lambda(nablaMain *nabla){
+nHooks* lambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     nLambdaCalls.parallel=&lambdaCilkCalls;
   

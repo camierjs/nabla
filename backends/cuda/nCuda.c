@@ -211,74 +211,20 @@ static nHooks cudaHooks={
   &cudaHookToken,
   &cudaHookGrammar,
   &cudaHookCall,
-  &cudaXyzHooks, // xyz
-  &cudaPragmaGCCHooks, // pragma
-  &cudaHookHeader, // source
+  &cudaXyzHooks,
+  &cudaPragmaGCCHooks,
+  &cudaHookHeader,
   &cudaHookSource,
-  &cudaHookMesh, // mesh
-  &cudaHookVars, // vars
-  &cudaHookMain // main
+  &cudaHookMesh,
+  &cudaHookVars,
+  &cudaHookMain
 };
 
 
 // ****************************************************************************
 // * nccCuda
 // ****************************************************************************
-nHooks *cuda(nablaMain *nabla, astNode *root){
+nHooks *cuda(nablaMain *nabla, const astNode *root){
   nabla->call=&cudaCalls;
   return &cudaHooks;
 }
-
-
-/*
-  // Dump des includes dans le header file, puis des typedefs, defines, debug & errors stuff
-  cudaHeaderPrefix(nabla);
-  cudaHeaderIncludes(nabla);
-  nMiddleTypedefs(nabla,cudaHookTypedef);
-  cudaHeaderHandleErrors(nabla);
-  nMiddleDefines(nabla,cudaHookDefines);
-  nMiddleForwards(nabla,cudaHookForwards);
-  cudaDefineEnumerates(nabla);
-   
-  // Génération du maillage
-  cudaMesh(nabla);
-  cudaMeshConnectivity(nabla);
-
-  // Rajout de la classe Real3 et des extras
-  cudaHeaderDebug(nabla);
-  cudaHeaderReal3(nabla);
-  cudaHeaderExtra(nabla);
-  cudaHeaderMesh(nabla);
-  cudaHeaderItems(nabla);
-
-  // Dump dans le fichier source
-  cudaInlines(nabla);
-  nccCudaMainMeshConnectivity(nabla);
-  
-  // Parse du code préprocessé et lance les hooks associés
-  nMiddleGrammar(root,nabla);
-  nccCudaMainVarInitKernel(nabla);
-
-  // Partie PREFIX
-  nccCudaMainPrefix(nabla);
-  cudaVariablesPrefix(nabla);
-  nccCudaMainMeshPrefix(nabla);
-  
-  // Partie Pré Init
-  nccCudaMainPreInit(nabla);
-  nccCudaMainVarInitCall(nabla);
-      
-  // Dump des entry points dans le main
-  nccCudaMain(nabla);
-
-  // Partie Post Init
-  nccCudaMainPostInit(nabla);
-  
-  // Partie POSTFIX
-  cudaHeaderPostfix(nabla); 
-  nccCudaMainMeshPostfix(nabla);
-  cudaVariablesPostfix(nabla);
-  nccCudaMainPostfix(nabla);
-  return NABLA_OK;
-}
-*/
