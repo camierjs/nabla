@@ -41,5 +41,33 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
+
+
+// ****************************************************************************
+// * Rajout des variables globales utiles aux mots clefs systèmes
+// * On rajoute en dur les variables time, deltat, coord
+// ****************************************************************************
+void middleGlobals(nablaMain *nabla){
+  dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding global deltat, time");
+  nablaVariable *deltat = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, deltat);
+  deltat->axl_it=false;
+  deltat->item=strdup("global");
+  deltat->type=strdup("real");
+  deltat->name=strdup("deltat");
+  nablaVariable *time = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, time);
+  time->axl_it=false;
+  time->item=strdup("global");
+  time->type=strdup("real");
+  time->name=strdup("time");
+  dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
+  nablaVariable *coord = nMiddleVariableNew(nabla);
+  nMiddleVariableAdd(nabla, coord);
+  coord->axl_it=true;
+  coord->item=strdup("node");
+  coord->type=strdup("real3");
+  coord->name=strdup("coord");
+  coord->field_name=strdup("NodeCoord");
+}
 
