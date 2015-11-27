@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
-const nWhatWith nCudaHeaderTypedef[]={
+const nWhatWith cudaHeaderTypedef[]={
   {"int","integer"},
   {"struct real3","Real3"},
   {"struct real3x3","Real3x3"},
@@ -57,7 +57,7 @@ const nWhatWith nCudaHeaderTypedef[]={
 // ****************************************************************************
 // * CUDA DEFINES
 // ****************************************************************************
-const nWhatWith nCudaHeaderDefines[]={
+const nWhatWith cudaHeaderDefines[]={
   {"Real3","real3"},
   {"Real","real"},
   {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
@@ -84,149 +84,149 @@ const nWhatWith nCudaHeaderDefines[]={
   {NULL,NULL}
 };
 
-const char* nCudaHeaderForwards[]={
+const char* cudaHeaderForwards[]={
   "void gpuEnum(void);",
   NULL
 };
 
 
-const nFwdDefTypes nCudaHeader={
-  nCudaHeaderForwards,
-  nCudaHeaderDefines,
-  nCudaHeaderTypedef
+const nFwdDefTypes cudaHeader={
+  cudaHeaderForwards,
+  cudaHeaderDefines,
+  cudaHeaderTypedef
 };
 
-const static nCallSimd nCudaSimdCalls={
-  nCudaHookBits,
-  nCudaHookGather,
-  nCudaHookScatter,
-  nCudaHookIncludes
+const static nCallSimd cudaSimdCalls={
+  cudaHookBits,
+  cudaHookGather,
+  cudaHookScatter,
+  cudaHookIncludes
 };
 
-nCalls nCudaCalls={
-  NULL, // header
-  &nCudaSimdCalls, // simd
+nCalls cudaCalls={
+  &cudaHeader, // header
+  &cudaSimdCalls, // simd
   NULL, // parallel
 };
 
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-const nHookXyz nCudaXyzHooks={
-  nCudaHookSysPrefix,
-  nCudaHookPrevCell,
-  nCudaHookNextCell,
-  nCudaHookSysPostfix
+const nHookXyz cudaXyzHooks={
+  cudaHookSysPrefix,
+  cudaHookPrevCell,
+  cudaHookNextCell,
+  cudaHookSysPostfix
 };
 
 const static nHookPragma cudaPragmaGCCHooks={
-  nCudaHookPragmaGccAlign
+  cudaHookPragmaGccAlign
 };
 
-const static nHookHeader nCudaHookHeader={
-  nCudaHookHeaderDump,
-  nCudaHookHeaderOpen,
-  nCudaHookDefineEnumerates,
-  nCudaHookHeaderPrefix,
-  nCudaHookHeaderIncludes,
-  nCudaHookHeaderPostfix
+const static nHookHeader cudaHookHeader={
+  cudaHookHeaderDump,
+  cudaHookHeaderOpen,
+  cudaHookHeaderEnumerates,
+  cudaHookHeaderPrefix,
+  cudaHookHeaderIncludes,
+  cudaHookHeaderPostfix
 };
 
 // Hooks pour le source
-const static nHookSource nCudaHookSource={
-  nCudaHookSourceOpen,
-  nCudaHookSourceInclude
+const static nHookSource cudaHookSource={
+  cudaHookSourceOpen,
+  cudaHookSourceInclude
 };
   
 // Hooks pour le maillage
-const static nHookMesh nCudaHookMesh={
-  nCudaHookMeshPrefix,
-  nCudaHookMeshCore,
-  nCudaHookMeshPostfix
+const static nHookMesh cudaHookMesh={
+  cudaHookMeshPrefix,
+  cudaHookMeshCore,
+  cudaHookMeshPostfix
 };
   
 // Hooks pour les variables
-const static nHookVars nCudaHookVars={
-  nCudaHookVariablesInit,
-  nCudaHookVariablesPrefix,
-  nCudaHookVariablesMalloc,
-  nCudaHookVariablesFree
+const static nHookVars cudaHookVars={
+  cudaHookVariablesInit,
+  cudaHookVariablesPrefix,
+  cudaHookVariablesMalloc,
+  cudaHookVariablesFree
 };  
 
 // Hooks pour le main
-const static nHookMain nCudaHookMain={
-  nCudaHookMainPrefix,
-  nCudaHookMainPreInit,
-  nCudaHookMainVarInitKernel,
-  nCudaHookMainVarInitCall,
-  nCudaHookMainCore,
-  nCudaHookMainPostInit,
-  nCudaHookMainPostfix
+const static nHookMain cudaHookMain={
+  cudaHookMainPrefix,
+  cudaHookMainPreInit,
+  cudaHookMainVarInitKernel,
+  cudaHookMainVarInitCall,
+  cudaHookMainCore,
+  cudaHookMainPostInit,
+  cudaHookMainPostfix
 };  
 
   
-const static nHookForAll nCudaHookForAll={
-  nCudaHookPrefixEnumerate,
-  nCudaHookDumpEnumerate,
-  nCudaHookItem,
-  nCudaHookPostfixEnumerate
+const static nHookForAll cudaHookForAll={
+  cudaHookForAllPrefix,
+  cudaHookForAllDump,
+  cudaHookForAllItem,
+  cudaHookForAllPostfix
 };
 
-const static nHookToken nCudaHookToken={
-  nCudaHookTokenPrefix, // prefix
-  nCudaHookSwitchToken, // svvitch
-  nCudaHookTurnTokenToVariable, // variable
-  nCudaHookTurnTokenToOption, // option
-  nCudaHookSystem, // system
-  nCudaHookIteration,
-  nCudaHookExit,
-  nCudaHookTime,
-  nCudaHookFatal,
-  nCudaHookTurnBracketsToParentheses,
+const static nHookToken cudaHookToken={
+  cudaHookTokenPrefix, // prefix
+  cudaHookSwitchToken, // svvitch
+  cudaHookTurnTokenToVariable, // variable
+  cudaHookTurnTokenToOption, // option
+  cudaHookSystem, // system
+  cudaHookIteration,
+  cudaHookExit,
+  cudaHookTime,
+  cudaHookFatal,
+  cudaHookTurnBracketsToParentheses,
   cudaHookIsTest,
-  nCudaHookTokenPostfix
+  cudaHookTokenPostfix
 };
 
-const static nHookGrammar nCudaHookGrammar={
-  nCudaHookFunction,
-  nCudaHookJob,
-  nCudaHookReduction,
+const static nHookGrammar cudaHookGrammar={
+  cudaHookFunction,
+  cudaHookJob,
+  cudaHookReduction,
   NULL, // primary_expression_to_return
   NULL // returnFromArgument
 };
   
   
-const static nHookCall nCudaHookCall={
-  nCudaHookAddCallNames,
-  nCudaHookAddArguments,
-  nCudaHookEntryPointPrefix,
-  nCudaHookDfsForCalls,
-  nCudaHookAddExtraParameters,
-  nCudaHookDumpNablaParameterList
+const static nHookCall cudaHookCall={
+  cudaHookAddCallNames,
+  cudaHookAddArguments,
+  cudaHookEntryPointPrefix,
+  cudaHookDfsForCalls,
+  cudaHookAddExtraParameters,
+  cudaHookDumpNablaParameterList
 };
 
 
-static nHooks nCudaHooks={
-  &nCudaHookForAll,
-  &nCudaHookToken,
-  &nCudaHookGrammar,
-  &nCudaHookCall,
-  &nCudaXyzHooks, // xyz
+static nHooks cudaHooks={
+  &cudaHookForAll,
+  &cudaHookToken,
+  &cudaHookGrammar,
+  &cudaHookCall,
+  &cudaXyzHooks, // xyz
   &cudaPragmaGCCHooks, // pragma
-  &nCudaHookHeader, // source
-  &nCudaHookSource,
-  &nCudaHookMesh, // mesh
-  &nCudaHookVars, // vars
-  &nCudaHookMain // main
+  &cudaHookHeader, // source
+  &cudaHookSource,
+  &cudaHookMesh, // mesh
+  &cudaHookVars, // vars
+  &cudaHookMain // main
 };
 
 
 // ****************************************************************************
 // * nccCuda
 // ****************************************************************************
-nHooks *nCuda(nablaMain *nabla, astNode *root){
-  nabla->call=&nCudaCalls;
-  return &nCudaHooks;
+nHooks *cuda(nablaMain *nabla, astNode *root){
+  nabla->call=&cudaCalls;
+  return &cudaHooks;
 }
 
 
@@ -234,10 +234,10 @@ nHooks *nCuda(nablaMain *nabla, astNode *root){
   // Dump des includes dans le header file, puis des typedefs, defines, debug & errors stuff
   cudaHeaderPrefix(nabla);
   cudaHeaderIncludes(nabla);
-  nMiddleTypedefs(nabla,nCudaHookTypedef);
+  nMiddleTypedefs(nabla,cudaHookTypedef);
   cudaHeaderHandleErrors(nabla);
-  nMiddleDefines(nabla,nCudaHookDefines);
-  nMiddleForwards(nabla,nCudaHookForwards);
+  nMiddleDefines(nabla,cudaHookDefines);
+  nMiddleForwards(nabla,cudaHookForwards);
   cudaDefineEnumerates(nabla);
    
   // Génération du maillage
@@ -252,7 +252,7 @@ nHooks *nCuda(nablaMain *nabla, astNode *root){
   cudaHeaderItems(nabla);
 
   // Dump dans le fichier source
-  nCudaInlines(nabla);
+  cudaInlines(nabla);
   nccCudaMainMeshConnectivity(nabla);
   
   // Parse du code préprocessé et lance les hooks associés

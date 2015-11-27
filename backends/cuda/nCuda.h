@@ -43,65 +43,112 @@
 #ifndef _NABLA_CUDA_H_
 #define _NABLA_CUDA_H_
 
-char *nCudaHookBits(void);
-char* nCudaHookGather(nablaJob*,nablaVariable*,enum_phase);
-char* nCudaHookScatter(nablaVariable*);
-char* nCudaHookSysPrefix(void);
-char* nCudaHookSysPostfix(void);
-char* nCudaHookPrevCell(void);
-char* nCudaHookNextCell(void);
-char* nCudaHookIncludes(void);
+void cudaHookSourceOpen(nablaMain *nabla);
+void cudaHookSourceInclude(nablaMain *nabla);
 
-extern const nWhatWith nCudaHookTypedef[];
-extern const nWhatWith nCudaHookDefines[];
-extern const char* nCudaHookForwards[];
+char *cudaHookBits(void);
+char* cudaHookGather(nablaJob*,nablaVariable*,enum_phase);
+char* cudaHookScatter(nablaVariable*);
 
+char* cudaHookSysPrefix(void);
+char* cudaHookSysPostfix(void);
+char* cudaHookPrevCell(void);
+char* cudaHookNextCell(void);
 
-void nCudaHookHeaderDump(nablaMain *nabla);
-void nCudaHookHeaderOpen(nablaMain *nabla);
-void nCudaHookHeaderIncludes(nablaMain *nabla);
-void nCudaHookHeaderPrefix(nablaMain *nabla);
-void nCudaHookDefineEnumerates(nablaMain *nabla);
-void nCudaHookHeaderPostfix(nablaMain *nabla);
+char* cudaHookIncludes(void);
 
-void nCudaHookSourceOpen(nablaMain *nabla);
-void nCudaHookSourceInclude(nablaMain *nabla);
+char* cudaHookFilterGather(nablaJob*);
+char* cudaHookFilterScatter(nablaJob*);
 
-void nCudaHookMeshPrefix(nablaMain *nabla);
-void nCudaHookMeshCore(nablaMain *nabla);
-void nCudaHookMeshPostfix(nablaMain *nabla);
+void cudaHookReduction(struct nablaMainStruct*,astNode*);
+void cudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
+//void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
+void cudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
-void nCudaHookVariablesInit(nablaMain *nabla);
-void nCudaHookVariablesPrefix(nablaMain *nabla);
-void nCudaHookVariablesPostfix(nablaMain *nabla);
-void nCudaHookVariablesMalloc(nablaMain *nabla);
-void nCudaHookVariablesFree(nablaMain *nabla);
+char *cudaHookPragmaGccIvdep(void);
+char *cudaHookPragmaGccAlign(void);
 
+// Hooks: Header
+void cudaHookHeaderDump(nablaMain*);
+void cudaHookHeaderOpen(nablaMain*);
+void cudaHookHeaderEnumerates(nablaMain*);
+void cudaHookHeaderPrefix(nablaMain*);
+void cudaHookHeaderPostfix(nablaMain*);
+void cudaHookHeaderIncludes(nablaMain*);
 
-NABLA_STATUS nCudaHookMainPrefix(nablaMain*);
-NABLA_STATUS nCudaHookMainPreInit(nablaMain*);
-NABLA_STATUS nCudaHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS nCudaHookMainVarInitCall(nablaMain*);
-NABLA_STATUS nCudaHookMainCore(nablaMain*);
-NABLA_STATUS nCudaHookMainPostInit(nablaMain*);
-NABLA_STATUS nCudaHookMainPostfix(nablaMain*);
-
-
-
-
-
-
-void nCudaInlines(nablaMain*);
-void cudaDefineEnumerates(nablaMain*);
-void cudaVariablesPrefix(nablaMain*);
-void cudaVariablesPostfix(nablaMain*);
-
+// Dump into Header & Source
+//void nLambdaDumpSource(nablaMain*);
+void cudaHeaderTypes(nablaMain*);
 void cudaHeaderReal3(nablaMain*);
 void cudaHeaderExtra(nablaMain*);
 void cudaHeaderMesh(nablaMain*);
 void cudaHeaderHandleErrors(nablaMain*);
 void cudaHeaderDebug(nablaMain*);
 void cudaHeaderItems(nablaMain*);
+//void nLambdaDumpMesh(nablaMain*);
+
+NABLA_STATUS cudaHookMainPrefix(nablaMain*);
+NABLA_STATUS cudaHookMainPreInit(nablaMain*);
+NABLA_STATUS cudaHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS cudaHookMainVarInitCall(nablaMain*);
+NABLA_STATUS cudaHookMainCore(nablaMain*);
+NABLA_STATUS cudaHookMainPostInit(nablaMain*);
+NABLA_STATUS cudaHookMainPostfix(nablaMain*);
+
+void cudaHookVariablesInit(nablaMain*);
+void cudaHookVariablesPrefix(nablaMain*);
+void cudaHookVariablesPostfix(nablaMain*);
+void cudaHookVariablesMalloc(nablaMain*);
+void cudaHookVariablesFree(nablaMain*);
+
+void cudaHookMeshPrefix(nablaMain*);
+void cudaHookMeshCore(nablaMain*);
+void cudaHookMeshPostfix(nablaMain*);
+void cudaHookMeshConnectivity(nablaMain*);
+
+void cudaHookIteration(struct nablaMainStruct*);
+void cudaHookExit(struct nablaMainStruct*,nablaJob*);
+void cudaHookTime(struct nablaMainStruct*);
+void cudaHookFatal(struct nablaMainStruct*);
+void cudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+//bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+char* cudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
+void cudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+
+void cudaHookFunctionName(nablaMain*);
+void cudaHookFunction(nablaMain*,astNode*);
+void cudaHookJob(nablaMain*,astNode*);
+void cudaHookLibraries(astNode*,nablaEntity*);
+
+char* cudaHookForAllPrefix(nablaJob*);
+char* cudaHookForAllDumpXYZ(nablaJob*);
+char* cudaHookForAllDump(nablaJob*);
+char* cudaHookForAllPostfix(nablaJob*);
+char* cudaHookForAllItem(nablaJob*,const char,const char,char);
+
+char* cudaHookTokenPrefix(nablaMain*);
+char* cudaHookTokenPostfix(nablaMain*);
+
+void cudaHookSwitchToken(astNode*,nablaJob*);
+nablaVariable *cudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void cudaHookSystem(astNode*,nablaMain*,const char,char);
+void cudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
+void cudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
+void cudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+
+//void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
+//void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
+
+void cudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
+
+void cudaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
+
+/*
+void cudaInlines(nablaMain*);
+void cudaDefineEnumerates(nablaMain*);
+void cudaVariablesPrefix(nablaMain*);
+void cudaVariablesPostfix(nablaMain*);
 
 void cudaMesh(nablaMain*);
 void cudaMeshConnectivity(nablaMain*);
@@ -109,54 +156,16 @@ void nccCudaMainMeshConnectivity(nablaMain*);
 void nccCudaMainMeshPrefix(nablaMain*);
 void nccCudaMainMeshPostfix(nablaMain*);
 
-void nCudaHookFunctionName(nablaMain*);
-void nCudaHookFunction(nablaMain*,astNode*);
-void nCudaHookJob(nablaMain*,astNode*);
-void nCudaHookLibraries(astNode*,nablaEntity*);
-char* nCudaHookPrefixEnumerate(nablaJob*);
-char* nCudaHookDumpEnumerateXYZ(nablaJob*);
-char* nCudaHookDumpEnumerate(nablaJob*);
-char* nCudaHookPostfixEnumerate(nablaJob*);
-char* nCudaHookItem(nablaJob*,const char,const char,char);
-void nCudaHookSwitchToken(astNode*,nablaJob*);
-nablaVariable *nCudaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void nCudaHookSystem(astNode*,nablaMain*,const char,char);
-void nCudaHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void nCudaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void nCudaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void nCudaHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void nCudaHookReduction(struct nablaMainStruct*,astNode*);
-
-void nCudaHookIteration(struct nablaMainStruct*);
-void nCudaHookExit(struct nablaMainStruct*,nablaJob*);
-void nCudaHookTime(struct nablaMainStruct*);
-void nCudaHookFatal(struct nablaMainStruct*);
-void nCudaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-void nCudaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void nCudaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-char* nCudaHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void nCudaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
-
-char* nCudaHookTokenPrefix(nablaMain*);
-char* nCudaHookTokenPostfix(nablaMain*);
-
-void cudaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
-
-char *nCudaHookPragmaGccIvdep(void);
-char *nCudaHookPragmaGccAlign(void);
-char* cudaGather(nablaJob*);
-char* cudaScatter(nablaJob*);
-
-
 // Pour dumper les arguments necessaire dans le main
 void cudaDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 void cudaAddExtraArguments(nablaMain*, nablaJob*,int*);
-void cudaAddNablaVariableList(nablaMain*,astNode*,nablaVariable**);
 void cudaAddExtraConnectivitiesParameters(nablaMain*,int*);
 void cudaAddExtraConnectivitiesArguments(nablaMain*,int*);
+*/
 
-nHooks *nCuda(nablaMain*, astNode*);
+void cudaDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
+
+nHooks *cuda(nablaMain*, astNode*);
 
 #endif // _NABLA_CUDA_H_
  

@@ -53,7 +53,7 @@ __shared__ double shared_array[CUDA_NB_THREADS_PER_BLOCK];
 // *****************************************************************************
 // * Reduce MIN Kernel
 // *****************************************************************************
-__device__ void reduce_min_kernel(Real  *results, const Real what){
+__device__ void reduce_min_kernel(real  *results, const real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   const unsigned int i = bid*blockDim.x+tid;
@@ -100,7 +100,7 @@ __device__ void reduce_min_kernel(Real  *results, const Real what){
 // *****************************************************************************
 // * Reduce MAX Kernel
 // *****************************************************************************
-__device__ void reduce_max_kernel(Real  *results, const Real what){
+__device__ void reduce_max_kernel(real  *results, const real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   const unsigned int i = bid*blockDim.x+tid;
@@ -145,7 +145,7 @@ __device__ void reduce_max_kernel(Real  *results, const Real what){
 
 
 
-__global__ void blockLevel(Real *results){
+__global__ void blockLevel(real *results){
   //const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   //const unsigned int i = bid*blockDim.x + tid;
@@ -157,6 +157,6 @@ __global__ void blockLevel(Real *results){
 // *****************************************************************************
 // * Pour l'exit, on force le global_deltat à une valeure négative
 // *****************************************************************************
-__device__ void cudaExit(Real *global_deltat){
+__device__ void cudaExit(real *global_deltat){
   *global_deltat=-1.0;
 }

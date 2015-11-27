@@ -46,8 +46,8 @@
 /*****************************************************************************
  * Diffraction
  *****************************************************************************/
-void nCudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
-  // On backup les statements qu'on rencontre pour éventuellement les diffracter (Real3 => _x, _y & _z)
+void cudaHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
+  // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
   // Et on amorce la diffraction
   if ((*n)->ruleid == rulenameToId("expression_statement")
       && (*n)->children->ruleid == rulenameToId("expression")

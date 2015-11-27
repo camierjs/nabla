@@ -44,7 +44,7 @@
 #include "nabla.tab.h"
 
 
-void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
+void cudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   int fakeNumParams=0;
   const astNode *item_node = n->children->next->children;
   const astNode *global_var_node = n->children->next->next;
@@ -96,8 +96,8 @@ void nCudaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 __global__ void %s(", item_var_name, global_var_name, job_name);
-  nCudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
-  nprintf(nabla, NULL,",Real *cell_%s){ // @ %s\n\
+  cudaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
+  nprintf(nabla, NULL,",real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(tcid);\n\
 \t/**global_%s=*/Reduce%sToDouble((double)(cell_%s[tcid]));\n\

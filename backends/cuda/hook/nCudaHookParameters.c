@@ -46,7 +46,7 @@
 /*****************************************************************************
   * Dump dans le src des parametres nabla en in comme en out
  *****************************************************************************/
-void nCudaHookDumpNablaParameterList(nablaMain *nabla,
+void cudaHookDumpNablaParameterList(nablaMain *nabla,
                                     nablaJob *job,
                                     astNode *n,
                                     int *numParams){
@@ -80,21 +80,21 @@ void nCudaHookDumpNablaParameterList(nablaMain *nabla,
     dbg("\n\t\t[cudaHookDumpNablaParameterList] Working with '%s %s':", var->item, var->name);
     
     if (strcmp(var->type, "real3")!=0){
-      dbg("\n\t\t[cudaHookDumpNablaParameterList] Non Real3 variable!\n");
+      dbg("\n\t\t[cudaHookDumpNablaParameterList] Non real3 variable!\n");
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
       }else{
         nprintf(nabla, NULL, ",\n\t\t%s *%s_%s", var->type, var->item, n->children->token);
       }
     }else{
       //dbg("\n\t\t[cudaHookDumpNablaParameterList] Working with '%s':", var->name);
-      //exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable Real3 error\n"));
+      //exit(NABLA_ERROR|fprintf(stderr, "\n[cudaHookDumpNablaParameterList] Variable real3 error\n"));
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
         //nprintf(nabla, NULL, NULL);
         dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found 'node coord', nothing to do!\n");
       }else{
         dbg("\n\t\t\t[cudaHookDumpNablaParameterList] Found %s %s!\n", var->item, n->children->token);
         if (var->dim==0){
-          nprintf(nabla, NULL, ",\n\t\tReal3 *%s_%s", var->item, n->children->token);
+          nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
         }else{
           nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
         }
@@ -117,15 +117,15 @@ void nCudaHookDumpNablaParameterList(nablaMain *nabla,
         nMiddleVariableLast(job->variables_to_gather_scatter)->next=new;
     }
   }
-  if (n->children != NULL) nCudaHookDumpNablaParameterList(nabla, job, n->children, numParams);
-  if (n->next != NULL) nCudaHookDumpNablaParameterList(nabla, job, n->next, numParams);
+  if (n->children != NULL) cudaHookDumpNablaParameterList(nabla, job, n->children, numParams);
+  if (n->next != NULL) cudaHookDumpNablaParameterList(nabla, job, n->next, numParams);
 }
 
 
 // ****************************************************************************
 // * Dump d'extra paramètres
 // ****************************************************************************
-void nCudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
+void cudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
   nablaVariable *var;
   if (*numParams!=0) nprintf(nabla, NULL, ",");
   nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
@@ -136,7 +136,7 @@ void nCudaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams
     if (strcmp(var->item, "global")!=0) continue;
     nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
             //(*numParams!=0)?",":"", 
-            (var->type[0]=='r')?"Real":(var->type[0]=='i')?"int":"/*Unknown type*/",
+            (var->type[0]=='r')?"real":(var->type[0]=='i')?"int":"/*Unknown type*/",
             var->name);
     *numParams+=1;
   }

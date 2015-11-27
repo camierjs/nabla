@@ -47,7 +47,7 @@
 /*****************************************************************************
  * Fonction prefix à l'ENUMERATE_*
  *****************************************************************************/
-char* nCudaHookPrefixEnumerate(nablaJob *job){
+char* cudaHookForAllPrefix(nablaJob *job){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   const char rgn=(job->region!=NULL)?job->region[0]:0;  // INNER, OUTER
   //if (j->xyz==NULL) return "// void ENUMERATE prefix";
@@ -56,7 +56,7 @@ char* nCudaHookPrefixEnumerate(nablaJob *job){
   if (itm=='f'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_FACE_THREAD(tfid);";
   if (itm=='f'  && rgn=='i' && strcmp(job->return_type,"void")==0) return "CUDA_INI_INNER_FACE_THREAD(tfid);";
   if (itm=='f'  && rgn=='o' && strcmp(job->return_type,"void")==0) return "CUDA_INI_OUTER_FACE_THREAD(tfid);";
-  if (itm=='c'  && strcmp(job->return_type,"Real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
+  if (itm=='c'  && strcmp(job->return_type,"real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
   if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
   if (itm=='\0' && job->is_an_entry_point
       && job->called_variables!=NULL) return "CUDA_LAUNCHER_FUNCTION_THREAD(tid);";
@@ -72,7 +72,7 @@ char* nCudaHookPrefixEnumerate(nablaJob *job){
 /*****************************************************************************
  * Fonction produisant l'ENUMERATE_* avec XYZ
  *****************************************************************************/
-char* nCudaHookDumpEnumerateXYZ(nablaJob *job){
+char* cudaHookForAllDumpXYZ(nablaJob *job){
   char *xyz=job->xyz;// Direction
   nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->direction);
   return "// cudaHookDumpEnumerateXYZ has xyz direction";
@@ -82,13 +82,13 @@ char* nCudaHookDumpEnumerateXYZ(nablaJob *job){
 /*****************************************************************************
  * Fonction produisant l'ENUMERATE_*
  *****************************************************************************/
-char* nCudaHookDumpEnumerate(nablaJob *job){
-  //nprintf(job->entity->main, NULL, "/*nCudaHookDumpEnumerate*/");
-  //dbg("\n\t\t[nCudaHookDumpEnumerate]\n"); fflush(stdout);
+char* cudaHookForAllDump(nablaJob *job){
+  //nprintf(job->entity->main, NULL, "/*cudaHookDumpEnumerate*/");
+  //dbg("\n\t\t[cudaHookDumpEnumerate]\n"); fflush(stdout);
   char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //dbg("\n\t\t[nCudaHookDumpEnumerate] itm=%c", itm);
+  //dbg("\n\t\t[cudaHookDumpEnumerate] itm=%c", itm);
   //if (job->xyz!=NULL) return cudaHookDumpEnumerateXYZ(job);
   if (itm=='\0') return "// function cudaHookDumpEnumerate\n";
   
@@ -120,10 +120,24 @@ char* nCudaHookDumpEnumerate(nablaJob *job){
 }
 
 
+// **************************************************************************** 
+// * Traitement des tokens NABLA ITEMS
+// ****************************************************************************
+char* cudaHookForAllItem(nablaJob *j,
+                          const char job,
+                          const char itm,
+                          char enum_enum){
+  nprintf(j->entity->main, "/*cudaHookItem*/", "/*cudaHookItem*/");
+  return "";
+  //nablaError("Could not switch in cudaHookItem!");
+  //return NULL;
+}
+
+
 /*****************************************************************************
  * Fonction postfix à l'ENUMERATE_*
  *****************************************************************************/
-char* nCudaHookPostfixEnumerate(nablaJob *job){
+char* cudaHookForAllPostfix(nablaJob *job){
   if (job->item[0]=='\0') return "// functioncudaHookPostfixEnumerate\n";
   if (job->xyz==NULL) return "";//// void ENUMERATE postfix\n\t";
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\

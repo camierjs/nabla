@@ -97,7 +97,6 @@ const int NABLA_NB_FACES         = 0;\n\
 \n\
 int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
 ");
-  nLambdaHookMesh1DConnectivity(nabla);
 }
 
 
@@ -130,10 +129,10 @@ static void nLambdaHookMesh3D(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH GENERATION (3D)\n\
 // ********************************************************\n\
-const int NABLA_NODE_PER_CELL = 8;\
-const int NABLA_CELL_PER_NODE = 8;\
-const int NABLA_CELL_PER_FACE = 2;\
-const int NABLA_NODE_PER_FACE = 4;\
+const int NABLA_NODE_PER_CELL = 8;\n\
+const int NABLA_CELL_PER_NODE = 8;\n\
+const int NABLA_CELL_PER_FACE = 2;\n\
+const int NABLA_NODE_PER_FACE = 4;\n\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
@@ -163,32 +162,39 @@ const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*N
 \n\
 int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 ");
-  nLambdaHookMesh3DConnectivity(nabla);
 }
 
 
 // ****************************************************************************
 // * Backend LAMBDA - Allocation de la connectivité du maillage
+// * On a pas encore parsé!, on ne peut pas jouer avec les isWithLibrary
 // ****************************************************************************
 void nLambdaHookMeshPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainMeshPrefix]");
   //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
-
+  dbg("\n[nLambdaHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
+  // Mesh structures and functions depends on the ℝ library that can be used
 }
 
 
 // ****************************************************************************
 // * nLambdaHookMeshCore
+// * Ici, on revient une fois parsé!
 // ****************************************************************************
 void nLambdaHookMeshCore(nablaMain *nabla){
- dbg("\n[nLambdaHookMeshCore]");
-  dbg("\n[nLambdaHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
-  // Mesh structures and functions depends on the ℝ library that can be used
+  dbg("\n[nLambdaHookMeshCore]");
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * nLambdaHookMeshCore\n\
+// ********************************************************\n");
   if (isWithLibrary(nabla,with_real)){
     nLambdaHookMesh1D(nabla);
+    nLambdaHookMesh1DConnectivity(nabla);
   }else{
     nLambdaHookMesh3D(nabla);
+    nLambdaHookMesh3DConnectivity(nabla);
   }
+  nLambdaDumpMesh(nabla);
 }
 
 

@@ -62,7 +62,7 @@ void nLambdaHookHeaderIncludes(nablaMain *nabla){
 // *****************************************************************************\n\
 // * Lambda includes\n\
 // *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
+// Includes from nabla->simd->includes\n\%s\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
@@ -75,7 +75,7 @@ void nLambdaHookHeaderIncludes(nablaMain *nabla){
 #include <sstream>\n\
 #include <fstream>\n\
 using namespace std;\n\
-// Next are dump from nabla->parallel->includes()\n\%s",
+// Includes from nabla->parallel->includes()\n\%s",
           nabla->call->simd->includes(),
           nabla->call->parallel->includes());
   nMiddleDefines(nabla,nabla->call->header->defines);
@@ -89,9 +89,7 @@ using namespace std;\n\
 // ****************************************************************************
 void nLambdaHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
-  nLambdaDumpHeaderTypes(nabla);
-  nLambdaDumpHeaderDebug(nabla);
-  nLambdaDumpHeaderMaths(nabla);
+  nLambdaDumpHeader(nabla);
 }
 
 // ****************************************************************************

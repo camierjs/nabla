@@ -43,7 +43,6 @@
 #include "nabla.h"
 
 extern char* lambdaAlephHeader(nablaMain*);
-//extern void lambdaAlephIni(nablaMain*);
 
 
 // ****************************************************************************
@@ -88,34 +87,21 @@ NABLA_STATUS nLambdaHookMainPrefix(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * Backend LAMBDA POSTFIX - Génération du 'main'
-\n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del *****************************************************************************/
-#define LAMBDA_MAIN_POSTFIX "\n//LAMBDA_MAIN_POSTFIX\
-\n\tglobal_time[0]+=*(double*)&global_deltat[0];\
-\n\tglobal_iteration[0]+=1;\
-\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
-\n\t}\
-\tgettimeofday(&et, NULL);\n\
-\tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n\
-\tnabla_free_variables();\n\
-\treturn 0;\n\
-\n}\n"
-
-
-/*****************************************************************************
-  * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
- *****************************************************************************/
-static void lambdaDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
-                                                         astNode *n,
-                                                         bool in_or_out){
-  nprintf(nabla,"\n\t\t/*lambdaDumpNablaDebugFunctionFromOutArguments*/",NULL);
+// ****************************************************************************
+// * Backend LAMBDA PREINIT - Génération du 'main'
+// ****************************************************************************
+#define LAMBDA_MAIN_PREINIT "\n\n\t//LAMBDA_MAIN_PREINIT\n\
+\tnabla_ini_variables();\n"
+NABLA_STATUS nLambdaHookMainPreInit(nablaMain *nabla){
+  dbg("\n[lambdaMainPreInit]");
+  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
+  return NABLA_OK;
 }
 
-/*****************************************************************************
- * lambdaMainVarInitKernel
- *****************************************************************************/
+
+// ****************************************************************************
+// * lambdaMainVarInitKernel
+// ****************************************************************************
 NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain *nabla){
   //int i,iVar;
   nablaVariable *var;
@@ -171,9 +157,35 @@ void nabla_ini_variables(void){");
 }
 
 
-/*****************************************************************************
- * lambdaMain
- *****************************************************************************/
+// ****************************************************************************
+// * lambdaMainVarInitKernel
+// ****************************************************************************
+NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain *nabla){
+  nablaVariable *var;
+  dbg("\n[lambdaMainVarInitCall]");
+  nprintf(nabla,NULL,"\n\
+\t// ***************************************************************************\n\
+\t// * nLambdaHookMainVarInitCall\n\
+\t// ***************************************************************************\n");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->name, "deltat")==0) continue;
+    if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    continue;
+    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
+            var->name,
+            (var->item[0]=='n')?"Node":"Cell",
+            (strcmp(var->type,"real3")==0)?"XYZ":"",
+            (var->dim==0)?"0":"1",
+            var->name);
+  }
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * lambdaMain
+// ****************************************************************************
 NABLA_STATUS nLambdaHookMain(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
@@ -211,7 +223,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     }
     if (entry_points[i].when_depth==(n->HLT_depth-1)){
       nprintf(n, NULL, "\n\t// Poping from HLT!");
-#warning HWed 'redo_with_a_smaller_time_step'
+//#warning HWed 'redo_with_a_smaller_time_step'
       nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==1);\n");
       n->HLT_depth=entry_points[i].when_depth;
     }
@@ -267,72 +279,42 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
       }
     }//else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
-    lambdaDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
-    //nprintf(n, NULL, "\n");
-  }
-  return NABLA_OK;
-}
-
-/*****************************************************************************
- * lambdaMainPostfix
- *****************************************************************************/
-NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
-  dbg("\n[lambdaMainPostfix] LAMBDA_MAIN_POSTFIX");
-  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
-
-  //dbg("\n[lambdaMainPostfix] lambdaSourceMesh");
-  nLambdaDumpSource(nabla);
-  dbg("\n[lambdaMainPostfix] NABLA_OK");
-  return NABLA_OK;
-}
-
-
-
-
-/*****************************************************************************
- * Backend LAMBDA INIT - Génération du 'main'
- *****************************************************************************/
-#define LAMBDA_MAIN_PREINIT "\n\n\t//LAMBDA_MAIN_PREINIT\n\
-\tnabla_ini_variables();\n"
-NABLA_STATUS nLambdaHookMainPreInit(nablaMain *nabla){
-  dbg("\n[lambdaMainPreInit]");
-  fprintf(nabla->entity->src, LAMBDA_MAIN_PREINIT);
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * lambdaMainVarInitKernel
- *****************************************************************************/
-NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[lambdaMainVarInitCall]");
-  nprintf(nabla,NULL,"\n\
-\t// ***************************************************************************\n\
-\t// * nLambdaHookMainVarInitCall\n\
-\t// ***************************************************************************\n");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
   }
   return NABLA_OK;
 }
 
 
-/*****************************************************************************
- * Backend LAMBDA POSTFIX - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * Backend LAMBDA POSTINIT - Génération du 'main'
+// ****************************************************************************
 #define LAMBDA_MAIN_POSTINIT "\n\t//LAMBDA_MAIN_POSTINIT"
 NABLA_STATUS nLambdaHookMainPostInit(nablaMain *nabla){
   dbg("\n[lambdaMainPostInit]");
   fprintf(nabla->entity->src, LAMBDA_MAIN_POSTINIT);
   return NABLA_OK;
 }
+
+
+// ****************************************************************************
+// * Backend LAMBDA POSTFIX - Génération du 'main'
+// ****************************************************************************
+#define LAMBDA_MAIN_POSTFIX "\n//LAMBDA_MAIN_POSTFIX\
+\n\tglobal_time[0]+=*(double*)&global_deltat[0];\
+\n\tglobal_iteration[0]+=1;\
+\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
+\n\t}\
+\tgettimeofday(&et, NULL);\n\
+\tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n\
+\tnabla_free_variables();\n\
+\treturn 0;\n\
+\n}\n"
+// ****************************************************************************
+// * lambdaMainPostfix
+// ****************************************************************************
+NABLA_STATUS nLambdaHookMainPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->src, LAMBDA_MAIN_POSTFIX);
+  return NABLA_OK;
+}
+
+

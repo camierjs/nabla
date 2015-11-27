@@ -43,10 +43,9 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-/***************************************************************************** 
- * enums pour les différents dumps à faire: déclaration, malloc et free
- *****************************************************************************/
+// ****************************************************************************
+// * enums pour les différents dumps à faire: déclaration, malloc et free
+// ****************************************************************************
 typedef enum {
   CUDA_VARIABLES_DECLARATION=0,
   CUDA_VARIABLES_MALLOC,
@@ -54,13 +53,18 @@ typedef enum {
 } CUDA_VARIABLES_SWITCH;
 
 
-// Pointeur de fonction vers une qui dump ce que l'on souhaite
-typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth);
+// ****************************************************************************
+// * Pointeur de fonction vers une qui dump ce que l'on souhaite
+// ****************************************************************************
+typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla,
+                                 nablaVariable *var,
+                                 char *postfix,
+                                 char *depth);
 
 
-/***************************************************************************** 
- * Upcase de la chaîne donnée en argument
- *****************************************************************************/
+// **************************************************************************** 
+// * Upcase de la chaîne donnée en argument
+// ****************************************************************************
 static inline char *itemUPCASE(const char *itm){
   if (itm[0]=='c') return "CELLS";
   if (itm[0]=='n') return "NODES";
@@ -73,10 +77,13 @@ static inline char *itemUPCASE(const char *itm){
 }
 
 
-/***************************************************************************** 
- * Dump d'un MALLOC d'une variables dans le fichier source
- *****************************************************************************/
-static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth){
+// **************************************************************************** 
+// * Dump d'un MALLOC d'une variables dans le fichier source
+// ****************************************************************************
+static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla,
+                                                     nablaVariable *var,
+                                                     char *postfix,
+                                                     char *depth){
   if (var->dim==0){
     fprintf(nabla->entity->src,
             "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
@@ -98,9 +105,9 @@ static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla, nablaVari
 }
 
 
-/***************************************************************************** 
- * Dump d'un FREE d'une variables dans le fichier source
- *****************************************************************************/
+// **************************************************************************** 
+// * Dump d'un FREE d'une variables dans le fichier source
+// ****************************************************************************
 static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla,
                                                    nablaVariable *var,
                                                    char *postfix,
@@ -122,22 +129,37 @@ static NABLA_STATUS cudaGenerateSingleVariableFree(nablaMain *nabla,
 }
 
 
-/***************************************************************************** 
- * Dump d'une variables dans le fichier
- *****************************************************************************/
+// **************************************************************************** 
+// * Dump d'une variables dans le fichier
+// ****************************************************************************
 static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla,
                                                nablaVariable *var,
                                                char *postfix,
                                                char *depth){  
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s%s; %s host_%s_%s%s%s[NABLA_NB_%s];",
-            postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
-            postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
+    fprintf(nabla->entity->hdr,
+            "\n__builtin_align__(8) %s *%s_%s%s%s; %s host_%s_%s%s%s[NABLA_NB_%s];",
+            postfix?"real":var->type,
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            depth?depth:"",
+            postfix?"real":var->type,
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n__builtin_align__(8) %s *%s_%s%s; %s host_%s_%s%s[NABLA_NB_%s][%ld];",
-            postfix?"real":var->type, var->item, var->name, postfix?postfix:"",
-            postfix?"real":var->type, var->item, var->name, postfix?postfix:"",
+    fprintf(nabla->entity->hdr,
+            "\n__builtin_align__(8) %s *%s_%s%s; %s host_%s_%s%s[NABLA_NB_%s][%ld];",
+            postfix?"real":var->type,
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            postfix?"real":var->type,
+            var->item, var->name,
+            postfix?postfix:"",
             itemUPCASE(var->item),
             var->size);
   return NABLA_OK;
@@ -147,13 +169,14 @@ static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla,
 /***************************************************************************** 
  * Retourne quelle fonction selon l'enum donné
  *****************************************************************************/
-pFunDump witch2func(CUDA_VARIABLES_SWITCH witch){
+static pFunDump witch2func(CUDA_VARIABLES_SWITCH witch){
   switch (witch){
   case (CUDA_VARIABLES_DECLARATION): return cudaGenerateSingleVariable;
   case (CUDA_VARIABLES_MALLOC): return cudaGenerateSingleVariableMalloc;
   case (CUDA_VARIABLES_FREE): return cudaGenerateSingleVariableFree;
   default: exit(NABLA_ERROR|fprintf(stderr, "\n[witch2switch] Error with witch\n"));
   }
+  return NULL;
 }
 
 
@@ -161,11 +184,14 @@ pFunDump witch2func(CUDA_VARIABLES_SWITCH witch){
 /***************************************************************************** 
  * Dump d'une variables de dimension 1
  *****************************************************************************/
-static NABLA_STATUS cudaGenericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
+static NABLA_STATUS cudaGenericVariableDim1(nablaMain *nabla,
+                                            nablaVariable *var,
+                                            pFunDump fDump){
   //int i;
   //char depth[]="[0]";
   dbg("\n[cudaGenerateVariableDim1] variable %s", var->name);
-  //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1) fDump(nabla, var, NULL, depth);
+  //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1)
+  //   fDump(nabla, var, NULL, depth);
   fDump(nabla, var, NULL, "/*8*/");
   return NABLA_OK;
 }
@@ -173,7 +199,9 @@ static NABLA_STATUS cudaGenericVariableDim1(nablaMain *nabla, nablaVariable *var
 /***************************************************************************** 
  * Dump d'une variables de dimension 0
  *****************************************************************************/
-static NABLA_STATUS cudaGenericVariableDim0(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
+static NABLA_STATUS cudaGenericVariableDim0(nablaMain *nabla,
+                                            nablaVariable *var,
+                                            pFunDump fDump){  
   dbg("\n[cudaGenerateVariableDim0] variable %s", var->name);
   if (strcmp(var->type,"real3")!=0)
     return fDump(nabla, var, NULL, NULL);
@@ -185,10 +213,12 @@ static NABLA_STATUS cudaGenericVariableDim0(nablaMain *nabla, nablaVariable *var
   return NABLA_ERROR;
 }
 
-/***************************************************************************** 
- * Dump d'une variables
- *****************************************************************************/
-static NABLA_STATUS cudaGenericVariable(nablaMain *nabla, nablaVariable *var, pFunDump fDump){  
+// **************************************************************************** 
+// * Dump d'une variables
+// ****************************************************************************
+static NABLA_STATUS cudaGenericVariable(nablaMain *nabla,
+                                        nablaVariable *var,
+                                        pFunDump fDump){  
   if (!var->axl_it) return NABLA_OK;
   if (var->item==NULL) return NABLA_ERROR;
   if (var->name==NULL) return NABLA_ERROR;
@@ -196,46 +226,9 @@ static NABLA_STATUS cudaGenericVariable(nablaMain *nabla, nablaVariable *var, pF
   if (var->dim==0) return cudaGenericVariableDim0(nabla,var,fDump);
   if (var->dim==1) return cudaGenericVariableDim1(nabla,var,fDump);
   dbg("\n[cudaGenericVariable] variable dim error: %d", var->dim);
-  exit(NABLA_ERROR|fprintf(stderr, "\n[cudaGenericVariable] Error with given variable\n"));
-}
-
-
-/***************************************************************************** 
- * Dump des options
- *****************************************************************************/
-static void cudaOptions(nablaMain *nabla){
-  nablaOption *opt;
-
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * Options\n\
-// ********************************************************");
-  for(opt=nabla->options;opt!=NULL;opt=opt->next)
-    fprintf(nabla->entity->hdr,
-            "\n#define %s %s",
-            opt->name,
-            opt->dflt);
-}
-
-
-/***************************************************************************** 
- * Dump des globals
- *****************************************************************************/
-static void cudaGlobals(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * Globals, coté DEVICE\n\
-// ********************************************************\n\
-__builtin_align__(8) Real *global_time;\n\
-__builtin_align__(8) Real *global_deltat;\n\
-__builtin_align__(8) int *global_iteration;\n\
-__builtin_align__(8) Real *global_device_shared_reduce_results;\n\
-\n\
-\n\
-// ********************************************************\n\
-// * Globals, coté HOST\n\
-// ********************************************************\n\
-double host_time;\n");
+  exit(NABLA_ERROR|
+       fprintf(stderr,
+               "\n[cudaGenericVariable] Error with given variable\n"));
 }
 
 
@@ -243,7 +236,7 @@ double host_time;\n");
 // ****************************************************************************
 // * Initialisation des besoins vis-à-vis des variables (globales)
 // ****************************************************************************
-void nCudaHookVariablesInit(nablaMain *nabla){
+void cudaHookVariablesInit(nablaMain *nabla){
   // Rajout de la variable globale 'iteration'
   nablaVariable *iteration = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, iteration);
@@ -264,119 +257,96 @@ void nCudaHookVariablesInit(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * Dump des variables
- *****************************************************************************/
-void nCudaHookVariablesPrefix(nablaMain *nabla){
+// **************************************************************************** 
+// * cudaHookVariablesPrefix
+// ****************************************************************************
+void cudaHookVariablesPrefix(nablaMain *nabla){
+  nablaOption *opt;
   nablaVariable *var;
-
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * Variables\n\
+// * cudaHookVariablesPrefix\n\
 // ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next){
-    if (cudaGenericVariable(nabla, var, witch2func(CUDA_VARIABLES_DECLARATION))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[cudaVariables] Error with variable %s\n", var->name));
-    if (cudaGenericVariable(nabla, var, witch2func(CUDA_VARIABLES_MALLOC))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[cudaVariables] Error with variable %s\n", var->name));
+    if (cudaGenericVariable(nabla,
+                            var,
+                            witch2func(CUDA_VARIABLES_DECLARATION))==NABLA_ERROR)
+      exit(NABLA_ERROR|
+           fprintf(stderr, "\n[cudaVariables] Error with variable %s\n",
+                   var->name));
   }
-  cudaOptions(nabla);
-  cudaGlobals(nabla);
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * Options\n\
+// ********************************************************");
+  for(opt=nabla->options;opt!=NULL;opt=opt->next)
+    fprintf(nabla->entity->hdr,
+            "\n#define %s %s",
+            opt->name, opt->dflt);
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * Globals, coté DEVICE\n\
+// ********************************************************\n\
+__builtin_align__(8) real *global_time;\n\
+__builtin_align__(8) real *global_deltat;\n\
+__builtin_align__(8) int *global_iteration;\n\
+__builtin_align__(8) real *global_device_shared_reduce_results;\n\
+\n\
+\n\
+// ********************************************************\n\
+// * Globals, coté HOST\n\
+// ********************************************************\n\
+double host_time;\n");
 }
 
 
 // ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void nCudaHookVariablesPostfix(nablaMain *nabla){
+void cudaHookVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * cudaHookVariablesPostfix\n\
+// ********************************************************");
   for(var=nabla->variables;var!=NULL;var=var->next)
-    if (cudaGenericVariable(nabla, var, witch2func(CUDA_VARIABLES_FREE))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[cudaVariables] Error with variable %s\n", var->name));
+    if (cudaGenericVariable(nabla,
+                            var,
+                            witch2func(CUDA_VARIABLES_FREE))==NABLA_ERROR)
+      exit(NABLA_ERROR|
+           fprintf(stderr,
+                   "\n[cudaVariables] Error with variable %s\n",
+                   var->name));
 }
 
 // ****************************************************************************
 // * Malloc des variables
 // ****************************************************************************
-void nCudaHookVariablesMalloc(nablaMain *nabla){
+void cudaHookVariablesMalloc(nablaMain *nabla){
+  nablaVariable *var;
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
-\t// * Malloc Variables\n\
+\t// * cudaHookVariablesMalloc\n\
 \t// ********************************************************");
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    if (cudaGenericVariable(nabla,
+                            var,
+                            witch2func(CUDA_VARIABLES_MALLOC))==NABLA_ERROR)
+      exit(NABLA_ERROR|
+           fprintf(stderr,
+                   "\n[cudaVariables] Error with variable %s\n",
+                   var->name));
+  }
 }
 
 
 // ****************************************************************************
 // * Variables Postfix
 // ****************************************************************************
-void nCudaHookVariablesFree(nablaMain *nabla){
+void cudaHookVariablesFree(nablaMain *nabla){
   fprintf(nabla->entity->src,"\n\
 // ********************************************************\n\
-// * Free Variables\n\
+// * cudaHookVariablesFree\n\
 // ********************************************************\n\
-void nabla_free_variables(void){");
+void nabla_free_variables(void){}");
 }
-
-
-
-
-// *****************************************************************************
-// * Ajout des variables d'un job trouvé depuis une fonction @ée
-// *****************************************************************************
-void cudaAddNablaVariableList(nablaMain *nabla,
-                              astNode *n,
-                              nablaVariable **variables){
-  if (n==NULL) return;
-  if (n->tokenid!=0)
-    dbg("\n\t\t\t[cudaAddNablaVariableList] token is '%s'",n->token);
-
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) {
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '{', returning");
-    return;
-  }
-  
-  if (n->tokenid=='@'){
-    return;
-    dbg("\n\t\t\t[cudaAddNablaVariableList] '@', returning");
-  }
-    
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Found a direct_declarator!");
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now looking for: '%s'",
-        n->children->token);
-    nablaVariable *hit=nMiddleVariableFind(nabla->variables,
-                                           n->children->token);
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Got the direct_declarator '%s' on %ss",
-        hit->name, hit->item);
-    // Si on ne trouve pas de variable, c'est pas normal
-    if (hit == NULL)
-      return exit(NABLA_ERROR|
-                  fprintf(stderr,
-                          "\n\t\t[cudaAddNablaVariableList] Variable error\n"));
-    dbg("\n\t\t\t[cudaAddNablaVariableList] Now testing if its allready in our growing variables list");
-    nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
-    if (allready_here!=NULL){
-      dbg("\n\t\t\t[cudaAddNablaVariableList] allready_here!");
-    }else{
-      // Création d'une nouvelle called_variable
-      nablaVariable *new = nMiddleVariableNew(NULL);
-      new->name=strdup(hit->name);
-      new->item=strdup(hit->item);
-      new->type=strdup(hit->type);
-      new->dim=hit->dim;
-      new->size=hit->size;
-      // Rajout à notre liste
-      if (*variables==NULL){
-        dbg("\n\t\t\t[cudaAddNablaVariableList] first hit");
-        *variables=new;
-      }else{
-        dbg("\n\t\t\t[cudaAddNablaVariableList] last hit");
-        nMiddleVariableLast(*variables)->next=new;
-      }
-    }
-  }
-  if (n->children != NULL) cudaAddNablaVariableList(nabla, n->children, variables);
-  if (n->next != NULL) cudaAddNablaVariableList(nabla, n->next, variables);
-}
-

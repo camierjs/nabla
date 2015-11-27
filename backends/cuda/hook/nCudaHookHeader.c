@@ -42,13 +42,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+extern char* cuSparseHeader(nablaMain *);
+
 
 // ****************************************************************************
-// * nCudaHookHeaderOpen
+// * cudaHookHeaderOpen
 // ****************************************************************************
-void nCudaHookHeaderOpen(nablaMain *nabla){
+void cudaHookHeaderOpen(nablaMain *nabla){
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  // Ouverture du fichier header
   sprintf(hdrFileName, "%sEntity.h", nabla->name);
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
@@ -58,11 +59,15 @@ void nCudaHookHeaderOpen(nablaMain *nabla){
 // ****************************************************************************
 // *
 // ****************************************************************************
-void nCudaHookHeaderIncludes(nablaMain *nabla){
+void cudaHookHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,"\n\n\n\
 // *****************************************************************************\n\
-// * Includes\n\
+// * Includes from nabla->simd->includes\n\
+// *****************************************************************************\n\
+%s\
+// *****************************************************************************\n\
+// * Standard CUDA Includes\n\
 // *****************************************************************************\n\
 #include <iostream>\n\
 #include <cstdio>\n\
@@ -81,8 +86,14 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
    if (cudaSuccess==cudaMalloc(devPtr,size))\n\
       return cudaMemset(*devPtr,0,size);\n\
    return cudaErrorMemoryAllocation;\n\
-}\n");
-//  #warning CUDA Cartesian here
+}\n\
+// *****************************************************************************\n\
+// * Includes from nabla->parallel->includes()\n\
+// *****************************************************************************\n\
+%s",
+          nabla->call->simd->includes(),
+          "");//nabla->call->parallel->includes());
+  
   fprintf(nabla->entity->hdr,"\n\n\
 // *****************************************************************************\n\
 // * Cartesian stuffs\n\
@@ -90,23 +101,33 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
 #define MD_DirX 0\n#define MD_DirY 1\n#define MD_DirZ 2\n\
 //#warning empty libCartesianInitialize\n\
 //__device__ void libCartesianInitialize(void){}\n");
+  
+//  #warning MiddlEnd call from here
+  nMiddleDefines(nabla,nabla->call->header->defines);
+  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
+  nMiddleForwards(nabla,nabla->call->header->forwards);
+  // Si on a la librairie Aleph, on la dump
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+    fprintf(nabla->entity->hdr, "%s", cuSparseHeader(nabla));
 }
 
 // ****************************************************************************
-// * nCudaHookHeaderDump
+// * cudaHookHeaderDump
 // ****************************************************************************
-void nCudaHookHeaderDump(nablaMain *nabla){
+void cudaHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
-//  nCudaDumpHeaderTypes(nabla);
-//  nCudaDumpHeaderDebug(nabla);
-//  nCudaDumpHeaderMaths(nabla);
+  cudaHeaderReal3(nabla);
+  cudaHeaderExtra(nabla);
+  cudaHeaderMesh(nabla);
+  cudaHeaderHandleErrors(nabla);
+  cudaHeaderItems(nabla);
 }
 
 
 // ****************************************************************************
 // *
 //*****************************************************************************
-void nCudaHookHeaderPrefix(nablaMain *nabla){
+void cudaHookHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,
           "#ifndef __CUDA_%s_H__\n#define __CUDA_%s_H__",
@@ -117,7 +138,7 @@ void nCudaHookHeaderPrefix(nablaMain *nabla){
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
-void nCudaHookDefineEnumerates(nablaMain *nabla){
+void cudaHookHeaderEnumerates(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
  * Forward enumerates\n\
@@ -166,7 +187,7 @@ void nCudaHookDefineEnumerates(nablaMain *nabla){
 // ****************************************************************************
 // *
 //*****************************************************************************
-void nCudaHookHeaderPostfix(nablaMain *nabla){
+void cudaHookHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n#endif // __CUDA_%s_H__\n",nabla->entity->name);
 }
 

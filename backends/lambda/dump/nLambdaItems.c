@@ -40,6 +40,7 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+
 #ifndef _LAMBDA_ITEMS_H_
 #define _LAMBDA_ITEMS_H_
 

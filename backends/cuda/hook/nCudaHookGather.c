@@ -124,7 +124,7 @@ static char* cudaGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nCudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* cudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return cudaGatherCells(job,var,phase);
   if (itm=='n') return cudaGatherNodes(job,var,phase);
@@ -142,7 +142,7 @@ char* nCudaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* cudaGather(nablaJob *job){
+char* cudaHookFilterGather(nablaJob *job){
   int i;
   char gathers[1024];
   nablaVariable *var;

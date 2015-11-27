@@ -42,12 +42,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-extern char* cuSparseHeader(nablaMain *);
 
-
-/*****************************************************************************
- * Backend CUDA PREFIX - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * CUDA_MAIN_PREFIX pour la génération du 'main'
+// ****************************************************************************
 #define CUDA_MAIN_PREFIX "\n\n\n\n\
 /*****************************************************************************\n\
  * Backend CUDA - 'main'\n\
@@ -74,17 +72,27 @@ int main(void){\n\
 \tassert((PAD_DIV(NABLA_NB_NODES,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
 \tassert((dimJobBlock.x<=1024)); // Max threads per block:  1024 \n\
 \tprintf(\"NABLA_NB_NODES=%%d,NABLA_NB_CELLS=%%d\",\n\
-\t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\n\
+\t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\
 \t// Allocation coté CUDA des variables globales\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*reduced_size));\n"
+// ****************************************************************************
+// * nccCudaMainPrefix
+// ****************************************************************************
+NABLA_STATUS cudaHookMainPrefix(nablaMain *nabla){
+  dbg("\n[nccCudaMainPrefix]");
+  fprintf(nabla->entity->src, CUDA_MAIN_PREFIX);
+//#warning cudaHookMeshConnectivity
+  cudaHookMeshConnectivity(nabla);
+  return NABLA_OK;
+}
 
 
-/*****************************************************************************
- * Backend CUDA INIT - Génération du 'main'
- *****************************************************************************/
+// ****************************************************************************
+// * CUDA_MAIN_PREINIT pour la génération du 'main'
+// ****************************************************************************
 #define CUDA_MAIN_PREINIT "\n\
 \tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,node_cell_corner_idx,%s);\n\
 \tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node);\n\
@@ -98,66 +106,10 @@ int main(void){\n\
 \thost_time=0.0;\n\n\
 \tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\n\
 \t{// Initialisation et boucle de calcul"
-
-
-/*****************************************************************************
- * Backend CUDA POSTFIX - Génération du 'main'
- *****************************************************************************/
-#define CUDA_MAIN_POSTINIT "\n\t}\n\n\
-\tgettimeofday(&et, NULL);\n\
-\tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);"
-
-
-/*****************************************************************************
- * Backend CUDA POSTFIX - Génération du 'main'
- *****************************************************************************/
-#define CUDA_MAIN_POSTFIX "\n\
-\tCUDA_HANDLE_ERROR(cudaFree(global_deltat));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(global_time));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(global_iteration));\n\
-\treturn 0;\n\
-}\n"
-
-
-/*****************************************************************************
- * Backend CUDA GPU ENUM - Génération de 'gpuEnum'
- *****************************************************************************/
-#define CUDA_MAIN_GPUENUM "\n\n\n\n\
-// *****************************************************************************\n\
-// * Backend CUDA - 'gpuEnum'\n\
-// *****************************************************************************\n\
-void gpuEnum(void){\n\
-  int count=0;\n\
-  cudaDeviceProp  prop;\n\
-  cudaGetDeviceCount(&count);\n\
-  CUDA_HANDLE_ERROR(cudaGetDeviceCount(&count));\n\
-  //CUDA_HANDLE_ERROR_WITH_SUCCESS(cudaGetDeviceCount(&count));\n\
-  for (int i=0; i<count; i++) {\n\
-    CUDA_HANDLE_ERROR( cudaGetDeviceProperties(&prop,i));\n\
-    printf(\"\\33[7m%%s, sm_%%d%%d, %%d thr/Warp, %%d thr/Block\\33[m\\n\",\
- prop.name, prop.major, prop.minor, prop.warpSize,prop.maxThreadsPerBlock);\n}\n\
-  CUDA_HANDLE_ERROR(cudaDeviceReset());\
-  CUDA_HANDLE_ERROR(cudaSetDevice(0));\n\
-}\n"
-
-
-/*****************************************************************************
- * nccCudaMainPrefix
- *****************************************************************************/
-NABLA_STATUS nCudaHookMainPrefix(nablaMain *nabla){
-  dbg("\n[nccCudaMainPrefix]");
-  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
-    fprintf(nabla->entity->hdr, "%s", cuSparseHeader(nabla));
-  fprintf(nabla->entity->src, CUDA_MAIN_PREFIX);
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * nccCudaMainPreInit
- *****************************************************************************/
-NABLA_STATUS nCudaHookMainPreInit(nablaMain *nabla){
+// ****************************************************************************
+// * nccCudaMainPreInit
+// ****************************************************************************
+NABLA_STATUS cudaHookMainPreInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPreInit]");
   //if ((nabla->colors&BACKEND_COLOR_SOA)!=BACKEND_COLOR_SOA)
     fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coord");
@@ -166,19 +118,19 @@ NABLA_STATUS nCudaHookMainPreInit(nablaMain *nabla){
   return NABLA_OK;
 }
 
-
-// *****************************************************************************
+// ****************************************************************************
 // * nccCudaMainVarInitKernel
 // * We now calloc things, so this init is now anymore usefull
 // * #warning Formal parameter space overflowed (256 bytes max)
-// *****************************************************************************/
-NABLA_STATUS nCudaHookMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
+// ****************************************************************************
+NABLA_STATUS cudaHookMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
 
 
-/*****************************************************************************
- * nccCudaMainVarInitCall
- *****************************************************************************/
-NABLA_STATUS nCudaHookMainVarInitCall(nablaMain *nabla){
+
+// ****************************************************************************
+// * nccCudaMainVarInitCall
+// ****************************************************************************
+NABLA_STATUS cudaHookMainVarInitCall(nablaMain *nabla){
   nablaVariable *var;
   dbg("\n[nccCudaMainVarInitCall]"); 
   //nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
@@ -202,20 +154,10 @@ NABLA_STATUS nCudaHookMainVarInitCall(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nccCudaMainPostInit
- *****************************************************************************/
-NABLA_STATUS nCudaHookMainPostInit(nablaMain *nabla){
-  dbg("\n[nccCudaMainPostInit]");
-  fprintf(nabla->entity->src, CUDA_MAIN_POSTINIT);
-  return NABLA_OK;
-}
-
-
-/*****************************************************************************
- * nccCudaMain
- *****************************************************************************/
-NABLA_STATUS nCudaHookMainCore(nablaMain *n){
+// ****************************************************************************
+// * nccCudaMain
+// ****************************************************************************
+NABLA_STATUS cudaHookMainCore(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
   int i,numParams,number_of_entry_points;
@@ -331,18 +273,53 @@ NABLA_STATUS nCudaHookMainCore(nablaMain *n){
 }
 
 
-/*****************************************************************************
- * nccCudaMainPostfix
- *****************************************************************************/
-NABLA_STATUS nccCudaMainPostfix(nablaMain *nabla){
-  dbg("\n[nccCudaMainPostfix]");
-  fprintf(nabla->entity->src, CUDA_MAIN_POSTFIX);
-  fprintf(nabla->entity->src, CUDA_MAIN_GPUENUM);
+// ****************************************************************************
+// * nccCudaMainPostInit
+// ****************************************************************************
+#define CUDA_MAIN_POSTINIT "\n\t}\n\n\
+\tgettimeofday(&et, NULL);\n\
+\tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
+\tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);"
+NABLA_STATUS cudaHookMainPostInit(nablaMain *nabla){
+  dbg("\n[nccCudaMainPostInit]");
+  fprintf(nabla->entity->src, CUDA_MAIN_POSTINIT);
   return NABLA_OK;
 }
 
 
-NABLA_STATUS nCudaHookMainPostfix(nablaMain *nabla){
+// ****************************************************************************
+// * Backend CUDA POSTFIX - Génération du 'main'
+// ****************************************************************************
+#define CUDA_MAIN_POSTFIX "\n\
+\tCUDA_HANDLE_ERROR(cudaFree(global_deltat));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(global_time));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(global_iteration));\n\
+\treturn 0;\n\
+}\n"
+// ****************************************************************************
+// * Backend CUDA GPU ENUM - Génération de 'gpuEnum'
+// ****************************************************************************
+#define CUDA_MAIN_GPUENUM "\n\n\n\n\
+// *****************************************************************************\n\
+// * Backend CUDA - 'gpuEnum'\n\
+// *****************************************************************************\n\
+void gpuEnum(void){\n\
+  int count=0;\n\
+  cudaDeviceProp  prop;\n\
+  cudaGetDeviceCount(&count);\n\
+  CUDA_HANDLE_ERROR(cudaGetDeviceCount(&count));\n\
+  //CUDA_HANDLE_ERROR_WITH_SUCCESS(cudaGetDeviceCount(&count));\n\
+  for (int i=0; i<count; i++) {\n\
+    CUDA_HANDLE_ERROR( cudaGetDeviceProperties(&prop,i));\n\
+    printf(\"\\33[7m%%s, sm_%%d%%d, %%d thr/Warp, %%d thr/Block\\33[m\\n\",\
+ prop.name, prop.major, prop.minor, prop.warpSize,prop.maxThreadsPerBlock);\n}\n\
+  CUDA_HANDLE_ERROR(cudaDeviceReset());\
+  CUDA_HANDLE_ERROR(cudaSetDevice(0));\n\
+}\n"
+// ****************************************************************************
+// * nccCudaMainPostfix
+// ****************************************************************************
+NABLA_STATUS cudaHookMainPostfix(nablaMain *nabla){
   dbg("\n[nccCudaMainMeshPostfix]");
   fprintf(nabla->entity->src,"\n\n\
 \tCUDA_HANDLE_ERROR(cudaFree(cell_node));\n\
@@ -355,5 +332,8 @@ NABLA_STATUS nCudaHookMainPostfix(nablaMain *nabla){
 \tCUDA_HANDLE_ERROR(cudaFree(face_node));\n\
 \t//CUDA_HANDLE_ERROR(cudaFree(node_cell_and_corner));\n\
 ");
+  fprintf(nabla->entity->src, CUDA_MAIN_POSTFIX);
+  fprintf(nabla->entity->src, CUDA_MAIN_GPUENUM);
   return NABLA_OK;
 }
+

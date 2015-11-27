@@ -73,12 +73,12 @@ void cudaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
 // ****************************************************************************
 // * cudaHookTokenPrefix
 // ****************************************************************************
-char* nCudaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
+char* cudaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
 
 // ****************************************************************************
 // * cudaHookTokenPostfix
 // ****************************************************************************
-char* nCudaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+char* cudaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 
 
@@ -193,7 +193,7 @@ static bool cudaHookSwitchAleph(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void nCudaHookSwitchToken(astNode *n, nablaJob *job){
+void cudaHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   const char forall=job->parse.enum_enum;
@@ -312,11 +312,11 @@ void nCudaHookSwitchToken(astNode *n, nablaJob *job){
 
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/","{\n\t\t\t");
-    nprintf(nabla, "/*cudaGather*/", "%s",cudaGather(job));
+    nprintf(nabla, "/*cudaGather*/", "%s",cudaHookFilterGather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*cudaScatter*/", "%s",cudaScatter(job));
+    nprintf(nabla, "/*cudaScatter*/", "%s",cudaHookFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/","\n\t\t}\n\t");
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

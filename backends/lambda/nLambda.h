@@ -90,6 +90,7 @@ char *lambdaHookPragmaIccAlign(void);
 char *lambdaHookPragmaGccAlign(void);
 
 // Hooks: Header
+void nLambdaHookHeaderDump(nablaMain *);
 void nLambdaHookHeaderOpen(nablaMain *);
 void nLambdaHookHeaderDefineEnumerates(nablaMain *);
 void nLambdaHookHeaderPrefix(nablaMain *);
@@ -97,11 +98,8 @@ void nLambdaHookHeaderPostfix(nablaMain *);
 void nLambdaHookHeaderIncludes(nablaMain *);
 
 // Dump into Header & Source
-void nLambdaHookHeaderDump(nablaMain *);
 void nLambdaDumpSource(nablaMain*);
-void nLambdaDumpHeaderTypes(nablaMain *);
-void nLambdaDumpHeaderDebug(nablaMain *);
-void nLambdaDumpHeaderMaths(nablaMain *);
+void nLambdaDumpHeader(nablaMain *);
 void nLambdaDumpMesh(nablaMain*);
 
 NABLA_STATUS nLambdaHookMainPrefix(nablaMain*);
@@ -120,7 +118,6 @@ void nLambdaHookVariablesFree(nablaMain*);
 void nLambdaHookMeshPrefix(nablaMain*);
 void nLambdaHookMeshCore(nablaMain*);
 void nLambdaHookMeshPostfix(nablaMain*);
-
 
 void lambdaHookIteration(struct nablaMainStruct*);
 void lambdaHookExit(struct nablaMainStruct*,nablaJob*);
@@ -158,7 +155,7 @@ void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
 void lambdaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
-nHooks *nLambda(nablaMain*);
+nHooks *lambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_H_
  

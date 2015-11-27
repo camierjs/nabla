@@ -90,7 +90,7 @@ void dbg(const unsigned int flag, const char *format,...){
     if (!DBG_MODE) return;                                              \
     CUDA_HANDLE_ERROR(cudaMemcpy(&host_node_##Variable,                      \
                             node_##Variable,                            \
-                            NABLA_NB_NODES*sizeof(Real),                \
+                            NABLA_NB_NODES*sizeof(real),                \
                             cudaMemcpyDeviceToHost));                   \
     for (int i=0; i<NABLA_NB_NODES; i+=1)                               \
       printf("\n\t#%%d %%.14f",i, host_node_##Variable[i]);             \
@@ -101,7 +101,7 @@ void dbg(const unsigned int flag, const char *format,...){
     if (!DBG_MODE) return;                                            \
     CUDA_HANDLE_ERROR(cudaMemcpy(&host_node_##Variable,                    \
                             node_##Variable,                          \
-                            NABLA_NB_NODES*sizeof(Real3),             \
+                            NABLA_NB_NODES*sizeof(real3),             \
                             cudaMemcpyDeviceToHost));                 \
     for (int i=0; i<NABLA_NB_NODES; i+=1)                             \
       printf("\n\t#%%d [%%.14f %%.14f %%.14f]", i,                    \
@@ -114,7 +114,7 @@ void dbg(const unsigned int flag, const char *format,...){
   if (!DBG_MODE) return; 
   printf("\ndbgCoords:");
   CUDA_HANDLE_ERROR(cudaMemcpy(&host_node_coord, node_coord,
-                          NABLA_NB_NODES*sizeof(Real3),
+                          NABLA_NB_NODES*sizeof(real3),
                           cudaMemcpyDeviceToHost));
   for (int i=0; i<NABLA_NB_NODES; i+=1){
     printf("\n\t#%%d [%%.14f,%%.14f,%%.14f]",i,
@@ -157,7 +157,7 @@ void dbg(const unsigned int flag, const char *format,...){
     if (!DBG_MODE) return;                                            \
     CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,               \
                             cell_##Variable,                          \
-                            NABLA_NB_CELLS*sizeof(Real3),             \
+                            NABLA_NB_CELLS*sizeof(real3),             \
                             cudaMemcpyDeviceToHost));                 \
     for (int i=0; i<NABLA_NB_CELLS; i+=1)                             \
       printf("\n\t#%%d [%%.14f %%.14f %%.14f]", i,                    \
@@ -173,7 +173,7 @@ void dbg(const unsigned int flag, const char *format,...){
     for(int i=0;i<NABLA_NB_CELLS;i+=1)                                \
       CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],          \
                               &cell_##Variable[i*8],                  \
-                              8*sizeof(Real3),                        \
+                              8*sizeof(real3),                        \
                               cudaMemcpyDeviceToHost));               \
     for(int i=0;i<8;i+=1)                                             \
       for (int c=0;c<NABLA_NB_CELLS;c+=1)                             \
@@ -192,7 +192,7 @@ void dbg(const unsigned int flag, const char *format,...){
     if (!DBG_MODE) return;                                              \
     CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable,                 \
                             cell_##Variable,                            \
-                            NABLA_NB_CELLS*sizeof(Real),                \
+                            NABLA_NB_CELLS*sizeof(real),                \
                             cudaMemcpyDeviceToHost));                   \
     for (int i=0; i<NABLA_NB_CELLS; i+=1)                               \
       printf("\n\t cell[%%d]=%%.14f",i, host_cell_##Variable[i]);       \
@@ -205,7 +205,7 @@ void dbg(const unsigned int flag, const char *format,...){
     for(int i=0;i<NABLA_NB_CELLS;i+=1)                                \
       CUDA_HANDLE_ERROR(cudaMemcpy(&host_cell_##Variable[i],          \
                               &cell_##Variable[i*8],                  \
-                              8*sizeof(Real),                         \
+                              8*sizeof(real),                         \
                               cudaMemcpyDeviceToHost));               \
     for(int i=0;i<8;i+=1)                                             \
       for (int c=0;c<NABLA_NB_CELLS;c+=1)                             \

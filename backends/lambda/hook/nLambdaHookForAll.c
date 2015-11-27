@@ -132,6 +132,10 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
 }
 
 
+
+// ****************************************************************************
+// * Fonction produisant l'ENUMERATE_*
+// ****************************************************************************
 char* lambdaHookForAllDump(nablaJob *job){
   dbg("\n\t[lambdaHookDumpEnumerate]");
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
@@ -185,7 +189,10 @@ __attribute__((unused)) static char* lambdaHookDumpEnumerateXYZ(nablaJob *job){
 // **************************************************************************** 
 // * Traitement des tokens NABLA ITEMS
 // ****************************************************************************
-char* lambdaHookForAllItem(nablaJob *j, const char job, const char itm, char enum_enum){
+char* lambdaHookForAllItem(nablaJob *j,
+                           const char job,
+                           const char itm,
+                           char enum_enum){
   nprintf(j->entity->main, "/*lambdaHookItem*/", "/*lambdaHookItem*/");
   //const int isPostfixed = j->parse.isPostfixed;
   if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";

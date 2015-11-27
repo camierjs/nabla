@@ -47,10 +47,10 @@
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nCudaHookSysPrefix(void){ return ""; }
-char* nCudaHookSysPostfix(void){ return ""; }
+char* cudaHookSysPrefix(void){ return ""; }
+char* cudaHookSysPostfix(void){ return ""; }
 
-char* nCudaHookPrevCell(void){
+char* cudaHookPrevCell(void){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }
 
@@ -58,7 +58,7 @@ char* nCudaHookPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nCudaHookNextCell(void){
+char* cudaHookNextCell(void){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
 }
 
@@ -66,7 +66,7 @@ char* nCudaHookNextCell(void){
 /***************************************************************************** 
  * Traitement des tokens NABLA ITEMS
  *****************************************************************************/
-char* nCudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
+char* cudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum){
   if (j=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
   if (j=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
   if (j=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
@@ -85,7 +85,7 @@ char* nCudaHookItem(nablaJob* job, const char j, const char itm, char enum_enum)
 /***************************************************************************** 
  * Traitement des transformations '[', '(' & ''
  *****************************************************************************/
-void nCudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
+void cudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVariable *var, char cnfg){
   dbg("\n\t[actJobItemParse] primaryExpression hits Cuda variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
@@ -111,7 +111,7 @@ void nCudaHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job, nablaVa
 /***************************************************************************** 
  * Traitement des tokens SYSTEM
  *****************************************************************************/
-void nCudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
+void cudaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   //char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger

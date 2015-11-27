@@ -126,14 +126,14 @@ int nMiddleSwitch(astNode *root,
     // The CUDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend    
   case BACKEND_CUDA:   {
-    nabla->hook=nCuda(nabla,root);
+    nabla->hook=cuda(nabla,root);
     return nMiddleBackendAnimate(nabla,root);
   }
   case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
     // The LAMBDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend
   case BACKEND_LAMBDA: {
-    nabla->hook=nLambda(nabla);
+    nabla->hook=lambda(nabla);
     return nMiddleBackendAnimate(nabla,root);
   }
   default:

@@ -69,46 +69,24 @@ extern char lambdaMsh3D_c[];
 // ****************************************************************************
 // * lambdaHeader for Std, Avx or Mic
 // ****************************************************************************
-void nLambdaDumpHeaderTypes(nablaMain *nabla){
+void nLambdaDumpHeader(nablaMain *nabla){
+  assert(nabla->entity->name);
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal3_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaTernary_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaScatter_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaOStream_h));
-}
-
-
-// ****************************************************************************
-// * lambdaHeader for Dbg
-// ****************************************************************************
-void nLambdaDumpHeaderDebug(nablaMain *nabla){
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
 }
 
 
 // ****************************************************************************
-// * lambdaHeader for Maths
-// ****************************************************************************
-void nLambdaDumpHeaderMaths(nablaMain *nabla){}
-
-
-// ****************************************************************************
-// * lambdaSourceMesh
+// * lambdaHeader after parse
 // ****************************************************************************
 void nLambdaDumpMesh(nablaMain *nabla){
-  assert(nabla->entity->name);
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh1D_c));
   else
     fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh3D_c));
   fprintf(nabla->entity->hdr,dumpExternalFile(lambdaItems_c));
-}
-
-
-// ****************************************************************************
-// * lambdaDump in source
-// ****************************************************************************
-void nLambdaDumpSource(nablaMain *nabla){
-  assert(nabla->entity->name);
-  nLambdaDumpMesh(nabla);
 }

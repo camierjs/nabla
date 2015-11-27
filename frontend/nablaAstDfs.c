@@ -238,6 +238,67 @@ astNode *dfsFetchRule(astNode *n, int ruleid){
 }
 
 
+// *****************************************************************************
+// * Ajout des variables d'un job trouvé depuis une fonction @ée
+// *****************************************************************************
+static void addNablaVariableList(nablaMain *nabla,
+                                 astNode *n,
+                                 nablaVariable **variables){
+  if (n==NULL) return;
+  if (n->tokenid!=0)
+    dbg("\n\t\t\t[addNablaVariableList] token is '%s'",n->token);
+
+  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
+  if (n->ruleid==rulenameToId("compound_statement")) {
+    dbg("\n\t\t\t[addNablaVariableList] '{', returning");
+    return;
+  }
+  
+  if (n->tokenid=='@'){
+    return;
+    dbg("\n\t\t\t[addNablaVariableList] '@', returning");
+  }
+    
+  if (n->ruleid==rulenameToId("direct_declarator")){
+    dbg("\n\t\t\t[addNablaVariableList] Found a direct_declarator!");
+    dbg("\n\t\t\t[addNablaVariableList] Now looking for: '%s'",
+        n->children->token);
+    nablaVariable *hit=nMiddleVariableFind(nabla->variables,
+                                           n->children->token);
+    dbg("\n\t\t\t[addNablaVariableList] Got the direct_declarator '%s' on %ss",
+        hit->name, hit->item);
+    // Si on ne trouve pas de variable, c'est pas normal
+    if (hit == NULL)
+      return exit(NABLA_ERROR|
+                  fprintf(stderr,
+                          "\n\t\t[addNablaVariableList] Variable error\n"));
+    dbg("\n\t\t\t[addNablaVariableList] Now testing if its allready in our growing variables list");
+    nablaVariable *allready_here=nMiddleVariableFind(*variables, hit->name);
+    if (allready_here!=NULL){
+      dbg("\n\t\t\t[addNablaVariableList] allready_here!");
+    }else{
+      // Création d'une nouvelle called_variable
+      nablaVariable *new = nMiddleVariableNew(NULL);
+      new->name=strdup(hit->name);
+      new->item=strdup(hit->item);
+      new->type=strdup(hit->type);
+      new->dim=hit->dim;
+      new->size=hit->size;
+      // Rajout à notre liste
+      if (*variables==NULL){
+        dbg("\n\t\t\t[addNablaVariableList] first hit");
+        *variables=new;
+      }else{
+        dbg("\n\t\t\t[addNablaVariableList] last hit");
+        nMiddleVariableLast(*variables)->next=new;
+      }
+    }
+  }
+  if (n->children != NULL) addNablaVariableList(nabla, n->children, variables);
+  if (n->next != NULL) addNablaVariableList(nabla, n->next, variables);
+}
+
+
 // ****************************************************************************
 // * DFS scan to get all job calls
 // ****************************************************************************
@@ -263,7 +324,7 @@ int dfsScanJobsCalls(void *vars, void *main, astNode * n){
         // On va maintenant rajouter à notre liste de variables celles du job trouvé
         if (foundJob->nblParamsNode!=NULL){
           dbg("\n\t\t[dfsScanJobsCalls] Looking its Nabla Variables List:");
-          cudaAddNablaVariableList(nabla,foundJob->nblParamsNode,variables);
+          addNablaVariableList(nabla,foundJob->nblParamsNode,variables);
           dbg("\n\t\t[dfsScanJobsCalls] done!");
         }
       }else{

@@ -42,15 +42,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char *nCudaHookBits(void){return "Not relevant here";}
-char* nCudaHookIncludes(void){return "";}
+char *cudaHookBits(void){return "Not relevant here";}
+char* cudaHookIncludes(void){return "";}
 
 
 // ****************************************************************************
 // * cudaPragmas
 // ****************************************************************************
-char *nCudaHookPragmaGccIvdep(void){ return ""; }
-char *nCudaHookPragmaGccAlign(void){ return "__align__(8)"; }
+char *cudaHookPragmaGccIvdep(void){ return ""; }
+char *cudaHookPragmaGccAlign(void){ return "__align__(8)"; }
 
 
 
@@ -58,7 +58,7 @@ char *nCudaHookPragmaGccAlign(void){ return "__align__(8)"; }
 /*****************************************************************************
  * Génération d'un kernel associé à un support
  *****************************************************************************/
-void nCudaHookJob(nablaMain *nabla, astNode *n){
+void cudaHookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,NULL);
@@ -71,7 +71,7 @@ void nCudaHookJob(nablaMain *nabla, astNode *n){
 /*****************************************************************************
  * Cuda libraries
  *****************************************************************************/
-void nCudaHookLibraries(astNode * n, nablaEntity *entity){
+void cudaHookLibraries(astNode * n, nablaEntity *entity){
   fprintf(entity->src, "\n/*lib %s*/",n->children->token);
 }
 

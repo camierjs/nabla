@@ -49,9 +49,9 @@ class __attribute__ ((aligned(8))) real {
   double d;
  public:
   // Constructors
-  __device__ inline Real(): d(0.0){}
-  __device__ inline Real(double f):d(f){}
-  __device__ inline Real(double *_x):d(*_x){}
+  __device__ inline real(): d(0.0){}
+  __device__ inline real(double f):d(f){}
+  __device__ inline real(double *_x):d(*_x){}
   
   // Convertors
   __device__ inline operator double() const { return d; }
@@ -98,11 +98,11 @@ class __attribute__ ((aligned(8))) real3 {
   real z;
  public:
   // Constructors
-  __device__ inline Real3(): x(0.0), y(0.0), z(0.0){}
-  __device__ inline Real3(double f):x(f), y(f), z(f){}
-  __device__ inline Real3(real f):x(f), y(f), z(f){}
-  __device__ inline Real3(real _x, real _y, real _z):x(_x), y(_y), z(_z){}
-  __device__ inline Real3(real *_x, real *_y, real *_z):x(*_x), y(*_y), z(*_z){}
+  __device__ inline real3(): x(0.0), y(0.0), z(0.0){}
+  __device__ inline real3(double f):x(f), y(f), z(f){}
+  __device__ inline real3(real f):x(f), y(f), z(f){}
+  __device__ inline real3(real _x, real _y, real _z):x(_x), y(_y), z(_z){}
+  __device__ inline real3(real *_x, real *_y, real *_z):x(*_x), y(*_y), z(*_z){}
 
   // Arithmetic operators
   friend __device__ inline real3 operator+(const real3 &a, const real3& b) {
@@ -228,20 +228,20 @@ class __attribute__ ((aligned(8))) real3 {
   __device__ inline real3 operator-()const {return real3(-x, -y, -z);}
   
   __device__ friend inline real dot3(const real3 u, const real3 v){
-    const Real _x=__dmul_rn(u.x,v.x);
-    const Real _y=__dmul_rn(u.y,v.y);
-    const Real _z=__dmul_rn(u.z,v.z);
-    const Real xy=__dadd_rn(_x,_y);
-    const Real result=__dadd_rn(xy,_z);
+    const real _x=__dmul_rn(u.x,v.x);
+    const real _y=__dmul_rn(u.y,v.y);
+    const real _z=__dmul_rn(u.z,v.z);
+    const real xy=__dadd_rn(_x,_y);
+    const real result=__dadd_rn(xy,_z);
     return result;
   }  
   __device__ friend inline real3 cross3(real3 u, real3 v){
-    const Real x=__dsub_rn(__dmul_rn(u.y,v.z),__dmul_rn(u.z,v.y));
-    const Real y=__dsub_rn(__dmul_rn(u.z,v.x),__dmul_rn(u.x,v.z));
-    const Real z=__dsub_rn(__dmul_rn(u.x,v.y),__dmul_rn(u.y,v.x));
+    const real x=__dsub_rn(__dmul_rn(u.y,v.z),__dmul_rn(u.z,v.y));
+    const real y=__dsub_rn(__dmul_rn(u.z,v.x),__dmul_rn(u.x,v.z));
+    const real z=__dsub_rn(__dmul_rn(u.x,v.y),__dmul_rn(u.y,v.x));
     return real3(x,y,z);
   }
-  __device__ friend inline real norm(real3 u){ return square_root(dot3(u,u));}
+  __device__ friend inline real norm(real3 u){ return __dsqrt_rd(dot3(u,u));}
 };
 //inline real norm(real u){ return ::fabs(u);}
 
@@ -324,12 +324,12 @@ __device__ inline void gatherFromNode_3kArray8(const int a, const int corner,
 // * opTernary
 // ****************************************************************************
 
-__device__ inline integer opTernary(const bool cond,
+__device__ inline int opTernary(const bool cond,
                          const int ifStatement,
                          const int elseStatement){
   //debug()<<"opTernary bool int int";
-  if (cond) return integer(ifStatement);
-  return integer(elseStatement);
+  if (cond) return ifStatement;
+  return elseStatement;
 }
 
 __device__ inline real opTernary(const bool cond,
@@ -374,7 +374,7 @@ __device__ inline real3 opTernary(const bool cond,
                        const double ifStatement,
                        const real3&  elseStatement){
   //debug()<<"opTernary bool double real3";
-  if (cond) return Real3(ifStatement);
+  if (cond) return real3(ifStatement);
   return elseStatement;
 }
 

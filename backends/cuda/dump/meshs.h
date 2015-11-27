@@ -40,11 +40,14 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// * Dumped from meshs.h
+// ****************************************************************************
 int host_cell_node[8*NABLA_NB_CELLS];
 int host_node_cell[8*NABLA_NB_NODES];
 int host_node_cell_corner[8*NABLA_NB_NODES];
 int host_node_cell_and_corner[2*8*NABLA_NB_NODES];
-
 
 __attribute__((unused)) static void verifConnectivity(void){
   printf("\nVérification des connectivité des noeuds");
@@ -56,7 +59,6 @@ __attribute__((unused)) static void verifConnectivity(void){
     }
   }
 }
-
 __attribute__((unused)) static void verifCorners(void){
   printf("\nVérification des coins des noeuds");
   for(int n=0;n<NABLA_NB_NODES;n+=1){
@@ -89,7 +91,6 @@ __attribute__((unused)) static void verifNextPrev(void){
         cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
   }
 }
-
 
 static int comparNodeCell(const void *a, const void *b){
   return (*(int*)a)>(*(int*)b);
@@ -157,25 +158,10 @@ static void host_set_corners(void){
   //verifCorners();
 }
 
-
 #define xOf7(n) (n%%NABLA_NB_CELLS_X_AXIS)
 #define yOf7(n) ((n/NABLA_NB_CELLS_X_AXIS)%%NABLA_NB_CELLS_Y_AXIS)
 #define zOf7(n) ((n/(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))%%NABLA_NB_CELLS_Z_AXIS)
 
-
-/*__device__ void sort(int *crnr,int *cell, int n, int i){
-  if (i==0) return;
-  //if (n==31) printf("\ncorner for node %%d, i=%%d, cell=%%d, cell-1=%%d",n,i,cell[8*n+i],cell[8*n+i-1]);
-  if (cell[8*n+i-1]>cell[8*n+i]) return;
-  {
-    const int tmpCell=cell[8*n+i-1];
-    const int tmpCrnr=crnr[8*n+i-1];
-    cell[8*n+i-1]=cell[8*n+i];
-    cell[8*n+i]=tmpCell;
-    crnr[8*n+i-1]=crnr[8*n+i];
-    crnr[8*n+i]=tmpCrnr;
-  }
-  }*/
 __global__ void nabla_set_next_prev(int *cell_node,
                                     int *cell_prev,
                                     int *cell_next,
@@ -184,56 +170,6 @@ __global__ void nabla_set_next_prev(int *cell_node,
                                     int *node_cell_corner_idx){
   CUDA_INI_CELL_THREAD(tcid);
   const int c=tcid;
-  /*const int iNode0 = cell_node[0*NABLA_NB_CELLS+c];
-  const int iNode1 = cell_node[1*NABLA_NB_CELLS+c];
-  const int iNode2 = cell_node[2*NABLA_NB_CELLS+c];
-  const int iNode3 = cell_node[3*NABLA_NB_CELLS+c];
-  const int iNode4 = cell_node[4*NABLA_NB_CELLS+c];
-  const int iNode5 = cell_node[5*NABLA_NB_CELLS+c];
-  const int iNode6 = cell_node[6*NABLA_NB_CELLS+c];
-  const int iNode7 = cell_node[7*NABLA_NB_CELLS+c];
-  //printf("\nCell #%%d has as nodes: %%d,%%d,%%d,%%d,%%d,%%d,%%d,%%d",c, iNode0,iNode1,iNode2,iNode3,iNode4,iNode5,iNode6,iNode7);
-  node_cell[8*iNode0+0]=c;
-  node_cell[8*iNode1+1]=c;
-  node_cell[8*iNode2+2]=c;
-  node_cell[8*iNode3+3]=c;
-  node_cell[8*iNode4+4]=c;
-  node_cell[8*iNode5+5]=c;
-  node_cell[8*iNode6+6]=c;
-  node_cell[8*iNode7+7]=c;*/
-  /*
-  node_cell_corner[8*iNode0+node_cell_corner_idx[iNode0]]=node_cell_corner_idx[iNode0];
-  sort(node_cell_corner,node_cell,iNode0,node_cell_corner_idx[iNode0]);
-  node_cell_corner_idx[iNode0]+=1;
-  
-  node_cell_corner[8*iNode1+node_cell_corner_idx[iNode1]]=node_cell_corner_idx[iNode1];
-  sort(node_cell_corner,node_cell,iNode1,node_cell_corner_idx[iNode1]);
-  node_cell_corner_idx[iNode1]+=1;
-  
-  node_cell_corner[8*iNode2+node_cell_corner_idx[iNode2]]=node_cell_corner_idx[iNode2];
-  sort(node_cell_corner,node_cell,iNode2,node_cell_corner_idx[iNode2]);
-  node_cell_corner_idx[iNode2]+=1;
-  
-  node_cell_corner[8*iNode3+node_cell_corner_idx[iNode3]]=node_cell_corner_idx[iNode3];
-  sort(node_cell_corner,node_cell,iNode3,node_cell_corner_idx[iNode3]);
-  node_cell_corner_idx[iNode3]+=1;
-  
-  node_cell_corner[8*iNode4+node_cell_corner_idx[iNode4]]=node_cell_corner_idx[iNode4];
-  sort(node_cell_corner,node_cell,iNode4,node_cell_corner_idx[iNode4]);
-  node_cell_corner_idx[iNode4]+=1;
-  
-  node_cell_corner[8*iNode5+node_cell_corner_idx[iNode5]]=node_cell_corner_idx[iNode5];
-  sort(node_cell_corner,node_cell,iNode5,node_cell_corner_idx[iNode5]);
-  node_cell_corner_idx[iNode5]+=1;
-  
-  node_cell_corner[8*iNode6+node_cell_corner_idx[iNode6]]=node_cell_corner_idx[iNode6];
-  sort(node_cell_corner,node_cell,iNode6,node_cell_corner_idx[iNode6]);
-  node_cell_corner_idx[iNode6]+=1;
-  
-  node_cell_corner[8*iNode7+node_cell_corner_idx[iNode7]]=node_cell_corner_idx[iNode7];
-  sort(node_cell_corner,node_cell,iNode7,node_cell_corner_idx[iNode7]);
-  node_cell_corner_idx[iNode7]+=1;
-  */
   // On met des valeurs négatives afin que le gatherk_and_zero_neg_ones puisse les reconaitre
   {// Dans la direction X
     const int i=c;
@@ -245,7 +181,6 @@ __global__ void nabla_set_next_prev(int *cell_node,
     if (((i+1)%%NABLA_NB_CELLS_X_AXIS)==0) cell_next[idx] = -44444444;
     //printf("\nNext/Prev(X) for cells %%d <- #%%d -> %%d", cell_prev[idx],i,cell_next[idx]);
   }
-  
   {// Dans la direction Y
     const int i=c;
     const int idy=MD_DirY*NABLA_NB_CELLS+i;
@@ -256,7 +191,6 @@ __global__ void nabla_set_next_prev(int *cell_node,
     if (yOf7(i)==(NABLA_NB_CELLS_Y_AXIS-1)) cell_next[idy] = -66666666 ;
     //printf("\nNext/Prev(Y) for cells %%d <- #%%d -> %%d", cell_prev[idy], i, cell_next[idy]);
   }
-  
   {// Dans la direction Z
     const int i=c;
     const int idz=MD_DirZ*NABLA_NB_CELLS+i;
