@@ -47,17 +47,14 @@
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
-const nWhatWith cudaHeaderTypedef[]={
+const nWhatWith cuHeaderTypedef[]={
   {"int","integer"},
   {"struct real3","Real3"},
   {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
-// ****************************************************************************
-// * CUDA DEFINES
-// ****************************************************************************
-const nWhatWith cudaHeaderDefines[]={
+const nWhatWith cuHeaderDefines[]={
   {"Real3","real3"},
   {"Real","real"},
   {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
@@ -84,46 +81,45 @@ const nWhatWith cudaHeaderDefines[]={
   {NULL,NULL}
 };
 
-const char* cudaHeaderForwards[]={
+const char* cuHeaderForwards[]={
   "void gpuEnum(void);",
   NULL
 };
 
-
-const nFwdDefTypes cudaHeader={
-  cudaHeaderForwards,
-  cudaHeaderDefines,
-  cudaHeaderTypedef
+const callHeader cudaHeader={
+  cuHeaderForwards,
+  cuHeaderDefines,
+  cuHeaderTypedef
 };
 
-const static nCallSimd cudaSimdCalls={
+const static callSimd cudaSimdCalls={
   cuHookBits,
   cuHookGather,
   cuHookScatter,
   cuHookIncludes
 };
 
-nCalls cudaCalls={
-  &cudaHeader, // header
-  &cudaSimdCalls, // simd
-  NULL, // parallel
+calls cudaCalls={
+  &cudaHeader,
+  &cudaSimdCalls,
+  NULL,
 };
 
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-const nHookXyz cuHookXyz={
+const hookXyz cuHookXyz={
   cuHookSysPrefix,
   cuHookPrevCell,
   cuHookNextCell,
   cuHookSysPostfix
 };
 
-const static nHookPragma cuHookPragma={
+const static hookPragma cuHookPragma={
   cuHookPragmaGccAlign
 };
 
-const static nHookHeader cuHookHeader={
+const static hookHeader cuHookHeader={
   cuHookHeaderDump,
   cuHookHeaderOpen,
   cuHookHeaderEnumerates,
@@ -133,20 +129,20 @@ const static nHookHeader cuHookHeader={
 };
 
 // Hooks pour le source
-const static nHookSource cuHookSource={
+const static hookSource cuHookSource={
   cuHookSourceOpen,
   cuHookSourceInclude
 };
   
 // Hooks pour le maillage
-const static nHookMesh cuHookMesh={
+const static hookMesh cuHookMesh={
   cuHookMeshPrefix,
   cuHookMeshCore,
   cuHookMeshPostfix
 };
   
 // Hooks pour les variables
-const static nHookVars cuHookVars={
+const static hookVars cuHookVars={
   cuHookVariablesInit,
   cuHookVariablesPrefix,
   cuHookVariablesMalloc,
@@ -154,7 +150,7 @@ const static nHookVars cuHookVars={
 };  
 
 // Hooks pour le main
-const static nHookMain cuHookMain={
+const static hookMain cuHookMain={
   cuHookMainPrefix,
   cuHookMainPreInit,
   cuHookMainVarInitKernel,
@@ -165,14 +161,14 @@ const static nHookMain cuHookMain={
 };  
 
   
-const static nHookForAll cuHookForAll={
+const static hookForAll cuHookForAll={
   cuHookForAllPrefix,
   cuHookForAllDump,
   cuHookForAllItem,
   cuHookForAllPostfix
 };
 
-const static nHookToken cuHookToken={
+const static hookToken cuHookToken={
   cuHookTokenPrefix, // prefix
   cuHookSwitchToken, // svvitch
   cuHookTurnTokenToVariable, // variable
@@ -187,7 +183,7 @@ const static nHookToken cuHookToken={
   cuHookTokenPostfix
 };
 
-const static nHookGrammar cuHookGrammar={
+const static hookGrammar cuHookGrammar={
   cuHookFunction,
   cuHookJob,
   cuHookReduction,
@@ -196,7 +192,7 @@ const static nHookGrammar cuHookGrammar={
 };
   
   
-const static nHookCall cuHookCall={
+const static hookCall cuHookCall={
   cuHookAddCallNames,
   cuHookAddArguments,
   cuHookEntryPointPrefix,
@@ -206,7 +202,7 @@ const static nHookCall cuHookCall={
 };
 
 
-static nHooks cuHooks={
+static hooks cuHooks={
   &cuHookForAll,
   &cuHookToken,
   &cuHookGrammar,
@@ -224,7 +220,7 @@ static nHooks cuHooks={
 // ****************************************************************************
 // * nccCuda
 // ****************************************************************************
-nHooks *cuda(nablaMain *nabla, const astNode *root){
+hooks *cuda(nablaMain *nabla){
   nabla->call=&cudaCalls;
   return &cuHooks;
 }

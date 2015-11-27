@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "frontend/nablaAst.h"
+#include "frontend/ast.h"
 
 
 // ****************************************************************************
@@ -53,28 +53,28 @@ NABLA_STATUS nOkina(nablaMain *nabla,
                       const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  const nFwdDefTypes nablaOkinaHeaderStdHeader={
+  const callHeader nablaOkinaHeaderStdHeader={
     nOkinaStdForwards,
     nOkinaStdDefines,
     nOkinaStdTypedef
   };
-  const nFwdDefTypes nablaOkinaHeaderSseHeader={
+  const callHeader nablaOkinaHeaderSseHeader={
     nOkinaSseForwards,
     nOkinaSseDefines,
     nOkinaSseTypedef
   };
-  const nFwdDefTypes nablaOkinaHeaderAvxHeader={
+  const callHeader nablaOkinaHeaderAvxHeader={
     nOkinaAvxForwards,
     nOkinaAvxDefines,
     nOkinaAvxTypedef
   };
-  const nFwdDefTypes nablaOkinaHeaderMicHeader={
+  const callHeader nablaOkinaHeaderMicHeader={
     nOkinaMicForwards,
     nOkinaMicDefines,
     nOkinaMicTypedef
   };
   // Std Typedefs, Defines & Forwards
-  const nHookHeader nablaOkinaHeaderStdHooks={
+  const hookHeader nablaOkinaHeaderStdHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -83,7 +83,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Sse Typedefs, Defines & Forwards
-  const nHookHeader nablaOkinaHeaderSseHooks={
+  const hookHeader nablaOkinaHeaderSseHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -92,7 +92,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Avx Typedefs, Defines & Forwards
-  const nHookHeader nablaOkinaHeaderAvxHooks={
+  const hookHeader nablaOkinaHeaderAvxHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -101,7 +101,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Mic Typedefs, Defines & Forwards
-  const nHookHeader nablaOkinaHeaderMicHooks={
+  const hookHeader nablaOkinaHeaderMicHooks={
     NULL, // dump
     NULL, // open
     NULL, // enums
@@ -110,96 +110,96 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL  // postfix
   };
   // Définition des hooks pour le mode Standard
-  const nCallSimd nablaOkinaSimdStdCalls={
+  const callSimd nablaOkinaSimdStdCalls={
     nOkinaStdBits,
     nOkinaStdGather,
     nOkinaStdScatter,
     nOkinaStdIncludes
   };
   // Définition des calls pour le mode SSE
-  const nCallSimd nablaOkinaSimdSseCalls={
+  const callSimd nablaOkinaSimdSseCalls={
     nOkinaSseBits,
     nOkinaSseGather,
     nOkinaSseScatter,
     nOkinaSseIncludes
   };
   // Définition des calls pour le mode AVX
-  const nCallSimd nablaOkinaSimdAvxCalls={
+  const callSimd nablaOkinaSimdAvxCalls={
     nOkinaAvxBits,
     nOkinaAvxGather,
     nOkinaAvxScatter,
     nOkinaAvxIncludes
   };
   // Définition des calls pour le mode MIC
-  const nCallSimd nablaOkinaSimdMicCalls={ 
+  const callSimd nablaOkinaSimdMicCalls={ 
     nOkinaMicBits,
     nOkinaMicGather,
     nOkinaMicScatter,
     nOkinaMicIncludes
   };
   // Définition des hooks des directions
-  const nHookXyz nablaOkinaXyzStdHooks={
+  const hookXyz nablaOkinaXyzStdHooks={
     nOkinaHookSysPrefix,
     nOkinaStdPrevCell,
     nOkinaStdNextCell,
     nOkinaHookSysPostfix
   };
   // Définition des hooks des directions
-  const nHookXyz nablaOkinaXyzSseHooks={
+  const hookXyz nablaOkinaXyzSseHooks={
     nOkinaHookSysPrefix,
     nOkinaSsePrevCell,
     nOkinaSseNextCell,
     nOkinaHookSysPostfix
   };
   // Définition des hooks pour le mode AVX
-  const nHookXyz nablaOkinaXyzAvxHooks={
+  const hookXyz nablaOkinaXyzAvxHooks={
     nOkinaHookSysPrefix,
     nOkinaAvxPrevCell,
     nOkinaAvxNextCell,
     nOkinaHookSysPostfix
   };
   // Définition des hooks pour le mode MIC
-  const nHookXyz nablaOkinaXyzMicHooks={ 
+  const hookXyz nablaOkinaXyzMicHooks={ 
     nOkinaHookSysPrefix,
     nOkinaMicPrevCell,
     nOkinaMicNextCell,
     nOkinaHookSysPostfix
   };
   // Définition des calls pour Cilk+
-  const nCallParallel okinaCilkCalls={
+  const callParallel okinaCilkCalls={
     nOkinaParallelCilkSync,
     nOkinaParallelCilkSpawn,
     nOkinaParallelCilkLoop,
     nOkinaParallelCilkIncludes
   };
   // Définition des calls pour OpenMP
-  const nCallParallel okinaOpenMPCalls={
+  const callParallel okinaOpenMPCalls={
     nOkinaParallelOpenMPSync,
     nOkinaParallelOpenMPSpawn,
     nOkinaParallelOpenMPLoop,
     nOkinaParallelOpenMPIncludes
   };
   // Définition des calls quand il n'y a pas de parallélisation
-  const nCallParallel okinaVoidCalls={
+  const callParallel okinaVoidCalls={
     nOkinaParallelVoidSync,
     nOkinaParallelVoidSpawn,
     nOkinaParallelVoidLoop,
     nOkinaParallelVoidIncludes
   };
   // Pragmas hooks definition for ICC or GCC
-  const nHookPragma okinaPragmaICCHooks ={
+  const hookPragma okinaPragmaICCHooks ={
     nOkinaPragmaIccAlign
   };
-  const nHookPragma okinaPragmaGCCHooks={
+  const hookPragma okinaPragmaGCCHooks={
     nOkinaPragmaGccAlign
   };
-  const nHookForAll nOkinaHookForAll={
+  const hookForAll nOkinaHookForAll={
     nOkinaHookEnumeratePrefix,
     nOkinaHookEnumerateDump,
     nOkinaHookItem,
     nOkinaHookEnumeratePostfix
   };
-  const nHookToken nOkinaHookToken={
+  const hookToken nOkinaHookToken={
     nOkinaHookTokenPrefix,
     nOkinaHookTokenSwitch,
     nOkinaHookVariablesTurnTokenToVariable,
@@ -213,14 +213,14 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     okinaHookIsTest,
     nOkinaHookTokenPostfix
   };
-  const nHookGrammar nOkinaHookGrammar={
+  const hookGrammar nOkinaHookGrammar={
     nOkinaHookFunction,
     nOkinaHookJob,
     nOkinaHookReduction,
     nOkinaHookPrimaryExpressionToReturn,
     nOkinaHookReturnFromArgument
   };
-  const nHookCall nOkinaHookCall={
+  const hookCall nOkinaHookCall={
     nOkinaHookAddCallNames,
     nOkinaHookAddArguments,
     nOkinaHookEntryPointPrefix,
@@ -229,7 +229,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookParamsDumpList
   };
   // Definition of Okina's Hooks
-  nHooks okinaBackendHooks={
+  hooks okinaBackendHooks={
     &nOkinaHookForAll,
     &nOkinaHookToken,
     &nOkinaHookGrammar,
@@ -243,7 +243,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL // main
   };
   // Par défaut, on est en mode 'std'
-  nCalls okinaBackendCalls={
+  calls okinaBackendCalls={
     &nablaOkinaHeaderStdHeader,
     &nablaOkinaSimdStdCalls,
     &okinaVoidCalls // parallel

@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "frontend/nablaAst.h"
+#include "frontend/ast.h"
 
 
 static char* arcaneEntryPointPrefix(nablaMain *nabla,
@@ -181,7 +181,7 @@ void %s%s::%s(){\n",
 }
 
 // Typedefs, Defines & Forwards
-const nHookHeader nablaArcaneHeaderHooks={
+const hookHeader nablaArcaneHeaderHooks={
   NULL, // dump
   NULL, // open
   NULL, // enums
@@ -202,25 +202,25 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   char hdrFileName[NABLA_MAX_FILE_NAME];
   nablaEntity *entity=middlend->entity;  // On fait l'hypothèse qu'il n'y a qu'un entity pour l'instant
 
-  nCallSimd nablaArcaneSimdCalls={
+  callSimd nablaArcaneSimdCalls={
     nccArcBits,
     nccArcGather,
     nccArcScatter,
     nccArcIncludes
   };
-  nHookXyz nablaArcaneXyzHooks={
+  hookXyz nablaArcaneXyzHooks={
     nccArcSystemPrefix,
     nccArcPrevCell,
     nccArcNextCell,
     nccArcSystemPostfix
   };
-  const nHookForAll nArcaneHookForAll={
+  const hookForAll nArcaneHookForAll={
     arcaneHookPrefixEnumerate,
     arcaneHookDumpEnumerate,
     arcaneHookItem,
     arcaneHookPostfixEnumerate
   };
-  const nHookToken nArcaneHookToken={
+  const hookToken nArcaneHookToken={
     arcaneHookTokenPrefix,
     arcaneHookSwitchToken,
     arcaneHookTurnTokenToVariable,
@@ -235,7 +235,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     arcaneHookTokenPostfix
   };
 
-  const nHookGrammar hookGrammar={
+  const hookGrammar hookGrammar={
     arcaneHookFunction,
     arcaneJob,
     arcaneHookReduction,
@@ -243,7 +243,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL // returnFromArgument
   };
   
-  const nHookCall nArcaneHookCall={
+  const hookCall nArcaneHookCall={
     arcaneAddCallNames,
     arcaneAddArguments,
     arcaneEntryPointPrefix,
@@ -252,7 +252,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL  // dumpNablaParameterList
   };
   
-  nHooks arcaneBackendHooks={
+  hooks arcaneBackendHooks={
     &nArcaneHookForAll,
     &nArcaneHookToken,
     &hookGrammar,
@@ -265,7 +265,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL, // vars
     NULL // main
   };
-  nCalls arcaneBackendCalls={
+  calls arcaneBackendCalls={
     NULL, // header
     &nablaArcaneSimdCalls, // simd
     NULL // parallel
@@ -275,7 +275,7 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
   middlend->hook=&arcaneBackendHooks;
   //middlend->hook->simd=&nablaArcaneSimdHooks;
   
-  nHookPragma arcanePragmaGCCHooks={
+  hookPragma arcanePragmaGCCHooks={
     nArcanePragmaGccAlign
   };
   middlend->hook->pragma=&arcanePragmaGCCHooks;

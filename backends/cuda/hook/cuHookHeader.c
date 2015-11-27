@@ -116,10 +116,10 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
 // ****************************************************************************
 void cuHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
-  cuHeaderReal3(nabla);
+  cuHeaderTypes(nabla);
   cuHeaderExtra(nabla);
-  cuHeaderMesh(nabla);
-  cuHeaderHandleErrors(nabla);
+  cuHeaderMeshs(nabla);
+  cuHeaderError(nabla);
   cuHeaderItems(nabla);
 }
 

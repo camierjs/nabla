@@ -154,13 +154,13 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #define NABLA_JOB_WHEN_MAX 64
 #define NABLA_JOB_WHEN_HLT_FACTOR 4
 
-#include "frontend/nFrontend.h"
+#include "frontend/frontend.h"
 
-#include "middlend/nMiddlend.h"
-#include "middlend/nMiddlendHooks.h"
-#include "backends/nBackends.h"
+#include "middlend/middlend.h"
+#include "backends/hooks.h"
+#include "backends/calls.h"
 
-#include "backends/cuda/nCuda.h"
+#include "backends/cuda/cuda.h"
 #include "backends/okina/nOkina.h"
 #include "backends/arcane/nArcane.h"
 #include "backends/lambda/nLambda.h"

@@ -214,15 +214,16 @@ typedef struct nablaMainStruct{
   char *service_name;   // Arcane specific
   int optionDumpTree;
   int HLT_depth;
-  struct nHooksStruct *hook;
-  struct nCallsStruct *call;
+  struct hookStruct *hook;
+  struct callStruct *call;
 } nablaMain;
 
 
 // ****************************************************************************
 // * Forward declaration
 // ****************************************************************************
-
+void middleGlobals(nablaMain*);
+ 
 // nMiddleLibraries.c
 bool isWithLibrary(nablaMain*,with_library);
 void nMiddleLibraries(astNode*,nablaEntity*);

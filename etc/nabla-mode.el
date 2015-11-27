@@ -1,54 +1,13 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; NABLA - a Numerical Analysis Based LAnguage                               ;;
-;;                                                                           ;;
-;; Copyright (C) 2014~2015 CEA/DAM/DIF                                       ;;
-;; IDDN.FR.001.520002.000.S.P.2014.000.10500                                 ;;
-;;                                                                           ;;
-;; Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          ;;
-;;                                                                           ;;
-;; This software is a computer program whose purpose is to translate         ;;
-;; numerical-analysis specific sources and to generate optimized code        ;;
-;; for different targets and architectures.                                  ;;
-;;                                                                           ;;
-;; This software is governed by the CeCILL license under French law and      ;;
-;; abiding by the rules of distribution of free software. You can  use,      ;;
-;; modify and/or redistribute the software under the terms of the CeCILL     ;;
-;; license as circulated by CEA, CNRS and INRIA at the following URL:        ;;
-;; "http:;;www.cecill.info".                                                 ;;
-;;                                                                           ;;
-;; The CeCILL is a free software license, explicitly compatible with         ;;
-;; the GNU GPL.                                                              ;;
-;;                                                                           ;;
-;; As a counterpart to the access to the source code and rights to copy,     ;;
-;; modify and redistribute granted by the license, users are provided only   ;;
-;; with a limited warranty and the software's author, the holder of the      ;;
-;; economic rights, and the successive licensors have only limited liability.;;
-;;                                                                           ;;
-;; In this respect, the user's attention is drawn to the risks associated    ;;
-;; with loading, using, modifying and/or developing or reproducing the       ;;
-;; software by the user in light of its specific status of free software,    ;;
-;; that may mean that it is complicated to manipulate, and that also         ;;
-;; therefore means that it is reserved for developers and experienced        ;;
-;; professionals having in-depth computer knowledge. Users are therefore     ;;
-;; encouraged to load and test the software's suitability as regards their   ;;
-;; requirements in conditions enabling the security of their systems and/or  ;;
-;; data to be ensured and, more generally, to use and operate it in the      ;;
-;; same conditions as regards security.                                      ;;
-;;                                                                           ;;
-;; The fact that you are presently reading this means that you have had      ;;
-;; knowledge of the CeCILL license and that you accept its terms.            ;;
-;;                                                                           ;;
-;; See the LICENSE file for details.                                         ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; nabla-mode.el --- major mode for editing Nabla files.
+(defconst nabla-version "151118" "Nabla Mode version number")
+(defconst nabla-time-stamp "2015-11-18"
+  "Nabla Mode time stamp for last update.")
 
-;; nabla-mode.el --- major mode for editing Nabla files.
-(defconst nabla-version "130604" "Nabla Mode version number")
-(defconst nabla-time-stamp "2013-06-04" "Nabla Mode time stamp")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defconst nabla-keywords
   '("inline" "restrict" "aligned" "const" "return" "register" "volatile"
-    "if" "else" "do" "while" "continue" "break" "for"
+    "if" "is" "else" "do" "while" "continue" "break" "for"
     "foreach"
     "all" "own" "inner" "outer"
     "in" "out" "inout" "with")
@@ -194,7 +153,9 @@
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
    ;; highlight special keywords
-   '("\\(∀\\)" . font-lock-keyword-face)
+   '("\\(∀\\|³\\)" . font-lock-keyword-face)
+   ;; highlight special characters
+   '("\\(ℝ\\|ℤ\\|ℕ\\|ℾ\\)" . font-lock-type-face)
    ;; highlight numbers[-+]?
    '("\\W\\([0-9._]+\\)\\>" 1 font-lock-constant-face)
    ;; highlight true, false
@@ -215,6 +176,7 @@
    '("^\\s-*\\(#\\)\\(\\w+\\)\\s-*\\(\\w+\\|\"\\).*" (1 font-lock-builtin-face) (2 font-lock-preprocessor-face) (3 font-lock-variable-name-face))
    ))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mode definitions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -224,3 +186,5 @@
   (message "Loading Nabla minor mode %s@%s" nabla-version nabla-time-stamp)
   (run-hooks 'nabla-mode-hook))
 (provide 'nabla-mode)
+
+;;; nabla-mode.el ends here

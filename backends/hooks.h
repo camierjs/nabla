@@ -44,36 +44,36 @@
 #define _NABLA_MIDDLEND_HOOKS_H_
 
 // Structure des hooks utilisé pour la gestion des directions
-typedef struct nHookXyzStruct{
+typedef struct hookXyzStruct{
   char* (*prefix)(void);
   char* (*prevCell)(void);
   char* (*nextCell)(void);
   char* (*postfix)(void);
-} nHookXyz;
+} hookXyz;
 
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
-typedef struct nHookPragmaStruct{
+typedef struct hookPragmaStruct{
   //char* (*ivdep)(void);
   char* (*align)(void);
-} nHookPragma;
+} hookPragma;
 
-typedef struct nHookHeaderStruct{
+typedef struct hookHeaderStruct{
   void (*dump)(struct nablaMainStruct*);  
   void (*open)(struct nablaMainStruct*);  
   void (*enums)(struct nablaMainStruct*);  
   void (*prefix)(struct nablaMainStruct*);  
   void (*include)(struct nablaMainStruct*);  
   void (*postfix)(struct nablaMainStruct*);
-} nHookHeader;
+} hookHeader;
 
 // Hooks for Sources
-typedef struct nHookSourceStruct{
+typedef struct hookSourceStruct{
   void (*open)(struct nablaMainStruct *);  
   void (*include)(struct nablaMainStruct *);  
-} nHookSource;
+} hookSource;
 
 // Hooks for Main
-typedef struct nHookMainStruct{
+typedef struct hookMainStruct{
   NABLA_STATUS (*prefix)(struct nablaMainStruct *);  
   NABLA_STATUS (*preInit)(struct nablaMainStruct *);  
   NABLA_STATUS (*varInitKernel)(struct nablaMainStruct *);  
@@ -81,25 +81,24 @@ typedef struct nHookMainStruct{
   NABLA_STATUS (*main)(struct nablaMainStruct *);  
   NABLA_STATUS (*postInit)(struct nablaMainStruct *);  
   NABLA_STATUS (*postfix)(struct nablaMainStruct *);  
-} nHookMain;
+} hookMain;
 
 // Mesh Hooks
-typedef struct nHookMeshStruct{
+typedef struct hookMeshStruct{
   void (*prefix)(struct nablaMainStruct *);  
   void (*core)(struct nablaMainStruct *);  
   void (*postfix)(struct nablaMainStruct *);  
-} nHookMesh;
+} hookMesh;
 
 // Variables Hooks
-typedef struct nHookVarsStruct{
+typedef struct hookVarsStruct{
   void (*init)(struct nablaMainStruct *);  
   void (*prefix)(struct nablaMainStruct *);  
   void (*malloc)(struct nablaMainStruct *);  
   void (*free)(struct nablaMainStruct *);  
-} nHookVars;
+} hookVars;
 
-
-typedef struct nHookForAllStruct{
+typedef struct hookForAllStruct{
   // Prefix à l'ENUMERATE_*
   char* (*prefix)(nablaJob*);  
   // Dump l'ENUMERATE_*
@@ -108,9 +107,9 @@ typedef struct nHookForAllStruct{
   char* (*item)(nablaJob*,const char, const char, char);
   // Dump l'ENUMERATE_*
   char* (*postfix)(nablaJob*);  
-} nHookForAll;
+} hookForAll;
 
-typedef struct nHookTokenStruct{
+typedef struct hookTokenStruct{
   char* (*prefix)(struct nablaMainStruct *);  
   // Gestion des différentes actions pour un job
   void (*svvitch)(astNode*, nablaJob*);
@@ -126,9 +125,9 @@ typedef struct nHookTokenStruct{
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char);
   void (*isTest)(nablaMain*,nablaJob*,astNode*,int);
   char* (*postfix)(nablaMain*);  
-} nHookToken;
+} hookToken;
 
-typedef struct nHookGrammarStruct{
+typedef struct hookGrammarStruct{
   // Hook de génération d'un kernel associé à une fonction
   void (*function)(struct nablaMainStruct*, astNode*);
   // Génération d'un kernel associé à un support
@@ -139,9 +138,9 @@ typedef struct nHookGrammarStruct{
   bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
-} nHookGrammar;
+} hookGrammar;
 
-typedef struct nHookCallStruct{
+typedef struct hookCallStruct{
   // Hooks pour rajouter au fur et à mesure qu'on les découvre
   // les fonctions appelées et les arguments
   void (*addCallNames)(struct nablaMainStruct*,nablaJob*,astNode*);
@@ -152,24 +151,23 @@ typedef struct nHookCallStruct{
   void (*dfsForCalls)(struct nablaMainStruct*,nablaJob*,astNode*,const char *,astNode *);
   void (*addExtraParameters)(nablaMain*, nablaJob*, int*);
   void (*dumpNablaParameterList)(nablaMain*, nablaJob*, astNode*,int*);
-} nHookCall;
+} hookCall;
 
 // ****************************************************************************
 // * Backend HOOKS
 // ****************************************************************************
-typedef struct nHooksStruct{
-  const nHookForAll *forall;
-  const nHookToken *token;
-  const nHookGrammar *grammar;
-  const nHookCall *call;
-  const nHookXyz *xyz;
-  const nHookPragma *pragma;
-  const nHookHeader *header;
-  const nHookSource *source;
-  const nHookMesh *mesh;
-  const nHookVars *vars;
-  const nHookMain *main;
-} nHooks;
-
+typedef struct hookStruct{
+  const hookForAll *forall;
+  const hookToken *token;
+  const hookGrammar *grammar;
+  const hookCall *call;
+  const hookXyz *xyz;
+  const hookPragma *pragma;
+  const hookHeader *header;
+  const hookSource *source;
+  const hookMesh *mesh;
+  const hookVars *vars;
+  const hookMain *main;
+} hooks;
 
 #endif // _NABLA_MIDDLEND_HOOKS_H_

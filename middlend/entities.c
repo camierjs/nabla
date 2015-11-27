@@ -42,79 +42,33 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-// ****************************************************************************
-// * dumpExternalFile
-// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
-// ****************************************************************************
-static char *dumpExternalFile(char *file){
-  return file+NABLA_LICENSE_HEADER;
+// Allocation d'une nouvelle structure de entity
+nablaEntity *nMiddleEntityNew(nablaMain *nabla){
+	nablaEntity *entity;
+	entity = (nablaEntity *)malloc(sizeof(nablaEntity));
+ 	assert(entity != NULL);
+   entity->hdr=entity->src=NULL;
+   entity->next=NULL;
+   entity->main=nabla;
+   entity->jobs=NULL;
+   entity->libraries=0;// Par défaut, pas de library utilisée
+  	return entity; 
 }
 
-
-// ****************************************************************************
-// * extern definitions from nCudaDump.S
-// ****************************************************************************
-extern char real3_h[];
-extern char extra_h[];
-extern char meshs_h[];
-extern char error_h[];
-extern char debug_h[];
-extern char items_h[];
-
-
-// ***************************************************************************** 
-// * 
-// *****************************************************************************
-void cuHeaderItems(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(items_h));
-}
-
-void cuHeaderReal3(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(real3_h));
-}
-
-void cuHeaderExtra(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(extra_h));
-}
-
-void cuHeaderMesh(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(meshs_h));
-}
-
-void cuHeaderHandleErrors(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,dumpExternalFile(error_h));
-}
-
-__attribute__((unused)) void cuHeaderDebug(nablaMain *nabla){
-  nablaVariable *var;
-  fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
-  hprintf(nabla,NULL,"\n\n\
-// *****************************************************************************\n\
-// * Debug macro functions\n\
-// * unused?\n\
-// *****************************************************************************\n");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->item, "global")==0) continue;
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    //continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-    continue;
-    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
+nablaEntity *nMiddleEntityAddEntity(nablaMain *nabla, nablaEntity *entity) {
+  nablaEntity *iterator;
+  assert(entity != NULL);
+  if (nabla->entity==NULL){
+    nabla->entity=entity;
+    return entity;
   }
-  hprintf(nabla,NULL,"\n");
+  iterator = nabla->entity->next;
+  if(iterator == NULL)
+    iterator = entity;
+  else {
+    while(iterator->next != NULL)
+      iterator = iterator->next;
+    iterator->next = entity;
+  }
+  return iterator;
 }
-

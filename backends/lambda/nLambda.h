@@ -154,7 +154,7 @@ void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
 void lambdaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
-nHooks* lambda(nablaMain*);
+hooks* lambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_H_
  

@@ -43,6 +43,20 @@
 #ifndef _NABLA_CUDA_H_
 #define _NABLA_CUDA_H_
 
+// ****************************************************************************
+// * CUDA DUMP 
+// ****************************************************************************
+void cuHeaderTypes(nablaMain*);
+void cuHeaderExtra(nablaMain*);
+void cuHeaderMeshs(nablaMain*);
+void cuHeaderError(nablaMain*);
+void cuHeaderDebug(nablaMain*);
+void cuHeaderItems(nablaMain*);
+
+
+// ****************************************************************************
+// * CUDA HOOKS
+// ****************************************************************************
 void cuHookSourceOpen(nablaMain *nabla);
 void cuHookSourceInclude(nablaMain *nabla);
 
@@ -67,22 +81,12 @@ void cuHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 char* cuHookPragmaGccIvdep(void);
 char* cuHookPragmaGccAlign(void);
 
-// Hooks: Header
 void cuHookHeaderDump(nablaMain*);
 void cuHookHeaderOpen(nablaMain*);
 void cuHookHeaderEnumerates(nablaMain*);
 void cuHookHeaderPrefix(nablaMain*);
 void cuHookHeaderPostfix(nablaMain*);
 void cuHookHeaderIncludes(nablaMain*);
-
-// Dump into Header & Source
-void cuHeaderTypes(nablaMain*);
-void cuHeaderReal3(nablaMain*);
-void cuHeaderExtra(nablaMain*);
-void cuHeaderMesh(nablaMain*);
-void cuHeaderHandleErrors(nablaMain*);
-void cuHeaderDebug(nablaMain*);
-void cuHeaderItems(nablaMain*);
 
 NABLA_STATUS cuHookMainPrefix(nablaMain*);
 NABLA_STATUS cuHookMainPreInit(nablaMain*);
@@ -137,7 +141,7 @@ void cuHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 void cuDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
-nHooks *cuda(nablaMain*, const astNode*);
+hooks* cuda(nablaMain*);
 
 #endif // _NABLA_CUDA_H_
  

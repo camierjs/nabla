@@ -119,41 +119,41 @@ const nWhatWith nLambdaHeaderTypedef[]={
   {NULL,NULL}
 };
 
-const nFwdDefTypes nLambdaHeader={
+const callHeader nLambdaHeader={
   nLambdaHeaderForwards,
   nLambdaHeaderDefines,
   nLambdaHeaderTypedef
 };
 
-const static nCallSimd lambdaSimdCalls={
+const static callSimd lambdaSimdCalls={
   lambdaHookBits,
   lambdaHookGather,
   lambdaHookScatter,
   lambdaHookIncludes
 };
 
-const static nCallParallel lambdaCilkCalls={
+const static callParallel lambdaCilkCalls={
   nLambdaParallelCilkSync,
   nLambdaParallelCilkSpawn,
   nLambdaParallelCilkLoop,
   nLambdaParallelCilkIncludes
 };
 
-const static nCallParallel lambdaOpenMPCalls={
+const static callParallel lambdaOpenMPCalls={
   nLambdaParallelOpenMPSync,
   nLambdaParallelOpenMPSpawn,
   nLambdaParallelOpenMPLoop,
   nLambdaParallelOpenMPIncludes
 };
 
-const static nCallParallel lambdaVoidCalls={
+const static callParallel lambdaVoidCalls={
   nLambdaParallelVoidSync,
   nLambdaParallelVoidSpawn,
   nLambdaParallelVoidLoop,
   nLambdaParallelVoidIncludes
 };
 
-nCalls nLambdaCalls={
+calls nLambdaCalls={
   &nLambdaHeader,
   &lambdaSimdCalls,
   &lambdaVoidCalls,
@@ -163,23 +163,23 @@ nCalls nLambdaCalls={
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-const static nHookXyz lambdaXyzHooks={
+const static hookXyz lambdaXyzHooks={
   lambdaHookSysPrefix,
   lambdaHookPrevCell,
   lambdaHookNextCell,
   lambdaHookSysPostfix
 };
 
-const static nHookPragma lambdaPragmaICCHooks ={
+const static hookPragma lambdaPragmaICCHooks ={
   lambdaHookPragmaIccAlign
 };
 
-const static nHookPragma lambdaPragmaGCCHooks={
+const static hookPragma lambdaPragmaGCCHooks={
   lambdaHookPragmaGccAlign
 };
 
 // Hooks pour le header
-const static nHookHeader nLHookHeader={
+const static hookHeader nLHookHeader={
   nLambdaHookHeaderDump,
   nLambdaHookHeaderOpen,
   nLambdaHookHeaderDefineEnumerates,
@@ -189,20 +189,20 @@ const static nHookHeader nLHookHeader={
 };
 
 // Hooks pour le source
-const static nHookSource nLHookSource={
+const static hookSource nLHookSource={
   nLambdaHookSourceOpen,
   nLambdaHookSourceInclude
 };
   
 // Hooks pour le maillage
-const static nHookMesh nLHookMesh={
+const static hookMesh nLHookMesh={
   nLambdaHookMeshPrefix,
   nLambdaHookMeshCore,
   nLambdaHookMeshPostfix
 };
   
 // Hooks pour les variables
-const static nHookVars nLHookVars={
+const static hookVars nLHookVars={
   nLambdaHookVariablesInit,
   nLambdaHookVariablesPrefix,
   nLambdaHookVariablesMalloc,
@@ -210,7 +210,7 @@ const static nHookVars nLHookVars={
 };  
 
 // Hooks pour le main
-const static nHookMain nLHookMain={
+const static hookMain nLHookMain={
   nLambdaHookMainPrefix,
   nLambdaHookMainPreInit,
   nLambdaHookMainVarInitKernel,
@@ -220,14 +220,14 @@ const static nHookMain nLHookMain={
   nLambdaHookMainPostfix
 };  
 
-const static nHookForAll nLHookForAll={
+const static hookForAll nLHookForAll={
   lambdaHookForAllPrefix,
   lambdaHookForAllDump,
   lambdaHookForAllItem,
   lambdaHookForAllPostfix
 };
 
-const static nHookToken nLHookToken={
+const static hookToken nLHookToken={
   lambdaHookTokenPrefix,
   lambdaHookSwitchToken,
   lambdaHookTurnTokenToVariable,
@@ -242,7 +242,7 @@ const static nHookToken nLHookToken={
   lambdaHookTokenPostfix
 };
 
-const static nHookGrammar hookGrammar={
+const static hookGrammar hookGram={
   lambdaHookFunction,
   lambdaHookJob,
   lambdaHookReduction,
@@ -250,7 +250,7 @@ const static nHookGrammar hookGrammar={
   lambdaHookReturnFromArgument
 };
 
-const static nHookCall nLambdaHookCall={
+const static hookCall nLambdaHookCall={
   lambdaHookAddCallNames,
   lambdaHookAddArguments,
   lambdaHookEntryPointPrefix,
@@ -259,10 +259,10 @@ const static nHookCall nLambdaHookCall={
   lambdaHookDumpNablaParameterList
 };
 
-static nHooks nLambdaHooks={
+static hooks nLambdaHooks={
   &nLHookForAll,
   &nLHookToken,
-  &hookGrammar,
+  &hookGram,
   &nLambdaHookCall,
   &lambdaXyzHooks,
   &lambdaPragmaGCCHooks,
@@ -277,7 +277,7 @@ static nHooks nLambdaHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-nHooks* lambda(nablaMain *nabla){
+hooks* lambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     nLambdaCalls.parallel=&lambdaCilkCalls;
   

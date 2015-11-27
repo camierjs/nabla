@@ -41,29 +41,29 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
    //.section ".rodata"
-   .globl ${ABI_UNDERSCORE}real3_h
-   .globl ${ABI_UNDERSCORE}debug_h
-   .globl ${ABI_UNDERSCORE}error_h
-   .globl ${ABI_UNDERSCORE}extra_h
-   .globl ${ABI_UNDERSCORE}meshs_h
-   .globl ${ABI_UNDERSCORE}items_h
+   .globl ${ABI_UNDERSCORE}cuTypes_h
+   .globl ${ABI_UNDERSCORE}cuDebug_h
+   .globl ${ABI_UNDERSCORE}cuError_h
+   .globl ${ABI_UNDERSCORE}cuExtra_h
+   .globl ${ABI_UNDERSCORE}cuMeshs_h
+   .globl ${ABI_UNDERSCORE}cuItems_h
 
-${ABI_UNDERSCORE}real3_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/real3.h"
+${ABI_UNDERSCORE}cuTypes_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuTypes.h"
    .byte 0
-${ABI_UNDERSCORE}debug_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/debug.h"
+${ABI_UNDERSCORE}cuDebug_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuDebug.h"
    .byte 0
-${ABI_UNDERSCORE}error_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/error.h"
+${ABI_UNDERSCORE}cuError_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuError.h"
    .byte 0
-${ABI_UNDERSCORE}extra_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/extra.h"
+${ABI_UNDERSCORE}cuExtra_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuExtra.h"
    .byte 0   
-${ABI_UNDERSCORE}meshs_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/meshs.h"
+${ABI_UNDERSCORE}cuMeshs_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuMeshs.h"
    .byte 0   
-${ABI_UNDERSCORE}items_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/items.h"
+${ABI_UNDERSCORE}cuItems_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuItems.h"
    .byte 0   
          

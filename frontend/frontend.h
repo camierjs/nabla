@@ -40,41 +40,10 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_BACKENDS_CALLS_H_
-#define _NABLA_BACKENDS_CALLS_H_
+#ifndef _NABLA_FRONTEND_H_
+#define _NABLA_FRONTEND_H_
 
-typedef struct nFwdDefTypesStruct{
-  const char** forwards;
-  const nWhatWith* defines;
-  const nWhatWith* typedefs;
-} nFwdDefTypes;
+#include "ast.h"
+#include "dbg.h"
 
-// Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
-typedef struct nCallSimdStruct{
-  char* (*bits)(void);
-  char* (*gather)(nablaJob*,nablaVariable*,enum_phase);
-  char* (*scatter)(nablaVariable*);
-  char* (*includes)(void);
-} nCallSimd;
-
-
-// Structure des calls de gestion du parallelisme
-typedef struct nCallParallelStruct{
-  char* (*sync)(void);
-  char* (*spawn)(void);
-  char* (*loop)(struct nablaMainStruct*);
-  char* (*includes)(void);
-} nCallParallel;
-
-
-// ****************************************************************************
-// * Backend CALLS
-// ****************************************************************************
-typedef struct nCallsStruct{
-  const nFwdDefTypes *header;
-  const nCallSimd *simd; 
-  const nCallParallel *parallel;
-} nCalls;
-
-
-#endif // _NABLA_BACKENDS_CALLS_H_
+#endif // _NABLA_FRONTEND_H_
