@@ -408,11 +408,6 @@ declaration_specifiers
 | type_qualifier {rhs;}
 ;
 
-//declaration_list
-//: declaration {rhs;}
-//| declaration_list declaration {rhs;}
-//;
-
 
 /////////////////
 // DeclaraTORS //
@@ -808,11 +803,8 @@ statement_list
 // ∇ functions //
 /////////////////
 function_definition
-//: declaration_specifiers declarator declaration_list compound_statement {rhs;}
-//| declaration_specifiers declarator declaration_list AT at_constant compound_statement {rhs;}
 : declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
-//| declaration_specifiers declarator AT at_constant IF '(' constant_expression ')' compound_statement {rhs;}
 ;
 
 
@@ -900,20 +892,18 @@ at_constant
 // ∇ jobs definitions //
 ////////////////////////
 nabla_job_prefix: nabla_family {rhs;} | FORALL nabla_family {rhs;};
-//nabla_job_decl: declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}| IDENTIFIER {rhs;};
+nabla_job_decl
+: nabla_job_prefix IDENTIFIER {rhs;}
+| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}
+;
+
 nabla_job_definition
-: nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' AT at_constant IF '(' constant_expression ')' compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10);}
-| nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement
-{compound_job($$,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);}
+: nabla_job_decl compound_statement {job;}
+| nabla_job_decl nabla_parameter_list compound_statement {job;}
+| nabla_job_decl AT at_constant compound_statement {job;}
+| nabla_job_decl AT at_constant IF '(' constant_expression ')' compound_statement {job;}
+| nabla_job_decl nabla_parameter_list AT at_constant compound_statement {job;}
+| nabla_job_decl nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement {job;}
 ;
 
 
@@ -921,8 +911,8 @@ nabla_job_definition
 // ∇ single reduction //
 ////////////////////////
 nabla_reduction
-: FORALL nabla_items IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
-| FORALL nabla_items IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+: nabla_job_prefix IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+| nabla_job_prefix IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
 ;
 
 
@@ -1125,10 +1115,10 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,
   astNode *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare les 2 tokens à rajouter
   astNode *left=astNewNode();
-  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
   left->tokenid=left_token;
   astNode *right=astNewNode();
-  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
   right->tokenid=right_token;
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
@@ -1169,10 +1159,10 @@ inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
   astNode *next=va_arg(args,astNode*);
   // On prépare les 2 tokens à rajouter
   astNode *left=astNewNode();
-  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
   left->tokenid=left_token;
   astNode *right=astNewNode();
-  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
   right->tokenid=right_token;
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
@@ -1258,13 +1248,13 @@ inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
   astNode *left=astNewNode();
-  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
   left->tokenid=left_token;
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare le token de droite à rajouter
   astNode *right=astNewNode();
-  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
   right->tokenid=right_token;
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
@@ -1306,13 +1296,13 @@ inline void rhsYSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
   astNode *left=astNewNode();
-  left->token=trQuote(strdup(yytname[YYTRANSLATE(left_token)]));
+  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
   left->tokenid=left_token;
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=va_arg(args,astNode*);
   // On prépare le token de droite à rajouter
   astNode *right=astNewNode();
-  right->token=trQuote(strdup(yytname[YYTRANSLATE(right_token)]));
+  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
   right->tokenid=right_token;
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){

@@ -46,18 +46,25 @@
 // *****************************************************************************
 // * p?[c|s]
 // *****************************************************************************
-static inline bool p2c(char *p, unsigned short hex, char *letter){
+static inline bool p2c(char *p,
+                       unsigned short hex,
+                       char *letter){
   if (*(unsigned short*)p!=hex) return false;
   *p=letter[0];
   *(p+1)=letter[1];
   return true;
 }
-static inline bool p2s(char *p, unsigned short hex, const char *str, char **bkp){
+static inline bool p2s(char *p,
+                       unsigned short hex,
+                       const char *str,
+                       char **bkp){
   if (*(unsigned short*)p!=hex) return false;
   *bkp=strdup(str); 
   return true;
 }
-static inline bool p3c(char *p, const unsigned int hex, const char *letter){
+static inline bool p3c(char *p,
+                       const unsigned int hex,
+                       const char *letter){
   register unsigned int mask = (*(unsigned int*)p)&0x00FFFFFFl;
   //dbg("\n[p3c] p=%08p vs hex=0x%x", mask, hex);
   if (mask!=hex) return false;
@@ -67,7 +74,9 @@ static inline bool p3c(char *p, const unsigned int hex, const char *letter){
   //dbg("\n[p3c] HIT!");
   return true;
 }
-static inline bool p4c(char *p, const unsigned int hex, const char *letter){
+static inline bool p4c(char *p,
+                       const unsigned int hex,
+                       const char *letter){
   register unsigned int mask = (*(unsigned int*)p)&0xFFFFFFFFl;
   //dbg("\n[p3c] p=%08p vs hex=0x%x", mask, hex);
   if (mask!=hex) return false;
@@ -78,7 +87,10 @@ static inline bool p4c(char *p, const unsigned int hex, const char *letter){
   //dbg("\n[p3c] HIT!");
   return true;
 }
-static inline bool p4c3(char *w, const char *p, const unsigned int hex, const char *letter){
+static inline bool p4c3(char *w,
+                        const char *p,
+                        const unsigned int hex,
+                        const char *letter){
   register unsigned int mask = (*(unsigned int*)p)&0xFFFFFFFFl;
   if (mask!=hex) return false;
   *w=letter[0];
@@ -86,24 +98,29 @@ static inline bool p4c3(char *w, const char *p, const unsigned int hex, const ch
   *(w+2)=letter[2];
   return true;
 }
-static inline bool p3s(char *p, const unsigned int hex, const char *str, char **bkp){
+static inline bool p3s(char *p,
+                       const unsigned int hex,
+                       const char *str, char **bkp){
   register unsigned int mask = (*(unsigned int*)p)&0x00FFFFFFl;
   if (mask!=hex) return false;
   *bkp=strdup(str); 
   return true;
 }
-static inline bool p4s(char *p, const unsigned int hex, const char *str, char **bkp){
+static inline bool p4s(char *p,
+                       const unsigned int hex,
+                       const char *str, char **bkp){
   register unsigned int mask = (*(unsigned int*)p)&0xFFFFFFFFl;
   if (mask!=hex) return false;
   *bkp=strdup(str); 
   return true;
 }
 
+
 // ****************************************************************************
 // UTF8 codes > 3 bytes are not currently supported
 // Pour ces caractères, on va les réduire si l'on peut
 // ****************************************************************************
-void nUtf8SupThree(char **read){//read
+void toolUtf8SupThree(char **read){//read
   char *r=*read;
   char *w=r;//write
   //dbg("\n\t\t[nUtf8SupThree] in \"%s\"", r);
@@ -135,7 +152,7 @@ void nUtf8SupThree(char **read){//read
 // * ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
 // * ½  ⅓  ¼  ⅛ 
 // ****************************************************************************
-void nUtf8(char **bkp){
+void toolUtf8(char **bkp){
   char *p=*bkp;
   if (p==NULL) return;
   //dbg("\n[nUtf8] '%s'",p);

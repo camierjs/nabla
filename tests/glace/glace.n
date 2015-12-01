@@ -115,6 +115,15 @@ cells{
   Real λ;                                  // λ géométrique utilisé pour retrouver Godunov 1D
 };
 
+
+// ****************************************************************************
+// * Globals
+// ****************************************************************************
+global{
+  ℝ global_δt;
+};
+
+
 // ****************************************************************************
 // * Partie d'initialisation ]-∞,-0.0[
 // ****************************************************************************
@@ -268,26 +277,23 @@ cells void computeTotalSoundSpeed(void) @ -18.0,28.0{
   c=√(γ*p/ρ);
 }
 
-
-
-
-cells Real hydroTimeStepCtrlCells(Real local_δt){ // 8%
+// Calcul du δt par maille
+cells void hydroTimeStepCtrlCells(void) out (cell glace_δt) @ 30.0{ // 8%
   Real Σljr=0.0;
   foreach node Σljr+=absCQs;
   glace_δt=2.0*λ*V/(c*Σljr);
-  if(glace_δt<local_δt)
-    local_δt = min(local_δt,glace_δt);
-  return local_δt;
 }
+
+// Réduction min vers le global_δt
+∀ cells global_δt <?= glace_δt @ 31.0;
+
 void hydroTimeStepCtrl(void) @ 35.0{
-  Real local_δt=hydroTimeStepCtrlCells(MAXFLOAT);
-  Real new_δt=option_δt_control*mpi_reduce(ReduceMin, local_δt);
-  { // on calcule les variations min et max autorisées
-    const Real max_time_step = (1.0+option_δt_max_variation)*δt;
-    const Real min_time_step = (1.0-option_δt_min_variation)*δt;
-    if (new_δt > max_time_step) new_δt=max_time_step;
-    if (new_δt < min_time_step) new_δt=min_time_step;
-  }
+  Real new_δt=option_δt_control*global_δt;
+  // on calcule les variations min et max autorisées
+  const Real max_time_step = (1.0+option_δt_max_variation)*δt;
+  const Real min_time_step = (1.0-option_δt_min_variation)*δt;
+  if (new_δt > max_time_step) new_δt=max_time_step;
+  if (new_δt < min_time_step) new_δt=min_time_step;
   new_δt = min(new_δt, option_δt_max);
   new_δt = max(new_δt, option_δt_min);
   // le dernier calcul se fait exactement au temps final

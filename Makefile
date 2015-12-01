@@ -115,6 +115,8 @@ tstlgg:
 ################
 # ARCANE tests #
 ################
+tstashr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_shydro_run_1)
 tstamr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
 tstaeg:
@@ -147,12 +149,14 @@ tstagad:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gad_run_1)
 tstacomd:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_comd_run_1)
-tstas:
+tstasr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tstas4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
-tstal1:
+tstalr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
+tstalg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_gen_1)
 tstagr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
 tsthas:

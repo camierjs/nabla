@@ -125,18 +125,18 @@ bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k) {
  */
 nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
   nablaVariable *variable=variables;
-  dbg("\n\t[nablaVariableFind] looking for '%s'", name);
+  //dbg("\n\t[nablaVariableFind] looking for '%s'", name);
   // Some backends use the fact it will return NULL
   //assert(variable != NULL);  assert(name != NULL);
   while(variable != NULL) {
-    dbg(" ?%s", variable->name);
+    //dbg(" ?%s", variable->name);
     if(strcmp(variable->name, name) == 0){
-      dbg(" Yes!");
+      //dbg(" Yes!");
       return variable;
     }
     variable = variable->next;
   }
-  dbg(" Nope!");
+  //dbg(" Nope!");
   return NULL;
 }
 
@@ -189,19 +189,20 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
                                                          const char cnf,
                                                          char enum_enum){
   // On cherche la primary_expression coté gauche du premier postfix_expression
-  dbg("\n\t[nMiddleVariables] Looking for 'primary_expression':");
+  //dbg("\n\t[nMiddleVariables] Looking for 'primary_expression':");
   astNode *primary_expression=dfsFetch(n->children,rulenameToId("primary_expression"));
   // On va chercher l'éventuel 'nabla_item' après le '['
-  dbg("\n\t[nMiddleVariables] Looking for 'nabla_item':");
+  //dbg("\n\t[nMiddleVariables] Looking for 'nabla_item':");
   astNode *nabla_item=dfsFetch(n->children->next->next,rulenameToId("nabla_item"));
   // On va chercher l'éventuel 'nabla_system' après le '['
-  dbg("\n\t[nMiddleVariables] Looking for 'nabla_system':");
+  //dbg("\n\t[nMiddleVariables] Looking for 'nabla_system':");
   astNode *nabla_system=dfsFetch(n->children->next->next,rulenameToId("nabla_system"));
   
-  dbg("\n\t[nMiddleVariables] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
+  /*dbg("\n\t[nMiddleVariables] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
       (primary_expression!=NULL)?primary_expression->token:"NULL",
       (nabla_item!=NULL)?nabla_item->token:"NULL",
       (nabla_system!=NULL)?nabla_system->token:"NULL");
+  */
   // SI on a bien une primary_expression
   if (primary_expression->token!=NULL && primary_expression!=NULL){
     // On récupère de nom de la variable potentielle de cette expression

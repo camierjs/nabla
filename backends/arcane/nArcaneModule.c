@@ -308,11 +308,8 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
     if (strstr(job->name, "arcaneReduction_")!=NULL)
       fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
     else
-      fprintf(entity->hdr, "\n\tvirtual %s %s(", job->returnTypeNode->children->token, job->name);
-    if (job->stdParamsNode!=NULL)
-      nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);    
-    // Les entry points ne prennent pas d'arguments dans Arcane
-    //actFunctionDumpHdr(entity->hdr, job->params);
+      fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
+    nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);
     fprintf(entity->hdr, ");");
   }
   return NABLA_OK;

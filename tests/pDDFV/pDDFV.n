@@ -140,6 +140,7 @@ cells{
   Real cell_sd_id;
   Real3 cell_mass_center;       // Centre de masse
   Real cell_exact_solution;
+  Real minCellDelta;
 };
 
 // ****************************************************************************
@@ -237,5 +238,12 @@ global{
   Bool full_triangles;
   Integer globalNbCells;
   Integer globalNbNodes;
+  Real min_θ_kp1mk,min_θ_1m0;
+  Real area_sum;
+  Integer sumNbCell;
+  Real sum_cell_θ_diff,sum_node_θ_diff;
+  Integer minNbNode,maxNbNode;
+  Integer localNbCells,localNbNodes;
+  Real minΔ;
 };
 

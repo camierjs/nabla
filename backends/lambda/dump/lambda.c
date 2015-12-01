@@ -55,15 +55,15 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 // * extern definitions from lambdaDump.S
 // ****************************************************************************
-extern char lambdaItems_c[];
-extern char lambdaDbg_h[];
-extern char lambdaReal3_h[];
-extern char lambdaGather_h[];
-extern char lambdaScatter_h[];
-extern char lambdaOStream_h[];
-extern char lambdaTernary_h[];
-extern char lambdaMsh1D_c[];
-extern char lambdaMsh3D_c[];
+extern char laItems_c[];
+extern char laDebug_h[];
+extern char laTypes_h[];
+extern char laGather_h[];
+extern char laScatter_h[];
+extern char laOStream_h[];
+extern char laTernary_h[];
+extern char laMsh1D_c[];
+extern char laMsh3D_c[];
 
 
 // ****************************************************************************
@@ -71,12 +71,12 @@ extern char lambdaMsh3D_c[];
 // ****************************************************************************
 void nLambdaDumpHeader(nablaMain *nabla){
   assert(nabla->entity->name);
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaReal3_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaTernary_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaGather_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaScatter_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaOStream_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaDbg_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laTypes_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laTernary_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laGather_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laScatter_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laOStream_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laDebug_h));
 }
 
 
@@ -85,8 +85,8 @@ void nLambdaDumpHeader(nablaMain *nabla){
 // ****************************************************************************
 void nLambdaDumpMesh(nablaMain *nabla){
   if ((nabla->entity->libraries&(1<<with_real))!=0)
-    fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh1D_c));
+    fprintf(nabla->entity->src,dumpExternalFile(laMsh1D_c));
   else
-    fprintf(nabla->entity->src,dumpExternalFile(lambdaMsh3D_c));
-  fprintf(nabla->entity->hdr,dumpExternalFile(lambdaItems_c));
+    fprintf(nabla->entity->src,dumpExternalFile(laMsh3D_c));
+  fprintf(nabla->entity->hdr,dumpExternalFile(laItems_c));
 }

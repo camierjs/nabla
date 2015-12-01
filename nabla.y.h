@@ -49,7 +49,7 @@
 // ****************************************************************************
 #define __NB_ARGS__(z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,cnt,...) cnt
 #define NB_ARGS(...) __NB_ARGS__(,##__VA_ARGS__,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0)
-#define TRY_TO_COUNT_HERE(...) __NB_ARGS__(__VA_ARGS__)
+//#define TRY_TO_COUNT_HERE(...) __NB_ARGS__(__VA_ARGS__)
 
 
 // ****************************************************************************
@@ -82,6 +82,8 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // ****************************************************************************
 // * Compound Jobs
 // ****************************************************************************
+#define job rhsTailSandwich(&yyval,yyn,COMPOUND_JOB_INI,COMPOUND_JOB_END,yyvsp);
+
 #define compound_job(lhs,...)                                           \
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
@@ -130,7 +132,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // *****************************************************************************
 #define Yop3p(lhs, n1, op, n3)                                        \
   astNode *nOp=astNewNode();                                          \
-  nOp->token=strdup(op2name(op->token));                              \
+  nOp->token=strdup(toolOpName(op->token));                           \
   nOp->tokenid=op->tokenid;                                           \
   astNode *pIn=astNewNode();                                          \
   pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;              \
@@ -144,7 +146,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   printf("\nyyn=%d, yyr1[yyn]=%d '%s' yytoken=%d %s\n",               \
          yyn,yyr1[yyn],yytname[yyr1[yyn]],yytoken,yytname[yytoken]);  \
   astNode *nOp=astNewNode();                                          \
-  nOp->token=strdup(op2name(op->token));                              \
+  nOp->token=strdup(toolOpName(op->token));                           \
   nOp->tokenid=op->tokenid;                                           \
   astNode *pIn=astNewNode();                                          \
   pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;              \

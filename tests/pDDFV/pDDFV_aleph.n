@@ -174,13 +174,21 @@ own nodes void getNodeResults(void) @ 20.0{
 // ****************************************************************************
 // * Récupération & Critère de sortie des itérations de Picard
 // ****************************************************************************
-own cells Real maxCellError(Real mx){  mx=max(mx,cell_θ_kp1mk); return mx;}
-own cells Real maxCellError0(Real mx){ mx=max(mx,cell_θ_1m0); return mx;}
-own nodes Real maxNodeError(Real mx){  mx=max(mx,node_θ_kp1mk); return mx;}
-own nodes Real maxNodeError0(Real mx){ mx=max(mx,node_θ_1m0); return mx;}
+//own cells Real maxCellError(Real mx){  mx=max(mx,cell_θ_kp1mk); return mx;}
+//own cells Real maxCellError0(Real mx){ mx=max(mx,cell_θ_1m0); return mx;}
+//own nodes Real maxNodeError(Real mx){  mx=max(mx,node_θ_kp1mk); return mx;}
+//own nodes Real maxNodeError0(Real mx){ mx=max(mx,node_θ_1m0); return mx;}
+
+∀ /*own*/ cells min_θ_kp1mk >?= cell_θ_kp1mk @ 29.9;
+∀ /*own*/ cells min_θ_1m0 >?= cell_θ_1m0 @ 29.9;
+
+//∀ own nodes θ_kp1mk >?= node_θ_kp1mk @ 29.99;
+//∀ own nodes θ_1m0 >?= node_θ_1m0 @ 29.99;
+
 void stopIterations(void) @ 30.0{
-  const Real mxε = mpi_reduce(ReduceMax, max(maxCellError(0.0), maxNodeError(0.0)));
-  const Real mx0 = mpi_reduce(ReduceMax, max(maxCellError0(0.0), maxNodeError0(0.0)));
+  #warning HACK 0.0 to stopIterations
+  const Real mxε = 1.0e-15;//min_θ_kp1mk;//mpi_reduce(ReduceMax, max(maxCellError(0.0), maxNodeError(0.0)));
+  const Real mx0 = 1.0;//min_θ_kp1mk;//θ_1m0;//mpi_reduce(ReduceMax, max(maxCellError0(0.0), maxNodeError0(0.0)));
   assert(mx0!=0.0);
   if (GlobalIteration>1.0 && mxε<(option_picard_ε*mx0)){
     info()<<"\t\33[7m[stopIterations] mxε="<<mxε<<"\33[m";

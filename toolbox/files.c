@@ -45,7 +45,7 @@
 // *****************************************************************************
 // * nablaMakeTempFile
 // *****************************************************************************
-int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name){
+int toolMkstemp(const char *entity_name, char **unique_temporary_file_name){
   int n,size = NABLA_MAX_FILE_NAME;
   if ((*unique_temporary_file_name=malloc(size))==NULL)
     nablaError("[nablaMakeTempFile] Could not malloc our unique_temporary_file_name!");
@@ -60,7 +60,7 @@ int nablaMakeTempFile(const char *entity_name, char **unique_temporary_file_name
 // ****************************************************************************
 // * nToolUnlink: deletes a name from the filesystem
 // ****************************************************************************
-void nToolUnlink(char *pathname){
+void toolUnlink(char *pathname){
   if (pathname!=NULL)
     if (unlink(pathname)!=0)
       nablaError("Error while removing '%s' file", pathname);
@@ -71,7 +71,7 @@ void nToolUnlink(char *pathname){
 // ****************************************************************************
 // * nToolFileCatAndHackIncludes
 // ****************************************************************************
-int nToolFileCatAndHackIncludes(const char *list_of_nabla_files,
+int toolCatAndHackIncludes(const char *list_of_nabla_files,
                                 const char *cat_sed_temporary_file_name){
   size_t size;
 //#warning BUFSIZ pour les anciens compilos/stations ?

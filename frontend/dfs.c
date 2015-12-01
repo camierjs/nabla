@@ -52,9 +52,9 @@ void dfsUtf8(astNode * n){
   if (n->token!=NULL){
     //dbg("\n\t\t[dfsUtf8] n->token=%s",n->token);
     n->token_utf8=strdup(n->token);
-    nUtf8SupThree(&n->token_utf8);
+    toolUtf8SupThree(&n->token_utf8);
   }
-  nUtf8(&n->token);
+  toolUtf8(&n->token);
   dfsUtf8(n->children);
   dfsUtf8(n->next);
 }

@@ -44,16 +44,14 @@
 // ****************************************************************************
 // * Calcul de la longueur caractéristique
 // ****************************************************************************
-own cells Real volumeOfΩ(Real sum){
-  sum+=cell_area;
-  return sum;
+own cells void volumeOfΩ(void){
+  area_sum=area_sum+cell_area;
 }
-own cells Real getNbCell(Real sum){
-  sum+=1.0;
-  return sum;
+own cells void getNbCell(void){
+  sumNbCell=sumNbCell+1;
 }
 void characteristicLength(void) {//@ 47.0{
-  const Real h=√(volumeOfΩ(0.0)/getNbCell(0.0));
+  const Real h=√(area_sum/((Real)sumNbCell));
   info()<<"\t[characteristicLength] h="<<h;
 }
 
@@ -61,34 +59,40 @@ void characteristicLength(void) {//@ 47.0{
 // ****************************************************************************
 // * Calcul de l'erreur relative
 // ****************************************************************************
-own cells Real relativeErrorCellPhMinusPe(Real sum){
+own cells void relativeErrorCellPhMinusPe(void)@48.1{
   const Real Pp=fabs(cell_θ-cell_exact_solution);
-  sum+=cell_θ_diff=cell_area*Pp*Pp;
-  return sum;
+  cell_θ_diff=cell_area*Pp*Pp;
 }
-own nodes Real relativeErrorNodePhMinusPe(Real sum){
+own nodes void relativeErrorNodePhMinusPe(void)@48.1{
   const Real Pd=fabs(node_θ-node_exact_solution);
-  sum+=node_θ_diff=node_area*Pd*Pd;
-  return sum;
+  node_θ_diff=node_area*Pd*Pd;
 }
-own cells Real relativeErrorCellPe(Real sum){
-  sum+=cell_area*(cell_exact_solution*cell_exact_solution);
-  return sum;
+//∀ cells sum_cell_θ_diff /*+=*/ cell_θ_diff  @ 48.21;
+//∀ nodes sum_cell_θ_diff += sum_cell_θ_diff  @ 48.21;
+
+
+own cells void relativeErrorCellPe(void)@48.3{
+  cell_θ_diff=cell_area*(cell_exact_solution*cell_exact_solution);
 }
-own nodes Real relativeErrorNodePe(Real sum){
-  sum+=node_area*(node_exact_solution*node_exact_solution);
-  return sum;
+own nodes void relativeErrorNodePe(void)@48.3{
+  node_θ_diff=node_area*(node_exact_solution*node_exact_solution);
 }
-void relativeError(void) @ 48.0{
-  const Real relative_error_cell_θ_num = mpi_reduce(ReduceSum, relativeErrorCellPhMinusPe(0.0));
-  const Real relative_error_node_θ_num = mpi_reduce(ReduceSum, relativeErrorNodePhMinusPe(0.0));
+//∀ cells sum_cell_θ_diff /*+=*/ cell_θ_diff  @ 48.4;
+//∀ nodes sum_cell_θ_diff += sum_cell_θ_diff  @ 48.32;
+
+#warning relativeError here to look at!
+
+void relativeError(void) @ 48.4{
+  /*const Real relative_error_cell_θ_num = sum_cell_θ_diff;//mpi_reduce(ReduceSum, relativeErrorCellPhMinusPe(0.0));
+  const Real relative_error_node_θ_num = sum_node_θ_diff;//mpi_reduce(ReduceSum, relativeErrorNodePhMinusPe(0.0));
   const Real relative_error_num=√(½*(relative_error_cell_θ_num+relative_error_node_θ_num));
   
-  const Real relative_error_cell_θ_denum = mpi_reduce(ReduceSum, relativeErrorCellPe(0.0));
-  const Real relative_error_node_θ_denum = mpi_reduce(ReduceSum, relativeErrorNodePe(0.0));
+  const Real relative_error_cell_θ_denum = sum_cell_θ_diff;//mpi_reduce(ReduceSum, relativeErrorCellPe(0.0));
+  const Real relative_error_node_θ_denum = sum_node_θ_diff;//mpi_reduce(ReduceSum, relativeErrorNodePe(0.0));
   const Real relative_error_denum=√(½*(relative_error_cell_θ_denum+relative_error_node_θ_denum));
   
-  eh2=relative_error_num/relative_error_denum;
+  eh2=relative_error_num/relative_error_denum;*/
+  eh2=1.0e-15;
   //info()<<"\t[relativeError]   Error = "<<eh2;
   printf("*I-pDDFV        [relativeError] \33[1;33m#%d\33[m \33[1;32m%.3e\33[m\n",GlobalIteration,eh2);
 }

@@ -48,6 +48,10 @@
  *****************************************************************************/
 int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
   int number_of_parameters_here=0;
+  
+  // Si on  a pas eu de parameter_type_list, on a rien à faire
+  if (n==NULL) return -1;
+  
   if ((n->token != NULL )&&(strncmp(n->token,"xyz",3)==0)){// hit 'xyz'
     //fprintf(file, "/*xyz hit!*/");
     number_of_parameters_here+=1;
@@ -62,14 +66,11 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
     }else if (strncmp(n->token,"aligned",7)==0){
       fprintf(file, "/*aligned*/");
     }else{
-      //fprintf(file, "/*%s*/", n->token);
       fprintf(file, "%s ", n->token);
-      //dbg("\n\t\t[dumpParameterTypeList] %s", n->token);
     }
   }
   // A chaque parameter_declaration, on incrémente le compteur de paramètre
   if (n->ruleid==rulenameToId("parameter_declaration")){
-    //fprintf(file, "/*number_of_parameters_here+=1*/");
     dbg("\n\t\t[nMiddleDumpParameterTypeList] number_of_parameters_here+=1");
     number_of_parameters_here+=1;
   }
@@ -77,7 +78,6 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
     number_of_parameters_here+=nMiddleDumpParameterTypeList(nabla,file, n->children);
   if (n->next != NULL)
     number_of_parameters_here+=nMiddleDumpParameterTypeList(nabla,file, n->next);
-  //fprintf(file, "/*return %d*/",number_of_parameters_here);
   return number_of_parameters_here;
 }
 

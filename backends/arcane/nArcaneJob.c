@@ -229,8 +229,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   const char support=job->item[0];
   const char forall=job->parse.enum_enum;
   
-  if (n->tokenid!=0)
-    dbg("\n\t[arcaneHookSwitchToken] n->token=%s (id:%d)", n->token, n->tokenid);
+  //if (n->tokenid!=0) dbg("\n\t[arcaneHookSwitchToken] n->token=%s (id:%d)", n->token, n->tokenid);
 
   // Dump des tokens possibles
   switch(n->tokenid){

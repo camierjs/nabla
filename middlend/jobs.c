@@ -265,8 +265,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
-  if (n->token)
-    dbg("\n\n\t[nablaJobParse] token: '%s'?", n->token);
+  //if (n->token) dbg("\n\n\t[nablaJobParse] token: '%s'?", n->token);
 
   if (job->parse.got_a_return && job->parse.got_a_return_and_the_semi_colon) return;
    
@@ -361,7 +360,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
   if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL)){
     nablaVariable *var;
-    dbg("\n\t[nablaJobParse] primaryExpression=%s child->token=%s",n->rule,n->children->token);
+    //dbg("\n\t[nablaJobParse] primaryExpression=%s child->token=%s",n->rule,n->children->token);
     if ((var=nabla->hook->token->variable(n->children, nabla,job))!=NULL){
       if (nabla->hook->token->turnBracketsToParentheses)
         nabla->hook->token->turnBracketsToParentheses(nabla,job,var,cnfgem);
@@ -399,7 +398,7 @@ void nMiddleJobFill(nablaMain *nabla,
                     nablaJob *job,
                     astNode *n,
                     const char *namespace){
-  int numParams;
+  int numParams=0;
   astNode *nd;
   job->is_a_function=false;
   assert(job != NULL);
@@ -412,20 +411,17 @@ void nMiddleJobFill(nablaMain *nabla,
     job->item = dfsFetchFirst(n->children,rulenameToId("nabla_matenvs"));
   assert(job->item);
   job->return_type = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
+  if (!job->return_type) job->return_type=strdup("void");
+  assert(job->return_type);
   
   // On va chercher le premier identifiant qui est le nom du job
   nd=dfsFetchTokenId(n->children,IDENTIFIER);
   assert(nd);
   job->name=strdup(nd->token);
-  //assert(n->children->next->next->token!=NULL);
-  //job->name = strdup(n->children->next->next->token);
   job->name_utf8 = strdup(nd->token_utf8);
-  //nprintf(nabla, NULL, "/*name=%s*/", job->name);
   dbg("\n\n\t[nablaJobFill] named '%s'", job->name);
 
   // On va chercher s'il y a des xyz dans les parameter_type_list
-  //assert(n->children->next->next->next->children!=NULL);
-  nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
   job->xyz = dfsFetchFirst(nd,rulenameToId("nabla_xyz_declaration"));
   job->direction = dfsFetchFirst(n->children,
                               rulenameToId("nabla_xyz_direction"));
@@ -437,19 +433,19 @@ void nMiddleJobFill(nablaMain *nabla,
     nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
   // Récupération du type de retour
-  assert(n->children->next->children->ruleid==rulenameToId("type_specifier"));
-  job->returnTypeNode=n->children->next->children;
+  job->returnTypeNode=dfsFetch(nd,rulenameToId("type_specifier"));
+  
   // Récupération de la liste des paramètres
   nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
-  assert(nd);
-  job->stdParamsNode=nd->children;
+  if (nd) job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
       job->item, job->return_type, job->name);
-  // nMiddleScanForNablaJobParameter ne fait que dumper
-  //nMiddleScanForNablaJobParameter(n->children, rulenameToId("nabla_parameter_list"), nabla);
+
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
+  
   nMiddleScanForIfAfterAt(n->children, job, nabla);
+  
   // On remplit la ligne du fichier SRC
   nprintf(nabla, NULL, "\n\n\n\
 // ********************************************************\n\
@@ -461,15 +457,13 @@ void nMiddleJobFill(nablaMain *nabla,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
           job->name);
-  // On va chercher les paramètres standards
+  // On va chercher les paramètres standards, s'il y en a eu
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
   
   // On va chercher les paramètres nabla in/out/inout
-  //nd=dfsFetch(n->children,rulenameToId("nabla_parameter"));
-  job->nblParamsNode=n->children->next->next->next->next->next->next;
-  //job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_inout_parameter"));
+  job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_inout_parameter"));
 
   // Si on a un type de retour et des arguments
   if (numParams!=0 && strncmp(job->return_type,"void",4)!=0){
@@ -485,7 +479,7 @@ void nMiddleJobFill(nablaMain *nabla,
   // Et on dump les in et les out
   dbg("\n\t[nablaJobFill] Et on dump les in et les out");
   if (nabla->hook->call->dumpNablaParameterList!=NULL){
-    dbg("\n\t\t[nablaJobFill] job->nblParamsNode->ruleid is '%s'",job->nblParamsNode->rule);
+    //dbg("\n\t\t[nablaJobFill] job->nblParamsNode->ruleid is '%s'",job->nblParamsNode->rule);
     // On enlève ce test tant qu'on autorise des jobs sans déclaration
     // Mais il faudra le remettre quand on l'obligera!
     // assert(job->nblParamsNode->ruleid==rulenameToId("nabla_parameter_list"));

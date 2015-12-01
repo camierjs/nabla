@@ -71,7 +71,7 @@ char *toolStrUpCase(const char * str){
 /******************************************************************************
  * ''' to ' '
  ******************************************************************************/
-char *trQuote(const char * str){
+char *toolStrQuote(const char * str){
   char *p=strdup(str);
   char *bkp=p;
   for(;*p!=0;p++)

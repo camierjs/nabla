@@ -45,7 +45,7 @@
 // * Calcul min et max des solutions
 // ****************************************************************************
 
-own cells Real minCellθ(Real mn){ mn=min(mn,cell_θ); return mn;}
+/*own cells Real minCellθ(Real mn){ mn=min(mn,cell_θ); return mn;}
 own nodes Real minNodeθ(Real mn){ mn=min(mn,node_θ); return mn;}
 void minθ(void) @ 31.0{
   const Real mnθ = mpi_reduce(ReduceMin, min(minCellθ(HUGE_VAL), minNodeθ(HUGE_VAL)));
@@ -58,3 +58,4 @@ void maxθ(void) @ 31.0{
   const Real mxθ = mpi_reduce(ReduceMax, max(maxCellθ(0.0), maxNodeθ(0.0)));
   info()<<"\t[maxθ] maxθ="<<mxθ;
 }
+*/

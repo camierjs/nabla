@@ -113,15 +113,19 @@ char *nArcanePragmaGccAlign(void){ return ""; }
 // *arcaneHookReduction
 // ****************************************************************************
 static void arcaneHookReduction(nablaMain *nabla, astNode *n){
-  //int fakeNumParams=0;
-  const astNode *item_node = n->children->next->children;
-  const astNode *global_var_node = n->children->next->next;
+  dbg("\n\t\t[arcaneHookReduction]");
+  const astNode *nabla_items = dfsFetch(n->children,rulenameToId("nabla_items"));
+  assert(nabla_items);
+  const astNode *global_var_node = n->children->next;
   const astNode *reduction_operation_node = global_var_node->next;
   const astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
-  assert(at_single_cst_node!=NULL);
+  assert(at_single_cst_node);
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
+  dbg("\n\t\t[arcaneHookReduction] global_var_name=%s",global_var_name);
+  dbg("\n\t\t[arcaneHookReduction] item_var_name=%s",item_var_name);
+  dbg("\n\t\t[arcaneHookReduction] item=%s",nabla_items->token);
   // Préparation du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   job_name[0]=0;
@@ -133,7 +137,7 @@ static void arcaneHookReduction(nablaMain *nabla, astNode *n){
   redjob->is_a_function=false;
   redjob->scope  = strdup("NoGroup");
   redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
+  redjob->item   = strdup(nabla_items->token);
   redjob->return_type  = strdup("void");
   redjob->name   = strdup(job_name);
   redjob->name_utf8 = strdup(job_name);

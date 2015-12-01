@@ -44,21 +44,16 @@
 #define _NABLA_TOOLS_H_
 
 char *toolStrDownCase(const char*);
-
 char *toolStrUpCase(const char*);
+char *toolStrQuote(const char*);
 
-char *trQuote(const char*);
+char *toolOpName(char*);
 
-char *op2name(char*);
+void toolUtf8(char**);
+void toolUtf8SupThree(char **);
 
-void nUtf8(char**);
-
-int nablaMakeTempFile(const char*,char**);
-
-void nUtf8SupThree(char **);
-
-void nToolUnlink(char *);
-
-int nToolFileCatAndHackIncludes(const char*,const char*);
+void toolUnlink(char *);
+int toolMkstemp(const char*,char**);
+int toolCatAndHackIncludes(const char*,const char*);
 
 #endif // _NABLA_TOOLS_H_

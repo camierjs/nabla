@@ -97,6 +97,7 @@ cells{
   Real internal_energy;
   Real viscosity_force;  // Contribution locale des forces de viscosité
   Real viscosity_work;   // Travail des forces de viscosité par maille
+  Real minimum_cell_aux;
 };
 
 
@@ -108,6 +109,7 @@ global{
   // Real delta_t_n;             //!< Delta t n       entre t^{n-1/2} et t^{n+1/2}
   // Real delta_t_f;             //!< Delta t n+\demi entre t^{n}     et t^{n+1}
   // Real old_dt_f;              //!< Delta t n-\demi entre t^{n-1}   et t^{n}
+  Real global_min_aux;
   };
 
 
@@ -387,13 +389,14 @@ cells void computeDxSound(void)
   out(cell dxSound) @ 9{
   dxSound = kLength/sound_speed;
 }
-cells Real computeMinDxSound(Real minimum_aux) in (cell dxSound){
-  minimum_aux = min(minimum_aux, dxSound);
-  return minimum_aux;
-}
-void computeDeltaT(void) @ 10{
+/*cells void computeMinDxSound(void) in (cell dxSound) @ 10.0{
+  minimum_cell_aux = min(minimum_aux, dxSound);
+  }*/
+∀ cells global_min_aux <?= dxSound  @ 10.1;
+
+void computeDeltaT(void) @ 10.2{
   Real new_dt,minimum_aux;
-  minimum_aux = computeMinDxSound(HUGE_VALL);
+  minimum_aux = global_min_aux;//computeMinDxSound(HUGE_VALL);
   new_dt = OPTION_CFL* minimum_aux;
 #warning parallele reduce
   // respect des valeurs min et max imposées par les options

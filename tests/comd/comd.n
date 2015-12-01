@@ -363,32 +363,30 @@ own cells void cellsComputeForceViaPairs(void) {
   cellComputeForce(*this,*this);            // itself
   foreach cell cellComputeForce(*this,*cc);  // neighbors
 }
-own cells Real computeSumEnergy(Real nrj) in (cell cell_energy){
-  nrj+=cell_energy;
-  return nrj;
+own cells void computeSumEnergy(void) in (cell cell_energy){
+  etot=etot+cell_energy; // atomic +=
 }
-own cells Real computeSumStress(Real s) in (cell cell_stress){
-  s+=cell_stress;
-  return s;
+own cells void computeSumStress(void) in (cell cell_stress){
+  stress=stress+cell_stress; // atomic +=
 }
+
 void endComputeForce(void) {
   etot = etot*4.0*ε*s6;
   e = etot;
   // renormalize stress
   stress = stress/(xBounds*yBounds*zBounds);
 }
+
 void computeForce(void){
   iniComputeForce();
   particleZeroForcesEnergy();
   cellsComputeForceViaPairs();
-  etot=computeSumEnergy(etot);
-  stress=computeSumStress(stress);
+  computeSumEnergy();
+  computeSumStress();
   etot=mpi_reduce(ReduceSum,etot);
   stress=mpi_reduce(ReduceSum,stress);
   endComputeForce();
 }
-
-
 // ********************************************************
 // * Initialisation des forces avant la boucle
 // ********************************************************

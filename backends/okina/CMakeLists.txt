@@ -5,18 +5,11 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
 # BACKEND OKINA
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}OKINA${VT100_RESET}")
 set(BACKEND_OKINA_C 
-  nOkina.c
-  nOkinaArgs.c
-  nOkinaHeader.c
-  nOkinaInit.c
-  nOkinaVariables.c
-  nOkinaEnum.c
-  nOkinaMain.c
-  nOkinaPragmas.c
-  ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
+  knArgs.c  knEnum.c  knHeader.c  knInit.c  knMain.c  knPragma.c  knVariables.c  okina.c
+  ${CMAKE_CURRENT_BINARY_DIR}/okina.S)
 
 # On spécifie en plus que nOkinaDump.S va utiliser incbin pour se compiler
-set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S 
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/okina.S 
              PROPERTY OBJECT_DEPENDS 
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/*.*
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/*.*
@@ -26,7 +19,7 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/*.*
              ${CMAKE_CURRENT_SOURCE_DIR}/dump/std/*.*)
 
-configure_file(nOkinaDump.S ${CMAKE_CURRENT_BINARY_DIR}/nOkinaDump.S)
+configure_file(okina.S ${CMAKE_CURRENT_BINARY_DIR}/okina.S)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
 

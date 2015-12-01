@@ -215,8 +215,8 @@ int sysPreprocessor(const char *nabla_entity_name,
   if (cat_sed_temporary_fd==-1)
     nablaError("[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
   
-  nToolFileCatAndHackIncludes(list_of_nabla_files,
-                              cat_sed_temporary_file_name);
+  toolCatAndHackIncludes(list_of_nabla_files,
+                         cat_sed_temporary_file_name);
   
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
@@ -348,44 +348,54 @@ int main(int argc, char * argv[]){
       // ************************************************************      
     case BACKEND_ARCANE:
       backend=BACKEND_ARCANE;
-      dbg("\n[nabla] Command line hits target ARCANE (%s)", longopts[longindex].name);
+      dbg("\n[nabla] Command line hits target ARCANE (%s)",
+          longopts[longindex].name);
       break;
       
     case BACKEND_COLOR_ARCANE_ALONE:
       backend_color=BACKEND_COLOR_ARCANE_ALONE;
       dbg("\n[nabla] Command line specifies ARCANE's STAND-ALONE option");
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+          nabla_entity_name);
       break;
       
     case 'p': // specific path to source directory for a module or a service
       specific_path=strdup(optarg);
-      dbg("\n[nabla] Command line specifies ARCANE's path: %s", specific_path);
+      dbg("\n[nabla] Command line specifies ARCANE's path: %s",
+          specific_path);
       break;
 
     case BACKEND_COLOR_ARCANE_MODULE:
       backend_color=BACKEND_COLOR_ARCANE_MODULE;
       dbg("\n[nabla] Command line specifies ARCANE's MODULE option");
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+          nabla_entity_name);
       break;
       
     case BACKEND_COLOR_ARCANE_SERVICE:
       backend_color=BACKEND_COLOR_ARCANE_SERVICE;
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE option");
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+          nabla_entity_name);
       break;
     case 'I': // Interface name
       interface_name=strdup(optarg);
-      dbg("\n[nabla] Command line specifies ARCANE's SERVICE interface name: %s", interface_name);
+      dbg("\n[nabla] Command line specifies ARCANE's SERVICE interface name: %s",
+          interface_name);
       break;
     case 'n': // Service name
       service_name=strdup(optarg);
-      dbg("\n[nabla] Command line specifies ARCANE's SERVICE service name: %s", service_name);
+      dbg("\n[nabla] Command line specifies ARCANE's SERVICE service name: %s",
+          service_name);
       break;
 
       // ************************************************************
@@ -394,10 +404,13 @@ int main(int argc, char * argv[]){
     case BACKEND_OKINA:
       backend=BACKEND_OKINA;
       backend_color=BACKEND_COLOR_VOID;
-      dbg("\n[nabla] Command line hits long option %s", longopts[longindex].name);
+      dbg("\n[nabla] Command line hits long option %s",
+          longopts[longindex].name);
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s",
+          nabla_entity_name);
       break;
     case BACKEND_COLOR_OKINA_TILING:
       backend_color=BACKEND_COLOR_OKINA_TILING;
@@ -457,10 +470,13 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_CUDA:
       backend=BACKEND_CUDA;
-      dbg("\n[nabla] Command line hits long option %s", longopts[longindex].name);
+      dbg("\n[nabla] Command line hits long option %s",
+          longopts[longindex].name);
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new CUDA nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new CUDA nabla_entity_name: %s",
+          nabla_entity_name);
       break;
 
       // ************************************************************
@@ -468,10 +484,13 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_LAMBDA:
       backend=BACKEND_LAMBDA;
-      dbg("\n[nabla] Command line hits long option %s", longopts[longindex].name);
+      dbg("\n[nabla] Command line hits long option %s",
+          longopts[longindex].name);
       nabla_entity_name=strdup(optarg);
-      unique_temporary_file_fd=nablaMakeTempFile(nabla_entity_name, &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s", nabla_entity_name);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s",
+          nabla_entity_name);
       break;
        
       // ************************************************************
@@ -488,16 +507,20 @@ int main(int argc, char * argv[]){
   }
   
   if (nabla_entity_name==NULL)
-    exit(NABLA_ERROR|fprintf(stderr,"\n[nabla] Error with entity name!\n"));
+    exit(NABLA_ERROR|
+         fprintf(stderr,"\n[nabla] Error with entity name!\n"));
 
   if (backend==BACKEND_VOID)
-    exit(NABLA_ERROR|fprintf(stderr,"\n[nabla] Error with target switch!\n"));
+    exit(NABLA_ERROR|
+         fprintf(stderr,"\n[nabla] Error with target switch!\n"));
  
   if (unique_temporary_file_fd==0)
-    exit(NABLA_ERROR|fprintf(stderr,"\n[nabla] Error with unique temporary file\n"));
+    exit(NABLA_ERROR|
+         fprintf(stderr,"\n[nabla] Error with unique temporary file\n"));
   
   if (input_file_list==NULL)
-    exit(NABLA_ERROR|fprintf(stderr,"\n[nabla] Error in input_file_list\n"));
+    exit(NABLA_ERROR|
+         fprintf(stderr,"\n[nabla] Error in input_file_list\n"));
 
   // On a notre fichier temporaire et la listes des fichiers ∇ à parser
   nablaPreprocessor(nabla_entity_name,
@@ -516,7 +539,7 @@ int main(int argc, char * argv[]){
                    service_name)!=NABLA_OK)
     exit(NABLA_ERROR);
   //#warning unlinked unique_temporary_file_name
-  nToolUnlink(unique_temporary_file_name);
+  toolUnlink(unique_temporary_file_name);
   return NABLA_OK;
 }
 

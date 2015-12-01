@@ -96,7 +96,12 @@ global{
   Real alpha_global;
 };
 
-/*void ini(void) @ -10.0{}
+
+/*∀ cells iniCellsWithOutVoid @ 8.0 {
+  volo += e*v;
+}
+
+void ini(void) @ -10.0{}
 
 ∀ cells void iniCells(void) in (cell e,v)
   out (cell volo) @ 8.0 {
@@ -117,9 +122,9 @@ global{
   ∀ node τVolume += coord⋅cqs;
   }*/
 
-∀ faces void loop(void) in (node u) @ 1.0 {
+/*∀ faces void loop(void) in (node u) @ 1.0 {
   if (0==1){}
   if (backCell is own){}
-}
+  }*/
 
-//∀ cells alpha_global <?= alpha @ 12.11;
+∀ cells alpha_global <?= alpha @ 12.11;

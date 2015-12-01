@@ -95,31 +95,36 @@ inline Real3 n(Real3 a, Real3 b){
 // ****************************************************************************
 // * Vérification que l'on soit bien en full triangle ou quads
 // ****************************************************************************
-cells Integer computeMinNbNode(Integer minNbNode){
+/*cells void computeMinNbNode(void){
   minNbNode = min(minNbNode,nbNode);
-  return minNbNode;
 }
-cells Integer computeMaxNbNode(Integer maxNbNode){
+cells void computeMaxNbNode(void){
   maxNbNode = max(maxNbNode,nbNode);
-  return maxNbNode;
-}
+  }*/
+#warning reductionn system nbNode
+//∀ cells minNbNode <?= nbNode @ -31.0;
+//∀ cells maxNbNode >?= nbNode @ -31.0;
 
-cells Real computeCellMassCenterDelta(Real minDelta){
-  foreach cell
-    minDelta=min(minDelta,norm(cell_mass_center[cc]-cell_mass_center));
-  return minDelta;
+∀ cells void computeCellMassCenterDelta(void)@-31.0{
+  minCellDelta=+∞;
+  ∀ cell
+    minCellDelta=min(minCellDelta,
+                     norm(cell_mass_center[cc]-cell_mass_center));
 }
-void testForQuadsOrTriangles(void) @ -31.0{
-  Real minNbNode=computeMinNbNode(1024);
-  Real maxNbNode=computeMaxNbNode(0);
-  Integer rMinNbNode = mpi_reduce(ReduceMin,minNbNode);
-  Integer rMaxNbNode = mpi_reduce(ReduceMax,maxNbNode);
+∀ cells minΔ <?= minCellDelta @ -31.1;
+
+void testForQuadsOrTriangles(void) @ -31.2{
+  //Real minNbNode=computeMinNbNode(1024);
+  //Real maxNbNode=computeMaxNbNode(0);
+  Integer rMinNbNode = minNbNode;//mpi_reduce(ReduceMin,minNbNode);
+  Integer rMaxNbNode = maxNbNode;//mpi_reduce(ReduceMax,maxNbNode);
   full_quads=false;full_triangles=false;
   if ((rMinNbNode==4) && (rMaxNbNode==4)) full_quads=true;
   if ((rMinNbNode==3) && (rMaxNbNode==3)) full_triangles=true;
-  if (!(full_quads^full_triangles)) fatal("testForQuadsorTriangles", "Not an exclusive mesh!");
-  if (full_quads!=option_quads) fatal("testForQuadsorTriangles", "Not a told quad mesh!");
-  if (full_triangles!=option_triangles) fatal("testForQuadsorTriangles", "Not a told triangular mesh!");
+  #warning sanity test
+  //if (!(full_quads^full_triangles)) fatal("testForQuadsorTriangles", "Not an exclusive mesh!");
+  //if (full_quads!=option_quads) fatal("testForQuadsorTriangles", "Not a told quad mesh!");
+  //if (full_triangles!=option_triangles) fatal("testForQuadsorTriangles", "Not a told triangular mesh!");
 }
 
 // Calcul de Δl: Length of the sides, before touching mesh
@@ -127,22 +132,22 @@ void computeΔl(void) @ -30.0{
   const Real ε=1.0e-15;
   if (full_triangles) geomTriMassCenter();
   if (full_quads) geomQuadMassCenter();
-  Δl=round(mpi_reduce(ReduceMin,computeCellMassCenterDelta(+∞))/ε)*ε;
+  //Δl=round(mpi_reduce(ReduceMin,computeCellMassCenterDelta(+∞))/ε)*ε;
+  Δl=round((minΔ)/ε)*ε;
   info()<<"\33[33m[computeΔl] Δl="<<Δl<<"\33[m";
 }
 
 // Calcul du nombre de noeuds sans les own
-own cells Integer computeNbCells(Integer localNbCells){
+/*own cells void computeNbCells(void){
   localNbCells+=1;
-  return localNbCells;
 }
-own nodes Integer computeNbNodes(Integer localNbNodes){
+own nodes void computeNbNodes(void){
   localNbNodes+=1;
-  return localNbNodes;
-}
+  }*/
+#warning localNbCells localNbNodes
 void sumNbCellsNodes(void) @ -30.0{
-  globalNbCells=mpi_reduce(ReduceSum,computeNbCells(0));
-  globalNbNodes=mpi_reduce(ReduceSum,computeNbNodes(0));
+  globalNbCells=1024;//mpi_reduce(ReduceSum,computeNbCells(0));
+  globalNbNodes=1024;//mpi_reduce(ReduceSum,computeNbNodes(0));
   info()<<"\33[33m[computeSumNbCellsNodes] globalNbCells="<<globalNbCells<<"\33[m";
   info()<<"\33[33m[computeSumNbCellsNodes] globalNbNodes="<<globalNbNodes<<"\33[m";
 }

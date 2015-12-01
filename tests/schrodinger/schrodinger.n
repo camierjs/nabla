@@ -105,6 +105,15 @@ faces{
   Uid nodeLowId;
 };
 
+
+// ****************************************************************************
+// *
+// ****************************************************************************
+global{
+  Real min_σ;
+};
+
+
 // ****************************************************************************
 // * Partie d'initialisation ]-∞,-0[
 // ****************************************************************************
@@ -193,15 +202,12 @@ faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -9.0{
 // ****************************************************************************
 // * Initialisation du δt en fonction des options
 // ****************************************************************************
-faces Real computeMin_σ(Real min_σ) in (face σ){
-  min_σ = min(min_σ,σ);
-  return min_σ;
-}
+#warning face reduction
+//∀ faces min_σ <?= σ @ -8.6;
+
 void ini_δt(void) @ -8.5{
   if (option_deltat==0.0){
-    Real min_σ=computeMin_σ(1.0e+20);
-    Real reduced_min_σ = mpi_reduce(ReduceMin,min_σ);
-    δt=reduced_min_σ/option_deltat_factor;
+    δt=1.0/*min_σ*//option_deltat_factor;
   }else δt=option_deltat;
   info()<< "\33[7m[ini_δt] δt="<<δt<<"\33[m";
 }
