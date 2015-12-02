@@ -137,22 +137,23 @@ int nMiddleNumberOfEntryPoints(nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nablaEntryPointsSort
- *****************************************************************************/
-nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
-  //bool initPhase=true;
+// ****************************************************************************
+// * nablaEntryPointsSort
+// ****************************************************************************
+nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
+                                 int number_of_entry_points){
   int i,j;
-  nablaJob *job, *entry_points;
-  
-  dbg("\n[nablaEntryPointsSort] Sorting %d entry-points", number_of_entry_points);
-
+  nablaJob *job, *entry_points=NULL;
+  dbg("\n[nablaEntryPointsSort] Sorting %d entry-points...", number_of_entry_points);
   // On va rajouter le ComputeLoop[Begin||End]
   number_of_entry_points+=2;
   
   // On prépare le plan de travail de l'ensemble des entry_points
-  entry_points =(nablaJob *)calloc(number_of_entry_points, sizeof(nablaJob));
-
+  entry_points =(nablaJob*)calloc(1+number_of_entry_points, sizeof(nablaJob));
+  assert(entry_points);
+  dbg("\n[nablaEntryPointsSort] calloc'ed!");
+  
+  dbg("\n[nablaEntryPointsSort] Adding ComputeLoopBegin");
   entry_points[0].item = strdup("\0");
   entry_points[0].is_an_entry_point=true;
   entry_points[0].is_a_function=true;
@@ -161,6 +162,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,int number_of_entry_points){
   entry_points[0].whens[0] = ENTRY_POINT_compute_loop;
   entry_points[0].when_index = 1;
 
+  dbg("\n[nablaEntryPointsSort] Adding ComputeLoopEnd");
   entry_points[1].item = strdup("\0");
   entry_points[1].is_an_entry_point=true;
   entry_points[1].is_a_function=true;

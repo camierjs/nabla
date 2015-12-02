@@ -569,20 +569,20 @@ argument_expression_list
 // EXPRESSIONS //
 /////////////////
 primary_expression
-: BUILTIN_INFF {rhs;}
+: IDENTIFIER {rhs;}
+| IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
+| BUILTIN_INFF {rhs;}
 | FRACTION_ONE_HALF_CST {rhs;}
 | FRACTION_ONE_THIRD_CST {rhs;}
 | FRACTION_ONE_QUARTER_CST {rhs;}
-| FRACTION_ONE_EIGHTH_CST {rhs;}
-| DIESE {rhs;}  // Permet d'écrire un '#' à la place d'un [c|n]
-| IDENTIFIER {rhs;}
-| IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
-| nabla_item {rhs;} // Permet de rajouter les items Nabla au sein des corps de fonctions
-| nabla_system {rhs;}
+| FRACTION_ONE_EIGHTH_CST {rhs;};
 | HEX_CONSTANT {rhs;} 
 | OCT_CONSTANT {rhs;}
 | Z_CONSTANT {rhs;}
 | R_CONSTANT {rhs;}
+| DIESE {rhs;}  // Permet d'écrire un '#' à la place d'un [c|n]
+| nabla_item {rhs;} // Permet de rajouter les items Nabla au sein des corps de fonctions
+| nabla_system {rhs;}
 | QUOTE_LITERAL {rhs;}
 | STRING_LITERAL {rhs;}
 | '(' expression ')'	{rhs;}
@@ -891,13 +891,9 @@ at_constant
 ////////////////////////
 // ∇ jobs definitions //
 ////////////////////////
-nabla_job_prefix
-//: nabla_family {rhs;}
-: FORALL nabla_family {rhs;}
-;
+nabla_job_prefix: FORALL nabla_family {rhs;};
 nabla_job_decl
 : nabla_job_prefix {rhs;}
-| nabla_job_prefix IDENTIFIER {rhs;}
 | nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}
 ;
 
@@ -915,8 +911,8 @@ nabla_job_definition
 // ∇ single reduction //
 ////////////////////////
 nabla_reduction
-: nabla_job_decl MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
-| nabla_job_decl MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+: nabla_job_prefix IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+| nabla_job_prefix IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
 ;
 
 

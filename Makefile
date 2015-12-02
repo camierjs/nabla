@@ -135,7 +135,7 @@ tstasw:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_swirl_gen_1)
 tstabg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_amber_gen_1)
-tstaag:
+tstaalfg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aleph1D_gen_1)
 tstahg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_gen_1)
@@ -172,8 +172,13 @@ tsths:
 tsts4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_4)
 
+tstaag:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aecjs_gen_1)
+
 tstapr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
+tstapg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_gen_1)
 tstmh:
 	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
 tstm4:

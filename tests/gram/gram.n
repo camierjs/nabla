@@ -80,12 +80,15 @@ __timer_t t;
 
  
 //FILE *fDot;
+options{
+  ℕ opt = 1;
+};
 
 
 cells{
-  Real alpha;
-  Real v;
-  Real e,volo;
+  ℝ α,β;
+  ℝ v;
+  ℝ e,volo;
 };
 
 nodes{
@@ -93,21 +96,23 @@ nodes{
 };
 //
 global{
-  Real alpha_global;
+  ℝ α_global;
 };
 
 
-∀ cells iniCellsWithOutVoid @ 8.0 {
-  volo += e*v;
-}
+//void ini(void) @ -10.0{}
 
-void ini(void) @ -10.0{}
-
-
-∀ cells void iniCells(void) in (cell e,v, node coord)
+/*∀ cells void iniCells(void)
+  in (cell e,v, node coord)
   out (cell volo) @ 8.0 {
   volo += e*v;
-}
+  }*/
+
+/*∀ cells in (cell e,v, node coord) out (cell volo) @ 8.0 {
+  volo += e*v;
+  }*/
+
+∀ cells @ 8.0 {volo += α_global*β*e*v;}
 
 
 /*∀ nodes void loop(void) in (node u) @ 1.0 {
@@ -128,4 +133,5 @@ void ini(void) @ -10.0{}
   if (backCell is own){}
   }*/
 
-∀ cells alpha_global <?= alpha @ 12.11;
+∀ cells α_global <?= α @ 12.11;
+
