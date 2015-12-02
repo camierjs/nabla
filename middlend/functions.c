@@ -346,7 +346,6 @@ void nMiddleFunctionFill(nablaMain *nabla,
   astNode *nParams;
   fct->jobNode=n;
   fct->called_variables=NULL;
-  fct->in_out_variables=NULL;
   dbg("\n\n\t[nablaFctFill] ");
   fct->is_a_function=true;
   assert(fct != NULL);

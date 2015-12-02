@@ -57,7 +57,8 @@ nablaVariable *nMiddleVariableNew(nablaMain *arc){
    variable->next=NULL;
    variable->gmpRank=-1;
    variable->dump=true;
-   //variable->used_in_a_forall=false;
+   variable->in=false; 
+   variable->out=false;
    variable->is_gathered=false;
   	return variable; 
 }
@@ -254,4 +255,108 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
   }
   nprintf(nabla, "/*return postfixed_not_a_nabla_variable*/", NULL);
   return postfixed_not_a_nabla_variable;
+}
+
+
+// ****************************************************************************
+// * dfsVariables
+// * On scan pour lister les variables en in/inout/out
+// ****************************************************************************
+void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
+                  bool left_of_assignment_expression){
+  if (n==NULL) return;
+  
+  // Par défault, left_of_assignment_expression arrive à false
+  // Si on tombe sur un assignment_expression, et un en fils en unary_expression
+  // c'est qu'on passe à gauche du '=' et on 'écrit'
+  if (n->ruleid==rulenameToId("assignment_expression")&&
+      (n->children->ruleid==rulenameToId("unary_expression"))){
+    //dbg("\n\t\t\t[dfsVariables] left_of_assignment_expression @ TRUE!");
+    left_of_assignment_expression=true;
+  }
+  // Si on passe par l'opérateur, on retombe du coté lecture
+  if (n->ruleid==rulenameToId("assignment_operator")){
+    //dbg("\n\t\t\t[dfsVariables] left_of_assignment_expression @ FALSE!");
+    left_of_assignment_expression=false;
+  }
+  
+  if (n->ruleid==rulenameToId("primary_expression")){
+    //dbg("\n\t\t\t[dfsVariables] primary_expression!");
+    if (n->children->tokenid == IDENTIFIER){
+      const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
+      char* token = n->children->token;
+      // Est-ce une variable connue?
+      const nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
+      if (var!=NULL){ // Si c'est bien un variable
+        nablaVariable *new=nMiddleVariableFind(job->used_variables, token);
+        if (new==NULL){ // Si c'est une variable qu'on a pas déjà placée dans la liste connue
+          dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
+          // Création d'une nouvelle used_variable
+          new = nMiddleVariableNew(NULL);
+          new->name=strdup(var->name);
+          new->item=strdup(var->item);
+          new->type=strdup(var->type);
+          new->dim=var->dim;
+          new->size=var->size;
+          // Et on mémorise ce que l'on a fait en in/out
+          if (left_of_assignment_expression) new->out|=true;
+          if (!left_of_assignment_expression) new->in|=true;
+          // Rajout à notre liste
+          if (job->used_variables==NULL)
+            job->used_variables=new;
+          else
+            nMiddleVariableLast(job->used_variables)->next=new;        
+        }
+        // Et on mémorise ce que l'on a fait en in/out
+        if (left_of_assignment_expression)
+          new->out|=true;
+        else
+          new->in|=true;
+        //if (!left_of_assignment_expression) new->in|=true;
+      }
+      
+      // Est-ce une option connue?
+      const nablaOption *opt=nMiddleOptionFindName(nabla->options,token);
+      if (opt!=NULL){
+        nablaOption *new=nMiddleOptionFindName(job->used_options,token);
+        if (new==NULL){
+          assert(left_of_assignment_expression==false);
+          dbg("\n\t[dfsVariables] Option '%s' is used (%s) in this job!",opt->name,rw);
+          // Création d'une nouvelle used_option
+          new = nMiddleOptionNew(nabla);
+          new->axl_it=opt->axl_it;
+          new->type=opt->type;
+          new->name=opt->name;
+          new->dflt=opt->dflt;
+          new->main=nabla;        
+          // Rajout à notre liste
+          if (job->used_options==NULL)
+            job->used_options=new;
+          else
+            nMiddleOptionLast(job->used_options)->next=new;
+        }
+      }
+    }
+  }
+  if (n->children != NULL)
+    dfsVariables(nabla, job, n->children,
+                 left_of_assignment_expression);
+  if (n->next != NULL)
+    dfsVariables(nabla, job, n->next,
+                 left_of_assignment_expression);
+}
+
+static char* inout(const nablaVariable *var){
+  if (var->in && var->out) return "inout";
+  if (var->in && !var->out) return "in";
+  if (!var->in && var->out) return "out";
+  exit(NABLA_ERROR|fprintf(stderr, "\n[inout] in/inout/out error!\n"));
+}
+void dfsVariablesDump(nablaMain *nabla, nablaJob *job, astNode *n){
+  nablaVariable *var=job->used_variables;
+  dbg("\n\t[dfsVariablesDump]:");
+  //assert(var);
+  for(;var!=NULL;var=var->next){
+    dbg("\n\t\t[dfsVariablesDump] Variable '%s' is used (%s) in this job!",var->name,inout(var));
+  }
 }

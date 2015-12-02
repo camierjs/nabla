@@ -67,7 +67,6 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->nblParamsNode=NULL;
   job->ifAfterAt=NULL;
   job->called_variables=NULL;
-  job->in_out_variables=NULL;
   job->variables_to_gather_scatter=NULL;
   job->forall_item='\0';
   job->reduction=false;
@@ -522,6 +521,9 @@ void nMiddleJobFill(nablaMain *nabla,
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
   // Et on dump les tokens dans ce job
+  dbg("\n\t[nablaJobFill] Now dfsVariables...");
+  dfsVariables(nabla,job,n,false);
+  dfsVariablesDump(nabla,job,n);
   dbg("\n\t[nablaJobFill] Now parsing...");
   nMiddleJobParse(n,job);
 

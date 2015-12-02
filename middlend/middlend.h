@@ -99,6 +99,8 @@ typedef struct nablaVariableStruct{
   int dim;    // sa dimension
   long size;   // sa taille dans le cas où dim vaut '1'
   bool dump;
+  bool in;
+  bool out;
   bool is_gathered;
   inout_mode inout;
   struct nablaMainStruct *main;
@@ -143,8 +145,9 @@ typedef struct nablaJobStruct{
   astNode *stdParamsNode;
   astNode *nblParamsNode;
   astNode *ifAfterAt;
+  nablaVariable *used_variables;
+  nablaOption *used_options;
   nablaVariable *called_variables;
-  nablaVariable *in_out_variables;
   nablaVariable *variables_to_gather_scatter;
   char forall_item;
   bool reduction;
@@ -259,6 +262,8 @@ int nMiddleVariableGmpRank(nablaVariable*);
 char *nMiddleVariableGmpNameRank(nablaVariable*,int);
 bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
 int nMiddleVariableGmpDumpNumber(nablaVariable*);
+void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
+void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
 
 // nMiddleType
 nablaType *nMiddleTypeNew(void);

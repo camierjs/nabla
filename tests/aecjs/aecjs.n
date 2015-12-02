@@ -111,7 +111,7 @@ void dbgLoop(void) @ 1.0{
   out (node nU) @ 2.0{
   if (n==0) continue;
   if (n==(NABLA_NB_NODES-1)) continue;
-  ℝ  r=2*epsilon;
+  ℝ r=2*epsilon;
   nU=0.0;
   ∀ cell
       {

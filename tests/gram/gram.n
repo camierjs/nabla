@@ -82,11 +82,12 @@ __timer_t t;
 //FILE *fDot;
 options{
   ℕ opt = 1;
+  ℾ tst = true;
 };
 
 
 cells{
-  ℝ α,β;
+  ℝ α,β,γ;
   ℝ v;
   ℝ e,volo;
 };
@@ -112,7 +113,10 @@ global{
   volo += e*v;
   }*/
 
-∀ cells @ 8.0 {volo += α_global*β*e*v;}
+∀ cells @ 8.0 {
+  α=β=γ=(tst)?1.0:0.0;
+}
+//∀ cells @ 8.0 {volo += (α=1.0)*α_global*β*(e=1.0)*v*α;}
 
 
 /*∀ nodes void loop(void) in (node u) @ 1.0 {
