@@ -202,7 +202,7 @@ void iniDomain(void) @ -9.0{
 // ********************************************************
 // * Initialisation des particules
 // ********************************************************
-particles void iniParticles(void) out (particle id) @ -9.0{
+∀ particles void iniParticles(void) out (particle id) @ -9.0{
   f=μ=r=0.0;
   energy=0.0;
   id=iType=0;
@@ -212,7 +212,7 @@ particles void iniParticles(void) out (particle id) @ -9.0{
 // ********************************************************
 // * Initialisation des mailles et calcul du centre
 // ********************************************************
-cells void computeDomainCenter(void) @ -8.0{
+∀ cells void computeDomainCenter(void) @ -8.0{
   natom=0.0;
   dcenter=0.0;
   foreach node dcenter+=coord;
@@ -259,7 +259,7 @@ void putAtomsInBoxes(void) @ -7.0{
 // ********************************************************
 // * Initialisation des particules
 // ********************************************************
-particles void iniAtomTheBox(void) in (cell dcenter)
+∀ particles void iniAtomTheBox(void) in (cell dcenter)
   out (particle id, particle iType, particle r) @ -6.0{
   id = uid;
   iType = 1;
@@ -270,8 +270,8 @@ particles void iniAtomTheBox(void) in (cell dcenter)
 // ********************************************************
 // * Mise à jour du nombre de particules dans chaque maille
 // ********************************************************
-own cells void iniParticlesInCells(void) in (particle id, particle r)@ -5.9{
-  foreach particle{
+∀ own cells void iniParticlesInCells(void) in (particle id, particle r)@ -5.9{
+  ∀ particle{
     natom+=1.0;
     //cell_energy=0.0;
     //if (!(uid%1024)) info()<<"cell #"<<uid<<" has particle "<< id <<" @ coords="<<r;
@@ -317,7 +317,7 @@ void iniComputeForce(void){
   s6 = σ*σ*σ*σ*σ*σ;
   r2cut = cutoff*cutoff;
 }
-particles void particleZeroForcesEnergy(void){
+∀ particles void particleZeroForcesEnergy(void){
   //if (!particle->cell().isOwn()) continue;
   f=0.0;
   energy=0.0;
@@ -333,9 +333,9 @@ void cellComputeForce(Cell i, Cell j){
   //if (drbox.x < -0.5*xBounds) drbox.x += xBounds;
   //if (drbox.y < -0.5*yBounds) drbox.y += yBounds;
   //if (drbox.z < -0.5*zBounds) drbox.z += zBounds;
-  foreach i particle{
+  ∀ i particle{
     strss -= - μ[pi].x*μ[pi].x/mass;
-    foreach j particle{
+    ∀ j particle{
       if (id[pj]<=id[pi]) continue;
       dr = drbox+(r[pi]-r[pj]);
       r2 = dot(dr,dr);
@@ -358,15 +358,15 @@ void cellComputeForce(Cell i, Cell j){
   cell_stress[i]+=strss;
 }
 // loop over all boxes in system via pairs
-own cells void cellsComputeForceViaPairs(void) {
+∀ own cells void cellsComputeForceViaPairs(void) {
   cell_stress=cell_energy=0.0;
   cellComputeForce(*this,*this);            // itself
-  foreach cell cellComputeForce(*this,*cc);  // neighbors
+  ∀ cell cellComputeForce(*this,*cc);  // neighbors
 }
-own cells void computeSumEnergy(void) in (cell cell_energy){
+∀ own cells void computeSumEnergy(void) in (cell cell_energy){
   etot=etot+cell_energy; // atomic +=
 }
-own cells void computeSumStress(void) in (cell cell_stress){
+∀ own cells void computeSumStress(void) in (cell cell_stress){
   stress=stress+cell_stress; // atomic +=
 }
 
@@ -414,7 +414,7 @@ void do_compute_work(void) @ 1.0{
 // ****************************************************************************
 // * advanceVelocity
 // ****************************************************************************
-particles void advanceVelocity(Real dt) in (particle f) out (particle p){
+∀ particles void advanceVelocity(Real dt) in (particle f) out (particle p){
   μ -= dt*f;
 }
 
@@ -427,7 +427,7 @@ particles void advanceVelocity(Real dt) in (particle f) out (particle p){
 // * amu, we need to multiply it by 1822.83 to
 // * get the mass in amu.
 // ****************************************************************************
-particles void advancePositions(Real dt) in (particle mass){
+∀ particles void advancePositions(Real dt) in (particle mass){
   r += dt*μ/(amu_to_m_e*mass);
 }
 
@@ -452,7 +452,7 @@ int getIBoxFromIxyz3(int x, int y, int z){
 // ****************************************************************************
 // * reBoxAll
 // ****************************************************************************
-cells void reBoxAll(void){
+∀ cells void reBoxAll(void){
   int ibox=uid;
   int iXold=getIx(uid);
   int iYold=getIy(uid);

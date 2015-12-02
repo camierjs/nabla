@@ -120,7 +120,7 @@ global{
 
 //void ini(void) @ -10.0{  δt=option_deltat;}
 
-cells void iniCells(void) out (cell cell_nb_nodes,
+∀ cells void iniCells(void) out (cell cell_nb_nodes,
                                cell cell_density,
                                cell cell_density_re,
                                cell cell_density_im) @ -10.0{
@@ -134,19 +134,19 @@ cells void iniCells(void) out (cell cell_nb_nodes,
   //info()<<"\33[7mcell["<<uid<<"]"<<"\33[m";
 }
 
-nodes void iniNodes(void) out (node node_density,
+∀ nodes void iniNodes(void) out (node node_density,
                                node node_density_re,
                                node node_density_im) @ -10.0{
   node_density=node_density_re=node_density_im=0.0;
   //info()<<"\33[7mnode["<<uid<<"]"<<"\33[m";
 }
 
-faces void iniFaces(void) out (face face_density) @ -10.0{
+∀ faces void iniFaces(void) out (face face_density) @ -10.0{
   edge_density_re=edge_density_im=option_ini_borders;
   //info()<<"\33[7mface["<<uid<<"]"<<"\33[m";
 }
 
-cells void cellArea(void) out (cell cell_area) @ -10.0{
+∀ cells void cellArea(void) out (cell cell_area) @ -10.0{
   const Real3 a=coord[0];
   const Real3 b=coord[1];
   const Real3 c=coord[2];
@@ -160,27 +160,27 @@ cells void cellArea(void) out (cell cell_area) @ -10.0{
   cell_area=√(p*(p-ab)*(p-bc)*(p-ca));
 }
 
-cells void cellVolume(void) out (cell cell_volume){
+∀ cells void cellVolume(void) out (cell cell_volume){
   const register Real3 a1 = coord[1] - coord[0];
   const register Real3 a2 = coord[2] - coord[0];
   const register Real3 a3 = coord[3] - coord[0];
   cell_volume = mixteMul(a1,a2,a3)/6.0;
 }
 
-cells void cellGravityCenter(void) out (cell ccc) @ -10.0{
+∀ cells void cellGravityCenter(void) out (cell ccc) @ -10.0{
   ccc=0.;
   foreach node ccc+=coord;
   ccc/=nbNode;
 }
 
-nodes void nodeArea(void)
+∀ nodes void nodeArea(void)
   in (cell cell_area, cell cell_nb_nodes)
   out (node node_area) @ -9.0{
   node_area=0.0;
   foreach cell node_area+=cell_area/cell_nb_nodes;
 }
 
-faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -9.0{
+∀ faces void faceSbySigma(void) in (cell ccc) out (face sdivs, face σ) @ -9.0{
   Real3 fn0 = coord[0];
   Real3 fn1 = coord[1];
   Real s=norm(fn0-fn1);
@@ -215,7 +215,7 @@ void ini_δt(void) @ -8.5{
 // ****************************************************************************
 // * faceTheta
 // ****************************************************************************
-faces void faceTheta(void) in (cell ccc) out (face Cosθ,
+∀ faces void faceTheta(void) in (cell ccc) out (face Cosθ,
                                               face Sinθ) @ -8.0{
   Real3 n0=coord[0];
   Real3 n1=coord[1];  
@@ -258,7 +258,7 @@ faces void faceTheta(void) in (cell ccc) out (face Cosθ,
 // ****************************************************************************
 // * updateAlphaBetaGammaDelta
 // ****************************************************************************
-faces void updateAlphaBetaGammaDelta(void)
+∀ faces void updateAlphaBetaGammaDelta(void)
   in (face sdivs, face Cosθ, face Sinθ)
   out (face α, face β, face δ) @ -7.0{
   α = δt*sdivs/Cosθ;
@@ -269,10 +269,10 @@ faces void updateAlphaBetaGammaDelta(void)
 // ****************************************************************************
 // * iniNodeIsAnEdge, iniOuterNodeIsAnEdge
 // ****************************************************************************
-nodes void iniNodeIsAnEdge(void) out (node node_is_an_edge) @ -6.0{
+∀ nodes void iniNodeIsAnEdge(void) out (node node_is_an_edge) @ -6.0{
   node_is_an_edge=false;
 }
-own outer nodes void iniOuterNodeIsAnEdge(void) out (node node_is_an_edge) @ -5.0{
+∀ own outer nodes void iniOuterNodeIsAnEdge(void) out (node node_is_an_edge) @ -5.0{
   node_is_an_edge=true;
 }
 
@@ -292,21 +292,21 @@ void sync(void) @ -7.0{
 void rhsInit(void) @ 1.0{
   ℵ rhs reset;
 }
-own cells void setRhsCellValues(void) in (cell cell_density_re,
+∀ own cells void setRhsCellValues(void) in (cell cell_density_re,
                                           cell cell_density_im) @ 1.1{
   Real re=cell_density_re;
   Real im=cell_density_im;
   ℵ rhs setValue(cell_density_re,this, +re);
   ℵ rhs setValue(cell_density_im,this, -im);
 }
-own nodes void setRhsNodeValues(void) in (node node_density_re,
+∀ own nodes void setRhsNodeValues(void) in (node node_density_re,
                                           node node_density_im) @ 1.2{
   Real re=node_density_re;
   Real im=node_density_im;
   ℵ rhs setValue(node_density_re,this, +re);
   ℵ rhs setValue(node_density_im,this, -im);
 }
-own outer faces void setRhsFaceValues(void) in (face edge_density_re,
+∀ own outer faces void setRhsFaceValues(void) in (face edge_density_re,
                                                 face edge_density_im) @ 1.3{
   Real re=edge_density_re;
   Real im=edge_density_im;
@@ -318,7 +318,7 @@ own outer faces void setRhsFaceValues(void) in (face edge_density_re,
 // On met lors des 'option_ini_iterations' premières itérations à 'option_ini_borders'
 // les noeuds et faces de l'ensemble des bords
 // ****************************************************************************
-own outer faces void setStdRhsEdgesOnBorders(void) in (face edge_density_re,
+∀ own outer faces void setStdRhsEdgesOnBorders(void) in (face edge_density_re,
                                                        face edge_density_im)@ 1.4{
   const double ini=(GlobalIteration>option_ini_iterations)?0.0:option_ini_borders;
   ℵ rhs setValue(edge_density_re,this, +ini);
@@ -345,7 +345,7 @@ void getMatrixAndVectors(void) @ 2.0 { alephInitialize(); }
 // ****************************************************************************
 // * alphaCells
 // ****************************************************************************
-own cells void alphaCells(void) in (cell cell_area,
+∀ own cells void alphaCells(void) in (cell cell_area,
                                     cell cell_matrix_idx_re,
                                     cell cell_matrix_idx_im,
                                     face edge_density_im,
@@ -378,7 +378,7 @@ own cells void alphaCells(void) in (cell cell_area,
 // ****************************************************************************
 // * betaCells
 // ****************************************************************************
-own cells void betaCells(void) in (cell cell_area,
+∀ own cells void betaCells(void) in (cell cell_area,
                                    cell cell_matrix_idx_re,
                                    cell cell_matrix_idx_im,
                                    node node_density_re,
@@ -401,7 +401,7 @@ own cells void betaCells(void) in (cell cell_area,
 // ****************************************************************************
 // * gammaCells
 // ****************************************************************************
-own nodes void gammaNodes(void) in (node node_area,
+∀ own nodes void gammaNodes(void) in (node node_area,
                                     node node_is_an_edge,
                                     cell cell_density_re,
                                     cell cell_density_im) @ 3.3{
@@ -426,7 +426,7 @@ own nodes void gammaNodes(void) in (node node_area,
 // ****************************************************************************
 // * deltaCells
 // ****************************************************************************
-own nodes void deltaNodes(void) in (node node_area,
+∀ own nodes void deltaNodes(void) in (node node_area,
                                     node node_is_an_edge) @ 3.4{
   register Real δn,Σδ=0.;
   if (node_is_an_edge==true) continue;
@@ -451,13 +451,13 @@ own nodes void deltaNodes(void) in (node node_area,
 // ****************************************************************************
 // * Conditions de Dirichlet
 // ****************************************************************************
-own outer faces void dirichletFaces(void) in (face edge_density_re,
-                                              face edge_density_im) @ 3.5{
+∀ own outer faces void dirichletFaces(void) in (face edge_density_re,
+                                                face edge_density_im) @ 3.5{
   ℵ matrix addValue(edge_density_re,this, edge_density_re,this, +1.0);
   ℵ matrix addValue(edge_density_im,this, edge_density_im,this, +1.0);
 }
-own nodes void dirichletNodes(void) in (face edge_density_re,
-                                              face edge_density_im) @ 3.6{
+∀ own nodes void dirichletNodes(void) in (face edge_density_re,
+                                          face edge_density_im) @ 3.6{
   if (node_is_an_edge==false) continue;
   ℵ matrix addValue(node_density_re,this, node_density_re,this, +1.0);
   ℵ matrix addValue(node_density_im,this, node_density_im,this, +1.0);
@@ -471,27 +471,27 @@ void assembleAndSolve(void) @ 4.0 { ℵ solve; }
 // ****************************************************************************
 // * Récupération des résultats
 // ****************************************************************************
-own cells void getCellResults(void) out (cell cell_density_re,
-                                         cell cell_density_im) @ 4.1{
+∀ own cells void getCellResults(void) out (cell cell_density_re,
+                                           cell cell_density_im) @ 4.1{
   cell_density_re=ℵ lhs getValue(cell_density_re,this);
   cell_density_im=ℵ lhs getValue(cell_density_im,this);
 }
-own nodes void getNodeResults(void) out (node node_density_re,
-                                         node node_density_im) @ 4.2{
+∀ own nodes void getNodeResults(void) out (node node_density_re,
+                                           node node_density_im) @ 4.2{
   node_density_re=ℵ lhs getValue(node_density_re,this);
   node_density_im=ℵ lhs getValue(node_density_im,this);
 }
-own cells void saveCellDensity(void) in (cell cell_density_re,
-                                         cell cell_density_im)
-                                    out (cell cell_density) @ 4.3{
+∀ own cells void saveCellDensity(void) in (cell cell_density_re,
+                                           cell cell_density_im)
+  out (cell cell_density) @ 4.3{
   cell_density = √(cell_density_re*cell_density_re +
-                      cell_density_im*cell_density_im);
+                   cell_density_im*cell_density_im);
 }
-own nodes void saveNodeDensity(void) in (node node_density_re,
-                                         node node_density_im)
-                                    out (node node_density) @ 4.3{
+∀ own nodes void saveNodeDensity(void) in (node node_density_re,
+                                           node node_density_im)
+  out (node node_density) @ 4.3{
   node_density = √(node_density_re*node_density_re +
-                      node_density_im*node_density_im);
+                   node_density_im*node_density_im);
 }
 
 // ****************************************************************************

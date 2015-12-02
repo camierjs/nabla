@@ -113,13 +113,13 @@ void rhsInit(void) @ 1.0{
 }
 
 
-cells void addRhsCellValues(void) in (cell Ω) @ 1.1{
+∀ cells void addRhsCellValues(void) in (cell Ω) @ 1.1{
   const ℝ value=Ω;
   ℵ rhs addValue(Ω,this,value);
 }
 
 
-nodes void setRhsNodeValues(void) in (/*cell Ω,*/node Φω) @ 1.2{
+∀ nodes void setRhsNodeValues(void) in (/*cell Ω,*/node Φω) @ 1.2{
   const ℝ value = δt*Φω;
   info()<<"[setRhsNodeValues] n="<<n;
   ∀ cell{
@@ -151,14 +151,14 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 // ****************************************************************************
 // * Fill our matrix
 // ****************************************************************************
-nodes void setInnerNodesValues(void) in (/*cell Ω,*/ node Φω) @ 2.1{
+∀ nodes void setInnerNodesValues(void) in (/*cell Ω,*/ node Φω) @ 2.1{
   const ℝ value=Φω*δt²;
   if (cell(0)<0) continue;
   if (cell(1)<0) continue;
   ℵ matrix setValue(Ω, cell(0), Ω, cell(1), value);
 }
 
-cells void setCellsValues(void) in (cell Ω/*, node Φω*/) @ 2.2{
+∀ cells void setCellsValues(void) in (cell Ω/*, node Φω*/) @ 2.2{
   ℝ diagonalTerme=0.0;
   ∀ node diagonalTerme += Φω;
   diagonalTerme*=δt;
@@ -176,7 +176,7 @@ void assembleAndSolve(void) @ 4.0 { ℵ solve; }
 // ****************************************************************************
 // * Récupération des résultats
 // ****************************************************************************
-own cells void getCellResults(void) out (cell Ω) @ 4.1{
+∀ own cells void getCellResults(void) out (cell Ω) @ 4.1{
   Ω=ℵ lhs getValue(Ω, this);
 }
 

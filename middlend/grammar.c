@@ -169,9 +169,9 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     dbg("\n\t[nablaMiddlendParseAndHook] item done");
   }
 
-  ///////////////////////////////////
-  // Règle de définitions des options
-  ///////////////////////////////////
+  //////////////////////////////////////
+  // Règle de définitions des options //
+  //////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_options_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
     nMiddleOptions(n->children,
@@ -206,8 +206,8 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // On a une reduction Nabla //
   //////////////////////////////
   if (n->ruleid == rulenameToId("nabla_reduction")){
-    const astNode *global_node = n->children->next;
-    const astNode *reduction_operation_node = global_node->next;
+    const astNode *global_node = n->children->children->next;
+    const astNode *reduction_operation_node = n->children->next;
     const astNode *item_node = reduction_operation_node->next;
     char *global_var_name = global_node->token;
     char *item_var_name = item_node->token;

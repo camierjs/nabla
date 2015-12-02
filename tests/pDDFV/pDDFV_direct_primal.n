@@ -113,7 +113,7 @@ Bool dPrimalLoop(Bool dbg,Cell c, Real3x3 kappa, Real3 ns, Real3 p,
 // ****************************************************************************
 // Pour les faces externes, on ré-oriente éventuellement la normale vers l'exterieur
 // ****************************************************************************
-own outer faces void dOuterPrimal(void) @ 1.0 if (!option_indirect){
+∀ own outer faces void dOuterPrimal(void) @ 1.0 if (!option_indirect){
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
   const Integer nid1 = 1+node(1)->uniqueId().asInteger();
   Real3 f,g;
@@ -150,7 +150,7 @@ own outer faces void dOuterPrimal(void) @ 1.0 if (!option_indirect){
 // ****************************************************************************
 // Pour les faces internes, tout est bien déterminé, pas de ré-orientation à prévoir
 // ****************************************************************************
-own inner faces void dInnerPrimal(void) @ 1.0 if (!option_indirect){
+∀ own inner faces void dInnerPrimal(void) @ 1.0 if (!option_indirect){
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
   const Integer nid1 = 1+node(1)->uniqueId().asInteger();
   Real3 f,g, h,i;

@@ -55,13 +55,13 @@ void rhsInit(void) @ 10.0{
 // ****************************************************************************
 // * RHS, coté Primal
 // ****************************************************************************
-own cells void setRhsCellValues(void) @ 11.0{
+∀ own cells void setRhsCellValues(void) @ 11.0{
   const Real value=cell_area*f(cell_mass_center);
   if (option_hole) assert(value>=0.0);
   ℵ rhs addValue(cell_θ,this, value);
 }
 
-own outer faces void setRhs𝜕ΩCellValues(void) @ 11.0{
+∀ own outer faces void setRhs𝜕ΩCellValues(void) @ 11.0{
   const Real value=boundary_primal_d_sp;
   if (!cell(0).isOwn()) continue;
   assert(value>=0.0);
@@ -78,7 +78,7 @@ own outer faces void setRhs𝜕ΩCellValues(void) @ 11.0{
     mean_f+=f(cell_mass_center)*cell_area/nbNode;
   return mean_f;
   }*/
-own nodes void setRhsAllNodeValues(void) @ 11.0{
+∀ own nodes void setRhsAllNodeValues(void) @ 11.0{
   //option_gao_wu
   Real h=node_is_on_𝜕Ω?g(coord):
     option_gao_wu?
@@ -94,7 +94,7 @@ own nodes void setRhsAllNodeValues(void) @ 11.0{
 // ****************************************************************************
 
 // Diagonale outer: Ss𝞊𝜕Pp et 𝜕Ω
-outer faces void alephOuterCells(void) @ 12.0{
+∀ outer faces void alephOuterCells(void) @ 12.0{
   const Real value = boundary_primal_c_sp;
   if (!cell(0).isOwn()) continue;
   assert(value>0.0);
@@ -105,7 +105,7 @@ outer faces void alephOuterCells(void) @ 12.0{
 // ****************************************************************************
 // Diag+extra inner: Ss𝞊𝜕Pp sans 𝜕Ω
 // ****************************************************************************
-inner faces void alephInnerCells(void) @ 12.0{
+∀ inner faces void alephInnerCells(void) @ 12.0{
   const Real pvalue = interior_primal_c_sp;
   const Real qvalue = interior_primal_c_sq;
   // On laisse le >= vs > pour les cas où les bords sont à 0.0
@@ -141,7 +141,7 @@ Face loopOnThisNodeToFindPositiveDualFaceCells(Node nd,
 // ****************************************************************************
 // * Conditions de Dirichlet
 // ****************************************************************************
-own outer nodes void dirichletNodes(void) @ 17.0{
+∀ own outer nodes void dirichletNodes(void) @ 17.0{
   ℵ matrix addValue(node_θ,this, node_θ,this, +1.0);
 }
 
@@ -154,14 +154,14 @@ void assembleAndSolve(void) @ 18.0{ ℵ solve; }
 // ****************************************************************************
 // * Récupération des résultats
 // ****************************************************************************
-own cells void getCellResults(void) @ 20.0{
+∀ own cells void getCellResults(void) @ 20.0{
   const Real cell_θ_kp1=ℵ lhs getValue(cell_θ,this);
   assert(cell_θ_kp1>=0.0);
   cell_θ_kp1mk=fabs(cell_θ_kp1-cell_θ);
   if (GlobalIteration==1.0) cell_θ_1m0=cell_θ_kp1mk;
   cell_θ=cell_θ_kp1;
 }
-own nodes void getNodeResults(void) @ 20.0{
+∀ own nodes void getNodeResults(void) @ 20.0{
   const Real node_θ_kp1=ℵ lhs getValue(node_θ,this);
   if (node_θ_kp1<0.0)
     info()<<"\t\33[33m[getNodeResults] node_theta="<< node_θ_kp1 <<"\33[m";

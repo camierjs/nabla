@@ -115,20 +115,20 @@ global{
 // * Partie d'initialisation ]-∞,-0[
 // ****************************************************************************
 
-cells void iniCells(void) @ -10.0{
+∀ cells void iniCells(void) @ -10.0{
   cell_nb_nodes=nbNode; 
   cell_θ=option_theta_ini;
 }
 
-nodes void iniNodes(void) @ -10.0{
+∀ nodes void iniNodes(void) @ -10.0{
   node_θ=option_theta_ini;
 }
 
-cells Integer computeMinNbNode(Integer minNbNode){
+∀ cells Integer computeMinNbNode(Integer minNbNode){
   minNbNode = min(minNbNode,nbNode);
   return minNbNode;
 }
-cells Integer computeMaxNbNode(Integer maxNbNode){
+∀ cells Integer computeMaxNbNode(Integer maxNbNode){
   maxNbNode = max(maxNbNode,nbNode);
   return maxNbNode;
 }
@@ -150,17 +150,17 @@ void testForQuadsorTriangles(void) @ -10.0{
 // ****************************************************************************
 #define computeTriangleArea2D(a, b, c) (½*((b-a)⤫(c-a)))
 
-cells void geomComputeTriangleSurface(void)  @ -10.0 if (option_triangles){
+∀ cells void geomComputeTriangleSurface(void)  @ -10.0 if (option_triangles){
   cell_area = computeTriangleArea2D(coord[0],coord[1],coord[2]);
 }
 
-cells void geomComputeQuadSurface(void) @ -10.0 if (option_quads){
+∀ cells void geomComputeQuadSurface(void) @ -10.0 if (option_quads){
   const Real3 fst_edge = coord[2]-coord[0];
   const Real3 snd_edge = coord[3]-coord[1];
   cell_area=½*(fst_edge⤫snd_edge);
 }
 
-nodes void nodeArea(void) @ -9.0{
+∀ nodes void nodeArea(void) @ -9.0{
   node_area=0.0;
   foreach cell node_area+=cell_area/cell_nb_nodes;
 }
@@ -168,13 +168,13 @@ nodes void nodeArea(void) @ -9.0{
 // ****************************************************************************
 // * Calcul des Centres de Gravité
 // ****************************************************************************
-cells void geomComputeCellTriangleMassCenter(void) @ -10.0 if (option_triangles){
+∀ cells void geomComputeCellTriangleMassCenter(void) @ -10.0 if (option_triangles){
   cell_mass_center=0.0;
   foreach node cell_mass_center+=coord;
   cell_mass_center/=nbNode;
 }
 
-cells void geomComputeCellQuadMassCenter(void) @ -10.0 if (option_quads){
+∀ cells void geomComputeCellQuadMassCenter(void) @ -10.0 if (option_quads){
   const register Real3 s0 = coord[0];
   const register Real3 s1 = coord[1];
   const register Real3 s2 = coord[2];
@@ -197,7 +197,7 @@ cells void geomComputeCellQuadMassCenter(void) @ -10.0 if (option_quads){
 // ****************************************************************************
 // * Calculs géométriques des σ et sdivs
 // ****************************************************************************
-faces void faceSbySigma(void) @ -9.0{
+∀ faces void faceSbySigma(void) @ -9.0{
   Real3 fn0 = coord[0];
   Real3 fn1 = coord[1];
   Real s=norm(fn0-fn1);
@@ -219,7 +219,7 @@ faces void faceSbySigma(void) @ -9.0{
 // ****************************************************************************
 // * Initialisation du δt en fonction des options
 // ****************************************************************************
-faces Real computeMin_σ(Real min_σ) in (face σ){
+∀ faces Real computeMin_σ(Real min_σ) in (face σ){
   min_σ = min(min_σ,σ);
   return min_σ;
 }
@@ -235,7 +235,7 @@ void ini_δt(void) @ -8.5{
 // ****************************************************************************
 // * Calculs géométriques des Cosθ,Sinθ
 // ****************************************************************************
-faces void faceTheta(void) @ -8.0{
+∀ faces void faceTheta(void) @ -8.0{
   Real3 n0=coord[0];
   Real3 n1=coord[1];  
   Real3 c1,c0,τ,tan,nrm;
@@ -279,7 +279,7 @@ faces void faceTheta(void) @ -8.0{
 // ****************************************************************************
 // * updateAlphaBetaGammaDelta
 // ****************************************************************************
-faces void updateAlphaBetaGammaDelta(void) @ -7.0{
+∀ faces void updateAlphaBetaGammaDelta(void) @ -7.0{
   α = δt*sdivs/Cosθ;
   β = γ = δt*(-Sinθ/Cosθ);
   δ = δt*(1./(sdivs*Cosθ));
@@ -288,10 +288,10 @@ faces void updateAlphaBetaGammaDelta(void) @ -7.0{
 // ****************************************************************************
 // * iniNodeIsAnEdge, iniOuterNodeIsAnEdge
 // ****************************************************************************
-nodes void iniNodeIsAnEdge(void) @ -6.0{
+∀ nodes void iniNodeIsAnEdge(void) @ -6.0{
   node_is_an_edge=false;
 }
-own outer nodes void iniOuterNodeIsAnEdge(void) @ -5.0{
+∀ own outer nodes void iniOuterNodeIsAnEdge(void) @ -5.0{
   node_is_an_edge=true;
 }
 
@@ -305,28 +305,28 @@ void rhsInit(void) @ 1.0{
   ℵ lhs reset;
 }
 
-own cells void setRhsCellValues(void) @ 1.1{
+∀ own cells void setRhsCellValues(void) @ 1.1{
   const Real θ=cell_θ;
   ℵ rhs setValue(cell_θ,this, θ);
 }
 
-own nodes void setRhsAllNodeValues(void)  @ 1.2{
+∀ own nodes void setRhsAllNodeValues(void)  @ 1.2{
   const Real θ=node_θ;
   ℵ rhs setValue(node_θ,this, θ);
 }
 
-own outer nodes void setRhsOuterNodeValues(void)  @ 1.3{
+∀ own outer nodes void setRhsOuterNodeValues(void)  @ 1.3{
   ℵ rhs setValue(node_θ,this, option_theta_hot);
 }
 
-own outer faces void setRhsFaceValues(void) @ 1.3{
+∀ own outer faces void setRhsFaceValues(void) @ 1.3{
   ℵ rhs setValue(face_θ,this, option_theta_hot);
 }
 
 // ****************************************************************************
 // * alphaCells
 // ****************************************************************************
-own cells void alphaCells(void) @ 3.1{
+∀ own cells void alphaCells(void) @ 3.1{
   register Real αc, Σα=0.0;
   foreach face {
     Σα+=sdivs/Cosθ;
@@ -347,7 +347,7 @@ own cells void alphaCells(void) @ 3.1{
 // ****************************************************************************
 // * betaCells
 // ****************************************************************************
-own cells void betaCells(void) @ 3.2{
+∀ own cells void betaCells(void) @ 3.2{
   Cell cP;
   Node nD,nE;
   foreach face{
@@ -364,7 +364,7 @@ own cells void betaCells(void) @ 3.2{
 // ****************************************************************************
 // * Couplage Node-Cell: γ
 // ****************************************************************************
-own nodes void gammaNodes(void) @ 3.3{
+∀ own nodes void gammaNodes(void) @ 3.3{
   Node nD;
   Cell cP,cQ;
   if (node_is_an_edge) continue;
@@ -384,7 +384,7 @@ own nodes void gammaNodes(void) @ 3.3{
 // ****************************************************************************
 // * Node-Node: δ
 // ****************************************************************************
-own nodes void deltaNodes(void) @ 3.4{
+∀ own nodes void deltaNodes(void) @ 3.4{
   register Real δn,Σδ=0.0;
   if (node_is_an_edge) continue;
   foreach face {
@@ -401,10 +401,10 @@ own nodes void deltaNodes(void) @ 3.4{
 // ****************************************************************************
 // * Conditions de Dirichlet
 // ****************************************************************************
-own outer faces void dirichletFaces(void) @ 3.5{
+∀ own outer faces void dirichletFaces(void) @ 3.5{
   ℵ matrix addValue(face_θ,this, face_θ,this, +1.0);
 }
-own outer nodes void dirichletNodes(void) @ 3.6{
+∀ own outer nodes void dirichletNodes(void) @ 3.6{
   ℵ matrix addValue(node_θ,this, node_θ,this, +1.0);
 }
 
@@ -416,10 +416,10 @@ void assembleAndSolve(void) @ 4.0 { ℵ solve; }
 // ****************************************************************************
 // * Récupération des résultats
 // ****************************************************************************
-own cells void getCellResults(void) @ 4.1{
+∀ own cells void getCellResults(void) @ 4.1{
   cell_θ=ℵ lhs getValue(cell_θ,this);
 }
-own nodes void getNodeResults(void) @ 4.2{
+∀ own nodes void getNodeResults(void) @ 4.2{
   node_θ=ℵ lhs getValue(node_θ,this);
 }
 

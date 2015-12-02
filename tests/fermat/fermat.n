@@ -91,7 +91,7 @@ void iniGlobals(void) @ -1.0{
 // ********************************************************
 // * iniCells
 // ********************************************************
-own cells void iniCells(void) out (cell i, cell nth) @ -1.0{
+∀ own cells void iniCells(void) out (cell i, cell nth) @ -1.0{
   i=0ul;       // On flush le rang de l'itérateur
   cpuTime=0.0;
   nth=option_ini_nth+uid;
@@ -104,7 +104,7 @@ own cells void iniCells(void) out (cell i, cell nth) @ -1.0{
 // ********************************************************
 // * iniMeshSize + reduceMeshSize to set meshSize = mesh size
 // ********************************************************
-own cells Integer iniMeshSize(void) out (cell meshSize){
+∀ own cells Integer iniMeshSize(void) out (cell meshSize){
   meshSize=max(uid,meshSize);
   return meshSize;
 }
@@ -126,7 +126,7 @@ void continueInit(void) @ 0.0{
 // ********************************************************
 // * bodyLoop
 // ********************************************************
-own cells void bodyLoop(void) @ 1.0{
+∀ own cells void bodyLoop(void) @ 1.0{
   int probab_prime;
   i+=1ul;
   info()<<"cell #"<<uid<<" @ "<<i<<"/"<<nth;

@@ -389,7 +389,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
         nprintf(arc, NULL, "for(ParticleEnumerator p(cellParticles(%s->localId())); p.hasNext(); ++p)",iterator);
       break;
     }
-    case (MATERIAL): break;
+      //case (MATERIAL): break;
     
     default: nablaError("[arcaneHookSwitchToken] Could not distinguish FORALL!");
     }

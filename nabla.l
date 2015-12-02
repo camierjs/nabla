@@ -180,13 +180,6 @@ __asm__           { return tok(&yylval, ASM);}
 "frontCell"       { return tok(&yylval, FRONTCELL);}
 "frontCellUid"    { return tok(&yylval, FRONTCELLUID);}
 
-"mat"             { return tok(&yylval, MAT);}
-"env"             { return tok(&yylval, ENV);}
-"matenv"          { return tok(&yylval, LIB_MATENV);}
-"material"        { return tok(&yylval, MATERIAL);}
-"materials"       { return tok(&yylval, MATERIALS);}
-"environments"    { return tok(&yylval, ENVIRONMENTS);}
-
 "mathematica"     { return tok(&yylval, LIB_MATHEMATICA);}
 "mathlink"        { return tok(&yylval, MATHLINK);}
 "Prime"           { return tok(&yylval, PRIME);}
@@ -340,6 +333,13 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 //"⊽"					{ return tok(&yylval, NOR_OP);}  // Nor 22BD
 //"::"				{ return tok(&yylval, NAMESPACE);}
 //∀ ∈ ∃
+
+//"mat"             { return tok(&yylval, MAT);}
+//"env"             { return tok(&yylval, ENV);}
+//"matenv"          { return tok(&yylval, LIB_MATENV);}
+//"material"        { return tok(&yylval, MATERIAL);}
+//"materials"       { return tok(&yylval, MATERIALS);}
+//"environments"    { return tok(&yylval, ENVIRONMENTS);}
 
 // ****************************************************************************
 // * Get rid of line comments

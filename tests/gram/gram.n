@@ -97,12 +97,12 @@ global{
 };
 
 
-/*∀ cells iniCellsWithOutVoid @ 8.0 {
+∀ cells iniCellsWithOutVoid @ 8.0 {
   volo += e*v;
 }
 
 void ini(void) @ -10.0{}
-*/
+
 
 ∀ cells void iniCells(void) in (cell e,v, node coord)
   out (cell volo) @ 8.0 {

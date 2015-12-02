@@ -106,13 +106,13 @@ void ini(void) @ -6.0{
 // ****************************************************************************
 // * Conditions initiales pour les mailles
 // ****************************************************************************
-cells void iniCellsCenter(void) in (node coord) out (cell xCenter) @ -6.0{
+∀ cells void iniCellsCenter(void) in (node coord) out (cell xCenter) @ -6.0{
   xCenter=0.0;
   foreach node xCenter+=coord.x;
   xCenter*=⅛;
 }
 
-cells void iniRhoPressureAdiabaticCst(void) in (cell xCenter)
+∀ cells void iniRhoPressureAdiabaticCst(void) in (cell xCenter)
   out(cell ρ,
       cell pressure,
       cell adiabatic_cst) @ -5.0{
@@ -126,7 +126,7 @@ cells void iniRhoPressureAdiabaticCst(void) in (cell xCenter)
 // ****************************************************************************
 // * Conditions initiales pour les noeuds
 // ****************************************************************************
-nodes void iniNodes(void) out (node nMass,
+∀ nodes void iniNodes(void) out (node nMass,
                                node force,
                                node velocity) @ -6.0{
   nMass=0.0;
@@ -137,7 +137,7 @@ nodes void iniNodes(void) out (node nMass,
 // * Initialise l'équation d'état aux mailles,
 // * calcule la vitesse du son et l'énergie interne 
 // ****************************************************************************
-cells void initEOS(void)
+∀ cells void initEOS(void)
   in (cell pressure, cell adiabatic_cst, cell ρ)
   out (cell internal_Ξ, cell σSound) @ -3.0{
   internal_Ξ = pressure / ((adiabatic_cst - 1.0) * ρ);
@@ -147,15 +147,15 @@ cells void initEOS(void)
 // ****************************************************************************
 // * Calcul de la masse d'une maille
 // ****************************************************************************
-cells void iniCellMass(void) in (cell ρ, cell v) out (cell m) @ -2.0{
+∀ cells void iniCellMass(void) in (cell ρ, cell v) out (cell m) @ -2.0{
   m = ρ*v;
 }
 
 // ****************************************************************************
 // * Calcul de la masse d'un noeud
 // ****************************************************************************
-cells void iniNodeMass_c(void) in (cell m) out (node nMass) @ -1.0{
-  foreach node nMass += ⅛ * m;
+∀ cells void iniNodeMass_c(void) in (cell m) out (node nMass) @ -1.0{
+  ∀ node nMass += ⅛ * m;
 }
 
 
@@ -168,20 +168,20 @@ cells void iniNodeMass_c(void) in (cell m) out (node nMass) @ -1.0{
 // * Calcul pour chaque noeud de chaque maille
 // * la contribution des forces de pression
 // ****************************************************************************
-nodes void computeIniPressureForce(void) out (node force) @ 0.01{
+∀ nodes void computeIniPressureForce(void) out (node force) @ 0.01{
   force = 0.0;
 }
 
-cells void computePressureForce(void)
+∀ cells void computePressureForce(void)
   in (cell pressure, cell cqs) inout (node force) @ 0.1{
-  foreach node
+  ∀ node
     force += pressure * cqs; 
 }
 
 // ****************************************************************************
 // * Calcule l'impulsion aux noeuds
 // ****************************************************************************
-nodes void computeVelocity(void)
+∀ nodes void computeVelocity(void)
   in (node nMass, node force) inout (node velocity) @ 1.0{
   velocity+=(δt/nMass)*force;
 }
@@ -190,7 +190,7 @@ nodes void computeVelocity(void)
 // ****************************************************************************
 // * Applique les conditions aux bords
 // ****************************************************************************
-outer nodes void applyBoundaryCondition(void) in (node coord)
+∀ outer nodes void applyBoundaryCondition(void) in (node coord)
   out (node velocity) @ 2.0{
   const Real maxBoundaryX = 1.0;
   const Real maxBoundaryY = option_yz_ticks*(option_size_y-1);
@@ -208,19 +208,19 @@ outer nodes void applyBoundaryCondition(void) in (node coord)
 // ****************************************************************************
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
-nodes void moveNodes(void) in (node velocity) out (node coord)@ 3.0{
+∀ nodes void moveNodes(void) in (node velocity) out (node coord)@ 3.0{
   coord += δt * velocity;
 }
 
 // ****************************************************************************
 // * Calcule la longueur caractéristique d'une maille héxahédrique
 // ****************************************************************************
-cells void computeGeometricKlength(void) in (node coord) out (cell kLength, cell cqs) @ -4.0,4.0{
+∀ cells void computeGeometricKlength(void) in (node coord) out (cell kLength, cell cqs) @ -4.0,4.0{
   Real3 Χ[8];            // Copie locale des coordonnées des sommets d'une maille
   Real3 face_coord[6];   // Coordonnées des centres des faces
 
   // Recopie des coordonnées locales
-  foreach node Χ[n] = coord;
+  ∀ node Χ[n] = coord;
   
   { // Calcul les coordonnées des centres des faces
     face_coord[0] = ¼*(Χ[0]+Χ[3]+Χ[2]+Χ[1]);
@@ -248,7 +248,7 @@ cells void computeGeometricKlength(void) in (node coord) out (cell kLength, cell
 // ****************************************************************************
 // * computeVolume: Calcule le volume de la maille
 // ****************************************************************************
-cells void computeGeometricVolume(void) in (cell cqs, node coord)
+∀ cells void computeGeometricVolume(void) in (cell cqs, node coord)
   out (cell oldVolume) inout(cell v) @ -3.9,5.0{
   Real τVolume = 0.0;
   oldVolume = v;
@@ -260,14 +260,14 @@ cells void computeGeometricVolume(void) in (cell cqs, node coord)
 // ****************************************************************************
 // * updateDensity
 // ****************************************************************************
-cells void updateDensity(void) in (cell m, cell v) out (cell ρ) @ 6.0{
+∀ cells void updateDensity(void) in (cell m, cell v) out (cell ρ) @ 6.0{
   ρ = m/v;
 }
 
 // ****************************************************************************
 // * Calcul de l'energie interne
 // ****************************************************************************
-cells void computeInternalEnergy(void)
+∀ cells void computeInternalEnergy(void)
   in (cell v, cell oldVolume, cell adiabatic_cst)
   out (cell internal_Ξ) @ 6.0{
   const Real γVolume = v/oldVolume;
@@ -281,7 +281,7 @@ cells void computeInternalEnergy(void)
 // * Applique l'équation d'état aux mailles
 // * et calcule la vitesse du son et la pression
 // ****************************************************************************
-cells void applyEOS(void)
+∀ cells void applyEOS(void)
   in (cell ρ, cell adiabatic_cst, cell internal_Ξ)
   out (cell σSound) inout (cell pressure) @ 8.0{
   // On calcule en premier la pression
@@ -293,7 +293,7 @@ cells void applyEOS(void)
 // ****************************************************************************
 // * Calcul du pas de temps pour le respect du critère de CFL
 // ****************************************************************************
-cells void computeDxSound(void)
+∀ cells void computeDxSound(void)
   in (cell kLength, cell σSound)
   out(cell δxSound) @ 9.0{
   δxSound = kLength/σSound;

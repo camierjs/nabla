@@ -234,7 +234,7 @@ Bool iTrialLoop(Bool dbg, Face f, Real3x3 kappa, Real3 νs,
 // ****************************************************************************
 // Pour les faces internes, tout est bien déterminé, pas de ré-orientation à prévoir
 // ****************************************************************************
-own inner faces void iInnerTrial(void) @ 1.0 if (option_trial &&
+∀ own inner faces void iInnerTrial(void) @ 1.0 if (option_trial &&
                                                  option_indirect){
   const Real3 D=coord[0];
   const Real3 E=coord[1];
@@ -422,7 +422,7 @@ own inner faces void iInnerTrial(void) @ 1.0 if (option_trial &&
 // ****************************************************************************
 // * Second membre, coté Trial
 // ****************************************************************************
-own inner faces void iInnerTrialRhs(void) @ 13.1 if (option_trial &&
+∀ own inner faces void iInnerTrialRhs(void) @ 13.1 if (option_trial &&
                                                      option_indirect){
   const Real3 D=coord[0];
   const Real3 E=coord[1];
@@ -438,7 +438,7 @@ own inner faces void iInnerTrialRhs(void) @ 13.1 if (option_trial &&
   ℵ rhs addValue(face_θ,this, h);
 }
 
-own outer faces void iOuterTrialRhs(void) @ 13.1 if (option_trial &&
+∀ own outer faces void iOuterTrialRhs(void) @ 13.1 if (option_trial &&
                                                      option_indirect ){
   const Real3 D=coord[0];
   const Real3 E=coord[1];
@@ -455,7 +455,7 @@ own outer faces void iOuterTrialRhs(void) @ 13.1 if (option_trial &&
 // ****************************************************************************
 // * Remplissage matriciel, coté Trial, Tail
 // ****************************************************************************
-inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
+∀ inner faces void iTrialMtxTail(void) @ 16.4 if (option_trial &&
                                                 option_indirect){
   Face f;
   const Real s0value = interior_trial_s[0];
@@ -541,7 +541,7 @@ Integer fnid1(Face f){ return 1+f.node(1).uniqueId().asInteger();}
 // ****************************************************************************
 // * Remplissage matriciel, coté Trial, Head
 // ****************************************************************************
-inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
+∀ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
                                                 option_indirect){
   Face f;
   const Real s0value = interior_trial_s[0];
@@ -641,7 +641,7 @@ inner faces void iTrialMtxHead(void) @ 16.5 if (option_trial &&
 // ****************************************************************************
 // * Conditions de Dirichlet
 // ****************************************************************************
-own outer faces void iTrialDirichlet(void) @ 17.0 if (option_trial &&
+∀ own outer faces void iTrialDirichlet(void) @ 17.0 if (option_trial &&
                                                       option_indirect){
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
   const Integer nid1 = 1+node(1)->uniqueId().asInteger();
@@ -654,7 +654,7 @@ own outer faces void iTrialDirichlet(void) @ 17.0 if (option_trial &&
 // ****************************************************************************
 // * Récupération des résultats, coté Trial
 // ****************************************************************************
-own faces void getTrial(void) @ 20.0 if (option_trial &&
+∀ own faces void getTrial(void) @ 20.0 if (option_trial &&
                                          option_indirect){
   Real face_θ_kp1;
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();

@@ -44,14 +44,14 @@
 // Attention, on est en séquentiel, ici!
 // A utiliser avec le PsyDisplay sur la station grasse RedHat5
 
-cells void dagCells(File pDDFV){
+∀ cells void dagCells(File pDDFV){
   pDDFV << "\t";
   foreach node
     pDDFV << "\t" << 1+n->uniqueId().asInteger();
   pDDFV << "\n";
 }
 
-nodes void dagNodes(File pDDFV){
+∀ nodes void dagNodes(File pDDFV){
   pDDFV << "\t" << coord.x <<"\t"<<coord.y<<"\t"<<node_θ<<"\n";
 }
 

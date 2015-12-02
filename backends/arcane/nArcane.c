@@ -116,8 +116,8 @@ static void arcaneHookReduction(nablaMain *nabla, astNode *n){
   dbg("\n\t\t[arcaneHookReduction]");
   const astNode *nabla_items = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(nabla_items);
-  const astNode *global_var_node = n->children->next;
-  const astNode *reduction_operation_node = global_var_node->next;
+  const astNode *global_var_node = n->children->children->next;
+  const astNode *reduction_operation_node = n->children->next;
   const astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
   assert(at_single_cst_node);

@@ -105,8 +105,8 @@ static void actItemNablaItems(astNode * n, void *generic_arg){
   if (cfgn=='c'&& n->children->tokenid==NODES) variable->size=8; // cell_var[nodes]: tied @ 8 (hex mesh), should depend on dimension
   if (n->children->tokenid==FACES) variable->size=8;
   if (n->children->tokenid==PARTICLES) variable->size=8;
-  if (n->children->tokenid==MATERIALS) variable->size=8;
-  if (n->children->tokenid==ENVIRONMENTS) variable->size=8;
+  //if (n->children->tokenid==MATERIALS) variable->size=8;
+  //if (n->children->tokenid==ENVIRONMENTS) variable->size=8;
   dbg("\n\t\t[actItemNablaItems] variable->size=%d", variable->size);
 }
 

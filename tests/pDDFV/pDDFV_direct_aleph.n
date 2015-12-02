@@ -44,7 +44,7 @@
 // ****************************************************************************
 // * Remplissage matriciel, coté Dual Direct
 // ****************************************************************************
-inner faces void dDualMtx(void) @ 16.0 if (!option_indirect){
+∀ inner faces void dDualMtx(void) @ 16.0 if (!option_indirect){
   const Real pvalue = interior_dual_c_sd;
   const Real qvalue = interior_dual_c_se;
 
@@ -73,7 +73,7 @@ inner faces void dDualMtx(void) @ 16.0 if (!option_indirect){
 // et débrayant les asserts du second membre
 // et en mettant à 1.0 le bord et l'init
 // ********************************************************
-inner faces void dDualMtxLM(void) @ 16.1 if (!option_indirect){
+∀ inner faces void dDualMtxLM(void) @ 16.1 if (!option_indirect){
   Cell back,front;
   const Real evalue = interior_dual_c_se;
   const Real lvalue = interior_dual_c_sl;
@@ -103,7 +103,7 @@ inner faces void dDualMtxLM(void) @ 16.1 if (!option_indirect){
 // de la numérotation de Magix des faces depuis les outer nodes
 // qui sont orientés vers l'intérieur
 // ********************************************************
-inner faces void dDualMtxJK(void) @ 16.2 if (!option_indirect){
+∀ inner faces void dDualMtxJK(void) @ 16.2 if (!option_indirect){
   Cell back,front;
   const Real dvalue = interior_dual_c_sd;
   const Real jvalue = interior_dual_c_sj;

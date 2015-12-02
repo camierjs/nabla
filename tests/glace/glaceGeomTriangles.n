@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 // Calcul des aires orientées des faces
-cells void geom_computeSurfaceAndVolume_Triangle(void) @ -20.0,23.0 if (option_triangles){
+∀ cells void geom_computeSurfaceAndVolume_Triangle(void) @ -20.0,23.0 if (option_triangles){
   const Real3 fst_edge = coord[2]-coord[0];
   const Real3 snd_edge = coord[0]-coord[1];
   V=½*cross2D(fst_edge,snd_edge);
@@ -49,7 +49,7 @@ cells void geom_computeSurfaceAndVolume_Triangle(void) @ -20.0,23.0 if (option_t
 
 
 // Calcul des résultantes aux sommets des mailles
-cells void geom_computeNormal_Triangle(void) @ -20.0,24.0 if (option_triangles){
+∀ cells void geom_computeNormal_Triangle(void) @ -20.0,24.0 if (option_triangles){
   const Real3 s0=coord[0];
   const Real3 s1=coord[1];
   const Real3 s2=coord[2];

@@ -48,8 +48,8 @@ void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
   int fakeNumParams=0;
   const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
-  const astNode *global_var_node = n->children->next;
-  const astNode *reduction_operation_node = global_var_node->next;
+  const astNode *global_var_node = n->children->children->next;
+  const astNode *reduction_operation_node = n->children->next;
   astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
   assert(at_single_cst_node!=NULL);

@@ -121,10 +121,7 @@ void nOkinaHookTokenSwitch(astNode *n, nablaJob *job){
     break;
   }
     
-  case (MATERIAL):{
-    nprintf(nabla, "/*MATERIAL*/", "/*MATERIAL*/");
-    break;
-  }
+//case (MATERIAL):{ nprintf(nabla, "/*MATERIAL*/", "/*MATERIAL*/"); break; }
 
   case (MIN_ASSIGN):{
     job->parse.left_of_assignment_operator=false;

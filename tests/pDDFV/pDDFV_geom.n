@@ -155,14 +155,14 @@ void sumNbCellsNodes(void) @ -30.0{
 // ****************************************************************************
 // * Calcul des Centres de Gravité
 // ****************************************************************************
-cells void geomTriMassCenter(void) @ -10.0 if (option_triangles){
+∀ cells void geomTriMassCenter(void) @ -10.0 if (option_triangles){
   cell_mass_center=0.0;
   foreach node cell_mass_center+=coord;
   cell_mass_center/=nbNode;
   //info()<<"[geomComputeCellTriangleMassCenter] cell_mass_center #"<<uid<<"="<<cell_mass_center;
 }
 
-cells void geomQuadMassCenter(void) @ -10.0 if (option_quads){
+∀ cells void geomQuadMassCenter(void) @ -10.0 if (option_quads){
   const Integer cid=1+this->uniqueId().asInteger();
   const Real3 s0 = coord[0];
   const Real3 s1 = coord[1];
@@ -217,13 +217,13 @@ cells void geomQuadMassCenter(void) @ -10.0 if (option_quads){
 // ****************************************************************************
 // * Calcul des Aires des mailles primales
 // ****************************************************************************
-cells void geomTriSurface(void)  @ -9.0 if (option_triangles){
+∀ cells void geomTriSurface(void)  @ -9.0 if (option_triangles){
   cell_area = geomComputeTriangleArea(coord[0],coord[1],coord[2]);
   if (cell_area<0.0) info()<<"\33[33m[geomComputeTriangleArea] cell_area"<<cell_area<<"\33[m";
   assert(cell_area>0.0);
 }
 
-cells void geomQuadSurface(void) @ -9.0 if (option_quads){
+∀ cells void geomQuadSurface(void) @ -9.0 if (option_quads){
   const Integer cid=1+this->uniqueId().asInteger();
   const Real3 s0 = coord[0];
   const Real3 s1 = coord[1];
@@ -245,7 +245,7 @@ cells void geomQuadSurface(void) @ -9.0 if (option_quads){
 // ****************************************************************************
 // * Calcul des Aires des mailles duales dans les cas directs/indirects
 // ****************************************************************************
-nodes void geomNodeAreaDirect(void) @ -8.5 if (!option_indirect){
+∀ nodes void geomNodeAreaDirect(void) @ -8.5 if (!option_indirect){
   node_area=0.0;
   foreach cell
     node_area+=cell_area/nbNode;
@@ -253,7 +253,7 @@ nodes void geomNodeAreaDirect(void) @ -8.5 if (!option_indirect){
   assert(node_area>0.0);
 }
 
-nodes void geomNodeAreaIndirect(void) @ -8.5 if (option_indirect){
+∀ nodes void geomNodeAreaIndirect(void) @ -8.5 if (option_indirect){
   node_area=0.0;
   foreach face{
     const Real3 d=coord[node(0)];
@@ -273,7 +273,7 @@ nodes void geomNodeAreaIndirect(void) @ -8.5 if (option_indirect){
 
 // Utilisé pour calculer dans le cas d'option_gao_wu
 // un f second membre pondéré par les aires
-nodes void nAreaMeanF(void) @ -8.4 if (option_indirect){
+∀ nodes void nAreaMeanF(void) @ -8.4 if (option_indirect){
   node_f_area=0.0;
   foreach face{
     const ℝ³ d=coord[node(0)];

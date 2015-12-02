@@ -44,10 +44,10 @@
 // ****************************************************************************
 // * Calcul de la longueur caractéristique
 // ****************************************************************************
-own cells void volumeOfΩ(void){
+∀ own cells void volumeOfΩ(void){
   area_sum=area_sum+cell_area;
 }
-own cells void getNbCell(void){
+∀ own cells void getNbCell(void){
   sumNbCell=sumNbCell+1;
 }
 void characteristicLength(void) {//@ 47.0{
@@ -59,11 +59,11 @@ void characteristicLength(void) {//@ 47.0{
 // ****************************************************************************
 // * Calcul de l'erreur relative
 // ****************************************************************************
-own cells void relativeErrorCellPhMinusPe(void)@48.1{
+∀ own cells void relativeErrorCellPhMinusPe(void)@48.1{
   const Real Pp=fabs(cell_θ-cell_exact_solution);
   cell_θ_diff=cell_area*Pp*Pp;
 }
-own nodes void relativeErrorNodePhMinusPe(void)@48.1{
+∀ own nodes void relativeErrorNodePhMinusPe(void)@48.1{
   const Real Pd=fabs(node_θ-node_exact_solution);
   node_θ_diff=node_area*Pd*Pd;
 }
@@ -71,10 +71,10 @@ own nodes void relativeErrorNodePhMinusPe(void)@48.1{
 //∀ nodes sum_cell_θ_diff += sum_cell_θ_diff  @ 48.21;
 
 
-own cells void relativeErrorCellPe(void)@48.3{
+∀ own cells void relativeErrorCellPe(void)@48.3{
   cell_θ_diff=cell_area*(cell_exact_solution*cell_exact_solution);
 }
-own nodes void relativeErrorNodePe(void)@48.3{
+∀ own nodes void relativeErrorNodePe(void)@48.3{
   node_θ_diff=node_area*(node_exact_solution*node_exact_solution);
 }
 //∀ cells sum_cell_θ_diff /*+=*/ cell_θ_diff  @ 48.4;

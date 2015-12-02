@@ -44,7 +44,7 @@
 // *****************************************************************************
 // Si on a des quads et que l'on souhaite un Randomly distorted quadrilateral mesh
 // *****************************************************************************
-nodes void randomDistortedQuads(void) @ -20.0 if (option_rdq and option_quads) {
+∀ nodes void randomDistortedQuads(void) @ -20.0 if (option_rdq and option_quads) {
   const Real α=option_rdq_α;
   const Real ρ1=drand48()+drand48()-1.0;
   const Real ρ2=drand48()+drand48()-1.0;
@@ -65,7 +65,7 @@ void eieioCoordsForRDQ(void) @ -19.0{
 // *****************************************************************************
 // *
 // *****************************************************************************
-nodes void randomDistortedTriangles(void) @ -20.0 if (option_rdq and option_triangles) {
+∀ nodes void randomDistortedTriangles(void) @ -20.0 if (option_rdq and option_triangles) {
   const Real α=option_rdq_α;
   const Real ρ1=drand48()+drand48()-1.0;
   const Real ρ2=drand48()+drand48()-1.0;
@@ -86,7 +86,7 @@ void eieioCoordsForRDTriangles(void) @ -19.0{
 // *****************************************************************************
 // *
 // *****************************************************************************
-nodes void stronglyNonConvexQuads(void) @ -20.0 if (option_sncq and option_quads){
+∀ nodes void stronglyNonConvexQuads(void) @ -20.0 if (option_sncq and option_quads){
   const Integer nid=uid+1;
   const Integer nbNodesPerLine=sqrtl(globalNbNodes);
   const Real θ=M_PI*option_sncq_θ;
@@ -144,7 +144,7 @@ nodes void stronglyNonConvexQuads(void) @ -20.0 if (option_sncq and option_quads
   return Δ;
 }
 
-nodes void kershaw(void) @ -18.0 if (option_kershaw and option_quads){
+∀ nodes void kershaw(void) @ -18.0 if (option_kershaw and option_quads){
   const ℝ x=coord.x;
   const ℝ y=coord.y;
   const ℕ z=zone(x,y);

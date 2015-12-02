@@ -124,7 +124,7 @@ void initTables(void) @ -10.0{
   δt = option_δt_ini;
 }
 
-cells void initCellsTableUpr(void) out (cell p, cell r) @ -10.0{
+∀ cells void initCellsTableUpr(void) out (cell p, cell r) @ -10.0{
   u = 0.0;
   p=(coord[0].x<0.5)?1.0:0.1;
   r=(coord[0].x<0.5)?1.0:0.125;
@@ -133,13 +133,13 @@ cells void initCellsTableUpr(void) out (cell p, cell r) @ -10.0{
 }
 void syncUprx(void)@-9.9{eieio();}
 
-cells void initCellsTableE(void) @ -9.0{
+∀ cells void initCellsTableE(void) @ -9.0{
   const Real invR=1./r;
   const Real pDr=p*invR;
   E = e = pDr/(option_gamma-1.);
 }
 
-cells void initCellsTableC(void) @ -9.0{
+∀ cells void initCellsTableC(void) @ -9.0{
   const Real invR=1./r;
   const Real pDr=p*invR;
   c = sqrt(option_gamma*pDr);
@@ -151,7 +151,7 @@ void syncEc(void)@-8.9{eieio();}
 // * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
 
-cells Real minCellsCfl(xyz direction, Real δt_final){ // [0,n[
+∀ cells Real minCellsCfl(xyz direction, Real δt_final){ // [0,n[
   if (nextCell.null()) continue;
   δt_final = min(δt_final, option_cfl*(x[nextCell]-x)/c);
   return δt_final;
@@ -162,7 +162,7 @@ void timeStepControlAndCFLCondition(void) @ 1.0{
 }
 
 
-cells void firstOrderNumericalFluxXYZ(xyz dir){ // [1,n[
+∀ cells void firstOrderNumericalFluxXYZ(xyz dir){ // [1,n[
   Real rcg,rcd;
   if (prevCell.null()) continue;
   if (nextCell.null()) continue;
@@ -178,7 +178,7 @@ void firstOrderNumericalFlux(void) @ 2.0{
 void syncFirstOrderFlux(void)@2.1{eieio();}
 
 
-cells void secondOrderNumericalFluxXYZ(xyz dir) {// [1,n[
+∀ cells void secondOrderNumericalFluxXYZ(xyz dir) {// [1,n[
   if (prevCell.null()) continue;
   if (nextCell.null()) continue;
   {
@@ -198,7 +198,7 @@ void secondOrderNumericalFlux(void) @ 3.0 {
 void syncSecondOrderFlux(void)@3.1{eieio();}
 
 
-cells void boundaryConditionsXYZ(xyz dir){
+∀ cells void boundaryConditionsXYZ(xyz dir){
   const Bool hit = (uid==option_n-1-1);
   u=(uid==0)?0.0;
   ps=(uid==0)?p;
@@ -213,7 +213,7 @@ void boundaryConditions(void) @ 4.0{
 void syncBC(void)@4.1{eieio();}
 
 
-cells void fluxBalanceAndEosClosureEquationXYZ(xyz dir) { // [0,n[
+∀ cells void fluxBalanceAndEosClosureEquationXYZ(xyz dir) { // [0,n[
   if (nextCell.null()) continue;
   {
     const Real dxa = x[nextCell] - x;
@@ -233,7 +233,7 @@ void fluxBalanceAndEosClosureEquation(void) @ 5.0{
 void syncBalance(void)@5.1{eieio();}
 
 
-cells void movePositions(void) @ 6.0{ //[0,n]
+∀ cells void movePositions(void) @ 6.0{ //[0,n]
   x += us*δt ;
 }
 void syncPositions(void)@6.1{eieio();}

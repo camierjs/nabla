@@ -232,7 +232,7 @@ Bool iDualLoop(Bool dbg, Node nd,
 // ****************************************************************************
 // * Fonction qui détermine les coéfficients des duaux indirects
 // ****************************************************************************
-own inner faces void iInerDual(void) @ 1.0 if (option_indirect){
+∀ own inner faces void iInerDual(void) @ 1.0 if (option_indirect){
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
   const Integer nid1 = 1+node(1)->uniqueId().asInteger();
   const Bool dbg=option_debug_dual;// && uid==6;

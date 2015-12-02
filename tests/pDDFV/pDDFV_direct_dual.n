@@ -94,7 +94,7 @@ Bool convexLoopOnThisNodeToFindPositiveDualFace(Bool dbg,
 
 // Pour les faces internes, tout est bien déterminé
 // Pas de swap à prévoir pour le coté dual non plus
-own inner faces void dDual(void) @ 1.0 if (!option_indirect){
+∀ own inner faces void dDual(void) @ 1.0 if (!option_indirect){
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
   const Integer nid1 = 1+node(1)->uniqueId().asInteger();
   const Bool dbg=option_debug_dual;

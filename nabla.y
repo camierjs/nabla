@@ -111,10 +111,10 @@ extern char *last_identifier;
 %token XYZ NEXTCELL PREVCELL NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
 
  // Nabla Materials
-%token MAT MATERIAL MATERIALS ENV ENVIRONMENT ENVIRONMENTS
+ //%token MAT MATERIAL MATERIALS ENV ENVIRONMENT ENVIRONMENTS LIB_MATENV
 
  // Nabla LIBRARIES
-%token LIB_MPI LIB_ALEPH LIB_CARTESIAN LIB_MATENV LIB_GMP LIB_MATHEMATICA LIB_SLURM MAIL LIB_MAIL LIB_DFT LIB_REAL
+%token LIB_MPI LIB_ALEPH LIB_CARTESIAN LIB_GMP LIB_MATHEMATICA LIB_SLURM MAIL LIB_MAIL LIB_DFT LIB_REAL
 
  // ALEPH tokens
 %token ALEPH_RHS ALEPH_LHS ALEPH_MTX ALEPH_RESET ALEPH_SOLVE ALEPH_SET ALEPH_GET ALEPH_NEW_VALUE ALEPH_ADD_VALUE
@@ -256,7 +256,7 @@ type_specifier
 | FILETYPE {rhs;} 
 | OFSTREAM {rhs;} 
 | FILECALL '(' IDENTIFIER ',' IDENTIFIER ')' {rhs;} 
-| MATERIAL {rhs;}
+//| MATERIAL {rhs;}
 ;
 
 storage_class_specifier 
@@ -292,8 +292,8 @@ type_name
 ///////////////////////////////////////////////////////////
 // ∇ item(s), group, region, family & system definitions //
 ///////////////////////////////////////////////////////////
-nabla_matenv: MATERIAL {rhs;}| ENVIRONMENT {rhs;};
-nabla_matenvs: MATERIALS {rhs;} | ENVIRONMENTS {rhs;};
+//nabla_matenv: MATERIAL {rhs;}| ENVIRONMENT {rhs;};
+//nabla_matenvs: MATERIALS {rhs;} | ENVIRONMENTS {rhs;};
 nabla_item
 : CELL {rhs;}
 | NODE {rhs;}
@@ -311,7 +311,7 @@ nabla_scope: OWN {rhs;} | ALL {rhs;};
 nabla_region: INNER {rhs;} | OUTER {rhs;};
 nabla_family
 : nabla_items {rhs;}
-| nabla_matenvs {rhs;}
+//| nabla_matenvs {rhs;}
 | nabla_scope nabla_items {rhs;}
 | nabla_region nabla_items {rhs;}
 | nabla_scope nabla_region nabla_items {rhs;}
@@ -482,8 +482,8 @@ parameter_list
 ;
 parameter_declaration
 : nabla_xyz_declaration {rhs;}
-| nabla_mat_declaration {rhs;}
-| nabla_env_declaration {rhs;}
+//| nabla_mat_declaration {rhs;}
+//| nabla_env_declaration {rhs;}
 | declaration_specifiers declarator {rhs;}
 | declaration_specifiers abstract_declarator {rhs;}
 | declaration_specifiers {rhs;}
@@ -499,10 +499,10 @@ nabla_xyz_declaration
 : XYZ nabla_xyz_direction {rhs;}
 | XYZ nabla_xyz_direction '=' unary_expression{rhs;}
 ;
-nabla_mat_material:IDENTIFIER {rhs;};
-nabla_mat_declaration: MAT nabla_mat_material {rhs;};
-nabla_env_environment:IDENTIFIER {rhs;};
-nabla_env_declaration: ENV nabla_env_environment {rhs;};
+//nabla_mat_material:IDENTIFIER {rhs;};
+//nabla_mat_declaration: MAT nabla_mat_material {rhs;};
+//nabla_env_environment:IDENTIFIER {rhs;};
+//nabla_env_declaration: ENV nabla_env_environment {rhs;};
 
 /////////////////////////
 // ∇ IN/OUT parameters //
@@ -766,8 +766,8 @@ selection_statement
 iteration_statement
 : FORALL nabla_item statement {forall;}
 | FORALL nabla_item AT at_constant statement {forall;}
-| FORALL nabla_matenv statement {forall;}
-| FORALL nabla_matenv AT at_constant statement {forall;}
+//| FORALL nabla_matenv statement {forall;}
+//| FORALL nabla_matenv AT at_constant statement {forall;}
 | FORALL IDENTIFIER CELL statement {forall;}
 | FORALL IDENTIFIER NODE statement {forall;}
 | FORALL IDENTIFIER FACE statement {forall;}
@@ -852,19 +852,19 @@ nabla_option_declaration
 ////////////////////////////
 // ∇ materials definition //
 ////////////////////////////
-nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {rhs;}
+//nabla_materials_definition: MATERIALS '{' identifier_list '}' ';' {rhs;}
 
 
 ///////////////////////////////
 // ∇ environments definition //
 ///////////////////////////////
-nabla_environment_declaration
-: IDENTIFIER '{' identifier_list '}' ';' {rhs;}
-nabla_environments_declaration_list
-: nabla_environment_declaration {rhs;}
-| nabla_environments_declaration_list nabla_environment_declaration {rhs;}
-;
-nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {rhs;}
+//nabla_environment_declaration
+//: IDENTIFIER '{' identifier_list '}' ';' {rhs;}
+//nabla_environments_declaration_list
+//: nabla_environment_declaration {rhs;}
+//| nabla_environments_declaration_list nabla_environment_declaration {rhs;}
+//;
+//nabla_environments_definition: ENVIRONMENTS '{' nabla_environments_declaration_list '}' ';' {rhs;}
 
 
 ///////////////////////
@@ -891,9 +891,13 @@ at_constant
 ////////////////////////
 // ∇ jobs definitions //
 ////////////////////////
-nabla_job_prefix: nabla_family {rhs;} | FORALL nabla_family {rhs;};
+nabla_job_prefix
+//: nabla_family {rhs;}
+: FORALL nabla_family {rhs;}
+;
 nabla_job_decl
-: nabla_job_prefix IDENTIFIER {rhs;}
+: nabla_job_prefix {rhs;}
+| nabla_job_prefix IDENTIFIER {rhs;}
 | nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}
 ;
 
@@ -911,8 +915,8 @@ nabla_job_definition
 // ∇ single reduction //
 ////////////////////////
 nabla_reduction
-: nabla_job_prefix IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
-| nabla_job_prefix IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+: nabla_job_decl MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
+| nabla_job_decl MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
 ;
 
 
@@ -927,7 +931,7 @@ single_library:
 | PARTICLES       {rhs;}
 | LIB_ALEPH       {rhs;}
 | LIB_SLURM       {rhs;}
-| LIB_MATENV      {rhs;}
+//| LIB_MATENV      {rhs;}
 | LIB_CARTESIAN   {rhs;}
 | LIB_MATHEMATICA {rhs;}
 | REAL {rhs;}
@@ -953,8 +957,8 @@ nabla_grammar
 | function_definition	        {rhs;}
 | nabla_job_definition          {rhs;}
 | nabla_reduction               {rhs;}
-| nabla_materials_definition    {rhs;}
-| nabla_environments_definition {rhs;}
+//| nabla_materials_definition    {rhs;}
+//| nabla_environments_definition {rhs;}
 ;
 
 

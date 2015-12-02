@@ -51,14 +51,14 @@ void iniδt(void) @ -10.0{
 }
 
 
-cells void iniCells(void) @ -9.5{
+∀ cells void iniCells(void) @ -9.5{
   cell_sd_id=this->owner();
   cell_θ=option_ini_temperature;
   cell_exact_solution=exact_solution(cell_mass_center);
 }
 
 
-nodes void iniNodes(void) @ -9.5{
+∀ nodes void iniNodes(void) @ -9.5{
   node_is_on_𝜕Ω=false;
   node_unique_id=uid;
   node_sd_id=this->owner();
@@ -66,13 +66,13 @@ nodes void iniNodes(void) @ -9.5{
   node_exact_solution=exact_solution(coord);
 }
 
-outer nodes void iniOuterNodes(void) @ -9.0 {
+∀ outer nodes void iniOuterNodes(void) @ -9.0 {
   node_is_on_𝜕Ω=is_on_𝜕Ω(coord);
   if (node_is_on_𝜕Ω) node_θ=g(coord);
 }
 
 
-faces void iniFaces(void) @ -9.5{
+∀ faces void iniFaces(void) @ -9.5{
   const ℝ³ d=coord[0];
   const ℝ³ e=coord[1];
   const Real3 s = ½*(d+e);
@@ -137,7 +137,7 @@ faces void iniFaces(void) @ -9.5{
     interior_trial_tail[2] = interior_trial_tail[3] = false;
 }
 
-outer faces void iniOuterFaces(void) @ -9.0 {
+∀ outer faces void iniOuterFaces(void) @ -9.0 {
   const Real3 s = ½*(coord[0]+coord[1]);
   face_is_on_𝜕Ω=is_on_𝜕Ω(s);
   if (face_is_on_𝜕Ω) face_θ=g(s);

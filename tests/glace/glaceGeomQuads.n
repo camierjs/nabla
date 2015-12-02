@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 // Calcul des aires orientées des faces
-cells void geom_computeSurfaceAndVolume_Quad(void) @ -20.0,23.0 if (option_quads){
+∀ cells void geom_computeSurfaceAndVolume_Quad(void) @ -20.0,23.0 if (option_quads){
   const Real3 fst_edge = coord[2]-coord[0];
   const Real3 snd_edge = coord[3]-coord[1];
   V=½*cross2D(fst_edge,snd_edge);
@@ -49,7 +49,7 @@ cells void geom_computeSurfaceAndVolume_Quad(void) @ -20.0,23.0 if (option_quads
 
 
 // Calcul des résultantes aux sommets des mailles
-cells void geom_computeNormal_Quad(void) @ -20.0,24.0 if (option_quads){
+∀ cells void geom_computeNormal_Quad(void) @ -20.0,24.0 if (option_quads){
   const Real3 s0=coord[0];
   const Real3 s1=coord[1];
   const Real3 s2=coord[2];

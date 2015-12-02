@@ -130,7 +130,7 @@ void ini(void) @ -6{
 // ****************************************************************************
 // * Conditions initiales pour les mailles
 // ****************************************************************************
-cells void iniCells(void)
+∀ cells void iniCells(void)
   out(cell density, cell pressure, cell adiabatic_cst) @ -5{  
 // On regarde si le noeud '0' de la maille est à la frontière ZG/ZD
   if (coord[0].x < 0.5){
@@ -147,7 +147,7 @@ cells void iniCells(void)
 // ****************************************************************************
 // * Conditions initiales pour les noeuds
 // ****************************************************************************
-nodes void iniNodes(void) out (node nMass, node force, node velocity) @ -5{
+∀ nodes void iniNodes(void) out (node nMass, node force, node velocity) @ -5{
   nMass=0.0;
   force.x = force.y = force.z = 0.0;
   velocity.x = velocity.y = velocity.z = 0.0;
@@ -165,7 +165,7 @@ void iniGeometry(void) @ -4{
 // * Initialise l'équation d'état aux mailles,
 // * calcule la vitesse du son et l'énergie interne 
 // ****************************************************************************
-cells void initEOS(void)
+∀ cells void initEOS(void)
   in (cell pressure, cell adiabatic_cst, cell density)
   out (cell internal_energy, cell sound_speed) @ -3{
   internal_energy = pressure / ((adiabatic_cst - 1.0) * density);
@@ -175,14 +175,14 @@ cells void initEOS(void)
 // ****************************************************************************
 // * Calcul de la masse d'une maille
 // ****************************************************************************
-cells void iniCellMass(void) in (cell density, cell volume) out (cell cMass) @ -2{
+∀ cells void iniCellMass(void) in (cell density, cell volume) out (cell cMass) @ -2{
   cMass = density * volume;
 }
 
 // ****************************************************************************
 // * Calcul de la masse d'un noeud
 // ****************************************************************************
-nodes void iniNodeMass(void) in (cell cMass) out (node nMass) @ -1{
+∀ nodes void iniNodeMass(void) in (cell cMass) out (node nMass) @ -1{
   foreach cell
     nMass += 0.125 * cMass;
 }
@@ -195,7 +195,7 @@ nodes void iniNodeMass(void) in (cell cMass) out (node nMass) @ -1{
 // ****************************************************************************
 // * Mise à zéro des forces aux noeuds
 // ****************************************************************************
-nodes void computeIniPressureForce(void)
+∀ nodes void computeIniPressureForce(void)
   in (cell pressure, cell cqs) inout (node force) @ 0.1{
   force.x = force.y = force.z = 0.0;
 }
@@ -204,7 +204,7 @@ nodes void computeIniPressureForce(void)
 // * Calcul pour chaque noeud de chaque maille la contribution
 // * des forces de pression et de la pseudo-viscosite
 // ****************************************************************************
-cells void computePressureAndCellPseudoViscosityForces(void)
+∀ cells void computePressureAndCellPseudoViscosityForces(void)
   in(cell density, cell pressure, cell cqs, cell sound_speed, node velocity)
   out (cell viscosity_force, node force) @ 0.2 {
   Real linear_coef = VISCOSITY_LINEAR_COEF;
@@ -242,7 +242,7 @@ cells void computePressureAndCellPseudoViscosityForces(void)
 // ****************************************************************************
 // * Calcule l'impulsion aux noeuds
 // ****************************************************************************
-nodes void computeVelocity(void)
+∀ nodes void computeVelocity(void)
   in (node nMass, node force) inout (node velocity) @ 1{
   velocity+=(deltat/nMass)*force;
 }
@@ -250,7 +250,7 @@ nodes void computeVelocity(void)
 // ****************************************************************************
 // * Calcul du travail des forces de viscosité dans une maille
 // ****************************************************************************
-cells void computeViscosityWork(void)
+∀ cells void computeViscosityWork(void)
   in (cell viscosity_force, cell cqs, node velocity) out (cell viscosity_work) @1.1{
   Real work = 0.;
   Real scalarViscosity = viscosity_force;
@@ -264,7 +264,7 @@ cells void computeViscosityWork(void)
 // ****************************************************************************
 // * Applique les conditions aux bords
 // ****************************************************************************
-nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
+∀ nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
   // MIN boundaries
   if (coord.x==0.0){velocity.x=0.0;}
   if (coord.y==0.0){velocity.y=0.0;}
@@ -281,7 +281,7 @@ nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
 // ****************************************************************************
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
-nodes void moveNodes(void) in (node velocity) @ 3{
+∀ nodes void moveNodes(void) in (node velocity) @ 3{
   coord += deltat * velocity;
   //info()<< "[moveNodes] coord="<<coord;
 }
@@ -289,7 +289,7 @@ nodes void moveNodes(void) in (node velocity) @ 3{
 // ****************************************************************************
 // * Calcule la longueur caractéristique d'une maille héxahédrique
 // ****************************************************************************
-cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4{
+∀ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4{
   Real3 coords[8];       // Copie locale des coordonnées des sommets d'une maille
   Real3 face_coord[6];   // Coordonnées des centres des faces
   
@@ -324,7 +324,7 @@ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4{
 // ****************************************************************************
 // * computeVolume: Calcule le volume de la maille
 // ****************************************************************************
-cells void computeGeometricVolume(void)
+∀ cells void computeGeometricVolume(void)
   in (cell cqs) out (cell oldVolume) inout(cell volume) @ 5 {
   Real tmpVolume = 0.0;// @ 0;
   oldVolume = volume @ 0;
@@ -340,7 +340,7 @@ cells void computeGeometricVolume(void)
 void updateDensityRatioMaximum(void)@6{
   density_ratio_maximum=0.0;
 }
-cells void updateDensity(void)
+∀ cells void updateDensity(void)
   in (cell cMass, cell volume) out (cell density) @ .1{
   Real old_density = density;
   Real new_density = cMass/volume;
@@ -356,7 +356,7 @@ cells void updateDensity(void)
 // ****************************************************************************
 // * Calcul de l'energie interne
 // ****************************************************************************
-cells void computeInternalEnergy(void)
+∀ cells void computeInternalEnergy(void)
   in (cell volume, cell oldVolume, cell adiabatic_cst, cell viscosity_work, cell cMass)
   out (cell internal_energy) @ 7{
   Real γVolume = volume / oldVolume;
@@ -371,7 +371,7 @@ cells void computeInternalEnergy(void)
 // * Applique l'équation d'état aux mailles
 // * et calcule la vitesse du son et la pression
 // ****************************************************************************
-cells void applyEOS(void)
+∀ cells void applyEOS(void)
   in (cell density, cell adiabatic_cst, cell internal_energy)
   out (cell sound_speed) inout (cell pressure) @ 8{
   // On calcule en premier la pression
@@ -384,7 +384,7 @@ cells void applyEOS(void)
 // ****************************************************************************
 // * Calcul du pas de temps pour le respect du critère de CFL
 // ****************************************************************************
-cells void computeDxSound(void)
+∀ cells void computeDxSound(void)
   in (cell kLength, cell sound_speed)
   out(cell dxSound) @ 9{
   dxSound = kLength/sound_speed;

@@ -43,7 +43,7 @@
 //inline Real mixteMul(const Real3 _a, const Real3 _b, const Real3 _c){ return _a⋅(_b⨯_c); }
 
 // Calcul des aires orientées des faces
-cells void geom_computeSurface_Hexa(void){// @ -20.0,23.0 if (option_hexa||option_cylinder){
+∀ cells void geom_computeSurface_Hexa(void){// @ -20.0,23.0 if (option_hexa||option_cylinder){
   const Real ratio = 1./12.;
   const Real3 a1 = coord[6]-coord[1];
   const Real3 a2 = coord[6]-coord[3];
@@ -59,10 +59,10 @@ cells void geom_computeSurface_Hexa(void){// @ -20.0,23.0 if (option_hexa||optio
 
 
 // Calcul des résultantes aux sommets des mailles
-cells void geom_computeNormal_Hexa(void) @ -21.0,24.0 if (option_hexa||option_cylinder){
+∀ cells void geom_computeNormal_Hexa(void) @ -21.0,24.0 if (option_hexa||option_cylinder){
   Real3 Χ[8];                 // Copie locale des coordonnées des sommets d'une maille
   Real3 face_coord[6];        // Coordonnées des centres des faces
-  foreach node Χ[n] = coord;  // Recopie des coordonnées locales
+  ∀ node Χ[n] = coord;  // Recopie des coordonnées locales
   face_coord[0] = ¼*(Χ[0]+Χ[3]+Χ[2]+Χ[1]);
   face_coord[1] = ¼*(Χ[0]+Χ[4]+Χ[7]+Χ[3]);
   face_coord[2] = ¼*(Χ[0]+Χ[1]+Χ[5]+Χ[4]);
@@ -81,14 +81,14 @@ cells void geom_computeNormal_Hexa(void) @ -21.0,24.0 if (option_hexa||option_cy
 }
 
 
-cells void geom_assertNbNodes(void) {//@ -20.0 if (option_hexa||option_cylinder){
+∀ cells void geom_assertNbNodes(void) {//@ -20.0 if (option_hexa||option_cylinder){
   if (nbNode!=8) fatal("nbNode!=8");
   info()<<"nbNode="<<nbNode;
 }
 
-cells void geom_computeVolumeHexa(void) @ -20.0,25.0 if (option_hexa||option_cylinder){
+∀ cells void geom_computeVolumeHexa(void) @ -20.0,25.0 if (option_hexa||option_cylinder){
   V=0.0;
-  foreach node
+  ∀ node
     V += coord⋅CQs;
   V *= 1./3.;
  }

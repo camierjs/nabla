@@ -151,7 +151,7 @@ void ini(void) @ -10.0{
   inv_slope_type=1.0/slope_type;
 }
 
-cells void init_hydro(void)
+∀ cells void init_hydro(void)
   out (cell ρ, cell u, cell v, cell E, cell p, cell c) @ -9.1{
   old_ρ=ρ=1.0;
   old_u=u=old_v=v=0.0;
@@ -162,7 +162,7 @@ cells void init_hydro(void)
   old_p=p=old_c=c=0.0;
 }
 
-own cells Real courant(Real courantv)
+∀ own cells Real courant(Real courantv)
   in (cell prim_u, cell prim_v, cell prim_c){
   courantv = max(courantv, max(prim_c+fabs(prim_u), prim_c+fabs(prim_v)));
   return courantv;
@@ -192,7 +192,7 @@ void init_δt(void) @ -4.0{
 // * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
 
-cells void gatherConservativeVariables(void) @ 0.5{
+∀ cells void gatherConservativeVariables(void) @ 0.5{
   ρ=old_ρ;
   if (isX()){
     u=old_u;
@@ -204,7 +204,7 @@ cells void gatherConservativeVariables(void) @ 0.5{
   E=old_E;
 }
 
-cells void conservative_to_primitive(void)
+∀ cells void conservative_to_primitive(void)
   in (cell old_ρ, cell old_u, cell old_v, cell old_E)
   out (cell prim_ρ, cell inv_prim_ρ, cell prim_u,
        cell prim_v, cell E_internal) @ 1.0{
@@ -218,13 +218,13 @@ cells void conservative_to_primitive(void)
   }
 }
 
-cells void equation_of_state(void)
+∀ cells void equation_of_state(void)
   in (cell prim_ρ, cell E_internal)
   out (cell prim_p) @ 2.0{
   prim_p = max((γ - 1.0) * prim_ρ * E_internal, SMALLP);
 }
 
-cells void speed_of_sound(void)
+∀ cells void speed_of_sound(void)
   in (cell prim_inv_ρ, cell prim_p)
   out (cell prim_c) @ 3.0{
   prim_c = sqrt(γ * prim_p * inv_prim_ρ);
@@ -245,7 +245,7 @@ Real slope(const Real nbv_m, const Real nbv_0, const Real nbv_p){
   rtn = sign * fmin((1.0-llftrgt)*t1, fabs(center));
   return rtn;
 }
-inner cells void compute_inner_slopes_xyz(xyz direction)
+∀ inner cells void compute_inner_slopes_xyz(xyz direction)
   in (cell ρ, cell u, cell v, cell p)
   out (cell slope_ρ, cell slope_u, cell slope_v, cell slope_p){
   slope_ρ=slope(prim_ρ[prevCell],prim_ρ,prim_ρ[nextCell]);
@@ -253,7 +253,7 @@ inner cells void compute_inner_slopes_xyz(xyz direction)
   slope_v=slope(prim_v[prevCell],prim_v,prim_v[nextCell]);
   slope_p=slope(prim_p[prevCell],prim_p,prim_p[nextCell]);
 }
-outer cells void compute_outer_slopes_xyz(xyz direction)
+∀ outer cells void compute_outer_slopes_xyz(xyz direction)
   in (cell ρ, cell u, cell v, cell p)
   out (cell slope_ρ, cell slope_u, cell slope_v, cell slope_p){
   if (prevCell.null()){ // Frontière gauche
@@ -285,7 +285,7 @@ void compute_slopes(void) @ 4.0{
 // ****************************************************************************
 // * Compute fluxes
 // ****************************************************************************
-cells void compute_right_flux(void) @ 5.0{
+∀ cells void compute_right_flux(void) @ 5.0{
   const Real inv_c = 1.0/prim_c;
   const Real alpha_m = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) - slope_u)*prim_ρ*inv_c;
   const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
@@ -303,7 +303,7 @@ cells void compute_right_flux(void) @ 5.0{
   q_v_right = flux_v_right = prim_v + a_0v;
   q_p_right = flux_p_right = prim_p + (a_p + a_m) * prim_c * prim_c;
 }
-cells void compute_left_flux(void) @ 5.0{
+∀ cells void compute_left_flux(void) @ 5.0{
   const Real inv_c = 1.0/prim_c;
   const Real alpha_m = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) - slope_u)*prim_ρ*inv_c;
   const Real alpha_p = 0.5 * (slope_p * ( inv_prim_ρ*inv_c) + slope_u)*prim_ρ*inv_c;
@@ -325,13 +325,13 @@ cells void compute_left_flux(void) @ 5.0{
 // ****************************************************************************
 // * Compute qleftright
 // ****************************************************************************
-inner cells void inner_qleftright_std(xyz direction){
+∀ inner cells void inner_qleftright_std(xyz direction){
   q_ρ_left = flux_ρ_left[prevCell];
   q_u_left = flux_u_left[prevCell];
   q_v_left = flux_v_left[prevCell];
   q_p_left = flux_p_left[prevCell];
 }
-outer cells void outer_qleftright(xyz direction){
+∀ outer cells void outer_qleftright(xyz direction){
   if (prevCell.null()){ // Frontière gauche
     q_u_left = -flux_u_right;
     continue;
@@ -358,7 +358,7 @@ void do_qleftright(void) @ 5.5{
 // ****************************************************************************
 // * Compute Riemann @ 6.0
 // ****************************************************************************
-cells void riemann(void)
+∀ cells void riemann(void)
   in (face q_ρ_left, face q_u_left, face q_v_left, face q_p_left,
       face q_ρ_right, face q_u_right, face q_v_right, face q_p_right)
   out (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 6.0{
@@ -440,7 +440,7 @@ cells void riemann(void)
 // ****************************************************************************
 // * Compute fluxes from solution @ 7.0
 // ****************************************************************************
-cells void cmpflx(void) in (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 7.0{
+∀ cells void cmpflx(void) in (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p) @ 7.0{
   const Real mass_density = gdnv_ρ * gdnv_u;
   flux_ρ = mass_density;
   flux_u = mass_density * gdnv_u + gdnv_p;
@@ -455,7 +455,7 @@ cells void cmpflx(void) in (cell gdnv_ρ, cell gdnv_u, cell gdnv_v, cell gdnv_p)
 // ****************************************************************************
 // * Update fluxes from solution @ 8.0
 // ****************************************************************************
-cells void updateXYZ(xyz direction) {
+∀ cells void updateXYZ(xyz direction) {
   Real dtSδx=δt/δx;
   if (!this->isOwn()) continue;
   if (prevCell.null()){ // Frontière prev

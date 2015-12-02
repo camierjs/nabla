@@ -43,7 +43,7 @@
 // **********************************************************
 // * Conditions aux limites dans le cas 2D Triangles ou Quads
 // **********************************************************
-outer faces void applyBoundaryConditionsSymmetries(void) @ 13.1 if (option_triangles ||
+∀ outer faces void applyBoundaryConditionsSymmetries(void) @ 13.1 if (option_triangles ||
                                                                     option_quads ||
                                                                     option_hexa){
   const Real Y_MIN = option_y_min;
@@ -66,7 +66,7 @@ outer faces void applyBoundaryConditionsSymmetries(void) @ 13.1 if (option_trian
   }
 }
 
-outer faces void applyBoundaryConditionsVelocities(void) @ 13.3 if (option_triangles ||
+∀ outer faces void applyBoundaryConditionsVelocities(void) @ 13.3 if (option_triangles ||
                                                                     option_quads||
                                                                     option_hexa){
   const Real X_MIN = option_x_min;
@@ -106,13 +106,13 @@ void pointIt(void){//@ 13.3 {
   //exit;
 }
 
-outer nodes void flushBoundaryConditionsSymmetries3DCylinder(void) @ 13.09 if (option_cylinder){
+∀ outer nodes void flushBoundaryConditionsSymmetries3DCylinder(void) @ 13.09 if (option_cylinder){
   node_got_tgt=false;
   node_tangent=0.0;
 }
 
 
-outer nodes void applyBoundaryConditionsSymmetries3DCylinderHardCodedNodeTangent(void) @ 13.1 if (option_cylinder){//File allPoints){//
+∀ outer nodes void applyBoundaryConditionsSymmetries3DCylinderHardCodedNodeTangent(void) @ 13.1 if (option_cylinder){//File allPoints){//
   const Real3x3 I = matrix3x3Id();
   //foreach node{
     //const Real cx=rnd(coord.x);    const Real cy=rnd(coord.y);    const Real cz=rnd(coord.z);
@@ -130,7 +130,7 @@ outer nodes void applyBoundaryConditionsSymmetries3DCylinderHardCodedNodeTangent
 }
 
 
-outer nodes void applyBoundaryConditionsVelocities3DCylinder(void)@ 13.3 if (option_hexa||option_cylinder){//File allPoints){//
+∀ outer nodes void applyBoundaryConditionsVelocities3DCylinder(void)@ 13.3 if (option_hexa||option_cylinder){//File allPoints){//
   //const Real X_MIN = option_x_min;
   //const Real X_MAX = option_x_max;
   //const Real value = option_u_ini;
@@ -151,7 +151,7 @@ outer nodes void applyBoundaryConditionsVelocities3DCylinder(void)@ 13.3 if (opt
 }
 
 
-outer faces void applyBoundaryConditionsSymmetries3DCylinder(void) @ 13.1 if (option_cylinder){
+∀ outer faces void applyBoundaryConditionsSymmetries3DCylinder(void) @ 13.1 if (option_cylinder){
   //const Real ε=10.0*__DBL_EPSILON__;
   //const Integer fid=uid;
   const Real3x3 I = matrix3x3Id();
@@ -210,7 +210,7 @@ outer faces void applyBoundaryConditionsSymmetries3DCylinder(void) @ 13.1 if (op
 }
 
 
-outer faces void applyBoundaryConditionsSymmetries3DHexa(void) @ 13.1 if (option_hexa){
+∀ outer faces void applyBoundaryConditionsSymmetries3DHexa(void) @ 13.1 if (option_hexa){
   const Real ε=10.0*__DBL_EPSILON__;
   const Real3x3 I = matrix3x3Id();
   const Real3 center = ¼*(coord[0]+coord[1]+coord[2]+coord[3]);

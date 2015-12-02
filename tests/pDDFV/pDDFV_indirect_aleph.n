@@ -44,7 +44,7 @@
 // ****************************************************************************
 // * Remplissage matriciel, coté Dual Indirect, coté Q
 // ****************************************************************************
-inner faces void iDualMtxQ(void) @ 16.0 if (option_indirect){
+∀ inner faces void iDualMtxQ(void) @ 16.0 if (option_indirect){
   const Real pvalue = interior_dual_c_sd_q;
   const Real qvalue = interior_dual_c_se_q;
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
@@ -72,7 +72,7 @@ inner faces void iDualMtxQ(void) @ 16.0 if (option_indirect){
 // ****************************************************************************
 // * Remplissage matriciel, coté Dual Indirect, coté P
 // ****************************************************************************
-inner faces void iDualMtxP(void) @ 16.0 if (option_indirect){
+∀ inner faces void iDualMtxP(void) @ 16.0 if (option_indirect){
   const Real pvalue = interior_dual_c_sd_p;
   const Real qvalue = interior_dual_c_se_p;
   const Integer nid0 = 1+node(0)->uniqueId().asInteger();
@@ -102,7 +102,7 @@ inner faces void iDualMtxP(void) @ 16.0 if (option_indirect){
 // ****************************************************************************
 // * LM_Q
 // ****************************************************************************
-inner faces void iDualMtxLMHead(void) @ 16.1 if (option_indirect){
+∀ inner faces void iDualMtxLMHead(void) @ 16.1 if (option_indirect){
   Face f;
   Cell back,front;
   const Real evalue = interior_dual_c_se_q;
@@ -131,7 +131,7 @@ inner faces void iDualMtxLMHead(void) @ 16.1 if (option_indirect){
 // ****************************************************************************
 // * LM_P
 // ****************************************************************************
-inner faces void iDualMtxLMTail(void) @ 16.1 if (option_indirect){
+∀ inner faces void iDualMtxLMTail(void) @ 16.1 if (option_indirect){
   Face f;
   Cell back,front;
   const Real evalue = interior_dual_c_se_p;
@@ -162,7 +162,7 @@ inner faces void iDualMtxLMTail(void) @ 16.1 if (option_indirect){
 // ****************************************************************************
 // * JK_Q
 // ****************************************************************************
-inner faces void iDualMtxJKHead(void) @ 16.2 if (option_indirect){
+∀ inner faces void iDualMtxJKHead(void) @ 16.2 if (option_indirect){
   Face f;
   Cell back,front;
   const Real dvalue = interior_dual_c_sd_q;
@@ -190,7 +190,7 @@ inner faces void iDualMtxJKHead(void) @ 16.2 if (option_indirect){
 // ****************************************************************************
 // * JK_P
 // ****************************************************************************
-inner faces void iDualMtxJKTail(void) @ 16.2 if (option_indirect){
+∀ inner faces void iDualMtxJKTail(void) @ 16.2 if (option_indirect){
   Face f;
   Cell back,front;
   const Real dvalue = interior_dual_c_sd_p;
