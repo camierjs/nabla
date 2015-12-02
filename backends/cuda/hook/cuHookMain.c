@@ -208,7 +208,7 @@ NABLA_STATUS cuHookMainCore(nablaMain *n){
                                              entry_points[i].stdParamsNode);
     else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
-    //nprintf(n,NULL,"/*numParams=%d*/",numParams);
+    nprintf(n,NULL,"/*numParams=%d*/",numParams);
     
     // On s'autorise un endroit pour insérer des arguments
     nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);

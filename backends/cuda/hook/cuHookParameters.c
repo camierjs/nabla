@@ -77,10 +77,10 @@ void cuHookDumpNablaParameterList(nablaMain *nabla,
     if (var == NULL)
       return exit(NABLA_ERROR|fprintf(stderr, "\n[cuHookDumpNablaParameterList] Variable error\n"));
 
-    dbg("\n\t\t[cuHookDumpNablaParameterList] Working with '%s %s':", var->item, var->name);
+    dbg("\n\t\t\t[cuHookDumpNablaParameterList] Working with '%s %s':", var->item, var->name);
     
     if (strcmp(var->type, "real3")!=0){
-      dbg("\n\t\t[cuHookDumpNablaParameterList] Non real3 variable!\n");
+      dbg("\n\t\t\t[cuHookDumpNablaParameterList] Non real3 variable!\n");
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
       }else{
         nprintf(nabla, NULL, ",\n\t\t%s *%s_%s", var->type, var->item, n->children->token);
@@ -90,9 +90,9 @@ void cuHookDumpNablaParameterList(nablaMain *nabla,
       //exit(NABLA_ERROR|fprintf(stderr, "\n[cuHookDumpNablaParameterList] Variable real3 error\n"));
       if (strncmp(var->item, "node", 4)==0 && strncmp(n->children->token, "coord", 5)==0){
         //nprintf(nabla, NULL, NULL);
-        dbg("\n\t\t\t[cuHookDumpNablaParameterList] Found 'node coord', nothing to do!\n");
+        dbg("\n\t\t\t[cuHookDumpNablaParameterList] Found 'node coord', nothing to do!");
       }else{
-        dbg("\n\t\t\t[cuHookDumpNablaParameterList] Found %s %s!\n", var->item, n->children->token);
+        dbg("\n\t\t\t[cuHookDumpNablaParameterList] Found %s %s!", var->item, n->children->token);
         if (var->dim==0){
           nprintf(nabla, NULL, ",\n\t\treal3 *%s_%s", var->item, n->children->token);
         }else{
@@ -119,6 +119,7 @@ void cuHookDumpNablaParameterList(nablaMain *nabla,
   }
   if (n->children != NULL) cuHookDumpNablaParameterList(nabla, job, n->children, numParams);
   if (n->next != NULL) cuHookDumpNablaParameterList(nabla, job, n->next, numParams);
+  dbg("\n\t\t\t[cuHookDumpNablaParameterList] done!");
 }
 
 

@@ -50,7 +50,6 @@
 void cuDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
                                                 astNode *n,
                                                 bool in_or_out){
-  //nprintf(nabla,"\n\t[cuHookDumpNablaParameterList]",NULL);
   if (n==NULL) return;
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
   if (n->ruleid==rulenameToId("compound_statement")) return;

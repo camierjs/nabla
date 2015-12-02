@@ -48,14 +48,19 @@
 // * nOkinaHookReduction
 // ****************************************************************************
 void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  const astNode *item_node = n->children->next->children;
-  const astNode *global_var_node = n->children->next->next;
+  dbg("\n\t\t[arcaneHookReduction]");
+  const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
+  assert(item_node);
+  const astNode *global_var_node = n->children->next;
   const astNode *reduction_operation_node = global_var_node->next;
   const astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n, rulenameToId("at_constant"));
   assert(at_single_cst_node!=NULL);
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
+  dbg("\n\t\t[arcaneHookReduction] global_var_name=%s",global_var_name);
+  dbg("\n\t\t[arcaneHookReduction] item_var_name=%s",item_var_name);
+  dbg("\n\t\t[arcaneHookReduction] item=%s",item_node->token);
   // Préparation du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   job_name[0]=0;

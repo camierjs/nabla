@@ -102,11 +102,12 @@ global{
 }
 
 void ini(void) @ -10.0{}
+*/
 
-∀ cells void iniCells(void) in (cell e,v)
+∀ cells void iniCells(void) in (cell e,v, node coord)
   out (cell volo) @ 8.0 {
   volo += e*v;
-  }*/
+}
 
 
 /*∀ nodes void loop(void) in (node u) @ 1.0 {

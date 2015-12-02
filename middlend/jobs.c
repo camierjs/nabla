@@ -459,11 +459,11 @@ void nMiddleJobFill(nablaMain *nabla,
           job->name);
   // On va chercher les paramètres standards, s'il y en a eu
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
-  //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
+  nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
   dbg("\n\t[nablaJobFill] numParams=%d", numParams);
   
   // On va chercher les paramètres nabla in/out/inout
-  job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_inout_parameter"));
+  job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_parameter_list"));
 
   // Si on a un type de retour et des arguments
   if (numParams!=0 && strncmp(job->return_type,"void",4)!=0){

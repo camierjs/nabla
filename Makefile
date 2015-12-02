@@ -83,6 +83,8 @@ tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
 tstolr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_sse_seq)
+tstolg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_gen_1_std_seq)
 tstoa:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_aecjs_gen_1)
 
