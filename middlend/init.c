@@ -96,7 +96,7 @@ int nMiddleSwitch(astNode *root,
   case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
     // The CUDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend    
-  case BACKEND_CUDA:   {
+  case BACKEND_CUDA: {
     nabla->hook=cuda(nabla);
     return nMiddleBackendAnimate(nabla,root);
   }

@@ -108,7 +108,9 @@ extern char *last_identifier;
 %token SUPERSCRIPT_N_PLUS_ONE
 
  // Nabla Cartesian
-%token XYZ NEXTCELL PREVCELL NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
+%token XYZ NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
+%token NEXTCELL PREVCELL
+%token NEXTCELL_X PREVCELL_X NEXTCELL_Y PREVCELL_Y NEXTCELL_Z PREVCELL_Z
 
  // Nabla Materials
  //%token MAT MATERIAL MATERIALS ENV ENVIRONMENT ENVIRONMENTS LIB_MATENV
@@ -329,7 +331,13 @@ nabla_system
 | FRONTCELL {rhs;}
 | FRONTCELLUID {rhs;}
 | NEXTCELL {rhs;}
+| NEXTCELL_X {rhs;}
+| NEXTCELL_Y {rhs;}
+| NEXTCELL_Z {rhs;}
 | PREVCELL {rhs;}
+| PREVCELL_X {rhs;}
+| PREVCELL_Y {rhs;}
+| PREVCELL_Z {rhs;}
 | NEXTNODE {rhs;}
 | PREVNODE {rhs;}
 | PREVLEFT {rhs;}
@@ -898,6 +906,7 @@ nabla_job_decl
 ;
 
 nabla_job_definition
+//: nabla_job_decl ',' unary_expression assignment_operator assignment_expression ';' {job;}
 : nabla_job_decl compound_statement {job;}
 | nabla_job_decl nabla_parameter_list compound_statement {job;}
 | nabla_job_decl AT at_constant compound_statement {job;}

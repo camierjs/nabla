@@ -374,5 +374,8 @@ NABLA_STATUS nOkina(nablaMain *nabla,
   nOkinaMeshPostfix(nabla);
   okinaVariablesPostfix(nabla);
   nOkinaMainPostfix(nabla);
+  
+  dbg("\n\t[nOkina]  Deleting kernel names");
+  toolUnlinkKtemp(nabla->entity->jobs);
   return NABLA_OK;
 }

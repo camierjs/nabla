@@ -157,3 +157,26 @@ void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParam
     nMiddleParamsAddExtra(nabla, numParams);
   //nprintf(nabla, NULL, "/*eolambdaHookAddExtraParameters*/");
 }
+
+
+// ****************************************************************************
+// *
+// ****************************************************************************
+void lambdaHookAddExtraParametersDFS(nablaMain *nabla,
+                                     nablaJob *job,
+                                     int *numParams){
+  nprintf(nabla, NULL, "/*nothing in lambdaHookAddExtraParametersDFS*/");
+}
+
+
+// ****************************************************************************
+// * Dump dans le src des parametres nabla en in comme en out
+// * On va surtout remplir les variables 'in' utilisées de support différent
+// * pour préparer les GATHER/SCATTER
+// ****************************************************************************
+void lambdaHookDumpNablaParameterListDFS(nablaMain *nabla,
+                                     nablaJob *job,
+                                     astNode *n,
+                                     int *numParams){
+  nprintf(nabla, NULL, "/*nothing in lambdaHookDumpNablaParameterListDFS*/");
+}

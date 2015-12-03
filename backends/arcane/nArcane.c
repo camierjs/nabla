@@ -202,14 +202,14 @@ const hookHeader nablaArcaneHeaderHooks={
 /*****************************************************************************
  * ncc
  *****************************************************************************/
-NABLA_STATUS nccArcane(nablaMain *middlend,
+NABLA_STATUS nccArcane(nablaMain *nabla,
                        astNode *root,
                        const char *nabla_entity_name){
   char cfgFileName[NABLA_MAX_FILE_NAME];
   char axlFileName[NABLA_MAX_FILE_NAME];
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  nablaEntity *entity=middlend->entity;  // On fait l'hypothèse qu'il n'y a qu'un entity pour l'instant
+  nablaEntity *entity=nabla->entity;  // On fait l'hypothèse qu'il n'y a qu'un entity pour l'instant
 
   callSimd nablaArcaneSimdCalls={
     nccArcBits,
@@ -280,63 +280,63 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     NULL // parallel
   };
 
-  middlend->call=&arcaneBackendCalls;
-  middlend->hook=&arcaneBackendHooks;
-  //middlend->hook->simd=&nablaArcaneSimdHooks;
+  nabla->call=&arcaneBackendCalls;
+  nabla->hook=&arcaneBackendHooks;
+  //nabla->hook->simd=&nablaArcaneSimdHooks;
   
   hookPragma arcanePragmaGCCHooks={
     nArcanePragmaGccAlign
   };
-  middlend->hook->pragma=&arcanePragmaGCCHooks;
+  nabla->hook->pragma=&arcanePragmaGCCHooks;
     
   dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
-  if (isAnArcaneModule(middlend)==true)
-    nccArcMain(middlend);
+  if (isAnArcaneModule(nabla)==true)
+    nccArcMain(nabla);
 
-  dbg("\n[nccArcane] Ouverture du fichier SOURCE du middlend");
-  sprintf(srcFileName, "%s%s.cc", entity->name, nablaArcaneColor(middlend));
-  if ((middlend->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
+  dbg("\n[nccArcane] Ouverture du fichier SOURCE du nabla");
+  sprintf(srcFileName, "%s%s.cc", entity->name, nablaArcaneColor(nabla));
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 
-  dbg("\n[nccArcane] Ouverture du fichier HEADER du middlend dans le cas d'un module");
-  if (isAnArcaneModule(middlend)==true){
-    sprintf(hdrFileName, "%s%s.h", middlend->name, nablaArcaneColor(middlend));
-    if ((middlend->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
+  dbg("\n[nccArcane] Ouverture du fichier HEADER du nabla dans le cas d'un module");
+  if (isAnArcaneModule(nabla)==true){
+    sprintf(hdrFileName, "%s%s.h", nabla->name, nablaArcaneColor(nabla));
+    if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
   }
 
   dbg("\n[nccArcane] Ouverture du fichier CONFIG pour ARCANE dans le cas d'un module");
-  if (isAnArcaneModule(middlend)==true){
-    sprintf(cfgFileName, "%s.config", middlend->name);
-    if ((middlend->cfg=fopen(cfgFileName, "w")) == NULL) exit(NABLA_ERROR);
+  if (isAnArcaneModule(nabla)==true){
+    sprintf(cfgFileName, "%s.config", nabla->name);
+    if ((nabla->cfg=fopen(cfgFileName, "w")) == NULL) exit(NABLA_ERROR);
   }
 
   dbg("\n[nccArcane] Et du fichier AXL pour ARCANE");
-  if (isAnArcaneModule(middlend))
-    sprintf(axlFileName, "%s.axl", middlend->name);
+  if (isAnArcaneModule(nabla))
+    sprintf(axlFileName, "%s.axl", nabla->name);
   else
-    sprintf(axlFileName, "%sService.axl", middlend->name);
-  if ((middlend->axl=fopen(axlFileName, "w")) == NULL) exit(NABLA_ERROR);
+    sprintf(axlFileName, "%sService.axl", nabla->name);
+  if ((nabla->axl=fopen(axlFileName, "w")) == NULL) exit(NABLA_ERROR);
 
   dbg("\n[nccArcane] Pour l'instant, nous n'avons pas d'options");
-  middlend->options=NULL;
+  nabla->options=NULL;
   
   dbg("\n[nccArcane] nccAxlGenerateHeader");
-  nccAxlGenerateHeader(middlend);
-  nccArcaneEntityHeader(middlend);
+  nccAxlGenerateHeader(nabla);
+  nccArcaneEntityHeader(nabla);
  
   // Dans le cas d'un service, on le fait maintenant
-  if (isAnArcaneService(middlend)){
+  if (isAnArcaneService(nabla)){
     if (nccArcaneEntityIncludes(entity)!=NABLA_OK) printf("error: in service HDR generation!\n");
-    nccArcaneBeginNamespace(middlend);
+    nccArcaneBeginNamespace(nabla);
   }
   
   // Première passe pour les VARIABLES du fichier AXL
-  if (isAnArcaneModule(middlend))
-    nccArcConfigHeader(middlend);
+  if (isAnArcaneModule(nabla))
+    nccArcConfigHeader(nabla);
   
-  nMiddleGrammar(root,middlend);
+  nMiddleGrammar(root,nabla);
 
   // Dans le cas d'un module, on le fait maintenant
-  if (isAnArcaneModule(middlend)){
+  if (isAnArcaneModule(nabla)){
     dbg("\n[nccArcane] nccArcaneEntityIncludes initialization");
     if (nccArcaneEntityIncludes(entity)!=NABLA_OK) printf("error: in Includes generation!\n");
   }
@@ -351,69 +351,69 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
     // MATHEMATICA fonctions d'initialisation
     if ((entity->libraries&(1<<with_mathematica))!=0){
       dbg("\n[nccArcane] MATHEMATICA initialization");
-      nccArcLibMathematicaIni(middlend);
+      nccArcLibMathematicaIni(nabla);
     }
     // MAIL fonctions d'initialisation
     if ((entity->libraries&(1<<with_mail))!=0){
       dbg("\n[nccArcane] MAIL initialization");
-      nccArcLibMailIni(middlend);
+      nccArcLibMailIni(nabla);
     }
     // PARTICLES fonctions d'initialisation
     if ((entity->libraries&(1<<with_particles))!=0){
       dbg("\n[nccArcane] PARTICLES initialization");
-      nccArcLibParticlesIni(middlend);
+      nccArcLibParticlesIni(nabla);
     }
     // ALEPH fonctions d'initialisation
     if ((entity->libraries&(1<<with_aleph))!=0){
       dbg("\n[nccArcane] ALEPH initialization");
-      if (isAnArcaneModule(middlend)) nccArcLibAlephIni(middlend);
-      if (isAnArcaneService(middlend)) nccArcLibSchemeIni(middlend);
+      if (isAnArcaneModule(nabla)) nccArcLibAlephIni(nabla);
+      if (isAnArcaneService(nabla)) nccArcLibSchemeIni(nabla);
     }
     // CARTESIAN fonctions d'initialisation
     if ((entity->libraries&(1<<with_cartesian))!=0){
       dbg("\n[nccArcane] CARTESIAN initialization");
-      nccArcLibCartesianIni(middlend);
+      nccArcLibCartesianIni(nabla);
     }
     // MATERIALS fonctions d'initialisation
     if ((entity->libraries&(1<<with_materials))!=0){
       dbg("\n[nccArcane] MATERIALS initialization");
-      nccArcLibMaterialsIni(middlend);
+      nccArcLibMaterialsIni(nabla);
     }
     // GMP fonctions d'initialisation
     if ((entity->libraries&(1<<with_gmp))!=0){
       dbg("\n[nccArcane] GMP initialization");
-      nccArcLibGmpIni(middlend);
+      nccArcLibGmpIni(nabla);
     }
     // DFT fonctions d'initialisation
     if ((entity->libraries&(1<<with_dft))!=0){
       dbg("\n[nccArcane] DFT initialization");
-      nccArcLibDftIni(middlend);
+      nccArcLibDftIni(nabla);
     }
     // SLURM fonctions d'initialisation
     if ((entity->libraries&(1<<with_slurm))!=0){
       dbg("\n[nccArcane] SLURM initialization");
-      nccArcLibSlurmIni(middlend);
+      nccArcLibSlurmIni(nabla);
     }
   }
-  nArcaneHLTInit(middlend);
+  nArcaneHLTInit(nabla);
   
   dbg("\n[nccArcane] AXL generation");
-  if (nccAxlGenerator(middlend)!=NABLA_OK) printf("error: in AXL generation!\n");
+  if (nccAxlGenerator(nabla)!=NABLA_OK) printf("error: in AXL generation!\n");
 
   dbg("\n[nccArcane] HDR generation");
   if (nccArcaneEntityGeneratorPrivates(entity)!=NABLA_OK) printf("error: in HDR generation!\n");
 
-  if (isAnArcaneModule(middlend)==true){ // Fermeture du CONFIG dans le cas d'un module
-    nccArcConfigFooter(middlend); 
-    fclose(middlend->cfg);
+  if (isAnArcaneModule(nabla)==true){ // Fermeture du CONFIG dans le cas d'un module
+    nccArcConfigFooter(nabla); 
+    fclose(nabla->cfg);
   }
 
   // Fermeture de l'AXL
-  fprintf(middlend->axl,"\n</%s>\n", (isAnArcaneModule(middlend)==true)?"module":"service");
-  fclose(middlend->axl);
+  fprintf(nabla->axl,"\n</%s>\n", (isAnArcaneModule(nabla)==true)?"module":"service");
+  fclose(nabla->axl);
   
   // Fermeture du header du entity
-  if (isAnArcaneModule(middlend)==true){ // Fermeture du HEADER dans le cas d'un module
+  if (isAnArcaneModule(nabla)==true){ // Fermeture du HEADER dans le cas d'un module
     fclose(entity->hdr);
   }
   
@@ -422,16 +422,20 @@ NABLA_STATUS nccArcane(nablaMain *middlend,
 \n/*---------------------------------------------------------------------------*/\
 \n/*---------------------------------------------------------------------------*/\
 \nARCANE_REGISTER_%s_%s%s(%s%s%s%s%s);\n%s\n",
-          isAnArcaneModule(middlend)?"MODULE":"SERVICE",
-          toolStrUpCase(middlend->name),
-          isAnArcaneService(middlend)?"SERVICE":"",
-          isAnArcaneService(middlend)?middlend->service_name:"",
-          isAnArcaneService(middlend)?",":"",
-          middlend->name,
-          isAnArcaneModule(middlend)?"Module":"Service",
-          isAnArcaneService(middlend)?",SFP_None":"",
-          isAnArcaneService(middlend)?"ARCANE_END_NAMESPACE\n":"");
+          isAnArcaneModule(nabla)?"MODULE":"SERVICE",
+          toolStrUpCase(nabla->name),
+          isAnArcaneService(nabla)?"SERVICE":"",
+          isAnArcaneService(nabla)?nabla->service_name:"",
+          isAnArcaneService(nabla)?",":"",
+          nabla->name,
+          isAnArcaneModule(nabla)?"Module":"Service",
+          isAnArcaneService(nabla)?",SFP_None":"",
+          isAnArcaneService(nabla)?"ARCANE_END_NAMESPACE\n":"");
   fclose(entity->src);
+
+  dbg("\n\t[nccArcane]  Deleting kernel names");
+  toolUnlinkKtemp(nabla->entity->jobs);
+
   dbgCloseTraceFile();
   return NABLA_OK;
 }

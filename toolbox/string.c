@@ -79,3 +79,41 @@ char *toolStrQuote(const char * str){
   return bkp;
 }
 
+
+// *****************************************************************************
+// * 
+// *****************************************************************************
+const char* mkktemp(const char *prefix){
+  char *unique_temporary_kernel_name=NULL;
+  int n,size = NABLA_MAX_FILE_NAME;
+  
+  if ((unique_temporary_kernel_name=malloc(size))==NULL)
+    nablaError("[mkktemp] Could not malloc our unique_temporary_kernel_name!");
+  n=snprintf(unique_temporary_kernel_name, size, "/tmp/nabla_%sXXXXXX", prefix);
+  
+  if (n > -1 && n < size)
+    if (mkstemp(unique_temporary_kernel_name)==-1)
+      nablaError("[mkktemp] Could not mkstemp our unique_temporary_kernel_name!");
+  assert(strrchr(prefix,'_')==NULL);
+  return strdup(strrchr(unique_temporary_kernel_name,'_')+1);
+}
+
+
+// *****************************************************************************
+// * 
+// *****************************************************************************
+void toolUnlinkKtemp(nablaJob *job){
+  char *kernel_name=NULL;
+  int size = NABLA_MAX_FILE_NAME;
+  
+  if ((kernel_name=malloc(size))==NULL)
+    nablaError("[mkktemp] Could not malloc our unique_temporary_kernel_name!");
+
+  for(;job!=NULL;job=job->next){
+    if (!job->has_to_be_unlinked) continue;
+    snprintf(kernel_name, size, "/tmp/nabla_%s", job->name);
+    dbg("\n\t\t[toolUnlinkKtemp] kernel_name to unlink: '%s'", kernel_name);
+    if (unlink(kernel_name)!=0)
+      nablaError("Error while removing '%s' file", kernel_name);
+  }
+}

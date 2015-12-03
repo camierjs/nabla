@@ -49,7 +49,7 @@
 // * lambdaHookReduction
 // ****************************************************************************
 void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  int fakeNumParams=0;
+  //int fakeNumParams=0;
   const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
   const astNode *global_var_node = n->children->next;
@@ -96,7 +96,39 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 void %s(",item_var_name,global_var_name,job_name);
-  lambdaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
+
+  
+  nablaVariable *global_var=nMiddleVariableFind(nabla->variables, global_var_name);
+  assert(global_var);
+
+  nprintf(nabla, NULL, "%s* __restrict__ %s_%s",
+          global_var->type,
+          global_var->item,
+          global_var->name);
+  
+  nablaVariable *local_var=nMiddleVariableFind(nabla->variables, item_var_name);
+  assert(local_var);
+  nprintf(nabla, NULL, ",const %s* %s_%s",
+          local_var->type,
+          local_var->item,
+          local_var->name);
+
+  // Et on les rajoute pour faire croire qu'on a fait le DFS
+  nablaVariable* new_global_var=nMiddleVariableNew(nabla);
+  new_global_var->name=strdup(global_var->name);
+  new_global_var->type=strdup(global_var->type);
+  new_global_var->out=true;
+  new_global_var->item=strdup("global");
+  redjob->used_variables=new_global_var;
+
+  nablaVariable* new_local_var=nMiddleVariableNew(nabla);
+  new_local_var->name=strdup(local_var->name);
+  new_local_var->type=strdup(local_var->type);
+  new_local_var->in=true;
+  new_local_var->item=strdup(local_var->item);
+  redjob->used_variables->next=new_local_var;
+
+  //lambdaHookAddExtraParameters(nabla,redjob,&fakeNumParams);
 
   nprintf(nabla, NULL,"){ // @ %s\n\
 \tconst double reduction_init=%e;\n\

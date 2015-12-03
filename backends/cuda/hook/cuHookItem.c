@@ -50,7 +50,7 @@
 char* cuHookSysPrefix(void){ return ""; }
 char* cuHookSysPostfix(void){ return ""; }
 
-char* cuHookPrevCell(void){
+char* cuHookPrevCell(int direction){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }
 
@@ -58,7 +58,7 @@ char* cuHookPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* cuHookNextCell(void){
+char* cuHookNextCell(int direction){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
 }
 

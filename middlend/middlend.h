@@ -43,8 +43,20 @@
 #ifndef _NABLA_MIDDLEND_H_
 #define _NABLA_MIDDLEND_H_
 
+
 // ****************************************************************************
-// * Enumération des libraries possible
+// * Enumération des directions possibles
+// ****************************************************************************
+typedef enum {
+  DIR_UNKNOWN,
+  DIR_X,
+  DIR_Y,
+  DIR_Z
+} dir_xyz;
+
+  
+// ****************************************************************************
+// * Enumération des libraries possibles
 // ****************************************************************************
 typedef enum {
   with_mpi=0,
@@ -126,6 +138,7 @@ typedef struct nablaOptionStruct{
 typedef struct nablaJobStruct{
   bool is_an_entry_point;
   bool is_a_function;
+  bool has_to_be_unlinked;
   char *scope;
   char *region;
   char *item;
@@ -324,7 +337,11 @@ NABLA_STATUS nMiddleBackendAnimate(nablaMain*,astNode*);
 void nMiddleArgsAddExtra(nablaMain*,int*);
 void nMiddleArgsAddGlobal(nablaMain*,nablaJob*,int*);
 void nMiddleArgsDump(nablaMain*,astNode*,int*);
+void nMiddleArgsDumpFromDFS(nablaMain*,nablaJob*);
+void nMiddleParamsDumpFromDFS(nablaMain*,nablaJob*,int);
 void nMiddleParamsAddExtra(nablaMain*,int*);
 void nMiddleDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+
+void nMiddleFunctionDumpFwdDeclaration(nablaMain*,nablaJob*,astNode*,const char *);
 
 #endif // _NABLA_MIDDLEND_H_

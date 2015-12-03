@@ -75,16 +75,24 @@ char* lambdaHookSysPrefix(void){ return "/*lambdaHookSysPrefix*/"; }
 // ****************************************************************************
 // * System Prev Cell
 // ****************************************************************************
-char* lambdaHookPrevCell(void){
-  return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+c+0],";
+char* lambdaHookPrevCell(int direction){
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirX*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirY*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirZ*NABLA_NB_CELLS+c+0],";
+  assert(NULL);
+  return NULL;
 }
 
 
 // ****************************************************************************
 // * System Next Cell
 // ****************************************************************************
-char* lambdaHookNextCell(void){
-  return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+c+0],";
+char* lambdaHookNextCell(int direction){
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_next[MD_DirX*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_next[MD_DirY*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_next[MD_DirZ*NABLA_NB_CELLS+c+0],";
+  assert(NULL);
+  return NULL;
 }
 
 
@@ -115,7 +123,8 @@ void lambdaHookDfsForCalls(struct nablaMainStruct *nabla,
                              astNode *n,
                              const char *namespace,
                              astNode *nParams){
-  nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+  //nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
 

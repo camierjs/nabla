@@ -66,8 +66,8 @@ char* cuHookScatter(nablaVariable*);
 
 char* cuHookSysPrefix(void);
 char* cuHookSysPostfix(void);
-char* cuHookPrevCell(void);
-char* cuHookNextCell(void);
+char* cuHookPrevCell(int);
+char* cuHookNextCell(int);
 
 char* cuHookIncludes(void);
 

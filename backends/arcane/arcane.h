@@ -49,8 +49,8 @@ char* nccArcScatter(nablaVariable* var);
 
 char* nccArcSystemPrefix(void);
 char* nccArcSystemPostfix(void);
-char* nccArcPrevCell(void);
-char* nccArcNextCell(void);
+char* nccArcPrevCell(int);
+char* nccArcNextCell(int);
 char* nccArcIncludes(void);
 
 char *nablaArcaneColor(nablaMain*);

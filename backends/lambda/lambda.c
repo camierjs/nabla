@@ -255,8 +255,8 @@ const static hookCall nLambdaHookCall={
   lambdaHookAddArguments,
   lambdaHookEntryPointPrefix,
   lambdaHookDfsForCalls,
-  lambdaHookAddExtraParameters,
-  lambdaHookDumpNablaParameterList
+  lambdaHookAddExtraParametersDFS,
+  lambdaHookDumpNablaParameterListDFS
 };
 
 static hooks nLambdaHooks={

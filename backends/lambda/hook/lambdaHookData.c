@@ -102,11 +102,7 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]");
   if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
   if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
-  
-  // NEXTCELL/PREVCELL sont traité en amont avec les gatherk_and_zero_neg_ones
-  //if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");
-  //if (n->tokenid == PREVCELL)      nprintf(arc, NULL, ")");
-  
+    
   if (n->tokenid == NEXTNODE)      nprintf(arc, NULL, "[n])+nextNode))");
   if (n->tokenid == PREVNODE)      nprintf(arc, NULL, "[n])-prevNode))");
   if (n->tokenid == PREVLEFT)      nprintf(arc, "/*chs PREVLEFT*/", "[cn.previousLeft()]");

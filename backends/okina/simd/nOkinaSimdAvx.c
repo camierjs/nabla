@@ -50,7 +50,7 @@ char *nOkinaAvxBits(void){return "256";}
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nOkinaAvxPrevCell(void){
+char* nOkinaAvxPrevCell(int direction){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -61,7 +61,7 @@ char* nOkinaAvxPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nOkinaAvxNextCell(void){
+char* nOkinaAvxNextCell(int direction){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\

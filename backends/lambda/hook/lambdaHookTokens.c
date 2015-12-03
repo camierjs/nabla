@@ -449,8 +449,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
-  case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}
-  case (PREVCELL):{ nprintf(nabla, "/*token PREVCELL*/", "prevCell"); break;}
+    //case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}
+    //case (PREVCELL):{ nprintf(nabla, "/*token PREVCELL*/", "prevCell"); break;}
   case (NEXTNODE):{ nprintf(nabla, "/*token NEXTNODE*/", "nextNode"); break; }
   case (PREVNODE):{ nprintf(nabla, "/*token PREVNODE*/", "prevNode"); break; }
   case (PREVLEFT):{ nprintf(nabla, "/*token PREVLEFT*/", "cn.previousLeft()"); break; }

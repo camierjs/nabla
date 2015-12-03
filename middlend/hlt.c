@@ -200,6 +200,8 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       entry_points[i].stdParamsNode=job->stdParamsNode;
       entry_points[i].nblParamsNode=job->nblParamsNode;
       entry_points[i].called_variables=job->called_variables;
+      entry_points[i].used_variables=job->used_variables;
+      entry_points[i].used_options=job->used_options;
       entry_points[i].reduction=job->reduction;
       entry_points[i].reduction_name=job->reduction_name;
       ++i;

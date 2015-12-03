@@ -56,4 +56,7 @@ void toolUnlink(char *);
 int toolMkstemp(const char*,char**);
 int toolCatAndHackIncludes(const char*,const char*);
 
+const char* mkktemp(const char*);
+void toolUnlinkKtemp(nablaJob*);
+
 #endif // _NABLA_TOOLS_H_

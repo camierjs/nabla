@@ -40,56 +40,35 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
 
-// ****************************************************************************
-// * nMiddleBackendAnimate
-// ****************************************************************************
-//#warning nMiddleBackendAnimate a simplifier
-NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
-  ///////////////////////////////////////////////////////////
-  // Partie des hooks à remonter à termes dans le middlend //
-  ///////////////////////////////////////////////////////////
-  nabla->hook->vars->init(nabla);
-  nabla->hook->source->open(nabla);
-  nabla->hook->source->include(nabla);
-
-  // Le header
-  nabla->hook->header->open(nabla);
-  nabla->hook->header->prefix(nabla);
-  nabla->hook->header->include(nabla);
-  nabla->hook->mesh->prefix(nabla);
-  nabla->hook->header->enums(nabla);
-  nabla->hook->header->dump(nabla);
-
-  // Parse du code préprocessé et lance les hooks associés
-  // On en profite pour dumper dans le header les forwards des fonctions
-  nMiddleGrammar(root,nabla);
-
-  // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
-  nabla->hook->mesh->core(nabla);
-  // Rapidement on place dans le header les variables et options
-  // qui pourront etre utilisées par d'autres dump
-  nabla->hook->vars->prefix(nabla);
-
-  nabla->hook->main->varInitKernel(nabla);
-  nabla->hook->main->prefix(nabla);
-  nabla->hook->vars->malloc(nabla);
-  
-  nabla->hook->main->preInit(nabla);
-  nabla->hook->main->varInitCall(nabla);
-  nabla->hook->main->main(nabla);
-  nabla->hook->main->postInit(nabla);
-  
-  // Partie POSTFIX  
-  nabla->hook->header->postfix(nabla); 
-  nabla->hook->mesh->postfix(nabla);
-  nabla->hook->main->postfix(nabla);
-  nabla->hook->vars->free(nabla);
-  
-  dbg("\n\t[nMiddleBackendAnimate]  Deleting kernel names");
-  toolUnlinkKtemp(nabla->entity->jobs);
-
-  return NABLA_OK;
+// Calcul des aires orientées des faces
+∀ cells @ -20.0,23.0 if (option_triangles){
+  const Real3 fst_edge = coord[2]-coord[0];
+  const Real3 snd_edge = coord[0]-coord[1];
+  V=½*cross2D(fst_edge,snd_edge);
 }
 
+// Calcul des résultantes aux sommets des mailles
+∀ cells @ -20.0,24.0 if (option_triangles){
+  const Real3 s0=coord[0];
+  const Real3 s1=coord[1];
+  const Real3 s2=coord[2];
+  const Real3 c0 = ½*(s0+s1);
+  const Real3 c1 = ½*(s1+s2);
+  const Real3 c2 = ½*(s2+s0);
+  const Real3 c3 = s0;
+  const Real3 length20 = ½*(c2-c0);
+  const Real3 length31 = ½*(c3-c1);
+  CQs[0].x = -(2.0*length20.y);
+  CQs[0].y =  (2.0*length20.x);
+  CQs[0].z = 0.0;
+  absCQs[0]=CQs[0].abs();
+  CQs[1].x = -(length31.y-length20.y);
+  CQs[1].y =  (length31.x-length20.x); 
+  CQs[1].z = 0.0;
+  absCQs[1]=CQs[1].abs();
+  CQs[2].x = -(-length31.y-length20.y);
+  CQs[2].y =  (-length31.x-length20.x); 
+  CQs[2].z = 0.0;
+  absCQs[2]=CQs[2].abs();
+}

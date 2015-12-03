@@ -5,7 +5,7 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 #SIMD = avx
 COLORS = 
 #PARALLEL = omp
-LOG = -t -v $(TGT).log
+LOG = -t #-v $(TGT).log
 
 SIMD_ori_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double

@@ -82,15 +82,15 @@ char* nOkinaMicScatter(nablaVariable*);
 char* nOkinaHookSysPrefix(void);
 char* nOkinaHookSysPostfix(void);
 
-char* nOkinaStdPrevCell(void);
-char* nOkinaSsePrevCell(void);
-char* nOkinaAvxPrevCell(void);
-char* nOkinaMicPrevCell(void);
+char* nOkinaStdPrevCell(int);
+char* nOkinaSsePrevCell(int);
+char* nOkinaAvxPrevCell(int);
+char* nOkinaMicPrevCell(int);
 
-char* nOkinaStdNextCell(void);
-char* nOkinaSseNextCell(void);
-char* nOkinaAvxNextCell(void);
-char* nOkinaMicNextCell(void);
+char* nOkinaStdNextCell(int);
+char* nOkinaSseNextCell(int);
+char* nOkinaAvxNextCell(int);
+char* nOkinaMicNextCell(int);
 
 // Cilk+ parallel color
 char *nOkinaParallelCilkSync(void);

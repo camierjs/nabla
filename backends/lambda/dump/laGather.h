@@ -62,6 +62,10 @@ inline real gatherk_and_zero_neg_ones(const int a, real *data){
   if (a>=0) return *(data+a);
   return 0.0;
 }
+inline real gatherk_and_zero_neg_ones(const int a, const real *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
 
 inline void gatherFromNode_k(const int a, real *data, real *gthr){
   *gthr=gatherk_and_zero_neg_ones(a,data);

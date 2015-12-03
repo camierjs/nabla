@@ -53,9 +53,9 @@ inline int opTernary(const bool cond,
   return elseStatement;
 }
 
-inline double opTernary(const bool cond,
-                      const double ifStatement,
-                      const double elseStatement){
+inline real opTernary(const bool cond,
+                      const real ifStatement,
+                      const real elseStatement){
   if (cond) return ifStatement;
   return elseStatement;
 }

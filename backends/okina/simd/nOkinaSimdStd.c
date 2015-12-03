@@ -50,7 +50,7 @@ char *nOkinaStdBits(void){return "64";}
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nOkinaStdPrevCell(void){
+char* nOkinaStdPrevCell(int direction){
   return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
 }
 
@@ -58,7 +58,7 @@ char* nOkinaStdPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nOkinaStdNextCell(void){
+char* nOkinaStdNextCell(int direction){
   return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
 }
 

@@ -95,6 +95,10 @@ tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
 tstllr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
+tstlllg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_llsh_gen_1_seq)
+tstlllr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_llsh_run_1_seq)
 tstllo:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
 tstlau:
@@ -157,10 +161,14 @@ tstas4:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
 tstalr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
+tstallg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_llsh_gen_1)
 tstalg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_gen_1)
 tstagr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
+tstaglcr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glc_run_1)
 tsthas:
 	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
 tsthas4:

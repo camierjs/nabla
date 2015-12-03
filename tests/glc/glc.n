@@ -1,0 +1,292 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+#include "assert.h"
+
+// ****************************************************************************
+// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ∀ ℝℕℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂
+// * ⋅⨯⤫⊗⨂⊛
+// * ⁾ⁱ²³ⁿ⁺¹
+// * ∞
+// ****************************************************************************
+
+// Options Hydro-Glace Euler/Sans reconstruction
+options{
+  ℾ option_glace = true;
+  ℾ option_chic = false;
+  ℝ γ = 1.4;
+  ℾ option_test_sod = true;  
+  ℾ option_quads = false;  
+  ℾ option_triangles = false;
+  ℾ option_hexa = true;
+  ℾ option_cylinder = false;
+  ℝ option_x_interface = 0.5;
+  ℝ option_x_min = 0.0;
+  ℝ option_y_min = 0.0;
+  ℝ option_z_min = 0.0;
+  ℝ option_x_max = 1.0;
+  ℝ option_y_max = 1.0;
+  ℝ option_z_max = 1.0;
+  ℝ option_δt_ini = 0.0001;
+  ℝ option_δt_min = 1e-12;
+  ℝ option_δt_max = 0.01;
+  ℝ option_δt_end = 0.01;
+  ℝ option_δt_control = 0.9;            // Contrôle du pas de temps hydrodynamique
+  ℝ option_δt_min_variation = 0.99;     // Décroissance maximale tolérée du pas de temps
+  ℝ option_δt_max_variation = 0.10;     // Amplitude maximale de croissance du pas de temps
+  ℾ option_δt_last_exact = true;
+  ℕ option_max_iterations = 1024;
+  ℝ option_ini_zg_ρ = 1.0;
+  ℝ option_ini_zd_ρ = 0.125;
+  ℝ option_ini_zg_p = 1.0; 
+  ℝ option_ini_zd_p = 0.1;
+  ℝ option_u_ini = 0.0;
+};
+
+// Déclaration des variables aux faces
+faces{
+  ℝ³ face_normales[nodes];               // Pour Chic
+  ℝ³ faces_oriented_areas[nodes];
+};
+
+// Déclaration des variables aux noeuds
+nodes{
+  ℾ node_x_min_max;
+  ℾ node_got_tgt;
+  ℝ³ node_tangent;
+  ℝ³ node_u;                          // Vitesse nodale du maillage
+  ℝ³⨯ℝ³ node_u_matrix;                // Matrice aux sommets pour le calcul de la vitesse
+  ℝ³ node_u_second_member;            // Second membre aux sommets pour le calcul de la vitesse
+};
+
+// Déclaration des variables aux mailles
+cells{  
+  ℝ ZG;                                 // Group ZG
+  ℝ ZD;                                 // Group ZD
+  ℝ m;                                  // Masse
+  ℝ V;                                  // Volume des mailles
+  ℝ ρ;                                  // Densités
+  ℝ p;                                  // Pression
+  ℝ³ u;                                 // Vitesse moyenne
+  ℝ c;
+  ℝ glace_δt;
+  ℝ absCQs[nodes];
+  ℝ³ CQs[nodes];                        // Résultantes aux sommets
+  ℝ³⨯ℝ³ AQs[nodes];                      // Matrices de contributions aux sommets
+  ℝ ρΕ;                                 // Énergie massique
+  ℝ ιΕ;                                 // Énergie interne
+  ℝ³ reconstructed_u[nodes];            // Tableau des vitesses reconstruites
+  ℝ reconstructed_p[nodes];             // Tableau des pressions reconstruites
+  ℝ³ momentum_fluxes_Σ;
+  ℝ total_energy_fluxes_Σ;
+  ℝ λ;                                  // λ géométrique utilisé pour retrouver Godunov 1D
+};
+
+
+// ****************************************************************************
+// * Globals
+// ****************************************************************************
+global{
+  ℝ global_δt;
+};
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0.0[
+// ****************************************************************************
+
+void hydroInit(void) @ -25.0{
+  δt=option_δt_ini;
+  assert(option_triangles^option_quads^option_hexa^option_cylinder);
+}
+
+∀ cells @ -25.0{
+  ℝ³ centre; 
+  λ=1.0;
+  ∀ node centre+=coord;
+  centre/=nbNode;
+  // On regarde si le centre de la maille est à G ou D de la frontière
+  if ((option_test_sod && (centre.x < option_x_interface))
+      ||(!option_test_sod && (centre.abs() < option_x_interface))){
+    ρ=option_ini_zg_ρ;
+    p=option_ini_zg_p;
+    ZG=p;
+  }else{
+    ρ=option_ini_zd_ρ;
+    p=option_ini_zd_p;
+    ZD=p;
+  }
+}
+
+∀ cells @ -19.0 {
+  c=0.0;
+  u = 0.0;
+  m = ρ*V;
+}
+
+∀ cells @ -18.0{ ρΕ = p/((γ-1.0)*ρ); }
+
+∀ nodes void flushNodeGroups(void)@-18.0{
+  //node_u=0;
+  node_x_min_max=false;
+}
+
+∀ outer nodes @-17.0{
+  //if (!(coord.x==option_x_min || coord.x==option_x_max)) continue;
+  if (coord.x<=(option_x_min+0.01) || coord.x>=(option_x_max-0.01))
+    node_x_min_max=true;
+}
+
+// ****************************************************************************
+// * Partie boucle de calcul ]+0.0,+∞[ 
+// ****************************************************************************
+
+∀ cells @ 9.0 if (option_glace){ // 18%
+  const ℝ ρc = λ*ρ*c;
+  ∀ node{
+    AQs = CQs⊗CQs;
+    AQs *= ρc/absCQs;
+  }
+}
+
+∀ cells @ 10.0 { ∀ node reconstructed_p=p; }
+
+∀ cells @ 10.0 { ∀ node reconstructed_u=u; }
+
+∀ nodes @ 11.0{
+  node_u_matrix=ℝ³⨯ℝ³();
+//#warning 3D ℝ³(0,0,1));
+  //ℝ³(0,0,1));
+  node_u_second_member=0.0;//ℝ³(0,0,0);
+}
+
+∀ cells @ 12.0{ // 16%
+  ∀ node{
+    const ℝ³⨯ℝ³ local_matrix = AQs;
+    node_u_matrix += local_matrix;
+    node_u_second_member += local_matrix ⨂ reconstructed_u;
+    node_u_second_member += CQs*reconstructed_p;
+  }
+}
+
+void eieioNode_u_matrix_second_member(void)@ 13.4{
+  synchronize(node_u_matrix);
+  synchronize(node_u_second_member);
+}
+
+∀ nodes @ 14.0{ // 11%
+  const ℝ determinent = matrixDeterminant(node_u_matrix);
+  node_u_matrix = inverseMatrix(node_u_matrix, determinent);
+  node_u = node_u_matrix ⨂ node_u_second_member;
+//#warning 3D node_u.z=0.0;
+  //node_u.z=0.0;
+}
+  
+∀ cells @ 15.0{
+  momentum_fluxes_Σ=total_energy_fluxes_Σ=0.0;
+}
+∀ cells @ 16.0{ // 14%
+  ∀ node{
+    const ℝ³ Δu = reconstructed_u-node_u;
+    ℝ³ FQs = AQs ⨂ Δu;
+    FQs += reconstructed_p*CQs;
+    momentum_fluxes_Σ -= FQs;
+    total_energy_fluxes_Σ -= FQs⋅node_u;
+  }
+}
+
+∀ cells @ 19.0{
+  u += δt*momentum_fluxes_Σ/m;
+  ρΕ += δt*total_energy_fluxes_Σ/m;
+}
+
+∀ nodes @ 22.0 { coord += δt*node_u; }
+
+∀ cells @ 26.0 { ρ = m/V; }
+
+∀ cells @ -16.0,26.0 { ιΕ = ρΕ-½*u.abs2(); }
+
+∀ cells @ 27.0 { p=(γ-1.0)*ρ*ιΕ;}
+
+∀ cells @ 28.0{
+  ℝ³ centre; 
+  ∀ node centre+=coord;
+  centre/=nbNode;
+  // On regarde si le centre de la maille est à G ou D de la frontière
+  if ((option_test_sod && (centre.x < option_x_interface))
+      ||(!option_test_sod && (centre.abs() < option_x_interface))){
+    ZG=p;
+  }else{
+    ZD=p;
+  }
+}
+
+∀ cells @ -18.0,28.0 { c=√(γ*p/ρ); }
+
+// Calcul du δt par maille
+∀ cells @ 30.0{ // 8%
+  ℝ Σljr=0.0;
+  ∀ node Σljr+=absCQs;
+  glace_δt=2.0*λ*V/(c*Σljr);
+}
+
+// Réduction min vers le global_δt
+∀ cells global_δt <?= glace_δt @ 31.0;
+
+void hydroTimeStepCtrl(void) @ 35.0{
+  ℝ new_δt=option_δt_control*global_δt;
+  // on calcule les variations min et max autorisées
+  const ℝ max_time_step = (1.0+option_δt_max_variation)*δt;
+  const ℝ min_time_step = (1.0-option_δt_min_variation)*δt;
+  if (new_δt > max_time_step) new_δt=max_time_step;
+  if (new_δt < min_time_step) new_δt=min_time_step;
+  new_δt = min(new_δt, option_δt_max);
+  new_δt = max(new_δt, option_δt_min);
+  // le dernier calcul se fait exactement au temps final
+  if (option_δt_last_exact && ((time + new_δt) > option_δt_end)) 
+      new_δt = option_δt_end - time;
+  if ((time>=option_δt_end) || (new_δt==0.0)) exit;
+  δt=new_δt;
+  info()<<"[1;32m final δt="<<δt<<"[0m";
+  if (option_max_iterations!=0 && GlobalIteration >= option_max_iterations) exit;
+}

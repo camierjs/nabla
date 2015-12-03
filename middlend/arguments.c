@@ -50,7 +50,7 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
   int number_of_parameters_here=0;
   
   // Si on  a pas eu de parameter_type_list, on a rien à faire
-  if (n==NULL) return -1;
+  if (n==NULL) return 0;
   
   if ((n->token != NULL )&&(strncmp(n->token,"xyz",3)==0)){// hit 'xyz'
     //fprintf(file, "/*xyz hit!*/");
@@ -60,6 +60,8 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
     //fprintf(file, "/*void hit!*/");
     number_of_parameters_here-=1;
   }
+  ///////////////////////////////////////
+  // Le DUMP ne devrait pas se faire ici!
   if ((n->token != NULL )&&(strncmp(n->token,"void",4)!=0)){// avoid 'void'
     if (strncmp(n->token,"restrict",8)==0){
       fprintf(file, "__restrict__ ");
@@ -109,15 +111,34 @@ void nMiddleDfsForCalls(nablaMain *nabla,
   // Si le job is_an_entry_point, il sera placé avant le main
   // donc pas besoin de le déclarer
   if (job->is_an_entry_point) return;
+}
 
+
+// *****************************************************************************
+// * nMiddleFunctionDumpFwdDeclaration
+// *****************************************************************************
+void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
+                                       nablaJob *fct,
+                                       astNode *nParams,
+                                       const char *namespace){
   // Sinon, on remplit la ligne du hdr
   hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->call->entryPointPrefix(nabla,job),
-          job->return_type,
+          nabla->hook->call->entryPointPrefix(nabla,fct),
+          fct->return_type,
           namespace?"Entity::":"",
-          job->name);
+          fct->name);
   // On va chercher les paramètres standards pour le hdr
   nMiddleDumpParameterTypeList(nabla,nabla->entity->hdr, nParams);
+  
+  // Dunp des variables du job dans le header
+  nablaVariable *var=fct->used_variables;
+  for(int i=0;var!=NULL;var=var->next,i+=1)
+    hprintf(nabla, NULL, "%s%s %s* %s_%s",
+            (i==0)?"":",",
+            (var->in&&!var->out)?"const":"",
+            var->type,
+            var->item, var->name);
+  
   hprintf(nabla, NULL, ");");
 }
 
@@ -222,4 +243,50 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
   }
   if (n->children != NULL) nMiddleArgsDump(nabla, n->children, numParams);
   if (n->next != NULL) nMiddleArgsDump(nabla, n->next, numParams);
+}
+
+
+// ****************************************************************************
+// * Dump dans le src des arguments depuis le scan DFS
+// ****************************************************************************
+void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
+  int i=numParams;
+  // Dump des options du job
+  //nablaOption *opt=job->used_options;
+  //for(i=0;opt!=NULL;opt=opt->next,i+=1)
+  //  nprintf(nabla, NULL, "%sconst %s %s", (i==0)?"":",", opt->type,opt->name);
+
+  // Si i!=0, c'est qu'il y a eu une xyz direction
+  // Devrait disparaître à terme
+  if (i!=0){
+    nprintf(nabla, NULL, ", const int *cell_prev");
+    nprintf(nabla, NULL, ", const int *cell_next");
+  }
+  
+  // Dunp des variables du job
+  nablaVariable *var=job->used_variables;
+  for(;var!=NULL;var=var->next,i+=1)
+    nprintf(nabla, NULL, "%s%s %s* %s_%s",
+            (i==0)?"":",",
+            (var->in&&!var->out)?"const":"",
+            var->type,
+            var->item, var->name);
+}
+
+
+// ****************************************************************************
+// * nMiddleArgsDumpFromDFS
+// ****************************************************************************
+void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
+  int i=0;
+  // Dump des options du job
+  //nablaOption *opt=job->used_options;
+  //for(i=0;opt!=NULL;opt=opt->next,i+=1)
+  //  nprintf(nabla, NULL, "%s%s", (i==0)?"":",", opt->name);
+  
+  // Dunp des variables du job
+  nablaVariable *var=job->used_variables;
+  for(;var!=NULL;var=var->next,i+=1)
+    nprintf(nabla, NULL, "%s%s_%s",
+            (i==0)?"":",", var->item, var->name);
 }

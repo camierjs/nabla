@@ -51,8 +51,8 @@ char* lambdaHookGather(nablaJob*,nablaVariable*,enum_phase);
 char* lambdaHookScatter(nablaVariable*);
 
 char* lambdaHookSysPrefix(void);
-char* lambdaHookPrevCell(void);
-char* lambdaHookNextCell(void);
+char* lambdaHookPrevCell(int);
+char* lambdaHookNextCell(int);
 char* lambdaHookSysPostfix(void);
 
 char* lambdaHookIncludes(void);
@@ -146,6 +146,8 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void lambdaHookSystem(astNode*,nablaMain*,const char,char);
 void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
+void lambdaHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
+void lambdaHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
 void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 // Pour dumper les arguments necessaire dans le main

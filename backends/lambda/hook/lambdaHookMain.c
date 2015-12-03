@@ -245,9 +245,8 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     last_when=entry_points[i].whens[0];
     
     // Dump de la tabulation et du nom du point d'entrée
-    //nprintf(n, NULL, "\n%s/*@%f*/%s%s( // ",
     //#warning f or s?
-    nprintf(n, NULL, "\n%s/*@%f*/%s%s( // ",
+    nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
             is_into_compute_loop?"\t\t":"\t",
             entry_points[i].whens[0],
             n->call->parallel->spawn(),
@@ -261,7 +260,10 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
     
     // On s'autorise un endroit pour insérer des arguments
-    nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
+    nMiddleArgsDumpFromDFS(n,&entry_points[i]);
+    if (entry_points[i].used_options==NULL &&
+        entry_points[i].used_variables==NULL)
+      nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){

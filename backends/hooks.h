@@ -46,8 +46,8 @@
 // Structure des hooks utilisé pour la gestion des directions
 typedef struct hookXyzStruct{
   char* (*prefix)(void);
-  char* (*prevCell)(void);
-  char* (*nextCell)(void);
+  char* (*prevCell)(int);
+  char* (*nextCell)(int);
   char* (*postfix)(void);
 } hookXyz;
 

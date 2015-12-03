@@ -49,7 +49,7 @@ char *nOkinaMicBits(void){return "512";}
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nOkinaMicPrevCell(void){
+char* nOkinaMicPrevCell(int direction){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
@@ -64,7 +64,7 @@ char* nOkinaMicPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nOkinaMicNextCell(void){
+char* nOkinaMicNextCell(int direction){
   return "gatherk_and_zero_neg_ones(\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
 			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\

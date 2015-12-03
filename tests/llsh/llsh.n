@@ -1,0 +1,741 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// This NABLA port is an implementation of the benchmark LULESH:
+// the Livermore Unstructured Lagrangian Explicit Shock Hydrodynamics
+// (see https://computation.llnl.gov/casc/ShockHydro/ for details)
+
+with cartesian;
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ option_dtfixed            = -1.0e-7;  // fixed time increment
+  ℝ option_δt_initial         = 1.0e-7;   // variable time increment
+  ℝ option_δt_courant         = 1.0e+20;
+  ℝ option_δt_hydro           = 1.0e+20;
+  ℝ option_δt_mult_lower_b    = 1.1;
+  ℝ option_δt_mult_upper_b    = 1.2;
+  ℝ option_initial_energy     = 3.948746e+7;
+  ℝ option_stoptime           = 1.0e-2;   // end time for simulation
+  ℝ option_hgcoef             = 3.0;      // hourglass control
+  ℝ option_qstop              = 1.0e+12;  // excessive q indicator
+  ℝ option_monoq_max_slope    = 1.0;
+  ℝ option_monoq_limiter_mult = 2.0;
+  ℝ option_e_cut              = 1.0e-7;   // energy tolerance
+  ℝ option_p_cut              = 1.0e-7;   // pressure tolerance
+  ℝ option_q_cut              = 1.0e-7;   // q tolerance
+  ℝ option_u_cut              = 1.0e-7;   // node velocity cut-off value
+  ℝ option_v_cut              = 1.0e-10;  // relative volume tolerance
+  ℝ option_qlc_monoq          = 0.5;      // linear term coef for q
+  ℝ option_qqc_monoq          = 0.6666666666667;//666666; // quadratic term coef for q
+  ℝ option_qqc                = 2.0;
+  ℝ option_eosvmax            = 1.0e+9;
+  ℝ option_eosvmin            = 1.0e-9;
+  ℝ option_pmin               = 0.0;      // pressure floor
+  ℝ option_emin               = -1.0e+15; // energy floor
+  ℝ option_dvovmax            = 0.1;      // maximum allowable volume change
+  ℝ option_refdens            = 1.0;      // reference density
+  ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
+  ℾ option_chaos              = false;
+  ℝ option_chaos_seed         = 1.1234567890123;//456789;
+  ℕ option_max_iterations     = 32768;
+};
+
+
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+nodes{
+  ℝ³ 𝜕x,𝜕𝜕x;    // Velocity vector, Acceleration vector
+  ℝ³ nForce;   // Force vector
+  ℝ nodalMass; // Nodal mass
+};
+
+
+// ****************************************************************************
+// * Element Variables
+// ****************************************************************************
+cells{
+  ℝ p,e,q; // pressure,internal energy, artificial viscosity, relative volume
+  ℝ v,calc_volume,vdov; // instant and relative volume
+  ℝ delv,volo; // relative volume change, reference (initial) volume
+  ℝ arealg; // characteristic length
+  ℝ³ ε; // diagonal terms of deviatoric strain  dxx(),dyy(),dzz()
+  ℝ ql,qq; // artificial viscosity linear and quadratic term
+  ℝ³ cForce[nodes];
+  // Temporaries
+  ℝ delv_xi, delv_eta, delv_zeta; // velocity gradient
+  ℝ delx_xi, delx_eta, delx_zeta; // coordinate gradient
+  ℝ phixi, phieta, phizeta;
+  ℝ vnew; // new relative volume
+  ℝ elemMass; // mass
+  // EoS
+  ℝ e_old,p_old,q_old;
+  ℝ delvc;
+  ℝ compression;
+  ℝ compHalfStep;
+  ℝ work;
+  ℝ p_new,e_new,q_new;
+  ℝ bvc,pbvc;
+  ℝ vnewc;
+  ℝ pHalfStep;
+  ℝ sound_speed;
+  // Boundary Conditions Flags
+  ℕ elemBC; // symmetry/free-surface flags for each elem face
+  // Reductions
+  ℝ δt_cell_hydro;
+  ℝ δt_cell_courant;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δt_courant; // Courant time constraint
+  ℝ δt_hydro;   // Hydro time constraint
+};
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+void ini(void) @ -10.0{
+  δt=(option_chaos)?option_δt_initial*option_chaos_seed:0.0;
+  δt_hydro=option_δt_hydro;
+  δt_courant=option_δt_courant;
+}
+
+∀ nodes @ -12.0{
+  coord *= (option_chaos)?option_chaos_seed:1.0;
+}
+
+// ****************************************************************************
+// * Set up boundary condition information
+// * Set up elemement connectivity information
+// ****************************************************************************
+#define XI_M        0x003
+#define XI_M_SYMM   0x001
+#define XI_M_FREE   0x002
+#define XI_P        0x00C
+#define XI_P_SYMM   0x004
+#define XI_P_FREE   0x008
+#define ETA_M       0x030
+#define ETA_M_SYMM  0x010
+#define ETA_M_FREE  0x020
+#define ETA_P       0x0C0
+#define ETA_P_SYMM  0x040
+#define ETA_P_FREE  0x080
+#define ZETA_M      0x300
+#define ZETA_M_SYMM 0x100
+#define ZETA_M_FREE 0x200
+#define ZETA_P      0xC00
+#define ZETA_P_SYMM 0x400
+#define ZETA_P_FREE 0x800
+∀ cells @ -9.5{
+  const ℝ zero = 0.0;
+  const ℝ maxBoundaryX = X_EDGE_TICK*X_EDGE_ELEMS;
+  const ℝ maxBoundaryY = Y_EDGE_TICK*Y_EDGE_ELEMS;
+  const ℝ maxBoundaryZ = Z_EDGE_TICK*Z_EDGE_ELEMS;
+  elemBC=0;
+  ∀ node{
+    elemBC |= (coord.x==zero)?XI_M_SYMM;
+    elemBC |= (coord.y==zero)?ETA_M_SYMM;
+    elemBC |= (coord.z==zero)?ZETA_M_SYMM;
+    elemBC |= (coord.x==maxBoundaryX)?XI_P_FREE;
+    elemBC |= (coord.y==maxBoundaryY)?ETA_P_FREE;
+    elemBC |= (coord.z==maxBoundaryZ)?ZETA_P_FREE;
+  }
+}
+
+// ****************************************************************************
+// * Cells initialization
+// ****************************************************************************
+∀ cells @ -8.0{
+  ℝ³ X[8];
+  const ℝ chaos = (((ℝ)uid)+1.0)*option_chaos_seed;
+  v=1.0;
+  ∀ node X[n]=coord;
+  e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
+  sound_speed=p=q=(option_chaos)?chaos;
+  volo=elemMass=calc_volume=computeElemVolume(X);
+}
+
+∀ nodes @ -6.9{
+  nodalMass=0.0;
+  ∀ cell{
+    nodalMass+=calc_volume/8.0;
+  }
+}
+
+// ****************************************************************************
+// * Compute part @ ]+0,+∞[
+// ****************************************************************************
+
+// ****************************************************************************
+// * timeIncrement
+// * This routine computes the time increment δtn for the
+// * current timestep loop iteration. We aim for a "target" value of t_final-tn
+// * for δtn . However, the actual time increment is allowed to grow by a
+// * certain prescribed amount from the value used in the previous step and is
+// * subject to the constraints δt_Courant and δt_hydro described in Section 1.5.3.
+// ****************************************************************************
+void timeIncrement(void) @ 0.1 {
+  const ℝ target_δt = option_stoptime - time;
+  const ℝ max_δt = 1.0e+20;
+  const ℝ new_δt_courant = (δt_courant < max_δt)?½*δt_courant:max_δt;
+  const ℝ new_δt_courant_hydro = (δt_hydro < new_δt_courant)?δt_hydro*2.0/3.0:new_δt_courant;
+  const ℝ now_δt = new_δt_courant_hydro ;
+  const ℝ old_δt = (GlobalIteration==1)?option_δt_initial:δt;
+  const ℝ ratio = now_δt / old_δt ;
+  const ℝ up_new_δt = (ratio >= 1.0)?(ratio < option_δt_mult_lower_b)?old_δt:now_δt:now_δt;
+  const ℝ dw_new_δt = (ratio >= 1.0)?(ratio > option_δt_mult_upper_b)?old_δt*option_δt_mult_upper_b:up_new_δt:up_new_δt;
+  const ℝ new_δt = (dw_new_δt > option_dtmax)?option_dtmax:dw_new_δt;
+  const ℝ δτ = (option_dtfixed <= 0.0)?(GlobalIteration != 1)?new_δt:old_δt:old_δt;
+  const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
+  const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
+  δt = scaled_δt ;
+  if (GlobalIteration >= option_max_iterations) exit;
+}
+
+// ****************************************************************************
+// * Sum contributions to total stress tensor
+// * pull in the stresses appropriate to the hydro integration
+// * Initialize stress terms for each element. Recall that our assumption of
+// * an inviscid isotropic stress tensor implies that the three principal
+// * stress components are equal, and the shear stresses are zero.
+// * Thus, we initialize the diagonal terms of the stress tensor to
+// * -(p + q) in each element.
+// ****************************************************************************
+∀ cells @ 0.3 {
+  const ℝ chaos = (((ℝ)0.0)+1.0)*option_chaos_seed;
+  const ℝ sig = (option_chaos)?chaos:-p-q;
+  ℝ³ fNormals,dj,x[8],B[8];
+  ∀ node x[n] = coord;
+  ε = dj = -¼*((x[0]+x[1]+x[5]+x[4])-(x[3]+x[2]+x[6]+x[7]));
+  calcElemShapeFunctionDerivatives(x,B);
+  ∀ node B[n]=0.0;
+  Σ_FaceNormal(B,0,1,2,3,x);
+  Σ_FaceNormal(B,0,4,5,1,x);
+  Σ_FaceNormal(B,1,5,6,2,x);
+  Σ_FaceNormal(B,2,6,7,3,x);
+  Σ_FaceNormal(B,3,7,4,0,x);
+  Σ_FaceNormal(B,4,7,6,5,x);
+  ∀ node cForce = -sig*B[n];
+}
+
+∀ nodes @ 0.301 {
+  ℝ³ Σ=0.0;
+  ∀ cell
+    Σ+=cForce;
+  nForce=Σ;
+}
+
+// ****************************************************************************
+// * calcFBHourglassForceForElems
+// * Calculates the Flanagan-Belytschko anti-hourglass force
+// * calcFBHourglassForceForElems
+// ****************************************************************************
+∀ cells @ 1.3{
+  const ℝ γ[4][8]={{ 1., 1.,-1.,-1.,-1.,-1., 1., 1.},
+                      { 1.,-1.,-1., 1.,-1., 1., 1.,-1.},
+                      { 1.,-1., 1.,-1., 1.,-1., 1.,-1.},
+                      {-1., 1.,-1., 1., 1.,-1., 1.,-1.}};
+  ℝ η0[4],η1[4],η2[4],η3[4] ;
+  ℝ η4[4],η5[4],η6[4],η7[4];
+  ℝ³ x[8],xd[8],dvd[8],η[8];
+  const ℝ hourg=option_hgcoef;
+  const ℝ τv = volo*v;
+  const ℝ volume13=∛(τv);
+  const ℝ θ = -hourg*0.01*sound_speed*elemMass/volume13;
+  const ℝ determ = τv;
+  //const ℝ chaos = (((ℝ)uid)+1.0)*option_chaos_seed;
+  ∀ node x[n] = coord;
+  //∀ node xd[n] = (option_chaos)?chaos:𝜕x;  
+  ∀ node xd[n] = 𝜕x;  
+  dvd[0]=𝜕Volume(x[1],x[2],x[3],x[4],x[5],x[7]);
+  dvd[3]=𝜕Volume(x[0],x[1],x[2],x[7],x[4],x[6]);
+  dvd[2]=𝜕Volume(x[3],x[0],x[1],x[6],x[7],x[5]);
+  dvd[1]=𝜕Volume(x[2],x[3],x[0],x[5],x[6],x[4]);
+  dvd[4]=𝜕Volume(x[7],x[6],x[5],x[0],x[3],x[1]);
+  dvd[5]=𝜕Volume(x[4],x[7],x[6],x[1],x[0],x[2]);
+  dvd[6]=𝜕Volume(x[5],x[4],x[7],x[2],x[1],x[3]);
+  dvd[7]=𝜕Volume(x[6],x[5],x[4],x[3],x[2],x[0]);
+  cHourglassModes(0,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  cHourglassModes(1,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  cHourglassModes(2,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  cHourglassModes(3,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
+  calcElemFBHourglassForce(xd,η0,η1,η2,η3,η4,η5,η6,η7,θ,η);
+  ∀ node cForce = η[n];
+}
+
+∀ nodes @ 1.4 {
+  ℝ³ Σ=0.0;
+  ∀ cell Σ+=cForce;
+  nForce+=Σ;
+}
+
+// ****************************************************************************
+// * The routine CalcAccelerationForNodes() calculates a three-dimensional
+// * acceleration vector A at each mesh node from F.
+// * The acceleration is computed using Newton's Second Law of Motion,
+// * F = m0 A, where m0 is the mass at the node.
+// * Note that since the mass in each element is constant in time for our calculations,
+// * the mass at each node is also constant in time.
+// * The nodal mass values are set during the problem set up.
+// ****************************************************************************
+∀ nodes @ 2.8{
+  𝜕𝜕x = nForce/nodalMass;
+}
+
+// ****************************************************************************
+// * The routine ApplyAccelerationBoundaryConditions() applies symmetry boundary
+// * conditions at nodes on the boundaries of the mesh where these were specified
+// * during problem set up. A symmetry boundary condition sets the normal
+// * component of A at the boundary to zero.
+// * This implies that the normal component of the velocity vector U will
+// * remain constant in time.
+// ****************************************************************************
+∀ outer nodes @ 2.9 {
+  𝜕𝜕x.x=(coord.x==0.0)?0.0;
+  𝜕𝜕x.y=(coord.y==0.0)?0.0;
+  𝜕𝜕x.z=(coord.z==0.0)?0.0;
+}
+
+// ****************************************************************************
+// * The routine CalcVelocityForNodes() integrates the acceleration at each node
+// * to advance the velocity at the node to tn+1.
+// * Note that this routine also applies a cut-off to each velocity vector value.
+// * Specifically, if a value is below some prescribed value, that term is set to zero.
+// * The reason for this cutoff is to prevent spurious mesh motion which may arise
+// * due to floating point roundoff error when the velocity is near zero.
+// ****************************************************************************
+∀ nodes @ 3.0{
+  𝜕x += 𝜕𝜕x*δt ;
+  𝜕x.x = (norm(𝜕x.x)<option_u_cut)?0.0;
+  𝜕x.y = (norm(𝜕x.y)<option_u_cut)?0.0;
+  𝜕x.z = (norm(𝜕x.z)<option_u_cut)?0.0;
+}
+
+// ****************************************************************************
+// * The routine CalcPositionForNodes() performs the last step in the nodal
+// * advance portion of the algorithm by integrating the velocity at each node
+// * to advance the position of the node to tn+1.
+// ****************************************************************************
+∀ nodes @ 3.1{
+  coord += 𝜕x*δt;
+}
+
+// ****************************************************************************
+// * calcElemVolume
+// ****************************************************************************
+∀ cells @ 4.0{
+  const ℝ dt2= ½*δt;
+  const ℝ δ = 1.e-36;
+  ℝ³ B[8],X[8],Xd[8];
+  ℝ DetJ,volume,ρVolume;
+  ∀ node X[n]=coord;
+  ∀ node Xd[n]=𝜕x;
+  volume = calc_volume = computeElemVolume(X);  
+  vnew = ρVolume = volume/volo;
+  delv = ρVolume - v;
+  arealg = calcElemCharacteristicLength(X,volume);
+  const ℝ vol = volo*vnew;
+  const ℝ nrm = 1.0/(vol+δ);
+  const ℝ³ di =  ¼*((X[1]+X[2]+X[6]+X[5])-(X[0]+X[3]+X[7]+X[4]));
+  const ℝ³ dj = -¼*((X[0]+X[1]+X[5]+X[4])-(X[3]+X[2]+X[6]+X[7]));
+  const ℝ³ dk =  ¼*((X[4]+X[5]+X[6]+X[7])-(X[0]+X[1]+X[2]+X[3]));
+  const ℝ³ a_xi = (dj⨯dk);
+  const ℝ³ a_eta = (dk⨯di);
+  const ℝ³ a_zeta = (di⨯dj);
+  const ℝ³ dv_xi  =  ¼*((Xd[1]+Xd[2]+Xd[6]+Xd[5])-(Xd[0]+Xd[3]+Xd[7]+Xd[4]));
+  const ℝ³ dv_eta = -¼*((Xd[0]+Xd[1]+Xd[5]+Xd[4])-(Xd[3]+Xd[2]+Xd[6]+Xd[7]));
+  const ℝ³ dv_zeta = ¼*((Xd[4]+Xd[5]+Xd[6]+Xd[7])-(Xd[0]+Xd[1]+Xd[2]+Xd[3]));
+  delx_xi = vol/√(a_xi⋅a_xi+δ);
+  delx_eta = vol/√(a_eta⋅a_eta+δ);
+  delx_zeta = vol/√(a_zeta⋅a_zeta+δ);
+  delv_zeta = (a_zeta*nrm)⋅dv_zeta;     
+  delv_xi = (a_xi*nrm)⋅dv_xi;
+  delv_eta = (a_eta*nrm)⋅dv_eta;
+  ∀ node X[n] -= dt2*Xd[n];
+  DetJ=calcElemShapeFunctionDerivatives(X,B);
+  ε=calcElemVelocityGradient(Xd,B,DetJ);
+  vdov = ε.x+ε.y+ε.z;
+  ε -= ⅓*vdov;
+}
+
+// ****************************************************************************
+// * This routine performs the second part of the q calculation.
+// ****************************************************************************
+∀ cells @ 4.7{
+  const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
+  const ℝ monoq_max_slope = option_monoq_max_slope;
+  ℤ bcSwitch;
+  ℝ delvm=0.0;
+  ℝ delvp=0.0;
+  const ℝ ptiny = 1.e-36;
+  const ℝ nrm = 1./(delv_xi+ptiny);
+  bcSwitch = elemBC & XI_M;
+  delvm = (bcSwitch == 0)?delv_xi[prevCellX];
+  delvm = (bcSwitch == XI_M_SYMM)?delv_xi;
+  delvm = (bcSwitch == XI_M_FREE)?0.0;
+  delvm = delvm * nrm ;
+  bcSwitch = elemBC & XI_P;
+  delvp = (bcSwitch == 0)?delv_xi[nextCellX];
+  delvp = (bcSwitch == XI_P_SYMM)?delv_xi;
+  delvp = (bcSwitch == XI_P_FREE)?0.0;
+  delvp = delvp * nrm ;
+  phixi = ½ * (delvm + delvp) ;
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  phixi = (delvm < phixi)?delvm;
+  phixi = (delvp < phixi)?delvp;
+  phixi = (phixi < 0.)?0.0;
+  phixi = (phixi > monoq_max_slope)?monoq_max_slope;
+}
+
+∀ cells @ 4.7 {
+  const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
+  const ℝ monoq_max_slope = option_monoq_max_slope;
+  ℤ register bcSwitch;
+  ℝ register delvm=0.;
+  ℝ register delvp=0.;
+  const ℝ ptiny = 1.e-36;
+  const ℝ nrm = 1./(delv_eta+ptiny);
+  bcSwitch = elemBC & ETA_M;
+  delvm = (bcSwitch == 0)?delv_eta[prevCellY];
+  delvm = (bcSwitch == ETA_M_SYMM)?delv_eta;
+  delvm = (bcSwitch == ETA_M_FREE)?0.0;
+  delvm = delvm * nrm ;
+  bcSwitch = elemBC & ETA_P;
+  delvp = (bcSwitch == 0)?delv_eta[nextCellY];
+  delvp = (bcSwitch == ETA_P_SYMM)?delv_eta;
+  delvp = (bcSwitch == ETA_P_FREE)?0.0;
+  delvp = delvp * nrm ;
+  phieta = ½*(delvm + delvp) ;
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  phieta = (delvm  < phieta)?delvm;
+  phieta = (delvp  < phieta)?delvp;
+  phieta = (phieta < 0.0)?0.0;
+  phieta = (phieta > monoq_max_slope)?monoq_max_slope;
+}
+
+∀ cells @ 4.7 {
+  const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
+  const ℝ monoq_max_slope = option_monoq_max_slope;
+  ℤ bcSwitch;
+  ℝ delvm=0.;
+  ℝ delvp=0.;
+  const ℝ ptiny = 1.e-36;
+  const ℝ nrm = 1./(delv_zeta+ptiny) ;
+  bcSwitch = elemBC & ZETA_M;
+  delvm = (bcSwitch == 0)?delv_zeta[prevCellZ];
+  delvm = (bcSwitch == ZETA_M_SYMM)?delv_zeta;
+  delvm = (bcSwitch == ZETA_M_FREE)?0.0;
+  delvm = delvm * nrm ;
+  bcSwitch = elemBC & ZETA_P;
+  delvp = (bcSwitch == 0)?delv_zeta[nextCellZ];
+  delvp = (bcSwitch == ZETA_P_SYMM)?delv_zeta;
+  delvp = (bcSwitch == ZETA_P_FREE)?0.0;
+  delvp = delvp * nrm ;
+  phizeta = ½*(delvm+delvp);
+  delvm *= monoq_limiter_mult ;
+  delvp *= monoq_limiter_mult ;
+  phizeta = (delvm < phizeta )?delvm;
+  phizeta = (delvp < phizeta )?delvp;
+  phizeta = (phizeta < 0.0)?0.0;
+  phizeta = (phizeta > monoq_max_slope )?monoq_max_slope;
+}
+
+
+∀ cells @ 4.72{
+  const ℝ rho = elemMass/(volo*vnew);
+  const ℝ qlc_monoq = option_qlc_monoq;
+  const ℝ qqc_monoq = option_qqc_monoq;
+  const ℝ delvxxi   = delv_xi*delx_xi;
+  const ℝ delvxeta  = delv_eta*delx_eta;
+  const ℝ delvxzeta = delv_zeta*delx_zeta;
+  const ℝ delvxxit  = (delvxxi>0.0)?0.0:delvxxi;
+  const ℝ delvxetat = (delvxeta>0.0)?0.0:delvxeta;
+  const ℝ delvxzetat= (delvxzeta>0.0)?0.0:delvxzeta;
+  const ℝ qlin = -qlc_monoq*rho*(delvxxit*(1.0-phixi)+
+                                    delvxetat*(1.0-phieta)+
+                                    delvxzetat*(1.0-phizeta));
+  const ℝ qquad = qqc_monoq*rho*(delvxxit*delvxxit*(1.0-phixi*phixi) +
+                                    delvxetat*delvxetat*(1.0-phieta*phieta) +
+                                    delvxzetat*delvxzetat*(1.0-phizeta*phizeta));
+  const ℝ qlint  = (vdov>0.0)?0.0:qlin; 
+  const ℝ qquadt = (vdov>0.0)?0.0:qquad;
+  qq = qquadt;
+  ql = qlint;
+}
+
+// ****************************************************************************
+// * The routine ApplyMaterialPropertiesForElems() updates the pressure and
+// * internal energy variables to their values at the new time, p_n+1 and e_n+1.
+// * The routine first initializes a temporary array with the values of Vn+1 for
+// * each element that was computed earlier. Then, upper and lower cut-off
+// * values are applied to each array value to keep the relative volumes
+// * within a prescribed range (not too close to zero and not too large).
+// * Next, the routine EvalEOSForElems() is called and the array of modified
+// * relative element volumes is passed to it.
+// ****************************************************************************
+∀ cells @ 5.0{
+  vnewc = vnew ;
+  vnewc = (vnewc < option_eosvmin)?option_eosvmin;
+  vnewc = (vnewc > option_eosvmax)?option_eosvmax;
+}
+
+
+// ****************************************************************************
+// * The routine EvalEOSForElems() calculates updated values for pressure p_n+1
+// * and internal energy e_n+1.
+// * The computation involves several loops over elements to pack various mesh
+// * element arrays (e.g., p, e, q, etc.) into local temporary arrays.
+// * Several other quantities are computed and stored in element length
+// * temporary arrays also.
+// * The temporary arrays are needed because the routine CalcEnergyForElems()
+// * calculates p_n+1 and e_n+1 in each element in an iterative process that
+// * requires knowledge of those variables at time tn while it computes the
+// * new time values.
+// ****************************************************************************
+∀ cells @ 6.0{
+  const ℝ vchalf = vnewc - ( ½*delv);
+  work = 0.0; 
+  e_old = e;
+  delvc = delv;
+  p_old = p;
+  q_old = q ;
+  compression = (1.0/vnewc) - 1.0;
+  compHalfStep = (1.0/vchalf)-1.0;
+}
+
+∀ cells @ 6.1 {
+  compHalfStep = (vnewc <= option_eosvmin)?compression;
+}
+
+∀ cells @ 6.6 {
+  p_old = (vnewc < option_eosvmax)?p_old:0.0;
+  compression =(vnewc < option_eosvmax)?compression:0.0;
+  compHalfStep = (vnewc < option_eosvmax)?compHalfStep:0.0;
+}
+
+// ****************************************************************************
+// * The routine CalcEnergyForElems() calls CalcPressureForElems() repeatedly.
+// * The function CalcPressureForElems() is the Equation of State model
+// * for a "gamma law" gas.
+// * The value c1s passed to the routine is defined to be γ - 1.
+// * The Equation of State calculation is a core part of any hydrocode.
+// * In a production code, one of any number of Equation of State functions
+// * may be called to generate a pressure that is needed to close the system
+// * of equations and generate a unique solution.
+// ****************************************************************************
+// @ 7.1   calcEnergyForElems1
+∀ cells @ 7.1{
+  e_new = e_old - ½*delvc*(p_old + q_old) + ½*work;
+  e_new = (e_new < option_emin)?option_emin;
+}
+
+// ****************************************************************************
+// * calcPressureForElems
+// * p_new => pHalfStep
+// * compression => compHalfStep
+// * e_old => e_new
+// ****************************************************************************
+∀ cells @ 7.2{
+  const ℝ c1s = 2.0/3.0;
+  bvc = c1s*(compHalfStep+1.0);
+  pbvc = c1s;
+  pHalfStep = bvc*e_new ;
+  pHalfStep=(rabs(pHalfStep)<option_p_cut)?0.0;
+  pHalfStep = (vnewc >= option_eosvmax )?0.0;
+  pHalfStep = (pHalfStep < option_pmin)?option_pmin;
+}
+
+inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
+                           const ℝ b, const ℝ pressure, const ℝ rho,
+                           const ℝ _ql, const ℝ _qq){
+  const ℝ pe = c*energy;
+  const ℝ vvbp=volume*volume*b*pressure;
+  const ℝ ssc = (pe + vvbp)/rho;
+  const ℝ ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  const ℝ sscq = ssct*_ql;
+  const ℝ sscqt = sscq+_qq;
+  return sscqt;
+}
+
+inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
+                           const ℝ b, const ℝ pressure, const ℝ rho){
+  const ℝ pe = c*energy;
+  const ℝ vvbp=volume*volume*b*pressure;
+  const ℝ ssc = (pe + vvbp)/rho;
+  const ℝ ssct = (ssc <= 0.111111e-36)?0.333333e-18:√(ssc);
+  return ssct;
+}
+
+∀ cells @ 7.3 {
+  const ℝ vhalf = 1.0/(1.0+compHalfStep);
+  const ℝ ssc = computeSoundSpeed(pbvc,e_new,vhalf,bvc,pHalfStep,option_refdens,ql,qq);
+  q_new = (delvc>0.0)?0.0:ssc;
+  e_new = e_new + ½*delvc*(3.0*(p_old+q_old)-4.0*(pHalfStep+q_new));
+}
+
+∀ cells @ 7.4{
+  e_new += ½*work;
+  e_new = (rabs(e_new) < option_e_cut)?0.0;
+  e_new = (e_new<option_emin)?option_emin;
+}
+
+∀ cells @ 7.5,7.7{
+  const ℝ c1s = 2.0/3.0;
+  bvc = c1s*(compression + 1.0);
+  pbvc = c1s;
+  p_new = bvc*e_new ;
+  p_new = (rabs(p_new) < option_p_cut)?0.0;
+  p_new = (vnewc >= option_eosvmax )?0.0;
+  p_new = (p_new < option_pmin)?option_pmin;
+}
+
+∀ cells @ 7.6{
+  const ℝ sixth = 1.0/6.0;
+  const ℝ ssc = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens,ql,qq);
+  const ℝ q_tilde = (delvc > 0.)?0.0:ssc;
+  e_new = e_new - (7.0*(p_old + q_old)
+                   - (8.0)*(pHalfStep + q_new)
+                   + (p_new + q_tilde)) * delvc*sixth;
+  e_new = (rabs(e_new) < option_e_cut)?0.0;
+  e_new = (e_new < option_emin)?option_emin;
+}
+
+∀ cells @ 7.8{
+  const ℝ qnw = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens,ql,qq);
+  const ℝ qnwt = (rabs(qnw) < option_q_cut)?0.0:qnw;
+  q_new = (delvc <= 0.)?qnwt;
+}
+
+∀ cells @ 8.0{
+  p = p_new;
+  e = e_new;
+  q = q_new;
+}
+
+// ****************************************************************************
+// * Lastly, the routine CalcSoundSpeedForElems() calculates the sound speed
+// * sound_speed in each element using p_n+1 and e_n+1.
+// * The maximum value of sound_speed is used to calculate constraints on t_n+1
+// * which will be used for the next time advance step.
+// ****************************************************************************
+∀ cells @ 9.0{
+  const ℝ ssTmpt = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens);
+  sound_speed = ssTmpt;
+}
+
+// ****************************************************************************
+// * The routine UpdateVolumesForElems() updates the relative volume to V_n+1.
+// * This routine basically resets the current volume V_n in each element to
+// * the new volume V_n+1 so the simulation can continue to the next time
+// * increment.
+// * Note that this routine applies a cut-off to the relative volume V in
+// * each element. Specifically, if V is sufficiently close to one (a
+// * prescribed tolerance), then V is set to one.
+// * The reason for this cutoff is to prevent spurious deviations of volume
+// * from their initial values which may arise due to floating point roundoff
+// * error.
+// ****************************************************************************
+∀ cells @ 10.0{
+  const ℝ ν = vnew;
+  const ℝ νt = (rabs(ν-1.0)<option_v_cut)?1.0:ν;
+  v = νt;
+}
+
+// ****************************************************************************
+// * The routine CalcCourantConstraintForElems() calculates the Courant timestep
+// * constraint δt_Courant. This constraint is calculated only in elements
+// * whose volumes are changing that is, dV/V!=0.
+// * If all element volumes remain the same, there is no Courant constraint
+// * applied during the subsequent δt calculation.
+// ****************************************************************************
+∀ cells @ 12.1{
+  const ℝ arg_max_courant=1.0e+20;
+  δt_cell_courant=arg_max_courant;
+  const ℝ qqc2 = 64.0 * option_qqc * option_qqc ;
+  const ℝ δf = sound_speed[m] * sound_speed[m];
+  const ℝ δft=(vdov[m]<0.0)?qqc2*arealg[m]*arealg[m]*vdov[m]*vdov[m]:0.0;
+  const ℝ δfpp = δf+δft;
+  const ℝ δfp = √(δfpp);
+  const ℝ aδfp = arealg[m]/δfp;
+  δt_cell_courant=(vdov!=0.0)?min(arg_max_courant,aδfp);
+} 
+
+// ****************************************************************************
+// * The routine CalcHydroConstraintForElems() calculates the hydro timestep
+// * constraint. Similar to δt_Courant, δt_hydro is calculated only in elements
+// * whose volumes are changing. When an element is undergoing volume change,
+// * δt_hydro for the element is some maximum allowable element volume change
+// * (prescribed) divided by dV/V in the element.
+// ****************************************************************************
+∀ cells @ 12.2{
+  const ℝ arg_max_hydro=1.0e+20;
+  δt_cell_hydro=arg_max_hydro;
+  const ℝ δdv = rabs(vdov[m]);
+  const ℝ δdve = δdv+1.e-20;
+  const ℝ δdvov = option_dvovmax/δdve;
+  const ℝ δhdr = min(arg_max_hydro,δdvov);
+  δt_cell_hydro=(vdov!=0.0)?δhdr;
+}
+
+// ****************************************************************************
+// * After all solution variables are advanced to t_n+1, the constraints δtCourant
+// * and δthydro for the next time increment t_n+1 are calculated in this routine.
+// * Each constraint is computed in each element and then the final constraint value
+// * is the minimum over all element values.
+// * The constraints are applied during the computation of δt for the next time step.
+// ****************************************************************************
+
+// Cells min reduction
+∀ cells δt_courant <?= δt_cell_courant @ 12.11;
+∀ cells δt_hydro   <?= δt_cell_hydro   @ 12.22;

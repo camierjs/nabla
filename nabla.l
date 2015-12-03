@@ -169,6 +169,12 @@ __asm__           { return tok(&yylval, ASM);}
 "xyz"             { return tok(&yylval, XYZ);}
 "nextCell"        { return tok(&yylval, NEXTCELL);}
 "prevCell"        { return tok(&yylval, PREVCELL);}
+"nextCellX"        { return tok(&yylval, NEXTCELL_X);}
+"nextCellY"        { return tok(&yylval, NEXTCELL_Y);}
+"nextCellZ"        { return tok(&yylval, NEXTCELL_Z);}
+"prevCellX"        { return tok(&yylval, PREVCELL_X);}
+"prevCellY"        { return tok(&yylval, PREVCELL_Y);}
+"prevCellZ"        { return tok(&yylval, PREVCELL_Z);}
 "nextNode"        { return tok(&yylval, NEXTNODE);}
 "prevNode"        { return tok(&yylval, PREVNODE);}
 "previousLeft"    { return tok(&yylval, PREVLEFT);}

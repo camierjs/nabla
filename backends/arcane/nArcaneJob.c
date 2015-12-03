@@ -607,8 +607,8 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 /***************************************************************************** 
  * nccArcaneJob
  *****************************************************************************/
-void arcaneJob(nablaMain *arc, astNode *n){
-  nablaJob *job = nMiddleJobNew(arc->entity);
-  nMiddleJobAdd(arc->entity, job);
-  nMiddleJobFill(arc,job,n,arc->name);
+void arcaneJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,nabla->name);
 }

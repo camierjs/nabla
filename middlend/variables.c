@@ -149,16 +149,59 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
                                          char **postfix){
   switch(tokenid){
   case(NEXTCELL):{
-    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL");
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL UNKNOWN");
     *prefix=nabla->hook->xyz->prefix();
-    *system=nabla->hook->xyz->nextCell();
+    *system=nabla->hook->xyz->nextCell(DIR_UNKNOWN);
     *postfix=nabla->hook->xyz->postfix();
     return;
   }
-  case(PREVCELL):{
-    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL");
+  case(NEXTCELL_X):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL X");
     *prefix=nabla->hook->xyz->prefix();
-    *system=nabla->hook->xyz->prevCell();
+    *system=nabla->hook->xyz->nextCell(DIR_X);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(NEXTCELL_Y):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL Y");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->nextCell(DIR_Y);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(NEXTCELL_Z):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL Z");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->nextCell(DIR_Z);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+    
+  case(PREVCELL):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL UNKNOWN");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->prevCell(DIR_UNKNOWN);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(PREVCELL_X):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL X");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->prevCell(DIR_X);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(PREVCELL_Y):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL Y");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->prevCell(DIR_Y);
+    *postfix=nabla->hook->xyz->postfix();
+    return;
+  }
+  case(PREVCELL_Z):{
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL Z");
+    *prefix=nabla->hook->xyz->prefix();
+    *system=nabla->hook->xyz->prevCell(DIR_Z);
     *postfix=nabla->hook->xyz->postfix();
     return;
   }
@@ -355,7 +398,6 @@ static char* inout(const nablaVariable *var){
 void dfsVariablesDump(nablaMain *nabla, nablaJob *job, astNode *n){
   nablaVariable *var=job->used_variables;
   dbg("\n\t[dfsVariablesDump]:");
-  //assert(var);
   for(;var!=NULL;var=var->next){
     dbg("\n\t\t[dfsVariablesDump] Variable '%s' is used (%s) in this job!",var->name,inout(var));
   }

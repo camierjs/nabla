@@ -72,7 +72,7 @@ char* nccArcSystemPostfix(void){ return ""; }
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nccArcPrevCell(void){
+char* nccArcPrevCell(int direction){
   return "";//prevCell";
 }
 
@@ -80,7 +80,7 @@ char* nccArcPrevCell(void){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nccArcNextCell(void){
+char* nccArcNextCell(int direction){
   return "";//nextCell";
 }
 
