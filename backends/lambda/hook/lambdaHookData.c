@@ -52,7 +52,7 @@ void lambdaHookTurnBracketsToParentheses(nablaMain* nabla,
                                          nablaJob *job,
                                          nablaVariable *var,
                                          char cnfg){
-  dbg("\n\t[actJobItemParse] primaryExpression hits variable");
+  dbg("\n\t[lambdaHookTurnBracketsToParentheses] primaryExpression hits variable");
   if (  (cnfg=='c' && var->item[0]=='n')
       ||(cnfg=='c' && var->item[0]=='f')
       ||(cnfg=='n' && var->item[0]!='n')            

@@ -264,9 +264,10 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
-  //if (n->token) dbg("\n\n\t[nablaJobParse] token: '%s'?", n->token);
+  if (n->token) dbg("\n\t\t\t[nablaJobParse] token '%s'?", n->token);
 
-  if (job->parse.got_a_return && job->parse.got_a_return_and_the_semi_colon) return;
+  if (job->parse.got_a_return &&
+      job->parse.got_a_return_and_the_semi_colon) return;
    
   // On regarde si on a un appel de fonction avec l'argument_expression_list
   if ((n->ruleid == rulenameToId("argument_expression_list"))
@@ -373,7 +374,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if (n->ruleid == rulenameToId("is_test")) nabla->hook->token->isTest(nabla,job,n,IS);
 
   // On fait le switch du token
-  //dbg("\n\t[nablaJobParse] On fait le switch du token!");
+  //dbg("\n\t\t\t[nablaJobParse] On fait le switch du token!");
   nabla->hook->token->svvitch(n, job);
   //dbg("\n\t[nablaJobParse] done!");
 
@@ -412,28 +413,21 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // Nom du job:
   // On va chercher le premier identifiant qui est le nom du job *ou pas*
+  dbg("\n\n\t// **********************************************************************");
   if (!job->return_type){ // Pas de 'void', pas de nom, on en créé un
     const char* kName=mkktemp("kernel");
     job->has_to_be_unlinked=true;
-    dbg("\n\n\t////////////////////////////////////////////////////////");
-    dbg("\n\t[nMiddleJobFill] kName is '%s'", kName);
-   //char name[16]="nablaKernelABCD";
-    //name[11]='A'+rand()%25;
-    //name[12]='A'+rand()%25;
-    //name[13]='A'+rand()%25;
-    //name[14]='A'+rand()%25;
-    dbg("\n\t[nablaJobFill] !job->return_type");
     job->name=strdup(kName);
     job->name_utf8=strdup(kName);
     job->return_type=strdup("void");
   }else{
-    dbg("\n\t[nablaJobFill] IS job->return_type");
     nd=dfsFetchTokenId(n->children,IDENTIFIER);
     assert(nd);
     job->name=strdup(nd->token);
     job->name_utf8 = strdup(nd->token_utf8);
   }
-  dbg("\n\t[nablaJobFill] named '%s'", job->name);
+  dbg("\n\t// * [nablaJobFill] Kernel named '%s'", job->name);
+  dbg("\n\t// **********************************************************************");
   
   // Scan DFS pour récuérer les in/inout/out
   // Et on dump dans le log les tokens de ce job
@@ -556,7 +550,7 @@ void nMiddleJobFill(nablaMain *nabla,
   nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
-  dbg("\n\t[nablaJobFill] Now parsing...");
+  dbg("\n\t[nablaJobFill] NOW PARSING...");
   nMiddleJobParse(n,job);
 
   if (!job->parse.got_a_return)

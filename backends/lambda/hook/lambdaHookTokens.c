@@ -93,19 +93,24 @@ void lambdaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt)
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
+static bool lambdaHookSwitchForall(astNode *n, nablaJob *job){
   const char cnfg=job->item[0];
 
 // Preliminary pertinence test
-  if (n->tokenid != FORALL) return;
+  if (n->tokenid != FORALL) return false;
+  
+  if (n->token) dbg("\n\t\t\t\t\t[lambdaHookSwitchForall]");
+  
   // Now we're allowed to work
   switch(n->next->children->tokenid){
   case(CELL):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchForall] CELL");
     job->parse.enum_enum='c';
     nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_CELL(c)");
     break;
   }
   case(NODE):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchForall] NODE");
     job->parse.enum_enum='n';
     if ((job->entity->libraries&(1<<with_real))!=0) // Iteration 1D
       nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
@@ -117,6 +122,7 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
     break;
   }
   case(FACE):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchForall] FACE");
     job->parse.enum_enum='f';
     if (job->item[0]=='c')
       nprintf(job->entity->main, "/*chsf fc*/", "for(int f=0;f<4;++f)");
@@ -124,12 +130,17 @@ static void lambdaHookSwitchForall(astNode *n, nablaJob *job){
       nprintf(job->entity->main, "/*chsf fn*/", "for(nFACE)");
     break;
   }
+  default: dbg("\n\t\t\t\t\t[lambdaHookSwitchForall] UNKNOWN!");
   }
   // Attention au cas où on a un @ au lieu d'un statement
-  if (n->next->next->tokenid == AT)
+  if (n->next->next->tokenid == AT){
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchForall] @ au lieu d'un statement!");
     nprintf(job->entity->main, "/* Found AT */", NULL);
+  }
   // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
+  #warning SKIP du nabla_item qui nous a renseigné sur le type de forall
   *n=*n->next->next;
+  return true;
 }
 
 
@@ -140,25 +151,30 @@ static bool lambdaHookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
   //nprintf(nabla, "/*lambdaHookSwitchAleph*/","/*lambdaHookSwitchAleph*/");
-
+  if (n->token) dbg("\n\t\t\t\t\t[lambdaHookSwitchAleph] token: '%s'?", n->token);
+  
   switch(n->tokenid){
   case(LIB_ALEPH):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchAleph] LIB_ALEPH");
     nprintf(nabla, "/*LIB_ALEPH*/","/*LIB_ALEPH*/");
     return true;
   }
   case(ALEPH_RHS):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchAleph] ALEPH_RHS");
     nprintf(nabla, "/*ALEPH_RHS*/","rhs");
     // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
     job->parse.alephKeepExpression=true;
     return true;
   }
   case(ALEPH_LHS):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchAleph] ALEPH_LHS");
     nprintf(nabla, "/*ALEPH_LHS*/","lhs");
     // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
     job->parse.alephKeepExpression=true;
     return true;
   }
   case(ALEPH_MTX):{
+    dbg("\n\t\t\t\t\t[lambdaHookSwitchAleph] ALEPH_MTX");
     nprintf(nabla, "/*ALEPH_MTX*/","mtx");
     job->parse.alephKeepExpression=true;
     return true;
@@ -212,12 +228,13 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   const char forall=job->parse.enum_enum;
 
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
-  //if (n->token) dbg("\n\t[lambdaHookSwitchToken] token: '%s'?", n->token);
+  if (n->token) dbg("\n\t\t\t\t[lambdaHookSwitchToken] token: '%s'?", n->token);
  
   // On tests si c'est un token Aleph
   // Si c'est le cas, on a fini
   if (lambdaHookSwitchAleph(n,job)) return;
   
+  //if (lambdaHookSwitchForall(n,job)) return;
   lambdaHookSwitchForall(n,job);
   
   switch(n->tokenid){
@@ -340,12 +357,15 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(FORALL_INI):{
+    dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*lambdaFilterGather*/", "%s",lambdaHookFilterGather(n,job,GATHER_SCATTER_CALL));
+    nprintf(nabla, "/*lambdaFilterGather*/", "%s",
+            lambdaHookFilterGather(n,job,GATHER_SCATTER_CALL));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*lambdaFilterScatter*/", lambdaHookFilterScatter(job));
+     dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_END");
+   nprintf(nabla, "/*lambdaFilterScatter*/", lambdaHookFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

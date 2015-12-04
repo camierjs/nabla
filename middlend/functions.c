@@ -346,7 +346,16 @@ void nMiddleFunctionFill(nablaMain *nabla,
   astNode *nParams;
   fct->jobNode=n;
   fct->called_variables=NULL;
-  dbg("\n\n\t[nablaFctFill] ");
+  nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
+  assert(nFctName->children->tokenid==IDENTIFIER);
+  dbg("\n\n\t// **********************************************************************");
+  dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
+  dbg("\n\t// **********************************************************************");
+  fct->name=strdup(nFctName->children->token);
+  dbg("\n\t[nablaFctFill] Coté UTF-8, on a: '%s'", nFctName->children->token_utf8);
+  fct->name_utf8=strdup(nFctName->children->token_utf8);
+
+  //dbg("\n\n\t[nablaFctFill] ");
   fct->is_a_function=true;
   assert(fct != NULL);
   if (fct->xyz!=NULL)
@@ -363,12 +372,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
   fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");
-  nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
-  assert(nFctName->children->tokenid==IDENTIFIER);
-  dbg("\n\t[nablaFctFill] Qui est: '%s'", nFctName->children->token);
-  fct->name=strdup(nFctName->children->token);
-  dbg("\n\t[nablaFctFill] Coté UTF-8, on a: '%s'", nFctName->children->token_utf8);
-  fct->name_utf8=strdup(nFctName->children->token_utf8);
+  
   //dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
  
   // Scan DFS pour récuérer les in/inout/out

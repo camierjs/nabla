@@ -121,7 +121,7 @@ void rhsInit(void) @ 1.0{
 
 ∀ nodes void setRhsNodeValues(void) in (/*cell Ω,*/node Φω) @ 1.2{
   const ℝ value = δt*Φω;
-  info()<<"[setRhsNodeValues] n="<<n;
+  //info()<<"[setRhsNodeValues] n="<<n;
   ∀ cell{
     if (cell(#)<0) continue; // C'est qu'on accède à une maille inexistante
     info()<<"\t[setRhsNodeValues] c="<<c<<", node_cell="<< cell(#);//node_cell[nc];

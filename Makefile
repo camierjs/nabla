@@ -107,6 +107,8 @@ tstlhg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_gen_1_seq)
 tstlhr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_run_1_seq)
+tstlag:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_gen_1_seq)
 tstlar:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
 tstlbr:

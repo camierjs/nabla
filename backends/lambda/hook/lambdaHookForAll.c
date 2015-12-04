@@ -141,18 +141,15 @@ char* lambdaHookForAllDump(nablaJob *job){
   const char *forall=strdup(lambdaHookSelectEnumerate(job));
   char format[NABLA_MAX_FILE_NAME];
   char str[NABLA_MAX_FILE_NAME];
-  dbg("\n\t[lambdaHookDumpEnumerate] Preparing:");
-  dbg("\n\t[lambdaHookDumpEnumerate]\t\tforall=%s",forall);
-  //dbg("\n\t[lambdaHookDumpEnumerate]\t\twarping=%s",warping);
+  //dbg("\n\t[lambdaHookDumpEnumerate] forall='%s'",forall);
 
   // On prépare le format grace à la partie du forall,
   // on rajoute l'extension suivant si on a une returnVariable
   if (job->parse.returnFromArgument){
     const char *ompLambdaLocal=job->parse.returnFromArgument?"_SHARED":"";
-    //const char *ompLambdaReturnVariable=lambdaReturnVariableNameForOpenMP(job);
-    const char *ompLambdaReturnVariableWitoutPerThread=lambdaHookReturnVariableNameForOpenMPWitoutPerThread(job);
-    //const char *ompLambdaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
-    //const char *ompLambdaLocalVariableName=job->parse.returnFromArgument?ompLambdaReturnVariable:"";
+    const char *ompLambdaReturnVariableWitoutPerThread=
+      lambdaHookReturnVariableNameForOpenMPWitoutPerThread(job);
+
     if (sprintf(format,"%s,%%s)",forall)<=0)
       nablaError("Could not patch format!");
     if (sprintf(str,format,    // FOR_EACH_XXX%s(
@@ -165,7 +162,7 @@ char* lambdaHookForAllDump(nablaJob *job){
                 forall,
                 job->is_a_function?"":")")<=0)
       nablaError("Could not patch format!");
-    dbg("\n[lambdaHookDumpEnumerate] format=%s",format);
+    //dbg("\n\t[lambdaHookDumpEnumerate] format='%s'",format);
     if (sprintf(str,format,
                 "", // warping
                 "",
