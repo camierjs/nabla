@@ -188,7 +188,8 @@ const static hookGrammar cuHookGrammar={
   cuHookJob,
   cuHookReduction,
   NULL, // primary_expression_to_return
-  NULL // returnFromArgument
+  NULL, // returnFromArgument
+  cudaHookDfsVariable
 };
   
   

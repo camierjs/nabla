@@ -6,8 +6,8 @@ with ℝ;
 // ∀ ℝℕℤ ²³√½⅓¼⅛
 // ****************************************************************************
 
-FILE *fDot;
-ofstream stream("timing.stream");
+//FILE *fDot;
+//ofstream stream("timing.stream");
 
 // ****************************************************************************
 // * Options
@@ -63,7 +63,7 @@ global{
 // ****************************************************************************
 ℝ analyticE(ℝ t, ℝ x){ return α*exp(x-t); }
 ℝ analyticF(ℝ t, ℝ x){ return β*exp(x-t); }
-ℝ stability(void){ return (δt/(ε*δx)+σ*δt/(2.0*ε²)); }
+ℝ stability(ℝ t, ℝ x, ℝ e){ return (t/(e*x)+σ*t/(2.0*e²)); }
 
 // ****************************************************************************
 // * Initialization Part @ ]-∞,-0.0[
@@ -75,7 +75,7 @@ void iniGlobals(void) @ -5.0{
   printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
   printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
   assert(δt>=0.0);
-  fDot=fopen("f.dot","w");
+  //fDot=fopen("f.dot","w");
 }
 
 
@@ -87,7 +87,7 @@ void iniGlobals(void) @ -5.0{
 // δt <= (2*δx*ε^2)/(2*ε+δx*σ);
 // ****************************************************************************
 void cflVerif(void) @ -4.5{
-  assert(stability()<=1.0);
+  assert(stability(δt,δx,ε)<=1.0);
 }
 
 
@@ -152,13 +152,13 @@ void dbgLoop(void) @ 1.0 {
 ∀ cells void Unp1(void) in (cell U, cell V/*, node fluxV*/) out (cell Uⁿ⁺¹) @ 2.0 {
   ℝ Um1=0;
   ∀ node Um1 = (Δ>coord)?fluxU;
-  Uⁿ⁺¹=(1.0-stability())*U+δt/(ε*δx)*Um1+σ*δt/(2.0*ε²)*V;
+  Uⁿ⁺¹=(1.0-stability(δt,δx,ε))*U+δt/(ε*δx)*Um1+σ*δt/(2.0*ε²)*V;
 }
 
 ∀ cells void Vnp1(void) in (cell U, cell V) out (cell Vⁿ⁺¹) @ 2.0 {
   ℝ Vp1=0;
   ∀ node Vp1 = (Δ<coord)?fluxV;
-  Vⁿ⁺¹=(1.0-stability())*V+δt/(ε*δx)*Vp1+σ*δt/(2.0*ε²)*U;
+  Vⁿ⁺¹=(1.0-stability(δt,δx,ε))*V+δt/(ε*δx)*Vp1+σ*δt/(2.0*ε²)*U;
 }
 
 
@@ -175,24 +175,24 @@ void dbgLoop(void) @ 1.0 {
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File results) in (cell E, cell F) {
-  results << "\t" << Δ << "\t" << E << "\t" << F << "\n";
-  stream << "\t" << Δ << "\t" << E << "\t" << F << "\n";
-}
+//∀ cells void dumpSolution(File results) in (cell E, cell F) {
+//  results << "\t" << Δ << "\t" << E << "\t" << F << "\n";
+//  stream << "\t" << Δ << "\t" << E << "\t" << F << "\n";
+//}
 
 
 void tstForQuit(void) @ 4.0 {
   printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
          GlobalIteration, time,(double)δt);
   if ((time<(option_stoptime-δt))) return;
-  {
-    file(results,plot);
-    printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
-    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-    dumpSolution(results);
-    }
-  fwrite("done", 4, 1, fDot);
-  fclose(fDot);
+//  {
+//    file(results,plot);
+//    printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+//    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+//    dumpSolution(results);
+//    }
+//  fwrite("done", 4, 1, fDot);
+//  fclose(fDot);
   exit;
 }
 

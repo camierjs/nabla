@@ -77,6 +77,7 @@ char* cuHookFilterScatter(nablaJob*);
 void cuHookReduction(struct nablaMainStruct*,astNode*);
 void cuHookAddArguments(struct nablaMainStruct*,nablaJob*);
 void cuHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+bool cudaHookDfsVariable(void);
 
 char* cuHookPragmaGccIvdep(void);
 char* cuHookPragmaGccAlign(void);

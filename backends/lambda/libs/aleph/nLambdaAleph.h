@@ -238,7 +238,7 @@ void alephInitialize(void){
 // ****************************************************************************
 // * alephIni
 // ****************************************************************************
-void alephIni(%s%s){ // we have to match args & params
+void alephIni(void){
 #ifndef ALEPH_INDEX
   debug()<<"\33[1;37;45m[alephIni] NO ALEPH_INDEX\33[0m";
   //#warning NO ALEPH_INDEX

@@ -43,6 +43,8 @@
 #ifndef _NABLA_ARCANE_H_
 #define _NABLA_ARCANE_H_
 
+bool arcaneHookDfsVariable(void);
+
 char *nccArcBits(void);
 char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
 char* nccArcScatter(nablaVariable* var);

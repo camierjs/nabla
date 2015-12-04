@@ -45,6 +45,8 @@
 char *cuHookBits(void){return "Not relevant here";}
 char* cuHookIncludes(void){return "";}
 
+bool cudaHookDfsVariable(void){ return false; }
+
 
 // ****************************************************************************
 // * cudaPragmas

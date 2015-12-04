@@ -409,7 +409,8 @@ void nMiddleFunctionFill(nablaMain *nabla,
   }else{
     numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
     nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-    nMiddleParamsDumpFromDFS(nabla,fct,numParams);
+    if (nabla->hook->grammar->dfsVariable())
+      nMiddleParamsDumpFromDFS(nabla,fct,numParams);
   }
     
   // On s'autorise un endroit pour insérer des paramètres

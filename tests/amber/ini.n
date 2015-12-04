@@ -28,6 +28,6 @@
 // * incell T
 // ****************************************************************************
 ∀ cells void iniCellT(void) in (cell center) out (cell cT) @ -4.0 {
-  cT = T_condini(center);
+  cT = T_condini(σ);
   //info()<<"[iniCellT] cT="<<cT;
 }

@@ -249,7 +249,8 @@ NABLA_STATUS nccArcane(nablaMain *nabla,
     arcaneJob,
     arcaneHookReduction,
     NULL, // primary_expression_to_return
-    NULL // returnFromArgument
+    NULL, // returnFromArgument
+    arcaneHookDfsVariable
   };
   
   const hookCall nArcaneHookCall={

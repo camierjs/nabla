@@ -218,7 +218,9 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookJob,
     nOkinaHookReduction,
     nOkinaHookPrimaryExpressionToReturn,
-    nOkinaHookReturnFromArgument
+    nOkinaHookReturnFromArgument,
+    okinaHookDfsVariable
+
   };
   const hookCall nOkinaHookCall={
     nOkinaHookAddCallNames,

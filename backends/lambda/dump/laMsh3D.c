@@ -56,6 +56,7 @@ static double yOf7(const int);
 static double zOf7(const int);
 //static int lg2(int p){int i=0; for(;p!=(0ull);++i,p>>=(1ull)); return i;}
 
+#warning cell_face
 
 // ****************************************************************************
 // * Connectivité cell->node

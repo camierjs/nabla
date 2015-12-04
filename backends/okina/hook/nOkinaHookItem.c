@@ -43,8 +43,8 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-char* nOkinaHookSysPrefix(void){ return ""; }
-char* nOkinaHookSysPostfix(void){ return ""; }
+char* nOkinaHookSysPrefix(void){ return "/*nOkinaHookSysPrefix*/"; }
+char* nOkinaHookSysPostfix(void){ return "/*nOkinaHookSysPostfix*/)"; }
 
 // ****************************************************************************
 // * Traitement des tokens NABLA ITEMS

@@ -162,6 +162,7 @@ void nOkinaHookLibraries(astNode *, nablaEntity*);
 void nOkinaHookJob(nablaMain*, astNode*);
 bool nOkinaHookPrimaryExpressionToReturn(nablaMain*, nablaJob*, astNode*);
 void nOkinaHookReturnFromArgument(nablaMain*, nablaJob*);
+bool okinaHookDfsVariable(void);
 
 // hooks/nOkinaHookReduction
 void nOkinaHookReduction(struct nablaMainStruct*, astNode*);

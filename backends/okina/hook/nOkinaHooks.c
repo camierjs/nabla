@@ -43,6 +43,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+bool okinaHookDfsVariable(void){ return false; }
 
 // ****************************************************************************
 // * Dump des variables appelées

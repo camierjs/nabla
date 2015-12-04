@@ -49,24 +49,43 @@
 // * Gather for Cells
 // ****************************************************************************
 static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
+  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL)
     return strdup("//int cw,ia;\n\t\t"); //__attribute__((unused))
-  // Phase function call
+
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t\
+
+  if (var->item[0]=='n'){
+    // Phase function call
+    snprintf(gather, 1024, "\n\t\t\t\
 %s gathered_%s_%s=%s(0.0);\n\t\t\t\
 gather%sk(cell_node[n*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
+             strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+             strcmp(var->type,"real")==0?"":dim1D?"":"3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"":"",
+             var->item, var->name);
+  }
+
+  if (var->item[0]=='f'){
+    // Phase function call
+     snprintf(gather, 1024, "\n\t\t\t\
+%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+gather%sk(cell_face[f*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"real":"real3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"real":"real3",
+             strcmp(var->type,"real")==0?"":"3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"":"",
+             var->item, var->name);
+  }
+
+  
   return strdup(gather);
 }
 
@@ -78,22 +97,25 @@ gather%sk(cell_node[n*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
 static char* lambdaHookGatherNodes(nablaJob *job,
                                    nablaVariable* var,
                                    GATHER_SCATTER_PHASE phase){
+  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL){
     return strdup("");
   }
+  
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t\
 %s gathered_%s_%s=%s(0.0);\n\t\t\t\
-gatherFromNode_%sk%s(node_cell[8*n+c],%s %s_%s, &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
+gatherFromNode_%sk%s(node_cell[NABLA_NODE_PER_CELL*n+c],%s %s_%s, &gathered_%s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            var->item,
            var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+           strcmp(var->type,"real")==0?"":dim1D?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"node_cell_corner[8*n+c],",
+           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+c],",
            var->item, var->name,
            var->item, var->name);
   return strdup(gather);
@@ -161,10 +183,11 @@ char* lambdaHookFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase
     if (!var->is_gathered) continue;
     if (n!=NULL) if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)) continue;
     nprintf(job->entity->main, NULL,
-            "// gather %s for variable '%s'",
+            "\n\t\t// gather %s for variable '%s'",
             (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
             var->name);
-    strcat(gather_src_buffer, job->entity->main->call->simd->gather(job,var,phase));
+    strcat(gather_src_buffer,
+           job->entity->main->call->simd->gather(job,var,phase));
   }
   return gather_src_buffer;
 }

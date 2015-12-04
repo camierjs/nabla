@@ -543,8 +543,8 @@ void timeIncrement(void) @ 0.1 {
 // ****************************************************************************
 // * This routine performs the second part of the q calculation.
 // ****************************************************************************
-∀ cells void calcMonotonicQForElemsByDirectionX(xyz direction)
-  in (cell elemBC, cell delv_xi) out (cell phixi){
+∀ cells void calcMonotonicQForElemsByDirectionX(void)
+  in (cell elemBC, cell delv_xi) out (cell phixi) @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ bcSwitch;
@@ -553,12 +553,12 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_xi+ptiny);
   bcSwitch = elemBC & XI_M;
-  delvm = (bcSwitch == 0)?delv_xi[prevCell];
+  delvm = (bcSwitch == 0)?delv_xi[prevCellX];
   delvm = (bcSwitch == XI_M_SYMM)?delv_xi;
   delvm = (bcSwitch == XI_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & XI_P;
-  delvp = (bcSwitch == 0)?delv_xi[nextCell];
+  delvp = (bcSwitch == 0)?delv_xi[nextCellX];
   delvp = (bcSwitch == XI_P_SYMM)?delv_xi;
   delvp = (bcSwitch == XI_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -571,8 +571,8 @@ void timeIncrement(void) @ 0.1 {
   phixi = (phixi > monoq_max_slope)?monoq_max_slope;
   }
 
-∀ cells void calcMonotonicQForElemsByDirectionY(xyz direction)
-  in (cell elemBC, cell delv_eta) out (cell phieta){
+∀ cells void calcMonotonicQForElemsByDirectionY(void)
+  in (cell elemBC, cell delv_eta) out (cell phieta) @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ register bcSwitch;
@@ -581,12 +581,12 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_eta+ptiny);
   bcSwitch = elemBC & ETA_M;
-  delvm = (bcSwitch == 0)?delv_eta[prevCell];
+  delvm = (bcSwitch == 0)?delv_eta[prevCellY];
   delvm = (bcSwitch == ETA_M_SYMM)?delv_eta;
   delvm = (bcSwitch == ETA_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & ETA_P;
-  delvp = (bcSwitch == 0)?delv_eta[nextCell];
+  delvp = (bcSwitch == 0)?delv_eta[nextCellY];
   delvp = (bcSwitch == ETA_P_SYMM)?delv_eta;
   delvp = (bcSwitch == ETA_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -599,8 +599,8 @@ void timeIncrement(void) @ 0.1 {
   phieta = (phieta > monoq_max_slope)?monoq_max_slope;
 }
 
-∀ cells void calcMonotonicQForElemsByDirectionZ(xyz direction)
-  in (cell elemBC, cell delv_zeta) out (cell phizeta){
+∀ cells void calcMonotonicQForElemsByDirectionZ(void)
+  in (cell elemBC, cell delv_zeta) out (cell phizeta) @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ bcSwitch;
@@ -609,12 +609,12 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_zeta+ptiny) ;
   bcSwitch = elemBC & ZETA_M;
-  delvm = (bcSwitch == 0)?delv_zeta[prevCell];
+  delvm = (bcSwitch == 0)?delv_zeta[prevCellZ];
   delvm = (bcSwitch == ZETA_M_SYMM)?delv_zeta;
   delvm = (bcSwitch == ZETA_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & ZETA_P;
-  delvp = (bcSwitch == 0)?delv_zeta[nextCell];
+  delvp = (bcSwitch == 0)?delv_zeta[nextCellZ];
   delvp = (bcSwitch == ZETA_P_SYMM)?delv_zeta;
   delvp = (bcSwitch == ZETA_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -627,13 +627,13 @@ void timeIncrement(void) @ 0.1 {
   phizeta = (phizeta > monoq_max_slope )?monoq_max_slope;
 }
 
-void calcMonotonicQForElems(void)@ 4.7{
+/*void calcMonotonicQForElems(void)@ 4.7{
   //in (cell elemBC, cell delv_xi, cell delv_eta, cell delv_zeta)
   //out (cell phixi, cell phieta, cell phizeta)@ 4.7{
   calcMonotonicQForElemsByDirectionX(MD_DirX);
   calcMonotonicQForElemsByDirectionY(MD_DirY);
   calcMonotonicQForElemsByDirectionZ(MD_DirZ);
-}
+  }*/
 
 ∀ cells void calcMonotonicQForElemsQQQL(void)
   in (cell vdov, cell elemMass, cell volo, cell vnew,

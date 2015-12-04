@@ -47,11 +47,15 @@
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* cuHookSysPrefix(void){ return ""; }
-char* cuHookSysPostfix(void){ return ""; }
+char* cuHookSysPrefix(void){ return "/*cuHookSysPrefix*/"; }
 
 char* cuHookPrevCell(int direction){
-  return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirX*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirY*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirZ*NABLA_NB_CELLS+tcid],";
+  assert(NULL);
+  return NULL;
+  //return "gatherk_and_zero_neg_ones(cell_prev[direction*NABLA_NB_CELLS+tcid],";
 }
 
 
@@ -59,8 +63,15 @@ char* cuHookPrevCell(int direction){
 // * Next Cell
 // ****************************************************************************
 char* cuHookNextCell(int direction){
-  return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_next[MD_DirX*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_next[MD_DirY*NABLA_NB_CELLS+tcid],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_next[MD_DirZ*NABLA_NB_CELLS+tcid],";
+  assert(NULL);
+  return NULL;
+  //return "gatherk_and_zero_neg_ones(cell_next[direction*NABLA_NB_CELLS+tcid],";
 }
+
+char* cuHookSysPostfix(void){ return "/*cuHookSysPostfix*/)"; }
 
 
 /***************************************************************************** 

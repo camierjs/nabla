@@ -113,9 +113,9 @@ char* lambdaAlephHeader(nablaMain *nabla){
     strcat(str, (var->type[0]=='r')?",real*":(var->type[0]=='i')?",int*":"/*Unknown type*/");
   }
   
-  fprintf(nabla->entity->hdr, dumpExternalFile(nLambdaAleph_h),
-          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
-          str);
+  fprintf(nabla->entity->hdr, dumpExternalFile(nLambdaAleph_h));
+  //,          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
+//          str);
   lambdaAlephIni(nabla);
   return "";
 }

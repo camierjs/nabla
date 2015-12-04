@@ -19,15 +19,15 @@
 // ****************************************************************************
 
 //Test 1 for linear advection (smooth data)
-ℝ U_condlimi(ℝ x,ℝ t){
-  return -ε + exp(-t/ε²) + ε/(2.0*τ-1.0)*exp(-2.0*τ*t/ε²) ;
+ℝ U_condlimi(ℝ x,ℝ t,ℝ e,ℝ tau){
+  return -e + exp(-t/e²) + e/(2.0*tau-1.0)*exp(-2.0*tau*t/e²) ;
 }
 
 // Test 2 for linear  advection (discontinuous data)
-ℝ P_condlimi(ℝ x,ℝ t){
-  return  x*(1.0+ exp(-2.0*τ*t/ε²)) ;
+ℝ P_condlimi(ℝ x,ℝ t,ℝ e,ℝ tau){
+  return  x*(1.0+ exp(-2.0*tau*t/e²)) ;
 }
 
-ℝ T_condlimi(ℝ x){
-  return -σ*x;
+ℝ T_condlimi(ℝ sigma,ℝ x){
+  return -sigma*x;
 }

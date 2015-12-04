@@ -192,7 +192,7 @@ void stopIterations(void) @ 30.0{
   assert(mx0!=0.0);
   if (GlobalIteration>1.0 && mxε<(option_picard_ε*mx0)){
     info()<<"\t\33[7m[stopIterations] mxε="<<mxε<<"\33[m";
-    if (option_dag) dagIt();
+    //if (option_dag) dagIt();
     if (option_quit_when_finish) exit;
     //assert(fabs(eh2-0.000715252152895967)<10.0*__DBL_EPSILON__);
   }

@@ -158,7 +158,7 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 
 ∀ own cells void setCellsValues(void) in (cell θ/*, face ih2*/) @ 2.2{
   ℝ diagonalTerme=0.0;
-  foreach face diagonalTerme += ih2;
+  ∀ face diagonalTerme += ih2;
   diagonalTerme*=δt;
   diagonalTerme+=1.0;
   ℵ matrix setValue(θ,this, θ,this, diagonalTerme);

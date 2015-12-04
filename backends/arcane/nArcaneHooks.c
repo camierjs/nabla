@@ -45,6 +45,7 @@
 
 extern bool adrs_it;
 
+bool arcaneHookDfsVariable(void){ return false; }
 
 // ****************************************************************************
 // * arcaneHookIsTest

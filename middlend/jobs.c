@@ -492,7 +492,8 @@ void nMiddleJobFill(nablaMain *nabla,
   }else{
     numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
     nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-    nMiddleParamsDumpFromDFS(nabla,job,numParams);
+    if (nabla->hook->grammar->dfsVariable())
+      nMiddleParamsDumpFromDFS(nabla,job,numParams);
   }
   
   // On va chercher les paramètres nabla in/out/inout

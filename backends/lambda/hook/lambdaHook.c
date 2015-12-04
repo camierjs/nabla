@@ -44,6 +44,8 @@
 #include "nabla.tab.h"
 #include "frontend/ast.h"
 
+bool lambdaHookDfsVariable(void){ return true; }
+
 
 // ****************************************************************************
 // * INCLUDES
@@ -76,9 +78,9 @@ char* lambdaHookSysPrefix(void){ return "/*lambdaHookSysPrefix*/"; }
 // * System Prev Cell
 // ****************************************************************************
 char* lambdaHookPrevCell(int direction){
-  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirX*NABLA_NB_CELLS+c+0],";
-  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirY*NABLA_NB_CELLS+c+0],";
-  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirZ*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirX*NABLA_NB_CELLS+c],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirY*NABLA_NB_CELLS+c],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_prev[MD_DirZ*NABLA_NB_CELLS+c],";
   assert(NULL);
   return NULL;
 }
@@ -88,9 +90,9 @@ char* lambdaHookPrevCell(int direction){
 // * System Next Cell
 // ****************************************************************************
 char* lambdaHookNextCell(int direction){
-  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_next[MD_DirX*NABLA_NB_CELLS+c+0],";
-  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_next[MD_DirY*NABLA_NB_CELLS+c+0],";
-  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_next[MD_DirZ*NABLA_NB_CELLS+c+0],";
+  if (direction==DIR_X) return "gatherk_and_zero_neg_ones(cell_next[MD_DirX*NABLA_NB_CELLS+c],";
+  if (direction==DIR_Y) return "gatherk_and_zero_neg_ones(cell_next[MD_DirY*NABLA_NB_CELLS+c],";
+  if (direction==DIR_Z) return "gatherk_and_zero_neg_ones(cell_next[MD_DirZ*NABLA_NB_CELLS+c],";
   assert(NULL);
   return NULL;
 }

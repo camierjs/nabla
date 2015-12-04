@@ -112,7 +112,8 @@ void cuHookDfsForCalls(struct nablaMainStruct *nabla,
                          nablaJob *fct, astNode *n,
                          const char *namespace,
                          astNode *nParams){
-  nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+  //nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
 

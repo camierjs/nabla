@@ -64,6 +64,7 @@ void lambdaHookReduction(struct nablaMainStruct*,astNode*);
 void lambdaHookAddArguments(struct nablaMainStruct*,nablaJob*);
 void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
 void lambdaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+bool lambdaHookDfsVariable(void);
 
 // Cilk+ parallel color
 char *nLambdaParallelCilkSync(void);

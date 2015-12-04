@@ -50,30 +50,76 @@ char *nOkinaMicBits(void){return "512";}
 // * Prev Cell
 // ****************************************************************************
 char* nOkinaMicPrevCell(int direction){
-  return "gatherk_and_zero_neg_ones(\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_X)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_Y)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_Z)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  assert(NULL);
+  return NULL;
 }
 
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
 char* nOkinaMicNextCell(int direction){
-  return "gatherk_and_zero_neg_ones(\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_X)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_Y)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  if (direction==DIR_Z)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+  assert(NULL);
+  return NULL;
 }
 
 // ****************************************************************************

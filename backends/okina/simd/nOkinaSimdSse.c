@@ -50,9 +50,20 @@ char *nOkinaSseBits(void){return "128";}
 // * Prev Cell
 // ****************************************************************************
 char* nOkinaSsePrevCell(int direction){
-  return "gatherk_and_zero_neg_ones(\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_prev[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_X)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_Y)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_Z)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  assert(NULL);
+  return NULL;
 }
 
 
@@ -60,9 +71,20 @@ char* nOkinaSsePrevCell(int direction){
 // * Next Cell
 // ****************************************************************************
 char* nOkinaSseNextCell(int direction){
-  return "gatherk_and_zero_neg_ones(\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_next[direction*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_X)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_Y)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  if (direction==DIR_Z)
+    return "gatherk_and_zero_neg_ones(\n\
+			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],";
+  assert(NULL);
+  return NULL;
 }
 
 

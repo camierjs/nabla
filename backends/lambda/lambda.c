@@ -247,7 +247,8 @@ const static hookGrammar hookGram={
   lambdaHookJob,
   lambdaHookReduction,
   lambdaHookPrimaryExpressionToReturn,
-  lambdaHookReturnFromArgument
+  lambdaHookReturnFromArgument,
+  lambdaHookDfsVariable
 };
 
 const static hookCall nLambdaHookCall={

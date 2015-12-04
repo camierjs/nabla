@@ -251,6 +251,8 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
 // ****************************************************************************
 void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   int i=numParams;
+  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+
   // Dump des options du job
   //nablaOption *opt=job->used_options;
   //for(i=0;opt!=NULL;opt=opt->next,i+=1)
@@ -258,10 +260,10 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
 
   // Si i!=0, c'est qu'il y a eu une xyz direction
   // Devrait disparaître à terme
-  if (i!=0){
-    nprintf(nabla, NULL, ", const int *cell_prev");//__restrict__
-    nprintf(nabla, NULL, ", const int *cell_next");//__restrict__
-  }
+//  if (i!=0){
+//    nprintf(nabla, NULL, ", const int *cell_prev");//__restrict__
+//    nprintf(nabla, NULL, ", const int *cell_next");//__restrict__
+//  }
   
   // Dunp des variables du job
   nablaVariable *var=job->used_variables;
@@ -269,7 +271,9 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
             (i==0)?"":",",
             (var->in&&!var->out)?"":"",//const
-            var->type,
+            // Si on est en 1D est qu'on a un real3,
+            // c'est qu'on joue peut-être avec les coord? => on force à real
+            (strcmp(var->type,"real3")==0&&dim1D)?"real":var->type,
             var->item, var->name);
 }
 

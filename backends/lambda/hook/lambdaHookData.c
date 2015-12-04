@@ -149,6 +149,7 @@ static bool lambdaHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                   nablaJob *job){
   //nprintf(arc, NULL, "/*gathered variable '%s' ?*/",var->name);
   if (!var->is_gathered) return false;
+  if (job->parse.enum_enum=='\0') return false;
   nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
   return true;
 }
