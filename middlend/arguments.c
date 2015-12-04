@@ -259,16 +259,16 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   // Si i!=0, c'est qu'il y a eu une xyz direction
   // Devrait disparaître à terme
   if (i!=0){
-    nprintf(nabla, NULL, ", const int *cell_prev");
-    nprintf(nabla, NULL, ", const int *cell_next");
+    nprintf(nabla, NULL, ", const int *cell_prev");//__restrict__
+    nprintf(nabla, NULL, ", const int *cell_next");//__restrict__
   }
   
   // Dunp des variables du job
   nablaVariable *var=job->used_variables;
   for(;var!=NULL;var=var->next,i+=1)
-    nprintf(nabla, NULL, "%s%s %s* %s_%s",
+    nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
             (i==0)?"":",",
-            (var->in&&!var->out)?"const":"",
+            (var->in&&!var->out)?"":"",//const
             var->type,
             var->item, var->name);
 }

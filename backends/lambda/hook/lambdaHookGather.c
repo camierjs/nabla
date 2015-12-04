@@ -48,17 +48,15 @@
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration)
-    return strdup("register int __attribute__((unused)) cw,ia;");
+  if (phase==GATHER_SCATTER_DECL)
+    return strdup("//int cw,ia;\n\t\t"); //__attribute__((unused))
   // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-cw=c;\n\t\t\t\
-gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
+  snprintf(gather, 1024, "\n\t\t\t\
+%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+gather%sk(cell_node[n*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
            var->item,
            var->name,
@@ -77,33 +75,27 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* lambdaHookGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* lambdaHookGatherNodes(nablaJob *job,
+                                   nablaVariable* var,
+                                   GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
-    return strdup("int nw;");
+  if (phase==GATHER_SCATTER_DECL){
+    return strdup("");
   }
   // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-nw=n;\n\t\t\t\
-//#warning continue node_cell_corner\n\
-//if (node_cell_corner[8*nw+c]==-1) continue;\n\
-gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
-%s\
-         %s_%s%s,\n\t\t\t\
-         &gathered_%s_%s);\n\t\t\t",
+  snprintf(gather, 1024, "\n\t\t\t\
+%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+gatherFromNode_%sk%s(node_cell[8*n+c],%s %s_%s, &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"real":"real3",
            strcmp(var->type,"real")==0?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
-           var->item,
-           var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item,
-           var->name);
+           var->dim==0?"":"node_cell_corner[8*n+c],",
+           var->item, var->name,
+           var->item, var->name);
   return strdup(gather);
 }
 
@@ -113,10 +105,10 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 // ****************************************************************************
 static char* lambdaHookGatherFaces(nablaJob *job,
                                    nablaVariable* var,
-                                   enum_phase phase){
+                                   GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
-    return strdup("int nw;");
+  if (phase==GATHER_SCATTER_DECL){
+    return strdup("int nw;\n\t\t");
   }
   // Phase function call
   char gather[1024];
@@ -141,73 +133,39 @@ static char* lambdaHookGatherFaces(nablaJob *job,
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* lambdaHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* lambdaHookGather(nablaJob *job,nablaVariable* var,
+                       GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return lambdaHookGatherCells(job,var,phase);
   if (itm=='n') return lambdaHookGatherNodes(job,var,phase);
   if (itm=='f') return lambdaHookGatherFaces(job,var,phase);
-  nablaError("Could not distinguish job item in lambdaStdGather for job '%s'!", job->name);
+  nablaError("Could not distinguish job item in lambdaHookGather for job '%s'!", job->name);
   return NULL;
 }
 
 
 // ****************************************************************************
+// * Devrait être un Call!
 // * Filtrage du GATHER
 // * Une passe devrait être faite à priori afin de déterminer les contextes
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* lambdaHookFilterGather(nablaJob *job){
-  int i;
-  char gathers[1024];
-  nablaVariable *var;
-  gathers[0]='\0';
-  int nbToGather=0;
-  int filteredNbToGather=0;
+char* lambdaHookFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
+  char *gather_src_buffer;
+  
+  if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
+    nablaError("[lambdaHookFilterGather] Could not malloc our gather_src_buffer!");
 
-  // Si l'on a trouvé un 'selection_statement_in_compound_statement'
-  // dans le corps du kernel, on débraye les gathers
-  // *ou pas*
-  if (job->parse.selection_statement_in_compound_statement){
-    //nprintf(job->entity->main,
-    //"/*selection_statement_in_compound_statement, nothing to do*/",
-    //"/*if=>!lambdaGather*/");
-    //return "";
+  for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+    if (!var->is_gathered) continue;
+    if (n!=NULL) if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)) continue;
+    nprintf(job->entity->main, NULL,
+            "// gather %s for variable '%s'",
+            (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
+            var->name);
+    strcat(gather_src_buffer, job->entity->main->call->simd->gather(job,var,phase));
   }
-  
-  // On récupère le nombre de variables potentielles à gatherer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToGather+=1;
-  //nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
-  
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToGather==0) return "";
-
-  // On filtre suivant s'il y a des forall
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaGather on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaGather enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToGather+=1;
-  }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToGather=%d*/", filteredNbToGather);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToGather==0) return "";
-  
-  strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_declaration));
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le gather de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iGather) continue;
-    strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_function_call));
-    // On informe la suite que cette variable est en train d'être gatherée
-    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-    if (real_variable==NULL)
-      nablaError("Could not find real variable from gathered variables!");
-    real_variable->is_gathered=true;
-  }
-  job->parse.iGather+=1;
-  return strdup(gathers);
+  return gather_src_buffer;
 }
 

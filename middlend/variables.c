@@ -302,6 +302,21 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
 
 
 // ****************************************************************************
+// * 
+// ****************************************************************************
+bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char *name){
+  nablaVariable *var=NULL;
+  if (n==NULL) return false;
+  if (n->ruleid==rulenameToId("primary_expression"))
+    if ((var=nMiddleVariableFind(nabla->variables,n->children->token))!=NULL)
+      if (strcmp(var->name,name)==0) return true;
+  if (n->children != NULL) if (dfsUsedInThisForall(nabla, job, n->children,name)) return true;
+  if (n->next != NULL) if (dfsUsedInThisForall(nabla, job, n->next,name)) return true;
+  return false;
+}
+
+
+// ****************************************************************************
 // * dfsVariables
 // * On scan pour lister les variables en in/inout/out
 // ****************************************************************************
@@ -329,7 +344,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
       char* token = n->children->token;
       // Est-ce une variable connue?
-      const nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
+      nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
       if (var!=NULL){ // Si c'est bien un variable
         nablaVariable *new=nMiddleVariableFind(job->used_variables, token);
         if (new==NULL){ // Si c'est une variable qu'on a pas déjà placée dans la liste connue
@@ -344,11 +359,24 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
           // Et on mémorise ce que l'on a fait en in/out
           if (left_of_assignment_expression) new->out|=true;
           if (!left_of_assignment_expression) new->in|=true;
+          // Si elles n'ont pas le même support,
+          
+          // c'est qu'il va falloir insérer un gather/scatter
+          dbg("\n\t[dfsVariables] new->item='%s' vs job->item='%s'",
+              new->item, job->item);
+          if (!job->is_a_function  &&
+              var->item[0]!='g' &&
+              (new->item[0]!=job->item[0])){
+            dbg("\n\t[dfsVariables] This variable will be gathered in this job!");
+            //var->is_gathered=true;
+            new->is_gathered=true;
+         }
+
           // Rajout à notre liste
           if (job->used_variables==NULL)
             job->used_variables=new;
           else
-            nMiddleVariableLast(job->used_variables)->next=new;        
+            nMiddleVariableLast(job->used_variables)->next=new;
         }
         // Et on mémorise ce que l'on a fait en in/out
         if (left_of_assignment_expression)

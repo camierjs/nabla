@@ -107,9 +107,9 @@ typedef enum {
 
 // Enumération des phases possibles lors des génération des gather/scatter
 typedef enum{
-  enum_phase_declaration=0,
-  enum_phase_function_call
-} enum_phase;
+  GATHER_SCATTER_DECL=0,
+  GATHER_SCATTER_CALL
+} GATHER_SCATTER_PHASE;
 
 
 // Enumération des actions à faire selon les cas de postfixs

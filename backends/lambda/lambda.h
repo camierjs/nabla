@@ -47,7 +47,7 @@ void nLambdaHookSourceOpen(nablaMain*);
 void nLambdaHookSourceInclude(nablaMain*);
 
 char* lambdaHookBits(void);
-char* lambdaHookGather(nablaJob*,nablaVariable*,enum_phase);
+char* lambdaHookGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
 char* lambdaHookScatter(nablaVariable*);
 
 char* lambdaHookSysPrefix(void);
@@ -57,7 +57,7 @@ char* lambdaHookSysPostfix(void);
 
 char* lambdaHookIncludes(void);
 
-char* lambdaHookFilterGather(nablaJob*);
+char* lambdaHookFilterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
 char* lambdaHookFilterScatter(nablaJob*);
 
 void lambdaHookReduction(struct nablaMainStruct*,astNode*);

@@ -117,25 +117,10 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
  * Prépare le nom de la variable
  *****************************************************************************/
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  nprintf(nabla, NULL, "%s_%s", var->item, var->name);
-  //nprintf(nabla, NULL, "/*nvar(*/%s_%s/*)*/", var->item, var->name);
-//  if (!job->parse.selection_statement_in_compound_statement){
-//    nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-//  }else{
-//    nprintf(nabla,NULL,"/*%s*/",var->type);
-//    if (strcmp(var->type,"real")==0)
-//      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
-//    if (strcmp(var->type,"int")==0)
-//      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
-//    if (strcmp(var->type,"real3")==0)
-//      nprintf(nabla, "/*tt2a(if+real3)*/", "/*if+real3 still in real3 vs double3*/%s_%s", var->item, var->name);
-//    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
-//  }    
-//  if (strcmp(var->type,"real3")!=0){
-//    //nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
-//    return;
-//  }
-//  return;
+  nprintf(nabla, NULL, "%s_%s",
+          //var->is_gathered?"gathered_":"",
+          var->item,
+          var->name);
 }
 
 
@@ -160,9 +145,9 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
  * Tokens to gathered  variables
  *****************************************************************************/
 static bool lambdaHookTurnTokenToGatheredVariable(nablaMain *arc,
-                                                 nablaVariable *var,
-                                                 nablaJob *job){
-  //nprintf(arc, NULL, "/*gathered variable?*/");
+                                                  nablaVariable *var,
+                                                  nablaJob *job){
+  //nprintf(arc, NULL, "/*gathered variable '%s' ?*/",var->name);
   if (!var->is_gathered) return false;
   nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
   return true;
@@ -257,7 +242,7 @@ static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 
   switch (var->item[0]){
   case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "/*var->dim!=0*/[c][c");
+    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "/**/");
     if (enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
     if (enum_enum=='c' && (!isWithLibrary(arc,with_real)))  nprintf(arc, "/*CellVar c*/", "/*nc*/[c]");
@@ -415,48 +400,57 @@ static void lambdaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
  * Transformation de tokens en variables selon les contextes dans le cas d'un '[Cell|node]Enumerator'
  *****************************************************************************/
 nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
-                                            nablaMain *arc,
+                                            nablaMain *nabla,
                                             nablaJob *job){
-  nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
+  nablaVariable *var=nMiddleVariableFind(nabla->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
+
+  // On récupère la variable de ce job pour ces propriétés
+  nablaVariable *used=nMiddleVariableFind(job->used_variables, n->token);
+  assert(used);
   
   dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
+  if (used->is_gathered)
+    dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s will be GATHERED here!", var->item, var->name);
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
   if (job->parse.alephKeepExpression==true){
-    nprintf(arc, "/*lambdaHookTurnTokenToVariable*/", "/*aleph*/%s_%s", var->item, var->name);
+    nprintf(nabla, "/*lambdaHookTurnTokenToVariable*/", "/*aleph*/%s_%s", var->item, var->name);
     return var;
   }
 
   // Set good isDotXYZ
-  if (job->parse.isDotXYZ==0 && strcmp(var->type,"real3")==0 && job->parse.left_of_assignment_operator==true){
+  if (job->parse.isDotXYZ==0 &&
+      strcmp(var->type,"real3")==0 &&
+      job->parse.left_of_assignment_operator==true){
 //    #warning Diffracting OFF
-    //nprintf(arc, NULL, "/* DiffractingNOW */");
+    //nprintf(nabla, NULL, "/* DiffractingNOW */");
     //job->parse.diffracting=true;
     //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
   }
-  //nprintf(arc, NULL, "\n\t/*lambdaHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
+  //nprintf(nabla, NULL, "\n\t/*lambdaHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
 
   // Check whether this variable is being gathered
-  if (lambdaHookTurnTokenToGatheredVariable(arc,var,job)){
+  if (lambdaHookTurnTokenToGatheredVariable(nabla,used,job)){
+    dbg("\n\t[lambdaHookTurnTokenToVariable] lambdaHookTurnTokenToGatheredVariable!");
     return var;
   }
   
   // Check whether there's job for a cell job
-  lambdaHookTurnTokenToVariableForCellJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForCellJob(nabla,var,job);
   
   // Check whether there's job for a node job
-  lambdaHookTurnTokenToVariableForNodeJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForNodeJob(nabla,var,job);
   
   // Check whether there's job for a face job
-  lambdaHookTurnTokenToVariableForFaceJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForFaceJob(nabla,var,job);
   
   // Check whether there's job for a standard function
-  lambdaHookTurnTokenToVariableForStdFunction(arc,var,job);
+  lambdaHookTurnTokenToVariableForStdFunction(nabla,var,job);
 
   // Check whether there's job for a standard function
-  lambdaHookTurnTokenToVariableForParticleJob(arc,var,job);
+  lambdaHookTurnTokenToVariableForParticleJob(nabla,var,job);
   
   return var;
 }

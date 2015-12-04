@@ -341,7 +341,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*lambdaFilterGather*/", "%s",lambdaHookFilterGather(job));
+    nprintf(nabla, "/*lambdaFilterGather*/", "%s",lambdaHookFilterGather(n,job,GATHER_SCATTER_CALL));
     break;
   }
   case(FORALL_END):{

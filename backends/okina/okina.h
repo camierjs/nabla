@@ -69,10 +69,10 @@ char* nOkinaSseBits(void);
 char* nOkinaAvxBits(void);
 char* nOkinaMicBits(void);
 
-char* nOkinaStdGather(nablaJob*,nablaVariable*,enum_phase);
-char* nOkinaSseGather(nablaJob*,nablaVariable*,enum_phase);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*,enum_phase);
-char* nOkinaMicGather(nablaJob*,nablaVariable*,enum_phase);
+char* nOkinaStdGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaSseGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaAvxGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaMicGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
 
 char* nOkinaStdScatter(nablaVariable*);
 char* nOkinaSseScatter(nablaVariable*);

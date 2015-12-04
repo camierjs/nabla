@@ -236,7 +236,7 @@ char* lambdaHookForAllPostfix(nablaJob *job){
     //if (job->item[0]=='n') return "// Should test INNER nodes here!\n";
   }
   
-  if (job->xyz==NULL) return lambdaHookFilterGather(job);
+  if (job->xyz==NULL) return lambdaHookFilterGather(NULL,job,GATHER_SCATTER_DECL);
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
 \t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
 \t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\

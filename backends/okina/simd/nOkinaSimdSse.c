@@ -69,9 +69,9 @@ char* nOkinaSseNextCell(int direction){
 // ****************************************************************************
 // * Gather pour un job sur les cells
 // ****************************************************************************
-static char* nOkinaSseGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaSseGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
   // Phase de déclaration
-  if (phase==enum_phase_declaration)
+  if (phase==GATHER_SCATTER_DECL)
     return strdup("register int __attribute__((unused)) cw,ia,ib;");
   // Phase function call
   char gather[1024];
@@ -95,9 +95,9 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather pour un job sur les nodes
 // * En SSE, le gather aux nodes N'est PAS le même qu'aux cells
 // ****************************************************************************
-static char* nOkinaSseGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaSseGatherNodes(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
+  if (phase==GATHER_SCATTER_DECL){
     return strdup("int nw;");
   }
   // Phase function call
@@ -129,7 +129,7 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\t\t\t\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaSseGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaSseGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return nOkinaSseGatherCells(job,var,phase);
   if (itm=='n') return nOkinaSseGatherNodes(job,var,phase);

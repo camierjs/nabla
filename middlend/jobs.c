@@ -415,8 +415,9 @@ void nMiddleJobFill(nablaMain *nabla,
   if (!job->return_type){ // Pas de 'void', pas de nom, on en créé un
     const char* kName=mkktemp("kernel");
     job->has_to_be_unlinked=true;
+    dbg("\n\n\t////////////////////////////////////////////////////////");
     dbg("\n\t[nMiddleJobFill] kName is '%s'", kName);
-    //char name[16]="nablaKernelABCD";
+   //char name[16]="nablaKernelABCD";
     //name[11]='A'+rand()%25;
     //name[12]='A'+rand()%25;
     //name[13]='A'+rand()%25;

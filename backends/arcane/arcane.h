@@ -44,7 +44,7 @@
 #define _NABLA_ARCANE_H_
 
 char *nccArcBits(void);
-char* nccArcGather(nablaJob*,nablaVariable* var, enum_phase phase);
+char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
 char* nccArcScatter(nablaVariable* var);
 
 char* nccArcSystemPrefix(void);

@@ -149,7 +149,7 @@ void ini(void) @ -10.0{
   δt_courant=option_δt_courant;
 }
 
-∀ nodes @ -12.0{
+∀ nodes @ -12.0 {
   coord *= (option_chaos)?option_chaos_seed:1.0;
 }
 
@@ -295,7 +295,7 @@ void timeIncrement(void) @ 0.1 {
   //const ℝ chaos = (((ℝ)uid)+1.0)*option_chaos_seed;
   ∀ node x[n] = coord;
   //∀ node xd[n] = (option_chaos)?chaos:𝜕x;  
-  ∀ node xd[n] = 𝜕x;  
+  ∀ node xd[n] = 𝜕x;
   dvd[0]=𝜕Volume(x[1],x[2],x[3],x[4],x[5],x[7]);
   dvd[3]=𝜕Volume(x[0],x[1],x[2],x[7],x[4],x[6]);
   dvd[2]=𝜕Volume(x[3],x[0],x[1],x[6],x[7],x[5]);

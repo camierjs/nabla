@@ -79,9 +79,9 @@ char* nOkinaMicNextCell(int direction){
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration)
+  if (phase==GATHER_SCATTER_DECL)
     return strdup("register int __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;");
   // Phase function call
   char gather[1024];
@@ -109,9 +109,9 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var, enum_phase phase){ 
+static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
   // Phase de déclaration
-  if (phase==enum_phase_declaration){
+  if (phase==GATHER_SCATTER_DECL){
     return strdup("int nw;");
   }
   // Phase function call
@@ -153,7 +153,7 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],%s\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaMicGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* nOkinaMicGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return nOkinaMicGatherCells(job,var,phase);
   if (itm=='n') return nOkinaMicGatherNodes(job,var,phase);

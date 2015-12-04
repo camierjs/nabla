@@ -49,7 +49,7 @@ char *nccArcBits(void){return "";}
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nccArcGather(nablaJob* job,nablaVariable* var, enum_phase phase){
+char* nccArcGather(nablaJob* job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   return "";
 }
 

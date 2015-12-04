@@ -906,8 +906,8 @@ nabla_job_decl
 ;
 
 nabla_job_definition
-//: nabla_job_decl ',' unary_expression assignment_operator assignment_expression ';' {job;}
-: nabla_job_decl compound_statement {job;}
+: nabla_job_decl ',' unary_expression assignment_operator assignment_expression ';' {job;}
+| nabla_job_decl compound_statement {job;}
 | nabla_job_decl nabla_parameter_list compound_statement {job;}
 | nabla_job_decl AT at_constant compound_statement {job;}
 | nabla_job_decl AT at_constant IF '(' constant_expression ')' compound_statement {job;}

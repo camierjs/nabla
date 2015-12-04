@@ -45,9 +45,9 @@
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* cuGatherCells(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration) return "";
+  if (phase==GATHER_SCATTER_DECL) return "";
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
@@ -70,9 +70,9 @@ gather%sk(cell_node[n*NABLA_NB_CELLS+tcid],\n\t\t\t\
 // ****************************************************************************
 // * Gather for Nodes
 // ****************************************************************************
-static char* cuGatherNodes(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherNodes(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration) return "";
+  if (phase==GATHER_SCATTER_DECL) return "";
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
@@ -100,9 +100,9 @@ gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
 // ****************************************************************************
 // * Gather for Faces
 // ****************************************************************************
-static char* cuGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase){
+static char* cuGatherFaces(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
-  if (phase==enum_phase_declaration) return "";
+  if (phase==GATHER_SCATTER_DECL) return "";
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\
@@ -124,7 +124,7 @@ static char* cuGatherFaces(nablaJob *job, nablaVariable* var, enum_phase phase){
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* cuHookGather(nablaJob *job,nablaVariable* var, enum_phase phase){
+char* cuHookGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return cuGatherCells(job,var,phase);
   if (itm=='n') return cuGatherNodes(job,var,phase);
@@ -180,12 +180,12 @@ char* cuHookFilterGather(nablaJob *job){
   // S'il reste rien après le filtre, on a rien d'autre à faire
   if (filteredNbToGather==0) return "";
   
-  strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_declaration));
+  strcat(gathers,job->entity->main->call->simd->gather(job,var,GATHER_SCATTER_DECL));
   
   for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
     // Si c'est pas le gather de l'ordre de la déclaration, on continue
     if (i!=job->parse.iGather) continue;
-    strcat(gathers,job->entity->main->call->simd->gather(job,var,enum_phase_function_call));
+    strcat(gathers,job->entity->main->call->simd->gather(job,var,GATHER_SCATTER_CALL));
     // On informe la suite que cette variable est en train d'être gatherée
     nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables,
                                                      var->name);

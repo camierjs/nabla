@@ -277,6 +277,7 @@ bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
 int nMiddleVariableGmpDumpNumber(nablaVariable*);
 void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
 void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
+bool dfsUsedInThisForall(nablaMain*,nablaJob*,astNode*,const char*);
 
 // nMiddleType
 nablaType *nMiddleTypeNew(void);

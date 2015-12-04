@@ -108,7 +108,7 @@ void %s(",item_var_name,global_var_name,job_name);
   
   nablaVariable *local_var=nMiddleVariableFind(nabla->variables, item_var_name);
   assert(local_var);
-  nprintf(nabla, NULL, ",const %s* %s_%s",
+  nprintf(nabla, NULL, ",const %s* __restrict__ %s_%s",
           local_var->type,
           local_var->item,
           local_var->name);
