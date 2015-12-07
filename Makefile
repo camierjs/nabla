@@ -65,7 +65,7 @@ install:bin
 # TESTs Commands #
 ##################
 tst:
-	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j 4) # --schedule-random -j $(NUMBR_PROCS))
+	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS))
 test:tst
 tst1:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1)

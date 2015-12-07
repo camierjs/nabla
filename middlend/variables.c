@@ -126,6 +126,7 @@ bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k) {
  */
 nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
   nablaVariable *variable=variables;
+  assert(name!=NULL);
   //dbg("\n\t[nablaVariableFind] looking for '%s'", name);
   // Some backends use the fact it will return NULL
   //assert(variable != NULL);  assert(name != NULL);
@@ -307,9 +308,16 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
 bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char *name){
   nablaVariable *var=NULL;
   if (n==NULL) return false;
-  if (n->ruleid==rulenameToId("primary_expression"))
-    if ((var=nMiddleVariableFind(nabla->variables,n->children->token))!=NULL)
-      if (strcmp(var->name,name)==0) return true;
+  if (n->ruleid==rulenameToId("primary_expression")){
+    //dbg("\n\t\t\t\t\t[dfsUsedInThisForall] primary_expression");
+    if (n->children->token!=NULL){
+      //dbg(", token: '%s'",n->children->token?n->children->token:"id");
+      if ((var=nMiddleVariableFind(nabla->variables,n->children->token))!=NULL){
+        //dbg(", var-name: '%s' vs '%s'",var->name,name);
+        if (strcmp(var->name,name)==0) return true;
+      }
+    }
+  }
   if (n->children != NULL) if (dfsUsedInThisForall(nabla, job, n->children,name)) return true;
   if (n->next != NULL) if (dfsUsedInThisForall(nabla, job, n->next,name)) return true;
   return false;

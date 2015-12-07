@@ -136,11 +136,8 @@ static char* lambdaHookGatherFaces(nablaJob *job,
   char gather[1024];
   snprintf(gather, 1024, "\
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\
-\n\t\t\tnw=n;\
-\n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NB_FACES*nw+f],\
-\n\t\t\t\t\t%s\
-\n\t\t\t\t\t%s_%s,\
-\n\t\t\t\t\t&gathered_%s_%s);\n\t\t\t",
+\n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NB_FACES*n+f],%s\
+\n\t\t\t\t\t%s_%s, &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3", var->item, var->name, // ligne #1
            strcmp(var->type,"real")==0?"real":"real3", strcmp(var->type,"real")==0?"":"3", // ligne #3
            var->dim==0?"":"Array8", // fin ligne #3
@@ -174,21 +171,25 @@ char* lambdaHookGather(nablaJob *job,nablaVariable* var,
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
 char* lambdaHookFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
-  char *gather_src_buffer;
+  char *gather_src_buffer=NULL;
   
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
     nablaError("[lambdaHookFilterGather] Could not malloc our gather_src_buffer!");
 
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+    dbg("\n\t\t\t\t[lambdaHookFilterGather] var '%s'", var->name);
     if (!var->is_gathered) continue;
-    if (n!=NULL) if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)) continue;
+    if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)) continue;
     nprintf(job->entity->main, NULL,
             "\n\t\t// gather %s for variable '%s'",
             (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
             var->name);
+    dbg("\n\t\t\t\t[lambdaHookFilterGather] strcat");
     strcat(gather_src_buffer,
            job->entity->main->call->simd->gather(job,var,phase));
   }
+  dbg("\n\t\t\t\t[lambdaHookFilterGather] gather_src_buffer='%s'",
+      gather_src_buffer?gather_src_buffer:"NULL");
   return gather_src_buffer;
 }
 
