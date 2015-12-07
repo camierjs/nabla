@@ -1,0 +1,176 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DESROZIERS Sylvain - Sylvain.Dezrosiers@ifpen.fr          //
+//                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
+//                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+void init(void) @ -20.0{
+   δt=option_δt_initial;
+}
+
+∀ cells @ -10.0 {
+  cell_uid=uid;
+}
+
+∀ cells @ -10.0 {
+  cell_center=0;
+  ∀ node cell_center+=coord;
+  cell_center/=nbNode;
+}
+
+∀ faces @ -10.0 {
+  face_center=0;
+  ∀ node {
+    //info()<<"[initFaceCenters] coord[#"<<#<<"]="<<coord;
+    face_center+=coord;
+  }
+  face_center/=nbNode;
+}
+
+∀ faces @ -10.0 {
+  const ℝ³ s0 = coord[0];
+  const ℝ³ s1 = coord[1];
+  const ℝ³ s2 = coord[2];
+  const ℝ³ a = s1-s0;
+  const ℝ³ b = s2-s0;
+  face_measure=½*norm(a⨯b);
+}
+
+∀ faces @ -10.0 {
+  const ℝ³ s0 = coord[0];
+  const ℝ³ s1 = coord[1];
+  const ℝ³ s2 = coord[2];
+  const ℝ³ a = s1-s0;
+  const ℝ³ b = s2-s0;
+  const ℝ³ axb=a⨯b;
+  face_normal=axb/norm(axb);
+}
+
+∀ cells @ -9.0 {
+  const ℝ³ s = coord[0];
+  const ℝ³ center = cell_center;
+  const ℝ³ h = center-s;
+  const ℝ x = 2.0*h.x;
+  const ℝ y = 2.0*h.y;
+  const ℝ z = 2.0*h.z;
+  cell_measure=x*y*z;
+}
+
+∀ cells @ -10.0 {
+  porosity=option_ini_porosity;
+}
+
+∀ cells @ -10.0 {
+  const ℝ p=option_ini_permeability;
+  permeability=Real3x3(ℝ³(  p, 0.0, 0.0),
+                       ℝ³(0.0,   p, 0.0),
+                       ℝ³(0.0, 0.0,   p));
+}
+
+∀ cells @ -10.0 {
+  water_saturation=1.0;
+  oil_saturation=0.0;
+}
+
+∀ cells @ -10.0 {
+  oil_density=option_ini_oil_density;
+}
+
+∀ cells @ -10.0 {
+  water_density=option_ini_water_density;
+}
+
+∀ cells @ -10.0 {
+  oil_viscosity=option_ini_oil_viscosity;
+}
+
+∀ cells @ -10.0 {
+  water_viscosity=option_ini_water_viscosity;
+}
+
+∀ outer faces @ -9.0 {
+  //if (this is isInner) continue;
+  const ℝ³ nF = face_normal;
+  //info()<<"[initOuterCellTransmissivity] nF["<<uid<<"]="<<nF;
+  const ℝ³ C0 = cell_center[0];
+  //info()<<"[initOuterCellTransmissivity] C0["<<uid<<"]="<<C0;
+  const ℝ³ CF = face_center;
+  const ℝ³ s0F = CF-C0;
+  const ℝ d0F1 = s0F⋅s0F;
+  //info()<<"[initOuterCellTransmissivity] d0F1["<<uid<<"]="<<d0F1;
+  const ℝ d0F2 = fabs(s0F⋅nF);
+  const ℝ³⨯ℝ³ k0 = permeability[0];
+  const ℝ nFnF =  nF⋅nF;
+  const ℝ cos2 =  (d0F2*d0F2)/(d0F1*nFnF);
+  const ℝ tau = (nF⋅(k0⨂nF))/d0F2;
+  transmissivity = tau*cos2;
+}
+
+
+∀ inner faces @ -7.0 {
+  const ℝ³ nF = face_normal;
+  const ℝ³ C0 = cell_center[backCell];
+  const ℝ³ C1 = cell_center[frontCell];
+  const ℝ³ CF = face_center;
+  const ℝ³ s0F = CF-C0;
+  const ℝ³ s1F = CF-C1;
+  const ℝ³ s01 = C1-C0;
+  const ℝ d0F = fabs(s0F⋅nF);
+  const ℝ d1F = fabs(s1F⋅nF);
+  const ℝ d01 = s01⋅s01;
+  const ℝ³⨯ℝ³ k0 = permeability[backCell];
+  const ℝ³⨯ℝ³ k1 = permeability[frontCell];
+  const ℝ t0 = (nF⋅(k0⨂nF))/d0F;
+  const ℝ t1 = (nF⋅(k1⨂nF))/d1F;
+  const ℝ nFnF = nF⋅nF;
+  const ℝ cos2 = (d0F+d1F)*(d0F+d1F)/(d01*nFnF);
+  const ℝ tau  = fabs(t0+t1)?(t0*t1/(t0+t1))*cos2:0.0;
+  transmissivity = tau;
+}
+
+//void exitHere(void) @ -7.0{exit;}

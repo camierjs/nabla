@@ -1,0 +1,131 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DESROZIERS Sylvain - Sylvain.Dezrosiers@ifpen.fr          //
+//                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
+//                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// *************************************
+// * Now computeExplicitWaterSaturation
+// *************************************
+∀ cells @ 6.0/1.0 {
+  water_saturation_local=water_saturation;
+}
+
+
+∀ inner faces @ WATER_SATURATION_HLT/2.0 {
+  const ℝ velocity = total_velocity;
+  const ℝ wfrac_flow = (velocity > 0.) ?
+    water_mobility[frontCell]/total_mobility[frontCell]:
+    water_mobility[backCell]/total_mobility[backCell];
+  const ℝ tmp = velocity*wfrac_flow*δt;
+  const ℝ tmpf = tmp/(cell_measure[frontCell]*porosity[frontCell]);
+  const ℝ tmpb = tmp/(cell_measure[backCell]*porosity[backCell]);
+  water_saturation_local[frontCell] -= tmpf;
+  water_saturation_local[backCell]  += tmpb;
+}
+
+
+∀ own outer faces @ WATER_SATURATION_HLT/3.0 {
+  if ((face_center.x!=option_bc_Xmin) &&
+      (face_center.x!=option_bc_Xmax)) continue;
+  const ℝ velocity = ((this) is isSubDomainBoundaryOutside)?-total_velocity:+total_velocity;
+  const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
+  if (velocity < 0.0) { // Injection d'huile
+    const ℝ local_water_mobility = krw(0.0) / water_viscosity[0];
+    const ℝ local_oil_mobility = krw(1.0) / oil_viscosity[0];
+    const ℝ mobility = local_water_mobility + local_oil_mobility;
+    const ℝ wfrac_flow = water_mobility[0] / mobility;
+    water_saturation_local[0] += wfrac_flow * tmp;
+  } else {
+    const ℝ wfrac_flow = water_mobility[0] / total_mobility[0];
+    water_saturation_local[0] -= wfrac_flow * tmp;
+  }
+}
+
+
+void flushRedoWithASmallerTimeStep(void) @ WATER_SATURATION_HLT/4.0 {
+  redo_with_a_smaller_time_step = 1;
+}
+
+
+∀ cells @ WATER_SATURATION_HLT/4.1 if (option_debug) {
+  const ℝ water_saturation_local_unglitched =
+    (fabs(water_saturation_local)<10.0*ε)?0.0:water_saturation_local;  
+  /*info()<< "\33[33m[dumpWaterSaturation] water_saturation_local_unglitched["
+    << uid<<"]="<<water_saturation_local_unglitched<<"\33[m";*/
+}
+
+∀ cells water_saturation_min <?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
+∀ cells water_saturation_max >?= water_saturation_local @ WATER_SATURATION_HLT/5.0;
+
+
+void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
+  /*info()<< "\33[36m[computeExplicitWaterSaturation] "
+        << "water_saturation_min="<<water_saturation_min
+        << ", water_saturation_max="<<water_saturation_max
+        <<"\33[m";*/
+    //printf("\n*I-darcy      \33[36m[computeExplicitWaterSaturation] water_saturation: min=%.15f, max=%.15f\33[m\n", water_saturation_min, water_saturation_max);
+  if ((water_saturation_max <= 1.0) && (water_saturation_min >= 0.0))
+    //if ((rrε <= 0.0) && (water_saturation_min >= 0.0))
+    redo_with_a_smaller_time_step=0;
+  else{
+    /*info()<< "\33[31m[computeExplicitWaterSaturation] "
+      << "Redoing with a smaller time step: "<<δt<<"\33[m";*/
+    δt=½*δt;
+  }
+}
+
+
+∀ cells @ WATER_SATURATION_HLT/7.0   
+  if (redo_with_a_smaller_time_step==0) {
+    //if (uid==0) info()<< "\33[33m[dupWaterSaturationLocalToTn] !\33[m";
+    water_saturation = water_saturation_local;
+}
+
+
+void testForQuitSaturation(void) @ WATER_SATURATION_HLT/8.0 {
+  if (redo_with_a_smaller_time_step==0){
+    //info()<< "\33[33m[testForQuitSaturation] Now exit from this HLT level!\33[m";
+    exit;
+  }
+}

@@ -1,0 +1,90 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DESROZIERS Sylvain - Sylvain.Dezrosiers@ifpen.fr          //
+//                 LELANDAIS Benoit - Benoit.Lelandais@cea.fr                //
+//                 OUDOT Marie-Pierre - Marie-Pierre.Oudot@cea.fr            //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+
+void computePressureRhsInit(void) @ 4.0{
+  alephInitialize();
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
+
+∀ own cells @ 4.1 {
+  ℵ rhs addValue(pressure,this,0.0);
+}
+
+∀ inner faces @ 4.2 {
+  const ℝ value = ½*transmissivity*
+    (total_mobility[backCell]+total_mobility[frontCell]);
+  if (backCell is own){
+    ℵ matrix addValue(pressure,backCell, pressure,backCell,  +value);
+    ℵ matrix addValue(pressure,backCell, pressure,frontCell, -value);
+  }
+  if (frontCell is own){
+    ℵ matrix addValue(pressure,frontCell, pressure,frontCell, +value);
+    ℵ matrix addValue(pressure,frontCell, pressure,backCell,  -value);
+  } 
+}
+
+∀ own outer faces @ 4.3 {
+  if ((face_center.x!=option_bc_Xmin)&&
+      (face_center.x!=option_bc_Xmax)) continue;
+  const ℝ value = transmissivity*(total_mobility[0]);
+  const ℝ boundary_pressure =
+    (face_center.x==option_bc_Xmin)?option_bc_Xmin_pressure:
+    (face_center.x==option_bc_Xmax)?option_bc_Xmax_pressure:-∞;
+  assert(boundary_pressure>=0.0);
+  if (!(cell(0) is own)) continue;
+  ℵ matrix addValue(pressure,cell(0), pressure,cell(0), +value);
+  ℵ rhs addValue(pressure,cell(0),value*boundary_pressure);
+}
+
+void solvePressure(void) @ 4.4 { ℵ solve; }
+
+∀ own cells @ 4.5{
+  pressure=ℵ lhs getValue(pressure, this);
+  assert(pressure>=0.0);
+}
+
