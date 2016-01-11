@@ -48,7 +48,8 @@
 // * Now computeExplicitWaterSaturation
 // *************************************
 ∀ cells void dupWaterSaturationTolocal(void)
-  in (cell water_saturation) out (cell water_saturation_local) @ 6.0/1.0 {
+  in (cell water_saturation)
+  out (cell water_saturation_local) @ WATER_SATURATION_HLT/1.0 {
   water_saturation_local=water_saturation;
 }
 

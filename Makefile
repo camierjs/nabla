@@ -171,6 +171,8 @@ tstalg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_gen_1)
 tstagr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
+tstag2Dr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace2D_run_1)
 tstaglcr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glc_run_1)
 tsthas:
