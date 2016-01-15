@@ -88,9 +88,9 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
 }
 
 
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_* avec XYZ
- *****************************************************************************/
+// *************************************************************
+// * Fonction produisant l'ENUMERATE_* avec XYZ
+// *************************************************************
 char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
   char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
@@ -110,23 +110,78 @@ char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
 }
 
 
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_*
- *****************************************************************************/
+// *************************************************************
+// * arcaneHookDumpAnyEnumerate
+// *************************************************************
+static char *arcaneHookDumpAnyEnumerate(nablaJob *job){
+  char *str=calloc(NABLA_MAX_FILE_NAME,1);
+  sprintf(str,"%s","\
+AnyItem::Family family;\
+\n\tfamily ");
+  for(char *p=job->item_set;*p!=0;p+=5){
+    char item[6];
+    item[0]=p[0]-32; // Majuscule
+    item[1]=p[1];    // recopie de l'item en cours
+    item[2]=p[2];
+    item[3]=p[3];
+    item[4]=p[4];
+    item[5]=0;
+    strcat(str," << AnyItem::GroupBuilder(all");strcat(str,item);strcat(str,"())");
+  }
+  strcat(str,";");
+  strcat(str,"\n\tAnyItem::Variable");
+  
+  for(nablaVariable *variable=job->used_variables;
+      variable != NULL; variable = variable->next){
+    if (variable->item[0]=='g') continue;
+    if (variable->dim>0) strcat(str,"Array");
+    break;
+  }
+  
+  strcat(str,"<Real> anyone(family);");
+  for(nablaVariable *variable=job->used_variables;
+       variable != NULL; variable = variable->next){
+    if (variable->item[0]=='g') continue;
+    for(char *p=job->item_set;*p!=0;p+=5){
+      char item[5];
+      item[0]=p[0]-32;// Majuscule
+      item[1]=p[1];   // recopie de l'item en cours
+      item[2]=p[2];
+      item[3]=p[3];
+      item[4]=p[4];
+      item[5]=0;
+      strcat(str,"\n\tanyone[all");strcat(str,item);strcat(str,"()] << m_");
+      item[0]=p[0];
+      item[4]=0;      //on enlève le 's'
+      strcat(str,item);
+      strcat(str,"_");
+      strcat(str,variable->name);
+      strcat(str,";");
+    }
+  }  
+  strcat(str,"\n\tENUMERATE_ANY_ITEM(iitem,family.allItems())");
+  return str;
+}
+
+
+// *************************************************************
+// * Fonction produisant l'ENUMERATE_*
+// *************************************************************
 char* arcaneHookDumpEnumerate(nablaJob *job){
   char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   char *xyz=job->xyz;// Direction
   char forall_item=job->forall_item;
-//#warning Should avoid testing NULL and [0]!
+  //#warning Should avoid testing NULL and [0]!
   if (xyz!=NULL) return arcaneHookDumpEnumerateXYZ(job);
+  if (job->nb_in_item_set>0) return arcaneHookDumpAnyEnumerate(job);
   //if (funcRegion!=NULL) funcRegion[0]-=32; // Si on a une région, on inner|outer => Inner|Outer
   dbg("\n\t[arcaneHookDumpEnumerate] forall_item='%c'", forall_item);
   // Pour une fonction, on fait rien ici
   if (itm=='\0') return "";
 
-  if (itm=='c' && forall_item=='c')          return "ENUMERATE_ITEMPAIR(Cell,Cell,cell,cells_pairgroup)";
+  if (itm=='c' && forall_item=='c')           return "ENUMERATE_ITEMPAIR(Cell,Cell,cell,cells_pairgroup)";
   if (itm=='p' && grp==NULL && rgn==NULL)     return "ENUMERATE_PARTICLE(particle,m_particle_family->allItems())";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "ENUMERATE_CELL(cell,allCells())";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_CELL(cell,innerCells())";

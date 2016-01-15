@@ -54,7 +54,8 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   assert(job != NULL);
   job->is_an_entry_point=false;
   job->is_a_function=false;
-  job->scope=job->region=job->item=job->name=job->xyz=job->direction=NULL;
+  job->nb_in_item_set=0;
+  job->scope=job->region=job->item=job->item_set=job->name=job->xyz=job->direction=NULL;
   job->at[0]=0;
   job->when_sign=1.0;// permet de gérer les '-' pour les '@'
   job->when_index=0; // permet de gérer les ',' pour les '@'
@@ -398,6 +399,7 @@ void nMiddleJobFill(nablaMain *nabla,
                     nablaJob *job,
                     astNode *n,
                     const char *namespace){
+  char *set=calloc(NABLA_MAX_FILE_NAME,1);
   int numParams=0;
   astNode *nd;
   job->is_a_function=false;
@@ -407,6 +409,9 @@ void nMiddleJobFill(nablaMain *nabla,
   job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
   job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
   job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
+  // On va chercher tous les items de l'ensemble, on stop au token SET_END
+  job->item_set = dfsFetchAll(n->children->children,rulenameToId("nabla_items"),
+                              &job->nb_in_item_set,set);
   assert(job->item);
   // On test en DFS dans le nabla_job_decl pour voir s'il y a un type retour
   job->return_type = dfsFetchFirst(n->children->children,rulenameToId("type_specifier"));
@@ -427,12 +432,17 @@ void nMiddleJobFill(nablaMain *nabla,
     job->name_utf8 = strdup(nd->token_utf8);
   }
   dbg("\n\n* Nabla Job: %s", job->name); // org-mode job name
-  dbg("\n\t// * [nablaJobFill] Kernel named '%s'", job->name);
+  dbg("\n\t[nablaJobFill] Kernel named '%s', on item '%s', item_set=%s",
+      job->name,job->item,job->item_set);
+  dbg("\n\t[nablaJobFill] Kernel item set idx=%d, job->item_set=%s, set=%s",
+      job->nb_in_item_set,
+      job->item_set,
+      set);
   //dbg("\n\t// **********************************************************************");
   
   // Scan DFS pour récuérer les in/inout/out
   // Et on dump dans le log les tokens de ce job
-  dbg("\n\t[nablaJobFill] Now dfsVariables...");
+  dbg("\n\t[nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
   dfsVariablesDump(nabla,job,n);
   

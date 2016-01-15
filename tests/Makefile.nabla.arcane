@@ -127,4 +127,6 @@ cln:
 # DOT 2 PNG #
 #############
 png:
-	dot -Tpng $(TGT).dot -o $(TGT).png
+	dot -v -Tpng $(TGT).dot -O #$(TGT).png
+gthumb:
+	gthumb . 2>/dev/null 

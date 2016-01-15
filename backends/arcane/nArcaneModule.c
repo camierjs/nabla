@@ -50,6 +50,7 @@ NABLA_STATUS nccArcaneEntityHeader(nablaMain *arc){
   fprintf(arc->entity->src,"#include \"%s%s%s.h\"\
 \n#include <arcane/IParallelMng.h>\
 \n#include <arcane/ITimeLoopMng.h>\
+\n#include <arcane/anyitem/AnyItem.h>\
 \n#include <arcane/ItemPairGroup.h>\
 \n#include <arcane/ItemPairEnumerator.h>\n\n",
           (isAnArcaneService(arc)

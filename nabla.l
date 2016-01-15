@@ -335,17 +335,9 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 //"nand"          { return tok(&yylval, NAND_OP);}
 //"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
 //"⊻"					{ return tok(&yylval, XOR_OP);}  // Xor 22BB
-//""				{return tok(&yylval, XNOR_OP);}  // Xnor F4A2
 //"⊽"					{ return tok(&yylval, NOR_OP);}  // Nor 22BD
 //"::"				{ return tok(&yylval, NAMESPACE);}
 //∀ ∈ ∃
-
-//"mat"             { return tok(&yylval, MAT);}
-//"env"             { return tok(&yylval, ENV);}
-//"matenv"          { return tok(&yylval, LIB_MATENV);}
-//"material"        { return tok(&yylval, MATERIAL);}
-//"materials"       { return tok(&yylval, MATERIALS);}
-//"environments"    { return tok(&yylval, ENVIRONMENTS);}
 
 // ****************************************************************************
 // * Get rid of line comments

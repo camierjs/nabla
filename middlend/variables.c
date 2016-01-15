@@ -151,23 +151,33 @@ nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain *nabla,
                                                   nablaVariable *variables,
                                                   const char *name){
   //const char cnfg=job->item[0];
+  //const char item = job->item;
   nablaVariable *variable=variables;
   assert(name!=NULL);
+  //if (job->is_a_function) return NULL;
   dbg("\n\t[nMiddleVariableFindWithJobItem] looking for '%s' of type '%s'", name, job->item);
   // Some backends use the fact it will return NULL
   //assert(variable != NULL);  assert(name != NULL);
   while(variable != NULL) {
-    dbg(" ?%s:%s", variable->name,variable->item);
-    if ((strcmp(variable->name, name)==0) &&  // Au moins le meme nom
+    dbg(" ?%s:%s:%s", variable->name,variable->item, job->item);
+    if ((strcmp(variable->name, name)==0) &&  // Au moins le même nom
                                               // ET au choix:
+//#warning choix qui résume les non-homogénéités!
         ((strncmp(variable->item, job->item,4)==0)|| // exactement le même item
-         (variable->item[0]=='g'))){                 // c'est une variable globale
+         (variable->item[0]=='g')||                  // une variable globale
+         (strncmp(variable->name, "coord",5)==0)||   // coord
+         (job->parse.alephKeepExpression==true)||    // aleph expression
+         (job->parse.enum_enum!='\0')||              // une variable sous le foreach
+         (job->is_a_function)||                      // synchronize par exemple
+         (job->item[0]=='p')||                       // particle job
+         (job->parse.isPostfixed!=0))){              // un accès à la boudarie condition 'pressure[0]'
       dbg(" Yes!");
       return variable;
     }
     variable = variable->next;
   }
-  dbg(" Nope!");
+  //dbg(" Nope!");
+  //assert(variable!=NULL);
   return NULL;  
 }
 
@@ -376,20 +386,22 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   }
   
   if (n->ruleid==rulenameToId("primary_expression")){
-    //dbg("\n\t\t\t[dfsVariables] primary_expression!");
+    dbg("\n\t\t\t[dfsVariables] primary_expression!");
     if (n->children->tokenid == IDENTIFIER){
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
       char* token = n->children->token;
       // Est-ce une variable connue?
       nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
+      //nablaVariable *var=nMiddleVariableFindWithSameJobItem(nabla,job,nabla->variables, token);
       if (var!=NULL){ // Si c'est bien un variable
         nablaVariable *new=nMiddleVariableFind(job->used_variables, token);
+        //nablaVariable *new=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, token);
         if (new==NULL){ // Si c'est une variable qu'on a pas déjà placée dans la liste connue
           dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
           // Création d'une nouvelle used_variable
           new = nMiddleVariableNew(NULL);
           new->name=strdup(var->name);
-          new->item=strdup(var->item);
+          new->item=var->item;//strdup((job->nb_in_item_set==0)?var->item:job->item);
           new->type=strdup(var->type);
           new->dim=var->dim;
           new->size=var->size;
@@ -401,8 +413,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
           // c'est qu'il va falloir insérer un gather/scatter
           dbg("\n\t[dfsVariables] new->item='%s' vs job->item='%s'",
               new->item, job->item);
-          if (!job->is_a_function  &&
-              var->item[0]!='g' &&
+          if (!job->is_a_function  && var->item[0]!='g' &&
               (new->item[0]!=job->item[0])){
             dbg("\n\t[dfsVariables] This variable will be gathered in this job!");
             //var->is_gathered=true;

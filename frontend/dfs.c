@@ -103,6 +103,30 @@ char *dfsFetchFirst(astNode *n, int ruleid){
 }
 
 
+
+// ****************************************************************************
+// * DFS scan until a all hit is found
+// ****************************************************************************
+char *dfsFetchAll(const astNode *n, const int ruleid,
+                int *idx,
+                char *rtn){
+  //if (n->ruleid) dbg("\n\t[dfsFetchAll] n->rule=%s",n->rule);
+  if (n->ruleid==ruleid){
+    //dbg("\n\t[dfsFetchAll] HIT rtn=%s",rtn);
+    if (rtn[0]!=0){
+      *idx+=1; // On incrémente idx que si on a déjà un item!
+      //dbg("INC idx!");
+    }
+    strcat(rtn,n->children->token);
+    return NULL;
+  }
+  if (n->children != NULL) dfsFetchAll(n->children, ruleid,idx,rtn);
+  if (n->next != NULL) dfsFetchAll(n->next, ruleid,idx,rtn);
+  //dbg("\n\t\t[dfsFetchAll] returning rtn='%s'", rtn);
+  return rtn;
+}
+
+
 // ****************************************************************************
 // On lance une recherche dfs jusqu'à un token en next 
 // ****************************************************************************

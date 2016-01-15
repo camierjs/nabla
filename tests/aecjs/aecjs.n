@@ -23,8 +23,9 @@ options{
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.000010;
   ℝ option_stoptime= 1.0;
-  ℝ tau =1.0;           
-  ℝ epsilon =0.5*0.5*0.5*0.5*0.5*0.5;         
+  ℝ tau =1.0;
+#warning options 0.5*0.5*0.5*0.5*0.5; 
+  ℝ epsilon =0.5;//*0.5*0.5*0.5*0.5*0.5;         
   ℝ CFL =0.75;  
   Bool option_dump_output = true;          
 };
@@ -41,9 +42,7 @@ cells{
   ℝ cT; 
   ℝ cp1T;
   ℝ center;
-  ℝ cM;
-
-  
+  ℝ cM;  
 };
 
 
@@ -100,7 +99,6 @@ void dbgLoop(void) @ 1.0{
 
 ∀ nodes void flushNodeB(void)@ 1.0{
   nP=nU=0.0;
-
 }
 
 
@@ -113,28 +111,20 @@ void dbgLoop(void) @ 1.0{
   if (n==(NABLA_NB_NODES-1)) continue;
   ℝ r=2*epsilon;
   nU=0.0;
-  ∀ cell
-      {
-        // maille de droite, on ajoute l'invariant de Rieman pour la vp 1
-        if (center>coord)
-          {
-            r+=cM;
-            nU+= cU -cP;            
-            // maille de gauche, on ajoute l'invariant de Rieman pour la vp 1
-          }else
-          {
-            r-=cM;
-            nU += cU + cP ;            
-          }
-    
-      }
+  ∀ cell{
+    // maille de droite, on ajoute l'invariant de Rieman pour la vp 1
+    if (center>coord){
+      r+=cM;
+      nU+= cU -cP;            
+      // maille de gauche, on ajoute l'invariant de Rieman pour la vp 1
+    }else{
+      r-=cM;
+      nU += cU + cP ;            
+    }
+  }
   r=epsilon/r;
-  nU*=r;
-
-  
- 
+  nU*=r; 
 }
-
 
 // ********************************************************
 // nP à  l'intérieur
@@ -157,9 +147,6 @@ void dbgLoop(void) @ 1.0{
   nP*=1/r;
 }
     
-  
-
-
 
 // ********************************************************
 // nU et nP au bord droit
@@ -167,7 +154,6 @@ void dbgLoop(void) @ 1.0{
 ∀ nodes void outer0Loop1(void) 
   in (node nU, node nP/*, node nP, node nU*/)
   out (node nU,node nP)@ 2.4{
-
   if (n!=0) continue;
   nU=0.0;
   nP=0.0;
@@ -177,13 +163,10 @@ void dbgLoop(void) @ 1.0{
     nU+=(cU - cP);
     nP+=(-cU+cP)*(epsilon + nM-nM_moins) ;
     r+=cM;
-    
   }
-  // ********************************************************
   // nU et nP à la "maille fantôme" droite
-  // ********************************************************
   nU+=(U_condlimi(coord-δx*0.5,n_time) + P_condlimi(coord-δx*0.5,n_time));
-    nP+= (U_condlimi(coord-δx*0.5,n_time) + P_condlimi(coord-δx*0.5,n_time))*(epsilon + nM_plus -nM);
+  nP+= (U_condlimi(coord-δx*0.5,n_time) + P_condlimi(coord-δx*0.5,n_time))*(epsilon + nM_plus -nM);
   r+=-nM_moins;
   nP*=1/r;
   nU*=epsilon/r; 
@@ -194,32 +177,23 @@ void dbgLoop(void) @ 1.0{
 // nP et nU au bord gauche
 // ********************************************************
 ∀ nodes void outer0Loop2(void)
-  in (node nU, node nP/*, node nP, node nU*/)
+  in (node nU, node nP)//, node nP, node nU)
   out (node nU, node nP)@ 2.45{
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   if (n!=(NABLA_NB_NODES-1)) continue;
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   nU=0.0;
   nP=0.0;
-  
   ℝ r=2*epsilon;
   ∀ cell{
     if (c==0) continue;
-    
     nU+= (cU + cP);
-    
     nP+= (cU + cP)*(epsilon + nM_plus-nM);
     r+= nM_plus -cM;
   }
-  // ********************************************************
-// nP et nU à la "maille fantôme" gauche
-// ********************************************************
+  // nP et nU à la "maille fantôme" gauche
   nU+=((U_condlimi(coord+δx*0.5,n_time) -P_condlimi(coord+δx*0.5,n_time)));
   nU*=epsilon/r;
   nP+= (-U_condlimi(coord+δx*0.5,n_time)  + P_condlimi(coord+δx*0.5,n_time))*(epsilon +nM-nM_moins);
   nP*=1/r;
-
   n_time+=δt;
 }
 
@@ -230,7 +204,6 @@ void dbgLoop(void) @ 1.0{
 ∀ cells void loop3(void) in (cell cT) @ 2.5{
   const ℝ e1 = (tau*δt)/(epsilon² + 2*tau*δt);
   cp1T = cT - e1*(cT -cP);
-  
 }
 
 
@@ -238,7 +211,8 @@ void dbgLoop(void) @ 1.0{
 // cU partout
 // ********************************************************
 ∀ cells void loop1(void)
-  in (cell cU, cell cp1U,  cell cM /*, node nP, node nU*/)  @ 2.6{
+  in (cell cU, cell cp1U,  cell cM //, node nP, node nU
+      )  @ 2.6{
   const ℝ δtSx = δt/(epsilon*δx);
   cp1U = cU;
   ∀ node {    
@@ -254,7 +228,6 @@ void dbgLoop(void) @ 1.0{
 // ********************************************************
 // cP  partout
 // ********************************************************
-
 ∀ cells void loop2(void)
   in (cell cU, cell cP, cell cM) @ 2.61{
   const ℝ δtSx = δt/(epsilon*δx);
@@ -269,15 +242,12 @@ void dbgLoop(void) @ 1.0{
   }  
 } 
 
-  
-// Copy results
+  // Copy results
 ∀ cells  void copyResults(void) in (cell cU, cell cP,cell cT ) @ 2.7{
   cU = cp1U;
   cP = cp1P;
   cT= cp1T;  
 }
-
-
 
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
@@ -291,9 +261,7 @@ void dbgLoop(void) @ 1.0{
 
 ∀ cells void dumpOutput(void) in (cell cU, cell cP, cell cT, cell cM){
   if  (center!=0.005) continue;
-  output << n_time
-    //<< "\t" << cU
-         << "\t" << cU
+  output << n_time         << "\t" << cU
          << "\t" << cT-cP
          << "\n";
   
@@ -302,24 +270,19 @@ void dbgLoop(void) @ 1.0{
 void tstForQuit(void) @ 4.0 {
   //printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
   //    GlobalIteration, time,(double)δt);
-
   if (option_dump_output){
     dumpOutput();
     output << "\n";
-    }
-  
+  }
   // file(resultsvstime ,plot);
   // dumpVsTimeSolution(resultsvstime);
- if ((time<(option_stoptime-δt))) return;
-  
+  if ((time<(option_stoptime-δt))) return;
   if (option_dump_output){
     file(results,plot);
     //printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
     dumpSolution(results);
   }else printf("\n");
-   
   exit;
 }
-
 

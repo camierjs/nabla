@@ -193,7 +193,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // *****************************************************************************
 #define superNP1(lhs,ident)                                           \
   char *dest;                                                         \
-  dest=malloc(1024);                                                        \
+  dest=malloc(1024);                                                  \
   dest=strcat(dest,ident->token);                                     \
   dest=strcat(dest,"np1");                                            \
   astNode *superNP1Node=astNewNode();                                 \

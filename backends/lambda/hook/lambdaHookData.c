@@ -408,7 +408,8 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
   if (var == NULL) return NULL;
 
   // On récupère la variable de ce job pour ces propriétés
-  nablaVariable *used=nMiddleVariableFind(job->used_variables, n->token);
+  //nablaVariable *used=nMiddleVariableFind(job->used_variables, n->token);
+  nablaVariable *used=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, n->token);
   assert(used);
   
   dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);

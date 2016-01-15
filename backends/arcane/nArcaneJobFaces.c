@@ -61,10 +61,11 @@ char *faceJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
  forall_node=%d, forall_face=%d, forall_cell=%d",
       scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
 
-  if (scalar && forall_none && !resolve) return "[face->cell";
-  if (scalar && forall_none &&  resolve) return "[face->cell]";
+  if (scalar && forall_none && !resolve) return "[face->cell/*1*/";
+  if (scalar && forall_none &&  resolve) return "[face->cell/*2*/]";
   if (scalar && !forall_none) return "[c";
   if (!scalar) return "[cell][node->cell";
+  if (!scalar&&job->nb_in_item_set>0) return "[cell][node->cell";
 
   nablaError("Could not switch in faceJobCellVar!");
   return NULL;

@@ -142,6 +142,8 @@ typedef struct nablaJobStruct{
   char *scope;
   char *region;
   char *item;
+  char *item_set;
+  int nb_in_item_set;
   char *return_type;
   char *name;
   char *name_utf8;

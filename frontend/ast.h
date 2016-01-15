@@ -72,31 +72,32 @@ typedef struct RuleActionStruct{
 // * Forward declaration of AST functions
 // ****************************************************************************
 astNode *astNewNode(void);
-astNode *astNewNodeRule(const char*, unsigned int);
-astNode *astAddChild(astNode*, astNode*);
-astNode *astAddNext(astNode*, astNode*);
+astNode *astNewNodeRule(const char*,unsigned int);
+astNode *astAddChild(astNode*,astNode*);
+astNode *astAddNext(astNode*,astNode*);
 
 NABLA_STATUS astTreeSave(const char*, astNode*);
-void getInOutPutsNodes(FILE*, astNode *n, char *color);
-void getInOutPutsEdges(FILE*, astNode *n, int inout, char *nName1, char* nName2);
+void getInOutPutsNodes(FILE*,astNode*,char*);
+void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
 
 void dfsUtf8(astNode*);
 void dfsDumpToken(astNode*);
 
-void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc);
-char *dfsFetchFirst(astNode *n, int ruleid);
-astNode *dfsFetch(astNode *n, int ruleid);
+void scanTokensForActions(astNode*, RuleAction*, void*);
+char *dfsFetchFirst(astNode*, int);
+char *dfsFetchAll(const astNode*,const int,int*,char*);
+astNode *dfsFetch(astNode*,int);
 
-astNode *dfsFetchTokenId(astNode *n, int tokenid);
-astNode *dfsFetchToken(astNode *n, const char *token);
-astNode *dfsFetchRule(astNode *n, int ruleid);
-int dfsScanJobsCalls(void *vars, void *nabla, astNode * n);
+astNode *dfsFetchTokenId(astNode*,int);
+astNode *dfsFetchToken(astNode*, const char *);
+astNode *dfsFetchRule(astNode*,int);
+int dfsScanJobsCalls(void*,void*,astNode*);
 
 int yyUndefTok(void);
-int yyTranslate(int tokenid);
-int tokenToId(const char *token);
-int tokenidToRuleid(int tokenid);
-int yyNameTranslate(int tokenid);
-int rulenameToId(const char *rulename);
+int yyTranslate(int);
+int tokenToId(const char*);
+int tokenidToRuleid(int);
+int yyNameTranslate(int);
+int rulenameToId(const char*);
 
 #endif // _NABLA_AST_H_

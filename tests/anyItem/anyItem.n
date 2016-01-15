@@ -59,28 +59,29 @@ global{
 // *************************************************************
 ∀ faces @ -10.0{ variable=1.0; }
 ∀ faces @ -10.0{
-  variable_array[0]=
-    variable_array[1]=
-    variable_array[2]=2.0; }
+  variable_array.fill(1.0);
+}
 
 ∀ cells @ -10.0{ variable=2.0;}
 ∀ cells @ -10.0{
-  variable_array[0]=
-    variable_array[1]=
-    variable_array[2]=2.0;
+  variable_array.fill(2.0);
 }
 
 
 // *************************************************************
-// * test1: ∪|
+// * test1: ∪|+
 // *************************************************************
-void iniValue(void) @ 1.0,2.0{ value=0.0; }
+//void iniValue(void) @ 1.0,2.0{ value=0.0; }
 
+∀ faces @ 1.1{
+  value=value+fct(variable);
+}
 ∀ cells+faces @ 1.1{
   value=value+fct(variable);
 }
 void infoValue(void) @ 1.2{
-  info() << "AnyItem iteration: Value = " << value;
+  info() << "[33mAnyItem items iteration: Value = "
+         << value << "[0m";
 }
 
 ∀ cells+faces @ 2.1{
@@ -88,10 +89,16 @@ void infoValue(void) @ 1.2{
     value=value+fct(variable_array[i]);
 }
 void infoArrayValue(void) @ 2.2{
-  info() << "AnyItem array iteration: Value = " << value;
+  info() << "[33mAnyItem array iteration: Value = "
+         << value << "[0m";
 }
+
+void timeToExit(void) @ 4.0{ exit; }
+
 
 // *************************************************************
 // * fct
 // *************************************************************
-ℝ fct(const ℝ value){ return drand48(); }
+ℝ fct(const ℝ v){ return drand48(); }
+
+

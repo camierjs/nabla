@@ -138,7 +138,7 @@ static bool lambdaHookSwitchForall(astNode *n, nablaJob *job){
     nprintf(job->entity->main, "/* Found AT */", NULL);
   }
   // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
-  #warning SKIP du nabla_item qui nous a renseigné sur le type de forall
+//#warning SKIP du nabla_item qui nous a renseigné sur le type de forall
   *n=*n->next->next;
   return true;
 }

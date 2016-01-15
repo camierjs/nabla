@@ -123,6 +123,8 @@ tstlgg:
 ################
 # ARCANE tests #
 ################
+tstaglocig:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gloci_gen_1)
 tstaanyg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_anyItem_gen_1)
 tstaanyr:
@@ -133,8 +135,6 @@ tstashr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_shydro_run_1)
 tstamr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
-tstaeg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aecjs_gen_1)
 tstadg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_gen_1)
 tstadr:
