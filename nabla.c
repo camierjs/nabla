@@ -157,6 +157,7 @@ NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   if(!(yyin=fopen(npFileName,"r")))
     return NABLA_ERROR | dbg("\n[nablaParsing] Could not open '%s' file",
                              npFileName);
+  dbg("\n* nablaParsing");
   dbg("\n[nablaParsing] Starting parsing");
   if (yyparse(&root)){
     fclose(yyin);
@@ -327,6 +328,7 @@ int main(int argc, char * argv[]){
     case 'v': // DEBUG MANAGEMENT
       if (dbgSet(DBG_ALL) == DBG_OFF) return NABLA_ERROR;
       dbgOpenTraceFile(optarg);
+      dbg("* Command line\n"); // org mode first item
       dbg("[nabla] Command line specifies debug file: %s", optarg);
       break;
       

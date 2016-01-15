@@ -144,7 +144,8 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
   //bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
   //int isPostfixed=job->parse.isPostfixed;
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
-  nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
+  //nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
+  nablaVariable *var=nMiddleVariableFindWithSameJobItem(arc,job,arc->variables, n->token);
   //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");
       
   // Si on ne trouve pas de variable, on a rien à faire

@@ -267,6 +267,8 @@ nablaVariable *nMiddleVariableNew(nablaMain*);
 nablaVariable *nMiddleVariableAdd(nablaMain*,nablaVariable*);
 nablaVariable *nMiddleVariableLast(nablaVariable*);
 nablaVariable *nMiddleVariableFind(nablaVariable*,char*);
+nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain*,nablaJob*,
+                                                  nablaVariable*,const char*);
 what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
                                                          astNode*,
                                                          const char,

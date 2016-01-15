@@ -121,9 +121,9 @@ bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k) {
 }
 
 
-/*
- * findTypeName
- */
+// *************************************************************
+// * nMiddleVariableFind
+// *************************************************************
 nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
   nablaVariable *variable=variables;
   assert(name!=NULL);
@@ -140,6 +140,35 @@ nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
   }
   //dbg(" Nope!");
   return NULL;
+}
+
+
+// *************************************************************
+// * nMiddleVariableFindWithJobItem
+// *************************************************************
+nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain *nabla,
+                                                  nablaJob *job,
+                                                  nablaVariable *variables,
+                                                  const char *name){
+  //const char cnfg=job->item[0];
+  nablaVariable *variable=variables;
+  assert(name!=NULL);
+  dbg("\n\t[nMiddleVariableFindWithJobItem] looking for '%s' of type '%s'", name, job->item);
+  // Some backends use the fact it will return NULL
+  //assert(variable != NULL);  assert(name != NULL);
+  while(variable != NULL) {
+    dbg(" ?%s:%s", variable->name,variable->item);
+    if ((strcmp(variable->name, name)==0) &&  // Au moins le meme nom
+                                              // ET au choix:
+        ((strncmp(variable->item, job->item,4)==0)|| // exactement le même item
+         (variable->item[0]=='g'))){                 // c'est une variable globale
+      dbg(" Yes!");
+      return variable;
+    }
+    variable = variable->next;
+  }
+  dbg(" Nope!");
+  return NULL;  
 }
 
 

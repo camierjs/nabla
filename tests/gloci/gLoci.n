@@ -1,0 +1,162 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+options{
+  ℝ γ = 1.4;
+  ℝ option_x_min = 0.0;
+  ℝ option_x_interface = 0.5;
+  ℝ option_x_max = 1.0;
+  ℝ option_y_min = 0.0;
+  ℝ option_y_max = 4.0;
+  ℝ option_δt_ini = 0.00001;
+  ℝ option_δt_min = 1e-12;
+  ℝ option_δt_max = 0.01;
+  ℝ option_δt_end = 0.2;
+  ℝ option_δt_cfl = 0.15;
+  ℝ option_δt_min_variation = 0.99;
+  ℝ option_δt_max_variation = 0.10;
+  ℾ option_δt_last_exact = true;
+  ℕ option_max_iterations = 32768;
+  ℝ option_ini_zg_ρ = 1.0;
+  ℝ option_ini_zd_ρ = 0.125;
+  ℝ option_ini_zg_p = 1.0; 
+  ℝ option_ini_zd_p = 0.1;
+};
+
+variables{
+  ℝ δt, t;
+  ℝ³ Χ⁰,Χ;  // Positions noeuds et mailles à t=0 et tⁿ
+  ℝ³ u,b;   // Vitesses & Second membre
+ 
+  ℝ e,E;    // Energies
+  ℝ c,m,p⁰,p,ρ⁰,ρ,V⁰,V; // Masse, Pression, Densités, Volume
+  
+  ℝ³ *C,*F;  // Résultantes aux sommets
+  ℝ³⨯ℝ³ *A;  // Matrices de contributions aux sommets
+};
+
+// *************************************************************
+// * Conditions initiales: Ω⁰,ρ⁰,p⁰,V⁰ & m
+// *************************************************************
+∀ j∈cells Χⱼ = ¼*∑ᵣΧ⁰ᵣ;
+∀ cells {
+  if (Χ.x < option_x_interface)){
+    ρ⁰=option_ini_zg_ρ;
+    p⁰=option_ini_zg_p;
+  }else{
+    ρ⁰=option_ini_zd_ρ;
+    p⁰=option_ini_zd_p;
+  }
+}
+∀ j∈cells V⁰ⱼ = ½*∑ᵣCⱼᵣ⋅Χ⁰ᵣ;
+∀ cells m = ρ⁰*V⁰;
+
+// *************************************************************
+// * Calcul des Cjr
+// *************************************************************
+ℝ³ ⟂(const ℝ³ s0, const ℝ³ s1){ return ℝ³(s1.y-s0.y,-s1.x+s0.x,0);}
+∀ j∈cells, ∀ r∈nodes(j) C_{jr}=½*⟂(Χ_{(j-1)%4}, Χ_{(j+1)%4});
+
+// *************************************************************
+// * Règles EOS standards
+// *************************************************************
+∀ cells c = √(γ*p/ρ);
+∀ cells p = (γ-1.0)*ρ*e;
+∀ cells ρ = m/V;
+∀ cells e = E-½*(u⋅u);
+
+// *************************************************************
+// * Init n=0
+// *************************************************************
+tⁿ⁼⁰ = 0;
+δtⁿ⁼⁰ = option_δt_ini;
+∀ nodes Χⁿ⁼⁰ = Χ⁰;
+∀ cells uⁿ⁼⁰ = 0;
+∀ cells Eⁿ⁼⁰ = p⁰/((γ-1.0)*ρ⁰);
+
+// *************************************************************
+// * Cell-centered Godunov Scheme for Lagrangian gas dynamics
+// *************************************************************
+∀ j∈cells, ∀ r∈nodes(j) Aⱼᵣ = ρⱼ*cⱼ*Cⱼᵣ⊗Cⱼᵣ/‖Cⱼᵣ‖;
+∀ r∈nodes Aᵣ = ∑ⱼAⱼᵣ;
+∀ r∈nodes bᵣ = ∑ⱼ(Aⱼᵣuⱼ+Cⱼᵣpⱼ);
+∀ r∈nodes uᵣ = b̌ᵣ/Ǎᵣ;
+∀ j∈cells, ∀ r∈nodes(j), Fⱼᵣ = pⱼ*Cⱼᵣ+Aⱼᵣ*(uᵣ-uⱼ);
+
+∀ j∈cells Eⱼⁿ⁺¹ = Eⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ;
+∀ j∈cells uⱼⁿ⁺¹ = uⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ⋅uᵣⁿ;
+∀ r∈nodes Χᵣⁿ⁺¹ = Χᵣⁿ + δtⁿ*uᵣⁿ;
+
+∀ j∈cells Vⱼ = ½*∑ᵣCⱼᵣ⋅Χᵣ;
+
+// *************************************************************
+// * δt = option_δt_cfl*minⱼ(glace_δtⱼ);
+// *************************************************************
+∀ j∈cells glace_δtⱼ = 2.0*Vⱼ/(cⱼ*Σᵣ‖Cⱼᵣ‖);
+ℝ computeδtNext(const ℝ reduced_Δt, const ℝ t, const ℝ Δt){
+  const ℝ max_time_step = (1.0+option_δt_max_variation)*Δt;
+  const ℝ min_time_step = (1.0-option_δt_min_variation)*Δt;
+  ℝ new_δt=option_δt_control*reduced_Δt;
+  if (new_δt > max_time_step) new_δt=max_time_step;
+  if (new_δt < min_time_step) new_δt=min_time_step;
+  new_δt = min(new_δt, option_δt_max);
+  new_δt = max(new_δt, option_δt_min);
+  if (option_δt_last_exact && ((t + new_δt) > option_δt_end)) 
+    new_δt = option_δt_end - t;
+  if ((t>=option_δt_end) || (new_δt==0.0)) exit;
+  return new_δt;
+}
+δtⁿ⁺¹ = computeδtNext(minⱼ(glace_δtⱼ),tⁿ,δtⁿ);
+tⁿ⁺¹ = tⁿ + δtⁿ⁺¹;
+
+// *************************************************************
+// * Boundary conditions
+// *************************************************************
+∀ k∈outer faces, ∀ r∈nodes(k) {
+  b̃ᵣ = (I-nₖ⊗nₖ)*bᵣ;
+  Ãᵣ = (I-nₖ⊗nₖ)*Aᵣ*(I-nₖ⊗nₖ)+tr(Aᵣ)*(I-nₖ⊗nₖ);
+  if (!((Χᵣ.x==option_x_min)||(Χᵣ.x==option_x_max))) continue;
+  Ǎᵣ=I;
+  b̌ᵣ=option_u_ini;
+}
+
+      

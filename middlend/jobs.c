@@ -413,7 +413,7 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // Nom du job:
   // On va chercher le premier identifiant qui est le nom du job *ou pas*
-  dbg("\n\n\t// **********************************************************************");
+  //dbg("\n\n\t// **********************************************************************");
   if (!job->return_type){ // Pas de 'void', pas de nom, on en créé un
     const char* kName=mkktemp("kernel");
     job->has_to_be_unlinked=true;
@@ -426,8 +426,9 @@ void nMiddleJobFill(nablaMain *nabla,
     job->name=strdup(nd->token);
     job->name_utf8 = strdup(nd->token_utf8);
   }
+  dbg("\n\n* Nabla Job: %s", job->name); // org-mode job name
   dbg("\n\t// * [nablaJobFill] Kernel named '%s'", job->name);
-  dbg("\n\t// **********************************************************************");
+  //dbg("\n\t// **********************************************************************");
   
   // Scan DFS pour récuérer les in/inout/out
   // Et on dump dans le log les tokens de ce job

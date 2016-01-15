@@ -290,6 +290,7 @@ NABLA_STATUS nccArcane(nablaMain *nabla,
   };
   nabla->hook->pragma=&arcanePragmaGCCHooks;
     
+  dbg("\n* Backend ARCANE"); // org mode item
   dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
   if (isAnArcaneModule(nabla)==true)
     nccArcMain(nabla);

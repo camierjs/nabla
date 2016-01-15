@@ -123,6 +123,10 @@ tstlgg:
 ################
 # ARCANE tests #
 ################
+tstaanyg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_anyItem_gen_1)
+tstaanyr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_anyItem_run_1)
 tstadrcg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_drc_gen_1)
 tstashr:

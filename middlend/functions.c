@@ -348,9 +348,10 @@ void nMiddleFunctionFill(nablaMain *nabla,
   fct->called_variables=NULL;
   nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
   assert(nFctName->children->tokenid==IDENTIFIER);
-  dbg("\n\n\t// **********************************************************************");
+  //dbg("\n\n\t// **********************************************************************");
+  dbg("\n* Fonction '%s'", nFctName->children->token); // org-mode function item
   dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
-  dbg("\n\t// **********************************************************************");
+  //dbg("\n\t// **********************************************************************");
   fct->name=strdup(nFctName->children->token);
   dbg("\n\t[nablaFctFill] Coté UTF-8, on a: '%s'", nFctName->children->token_utf8);
   fct->name_utf8=strdup(nFctName->children->token_utf8);

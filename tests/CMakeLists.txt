@@ -147,6 +147,7 @@ endforeach(tst)
 ##########################
 if (ARCANE_FOUND)
   # No ICartesianMesh out of CEA # nabla_add_arcane_test(gad 1 run)
+  nabla_add_arcane_test(anyItem 1 run)
   nabla_add_arcane_test(comd 1 run)
   nabla_add_arcane_test(mhydro 1 run)
   # OK, mais trop de temps: nabla_add_arcane_test(mhydro 3 run)
