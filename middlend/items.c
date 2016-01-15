@@ -51,20 +51,29 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
   nablaMain *arc=(nablaMain*)generic_arg;
   nablaVariable *variable = nMiddleVariableNew(arc);
   dbg("\n\t\t[actItemTypeSpecifier] %s:%s", arc->tmpVarKinds, n->children->token);
-  // On regarde s'il n'y a pas un noeud à coté qui nous dit de ne pas backuper
-  if (n->children->next != NULL &&  n->children->next->tokenid==VOLATILE){
-    dbg("\n\t\t[actItemTypeSpecifier] %s, id=%d volatile(%d) hit!",
-        n->children->next->token, n->children->next->tokenid, VOLATILE);
-    variable->dump=false;
-  }else{
-    variable->dump=true;
+
+  if (n->children->token!=NULL){ // Peut arriver avec le TYPEDEF_NAME
+    // On regarde s'il n'y a pas un noeud à coté qui nous dit de ne pas backuper
+    if (n->children->next != NULL &&  n->children->next->tokenid==VOLATILE){
+      dbg("\n\t\t[actItemTypeSpecifier] %s, id=%d volatile(%d) hit!",
+          n->children->next->token, n->children->next->tokenid, VOLATILE);
+      variable->dump=false;
+    }else{
+      variable->dump=true;
+    }
   }
+  dbg("\n\t\t[actItemTypeSpecifier] nMiddleVariableAdd:");
   nMiddleVariableAdd(arc, variable);
   variable->item=strdup(arc->tmpVarKinds);
-  variable->type=toolStrDownCase(n->children->token);
+  dbg("\n\t\t[actItemTypeSpecifier] item=%s",variable->item);
   // Par défaut, on met à '0' la dimension de la variable
   variable->dim=0;
-  // Si on a un gmp precise integer, on dit que c'est un tableau de 'byte'
+  if (n->children->token==NULL)
+    variable->type="real";
+  else
+    variable->type=toolStrDownCase(n->children->token);
+  dbg("\n\t\t[actItemTypeSpecifier] type=%s", variable->type);
+    // Si on a un gmp precise integer, on dit que c'est un tableau de 'byte'
   if (strcmp(variable->type, "mpinteger")==0){
     variable->gmpRank=nMiddleVariableGmpRank(arc->variables);
     dbg("\n\t\t[actItemTypeSpecifier] Found GMP rank=%d", variable->gmpRank);
@@ -80,10 +89,11 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
 static void actItemDirectDeclarator(astNode * n, void *generic_arg){
   nablaMain *arc=(nablaMain*)generic_arg;
   nablaVariable *variable =nMiddleVariableLast(arc->variables);
+  dbg("\n\t\t[actItemDirectDeclarator]");
   dbg("\n\t\t[actItemDirectDeclarator] %s", n->children->token);
   variable->name=strdup(n->children->token);
   if (variable->gmpRank!=-1)
-    dbg("\n\t\t[actItemTypeSpecifier] Found GMP variable %s", variable->name);
+    dbg("\n\t\t[actItemDirectDeclarator] Found GMP variable %s", variable->name);
 }
 
 

@@ -638,6 +638,7 @@ unary_expression
 | INC_OP unary_expression {rhs;}
 | DEC_OP unary_expression {rhs;}
 | '&' unary_expression {Yadrs($$,$1,$2);}
+//| '&' TYPEDEF_NAME {rhs;}
 | unary_prefix_operator cast_expression {rhs;}
 | SIZEOF unary_expression {rhs;}
 | SIZEOF '(' type_name ')'{rhs;}

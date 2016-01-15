@@ -41,28 +41,36 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 cells{
+  ℝ α,β,γ;
   ℝ variable;
   ℝ variable_array[3];
 };
 
 faces{
+  ℝ α,β,γ;
   ℝ variable;
   ℝ variable_array[3];
 };
 
 global{
-  ℝ value;
+  ℝ rα,rβ,rγ;
 };
 
 // *************************************************************
 // * initializeTest
 // *************************************************************
-∀ faces @ -10.0{ variable=1.0; }
+∀ faces @ -10.0{
+  α=β=γ=1.0;
+  variable=1.0;
+}
 ∀ faces @ -10.0{
   variable_array.fill(1.0);
 }
 
-∀ cells @ -10.0{ variable=2.0;}
+∀ cells @ -10.0{
+  α=β=γ=1.0;
+  variable=2.0;
+}
 ∀ cells @ -10.0{
   variable_array.fill(2.0);
 }
@@ -71,34 +79,45 @@ global{
 // *************************************************************
 // * test1: ∪|+
 // *************************************************************
-//void iniValue(void) @ 1.0,2.0{ value=0.0; }
+void iniValue(void) @ 1.0,2.0 { rα=0;rβ=0;rγ=0; }
 
-∀ faces @ 1.1{
-  value=value+fct(variable);
+∀ cells void αβγTestCells(void) @ 1.1{
+  rα=rα+fct(α,β,γ);
 }
-∀ cells+faces @ 1.1{
-  value=value+fct(variable);
+∀ faces void αβγTestFaces(void) @ 1.2{
+  rβ=rβ+fct(α,β,γ);
 }
-void infoValue(void) @ 1.2{
-  info() << "[33mAnyItem items iteration: Value = "
-         << value << "[0m";
+∀ cells+faces @ 1.3{
+  α=β=γ=1.0;
+}
+∀ cells+faces void αβγTestAny(void)@ 1.4{
+  rγ=rγ+fct(α,β,γ);
 }
 
-∀ cells+faces @ 2.1{
+void infoValue(void){//@ 1.5{
+  info() << "[33mAnyItem items iteration: rα="<< rα
+         <<", rβ="<< rβ
+         <<", rα+rβ="<< rα+rβ
+         <<", rγ="<< rγ
+         << "[0m";
+}
+/*
+∀ cells+faces {//@ 2.1{
   for(int i=0;i<3;i+=1)
     value=value+fct(variable_array[i]);
 }
-void infoArrayValue(void) @ 2.2{
+void infoArrayValue(void) {//@ 2.2{
   info() << "[33mAnyItem array iteration: Value = "
          << value << "[0m";
 }
-
-void timeToExit(void) @ 4.0{ exit; }
+*/
+void timeToExit(void) @ 4.0{ if (GlobalIteration==16) exit; }
 
 
 // *************************************************************
 // * fct
 // *************************************************************
 ℝ fct(const ℝ v){ return drand48(); }
+ℝ fct(const ℝ _α, const ℝ _β, const ℝ _γ){ return sin(_α)+sin(_β)+sin(_γ); }
 
 
