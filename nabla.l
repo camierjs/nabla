@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -331,13 +331,6 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
   REJECT;}
 \n                { yylineno+=1;}
 %% 
-//__gnuc_va_list    { return tok(&yylval, GNU_VA_LIST);}
-//"nand"          { return tok(&yylval, NAND_OP);}
-//"⊼"					{ return tok(&yylval, NAND_OP);} // Nand 22BC
-//"⊻"					{ return tok(&yylval, XOR_OP);}  // Xor 22BB
-//"⊽"					{ return tok(&yylval, NOR_OP);}  // Nor 22BD
-//"::"				{ return tok(&yylval, NAMESPACE);}
-//∀ ∈ ∃
 
 // ****************************************************************************
 // * Get rid of line comments
@@ -385,23 +378,19 @@ static int tok(YYSTYPE *yylval, int tokenid){
 static int tok_type(YYSTYPE *yylval){
   (*yylval) = astNewNode();
   (*yylval)->token=strdup(yytext);
-  
   last_identifier=strdup(yytext);
   //dbg("\n\t[tok_type] last_identifier is %s!",yytext);
-  
   // On check s'il est déjà connu comme TYPEDEF_NAME
   if (nMiddleTypeFindName(typedef_names,yytext)!=NULL){
     dbg("\n\t[tok_type] TYPEDEF_NAME: %s <=> known type!",yytext);
     (*yylval)->tokenid=TYPEDEF_NAME;
     return TYPEDEF_NAME;
   }
-
   if (strstr(yytext,"__builtin")!=NULL){
     dbg("\n\t[tok_type] BUILTIN TYPE: %s!",yytext);
     (*yylval)->tokenid=TYPEDEF_NAME;
     return TYPEDEF_NAME;
   }
-
   (*yylval)->tokenid=IDENTIFIER;
   return IDENTIFIER;
 }

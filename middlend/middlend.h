@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -72,6 +72,7 @@ typedef enum {
   with_real          // 1D only, no Real3 admitted
 } with_library;
 
+
 // ****************************************************************************
 // Enumération des possibilités des variables en in/out/inout
 // ****************************************************************************
@@ -81,6 +82,7 @@ typedef enum {
   enum_inout_variable
 } inout_mode;
 
+
 // ****************************************************************************
 // * Standard Association Struct
 // ****************************************************************************
@@ -88,6 +90,7 @@ typedef struct nWhatWithStruct{
   char *what;
   char *with;
 } nWhatWith;
+
 
 // ****************************************************************************
 // * Nabla Grammar TYPE struct
@@ -109,7 +112,7 @@ typedef struct nablaVariableStruct{
   char *field_name; // son nom
   int gmpRank;   // est-il géré par une indirection multi precision? -1 == non, sinon le rank
   int dim;    // sa dimension
-  long size;   // sa taille dans le cas où dim vaut '1'
+  long size;  // sa taille dans le cas où dim vaut '1'
   bool dump;
   bool in;
   bool out;
@@ -167,6 +170,7 @@ typedef struct nablaJobStruct{
   char forall_item;
   bool reduction;
   char *reduction_name;
+  int swirl_index;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;
@@ -198,6 +202,16 @@ typedef struct nablaJobStruct{
   struct nablaEntityStruct *entity;
   struct nablaJobStruct *next;
 }nablaJob;
+
+
+// ****************************************************************************
+// * Nabla SWIRL struct
+// ****************************************************************************
+typedef struct nablaSwirlStruct{
+  double *at;
+  nablaJob *jobs;
+} nablaSwirl;
+int swirlCompare(const nablaSwirl *,const nablaSwirl *);
 
 
 // ****************************************************************************

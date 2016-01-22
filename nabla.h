@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -96,8 +96,6 @@ typedef enum {
   BACKEND_COLOR_OKINA_SEQ      = 1<<(13),
   BACKEND_COLOR_OpenMP         = 1<<(14),
   BACKEND_COLOR_CILK           = 1<<(15),
-//  BACKEND_COLOR_OKINA_SOA      = 1<<(16),
-//  BACKEND_COLOR_OKINA_AOS      = 1<<(17),
   BACKEND_COLOR_GCC            = 1<<(16),
   BACKEND_COLOR_ICC            = 1<<(17),
   OPTION_TIME_DOT_STD          = 1<<(18),
@@ -171,6 +169,5 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #include "backends/lambda/lambda.h"
 
 #include "toolbox/toolbox.h"
-
 
 #endif // _NABLA_H_

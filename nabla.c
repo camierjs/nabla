@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -42,12 +42,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-extern int yylineno;
 extern FILE *yyin;
+extern int yylineno;
 #define YYSTYPE astNode*
 int yyparse (astNode **);
 extern char nabla_input_file[]; 
-//static void nabla_error_print_progname(void){/* No program  name here */}
 static char *unique_temporary_file_name=NULL;
 
 
@@ -106,23 +105,16 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t\t<camierjs@nabla-lang.org>\n\
 [1;36mBUGS[0m\n\
 \tBugs are to be reported to the above address.\n"
-//\t\t[36m--soa[0m\t\tSoA for coordx,coordy,coordz+Reals\n
-//\t\t[36m--aos[0m\t\tAoS for coords+Real3s\n
-//\t\t[36m(--tiling[0m\tDiced domain decomposition approach)\n
-
-
 
 
 // ****************************************************************************
 // * nabla_error
-// * int vsprintf(char *str, const char *format, va_list ap);
 // ****************************************************************************
 void nablaErrorVariadic(const char *file,
                         const int line,
                         const char *format,...){
   va_list args;
   va_start(args, format);
-  //error_at_line(!0,0,nabla_input_file, yylineno-1, format,args);
   fflush(stdout);
   fflush(stderr);
   fprintf(stderr,"\r%s:%d:%d: error: ",file,line,yylineno-1);
@@ -238,13 +230,11 @@ int sysPreprocessor(const char *nabla_entity_name,
   dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
   if (system(gcc_command)<0)
     exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while preprocessing!\n"));
-//#warning unlinked cat_sed_temporary_file_name
   if (unlink(cat_sed_temporary_file_name)<0)
     exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while unlinking sed file!\n"));
   return NABLA_OK;
 }
  
-
 
 // ****************************************************************************
 // * nablaPreprocessor
@@ -268,8 +258,6 @@ void nablaPreprocessor(char *nabla_entity_name,
 // ****************************************************************************
 int main(int argc, char * argv[]){
   int c;
-  BACKEND_SWITCH backend=BACKEND_VOID;
-  BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
   int optionDumpTree=0;
   char *nabla_entity_name=NULL;
   int longindex=0;
@@ -278,6 +266,8 @@ int main(int argc, char * argv[]){
   char *service_name=NULL;
   int unique_temporary_file_fd=0;
   char *input_file_list=NULL;
+  BACKEND_SWITCH backend=BACKEND_VOID;
+  BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
   const struct option longopts[]={
     {"arcane",no_argument,NULL,BACKEND_ARCANE},
        {"alone",required_argument,NULL,BACKEND_COLOR_ARCANE_ALONE},
@@ -295,15 +285,11 @@ int main(int argc, char * argv[]){
        {"cilk",no_argument,NULL,BACKEND_COLOR_CILK},
        {"omp",no_argument,NULL,BACKEND_COLOR_OpenMP},
        {"seq",no_argument,NULL,BACKEND_COLOR_OKINA_SEQ},
-    //{"soa",no_argument,NULL,BACKEND_COLOR_OKINA_SOA},
-    //{"aos",no_argument,NULL,BACKEND_COLOR_OKINA_AOS},
        {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
        {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
     {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
     {NULL,0,NULL,0}
   };
-  // Set our nabla_error_print_progname for emacs to be able to visit
-  //error_print_progname=&nabla_error_print_progname;
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   // Check for at least several arguments
@@ -450,14 +436,6 @@ int main(int argc, char * argv[]){
       backend_color|=BACKEND_COLOR_OKINA_SEQ;
       dbg("\n[nabla] Command line specifies OKINA's SEQ option");
       break;
-      //case BACKEND_COLOR_OKINA_AOS:
-      //backend_color|=BACKEND_COLOR_OKINA_AOS;
-      //dbg("\n[nabla] Command line specifies OKINA's AoS option");
-      //break;
-      //case BACKEND_COLOR_OKINA_SOA:
-      //backend_color|=BACKEND_COLOR_OKINA_SOA;
-      //dbg("\n[nabla] Command line specifies OKINA's SoA option");
-      //break;
     case BACKEND_COLOR_GCC:
       backend_color|=BACKEND_COLOR_GCC;
       dbg("\n[nabla] Command line specifies OKINA's GCC option");
@@ -540,7 +518,6 @@ int main(int argc, char * argv[]){
                    specific_path,
                    service_name)!=NABLA_OK)
     exit(NABLA_ERROR);
-  //#warning unlinked unique_temporary_file_name
   toolUnlink(unique_temporary_file_name);
   return NABLA_OK;
 }

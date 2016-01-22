@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -170,13 +170,11 @@ nabla_inputstream
 | nabla_inputstream nabla_grammar {astAddChild($1,$2);}
 ;
 
-
 ///////////////////////////
 // ∇ scopes: std & std+@ //
 ///////////////////////////
 start_scope: '{' {rhs;};
 end_scope: '}' {rhs;} | '}' AT at_constant {rhs;};
-
 
 ////////////////////
 // GNU Attributes //
@@ -199,7 +197,6 @@ attribute
 | Z_CONSTANT {rhs;}
 | storage_class_specifier {rhs;}
 ;
-
 
 /////////////
 // GNU ASM //
@@ -272,8 +269,8 @@ type_qualifier
 | VOLATILE {{rhs;};type_volatile=true;}
 | GMP_PRECISE {{rhs;};type_precise=true;}
 ;
-type_qualifier_list:
-  type_qualifier {rhs;}
+type_qualifier_list
+: type_qualifier {rhs;}
 | type_qualifier_list type_qualifier {rhs;}
 ;
 specifier_qualifier_list
@@ -286,7 +283,6 @@ type_name
 : specifier_qualifier_list abstract_declarator {rhs;}
 | specifier_qualifier_list {rhs;}
 ;
-
 
 ///////////////////////////////////////////////////////////
 // ∇ item(s), group, region, family & system definitions //
@@ -314,7 +310,7 @@ nabla_family
 ;
 nabla_set
 : nabla_family {rhs;}
-| nabla_set '+' nabla_family {rhs;}//{YopYop(SET_INI,SET_END);}
+| nabla_set '+' nabla_family {rhs;}
 ;
 
 nabla_system
@@ -349,7 +345,6 @@ nabla_system
 | EXIT {rhs;}
 | ITERATION {rhs;}
 | MAIL {rhs;}
-//| FATAL{rhs;}
 ;
 
 //////////////
@@ -414,7 +409,6 @@ declaration_specifiers
 | type_qualifier declaration_specifiers {rhs;}
 | type_qualifier {rhs;}
 ;
-
 
 /////////////////
 // DeclaraTORS //
@@ -495,7 +489,6 @@ parameter_declaration
 //| GNU_VA_LIST {rhs;}
 ;
 
-
 //////////////////////
 // ∇ xyz parameters //
 //////////////////////
@@ -507,10 +500,6 @@ nabla_xyz_declaration
 
 /////////////////////////
 // ∇ IN/OUT parameters //
-// Permettant de faire des virgules
-// Attention, on utilise le nom 'direct_declarator'
-// dans nMiddleScanForNablaJobParameter pour récupérer les noms
-// 150707 Ne marche pas pour le backend CUDA qui utilise qqchose pour dumper les arguments des jobs
 /////////////////////////
 nabla_inout
 : IN {rhs;};
@@ -521,11 +510,6 @@ nabla_parameter_declaration
 : direct_declarator {rhs;}
 | nabla_item direct_declarator {rhs;}
 ;
-/*IDENTIFIER {rhs;}
-| IDENTIFIER  SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
-| nabla_item IDENTIFIER {rhs;}
-| nabla_item IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$2);}
-;*/
 nabla_parameter_declaration_list
 : nabla_parameter_declaration {rhs;}
 | nabla_parameter_declaration_list ',' nabla_parameter_declaration {rhs;}
@@ -537,26 +521,6 @@ nabla_parameter_list
 : nabla_inout_parameter {rhs;}
 | nabla_parameter_list nabla_inout_parameter {rhs;}
 ;
-
-
-//nabla_parameter_declaration: nabla_item direct_declarator {rhs;};
-/*nabla_parameter
-: nabla_in_parameter_list {rhs;}
-| nabla_out_parameter_list {rhs;}
-| nabla_inout_parameter_list {rhs;}
-;
-nabla_in_parameter_list: IN '(' nabla_parameter_list ')' {rhs;};
-nabla_out_parameter_list: OUT '(' nabla_parameter_list ')' {rhs;};
-nabla_inout_parameter_list: INOUT '(' nabla_parameter_list ')' {rhs;};
-
-nabla_parameter_list
-: nabla_parameter {rhs;}
-| nabla_parameter_declaration {rhs;}
-| nabla_parameter_list nabla_parameter {rhs;}
-| nabla_parameter_list ',' nabla_parameter_declaration {rhs;}
-;*/
-
-
 
 //////////////////////////////////
 // Arguments of a function call //
@@ -581,8 +545,8 @@ primary_expression
 | OCT_CONSTANT {rhs;}
 | Z_CONSTANT {rhs;}
 | R_CONSTANT {rhs;}
-| DIESE {rhs;}  // Permet d'écrire un '#' à la place d'un [c|n]
-| nabla_item {rhs;} // Permet de rajouter les items Nabla au sein des corps de fonctions
+| DIESE {rhs;}
+| nabla_item {rhs;}
 | nabla_system {rhs;}
 | QUOTE_LITERAL {rhs;}
 | STRING_LITERAL {rhs;}
@@ -590,7 +554,6 @@ primary_expression
 ;
 postfix_expression
 : primary_expression {rhs;}
-//| postfix_expression SUPERSCRIPT_N_PLUS_ONE {rhs;}
 | postfix_expression FORALL_NODE_INDEX {rhs;}
 | postfix_expression FORALL_CELL_INDEX {rhs;}
 | postfix_expression FORALL_MTRL_INDEX 
@@ -626,11 +589,11 @@ postfix_expression
 //| mathlinks
 | aleph_expression
 ;
+
 ///////////////////////////////////
 // Unaries (operator,expression) //
 ///////////////////////////////////
 unary_prefix_operator: CENTER_DOT_OP | '*' | '+' | '-' | '~' | '!';
-//'⋅'
 unary_expression
 : postfix_expression {rhs;}
 | SQUARE_ROOT_OP unary_expression {rhs;}
@@ -638,7 +601,6 @@ unary_expression
 | INC_OP unary_expression {rhs;}
 | DEC_OP unary_expression {rhs;}
 | '&' unary_expression {Yadrs($$,$1,$2);}
-//| '&' TYPEDEF_NAME {rhs;}
 | unary_prefix_operator cast_expression {rhs;}
 | SIZEOF unary_expression {rhs;}
 | SIZEOF '(' type_name ')'{rhs;}
@@ -715,6 +677,7 @@ conditional_expression
 : logical_or_expression {rhs;}
 | logical_or_expression '?' expression ':' conditional_expression {YopTernary5p($$,$1,$2,$3,$4,$5);}
 ;
+
 ///////////////////////////////////////
 // Assignments (operator,expression) //
 ///////////////////////////////////////
@@ -742,7 +705,6 @@ constant_expression
 : conditional_expression {rhs;}
 ;
 
-
 ////////////////
 // Statements //
 ////////////////
@@ -754,9 +716,8 @@ compound_statement
 //| start_scope statement_list declaration_list statement_list end_scope {rhs;}
 ;
 expression_statement
-: ';'{rhs;}
-| expression ';'{rhs;}
-//| expression AT at_constant';' {rhs;}
+: ';' {rhs;}
+| expression ';' {rhs;}
 ;
 selection_statement
 //: IF '(' expression ')' statement %prec {rhs;}
@@ -798,7 +759,6 @@ statement_list
 | statement_list statement {rhs;}
 ;
 
-
 /////////////////
 // ∇ functions //
 /////////////////
@@ -806,7 +766,6 @@ function_definition
 : declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
 ;
-
 
 /////////////////////////
 // ∇ items definitions //
@@ -833,7 +792,6 @@ nabla_direct_declarator
 | IDENTIFIER  SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 ;
 
-
 //////////////////////////
 // ∇ options definition //
 //////////////////////////
@@ -847,7 +805,6 @@ nabla_option_declaration
 | type_specifier direct_declarator '=' expression ';' {rhs;}  
 | preproc {rhs;}
 ;
-
 
 ///////////////////////
 // ∇ '@' definitions //
@@ -865,10 +822,10 @@ at_tree_constant
 | at_tree_constant '/' at_single_constant {rhs;}
 ;
 at_constant
-// On rajoute des parenthèses que l'on enlevera lors du DFS nMiddleAtConstantParse
+// On rajoute des parenthèses (Yp1p),
+// que l'on enlevera lors du DFS nMiddleAtConstantParse
 : at_tree_constant {Yp1p($$,$1);} 
 | at_constant ',' at_tree_constant {Yp3p($$,$1,$2,$3);};
-
 
 ////////////////////////
 // ∇ jobs definitions //
@@ -897,7 +854,6 @@ nabla_job_definition
 | nabla_job_decl nabla_parameter_list AT at_constant IF '(' constant_expression ')' compound_statement {job;}
 ;
 
-
 ////////////////////////
 // ∇ single reduction //
 ////////////////////////
@@ -905,7 +861,6 @@ nabla_reduction
 : nabla_job_prefix IDENTIFIER MIN_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
 | nabla_job_prefix IDENTIFIER MAX_ASSIGN IDENTIFIER  AT at_constant ';' {rhs;}
 ;
-
 
 /////////////////
 // ∇ libraries //
@@ -928,7 +883,6 @@ with_library_list
 ;
 with_library: WITH with_library_list ';'{rhs;};
 
-
 ///////////////
 // ∇ grammar //
 ///////////////
@@ -944,7 +898,6 @@ nabla_grammar
 | nabla_job_definition          {rhs;}
 | nabla_reduction               {rhs;}
 ;
-
 
 ///////////////////////
 // Aleph Expressions //
@@ -966,7 +919,6 @@ aleph_expression
 | LIB_ALEPH ALEPH_LHS ALEPH_GET {rhs;}
 | LIB_ALEPH ALEPH_RHS ALEPH_GET {rhs;}
 ;
-
 
 /////////////////////////////
 // STRUCTS, ENUMS & UNIONS //
@@ -1017,12 +969,6 @@ struct_or_union_specifier
   }
 ;
 
-/*
-mathlinks:
-| MATHLINK PRIME '[' IDENTIFIER ']' {primeY1ident($$,$4)}
-| MATHLINK PRIME '[' Z_CONSTANT ']' {primeY1($$,$4)}
-;
-*/
 
 %%
 

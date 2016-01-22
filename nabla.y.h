@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2015 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
@@ -49,7 +49,6 @@
 // ****************************************************************************
 #define __NB_ARGS__(z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,cnt,...) cnt
 #define NB_ARGS(...) __NB_ARGS__(,##__VA_ARGS__,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0)
-//#define TRY_TO_COUNT_HERE(...) __NB_ARGS__(__VA_ARGS__)
 
 
 // ****************************************************************************
@@ -75,7 +74,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Forall
 // ****************************************************************************
 #define forall rhsTailSandwich(&yyval,yyn,FORALL_INI,FORALL_END,yyvsp);
-#define forallVariadic(lhs, ...)                                        \
+#define forallVariadic(lhs, ...)\
   tailSandwichVariadic(FORALL_INI,FORALL_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
 
@@ -84,14 +83,14 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // ****************************************************************************
 #define job rhsTailSandwich(&yyval,yyn,COMPOUND_JOB_INI,COMPOUND_JOB_END,yyvsp);
 
-#define compound_job(lhs,...)                                           \
+#define compound_job(lhs,...)\
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
-#define compound_reduction(lhs,...)                                     \
+#define compound_reduction(lhs,...)\
   tailSandwich(COMPOUND_REDUCTION_INI,COMPOUND_REDUCTION_END,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
-#define compound_job_without__NB_ARGS__(lhs,...)                        \
-  assert(NB_ARGS(__VA_ARGS__)==yyr2[yyn]);                              \
+#define compound_job_without__NB_ARGS__(lhs,...)                       \
+  assert(NB_ARGS(__VA_ARGS__)==yyr2[yyn]);\
   tailSandwich(COMPOUND_JOB_INI,COMPOUND_JOB_END,yyr2[yyn],__VA_ARGS__)
 
 
@@ -101,7 +100,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // *****************************************************************************
 #define YopYop(leftToken,rightToken)\
   rhsYSandwich(&yyval,yyn,yyvsp,leftToken,rightToken)
-#define YopYopVariadic(leftToken,rightToken, ...)                             \
+#define YopYopVariadic(leftToken,rightToken, ...)\
   rhsYSandwichVariadic(&yyval,yyn,yyr2[yyn],leftToken,rightToken, __VA_ARGS__)
 
 #define tailSandwich(leftToken,rightToken,n, ...)                       \
