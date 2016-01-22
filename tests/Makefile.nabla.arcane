@@ -6,7 +6,7 @@ TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 
-LOG = -t #-v $(TGT).log
+LOG = -t -v $(TGT).log
 
 
 ########################## 

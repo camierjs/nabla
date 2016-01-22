@@ -40,3 +40,94 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
+
+
+// *************************************************************
+// * nHLTNew
+// *************************************************************
+nablaHLT *nHLTNew(nablaMain *nabla){
+  nablaHLT *HLT = (nablaHLT *)calloc(1,sizeof(nablaHLT));
+  assert(HLT != NULL);
+  return HLT; 
+}
+
+// *************************************************************
+// * nHLTCompare
+// *************************************************************
+int nHLTCompare(const nablaHLT *one,const nablaHLT *two){
+  const int d1=one->depth;
+  const int d2=two->depth;
+  assert(d1>0 && d2>0);
+
+  // On est sur la 'root' ligne en temps
+  if (d1==1&&d2==1){
+    if (one->at[0]==two->at[0]) return 0;
+    if (one->at[0]<two->at[0]) return -1;
+    if (one->at[0]>two->at[0]) return +1;
+  }
+
+  // Sinon, c'est qu'on teste les niveaux HLT
+  // On va tester niveau par niveau jusqu'à trouver le résultat
+  /*for(k=1;;k+=1){
+    if ()
+    }*/
+
+  assert(false);
+  return 0;
+}
+
+
+// *************************************************************
+// * nSwirlNew
+// *************************************************************
+nablaSwirl *nSwirlNew(nablaMain *nabla){
+  nablaSwirl *swirl = (nablaSwirl *)calloc(1,sizeof(nablaSwirl));
+  assert(swirl != NULL);
+  return swirl; 
+}
+
+
+// *************************************************************
+// * nSwirlLast
+// *************************************************************
+nablaSwirl *nSwirlLast(nablaSwirl *swirls) {
+  while(swirls->next != NULL)
+    swirls = swirls->next;
+  return swirls;
+}
+
+
+// *************************************************************
+// * nSwirlAdd
+// *************************************************************
+nablaSwirl *nSwirlAdd(nablaMain *nabla, nablaSwirl *swirl) {
+  assert(swirl != NULL);
+  if (nabla->swirls == NULL)
+    nabla->swirls=swirl;
+  else
+    nSwirlLast(nabla->swirls)->next=swirl;
+  return NABLA_OK;
+}
+
+
+
+// *************************************************************
+// * nSwirlFind
+// *************************************************************
+nablaSwirl *nSwirlFind(nablaSwirl *swirl, nablaHLT *at) {
+  assert(at!=NULL);
+  //dbg("\n\t[nablaSwirlFind] looking for '%s'", name);
+  // Some backends use the fact it will return NULL
+  //assert(swirl != NULL);  assert(name != NULL);
+  while(swirl != NULL) {
+    //dbg(" ?%s", swirl->name);
+    if(nHLTCompare(swirl->at, at) == 0){
+      //dbg(" Yes!");
+      return swirl;
+    }
+    swirl = swirl->next;
+  }
+  //dbg(" Nope!");
+  return NULL;
+}

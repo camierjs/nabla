@@ -205,13 +205,19 @@ typedef struct nablaJobStruct{
 
 
 // ****************************************************************************
-// * Nabla SWIRL struct
+// * Nabla SWIRL & HLT struct
 // ****************************************************************************
+typedef struct nablaHLTStruct{
+  int depth;
+  double at[NABLA_JOB_WHEN_MAX];
+}nablaHLT;
+int nHLTCompare(const nablaHLT *,const nablaHLT *);
+
 typedef struct nablaSwirlStruct{
-  double *at;
+  nablaHLT *at;
   nablaJob *jobs;
+  struct nablaSwirlStruct *next;
 } nablaSwirl;
-int swirlCompare(const nablaSwirl *,const nablaSwirl *);
 
 
 // ****************************************************************************
@@ -239,6 +245,7 @@ typedef struct nablaMainStruct{
   nablaType *types;
   nablaOption *options;
   nablaEntity *entity;
+  nablaSwirl *swirls;
   BACKEND_SWITCH backend;
   BACKEND_COLORS colors;
   char *interface_name; // Arcane specific

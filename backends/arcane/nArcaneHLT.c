@@ -67,7 +67,6 @@ void nArcaneHLTInit(nablaMain *arc){
 
 // *****************************************************************************
 // * nArcaneHLTIni
-// * ARCANE_ASSERT((entry_point!=0),(\"nArcaneHLTEntryPoint\"));
 // *****************************************************************************
 static void nArcaneHLTIni(nablaMain *arc,
                           nablaJob *entry_point,
@@ -98,7 +97,7 @@ static void nArcaneHLTIni(nablaMain *arc,
     //if (HLT_depth>hlt_current_depth){
     fprintf(hdr, "\
       entry_point=entry_point_mng->findEntryPoint(StringBuilder(\"%s@%f\"));\n\
-      m_hlt_entry_points[%d].add(entry_point);//hlt_dive_when[0]=%f\n",
+      m_hlt_entry_points[%d].push_back(entry_point);//hlt_dive_when[0]=%f\n",
             entry_point[i].name,when,HLT_depth-1,hlt_dive_when[0]);
   }
   fprintf(hdr, "\t}\n");
@@ -121,6 +120,7 @@ void nArcaneHLTEntryPoint(nablaMain *arc,
                           nablaJob *entry_point,
                           int number_of_entry_points,
                           double *hlt_dive_when){
+  dbg("\n[nArcaneHLTEntryPoint]");
   FILE *hdr=arc->entity->hdr;
   fprintf(hdr, "\n\t//nArcaneHLTEntryPoint");
   // Voici les booléens d'exit & probe du dive HLT
@@ -128,31 +128,34 @@ void nArcaneHLTEntryPoint(nablaMain *arc,
   fprintf(hdr, "\n\tBoolArray m_hlt_dive;");
   fprintf(hdr, "\n\tBoolArray m_hlt_exit;");
   // Voici les points d'entrées de notre dive
-  fprintf(hdr, "\n\tArray<Array<IEntryPoint*> > m_hlt_entry_points;");
+  fprintf(hdr, "\n\tstd::vector<std::vector<IEntryPoint*> > m_hlt_entry_points;");
 
-  // Dump de la fonction HLT d'initialisation
+  dbg("\n[nArcaneHLTEntryPoint] Dump de la fonction HLT d'initialisation");
   nArcaneHLTIni(arc,entry_point,number_of_entry_points,hlt_dive_when);
 
   // Voici les fonction qui seront appelées lors des 'DIVE'
   for(int i=0;hlt_dive_when[i]!=0.0;i+=1){
-    fprintf(hdr, "\n\tvoid hltDive_at_%s(){\n\
+    fprintf(hdr, "\n\tvoid hltDive%d(){\n\
+      const int bkp_level=m_hlt_level;\n\
       m_hlt_level=%d;\n\
       const int level=m_hlt_level;\n\
-      info()<<\"[1;33mm_hlt_entry_points.at(\"<<level<<\") size=\"<<\
+      //info()<<\"%s[1;33mm_hlt_entry_points.at(\"<<level<<\") size=\"<<\
 m_hlt_entry_points.at(level).size()<<\"[m\";\n\
       m_hlt_dive[level] = true;\n\
       m_hlt_exit[level] = false;\n\
       for(;!m_hlt_exit.at(level);){\n\
          info();\n\
          for(Integer i=0, s=m_hlt_entry_points.at(level).size(); i<s; ++i){\n\
-            info()<<\"%s[1;33m\"<<\"HLT launching: '\"<<\
+            //info()<<\"%s[1;33m\"<<\"HLT launching: '\"<<\
 m_hlt_entry_points.at(level).at(i)->name()<<\"'[m\";\n \
             m_hlt_entry_points.at(level).at(i)->executeEntryPoint();\n\
-            //info()<<\"[1;33m\"<<\"HLT m_hlt_exit: '\"<<m_hlt_exit<<\"'[m\";\n\
-           //traceMng()->flush();\n\
+            //info()<<\"%s[1;33m\"<<\"HLT m_hlt_exit.at(\"<<level<<\"): '\"<<m_hlt_exit.at(level)<<\"'[m\";\n \
+            if (m_hlt_exit.at(level)) break;\n\
          }\n\
       }\n\
+     //info()<<\"[1;33m\"<<\"END \"<<level<<\"[m\";\n\
      m_hlt_dive[level] = false;\n\
-   }", nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i]),i,tab(1+i));
+     m_hlt_level=bkp_level;\n\
+   }",i,i,tab(1+i),tab(1+i),tab(1+i));//nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i])
   }
 }

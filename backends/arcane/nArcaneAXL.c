@@ -163,8 +163,8 @@ char* nccAxlGeneratorEntryPointWhenName(double when){
   const register unsigned long *adrs = (unsigned long*)&when;
   snprintf(name,18,"0x%lx",*adrs);
   //dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] when=%f => %p",when, *adrs);
-  dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] ENTRY_POINT_build=%f ENTRY_POINT_init=%f",
-      ENTRY_POINT_build,ENTRY_POINT_init);
+  /*dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] ENTRY_POINT_build=%f ENTRY_POINT_init=%f",
+      ENTRY_POINT_build,ENTRY_POINT_init);*/
   return strdup(name);
 }
 
@@ -194,16 +194,19 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   int hlt_dive_num=0;
   double *hlt_dive_when=calloc(32,sizeof(double));
 
-  dbg("\n\n* nccAxlGenerator");
+  dbg("\n\n* backend/arcane/nArcaneAXL.c: nccAxlGenerator");
   fprintf(arc->axl,"\n\t\t<variables>");
   for(var=arc->variables;var!=NULL;var=var->next)
     if (nccAxlGenerateVariable(arc, var)!=NABLA_OK) return NABLA_ERROR;
   fprintf(arc->axl,"\n\t\t</variables>\n\n\t\t<entry-points>");
 
+  dbg("\n\tGetting Number of Entry points and sorting it:");
+  // On remonte au middlend ici pour l'instant afin de trier les points d'entrées
   number_of_entry_points=nMiddleNumberOfEntryPoints(arc);
   entry_point=nMiddleEntryPointsSort(arc,number_of_entry_points);
 
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
+  dbg("\n\tEt on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin:");
   for(int i=0;i<number_of_entry_points+2;++i){
     if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
     if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
@@ -226,28 +229,33 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     // Si on trouve une transition en DIVE:
     // on rajoute un entry_point DIVE afin de déclencher l'HLT depuis le top
     if (HLT_depth>hlt_current_depth){
-      hlt_current_depth=HLT_depth;
-      *hlt_dive_when++=when;hlt_dive_num+=1;
+      dbg("\n\t[nccAxlGenerator] DIVE");
       // Si on est à la raçine,
       if (hlt_current_depth==0){
-        // On remplit la ligne du fichier CONFIG
-        dbg("\n\t[nccAxlGenerator] Config: %s.hltDive@%f", arc->entity->name,when);
-        if (isAnArcaneModule(arc)==true)
-          fprintf(arc->cfg, "\n\t\t\t\t%s<entry-point name=\"%s.hltDive@%f\" />",
+        // On rajoute la ligne DIVE du fichier CONFIG
+        dbg("\n\t[nccAxlGenerator] CONFIG %s.hltDive@%f", arc->entity->name,when);
+        if (isAnArcaneModule(arc)==true){
+          dbg("\n\t[nccAxlGenerator] isAnArcaneModule!, hltDive in config!");
+          fprintf(arc->cfg, "\n\t\t\t\t%s<!--entry-point name=\"%s.hltDive@%f\" /-->",
                   tab(hlt_current_depth),arc->entity->name,when);
-        // On remplit la ligne du fichier AXL
-        dbg("\n\t[nccAxlGenerator] hltDive %s in %s",whenName,where);
-        fprintf(arc->axl,"\n\t\t\t%s<entry-point method-name=\
-\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" />",
+        }
+        // On rajoute la ligne DIVE du fichier AXL
+        dbg("\n\t[nccAxlGenerator] AXL hltDive %s in %s",whenName,where);
+        fprintf(arc->axl,"\n\t\t\t%s<!--entry-point method-name=\
+\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" /-->",
                 tab(hlt_current_depth),whenName, when,where);
       }else{ // Si on est déjà dans un level HLT
-        fprintf(arc->cfg, "\n\t\t\t\t%s<entry-point name=\"%s.hltDive@%f\" />",
+        dbg("\n\t[nccAxlGenerator] NO CONFIG in HLT %s.hltDive@%f", arc->entity->name,when);
+        fprintf(arc->cfg, "\n\t\t\t\t%s<!--DIVE IN HLT depth>0 entry-point name=\"%s.hltDive@%f\" /-->",
                 tab(hlt_current_depth),arc->entity->name,when);
-        fprintf(arc->axl,"\n\t\t\t%s<entry-point method-name=\
-\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" />",
+        dbg("\n\t[nccAxlGenerator] AXL in HLT hltDive %s in %s",whenName,where);
+        fprintf(arc->axl,"\n\t\t\t%s<!--entry-point method-name=\
+\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" /-->",
                 tab(hlt_current_depth),whenName, when,where);
       }
-    }
+       hlt_current_depth=HLT_depth;
+      *hlt_dive_when++=when;hlt_dive_num+=1;
+   }
 
     
     // Si l'on passe pour la première fois la frontière du zéro, on l'écrit dans le .config
@@ -257,12 +265,15 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
       if (isAnArcaneModule(arc)==true)
         fprintf(arc->cfg, "\n\t\t\t</entry-points>\n\n\t\t\t<entry-points where=\"compute-loop\">");
     }
+
     
     // On remplit la ligne du fichier CONFIG
-    dbg("\n\t[nccAxlGenerator] On remplit la ligne du fichier CONFIG");
-    if (isAnArcaneModule(arc)==true)
+    if (isAnArcaneModule(arc)==true){
+    dbg("\n\t[nccAxlGenerator] CONFIG On remplit la ligne du fichier");
       fprintf(arc->cfg, "\n\t\t\t\t%s<%sentry-point name=\"%s.%s@%f\" /%s>",tab(hlt_current_depth),
               HLT_cfg_comment_in,arc->entity->name,entry_point[i].name,when,HLT_cfg_comment_out);
+    }
+
     
     // On remplit la ligne du fichier AXL
     dbg("\n\t[nccAxlGenerator] On remplit la ligne de l'AXL");
@@ -271,9 +282,12 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     // Pourrait être le where, mais pas de doublons dans l'axl
     fprintf(arc->axl, " where=\"%s\" property=\"none\" />",where);
 
-    dbg("\n\t[nccAxlGenerator] On remplit la ligne du header");
+    
+     // On remplit la ligne du fichier HEADER
+   dbg("\n\t[nccAxlGenerator] On remplit la ligne du header");
     fprintf(arc->entity->hdr, "\n\tinline void %s_at_%s(){",
             entry_point[i].name, whenName);
+
     
     // S'il y a un 'if' après le '@', on le dump maintenant
     if (entry_point[i].ifAfterAt!=NULL){

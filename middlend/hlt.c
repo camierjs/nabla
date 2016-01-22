@@ -63,19 +63,20 @@ static void dumpAtEndofAt(nablaJob *job, char *token){
 // ****************************************************************************
 void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla){
   // On évite les parenthèses rajoutée lors du parsing .y 'at_constant'
-  if (n->tokenid == '-') {job->when_sign*=-1.0;}
+  if (n->tokenid == '-') {
+    // On s'assure pour l'instant que les temps logiques
+    // sont positifs dans les imbrications
+    assert(job->when_depth==0);
+    job->when_sign*=-1.0;
+  }
   if (n->tokenid == '(') goto skip;
   if (n->tokenid == ')') goto skip;
   if (n->tokenid == '/') {
     // On s'enfonce dans la hiérarchie
     job->when_depth+=1;
-    // On sauvegarde là où en ętait
-    //job->whens[job->when_index]=atof(at);
     dbg("\n\t\t[nMiddleAtConstantParse] job->whens[%d]=%.12e",
         job->when_index,
         job->whens[job->when_index]);
-    // On flush le 'at' actuel
-    //at=strdup("");
     goto skip;
   }
   // Vérification que l'on ne déborde pas
@@ -138,44 +139,93 @@ int nMiddleNumberOfEntryPoints(nablaMain *nabla){
 
 
 // ****************************************************************************
-// * nablaEntryPointsSort
+// * nMiddleEntryPointsSort
 // ****************************************************************************
 nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
                                  int number_of_entry_points){
   int i,j;
+  int hlt_max_depth=0;
+  //int *hlt_idx_entry_points;
+  int hlt_current_depth=0;
+  //int hlt_dive_num=0;
+  //double *hlt_dive_when=calloc(32,sizeof(double));
   nablaJob *job, *entry_points=NULL;
-  dbg("\n[nablaEntryPointsSort] Sorting %d entry-points...", number_of_entry_points);
+  
+  dbg("\n\t\t[nMiddleEntryPointsSort] Sorting %d entry-points:", number_of_entry_points);
   // On va rajouter le ComputeLoop[Begin||End]
   number_of_entry_points+=2;
-  
+
+  // Première passe des job pour compter la profondeur max des imbrications des HLT
+  // Cela va nous permettre de rajouter les hltDives associés
+  for(job=nabla->entity->jobs;job!=NULL;job=job->next)
+    if (hlt_max_depth<job->when_depth)
+      hlt_max_depth=job->when_depth;
+  dbg("\n\t\t[nMiddleEntryPointsSort] hlt_max_depth=%d", hlt_max_depth);
+  number_of_entry_points+=hlt_max_depth;
+
   // On prépare le plan de travail de l'ensemble des entry_points
   entry_points =(nablaJob*)calloc(1+number_of_entry_points, sizeof(nablaJob));
   assert(entry_points);
-  dbg("\n[nablaEntryPointsSort] calloc'ed!");
-  
-  dbg("\n[nablaEntryPointsSort] Adding ComputeLoopBegin");
-  entry_points[0].item = strdup("\0");
-  entry_points[0].is_an_entry_point=true;
-  entry_points[0].is_a_function=true;
-  entry_points[0].name = strdup("ComputeLoopBegin");
-  entry_points[0].name_utf8 = strdup("ComputeLoopBegin");
-  entry_points[0].whens[0] = ENTRY_POINT_compute_loop;
-  entry_points[0].when_index = 1;
+  dbg("\n\t\t[nMiddleEntryPointsSort] calloc'ed!");
 
-  dbg("\n[nablaEntryPointsSort] Adding ComputeLoopEnd");
-  entry_points[1].item = strdup("\0");
-  entry_points[1].is_an_entry_point=true;
-  entry_points[1].is_a_function=true;
-  entry_points[1].name = strdup("ComputeLoopEnd");
-  entry_points[1].name_utf8 = strdup("ComputeLoopEnd");
-  entry_points[1].whens[0] = ENTRY_POINT_exit;
-  entry_points[1].when_index = 1; 
+  // On rajoute les DIVES
+  for(i=0,job=nabla->entity->jobs;job!=NULL;job=job->next){
+    // Si on remonte, on met à jour la profondeur
+    if (hlt_current_depth>job->when_depth)
+      hlt_current_depth=job->when_depth;
+    // Si on plonge, on rajoute notre DIVE
+    if (job->when_depth>hlt_current_depth){
+      char name[11+18+1];
+      const double when=job->whens[0];
+      //const unsigned long *adrs = (unsigned long*)&when;
+      //snprintf(name,11+18,"hltDive_at_0x%lx",*adrs);
+      snprintf(name,11+18,"hltDive%d",i);
+      dbg("\n\t\t[nMiddleEntryPointsSort] Adding hltDive%d before %s @ %f, name=%s",
+          i,job->name,when,name);
+      entry_points[i].item = strdup("\0");
+      entry_points[i].is_an_entry_point=true;
+      entry_points[i].is_a_function=true;
+      entry_points[i].name = strdup(name);
+      entry_points[i].name_utf8 = strdup(name);
+      entry_points[i].whens[0] = when;
+      entry_points[i].when_index = 1;
+      entry_points[i].when_depth = hlt_current_depth;
+      i+=1;
+      hlt_current_depth=job->when_depth;
+    }
+  }
+  
+  dbg("\n\t\t[nMiddleEntryPointsSort] Adding ComputeLoopBegin [%d]", i);
+  entry_points[i].item = strdup("\0");
+  entry_points[i].is_an_entry_point=true;
+  entry_points[i].is_a_function=true;
+  entry_points[i].name = strdup("ComputeLoopBegin");
+  entry_points[i].name_utf8 = strdup("ComputeLoopBegin");
+  entry_points[i].whens[0] = ENTRY_POINT_compute_loop;
+  entry_points[i].when_index = 1;
+  i+=1;
+  
+  dbg("\n\t\t[nMiddleEntryPointsSort] Adding ComputeLoopEnd [%d]", i);
+  entry_points[i].item = strdup("\0");
+  entry_points[i].is_an_entry_point=true;
+  entry_points[i].is_a_function=true;
+  entry_points[i].name = strdup("ComputeLoopEnd");
+  entry_points[i].name_utf8 = strdup("ComputeLoopEnd");
+  entry_points[i].whens[0] = ENTRY_POINT_exit;
+  entry_points[i].when_index = 1; 
 
   // On re scan pour remplir les duplicats
-  for(i=2,job=nabla->entity->jobs;job!=NULL;job=job->next){
+  for(i+=1,job=nabla->entity->jobs;job!=NULL;job=job->next){
     if (!job->is_an_entry_point) continue;
+    // Pour chaque temps logique séparé par une virgule
     for(j=0;j<job->when_index;++j){
-      dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %.12e", i, job->name, job->whens[j]);
+      dbg("\n\t\t\t[nMiddleEntryPointsSort] Scanning&Dumping #%d: %s @ %.12e",
+          i, job->name, job->whens[j]);
+      const int HLT_depth=entry_points[i].when_depth;
+      
+      if (hlt_current_depth>HLT_depth) // Si on trouve une transition en EXIT
+        hlt_current_depth=HLT_depth;   // On met à jour notre profondeur
+      
       entry_points[i].item=job->item;
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=job->is_a_function;
@@ -186,7 +236,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       entry_points[i].name_utf8=job->name_utf8;
       entry_points[i].whens[0]=job->whens[j];
       entry_points[i].when_depth=job->when_depth;
-      // Pas utilisé, on passe après par la fonctionnccAxlGeneratorEntryPointWhere
+      // Pas utilisé, on passe après par la fonction nccAxlGeneratorEntryPointWhere
       if (entry_points[i].whens[0]>ENTRY_POINT_compute_loop)
         entry_points[i].where=strdup("compute-loop");
       if (entry_points[i].whens[0]==-0.0)
@@ -204,7 +254,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       entry_points[i].used_options=job->used_options;
       entry_points[i].reduction=job->reduction;
       entry_points[i].reduction_name=job->reduction_name;
-      ++i;
+      i+=1;
     }
   }
 
