@@ -157,8 +157,8 @@ void ini(void) @ -6{
 // * Mise à jour de la géométrie
 // ****************************************************************************
 void iniGeometry(void) @ -4{
-  computeGeometricKlength() @ 0; // L'ordre est important ici
-  computeGeometricVolume() @ 1;
+  computeGeometricKlength(); // L'ordre est important ici
+  computeGeometricVolume();
 }
 
 // ****************************************************************************
@@ -243,7 +243,7 @@ void iniGeometry(void) @ -4{
 // * Calcule l'impulsion aux noeuds
 // ****************************************************************************
 ∀ nodes void computeVelocity(void)
-  in (node nMass, node force) inout (node velocity) @ 1{
+  in (node nMass, node force) inout (node velocity) @ 1.0{
   velocity+=(deltat/nMass)*force;
 }
 
@@ -264,7 +264,7 @@ void iniGeometry(void) @ -4{
 // ****************************************************************************
 // * Applique les conditions aux bords
 // ****************************************************************************
-∀ nodes void applyBoundaryCondition(void) out (node velocity) @ 2{
+∀ nodes void applyBoundaryCondition(void) out (node velocity) @ 2.0{
   // MIN boundaries
   if (coord.x==0.0){velocity.x=0.0;}
   if (coord.y==0.0){velocity.y=0.0;}
@@ -281,7 +281,7 @@ void iniGeometry(void) @ -4{
 // ****************************************************************************
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
-∀ nodes void moveNodes(void) in (node velocity) @ 3{
+∀ nodes void moveNodes(void) in (node velocity) @ 3.0{
   coord += deltat * velocity;
   //info()<< "[moveNodes] coord="<<coord;
 }
@@ -289,7 +289,7 @@ void iniGeometry(void) @ -4{
 // ****************************************************************************
 // * Calcule la longueur caractéristique d'une maille héxahédrique
 // ****************************************************************************
-∀ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4{
+∀ cells void computeGeometricKlength(void) out (cell kLength, cell cqs) @ 4.0{
   Real3 coords[8];       // Copie locale des coordonnées des sommets d'une maille
   Real3 face_coord[6];   // Coordonnées des centres des faces
   
@@ -303,7 +303,7 @@ void iniGeometry(void) @ -4{
     face_coord[3] = 0.25 * (coords[4] + coords[5] + coords[6] + coords[7]);
     face_coord[4] = 0.25 * (coords[1] + coords[2] + coords[6] + coords[5]);
     face_coord[5] = 0.25 * (coords[2] + coords[3] + coords[7] + coords[6]);
-  } @ 1;
+  }
 
   {                      // Calcule la longueur caractéristique de la maille
     Real3 median1 = face_coord[0] - face_coord[3];
@@ -315,33 +315,33 @@ void iniGeometry(void) @ -4{
     Real dx_numerator = d1*d2*d3;
     Real dx_denominator = d1*d2 + d1*d3 + d2*d3;
     kLength = dx_numerator/dx_denominator;
-  } @ 2;
+  }
 
   // Calcule les résultantes aux sommets
-  computeCQs(coords, face_coord, &cqs) @ 3; 
+  computeCQs(coords, face_coord, &cqs);
 }
 
 // ****************************************************************************
 // * computeVolume: Calcule le volume de la maille
 // ****************************************************************************
 ∀ cells void computeGeometricVolume(void)
-  in (cell cqs) out (cell oldVolume) inout(cell volume) @ 5 {
+  in (cell cqs) out (cell oldVolume) inout(cell volume) @ 5.0 {
   Real tmpVolume = 0.0;// @ 0;
-  oldVolume = volume @ 0;
+  oldVolume = volume;
   foreach node
     tmpVolume += dot(coord, cqs);
-  tmpVolume /= 3.0 @ 1;
+  tmpVolume /= 3.0;
   volume=tmpVolume;
 }
 
 // ****************************************************************************
 // * updateDensity
 // ****************************************************************************
-void updateDensityRatioMaximum(void)@6{
+void updateDensityRatioMaximum(void) @ 6.0{
   density_ratio_maximum=0.0;
 }
 ∀ cells void updateDensity(void)
-  in (cell cMass, cell volume) out (cell density) @ .1{
+  in (cell cMass, cell volume) out (cell density) @ 6.1{
   Real old_density = density;
   Real new_density = cMass/volume;
   Real density_ratio;
@@ -358,7 +358,7 @@ void updateDensityRatioMaximum(void)@6{
 // ****************************************************************************
 ∀ cells void computeInternalEnergy(void)
   in (cell volume, cell oldVolume, cell adiabatic_cst, cell viscosity_work, cell cMass)
-  out (cell internal_energy) @ 7{
+  out (cell internal_energy) @ 7.0{
   Real γVolume = volume / oldVolume;
   Real x = 0.5 * (adiabatic_cst - 1.0);
   Real numer_accrois_nrj = 1.0 + x * (1.0 - γVolume);
@@ -375,9 +375,9 @@ void updateDensityRatioMaximum(void)@6{
   in (cell density, cell adiabatic_cst, cell internal_energy)
   out (cell sound_speed) inout (cell pressure) @ 8{
   // On calcule en premier la pression
-  pressure = (adiabatic_cst - 1.0) * density * internal_energy @ 0;
+  pressure = (adiabatic_cst - 1.0) * density * internal_energy;
   // Que l'on va utiliser pour le calcule de la vitesse du son
-  sound_speed = sqrt((adiabatic_cst * pressure) / density) @ 2;
+  sound_speed = sqrt((adiabatic_cst * pressure) / density);
 }
 
 
@@ -386,7 +386,7 @@ void updateDensityRatioMaximum(void)@6{
 // ****************************************************************************
 ∀ cells void computeDxSound(void)
   in (cell kLength, cell sound_speed)
-  out(cell dxSound) @ 9{
+  out(cell dxSound) @ 9.0{
   dxSound = kLength/sound_speed;
 }
 /*cells void computeMinDxSound(void) in (cell dxSound) @ 10.0{

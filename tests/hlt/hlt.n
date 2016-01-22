@@ -40,72 +40,33 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "nabla.tab.h"
 
+cells{ ℝ δ; };
+global{ ℝ Δ; };
 
-void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  int fakeNumParams=0;
-  const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
-  assert(item_node);
-  const astNode *global_var_node = n->children->next;
-  const astNode *reduction_operation_node = global_var_node->next;
-  astNode *item_var_node = reduction_operation_node->next;
-  astNode *at_single_cst_node = dfsFetch(n->children->next, rulenameToId("at_constant"));
-  assert(at_single_cst_node!=NULL);
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
-  char job_name[NABLA_MAX_FILE_NAME];
-  job_name[0]=0;
-  strcat(job_name,"cudaReduction_");
-  strcat(job_name,global_var_name);
-  // Rajout du job de reduction
-  nablaJob *redjob = nMiddleJobNew(nabla->entity);
-  redjob->is_an_entry_point=true;
-  redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->return_type  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->direction  = strdup("NoDirection");
-  redjob->called_variables=nMiddleVariableNew(nabla);
-  redjob->called_variables->item=strdup("cell");
-  redjob->called_variables->name=item_var_name;
-  // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
-  redjob->reduction = true;
-  redjob->reduction_name = strdup(global_var_name);
+∀ cells void std_init(void) @ -10.0 {δ=0;}
 
-    // Init flush
-  redjob->when_index = 0;
-  redjob->whens[0] = 0.0;
-  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
-  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla);
-  nMiddleStoreWhen(redjob,nabla);
-  assert(redjob->when_index>0);
-  dbg("\n\t[cuHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+∀ cells void std_loop(void) @ 1.0 {δ+=1;}
 
-  nMiddleJobAdd(nabla->entity, redjob);
-  const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
-  const double reduction_init = min_reduction?1.0e20:-1.0e20;
-  // Génération de code associé à ce job de réduction
-  nprintf(nabla, NULL, "\n\
-// ******************************************************************************\n\
-// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
-// ******************************************************************************\n\
-__global__ void %s(", item_var_name, global_var_name, job_name);
-  cuHookAddExtraParameters(nabla,redjob,&fakeNumParams);
-  nprintf(nabla, NULL,",real *cell_%s){ // @ %s\n\
-\t//const double reduction_init=%e;\n\
-\tCUDA_INI_CELL_THREAD(tcid);\n\
-\t/**global_%s=*/Reduce%sToDouble((double)(cell_%s[tcid]));\n\
-}\n\n", item_var_name,
-          at_single_cst_node->token,
-          reduction_init,
-          global_var_name,
-          min_reduction?"Min":"Max",
-          item_var_name);
+∀ cells void hlt1_init(void) @ 1.0/1.0 {/*δ=0;*/}
+∀ cells void hlt1_loop(void) @ 1.0/2.0 {δ+=0.1;}
+∀ cells Δ <?= δ @ 1.0/3.0;
+void hlt1_exit(void) @ 1.0/4.0 {
+  //printf("\n\t[1;33mdelta=%.12e vs %.12e, m_hlt_dive=%d[0m",Δ,1.8,m_hlt_dive);
+  //info()<<"[1;33mdelta="<<Δ<<" vs "<<1.8<<", m_hlt_dive="<<m_hlt_dive<<"[0m";
+  //if (m_global_Dt.isNearlyEqual(1.8)) exit; // Why not == ?
+  info()<<"\t[31mdelta="<<Δ<<"[0m";
+  if (Δ>=1.8) exit;
 }
+
+∀ cells void hlt2_init(void) @ 1.0/2.5/1.0 {/*δ=0;*/}
+∀ cells void hlt2_loop(void) @ 1.0/2.5/2.0 {δ+=0.01;}
+∀ cells Δ <?= δ @ 1.0/2.5/3.0;
+void hlt2_exit(void) @ 1.0/2.5/4.0 {
+  info()<<"\t\t[34mdelta="<<Δ<<"[0m";
+  if (Δ==1.18) exit;
+}
+
+void dump(void) @ 3.0 {info()<<"[1;33mdelta="<<Δ<<"[0m";}
+
+void std_exit(void) @ 4.0 {exit;}

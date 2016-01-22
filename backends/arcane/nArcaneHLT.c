@@ -64,52 +64,95 @@ void nArcaneHLTInit(nablaMain *arc){
   nMiddleJobAdd(arc->entity, hltInitFunction);
 }
 
-  
+
 // *****************************************************************************
-// * nccAxlGeneratorHLTEntryPoint
+// * nArcaneHLTIni
+// * ARCANE_ASSERT((entry_point!=0),(\"nArcaneHLTEntryPoint\"));
 // *****************************************************************************
-void nArcaneHLTEntryPoint(nablaMain *arc,
+static void nArcaneHLTIni(nablaMain *arc,
                           nablaJob *entry_point,
                           int number_of_entry_points,
-                          double hlt_dive_when){
+                          double *hlt_dive_when){
   FILE *hdr=arc->entity->hdr;
-  fprintf(hdr, "\n\t//nccAxlGeneratorHLTEntryPoint");
-  // Voici les booléens d'exit & probe du dive HLT
-  fprintf(hdr, "\n\tBool m_hlt_dive=false;");
-  fprintf(hdr, "\n\tBool m_hlt_exit=false;");
-  // Voici les points d'entrées de notre dive
-  fprintf(hdr, "\n\tArray<IEntryPoint*> m_hlt_entry_points;");
-  // Voici la fonction qui sera appelée lors du premier 'dive'
-  fprintf(hdr, "\n\tvoid hltDive_at_%s(){\n\
-      //info()<<\"[1;33mm_hlt_entry_points size=\"<<m_hlt_entry_points.size()<<\"[m\";\n\
-      m_hlt_dive = true;\n\
-      m_hlt_exit = false;\n\
-      for(;!m_hlt_exit;){\n\
-         for(Integer i=0, s=m_hlt_entry_points.size(); i<s; ++i){\n\
-            debug()<<\"[1;33m\"<<\"\tHLT launching: '\"<<m_hlt_entry_points.at(i)->name()<<\"'[m\";\n\
-            m_hlt_entry_points.at(i)->executeEntryPoint();\n\
-            //traceMng()->flush();\n\
-         }\n\
-      }\n\
-     m_hlt_dive = false;\n\
-   }", nccAxlGeneratorEntryPointWhenName(hlt_dive_when));
   // Et voici la fonction d'init du HLT
   fprintf(hdr, "\n\
    void hltIni(){\n\
+      m_hlt_dive.resize(%d);\n\
+      m_hlt_dive.fill(false);\n\
+      m_hlt_exit.resize(%d);\n\
+      m_hlt_exit.fill(false);\n\
+      m_hlt_entry_points.resize(%d);\n\
       __attribute__((unused)) IEntryPointMng *entry_point_mng=subDomain()->entryPointMng();\n\
-      __attribute__((unused)) IEntryPoint* entry_point;");
+      __attribute__((unused)) IEntryPoint* entry_point;\n",
+          NABLA_JOB_WHEN_MAX,
+          NABLA_JOB_WHEN_MAX,
+          NABLA_JOB_WHEN_MAX);
   for(int i=0;i<number_of_entry_points+2;i+=1){
     if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
     if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
     const int HLT_depth=entry_point[i].when_depth;
     if (HLT_depth==0) continue;
+    assert(HLT_depth<NABLA_JOB_WHEN_MAX);
     const double when=entry_point[i].whens[0];
-    //const char *whenName=nccAxlGeneratorEntryPointWhenName(when);  
+    //const int depth=entry_point[i].when_depth;
+    //if (HLT_depth>hlt_current_depth){
     fprintf(hdr, "\
       entry_point=entry_point_mng->findEntryPoint(StringBuilder(\"%s@%f\"));\n\
-      ARCANE_ASSERT((entry_point!=0),(\"nccAxlGeneratorHLTEntryPoint\"));\n\
-      m_hlt_entry_points.add(entry_point);\n",
-            entry_point[i].name,when);
+      m_hlt_entry_points[%d].add(entry_point);//hlt_dive_when[0]=%f\n",
+            entry_point[i].name,when,HLT_depth-1,hlt_dive_when[0]);
   }
-  fprintf(hdr, "}\n");
+  fprintf(hdr, "\t}\n");
+}
+
+
+// *************************************************************
+// *************************************************************
+static char* tab(int k){
+  char tabs[32]; assert(k<32);
+  for(int i=0;i<k;i+=1) tabs[i]='\t';
+  tabs[k]=0;
+  return strdup(tabs);
+}
+
+// *****************************************************************************
+// * nArcaneHLTEntryPoint
+// *****************************************************************************
+void nArcaneHLTEntryPoint(nablaMain *arc,
+                          nablaJob *entry_point,
+                          int number_of_entry_points,
+                          double *hlt_dive_when){
+  FILE *hdr=arc->entity->hdr;
+  fprintf(hdr, "\n\t//nArcaneHLTEntryPoint");
+  // Voici les booléens d'exit & probe du dive HLT
+  fprintf(hdr, "\n\tint m_hlt_level=0;");
+  fprintf(hdr, "\n\tBoolArray m_hlt_dive;");
+  fprintf(hdr, "\n\tBoolArray m_hlt_exit;");
+  // Voici les points d'entrées de notre dive
+  fprintf(hdr, "\n\tArray<Array<IEntryPoint*> > m_hlt_entry_points;");
+
+  // Dump de la fonction HLT d'initialisation
+  nArcaneHLTIni(arc,entry_point,number_of_entry_points,hlt_dive_when);
+
+  // Voici les fonction qui seront appelées lors des 'DIVE'
+  for(int i=0;hlt_dive_when[i]!=0.0;i+=1){
+    fprintf(hdr, "\n\tvoid hltDive_at_%s(){\n\
+      m_hlt_level=%d;\n\
+      const int level=m_hlt_level;\n\
+      info()<<\"[1;33mm_hlt_entry_points.at(\"<<level<<\") size=\"<<\
+m_hlt_entry_points.at(level).size()<<\"[m\";\n\
+      m_hlt_dive[level] = true;\n\
+      m_hlt_exit[level] = false;\n\
+      for(;!m_hlt_exit.at(level);){\n\
+         info();\n\
+         for(Integer i=0, s=m_hlt_entry_points.at(level).size(); i<s; ++i){\n\
+            info()<<\"%s[1;33m\"<<\"HLT launching: '\"<<\
+m_hlt_entry_points.at(level).at(i)->name()<<\"'[m\";\n \
+            m_hlt_entry_points.at(level).at(i)->executeEntryPoint();\n\
+            //info()<<\"[1;33m\"<<\"HLT m_hlt_exit: '\"<<m_hlt_exit<<\"'[m\";\n\
+           //traceMng()->flush();\n\
+         }\n\
+      }\n\
+     m_hlt_dive[level] = false;\n\
+   }", nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i]),i,tab(1+i));
+  }
 }

@@ -80,8 +80,8 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->when_index = 0;
   redjob->whens[0] = 0.0;
   // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
-  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
-  nMiddleStoreWhen(redjob,nabla,NULL);
+  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla);
+  nMiddleStoreWhen(redjob,nabla);
   assert(redjob->when_index>0);
   dbg("\n\t[lambdaHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
   

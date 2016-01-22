@@ -177,5 +177,5 @@ char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaV
 
 void nArcaneHLTEntryPoint(nablaMain *arc,
                           nablaJob *entry_point,
-                          int number_of_entry_points,double);
+                          int number_of_entry_points,double*);
 #endif // _NABLA_ARCANE_H_

@@ -47,10 +47,12 @@
 // ****************************************************************************
 // *
 // ****************************************************************************
-static void dumpAtEndofAt(nablaJob *job, char *at, char *token){
+static void dumpAtEndofAt(nablaJob *job, char *token){
+  const double h=atof(token);
+  assert(h>=0.0);
   job->whens[job->when_index]+=
     job->when_sign*atof(token)*pow(10.0,-job->when_depth*NABLA_JOB_WHEN_HLT_FACTOR);
-  dbg("\n\t\t[nMiddleAtConstantParse/dumpAtEndofAt] HLT level #%d => %f ",
+  dbg("\n\t\t[nMiddleAtConstantParse/dumpAtEndofAt] HLT level #%d => %.12e ",
       job->when_depth,
       job->whens[job->when_index]);
 }
@@ -59,7 +61,7 @@ static void dumpAtEndofAt(nablaJob *job, char *at, char *token){
 // ****************************************************************************
 // * nablaAtConstantParse
 // ****************************************************************************
-void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla, char *at){
+void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla){
   // On évite les parenthèses rajoutée lors du parsing .y 'at_constant'
   if (n->tokenid == '-') {job->when_sign*=-1.0;}
   if (n->tokenid == '(') goto skip;
@@ -69,7 +71,7 @@ void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla, char *at
     job->when_depth+=1;
     // On sauvegarde là où en ętait
     //job->whens[job->when_index]=atof(at);
-    dbg("\n\t\t[nMiddleAtConstantParse] job->whens[%d]=%f",
+    dbg("\n\t\t[nMiddleAtConstantParse] job->whens[%d]=%.12e",
         job->when_index,
         job->whens[job->when_index]);
     // On flush le 'at' actuel
@@ -81,29 +83,27 @@ void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla, char *at
     // Si on tombe sur le "','", on sauve le 'when' dans l'entry_point
     if (yyNameTranslate(n->tokenid) == ',') {
       job->when_sign=1.0;
-      nMiddleStoreWhen(job,nabla,at);
+      nMiddleStoreWhen(job,nabla);
       goto skip;
     }
   }
   if (n->token != NULL )
-    dumpAtEndofAt(job,at,n->token);
+    dumpAtEndofAt(job,n->token);
  skip:
-  if (n->children != NULL) nMiddleAtConstantParse(job,n->children, nabla, at);
-  if (n->next != NULL) nMiddleAtConstantParse(job,n->next, nabla, at);
+  if (n->children != NULL) nMiddleAtConstantParse(job,n->children, nabla);
+  if (n->next != NULL) nMiddleAtConstantParse(job,n->next, nabla);
 }
 
 
 /*****************************************************************************
  * nablaStoreWhen
  *****************************************************************************/
-void nMiddleStoreWhen(nablaJob *job,nablaMain *nabla, char *at){
-  nablaJob *entry_point=job;//nMiddleJobLast(nabla->entity->jobs);
-  //entry_point->whens[entry_point->when_index]=atof(at);
-  //dbg("\n\t\t[nablaStoreWhen] @=\"%s\" ", at);
-  dbg("\n\t\t[nablaStoreWhen] Storing when @=%f ", entry_point->whens[entry_point->when_index]);
+void nMiddleStoreWhen(nablaJob *job,nablaMain *nabla){
+  nablaJob *entry_point=job;
+  dbg("\n\t\t[nablaStoreWhen] Storing when @=%.12e ",
+      entry_point->whens[entry_point->when_index]);
   entry_point->when_index+=1;
   entry_point->whens[entry_point->when_index]=0.0;
-//*at=0;
 }
 
 
@@ -130,7 +130,7 @@ int nMiddleNumberOfEntryPoints(nablaMain *nabla){
     assert(job->when_index>=1);
     dbg("\n\t[nablaNumberOfEntryPoints] %s: when_index=%d @ ", job->name, job->when_index);
     for(i=0;i<job->when_index;++i)
-      dbg("%f ", job->whens[i]);
+      dbg("%.12e ", job->whens[i]);
     number_of_entry_points+=job->when_index; // On rajoute les différents whens
   }
   return number_of_entry_points;
@@ -175,7 +175,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
   for(i=2,job=nabla->entity->jobs;job!=NULL;job=job->next){
     if (!job->is_an_entry_point) continue;
     for(j=0;j<job->when_index;++j){
-      dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %f", i, job->name, job->whens[j]);
+      dbg("\n\t[nablaEntryPointsSort] dumping #%d: %s @ %.12e", i, job->name, job->whens[j]);
       entry_points[i].item=job->item;
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=job->is_a_function;

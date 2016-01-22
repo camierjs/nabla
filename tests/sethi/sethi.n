@@ -274,11 +274,11 @@ Real slope(const Real nbv_m, const Real nbv_0, const Real nbv_p){
 }
 void compute_slopes(void) @ 4.0{
   if (isX()){
-    compute_inner_slopes_xyz(MD_DirX) @ 0.0;
-    compute_outer_slopes_xyz(MD_DirX) @ 0.0;
+    compute_inner_slopes_xyz(MD_DirX);
+    compute_outer_slopes_xyz(MD_DirX);
   }else{
-    compute_inner_slopes_xyz(MD_DirY) @ 0.0;
-    compute_outer_slopes_xyz(MD_DirY) @ 0.0;
+    compute_inner_slopes_xyz(MD_DirY);
+    compute_outer_slopes_xyz(MD_DirY);
   }
 }
 

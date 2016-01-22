@@ -81,7 +81,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 ####################################
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
+if (NOT APPLE)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif()
 add_executable(nabla nabla.c)
 add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 

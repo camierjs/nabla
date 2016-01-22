@@ -59,4 +59,5 @@ run4:$(TGT) $(NABLA)
 # DOT 2 PNG #
 #############
 png:
-	dot -Tpng $(TGT).dot -o $(TGT).png
+#	dot -Tpng $(TGT).dot -o $(TGT).png
+	dot -O -Tpng $(TGT).time.dot

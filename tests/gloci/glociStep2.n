@@ -40,42 +40,41 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-options{
-  ℝ γ = 1.4;
-  ℝ option_x_min = 0.0;
-  ℝ option_x_interface = 0.5;
-  ℝ option_x_max = 1.0;
-  ℝ option_y_min = 0.0;
-  ℝ option_y_max = 4.0;
-  ℝ option_δt_ini = 0.00001;
-  ℝ option_δt_min = 1e-12;
-  ℝ option_δt_max = 0.01;
-  ℝ option_δt_end = 0.2;
-  ℝ option_δt_cfl = 0.15;
-  ℝ option_δt_min_variation = 0.99;
-  ℝ option_δt_max_variation = 0.10;
-  ℾ option_δt_last_exact = true;
-  ℕ option_max_iterations = 32768;
-  ℝ option_ini_zg_ρ = 1.0;
-  ℝ option_ini_zd_ρ = 0.125;
-  ℝ option_ini_zg_p = 1.0; 
-  ℝ option_ini_zd_p = 0.1;
-};
-
-variables{
-  ℝ δt, t;
-  ℝ³ Χ⁰,Χ;  // Positions noeuds et mailles à t=0 et tⁿ
-  ℝ³ u,b;   // Vitesses & Second membre
- 
-  ℝ e,E;    // Energies
-  ℝ c,m,p⁰,p,ρ⁰,ρ,V⁰,V; // Masse, Pression, Densités, Volume
-  
-  ℝ³ *C,*F;  // Résultantes aux sommets
-  ℝ³⨯ℝ³ *A;  // Matrices de contributions aux sommets
-};
+// *************************************************************
+// * ∇-Glace: Temps logique ⇒ Temps discret
+// * Jean-Sylvain.Camier@cea.fr - 01.69.26.55.68
+// *************************************************************
 
 // *************************************************************
-// * Conditions initiales: Ω⁰,ρ⁰,p⁰,V⁰ & m
+// * Déclarations des options
+// *************************************************************
+ℝ γ = 1.4;
+ℝ option_x_min = 0.0;
+ℝ option_x_interface = 0.5;
+ℝ option_x_max = 1.0;
+ℝ option_δt_ini = 1e-5;
+ℝ option_δt_cfl = 0.15;
+ℝ option_ini_zg_ρ = 1.0;
+ℝ option_ini_zd_ρ = 0.125;
+ℝ option_ini_zg_p = 1.0; 
+ℝ option_ini_zd_p = 0.1;
+
+// *************************************************************
+// * Déclarations des variables
+// *************************************************************
+ℝ t,δt;    // Temps et pas de temps
+ℝ³ Χ⁰,Χ;   // Positions noeuds et mailles à t=0 et tⁿ
+ℝ³ u,b;    // Vitesses & Second membre
+
+ℝ c,m,e,E; // Masse & Energies
+ℝ p⁰,ρ⁰,V⁰
+ℝ p,ρ,V;   // Pression, Densités, Volume
+  
+ℝ³ *C,*F;  // Résultantes aux sommets
+ℝ³⨯ℝ³ *A;  // Matrices de contributions aux sommets
+
+// *************************************************************
+// * Conditions initiales: Χ⁰(par le mailleur), ρ⁰, p⁰, V⁰ & m
 // *************************************************************
 ∀ j∈cells Χⱼ = ¼*∑ᵣΧ⁰ᵣ;
 ∀ cells {
@@ -91,13 +90,15 @@ variables{
 ∀ cells m = ρ⁰*V⁰;
 
 // *************************************************************
-// * Calcul des Cjr
+// * Calcul des Cⱼᵣ et des variables qui en découlant
 // *************************************************************
-ℝ³ ⟂(const ℝ³ s0, const ℝ³ s1){ return ℝ³(s1.y-s0.y,-s1.x+s0.x,0);}
-∀ j∈cells, ∀ r∈nodes(j) C_{jr}=½*⟂(Χ_{(j-1)%4}, Χ_{(j+1)%4});
+ℝ³ ⟂(ℝ³ s0, ℝ³ s1){return ℝ³(s1.y-s0.y,-s1.x+s0.x,0);}
+∀ j∈cells, ∀ r∈nodes(j) C_{jr}=½*⟂(Χ_{(j-1)%4},Χ_{(j+1)%4});
+∀ j∈cells Vⱼ = ½*∑ᵣCⱼᵣ⋅Χᵣ;
+∀ j∈cells glace_δtⱼ = 2.0*Vⱼ/(cⱼ*Σᵣ‖Cⱼᵣ‖);
 
 // *************************************************************
-// * Règles EOS standards
+// * Règles EOS des 'invariants'
 // *************************************************************
 ∀ cells c = √(γ*p/ρ);
 ∀ cells p = (γ-1.0)*ρ*e;
@@ -105,7 +106,7 @@ variables{
 ∀ cells e = E-½*(u⋅u);
 
 // *************************************************************
-// * Init n=0
+// * Initialisation de la boucle en 'n'
 // *************************************************************
 tⁿ⁼⁰ = 0;
 δtⁿ⁼⁰ = option_δt_ini;
@@ -122,34 +123,18 @@ tⁿ⁼⁰ = 0;
 ∀ r∈nodes uᵣ = b̌ᵣ/Ǎᵣ;
 ∀ j∈cells, ∀ r∈nodes(j), Fⱼᵣ = pⱼ*Cⱼᵣ+Aⱼᵣ*(uᵣ-uⱼ);
 
-∀ j∈cells Eⱼⁿ⁺¹ = Eⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ;
-∀ j∈cells uⱼⁿ⁺¹ = uⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ⋅uᵣⁿ;
-∀ r∈nodes Χᵣⁿ⁺¹ = Χᵣⁿ + δtⁿ*uᵣⁿ;
-
-∀ j∈cells Vⱼ = ½*∑ᵣCⱼᵣ⋅Χᵣ;
-
 // *************************************************************
-// * δt = option_δt_cfl*minⱼ(glace_δtⱼ);
+// * Itérations de la boucle en 'n'
+// * Et calcule du δt pour mise-à-jour du temps de la simulation
 // *************************************************************
-∀ j∈cells glace_δtⱼ = 2.0*Vⱼ/(cⱼ*Σᵣ‖Cⱼᵣ‖);
-ℝ computeδtNext(const ℝ reduced_Δt, const ℝ t, const ℝ Δt){
-  const ℝ max_time_step = (1.0+option_δt_max_variation)*Δt;
-  const ℝ min_time_step = (1.0-option_δt_min_variation)*Δt;
-  ℝ new_δt=option_δt_control*reduced_Δt;
-  if (new_δt > max_time_step) new_δt=max_time_step;
-  if (new_δt < min_time_step) new_δt=min_time_step;
-  new_δt = min(new_δt, option_δt_max);
-  new_δt = max(new_δt, option_δt_min);
-  if (option_δt_last_exact && ((t + new_δt) > option_δt_end)) 
-    new_δt = option_δt_end - t;
-  if ((t>=option_δt_end) || (new_δt==0.0)) exit;
-  return new_δt;
-}
-δtⁿ⁺¹ = computeδtNext(minⱼ(glace_δtⱼ),tⁿ,δtⁿ);
-tⁿ⁺¹ = tⁿ + δtⁿ⁺¹;
+∀ n∈ℕ, ∀ j∈cells Eⱼⁿ⁺¹ = Eⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ;
+∀ n∈ℕ, ∀ j∈cells uⱼⁿ⁺¹ = uⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ⋅uᵣⁿ;
+∀ n∈ℕ, ∀ r∈nodes Χᵣⁿ⁺¹ = Χᵣⁿ + δtⁿ*uᵣⁿ;
+∀ n∈ℕ, δtⁿ⁺¹ = option_δt_cfl*minⱼ(glace_δtⱼ);
+∀ n∈ℕ, tⁿ⁺¹ = tⁿ + δtⁿ⁺¹;
 
 // *************************************************************
-// * Boundary conditions
+// * Conditions aux bords
 // *************************************************************
 ∀ k∈outer faces, ∀ r∈nodes(k) {
   b̃ᵣ = (I-nₖ⊗nₖ)*bᵣ;
@@ -158,5 +143,3 @@ tⁿ⁺¹ = tⁿ + δtⁿ⁺¹;
   Ǎᵣ=I;
   b̌ᵣ=option_u_ini;
 }
-
-      

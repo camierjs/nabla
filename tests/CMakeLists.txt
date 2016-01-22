@@ -146,6 +146,7 @@ endforeach(tst)
 # NABLA TESTS FOR ARCANE #
 ##########################
 if (ARCANE_FOUND)
+  nabla_add_arcane_test(hlt 1 run)
   # No ICartesianMesh out of CEA # nabla_add_arcane_test(gad 1 run)
   nabla_add_arcane_test(anyItem 1 run)
   nabla_add_arcane_test(comd 1 run)
@@ -228,6 +229,9 @@ nabla_add_lambda_test(upwindAP 1 run seq)
 nabla_add_lambda_test(heat 1 gen seq)
 nabla_add_lambda_test(aleph1D 1 gen seq)
 nabla_add_lambda_test(amber 1 gen seq)
+
+nabla_add_lambda_test(hlt 1 gen seq)
+#nabla_add_lambda_test(hlt 1 run seq)
 
 if (HYPRE_FOUND)
  nabla_add_lambda_test(heat 1 run seq)

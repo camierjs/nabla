@@ -164,26 +164,37 @@ char* nccAxlGeneratorEntryPointWhenName(double when){
   snprintf(name,18,"0x%lx",*adrs);
   //dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] when=%f => %p",when, *adrs);
   dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] ENTRY_POINT_build=%f ENTRY_POINT_init=%f",
-      ENTRY_POINT_build,
-      ENTRY_POINT_init);
+      ENTRY_POINT_build,ENTRY_POINT_init);
   return strdup(name);
 }
 
 
-/***************************************************************************** 
- * Dump de la structure des Variables et des EntryPoints dans le fichier AXL
- *****************************************************************************/
-NABLA_STATUS nccAxlGenerator(nablaMain *arc){
-  nablaVariable *var;
-  nablaOption *opt;
-  nablaJob *entry_point;
-  int i,number_of_entry_points;
-  bool is_into_compute_loop=false;
-  bool hlt_compute_loop=false;
-  double hlt_dive_when=0.0;
-  int hlt_dive_number=0;
+// *************************************************************
+// *************************************************************
+static char* tab(int k){
+  char tabs[32]; assert(k<32);
+  for(int i=0;i<k;i+=1) tabs[i]='\t';
+  tabs[k]=0;
+  return strdup(tabs);
+}
 
-  dbg("\n\n[nccAxlGenerator]");
+// *************************************************************
+// * Dump de la structure des Variables et des EntryPoints
+// * dans le fichier AXL
+// *************************************************************
+NABLA_STATUS nccAxlGenerator(nablaMain *arc){
+  nablaOption *opt;
+  nablaVariable *var;
+  nablaJob *entry_point;
+  int number_of_entry_points;
+  bool is_into_compute_loop=false;
+  
+  int hlt_current_depth=0;
+
+  int hlt_dive_num=0;
+  double *hlt_dive_when=calloc(32,sizeof(double));
+
+  dbg("\n\n* nccAxlGenerator");
   fprintf(arc->axl,"\n\t\t<variables>");
   for(var=arc->variables;var!=NULL;var=var->next)
     if (nccAxlGenerateVariable(arc, var)!=NABLA_OK) return NABLA_ERROR;
@@ -193,7 +204,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   entry_point=nMiddleEntryPointsSort(arc,number_of_entry_points);
 
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
-  for(i=0;i<number_of_entry_points+2;++i){
+  for(int i=0;i<number_of_entry_points+2;++i){
     if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
     if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
     const int HLT_depth=entry_point[i].when_depth;
@@ -202,29 +213,46 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     const double when=entry_point[i].whens[0];
     const char *where=nccAxlGeneratorEntryPointWhere(when);
     const char *whenName=nccAxlGeneratorEntryPointWhenName(when);
-
-    // Si on trouve ue transition,
-    // On rajoute un entry_point afin de déclencher l'HLT
-    if ((hlt_compute_loop==false) && (HLT_depth>0)){
-      hlt_dive_when=when;
-      hlt_dive_number+=1;
-      // On remplit la ligne du fichier CONFIG
-      dbg("\n\t[nccAxlGenerator] On remplit la ligne du fichier CONFIG");
-      if (isAnArcaneModule(arc)==true)
-        fprintf(arc->cfg, "\n\t\t\t\t<entry-point name=\"%s.hltDive@%f\" />",
-                arc->entity->name,when);
     
-      // On remplit la ligne du fichier AXL
-      dbg("\n\t[nccAxlGenerator] On remplit la ligne de l'AXL");
-      fprintf(arc->axl,
-              "\n\t\t\t<entry-point method-name=\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" />", whenName, when,where);
-    }
-      
-    hlt_compute_loop|=(HLT_depth>0)?true:false;
     dbg("\n\n\t[nccAxlGenerator] sorted #%d: %s @ %f(=%s) in '%s', HLT depth=%d", i,
         entry_point[i].name, when, whenName, where, HLT_depth);
+    dbg("\n\t[nccAxlGenerator] hlt_current_depth=%d, HLT_depth=%d", hlt_current_depth,HLT_depth);
+
+    // Si on trouve une transition en EXIT
+    if (hlt_current_depth>HLT_depth){
+      hlt_current_depth=HLT_depth;
+    }
+    
+    // Si on trouve une transition en DIVE:
+    // on rajoute un entry_point DIVE afin de déclencher l'HLT depuis le top
+    if (HLT_depth>hlt_current_depth){
+      hlt_current_depth=HLT_depth;
+      *hlt_dive_when++=when;hlt_dive_num+=1;
+      // Si on est à la raçine,
+      if (hlt_current_depth==0){
+        // On remplit la ligne du fichier CONFIG
+        dbg("\n\t[nccAxlGenerator] Config: %s.hltDive@%f", arc->entity->name,when);
+        if (isAnArcaneModule(arc)==true)
+          fprintf(arc->cfg, "\n\t\t\t\t%s<entry-point name=\"%s.hltDive@%f\" />",
+                  tab(hlt_current_depth),arc->entity->name,when);
+        // On remplit la ligne du fichier AXL
+        dbg("\n\t[nccAxlGenerator] hltDive %s in %s",whenName,where);
+        fprintf(arc->axl,"\n\t\t\t%s<entry-point method-name=\
+\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" />",
+                tab(hlt_current_depth),whenName, when,where);
+      }else{ // Si on est déjà dans un level HLT
+        fprintf(arc->cfg, "\n\t\t\t\t%s<entry-point name=\"%s.hltDive@%f\" />",
+                tab(hlt_current_depth),arc->entity->name,when);
+        fprintf(arc->axl,"\n\t\t\t%s<entry-point method-name=\
+\"hltDive_at_%s\" name=\"hltDive@%f\" where=\"%s\" property=\"none\" />",
+                tab(hlt_current_depth),whenName, when,where);
+      }
+    }
+
+    
     // Si l'on passe pour la première fois la frontière du zéro, on l'écrit dans le .config
     if (when > ENTRY_POINT_continue_init && is_into_compute_loop==false){
+      dbg("\n\t[nccAxlGenerator] Premiere frontiere Zero!");
       is_into_compute_loop=true;
       if (isAnArcaneModule(arc)==true)
         fprintf(arc->cfg, "\n\t\t\t</entry-points>\n\n\t\t\t<entry-points where=\"compute-loop\">");
@@ -233,20 +261,13 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     // On remplit la ligne du fichier CONFIG
     dbg("\n\t[nccAxlGenerator] On remplit la ligne du fichier CONFIG");
     if (isAnArcaneModule(arc)==true)
-      fprintf(arc->cfg, "\n\t\t\t\t<%sentry-point name=\"%s.%s@%f\" /%s>",
-              HLT_cfg_comment_in,
-              arc->entity->name,
-              entry_point[i].name,
-              when,
-              HLT_cfg_comment_out);
+      fprintf(arc->cfg, "\n\t\t\t\t%s<%sentry-point name=\"%s.%s@%f\" /%s>",tab(hlt_current_depth),
+              HLT_cfg_comment_in,arc->entity->name,entry_point[i].name,when,HLT_cfg_comment_out);
     
     // On remplit la ligne du fichier AXL
     dbg("\n\t[nccAxlGenerator] On remplit la ligne de l'AXL");
-    fprintf(arc->axl, "\n\t\t\t<entry-point method-name=\"%s_at_%s\" name=\"%s@%f\"",
-            entry_point[i].name,
-            whenName,
-            entry_point[i].name,
-            when);    
+    fprintf(arc->axl, "\n\t\t\t%s<entry-point method-name=\"%s_at_%s\" name=\"%s@%f\"",
+            tab(hlt_current_depth),entry_point[i].name,whenName,entry_point[i].name,when);    
     // Pourrait être le where, mais pas de doublons dans l'axl
     fprintf(arc->axl, " where=\"%s\" property=\"none\" />",where);
 
@@ -270,7 +291,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   nArcaneHLTEntryPoint(arc,
                        entry_point,
                        number_of_entry_points,
-                       hlt_dive_when);
+                       hlt_dive_when-hlt_dive_num);
   
   // Génération des options dans le fichier AXL
   fprintf(arc->axl,"\n\t\t<options>");

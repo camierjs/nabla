@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include <strings.h>
 #include "nabla.tab.h"
 #include "frontend/ast.h"
 
@@ -53,9 +54,11 @@ static void arcaneIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
 }
 static void arcaneExit(nablaMain *nabla,nablaJob *job){
+  // le token 'exit' doit être appelé depuis une fonction
+  assert(job->is_a_function);
   nprintf(nabla, "/*EXIT*/","{\n\
-if (m_hlt_dive){\n\
-   m_hlt_exit=true;\n\
+if (m_hlt_dive.at(m_hlt_level)){\n\
+   m_hlt_exit[m_hlt_level]=true;\n\
 }else{\n\
    subDomain()->timeLoopMng()->stopComputeLoop(true);\n\
 }}");
@@ -136,8 +139,35 @@ static void arcaneHookReduction(nablaMain *nabla, astNode *n){
   job_name[0]=0;
   strcat(job_name,"arcaneReduction_");
   strcat(job_name,global_var_name);
+  strcat(job_name,"_");
+  dbg("\n\t\t[arcaneHookReduction] job_name=%s",job_name);
+
   // Rajout du job de reduction
   nablaJob *redjob = nMiddleJobNew(nabla->entity);
+  redjob->when_index = 0;
+  redjob->whens[0] = 0.0;
+  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
+  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla);
+  nMiddleStoreWhen(redjob,nabla);
+  assert(redjob->when_index>0);
+  dbg("\n\t[arcaneHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
+  // On construit mtn la string representant le 'double'
+  char *ftoa=calloc(1024,1);
+  sprintf(ftoa,"%a",redjob->whens[redjob->when_index-1]);
+  // S'il est negatif, on l'évite
+  if (ftoa[0]=='-') ftoa+=1;
+  // On évite aussi le '.'
+  char *locate_dot_sign_in_ftoa=index(ftoa,'.');
+  assert(locate_dot_sign_in_ftoa);
+  *locate_dot_sign_in_ftoa='_';
+  // Ainsi que le '+'
+  char *locate_exp_sign_in_ftoa=rindex(ftoa,'+');
+  assert(locate_exp_sign_in_ftoa);
+  *locate_exp_sign_in_ftoa='_';
+  dbg("\n\t\t[arcaneHookReduction] ftoa=%s",ftoa);
+  strcat(job_name,ftoa);
+  dbg("\n\t\t[arcaneHookReduction] job_name=%s",job_name);
+
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
   redjob->scope  = strdup("NoGroup");
@@ -148,15 +178,8 @@ static void arcaneHookReduction(nablaMain *nabla, astNode *n){
   redjob->name_utf8 = strdup(job_name);
   redjob->xyz    = strdup("NoXYZ");
   redjob->direction  = strdup("NoDirection");
-  // Init flush
-  redjob->when_index = 0;
-  redjob->whens[0] = 0.0;
-  // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
-  nMiddleAtConstantParse(redjob,at_single_cst_node,nabla,redjob->at);
-  nMiddleStoreWhen(redjob,nabla,NULL);
-  assert(redjob->when_index>0);
-  dbg("\n\t[arcaneHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
   
+
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
   const double reduction_init = min_reduction?1.0e20:-1.0e20;

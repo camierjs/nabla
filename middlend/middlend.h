@@ -321,8 +321,8 @@ int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 void nMiddleItems(astNode*,int,nablaMain*);
 
 // nMiddleHLT: @ + When[s]
-void nMiddleAtConstantParse(nablaJob*,astNode*,nablaMain*,char*);
-void nMiddleStoreWhen(nablaJob*,nablaMain*,char*);
+void nMiddleAtConstantParse(nablaJob*,astNode*,nablaMain*);
+void nMiddleStoreWhen(nablaJob*,nablaMain*);
 int nMiddleComparEntryPoints(const void*,const void*);
 int nMiddleNumberOfEntryPoints(nablaMain*);
 nablaJob* nMiddleEntryPointsSort(nablaMain*,int);

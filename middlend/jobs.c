@@ -171,8 +171,8 @@ void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *nabla){
     entry_point->is_an_entry_point=true;      
     dbg("\n\t[scanForNablaJobAtConstant] dfsDumpToken:"); dfsDumpToken(n->next->children);
     entry_point->whens[entry_point->when_index]=0.0;
-    nMiddleAtConstantParse(entry_point,n->next->children,nabla,NULL);//entry_point->at);
-    nMiddleStoreWhen(entry_point, nabla, NULL);//entry_point->at);
+    nMiddleAtConstantParse(entry_point,n->next->children,nabla);
+    nMiddleStoreWhen(entry_point, nabla);
     return;
   }
 }
@@ -491,12 +491,12 @@ void nMiddleJobFill(nablaMain *nabla,
   // On va chercher les paramètres standards
   // Si used_options et used_variables ont été utilisées
   if (job->used_options==NULL && job->used_variables==NULL){
-    nprintf(nabla, NULL,"\n//job->nMiddleDumpParameterTypeList:");
+    //nprintf(nabla, NULL,"\n//job->nMiddleDumpParameterTypeList:");
     numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
-    nprintf(nabla, NULL,"\n//job->nMiddleDumpParameterTypeList done, with numParams=%d!\n",numParams);
+    //nprintf(nabla, NULL,"\n//job->nMiddleDumpParameterTypeList done, with numParams=%d!\n",numParams);
   }else{
     numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
-    nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
+    //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
     if (nabla->hook->grammar->dfsVariable())
       nMiddleParamsDumpFromDFS(nabla,job,numParams);
   }

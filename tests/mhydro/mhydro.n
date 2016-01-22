@@ -285,9 +285,9 @@ void ini(void) @ -6.0{
   in (cell ρ, cell adiabatic_cst, cell internal_Ξ)
   out (cell σSound) inout (cell pressure) @ 8.0{
   // On calcule en premier la pression
-  pressure = (adiabatic_cst-1.0)*ρ*internal_Ξ @ 0;
+  pressure = (adiabatic_cst-1.0)*ρ*internal_Ξ;
   // Que l'on va utiliser pour le calcule de la vitesse du son
-  σSound = sqrt((adiabatic_cst*pressure)/ρ) @ 2;
+  σSound = sqrt((adiabatic_cst*pressure)/ρ);
 }
 
 // ****************************************************************************

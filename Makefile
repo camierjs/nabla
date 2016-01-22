@@ -4,7 +4,7 @@
 ifeq ($(shell uname),Darwin)
 CMAKE_ROOT_PATH=/opt/local/bin
 COMPILER_ROOT_PATH=/opt/local/bin
-COMPILER_POSTFIX=-mp-4.9
+COMPILER_POSTFIX= #-mp-4.9
 else
 CMAKE_ROOT_PATH = /usr/bin
 COMPILER_ROOT_PATH=/usr/bin
@@ -91,6 +91,10 @@ tstoa:
 ################
 # LAMBDA tests #
 ################
+tstlhltr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_hlt_run_1)
+tstlhltg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_hlt_gen_1)
 tstl:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
 tstllr:
@@ -123,6 +127,10 @@ tstlgg:
 ################
 # ARCANE tests #
 ################
+tstahltr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_hlt_run_1)
+tstahltg:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_hlt_gen_1)
 tstaglocig:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gloci_gen_1)
 tstaanyg:

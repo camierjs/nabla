@@ -756,7 +756,7 @@ compound_statement
 expression_statement
 : ';'{rhs;}
 | expression ';'{rhs;}
-| expression AT at_constant';' {rhs;}
+//| expression AT at_constant';' {rhs;}
 ;
 selection_statement
 //: IF '(' expression ')' statement %prec {rhs;}
@@ -862,7 +862,7 @@ at_single_constant
 ;
 at_tree_constant
 : at_single_constant {rhs;}
-| at_single_constant '/' at_single_constant {rhs;}
+| at_tree_constant '/' at_single_constant {rhs;}
 ;
 at_constant
 // On rajoute des parenthèses que l'on enlevera lors du DFS nMiddleAtConstantParse
@@ -873,7 +873,15 @@ at_constant
 ////////////////////////
 // ∇ jobs definitions //
 ////////////////////////
-nabla_job_prefix: FORALL nabla_set {rhs;};
+org_mode_stars
+: '*' {rhs;}
+| org_mode_stars '*' {rhs;}
+;
+
+nabla_job_prefix
+: FORALL nabla_set {rhs;}
+| org_mode_stars FORALL nabla_set {rhs;}
+;
 nabla_job_decl
 : nabla_job_prefix {rhs;}
 | nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}
