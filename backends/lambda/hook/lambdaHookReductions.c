@@ -59,11 +59,8 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   assert(at_single_cst_node!=NULL);
   char *global_var_name = global_var_node->token;
   char *item_var_name = item_var_node->token;
-  // Préparation du nom du job
-  char job_name[NABLA_MAX_FILE_NAME];
-  job_name[0]=0;
-  strcat(job_name,"lambdaReduction_");
-  strcat(job_name,global_var_name);
+
+
   // Rajout du job de reduction
   nablaJob *redjob = nMiddleJobNew(nabla->entity);
   redjob->is_an_entry_point=true;
@@ -72,8 +69,6 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->region = strdup("NoRegion");
   redjob->item   = strdup(item_node->token);
   redjob->return_type  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
   redjob->xyz    = strdup("NoXYZ");
   redjob->direction  = strdup("NoDirection");
   // Init flush
@@ -85,6 +80,13 @@ void lambdaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   assert(redjob->when_index>0);
   dbg("\n\t[lambdaHookReduction] @ %f",redjob->whens[redjob->when_index-1]);
   
+    // Préparation du nom du job
+  char job_name[NABLA_MAX_FILE_NAME];
+  const unsigned long *adrs = (unsigned long*)&redjob->whens[redjob->when_index-1];
+  snprintf(job_name,NABLA_MAX_FILE_NAME,"lambdaReduction_%s_at_0x%lx",global_var_name,*adrs);
+  redjob->name   = strdup(job_name);
+  redjob->name_utf8 = strdup(job_name);
+
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
   const double reduction_init = min_reduction?1.0e20:-1.0e20;

@@ -69,6 +69,9 @@ int main(int argc, char *argv[]){\n\
 \telse\n\
 \t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
 \tnabla_ini_connectivity();\n\
+\t// Initialisation des swirls\n\
+\thlt_level=0;\n\
+\thlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
@@ -200,6 +203,7 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
   
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoop[End|Begin]
   for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
+    if (strncmp(entry_points[i].name,"hltDive",7)==0) continue;
     if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
     if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
     
@@ -217,14 +221,14 @@ NABLA_STATUS nLambdaHookMain(nablaMain *n){
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1)){
-      nprintf(n, NULL, "\n\n\t// DIVING in HLT!");
-      nprintf(n, NULL, "\n\tdo{");
+      nprintf(n, NULL, "\n\n\t// DIVING in HLT! (depth=%d)",n->HLT_depth);
+      nprintf(n, NULL, "\n\thlt_exit[hlt_level=%d]=true;\n\tdo{",n->HLT_depth);
       n->HLT_depth=entry_points[i].when_depth;
     }
     if (entry_points[i].when_depth==(n->HLT_depth-1)){
       nprintf(n, NULL, "\n\t// Poping from HLT!");
 //#warning HWed 'redo_with_a_smaller_time_step'
-      nprintf(n, NULL, "\n\t}while(global_redo_with_a_smaller_time_step[0]==1);\n");
+      nprintf(n, NULL, "\n\t}while(hlt_exit[%d]);hlt_level-=1;\n",entry_points[i].when_depth);
       n->HLT_depth=entry_points[i].when_depth;
     }
     

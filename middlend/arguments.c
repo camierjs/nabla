@@ -135,7 +135,7 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   for(int i=0;var!=NULL;var=var->next,i+=1)
     hprintf(nabla, NULL, "%s%s %s* %s_%s",
             (i==0)?"":",",
-            (var->in&&!var->out)?"const":"",
+            (var->in&&!var->out)?"/*const*/":"",
             var->type,
             var->item, var->name);
   

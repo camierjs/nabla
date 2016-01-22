@@ -145,7 +145,7 @@ void lambdaHookExit(struct nablaMainStruct *nabla, nablaJob *job){
   if (job->when_depth==0)
     nprintf(nabla, "/*EXIT*/", "/*lambdaHookExit*/exit(0.0)");
   else
-    nprintf(nabla, "/*EXIT*/", "//redo_with_a_smaller_time_step, skipping");    
+    nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
 void lambdaHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "global_time[0]");

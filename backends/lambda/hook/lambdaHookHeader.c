@@ -75,6 +75,8 @@ void nLambdaHookHeaderIncludes(nablaMain *nabla){
 #include <sstream>\n\
 #include <fstream>\n\
 using namespace std;\n\
+int hlt_level;\n\
+bool *hlt_exit;\n\
 // Includes from nabla->parallel->includes()\n\%s",
           nabla->call->simd->includes(),
           nabla->call->parallel->includes());
