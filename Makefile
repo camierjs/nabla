@@ -73,6 +73,8 @@ tstn:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
 tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
+tstp1g:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -R p1apwb1D)
 
 ###############
 # OKINA tests #

@@ -1,0 +1,276 @@
+with ℝ;
+
+// αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀
+// ℝℕℤ    
+// ²³√½⅓¼⅛
+
+ofstream output("schema1.plot");  
+
+#include "math.h"  
+
+// ****************************************************************************
+// * Options  
+// ****************************************************************************
+options{
+  ℝ option_a = 1.0;
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
+  ℝ pi =atan(1)*4;
+  ℝ N=1000;   
+  ℕ time_steps = 0.0005;       
+  ℝ final_time = 5.0;
+  ℝ sigma=1.0;   
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.000010;
+  ℝ option_stoptime= 0.0000000000008;
+  ℝ tau =1.0;           
+  ℝ epsilon =0.000000000001;         
+  ℝ CFL= 0.6;  
+  Bool option_dump_output = true;          
+};
+
+  
+// **************************************************************************
+// * Node Variables
+// ****************************************************************************
+cells{  
+  ℝ cU;
+  ℝ cP;
+  ℝ cT;
+  ℝ cp1P;
+  ℝ cp1U;    
+  ℝ center;
+  ℝ cM;
+  ℝ cTr;
+  ℝ cp1Tr;
+
+  
+};
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+nodes{
+  /* ℝ coord */
+  ℝ nU;  
+  ℝ nP;
+  ℝ nM;
+  ℝ nM_plus;
+  ℝ nM_moins;
+  
+ 
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+  ℝ Integrale;
+  ℝ n_time;
+  ℝ iδx;
+  ℝ L2;
+  ℝ N1;
+  ℝ N2;
+  ℝ Intu;  
+  ℝ Intt;  
+  ℝ Intp;  
+};
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+
+void iniGlobals(void) @ -5.0
+{
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
+  δt=CFL*epsilon*δx;
+  iδx=1./δx;
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+}
+
+
+
+
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0
+{
+  // printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+}
+
+
+
+
+              
+
+
+// ********************************************************
+// cU partout
+// ********************************************************
+∀ cells void loop1(void)
+  in (cell cU, cell cp1U,  cell cM /*, node nP, node nU*/)  @ 2.5
+{
+  const ℝ δtSx = δt/(epsilon*δx);
+  cp1U = cU;
+  /*∀ node
+      {    
+    
+        if (coord<center)
+          {
+            cp1U += - (1/epsilon)*δtSx*cM*nU + δtSx*(nP+ (1/epsilon)*nM*nU);        
+
+            
+
+          } else
+          {
+            cp1U +=  (1/epsilon)*δtSx*cM*nU-δtSx*(nP + (1/epsilon)*nM*nU);
+          }
+        
+          }*/
+
+  
+
+
+}
+
+
+// ********************************************************
+// cP  partout
+// ********************************************************
+
+∀ cells void loop2(void)
+  in (cell cU, cell cP, cell cM) @ 2.5
+{
+   ℝ b = pow(cTr,3);
+   ℝ e2 = (tau*δt*b)/(epsilon²+2*tau*δt*b) ;
+   ℝ e3 =pow(1+ 3*e2,0.333333333) ;
+   ℝ e4 =coeff(b,tau*δt,epsilon);
+   //ℝ e1 = e4/b;
+  
+  const ℝ δtSx = δt/(epsilon*δx);
+  
+  cp1P=  (1-e4)*cP+e4*pow(cTr,4);
+  
+  /*∀ node
+      {
+        if (center<coord){
+          cp1P += -nU*δtSx;
+      
+        } else{
+          cp1P += nU*δtSx ;
+      
+        }
+   
+        } */
+  
+  
+}
+
+// ********************************************************
+// cTr  partout
+//********************************************************
+
+∀ cells void loop4(void) in (cell cTr) @ 2.6
+{
+   ℝ b = pow(cTr,3);
+   ℝ e2 = (tau*δt*b)/(epsilon²+2*tau*δt*b) ;
+   ℝ e3 =pow(1+ 3*e2,0.333333333) ;
+   ℝ e4 =coeff(b,tau*δt,epsilon);
+
+   cp1Tr = cTr -e4*(pow(cTr,4) -cP);
+
+   info()<<" bis"<< " "<< cTr<<"tmeps="<<n_time;
+  
+   
+}
+
+
+
+
+// Copy results
+∀ cells  void copyResults(void) in (cell cU, cell cP, cell cTr ) @ 2.7
+{
+  cU = cp1U;
+  cP = cp1P;
+  cTr= cp1Tr;
+
+  
+}
+
+
+
+// ********************************************************
+// nP et nU au bord gauche
+// ********************************************************
+∀ nodes void outer0Loop2(void)
+  in (node nU, node nP/*, node nP, node nU*/)
+  out (node nU, node nP)@ 2.45
+{
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  n_time+=δt;
+}
+
+
+
+// ****************************************************************************
+// * Test for Quit & Dump Solution Found
+// ****************************************************************************
+∀ cells void dumpSolution(File results) in (cell cU, cell cP, cell cT, cell cM)
+{
+  results  << "\t" << center
+           << "\t" << cTr
+           << "\t" << cP
+           << "\t" << pow(cTr,4)
+           << "\t" << coeff(0,1,1)
+           << "\n";
+}
+
+∀ cells void dumpOutput(void) in (cell cU, cell cP, cell cT, cell cM)
+  
+{
+  if  (center!=0.005) continue;
+  output << n_time
+         << "\t" << pow(cTr,4)
+        << "\t" << cP
+         << "\n";
+  
+}  
+
+
+void tstForQuit(void) @ 4.0 {
+  //printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
+  //    GlobalIteration, time,(double)δt);
+
+  if (option_dump_output){
+    dumpOutput();
+    output << "\n";
+    }
+  
+  // file(resultsvstime ,plot);
+  // dumpVsTimeSolution(resultsvstime);
+ if ((time<(option_stoptime-δt))) return;
+  
+  if (option_dump_output){
+    file(results,plot);
+    //printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+    dumpSolution(results);
+  }else printf("\n");
+   
+  exit;
+}
+
+

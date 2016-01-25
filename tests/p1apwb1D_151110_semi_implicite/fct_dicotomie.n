@@ -1,0 +1,35 @@
+
+#include "math.h"
+
+ℝ fct_dicotomie(ℝ x,ℝ y,ℝ u,ℝ v)
+{
+  const ℝ e1=tau*δt/(epsilon²);
+  const ℝ e2=e1/(e1+1);
+        ℝ a2 =1.0;
+        ℝ y1 =y;
+        ℝ x1 =x;
+
+  for (int i=1; i<=I; i++)
+
+    {
+      if ( (a2 + e2*pow(a2,4)-e2*u-v)*(x1 + e2*pow(x1,4)-e2*u-v) < 0)
+
+        {
+          y1=a2;
+          a2=(x1+y1)*0.5;
+         
+        }
+      if ( (a2 + e2*pow(a2,4)-e2*u-v)*(y1 + e2*pow(y1,4)-e2*u-v) < 0)
+        {
+          x1=a2;
+          a2=(x1+y1)*0.5;
+        }
+       
+    
+
+
+    }
+
+  return  a2; 
+  
+}

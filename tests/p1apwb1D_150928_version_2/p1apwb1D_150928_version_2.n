@@ -1,0 +1,243 @@
+with ℝ;
+
+// αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀
+// ℝℕℤ
+// ²³√½⅓¼⅛
+
+ofstream output("schema1.plot");
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℝ option_a = 1.0;
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
+  ℕ test = 1;
+  ℕ test2 = 1;
+  ℝ pi =atan(1)*4;  
+  ℕ time_steps = 0.0005;
+  ℝ final_time = 5.0;
+  ℝ sigma=1.0;    
+  //ℝ Delta_t=0.0005;  
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.000010;
+  ℝ option_stoptime=10.0;//0.2;//10.
+  ℝ tau =0.25;    
+  ℝ epsilon = 1.0;   
+  ℝ CFL =0.4;
+  
+          
+}; // **************************************************************************
+// * Node Variables
+// ****************************************************************************
+cells{  
+  ℝ cU;
+  ℝ cP;
+  ℝ cp1P;
+  ℝ cp1U;  
+  ℝ cT; 
+  ℝ cp1T;
+  ℝ center;
+  ℝ cM;
+ 
+  
+};
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+nodes{
+  /* ℝ coord */
+  ℝ nU;  
+  ℝ nP;
+  ℝ nM;
+  
+ 
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+  ℝ Integrale;
+  ℝ n_time;
+  ℝ iδx;
+  ℝ L2;
+  ℝ N1;  
+  ℝ Intu;  
+  ℝ Intt;  
+  ℝ Intp;  
+};
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+
+void iniGlobals(void) @ -5.0{
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
+  //δt=(1-CFL)*(epsilon²/(2*tau))*(log(tau)+log(1+ δx/epsilon)) + CFL*0.75*epsilon*δx;
+   δt=epsilon*CFL*δx;
+  iδx=1./δx;
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+}
+
+
+
+
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0 {
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+}
+
+
+
+// ********************************************************
+// cpB1 partout
+// ********************************************************
+∀ cells void loop1(void)
+  in (cell cU, cell cp1U,  cell cM /*, node nP, node nU*/)  @ 2.6 {
+  const ℝ δtSx = δt/(epsilon*δx);
+  // Que les termes aux mailles
+  cp1U = cU;
+  ∀ node {    
+    
+    if (coord<center){
+      cp1U += (-δtSx*cM*nU +δtSx*(nP+ nM*nU));        
+      // info()<<"\t\t[loop1] then: cp1P="<<cp1U<<", nP="<<coord;
+    }else{
+      cp1U += (+δtSx*cM*nU -δtSx*(nP +nM*nU)) ;
+      //info()<<"\t\t[loop1] then: cp1P="<<cp1U<<", nP="<<coord;
+      
+    }
+    
+    
+    }
+     info()<<"\t\t[loop1] then: cp1P="<<cp1U<<", nP="<<center;
+  //if (fabs(cpB1-1.0)>1.e-14){  
+  //  info()<<"\t[loop1] cB1="<<cpB1 <<" center=" << center;
+//      exit;
+  }//info()<<"\t\t[loop1]  cB1(1)="<<cpB1;
+ 
+
+// cp1T partout
+∀ cells void loop3(void) in (cell cT) @ 2.5 {
+  const ℝ e1 =0.5*(1 - exp(-2*tau*δt/epsilon²));//tau*δt/(epsilon²+2*tau*δt);
+  const ℝ e2 = exp(-2*tau*δt);
+
+
+  cp1T = cT - e1*cT +e1*cP;
+  //info()<<"\t\t[loop1]  cT(1)="<<cp1T ;
+  }
+
+
+//void exitHere(void)@2.04{exit;}
+              
+// cB2 partout 
+∀ cells void loop2(void)
+  in (cell cU, cell cP, cell cM) @ 2.6 {
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ e1 = 0.5*(1 - exp(-2*tau*δt/epsilon²));//tau*δt/(epsilon²+2*tau*δt);
+  const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
+  
+  cp1P= cP +e1*(cT-cP) ;
+  
+  ∀ node {
+    //info()<<"\t[loop2] node="<<n;
+    if (center<coord){
+      cp1P += -nU*δt/(δx);
+    } else{
+      cp1P+= nU*δt/(δx) ;
+    }
+    
+  }  
+  //cp1P/=(1+e1);
+}
+
+
+
+   
+
+  
+ 
+
+
+
+
+// npT partout
+/*∀ nodes void loop4(void) in (node cT) @ 2.6 {
+  const ℝ e1 = 0.5*(1. -exp(-2*tau*δt));
+  const ℝ e2 = exp(-2*tau*δt);
+  const ℝ e3 =e1/(1-e1) ;
+  npT = e2*nT + e3*(nB2-nM*nB1);
+  }*/
+
+// Copy results
+∀ cells  void copyResults(void) in (cell cU, cell cP,cell cT ) @ 2.7 {
+  cU = cp1U;
+  cP = cp1P;
+  cT= cp1T;
+
+  
+ //printf(y"\n\t\t[copyResults] u[%d] = %f", n,u);
+}
+
+
+
+
+// ****************************************************************************
+// * Test for Quit & Dump Solution Found
+// ****************************************************************************
+∀ cells void dumpSolution(File results) in (cell cU, cell cP, cell cT, cell cM) {
+  results << "\t" << center
+          << "\t" << cU
+          << "\t" << cP
+          << "\t" << cT
+          << "\n";
+}
+
+∀ cells void dumpOutput(void) in (cell cU, cell cP, cell cT, cell cM) {
+  output << n_time
+         << "\t|\t" << center
+         << "\t|\t" << cU
+         << "\t|\t" << cP
+         << "\t|\t" << cT
+         << "\t|\t" << P_condlimi(center ,n_time)-cP
+         << "\t|\t" << U_condlimi(center ,n_time) - cU
+         << "\n";
+  
+         } 
+
+
+void tstForQuit(void) @ 4.0 {
+  printf("\n\t[testForQuit] GlobalIteraution =%d, time=%f, delta_t=%f",
+         GlobalIteration, time,(double)δt);
+  dumpOutput();
+  output << "\n";
+  //file(resultsvstime ,plot);
+  //dumpVsTimeSolution(resultsvstime);
+  if ((time<(option_stoptime-δt))) return;
+  //if ((GlobalIteration==time_steps)){
+    {
+      file(results,plot);
+      printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+      //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+      dumpSolution(results);
+    }
+   
+  exit;
+}
+
+

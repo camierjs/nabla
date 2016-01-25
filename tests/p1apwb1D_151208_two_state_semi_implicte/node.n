@@ -1,0 +1,168 @@
+∀ nodes void flushNodeB(void)@ 1.0{
+  nW=nV=0.0;
+
+}
+
+
+// ********************************************************
+// nB1 au centre
+// ********************************************************
+∀ nodes void computeNodV(void)
+  /*in (cell center, cell cU)*/
+  out (node nV) @ 2.0
+{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  const ℝ d1=2*a*b+a-b;
+  const ℝ d2=2*a*b+3*b+a+1;
+  nV=0.0;
+  ∀ cell
+      {
+   
+        if (center<coord)
+          {
+            nV+=cV;
+   
+              }else
+          {
+            nV+=0 ;
+              }
+    
+      }
+ 
+  
+ 
+}
+
+
+
+// ********************************************************
+// nB2 au centre
+// ********************************************************
+∀ nodes void computeNodW(void)
+  /*in (cell center, cell cU)*/ 
+  out (node nW) @ 2.1
+{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ Mepsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*Mepsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*Mepsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  
+  nW=0.0;
+  ∀ cell {
+   
+  
+   
+    if (center>coord)
+      {
+        nW+=cW;
+   
+
+          }
+    else
+      {
+        nW+=0;
+          }
+    
+  }
+}
+    
+
+
+
+   
+    
+  
+
+  
+
+    
+
+
+
+// ********************************************************
+// nB1 et nB2 à 0.0
+// ********************************************************
+∀ nodes void outer0Loop1(void) 
+  in (node nV, node nW/*, node nP, node nU*/)
+  out (node nV,node nW)@ 2.4 {
+  ///////////////////
+  if (n!=0) continue;
+  ///////////////////
+  
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  
+  nV=0.0;
+  ∀ cell {
+    if (c==0) continue;
+    nV+=0;
+    
+    }
+  
+  nV+=U_condlimi(coord-δx*0.5,n_time) + P_condlimi(coord-δx*0.5,n_time);
+  
+
+ 
+ 
+
+ 
+  }
+
+
+// ********************************************************
+// nP et nU à NABLA_NB_NODES
+// ********************************************************
+∀ nodes void outer0Loop2(void)
+
+  in (node nV, node nW/*, node nP, node nU*/)
+  out (node nV, node nW)@ 2.45
+{
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+ 
+  nW=0.0;
+  /*∀ cell
+      {
+        if (c==0) continue;
+    
+  
+    
+        nW+= 0;
+        }*/
+  
+ 
+  nW+= -U_condlimi(coord+δx*0.5,n_time)  + P_condlimi(coord+δx*0.5,n_time);
+
+
+
+ 
+  n_time+=δt;
+}
+
+
+
+
+
+

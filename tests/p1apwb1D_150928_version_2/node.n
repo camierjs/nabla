@@ -1,0 +1,127 @@
+∀ nodes void flushNodeB(void)@ 1.0{
+  nP=nU=0.0;
+
+}
+
+
+// ********************************************************
+// nB1 au centre
+// ********************************************************
+∀ nodes void computeNodB1(void)
+  /*in (cell center, cell cU)*/
+  out (node nU) @ 2.0 {
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ b= exp(-2*tau*δt/epsilon²);
+  const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
+  const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
+  nU=0.0;
+  ∀ cell {
+    // maille de droite, on ajoute l'invariant de Rieman pour la vp 1
+    if (center>coord){
+      nU+=a*cU -a²*(cP+cT)+b*cT;            
+      // maille de gauche, on ajoute l'invariant de Rieman pour la vp 1
+    }else{
+      nU += a*cU + a²*(cP+cT)- b*cT ;            
+    }
+    
+  }
+  nU*=r;
+  //info()<<"\t[computeNB1] nB1="<<nU;
+}
+
+
+
+// ********************************************************
+// nB2 au centre
+// ********************************************************
+∀ nodes void computeNodB2(void)
+  /*in (cell center, cell cU)*/
+  out (node nP) @ 2.1 {
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ b=exp(-2*tau*δt/epsilon²);
+  const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
+  const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
+  nP=0.0;
+  ∀ cell {
+    // maille de droite, on ajoute l'invariant de Rieman pour la vp 1
+    if (center>coord){
+      nP+=a²*(cP+cT)-b*cT - a*cU ;
+      // maille de gauche, on ajoute l'invariant de Rieman pour la vp 1
+    }else{
+      nP+= a²*(cP+cT)-b*cT + a*cU ;
+    }
+  }
+  nP*=0.5;
+    
+  //info()<<"\t[computeNB1] nB2="<<nB2;
+  // info()<<"\t[computeNB1] nT="<<nT;
+}
+
+
+// ********************************************************
+// nB1 et nB2 à 0.0
+// ********************************************************
+∀ nodes void outer0Loop1(void) 
+  in (node nU, node nP/*, node nP, node nU*/)
+  out (node nU,node nP)@ 2.4 {
+  if (n!=0) continue;
+  const ℝ b=  exp(-2*tau*δt/epsilon²);
+  const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
+  const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
+  
+  
+  ∀ cell {
+    if (c==0) continue;
+    nU=a*cU - a²*(cP+cT)+b*cT;
+    nP=a²*(cP+cT)-b*cT-a*cU ;
+    }
+  
+  nU+= a*U_condlimi(coord-δx*0.5,n_time) +a²*( P_condlimi(coord-δx*0.5,n_time)+ T_condlimi(coord-δx*0.5)) - b*T_condlimi(coord-δx*0.5);
+
+  nU*=r;
+
+  nP+= a*U_condlimi(coord-δx*0.5,n_time) + a²*(P_condlimi(coord-δx*0.5,n_time) + T_condlimi(coord-δx*0.5)) - b*T_condlimi(coord-δx*0.5);
+  nP*=0.5;
+
+  //info()<<"\t[outer0Loop2] node_bbord1="<<nU <<"et "<< nP;
+  //info()<<"\t[outer0Loop2] coord="<<coord ;   
+  
+   
+  }
+
+
+// ********************************************************
+// nP et nU à NABLA_NB_NODES
+// ********************************************************
+∀ nodes void outer0Loop2(void)
+  in (node nU, node nP/*, node nP, node nU*/)
+  out (node nU, node nP)@ 2.45 {
+  const ℝ b= exp(-2*tau*δt/epsilon²);
+  const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
+  const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
+  
+ 
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  //info()<<"[outer0Loop2] node="<<n;
+  ∀ cell {
+    if (c==0) continue;
+    // info()<<"\t[outer0Loop2] cell="<<c;
+    // info()<<"\t[outer0Loop2] center="<<center;
+    nU= a*cU + a²*(cP+cT)-b*cT;
+    nP= a*cU + a²*(cP+cT)-b*cT;
+  }
+  
+  nU+= a*U_condlimi(coord+δx*0.5,n_time) -a²*(P_condlimi(coord+δx*0.5,n_time)+T_condlimi(coord+δx*0.5))+b*T_condlimi(coord+δx*0.5); 
+  nU*=r;
+  nP+= -a*U_condlimi(coord+δx*0.5,n_time)  +a²*(P_condlimi(coord+δx*0.5,n_time)+T_condlimi(coord+δx*0.5))-b*T_condlimi(coord+δx*0.5) ; 
+  nP*=0.5;
+
+  //info()<<"\t[outer0Loop2] node_bbord2="<<nU <<"et "<< nP;
+  //info()<<"\t[outer0Loop2] coord="<<coord <<"et "<< nB2;
+
+  n_time+=δt;
+   
+  }
+

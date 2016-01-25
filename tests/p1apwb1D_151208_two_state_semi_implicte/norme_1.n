@@ -1,0 +1,25 @@
+
+∀ cells void loop8(void)  @ 2.49 {
+  
+
+
+  N1=0;
+  Intp=0.;
+  Intt=0.;
+  Intu=0.;
+  }
+
+
+// norme_1 (cP-cT)
+
+
+∀ cells void loop9(void) in (cell cT, cell cW, cell cV) @ 2.5 {
+
+  N1+= (0.5*(cV+cW)-cT)²*δx;
+  Intu+= (cV-cW)²*δx;
+  Intt+= (0.5*(cV+cW)-P_condlimi(center,n_time))²*δx;
+  }
+
+void printIntegral(void) @ 2.6 {
+  info()<<"sortieplot " << n_time << " " << -log(epsilon) << " " <<" "<<-log(δx)<<" "<<sqrt(Intt)<<" "<<-0.5*log( Intu)<<" "<<-0.5*log(N1);
+}

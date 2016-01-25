@@ -1,0 +1,129 @@
+// ****************************************************************************
+// * iniCellCenter
+// ****************************************************************************
+
+
+∀ cells void iniCellCenter(void) out (/*node coord,*/ cell center) @ -5.0
+{
+  center=0.0;
+  ∀ node
+      {
+        center+=coord;
+      }
+  center *= 0.5;
+        
+}
+// ****************************************************************************
+// cV_0; c_W0; cT_0
+// ****************************************************************************
+
+
+
+∀ cells void iniCellCv(void) out (/*node coord,*/ cell center) @ -5.0
+{
+  cV=P_condini(center,0.0) + U_condini(center,0.0);
+  cW=P_condini(center,0.0) - U_condini(center,0.0);
+  cT=T_condini(center);
+  
+  //info()<<"[iniMnoeud] sigma*x="<<nM << "coord="<<coord ;
+  // info()<<"[iniMnoeud]  coord="<<center ;          
+}
+
+
+
+
+// ****************************************************************************
+// calcul cDelta_F_sigma
+// ****************************************************************************
+
+∀ cells void ini_cDelta_F_sigma(void) out (/*node coord,*/ cell center) @ -5.0
+{
+  ℝ r=0;
+  ∀ node
+      {
+        if (center>coord)
+          {
+            r+=F_sigma(center);
+            
+          }
+        else
+          {
+            r-=F_sigma(center);
+             
+          }
+    
+      }
+  cDelta_F_sigma =r;
+}
+    
+
+// ****************************************************************************
+// calcul cDelta_F_sigma_moins
+// ****************************************************************************
+
+
+
+∀ cells void ini_cDelta_F_sigma_moins(void) out (/*node coord,*/ cell center) @ -5.0
+{
+  ℝ r=0;
+  ∀ node
+      {
+        if (center>coord)
+          {
+            r+=F_sigma(center-δx);
+            
+          }
+        else
+          {
+            r-=F_sigma(center-δx);
+             
+          }
+    
+      }
+  cDelta_F_sigma_moins= r;
+}
+    
+
+// ****************************************************************************
+// calcul cM_moins
+// ****************************************************************************
+
+
+
+∀ cells void ini_cM_moins(void) out (/*node coord,*/ cell center) @ -5.0
+{
+  cM_moins =  ε  / (2.0*ε + cDelta_F_sigma_moins);
+}
+    
+
+// ****************************************************************************
+// calcul cM
+// ****************************************************************************
+
+∀ cells void ini_cM(void) out (/*node coord,*/ cell center) @ -5.0
+{ 
+  cM =  ε  / (2.0*ε + cDelta_F_sigma);
+}
+    
+
+
+∀ nodes  void initimel(void) in(cell center) @ -5.0
+{
+  n_time=0.0; 
+}
+
+
+
+void iniOutput(void) @ -1.0
+{
+  //output <<"#output|2|3|4|5|6|7|8|9|\n";
+}
+
+// ********************************************************
+// * Initialisation des valeurs aux mailles  ℵ
+// ********************************************************
+
+
+
+
+

@@ -1,0 +1,214 @@
+
+
+
+
+#include "stdio.h"
+#include "stdlib.h" 
+
+
+
+∀ nodes void ini_mesh(void) @ -1.0 {
+  const Real ρ1=(rand()%2)*δx*0.25 + 0.25*δx;
+  
+//info()<< ρ1;
+  if (coord == 0.0 || coord == 1.0) continue;
+  n_mesh+=1;
+  coord += δx*mesh(5-n_mesh*δx);
+
+
+  }
+
+
+
+
+
+
+// ****************************************************************************
+// * iniCellCenter
+// ****************************************************************************
+
+
+∀ cells void iniCellCenter(void) out (/*node coord,*/ cell center) @ -0.9
+{
+  center=0.0;
+  ∀ node
+      {
+        center+=coord;
+      }
+  center*= 0.5;
+
+  
+}
+
+
+
+
+∀ cells void ini_cpas_espace(void) out (/*node coord,*/ cell cδx) @ -0.9
+{
+  cδx=0.0;
+  
+  ∀ node
+      {
+        if (center>= coord)
+          {
+            cδx-=coord;
+            
+          }
+        else
+          {
+            cδx+=coord;
+          }
+      }
+
+   info()<<"pas espace "<< cδx;
+  
+  
+ 
+}
+
+
+
+
+∀ cells void loop10(void)  @ -0.91
+{
+    
+  min_δx=δx;
+  
+ 
+  }  
+
+
+
+
+
+∀ nodes void ini_npas_espace(void) out (/*node coord,*/ node nδx) @ -0.9
+{
+
+  if (coord == 0 ) continue ;
+  if (coord ==1) continue;
+  //info()<<coord;
+  nδx=0;
+  ∀ cell
+      {
+        if (center >= coord )
+          {
+            nδx+=cδx;
+           
+          }
+        else
+          {
+            nδx+=cδx;
+            
+          }
+      }
+  nδx*=0.5;
+ 
+  
+}
+
+
+∀ nodes void ini_npas_espace_bord(void) out (/*node coord,*/ node nδx) @ -0.01
+{if (coord != 0 && coord !=1) continue;
+  //info()<<coord;
+  nδx=0;
+  ∀ cell
+      {
+        if (center >= coord )
+          {
+            nδx=2*center;
+           
+          }
+        else
+          {
+            nδx=2*(1-center);
+          
+          }
+      }
+  // info() <<"bis "<<  nδx;
+}
+// ****************************************************************************
+// * sigma*x aux noeudx
+// ****************************************************************************
+
+
+∀ nodes  void iniMnoeud(void) in(node coord)  out (/*node coord,*/ node nM ) @ -0.01
+{
+  nM = coord;
+   
+}
+
+// ****************************************************************************
+//F décalé à droite   aux noeudx
+// ****************************************************************************
+
+
+∀ nodes  void iniMnoeud_plus(void) in(node coord)  out (/*node coord,*/ node nM ) @ -0.9
+{
+  nM_plus = coord +0.5*nδx;
+}
+
+// ****************************************************************************
+//F décalé à gauche   aux noeudx
+// ****************************************************************************
+
+∀ nodes  void iniMnoeud_moins(void) in(node coord)  out (/*node coord,*/ node nM ) @ -0.9
+{
+  nM_moins = coord -0.5*nδx ;
+}
+
+
+// ****************************************************************************
+// * sigma*x aux mailles
+// ****************************************************************************
+
+
+
+∀ nodes  void initimel(void) in(cell center)  out (/*node coord,*/ node n_time ) @ -0.9
+{
+  n_time=0; 
+}
+
+
+// ****************************************************************************
+// *   U_0
+// ****************************************************************************
+
+
+∀ cells void inicellB1(void) in (cell center) out (cell cU) @ -0.01
+{
+  cU = U_condini(center, 0.0);
+  //info()<<"[iniMnoeud]  u="<<cU ; 
+}
+
+// ****************************************************************************
+// * P_0
+// ****************************************************************************
+
+∀ cells void iniCellB2(void) in (cell center) out (cell cP) @ -0.01
+{
+  cP =P_condini(center, 0.0) ;
+}
+
+// ****************************************************************************
+// *  T_0
+// ****************************************************************************
+∀ cells void iniCellT(void) in (cell center) out (cell cT) @ -0.01
+{
+  cT = T_condini(center);
+}
+
+
+void iniOutput(void) @ -0.9
+{
+  //output <<"#output|2|3|4|5|6|7|8|9|\n";
+}
+
+
+
+
+∀ cells  void iniMcell(void) in(cell center)  out (/*node coord,*/ cell cM ) @ -0.01
+{
+  cM =center;
+  
+}
+

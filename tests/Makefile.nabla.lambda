@@ -4,7 +4,10 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
 SIMD = std
 PARALLEL = seq
-SIMD_std_FLAGS  = -std=c++11 -O2 -Wall #-fPIC #-DNO_SSE2 -mno-avx 
+
+BYFL_FLAGS  = #-bf-verbose -bf-vectors #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
+
+SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall #-fPIC #-DNO_SSE2 -mno-avx 
 
 LOG = -t #-v $(TGT).log
 
@@ -12,6 +15,7 @@ PARALLEL_omp_FLAGS = #-fopenmp
 PARALLEL_cilk_FLAGS = #-fcilkplus
 
 CXX = ${CMAKE_CXX_COMPILER}
+#CXX=/usr/local/bin/bf-clang++
 #CXX = mpc_g++
 CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)

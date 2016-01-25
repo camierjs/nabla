@@ -1,0 +1,132 @@
+with ℝ, ℵ;
+
+// αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ∀
+// ℝℕℤ    
+// ²³√½⅓¼⅛
+
+//ofstream output("schema1.plot");
+ofstream outputCv("cv.plot");
+ofstream outputCvFinal("AP4.plot");     
+       
+
+// ****************************************************************************v 
+// * Options
+// ****************************************************************************
+options       
+{  
+  ℝ option_a = 1.0;
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina 
+  ℝ pi =atan(1.0)*4.0;  
+  //ℕ time_steps = 0.0005;
+  //ℝ final_time = 5.0; 
+  ℝ sigma=1.0;   
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.000010;
+  ℝ option_stoptime=0.1;//0.2;//10.
+  ℝ N=100;
+  ℝ N_i=100;
+  ℝ tau =1.0;    
+  ℝ ε = 0.001;           
+  ℝ CFL =0.5;  
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-16;
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 2048;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephPreconditionerMethod = 2;
+  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephSolverMethod     = 3; 
+  ℕ alephNumberOfCores    = 0;
+  Bool option_aleph_dump_matrix = false;
+  Bool option_dump_output= true; 
+};
+
+// **************************************************************************
+// * Node Variables
+// ****************************************************************************
+cells{  
+  ℝ cU;
+  ℝ cP;
+  ℝ cp1P;
+  ℝ cp1U;  
+  ℝ cT; 
+  ℝ cp1T;
+  ℝ center;
+  ℝ cV,cW;
+  ℝ cV_ini,cW_ini,cT_ini;
+  ℝ cDelta_F_sigma;
+  ℝ cDelta_F_sigma_moins;
+  ℝ cM;
+  ℝ cM_moins;
+};  
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+nodes{
+  ℝ nU,nV,nW,nT;
+};  
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;
+  ℝ Integrale;
+  ℝ n_time;        
+  ℝ iδx;
+  ℝ N1;    
+  ℝ Intu;    
+  ℝ Intt;    
+  ℝ Intp;  
+  ℕ tstQuit;
+};
+     
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+void iniGlobals(void) @ -5.0
+{
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
+  δt=0.01;
+  iδx=1./δx; 
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+  tstQuit=0;
+}
+
+  
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+void dbgLoop(void) @ 1.0
+{
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+} 
+
+    
+void tstForTstQuit(void) @ 4.0 {
+  if ((time<(option_stoptime-δt))) return;
+  tstQuit=1;
+}
+
+
+∀ cells void dumpOutputCvFinal(void)
+  in (cell cV, cell center) @ 4.0 if (global_tstQuit[0]==1){
+  outputCvFinal<<  center << "\t " << 0.5*(cV+cW)<< P_condlimi(center,n_time)<<"\n";
+}   
+
+
+void tstForQuit(void) @ 4.1 {
+  n_time+=δt;
+  if ((time<(option_stoptime-δt))) return;
+  printf("\n");
+  exit;
+}

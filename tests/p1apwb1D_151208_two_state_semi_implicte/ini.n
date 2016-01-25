@@ -1,0 +1,65 @@
+// ****************************************************************************
+// * iniCellCenter
+// ****************************************************************************
+∀ cells void iniCellCenter(void) out (/*node coord,*/ cell center) @ -5.0 {
+  center=0.0;
+  ∀ node {
+    center+=coord;
+  }
+  center *= 0.5;
+  //info()<<"[iniMnoeud] sigma*x="<<nM << "coord="<<coord ;
+  // info()<<"[iniMnoeud]  coord="<<center ;          
+}
+
+// ****************************************************************************
+// * sigma*x aux noeudx
+// ****************************************************************************
+∀ nodes  void iniMnoeud(void) in(node coord)  out (/*node coord,*/ node nM ) @ -5.0 {
+  nM = coord*(f_sigma(coord));
+   
+  
+}
+
+
+
+// ****************************************************************************
+// * sigma*x aux mailles
+// ****************************************************************************
+∀ cells  void iniMcell(void) in(cell center)  out (/*node coord,*/ cell cM ) @ -5.0 {
+  cM =center*(f_sigma(center)) ;
+  
+  }
+
+∀ nodes  void initimel(void) in(cell center)  out (/*node coord,*/ node n_time ) @ -5.0 {
+  n_time=0; 
+}
+// ****************************************************************************
+// * incell B1
+// ****************************************************************************
+∀ cells void inicellB1(void) in (cell center) out (cell cV) @ -4.0 {
+  cV = U_condini(center, 0.0) + P_condini(center, 0.0);
+ 
+}
+
+// ****************************************************************************
+// * incell B2
+// ****************************************************************************
+
+∀ cells void iniCellB2(void) in (cell center) out (cell cW) @ -4.0 {
+  cW =P_condini(center, 0.0)-U_condini(center, 0.0) ;
+}
+
+// ****************************************************************************
+// * incell T
+// ****************************************************************************
+∀ cells void iniCellT(void) in (cell center) out (cell cT) @ -4.0 {
+  cT = T_condini(center);
+}
+
+
+void iniOutput(void) @ -1.0 {
+  //output <<"#output|2|3|4|5|6|7|8|9|\n";
+}
+
+
+
