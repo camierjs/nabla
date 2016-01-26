@@ -1,0 +1,261 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): RAMBAUD Albéric                                           //
+//                 BUET Christophe - Christophe.Buet@cea.fr                  //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+with ℝ;
+
+// ****************************************************************************
+// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ∀ ℝℕℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂ * ⋅⨯⤫⊗⨂⊛ ∞ ⁰¹²³ⁱⁿ⁺⁼
+// ****************************************************************************
+
+ofstream output("schema1.plot");
+  
+   
+// ****************************************************************************
+// * Options  
+// ****************************************************************************
+options{  
+  ℝ option_a = 1.0;  
+  ℝ xmin = 0.0;
+  ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
+  ℕ test = 1;
+  ℕ test2 = 1;
+  ℝ pi =atan(1)*4;   
+  ℝ N_i=100;
+  ℝ N=100;
+  ℕ time_steps = 0.0005;   
+  ℝ final_time = 9.0;    
+  ℝ sigma=1.0;         
+  // Yet required options for Okina     
+  ℝ option_δt_initial = 0.000010;  
+  ℝ option_stoptime=0.1; 
+  ℝ tau =1.0;        
+  ℝ epsilon=0.001;                     
+  ℝ CFL =0.5;
+  Bool option_dump_output = true;          
+};
+
+
+// **************************************************************************
+// * Node Variables
+// ****************************************************************************
+cells{  
+  ℝ cV;
+  ℝ cW;
+  ℝ cp1V;
+  ℝ cp1W;  
+  ℝ cT; 
+  ℝ cp1T;
+  ℝ center;
+  ℝ cM;
+};
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+nodes{
+  ℝ nM;
+  ℝ nW;
+  ℝ nV;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ δx;  
+  ℝ Integrale;
+  ℝ n_time;
+  ℝ iδx;
+  ℝ L2;
+  ℝ N1;  
+  ℝ Intu;  
+  ℝ Intt;  
+  ℝ Intp;  
+};
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+
+
+void iniGlobals(void) @ -5.0{
+  δx=(xmax-xmin)/X_EDGE_ELEMS;
+  δt=CFL*δx*(2*epsilon+δx*sigma);
+  printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
+  printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
+  assert(δt>=0.0);
+}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+/*void dbgLoop(void) @ 1.0 {
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+  }*/
+
+
+// ********************************************************
+// cpB1 partout
+// ********************************************************
+∀ cells void loop1(void)
+  in (cell cV, cp1V /*, node nP, node nU*/)  @ 2.6{
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ Mepsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*Mepsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c0=2*Mepsilon*δtSx;
+  const ℝ d0=8*a*b + 2*a + 4*b + 1;
+  const ℝ d1=2*a*b + a - b;
+  const ℝ d2=2*a*b + 3*b + a + 1;
+  const ℝ d3=4*a*b + 2*b;
+  cp1V = (1-c0)*d2*cV + (1-c0)*d1*cW + (4*a*b + 2*b)*cT ;//+source1(center)*δt;
+  ∀ node{    
+    if (coord > center)
+      cp1V +=c0*d1*nW ;        
+    else
+      cp1V +=c0*d2*nV;
+  }
+  cp1V *=1/d0; 
+}
+
+// cp1W partout
+∀ cells void loop2(void)
+  in (cell cW) @ 2.6{
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon*epsilon);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c0=2*M_epsilon*δtSx;
+  const ℝ d0=8*a*b +2*a+4*b+1;
+  const ℝ d1=2*a*b+a-b;
+  const ℝ d2=2*a*b+3*b+a+1;
+  const ℝ d3=4*a*b + 2*b;
+  cp1W = (1-c0)*d2*cW + (1-c0)*d1*cV + (4*a*b + 2*b)*cT;//+source1(center)*δt ;
+  ∀ node{
+    if (center>coord)
+      cp1W +=c0*d1*nV;
+    else
+      cp1W +=c0*d2*nW;
+  }
+  cp1W*=1.0/d0;
+} 
+
+
+// cp1T partout
+∀ cells void loop3(void) in (cell cT) @ 2.6{
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon*epsilon);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c0=2*M_epsilon*δtSx;
+  const ℝ d0=8*a*b +2*a+4*b+1;
+  const ℝ d1=2*a*b+a-b;
+  const ℝ d2=2*a*b+3*b+a+1;
+  const ℝ d3=4*a*b + 2*b;
+  const ℝ d4=0.5*d3;
+  const ℝ d5=2*a*b+b;
+  cp1T = (1-c0)*d4*cW + (1-c0)*d4*cV + (4*a*b + 2*b+2*a+1)*cT;
+  ∀ node {
+    if (center>coord)
+      cp1T +=c0*d5*nV;
+    else
+      cp1T +=c0*d5*nW;
+  }
+  cp1T*=1.0/d0;  
+} 
+
+
+∀ cells  void copyResults(void)
+  in (cell cV, cell cW,cell cT ) @ 2.7{
+  cV = cp1V;
+  cW = cp1W;
+  cT= cp1T;
+}
+
+
+// ****************************************************************************
+// * Test for Quit & Dump Solution Found
+// ****************************************************************************
+∀ cells void dumpSolution(File results)
+  in (cell cV, cell cW, cell cT, cell cM) {
+  results << "\t" << center  
+          << "\t" << (cV + cW)*0.5
+          << "\n";
+}
+
+∀ cells void dumpOutput(void)
+  in (cell cV, cell cW, cell cT, cell cM) {
+  if  (center!=4.1475) continue;
+  output << n_time
+         << "\t" << 0.5*(cV+cW)
+         << "\n";
+}    
+
+
+void tstForQuit(void) @ 4.0 {
+  // printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
+  //     GlobalIteration, time,(double)δt);
+  if (option_dump_output){
+    dumpOutput();
+    output;
+  }
+  //file(resultsvstime ,plot);
+  //dumpVsTimeSolution(resultsvstime);
+  if ((time<(option_stoptime-δt))) return;
+  if (option_dump_output){
+    file(results,plot);
+    // printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
+    dumpSolution(results);
+  }else printf("\n");
+  exit;
+}
+
+

@@ -1,0 +1,149 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): RAMBAUD Albéric                                           //
+//                 BUET Christophe - Christophe.Buet@cea.fr                  //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+#include "math.h"
+
+
+//Test 1 for linear advection (smooth data)
+ ℝ U_condlimi(ℝ x,ℝ t){
+   return ε ;    
+}
+
+  
+// Test 2 for linear  advection (discontinuous data)
+
+ℝ P_condlimi(ℝ x,ℝ t){
+  return  erf(x/sqrt(2*t));
+}
+
+
+ℝ T_condini(ℝ x){
+  return 1.5;
+}
+  
+ℝ P_condini(ℝ x,ℝ t){   
+  return 0.5;
+}
+
+ℝ U_condini(ℝ x,ℝ t){
+  return ε; //(x+1)*exp(-sigma*t);}
+}    
+
+ℝ f_sigma(ℝ x){
+  return 1;
+  // if (x<=0.5-δx*0.5) return 1;
+  //if (x>=0.5) return 2;
+  // assert(false);// Jamais on doit passer par ici
+  // return 0.0;
+}
+
+
+/*ℝ analytics(ℝ t,ℝ x,ℝ y){
+  if (t²-(x-y)²<0.000001)
+    return 0.5*Heaviside(t-fabs(x-y))*t*exp(-t);
+  else 
+    return t*exp(-t)*BESSI(1,sqrt(t²-(x-y)²))* Heaviside(t-fabs(x-y))/(sqrt(t²-(x-y)²));
+}
+
+ℝ analytics1(ℝ t,ℝ x,ℝ y){
+  ℝ S ;
+  S=0;
+   double  w[4], yi[4];
+  w[0] = 0.347854845137454;   yi[0] = -0.861136311594053;
+  w[1] = 0.652145154862546;   yi[1] = -0.339981043584856;
+  w[2] = 0.652145154862546;   yi[2] =  0.339981043584856;
+  w[3] = 0.347854845137454;   yi[3] =  0.861136311594053;
+  for (int i=1; i<=N; i++){
+    for (int k=0; k < 4;k++){
+      S+=0.5*w[k]*analytics((t*(2.*i-1+ yi[k]))/(2.*N_i),x,y)*(t/N);
+    }
+  }
+  return S;
+}
+
+ℝ analytics2(ℝ t,ℝ x,ℝ y){
+  return analytics1( t, x, y) + exp(-fabs(x-y))*Heaviside(t-fabs(x-y));
+}   
+
+ℝ analytics3(ℝ t,ℝ x){
+  ℝ S ;
+  S=0;
+   double  w[4], yi[4];
+  w[0] = 0.347854845137454;   yi[0] = -0.861136311594053;
+  w[1] = 0.652145154862546;   yi[1] = -0.339981043584856;
+  w[2] = 0.652145154862546;   yi[2] =  0.339981043584856;
+  w[3] = 0.347854845137454;   yi[3] =  0.861136311594053;
+  for (int i=1; i<=N_i; i++){
+    for (int k=0; k < 4;k++){
+       S+=0.5*w[k]*analytics2(t,x,((2*i-1+ yi[k]))/(2.*N_i)+4.5);
+    }
+  }
+  S*=1./N_i;
+  return S ;
+}
+
+// ****************************************************************************
+// * fonction Heaviside
+// ****************************************************************************
+ℝ Heaviside(ℝ x){
+  if (x>=0)
+    return 1.0;
+  return 0.0;
+}
+
+// ****************************************************************************
+// * fonction dirac
+// ****************************************************************************
+ℝ source1(ℝ x){
+  if (x<5.5 && x>4.5)
+    return 1.0;
+  return 0.0;
+}
+*/
+
+ℝ F_sigma(ℝ x){
+  return x; 
+}
+

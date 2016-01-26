@@ -211,21 +211,21 @@ nabla_add_okina_test(upwindAP 1 run std seq)
 
 nabla_add_okina_test(aecjs 1 gen std seq)
 
-nabla_add_okina_test(p1apwb1D_150928_version_2 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151110_semi_implicite 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151203_two_state_nolinear 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151204_explicite 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151204_gosse 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151208_two_state_irregular_mesh 1 gen std seq)
-nabla_add_okina_test(p1apwb1D_151208_two_state_semi_implicte 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_version_2 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_semi_implicite 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_two_state_nolinear 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_explicite 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_gosse 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_two_state_irregular_mesh 1 gen std seq)
+nabla_add_okina_test(p1apwb1D_two_state_semi_implicte 1 gen std seq)
 
-nabla_add_okina_test(p1apwb1D_150928_version_2 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151110_semi_implicite 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151203_two_state_nolinear 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151204_explicite 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151204_gosse 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151208_two_state_irregular_mesh 1 run std seq)
-nabla_add_okina_test(p1apwb1D_151208_two_state_semi_implicte 1 run std seq)
+nabla_add_okina_test(p1apwb1D_version_2 1 run std seq)
+nabla_add_okina_test(p1apwb1D_semi_implicite 1 run std seq)
+nabla_add_okina_test(p1apwb1D_two_state_nolinear 1 run std seq)
+nabla_add_okina_test(p1apwb1D_explicite 1 run std seq)
+nabla_add_okina_test(p1apwb1D_gosse 1 run std seq)
+nabla_add_okina_test(p1apwb1D_two_state_irregular_mesh 1 run std seq)
+nabla_add_okina_test(p1apwb1D_two_state_semi_implicte 1 run std seq)
 
 ##########################
 # NABLA TESTS FOR LAMBDA #
@@ -256,16 +256,16 @@ endif (HYPRE_FOUND)
 
 nabla_add_lambda_test_with_defines(deflex 1 run seq -DNO_DEFINES 100000)
 
-nabla_add_lambda_test(p1apwb1D_150928_version_2 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151110_semi_implicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151203_two_state_nolinear 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151204_explicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151204_gosse 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151208_implicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151208_two_state_irregular_mesh 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_151208_two_state_semi_implicte 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_version_2 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_semi_implicite 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_two_state_nolinear 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_explicite 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_gosse 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_implicite 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_two_state_irregular_mesh 1 gen std seq)
+nabla_add_lambda_test(p1apwb1D_two_state_semi_implicte 1 gen std seq)
 
-nabla_add_lambda_test(p1apwb1D_151208_implicite 1 run std seq)
+nabla_add_lambda_test(p1apwb1D_implicite 1 run std seq)
 
 
 ########################

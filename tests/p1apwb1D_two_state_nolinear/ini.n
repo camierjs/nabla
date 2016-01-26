@@ -1,0 +1,131 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): RAMBAUD Albéric                                           //
+//                 BUET Christophe - Christophe.Buet@cea.fr                  //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+
+// ****************************************************************************
+// * iniCellCenter
+// ****************************************************************************
+∀ cells void iniCellCenter(void)
+  out (/*node coord,*/ cell center) @ -5.0{
+  center=0.0;
+  ∀ node
+      center+=coord;
+  center *= 0.5;
+}
+
+// ****************************************************************************
+// * sigma*x aux noeudx
+// ****************************************************************************
+∀ nodes void iniMnoeud(void)
+  in(node coord)  out (/*node coord,*/ node nM ) @ -5.0{
+  nM = F_sigma(coord);
+}
+
+
+// ****************************************************************************
+// * F décalé à droite   aux noeudx
+// ****************************************************************************
+∀ nodes void iniMnoeud_plus(void)
+  in(node coord)  out (/*node coord,*/ node nM ) @ -5.0{
+  nM_plus = F_sigma(coord +δx*0.5 );
+}
+
+
+// ****************************************************************************
+// * F décalé à gauche   aux noeudx
+// ****************************************************************************
+∀ nodes void iniMnoeud_moins(void)
+  in(node coord)  out (/*node coord,*/ node nM ) @ -5.0 {
+  nM_moins = F_sigma(coord -δx*0.5);
+}
+
+
+// ****************************************************************************
+// * sigma*x aux mailles
+// ****************************************************************************
+∀ cells void iniMcell(void)
+  in(cell center)  out (/*node coord,*/ cell cM ) @ -5.0{
+  cM =F_sigma(center);
+}
+
+∀ nodes void initimel(void)
+  in(cell center)  out (/*node coord,*/ node n_time ) @ -5.0{
+  n_time=0; 
+}
+
+// ****************************************************************************
+// *   U_0
+// ****************************************************************************
+∀ cells void inicellB1(void)
+  in (cell center) out (cell cU) @ -4.0{
+  cU = U_condini(center, 0.0);
+  //info()<<"[iniMnoeud]  u="<<cU ; 
+}
+
+// ****************************************************************************
+// * P_0
+// ****************************************************************************
+∀ cells void iniCellB2(void)
+  in (cell center) out (cell cP) @ -4.0{
+  cP =P_condini(center, 0.0) ;
+}
+
+// ****************************************************************************
+// *  T_r
+// ****************************************************************************
+∀ cells void iniCellTr(void)
+  in (cell center) out (cell cT) @ -4.0{
+  cTr = T_condini(center);
+}
+
+
+void iniOutput(void) @ -1.0{
+  //output <<"#output|2|3|4|5|6|7|8|9|\n";
+}
+
+
+
+

@@ -1,0 +1,189 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): RAMBAUD Albéric                                           //
+//                 BUET Christophe - Christophe.Buet@cea.fr                  //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+∀ nodes void flushNodeB(void)@ 1.0{
+  nW=nV=0.0;
+}
+
+
+// ********************************************************
+// nB1 au centre
+// ********************************************************
+∀ nodes void computeNodV(void)
+  /*in (cell center, cell cU)*/
+  out (node nV) @ 2.0{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  const ℝ d1=2*a*b+a-b;
+  const ℝ d2=2*a*b+3*b+a+1;
+  nV=0.0;
+  ∀ cell{
+    if (center<coord)
+      nV+=cV;
+    else
+      nV+=0 ;   
+  }
+}
+
+
+// ********************************************************
+// nB2 au centre
+// ********************************************************
+∀ nodes void computeNodW(void)
+  /*in (cell center, cell cU)*/ 
+  out (node nW) @ 2.1{
+  if (n==0) continue;
+  if (n==(NABLA_NB_NODES-1)) continue;
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ Mepsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*Mepsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*Mepsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  nW=0.0;
+  ∀ cell {
+    if (center>coord)
+      nW+=cW;
+    else
+      nW+=0;
+  }
+}
+    
+
+
+
+   
+    
+  
+
+  
+
+    
+
+
+
+// ********************************************************
+// nB1 et nB2 à 0.0
+// ********************************************************
+∀ nodes void outer0Loop1(void) 
+  in (node nV, node nW/*, node nP, node nU*/)
+  out (node nV,node nW)@ 2.4 {
+  ///////////////////
+  if (n!=0) continue;
+  ///////////////////
+  
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+  
+  nV=0.0;
+  ∀ cell {
+    if (c==0) continue;
+    nV+=0;
+    
+    }
+  
+  nV+=U_condlimi(coord-δx*0.5,n_time) + P_condlimi(coord-δx*0.5,n_time);
+  
+
+ 
+ 
+
+ 
+  }
+
+
+// ********************************************************
+// nP et nU à NABLA_NB_NODES
+// ********************************************************
+∀ nodes void outer0Loop2(void)
+
+  in (node nV, node nW/*, node nP, node nU*/)
+  out (node nV, node nW)@ 2.45
+{
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (n!=(NABLA_NB_NODES-1)) continue;
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const ℝ δtSx = δt/(epsilon*δx);
+  const ℝ M_epsilon =epsilon/(2*epsilon + sigma*δx);
+  const ℝ a=sigma*M_epsilon*δt/(epsilon²);
+  const ℝ b=0.5*tau*δt/(epsilon² + 2*tau*δt);
+  const ℝ c=2*M_epsilon*δtSx;
+  const ℝ d=8*a*b +2*a+4*b+1;
+ 
+  nW=0.0;
+  /*∀ cell
+      {
+        if (c==0) continue;
+    
+  
+    
+        nW+= 0;
+        }*/
+  
+ 
+  nW+= -U_condlimi(coord+δx*0.5,n_time)  + P_condlimi(coord+δx*0.5,n_time);
+
+
+
+ 
+  n_time+=δt;
+}
+
+
+
+
+
+
