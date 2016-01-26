@@ -10,16 +10,20 @@ LOG = -t #-v $(TGT).log
 SIMD_ori_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse4.2 -mno-avx
-SIMD_avx_FLAGS  = -DWARP_BIT=2 -Wa,-q -mavx #-march=native 
+SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx #-march=native 
 SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
 SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #mic mavx512f
 
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus
 
+CLANG_FLAGS = #-nobuiltininc -fno-builtin -fno-math-builtin
+
 CXX = ${CMAKE_CXX_COMPILER}
-CFLAGS = -O3 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -finline $(MESH_FLAGS)
-LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
+#CXX=/usr/local/bin/bf-clang++
+CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -finline $(MESH_FLAGS)
+LIB_seq_GOMP = 
+LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -40,7 +44,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) -fopenmp $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_GOMP)
+	$(CXX) $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_$(PARALLEL)_GOMP)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

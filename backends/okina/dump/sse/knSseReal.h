@@ -65,24 +65,27 @@ struct __attribute__ ((aligned(16))) real {
   inline operator __m128d() const { return vec; }
   
   // Logicals
-  friend inline real operator &(const real &a, const real &b) { return _mm_and_pd(a,b); }
-  friend inline real operator |(const real &a, const real &b) { return _mm_or_pd(a,b); }
-  friend inline real operator ^(const real &a, const real &b) { return _mm_xor_pd(a,b); }
+  //friend inline real operator &(const real &a, const real &b) { return _mm_and_pd(a,b); }
+  //friend inline real operator |(const real &a, const real &b) { return _mm_or_pd(a,b); }
+  //friend inline real operator ^(const real &a, const real &b) { return _mm_xor_pd(a,b); }
 
   // Arithmetics
   friend inline real operator +(const real &a, const real &b) { return _mm_add_pd(a,b); }
   friend inline real operator -(const real &a, const real &b) { return _mm_sub_pd(a,b); }
   friend inline real operator *(const real &a, const real &b) { return _mm_mul_pd(a,b); }
+  //CLANG has a built-in candidate
+#ifndef __clang_major__
   friend inline real operator /(const real &a, const real &b) { return _mm_div_pd(a,b); }
+#endif
 
   
   inline real& operator +=(const real &a) { return *this = _mm_add_pd(vec,a); }
   inline real& operator -=(const real &a) { return *this = _mm_sub_pd(vec,a); }
   inline real& operator *=(const real &a) { return *this = _mm_mul_pd(vec,a); }
   inline real& operator /=(const real &a) { return *this = _mm_div_pd(vec,a); }
-  inline real& operator &=(const real &a) { return *this = _mm_and_pd(vec,a); }
-  inline real& operator |=(const real &a) { return *this = _mm_or_pd(vec,a); }
-  inline real& operator ^=(const real &a) { return *this = _mm_xor_pd(vec,a); }
+  //inline real& operator &=(const real &a) { return *this = _mm_and_pd(vec,a); }
+  //inline real& operator |=(const real &a) { return *this = _mm_or_pd(vec,a); }
+  //inline real& operator ^=(const real &a) { return *this = _mm_xor_pd(vec,a); }
   
   inline real operator -() const { return _mm_xor_pd (_mm_set1_pd(-0.0), *this); }
 
@@ -174,12 +177,12 @@ struct __attribute__ ((aligned(16))) real {
 
 };
 
-inline double ReduceMinToDouble(Real r){
+inline double ReduceMinToDouble(real r){
   const double *dtv = (double*) &r;
   return dtv[0]>dtv[1]?dtv[1]:dtv[0];
 }
 
-inline double ReduceMaxToDouble(Real r){
+inline double ReduceMaxToDouble(real r){
   const double *dtv = (double*) &r;
   return dtv[0]>dtv[1]?dtv[0]:dtv[1];
 }

@@ -212,7 +212,7 @@ NABLA_STATUS nOkinaMain(nablaMain *n){
 extern char knMsh1D_c[];
 extern char knMsh3D_c[];
 static char *nOkinaMainSourceMeshAoS_vs_SoA(nablaMain *nabla){
-  return "node_coord[iNode]=Real3(x,y,z);"; 
+  return "node_coord[iNode]=real3(x,y,z);"; 
 }
 static void nOkinaMainSourceMesh(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);

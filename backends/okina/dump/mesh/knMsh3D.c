@@ -80,7 +80,7 @@ static void nabla_ini_node_coords(void){
     
   for(int iNode=0; iNode<NABLA_NB_NODES_WARP; iNode+=1){
     const int n=WARP_SIZE*iNode;
-    Real x,y,z;
+    real x,y,z;
 #if defined(__MIC__)||defined(__AVX512F__)
     x=set(xOf7(n+7), xOf7(n+6), xOf7(n+5), xOf7(n+4), xOf7(n+3), xOf7(n+2), xOf7(n+1), xOf7(n));
     y=set(yOf7(n+7), yOf7(n+6), yOf7(n+5), yOf7(n+4), yOf7(n+3), yOf7(n+2), yOf7(n+1), yOf7(n));

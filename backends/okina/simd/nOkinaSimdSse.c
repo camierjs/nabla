@@ -94,7 +94,7 @@ char* nOkinaSseNextCell(int direction){
 static char* nOkinaSseGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL)
-    return strdup("register int __attribute__((unused)) cw,ia,ib;");
+    return strdup("int __attribute__((unused)) cw,ia,ib;");
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\

@@ -477,9 +477,9 @@ void timeIncrement(void) @ 0.1 {
 // * calcElemVolume
 // ****************************************************************************
 ∀ cells void calcElemVolume(void)
-  in (node coord, node 𝜕x,cell v, cell volo, cell delx_xi, cell delv_xi,
-      cell delx_eta, cell delv_eta, cell delx_zeta, cell delv_zeta)
-  inout (cell ε) out (cell delv, cell vnew, cell calc_volume, cell vdov, cell arealg) @ 4.0{
+  in (node coord, node 𝜕x,cell v, volo, delx_xi, delv_xi,
+      cell delx_eta, delv_eta, delx_zeta, delv_zeta)
+  inout (cell ε) out (cell delv, vnew, calc_volume, vdov, arealg) @ 4.0{
   const ℝ dt2= ½*δt;
   const ℝ δ = 1.e-36;
   ℝ³ B[8],X[8],Xd[8];
@@ -575,9 +575,9 @@ void timeIncrement(void) @ 0.1 {
   in (cell elemBC, cell delv_eta) out (cell phieta) @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
-  ℤ register bcSwitch;
-  ℝ register delvm=0.;
-  ℝ register delvp=0.;
+  ℤ bcSwitch;
+  ℝ delvm=0.;
+  ℝ delvp=0.;
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_eta+ptiny);
   bcSwitch = elemBC & ETA_M;
@@ -672,13 +672,13 @@ void timeIncrement(void) @ 0.1 {
 // * for each element. The calculation is partitioned into two parts.
 // * CalcQForElems
 // ****************************************************************************
-∀ cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) {//@ 4.8{
+/*∀ cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) {//@ 4.8{
   // Don't allow excessive artificial viscosity
   //if (q>=option_qstop){
     //debug()<<"calcQForElemsExcessiveArtificialViscosityTest!";
     //fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
   //}
-}
+  }*/
 
 
 // ****************************************************************************
@@ -785,13 +785,13 @@ void timeIncrement(void) @ 0.1 {
 }
 
 inline ℝ computeSoundSpeed(const ℝ c,//pbvc
-                              const ℝ energy,
-                              const ℝ volume,
-                              const ℝ b,//bvc
-                              const ℝ pressure,
-                              const ℝ rho,
-                              const ℝ _ql,
-                              const ℝ _qq){
+                           const ℝ energy,
+                           const ℝ volume,
+                           const ℝ b,//bvc
+                           const ℝ pressure,
+                           const ℝ rho,
+                           const ℝ _ql,
+                           const ℝ _qq){
   const ℝ pe = c*energy;
   const ℝ vvbp=volume*volume*b*pressure;
   const ℝ ssc = (pe + vvbp)/rho;
@@ -801,11 +801,11 @@ inline ℝ computeSoundSpeed(const ℝ c,//pbvc
   return sscqt;
 }
 inline ℝ computeSoundSpeed(const ℝ c,//pbvc
-                              const ℝ energy,
-                              const ℝ volume,
-                              const ℝ b,//bvc
-                              const ℝ pressure,
-                              const ℝ rho){
+                           const ℝ energy,
+                           const ℝ volume,
+                           const ℝ b,//bvc
+                           const ℝ pressure,
+                           const ℝ rho){
   const ℝ pe = c*energy;
   const ℝ vvbp=volume*volume*b*pressure;
   const ℝ ssc = (pe + vvbp)/rho;
@@ -1034,16 +1034,16 @@ void dumpTimeConstraintsForElems(void) @ 12.3{
 // ****************************************************************************
 // * atexit: dumpFinalEnergy
 // ****************************************************************************
-void dumpFinalEnergy(void){
-  //ℝ MaxAbsDiff = 0.0;
-  //ℝ TotalAbsDiff = 0.0;
-  //ℝ MaxRelDiff = 0.0;
-  //int edgeElems=X_EDGE_ELEMS;
-//  debug()<<"   Problem size = "<<edgeElems;
-//  debug()<<"   Iteration count = "<<GlobalIteration-1;
-//  debug()<<"   Final Origin Energy = "<<e[0]/*[0]*/;
-//  debug()<<"";
-  /*for(int j=0; j < edgeElems; ++j){
+/*void dumpFinalEnergy(void){
+  ℝ MaxAbsDiff = 0.0;
+  ℝ TotalAbsDiff = 0.0;
+  ℝ MaxRelDiff = 0.0;
+  int edgeElems=X_EDGE_ELEMS;
+  debug()<<"   Problem size = "<<edgeElems;
+  debug()<<"   Iteration count = "<<GlobalIteration-1;
+  debug()<<"   Final Origin Energy = "<<e[0];
+  debug()<<"";
+  for(int j=0; j < edgeElems; ++j){
     for(int k=j+1; k < edgeElems; ++k){
       ℝ RelDiff,AbsDiff = fabs(e[j*edgeElems+k]-e[k*edgeElems+j]);
       TotalAbsDiff += AbsDiff;
@@ -1051,9 +1051,9 @@ void dumpFinalEnergy(void){
       RelDiff = AbsDiff/e[k*edgeElems+j];
       if (MaxRelDiff<RelDiff)MaxRelDiff=RelDiff;
     }
-    }*/
-  //debug()<<"\n   Testing Plane 0 of Energy Array:";
-  //debug()<<"        MaxAbsDiff   = "<<MaxAbsDiff;
-  //debug()<<"        TotalAbsDiff = "<<TotalAbsDiff;
-  //debug()<<"        MaxRelDiff   = "<<MaxRelDiff;
-}
+  }
+  debug()<<"\n   Testing Plane 0 of Energy Array:";
+  debug()<<"        MaxAbsDiff   = "<<MaxAbsDiff;
+  debug()<<"        TotalAbsDiff = "<<TotalAbsDiff;
+  debug()<<"        MaxRelDiff   = "<<MaxRelDiff;
+  }*/

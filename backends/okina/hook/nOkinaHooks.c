@@ -202,7 +202,7 @@ void nOkinaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nprintf(nabla, NULL, "\
 \n\tint threads = omp_get_max_threads();\
-\n\tReal %s_per_thread[threads];", rtnVariable);
+\n\treal *%s_per_thread=(real *)calloc(threads,sizeof(real));", rtnVariable);
 }
 
 

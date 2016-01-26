@@ -77,7 +77,7 @@ static void nabla_ini_node_coords(void){
     
   for(int iNode=0; iNode<NABLA_NB_NODES_WARP; iNode+=1){
     const int n=WARP_SIZE*iNode;
-    Real x;
+    real x;
 #if defined(__MIC__)||defined(__AVX512F__)
     x=set(xOf7(n+7), xOf7(n+6), xOf7(n+5), xOf7(n+4), xOf7(n+3), xOf7(n+2), xOf7(n+1), xOf7(n));
 #elif __AVX__ || __AVX2__
@@ -88,7 +88,7 @@ static void nabla_ini_node_coords(void){
     x=set(xOf7(n));
 #endif
     // Là où l'on poke le retour de okinaSourceMeshAoS_vs_SoA
-    node_coord[iNode]=Real(x);
+    node_coord[iNode]=real(x);
     dbg(DBG_INI,"\nSetting nodes-vector #%%d @", n);
     dbgReal(DBG_INI,node_coord[iNode]);
   }

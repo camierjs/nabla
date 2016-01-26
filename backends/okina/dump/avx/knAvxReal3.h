@@ -64,9 +64,9 @@ struct __attribute__ ((aligned(32))) real3 {
   inline real3(double *_x, double *_y, double *_z): x(_mm256_load_pd(_x)), y(_mm256_load_pd(_y)), z(_mm256_load_pd(_z)){}
 
   // Logicals
-  friend inline real3 operator&(const real3 &a, const real3 &b) { return real3(_mm256_and_pd(a.x,b.x), _mm256_and_pd(a.y,b.y), _mm256_and_pd(a.z,b.z)); }
-  friend inline real3 operator|(const real3 &a, const real3 &b) { return real3( _mm256_or_pd(a.x,b.x),  _mm256_or_pd(a.y,b.y),  _mm256_or_pd(a.z,b.z)); }
-  friend inline real3 operator^(const real3 &a, const real3 &b) { return real3(_mm256_xor_pd(a.x,b.x), _mm256_xor_pd(a.y,b.y), _mm256_xor_pd(a.z,b.z)); }
+  //friend inline real3 operator&(const real3 &a, const real3 &b) { return real3(_mm256_and_pd(a.x,b.x), _mm256_and_pd(a.y,b.y), _mm256_and_pd(a.z,b.z)); }
+  //friend inline real3 operator|(const real3 &a, const real3 &b) { return real3( _mm256_or_pd(a.x,b.x),  _mm256_or_pd(a.y,b.y),  _mm256_or_pd(a.z,b.z)); }
+  //friend inline real3 operator^(const real3 &a, const real3 &b) { return real3(_mm256_xor_pd(a.x,b.x), _mm256_xor_pd(a.y,b.y), _mm256_xor_pd(a.z,b.z)); }
 
   // Arithmetic operators
   friend inline real3 operator+(const real3 &a, const real3& b) { return real3(_mm256_add_pd(a.x,b.x), _mm256_add_pd(a.y,b.y), _mm256_add_pd(a.z,b.z));}

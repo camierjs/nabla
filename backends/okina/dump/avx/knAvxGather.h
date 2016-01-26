@@ -43,7 +43,7 @@
 #ifndef _KN_AVX_GATHER_H_
 #define _KN_AVX_GATHER_H_
 std::ostream& operator<<(std::ostream &os, const __m256d v);
-//std::ostream& operator<<(std::ostream &os, const Real &a);
+//std::ostream& operator<<(std::ostream &os, const real &a);
 
 /******************************************************************************
  * Gather: (X is the data @ offset x)       a            b       c   d
@@ -148,11 +148,24 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
                                      const int d, const int d_corner,
                                      real3 *data, real3 *gthr, int i){
   const __m256d zero256=_mm256_set1_pd(0.0);
-  double *p=(double *)data;
-  __m256d aData=a<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a)]));
-  __m256d bData=b<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b)]));
-  __m256d cData=c<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(c)+3*c_corner+i)+WARP_OFFSET(c)]));
-  __m256d dData=d<0?zero256:_mm256_broadcast_sd(&(p[4*(3*8*WARP_BASE(d)+3*d_corner+i)+WARP_OFFSET(d)]));
+  const double *p=(double *)data;
+  //const int nb_cells=X_EDGE_ELEMS*Y_EDGE_ELEMS*Z_EDGE_ELEMS;
+  //printf("nb_cells=%%d: %%d,%%d,%%d,%%d",nb_cells,a,b,c,d);fflush(stdout);
+  // Hypo 3D, given by definitions
+  //assert(a<nb_cells);
+  const int aa = 4*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a);
+  const int bb = 4*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b);
+  const int cc = 4*(3*8*WARP_BASE(c)+3*c_corner+i)+WARP_OFFSET(c);
+  const int dd = 4*(3*8*WARP_BASE(d)+3*d_corner+i)+WARP_OFFSET(d);
+  //assert(aa>=0 && bb>=0 && cc>=0 && dd>=0);
+  //printf(" %%d,%%d",a,aa);fflush(stdout);
+  //printf(" %%d,%%d",b,bb);fflush(stdout);
+  //printf(" %%d,%%d",c,cc);fflush(stdout);
+  //printf(" %%d,%%d\n\r",d,dd);fflush(stdout);
+  __m256d aData=a<0||aa<0?zero256:_mm256_broadcast_sd(&(p[aa]));
+  __m256d bData=b<0||bb<0?zero256:_mm256_broadcast_sd(&(p[bb]));
+  __m256d cData=c<0||cc<0?zero256:_mm256_broadcast_sd(&(p[cc]));
+  __m256d dData=d<0||dd<0?zero256:_mm256_broadcast_sd(&(p[dd]));
   __m256d ba=_mm256_blend_pd(aData,bData,0xA);
   __m256d dc=_mm256_blend_pd(cData,dData,0xA);
   __m256d dcba=_mm256_blend_pd(ba,dc,0xC);

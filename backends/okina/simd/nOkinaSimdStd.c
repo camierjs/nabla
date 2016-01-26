@@ -83,7 +83,7 @@ char* nOkinaStdNextCell(int direction){
 static char* nOkinaStdGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL)
-    return strdup("register int __attribute__((unused)) cw,ia;");
+    return strdup("int __attribute__((unused)) cw,ia;");
   // Phase function call
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\

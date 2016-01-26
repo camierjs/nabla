@@ -167,7 +167,9 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       nprintf(nabla, "/*CONST*/", "%s const ", fct->entity->main->hook->pragma->align());
       break;
     }
-
+    
+    //if(n->tokenid==REAL){ nprintf(nabla, "/*real*/", "real "); break; }
+    
     if(n->tokenid==FORALL_END){
       nprintf(nabla, "/*FORALL_END*/",NULL);
       fct->parse.enum_enum='\0';

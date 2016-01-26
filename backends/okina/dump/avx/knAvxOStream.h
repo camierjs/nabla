@@ -61,7 +61,7 @@ std::ostream& operator<<(std::ostream &os, const __m256d v){
   return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)<<"]";
 }
 
-std::ostream& operator<<(std::ostream &os, const Real &a){
+std::ostream& operator<<(std::ostream &os, const real &a){
   double *fp = (double*)&a;
   return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)<<"]";
 }
@@ -70,7 +70,7 @@ std::ostream& operator<<(std::ostream &os, const Real &a){
 // ****************************************************************************
 // * REALS_3
 // ****************************************************************************
-std::ostream& operator<<(std::ostream &os, const Real3 &a){
+std::ostream& operator<<(std::ostream &os, const real3 &a){
   double *x = (double*)&(a.x);
   double *y = (double*)&(a.y);
   double *z = (double*)&(a.z);

@@ -63,30 +63,28 @@ struct __attribute__ ((aligned(64))) real {
   operator __m512d() const { return vec; }
   
     // Logicals
-  friend inline real operator &(const real &a, const real &b) {
+  /*friend inline real operator &(const real &a, const real &b) {
     return _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(a),_mm512_castpd_si512(b))); }
-  friend inline real operator |(const real &a, const real &b) {
+    friend inline real operator |(const real &a, const real &b) {
     return _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(a),_mm512_castpd_si512(b))); }
   friend inline real operator ^(const real &a, const real &b) {
-    return _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(a),_mm512_castpd_si512(b))); }
+  return _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(a),_mm512_castpd_si512(b))); }*/
 
   // Arithmetics
   friend inline real operator +(const real &a, const real &b) { return _mm512_add_pd(a,b); }
   friend inline real operator -(const real &a, const real &b) { return _mm512_sub_pd(a,b); }
   friend inline real operator *(const real &a, const real &b) { return _mm512_mul_pd(a,b); }
+#ifndef __clang_major__
   friend inline real operator /(const real &a, const real &b) { return _mm512_div_pd(a,b); }
-
+#endif
 
   inline real& operator +=(const real &a) { return *this = _mm512_add_pd(vec,a); }
   inline real& operator -=(const real &a) { return *this = _mm512_sub_pd(vec,a); }
   inline real& operator *=(const real &a) { return *this = _mm512_mul_pd(vec,a); }
   inline real& operator /=(const real &a) { return *this = _mm512_div_pd(vec,a); }
-  inline real& operator &=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(vec),
-                                                                                                _mm512_castpd_si512(a))); }
-  inline real& operator |=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(vec),
-                                                                                               _mm512_castpd_si512(a))); }
-  inline real& operator ^=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(vec),
-                                                                                                _mm512_castpd_si512(a))); }
+  //inline real& operator &=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(vec),_mm512_castpd_si512(a))); }
+  //inline real& operator |=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(vec),_mm512_castpd_si512(a))); }
+  //inline real& operator ^=(const real &a) { return *this = _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(vec),_mm512_castpd_si512(a))); }
   
   inline real operator -() const { return real(0.0) - vec; }
   inline real operator -()       { return real(0.0) - vec; }

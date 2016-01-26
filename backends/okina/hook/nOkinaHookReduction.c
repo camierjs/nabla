@@ -100,20 +100,25 @@ void nOkinaHookReduction(struct nablaMainStruct *nabla, astNode *n){
 void %s(void){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
 \tconst int threads = omp_get_max_threads();\n\
-\tReal %s_per_thread[threads];\n\
+\treal *%s_per_thread=(real*)aligned_alloc(WARP_ALIGN,sizeof(real)*threads);\n\
+\t// GCC OK, not CLANG real %%s_per_thread[threads];\n\
 \tdbgFuncIn();\n\
+\t//printf(\"\\nreduction_init:\\n\\r\");\n\
 \tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
+\t//printf(\"\\nreduction_inited\\n\\r\");\n\
 \tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
 \t\tconst int tid = omp_get_thread_num();\n\
+\t\t//printf(\"\\ntid=%%d\\n\",tid);\n\
 \t\t%s_per_thread[tid] = m%s(%s_%s[%s],\n\
 \t\t\t\t\t\t\t\t\t\t\t\t\t%s_per_thread[tid]);\n\
 \t}\n\
 \tglobal_%s[0]=reduction_init;\n\
 \tfor (int i=0; i<threads; i+=1){\n\
-\t\tconst Real real_global_%s=global_%s[0];\n\
+\t\tconst real real_global_%s=global_%s[0];\n\
 \t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])<ReduceM%sToDouble(real_global_%s))?\n\
 \t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
 \t}\n\
+\tdelete [] %s_per_thread;\n\
 }\n\n",   item_var_name,global_var_name, // '%s' vers la globale '%s'
           job_name, // %s(void)
           at_single_cst_node->token, // @ %s
@@ -130,6 +135,6 @@ void %s(void){ // @ %s\n\
           global_var_name, // global_%s
           global_var_name,global_var_name, // real_global_%s=global_%s
           global_var_name,mix,global_var_name,mix,global_var_name, // avant dernière ligne
-          mix,global_var_name,mix,global_var_name // dernière
-          );  
+          mix,global_var_name,mix,global_var_name, // dernière
+          global_var_name);  
 }

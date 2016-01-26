@@ -144,17 +144,17 @@ void nOkinaHookTokenSwitch(astNode *n, nablaJob *job){
   }
     
   case(REAL):{
-    nprintf(nabla, "/*Real*/", "real ");
+    nprintf(nabla, "/*real*/", "real ");
     break;
   }
   case(REAL3):{
     if ((job->entity->libraries&(1<<with_real))!=0)
       exit(NABLA_ERROR|
            fprintf(stderr,
-                   "[nOkinaHookSwitchToken] Real3 can't be used with R library!\n"));
+                   "[nOkinaHookSwitchToken] real3 can't be used with R library!\n"));
     
     assert((job->entity->libraries&(1<<with_real))==0);
-    nprintf(nabla, "/*Real3*/", "real3 ");
+    nprintf(nabla, "/*real3*/", "real3 ");
     break;
   }
   case(INTEGER):{

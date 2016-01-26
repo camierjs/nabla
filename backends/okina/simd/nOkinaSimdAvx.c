@@ -106,7 +106,7 @@ char* nOkinaAvxNextCell(int direction){
 char* nOkinaAvxGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL){
-    return strdup("register int __attribute__((unused)) cw,ia,ib,ic,id;");
+    return strdup("int __attribute__((unused)) cw,ia,ib,ic,id;");
   }
   // Phase function call
   char gather[1024];

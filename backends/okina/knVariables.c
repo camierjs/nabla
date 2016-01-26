@@ -213,7 +213,7 @@ static void okinaGlobals(nablaMain *nabla){
 // ********************************************************\n\
 // * Temps de la simulation\n\
 // ********************************************************\n\
-Real global_deltat[1];\n\
+real global_deltat[1];\n\
 int global_iteration;\n\
 double global_time;\n");
 }

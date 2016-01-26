@@ -48,7 +48,7 @@
 // ****************************************************************************
 // * real3
 // ****************************************************************************
-class __attribute__ ((aligned(8))) real3 {
+struct __attribute__ ((aligned(8))) real3 {
  public:
   // Les formules 4*(3*WARP_BASE(a)+0)+WARP_OFFSET(a) fonctionnent grâce au fait
   // que real3 est bien une struct avec les x,y et z en positions [0],[1] et [2]
@@ -65,9 +65,9 @@ class __attribute__ ((aligned(8))) real3 {
   inline real3(double *_x, double *_y, double *_z): x(*_x), y(*_y), z(*_z){}
 
   // Logicals
-  friend inline real3 operator&(const real3 &a, const real3 &b) { return real3((a.x&b.x), (a.y&b.y), (a.z&b.z)); }
-  friend inline real3 operator|(const real3 &a, const real3 &b) { return real3((a.x|b.x), (a.y|b.y), (a.z|b.z)); }
-  friend inline real3 operator^(const real3 &a, const real3 &b) { return real3((a.x^b.x), (a.y^b.y), (a.z^b.z)); }
+  //friend inline real3 operator&(const real3 &a, const real3 &b) { return real3((a.x&b.x), (a.y&b.y), (a.z&b.z)); }
+  //friend inline real3 operator|(const real3 &a, const real3 &b) { return real3((a.x|b.x), (a.y|b.y), (a.z|b.z)); }
+  //friend inline real3 operator^(const real3 &a, const real3 &b) { return real3((a.x^b.x), (a.y^b.y), (a.z^b.z)); }
 
   // Arithmetic operators
   friend inline real3 operator+(const real3 &a, const real3& b) { return real3((a.x+b.x), (a.y+b.y), (a.z+b.z));}

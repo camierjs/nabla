@@ -74,7 +74,7 @@ inline __m256d returned_gatherk(const int a, const int b,
 // *****************************************************************************
 inline __m256d masked_gather_pd(const int a, const int b,
                                 const int c, const int d,
-                                const double *base, const int s){
+                                double *base){
   // base: address used to reference the loaded FP elements
   // the vector of double-precision FP values copied to the destination
   // when the corresponding element of the double-precision FP mask is '0'
@@ -85,17 +85,18 @@ inline __m256d masked_gather_pd(const int a, const int b,
   // only the most significant bit of each data element is used as a mask.
   const __m256d vmask = _mm256_cmp_pd(_mm256_set_pd(d,c,b,a), _mm256_setzero_pd(), _CMP_GE_OQ);
   // 32-bit scale used to address the loaded FP elements.
-  const int scale = s;
+  //const int scale = _MM_SCALE_8;
   // Gathers 4 packed double-precision floating point values from memory referenced by the given base address,
   // dword indices and scale, and using the given double-precision FP mask values. 
-  const __m256d mdcbat = _mm256_mask_i32gather_pd(def_vals, base, vindex, vmask, scale);
-  return mdcbat;
+  const __m256d mdcbat = _mm256_mask_i32gather_pd(def_vals, base, vindex, vmask, _MM_SCALE_8);
+  //const __m256d mdcbat = __builtin_ia32_gatherd_pd256(def_vals, (const __v4df *)base, vindex, vmask, scale);
+ return mdcbat;
 }
 
 inline __m256d gatherk_and_zero_neg_ones(const int a, const int b,
                                          const int c, const int d,
                                          real *data){
-  return masked_gather_pd(a,b,c,d,(double *)data,_MM_SCALE_8);
+  return masked_gather_pd(a,b,c,d,(double *)data);
 }
 
 inline void gatherFromNode_k(const int a, const int b,
@@ -140,12 +141,16 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
                                      const int c, const int c_corner,
                                      const int d, const int d_corner,
                                      real3 *data, real3 *gthr, int i){  
-  const double *base=(double *)data;
-  const int ia = a<0?a:(((3*WARP_BASE(a)<<3)+3*a_corner+i)<<2)+WARP_OFFSET(a);
-  const int ib = b<0?b:(((3*WARP_BASE(b)<<3)+3*b_corner+i)<<2)+WARP_OFFSET(b);
-  const int ic = c<0?c:(((3*WARP_BASE(c)<<3)+3*c_corner+i)<<2)+WARP_OFFSET(c);
-  const int id = d<0?d:(((3*WARP_BASE(d)<<3)+3*d_corner+i)<<2)+WARP_OFFSET(d);
-  const __m256d dcbag = masked_gather_pd(ia,ib,ic,id,base,_MM_SCALE_8);
+  double *base=(double *)data;
+  const int aa = (((3*WARP_BASE(a)<<3)+3*a_corner+i)<<2)+WARP_OFFSET(a);
+  const int bb = (((3*WARP_BASE(b)<<3)+3*b_corner+i)<<2)+WARP_OFFSET(b);
+  const int cc = (((3*WARP_BASE(c)<<3)+3*c_corner+i)<<2)+WARP_OFFSET(c);
+  const int dd = (((3*WARP_BASE(d)<<3)+3*d_corner+i)<<2)+WARP_OFFSET(d);
+  const int ia = a<0?a:aa;
+  const int ib = b<0?b:bb;
+  const int ic = c<0?c:cc;
+  const int id = d<0?d:dd;
+  const __m256d dcbag = masked_gather_pd(ia,ib,ic,id,base);
   if (i==0) gthr->x=dcbag;
   if (i==1) gthr->y=dcbag;
   if (i==2) gthr->z=dcbag;

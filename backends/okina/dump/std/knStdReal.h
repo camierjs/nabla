@@ -64,9 +64,9 @@ class __attribute__ ((aligned(8))) real {
   inline operator double() const { return vec; }
   
   // Logicals
-  friend inline real operator &(const real &a, const real &b) { return (a&b); }
-  friend inline real operator |(const real &a, const real &b) { return (a|b); }
-  friend inline real operator ^(const real &a, const real &b) { return (a^b); }
+  //friend inline real operator &(const real &a, const real &b) { return (a&b); }
+  //friend inline real operator |(const real &a, const real &b) { return (a|b); }
+  //friend inline real operator ^(const real &a, const real &b) { return (a^b); }
 
   // Arithmetics
   //friend inline real operator +(const real &a, const real &b) { return (a+b); }
@@ -78,9 +78,9 @@ class __attribute__ ((aligned(8))) real {
   inline real& operator -=(const real &a) { return *this = (vec-a); }
   inline real& operator *=(const real &a) { return *this = (vec*a); }
   inline real& operator /=(const real &a) { return *this = (vec/a); }
-  inline real& operator &=(const real &a) { return *this = (vec&a); }
-  inline real& operator |=(const real &a) { return *this = (vec|a); }
-  inline real& operator ^=(const real &a) { return *this = (vec^a); }
+  //inline real& operator &=(const real &a) { return *this = (vec&a); }
+  //inline real& operator |=(const real &a) { return *this = (vec|a); }
+  //inline real& operator ^=(const real &a) { return *this = (vec^a); }
   
   //inline real operator -() const { return -(*this); }
 

@@ -96,8 +96,9 @@ inline void gather3k(const int a, real3 *data, real3 *gthr){
 inline void gatherFromNode_3kiArray8(const int a, const int corner,
                                      real3 *data, real3 *gthr, int i){
   //debug()<<"gather3ki, i="<<i;
-  double *p=(double *)data;
-  double value=(a<0)?0.0:p[3*8*a+3*corner+i];
+  const double *p=(double *)data;
+  const int aa=3*8*a+3*corner+i;
+  double value=(a<0||aa<0)?0.0:p[aa];
   if (i==0) (*gthr).x=value;
   if (i==1) (*gthr).y=value;
   if (i==2) (*gthr).z=value;

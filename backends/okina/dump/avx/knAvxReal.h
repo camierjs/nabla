@@ -43,12 +43,27 @@
 #ifndef _KN_AVX_REAL_H_
 #define _KN_AVX_REAL_H_
 
+struct __attribute__ ((aligned(32))) reall {
+ protected:
+  __attribute__ ((aligned(32))) __m256d d256;
+  //__attribute__ ((aligned(16))) __m128d d128;
+ public:
+  inline __attribute__ ((aligned(32))) reall():
+    d256(_mm256_setzero_pd())//,
+    //d128(_mm_setzero_pd())
+    {
+      //printf("real!");
+    }
+  inline  __attribute__ ((aligned(32))) reall(double d):d256(_mm256_set1_pd(d)){}
+};
+
+  
 // ****************************************************************************
 // * real
 // ****************************************************************************
 struct __attribute__ ((aligned(32))) real {
  protected:
-  __m256d vec;
+  __attribute__ ((aligned(32))) __m256d vec;
  public:
   // Constructors
   inline real(): vec(_mm256_setzero_pd()){}
@@ -64,24 +79,29 @@ struct __attribute__ ((aligned(32))) real {
   inline operator __m256d() const { return vec; }
   
   // Logicals
-  friend inline real operator &(const real &a, const real &b) { return _mm256_and_pd(a,b); }
-  friend inline real operator |(const real &a, const real &b) { return _mm256_or_pd(a,b); }
-  friend inline real operator ^(const real &a, const real &b) { return _mm256_xor_pd(a,b); }
+  //friend inline real operator &(const real &a, const real &b) { return _mm256_and_pd(a,b); }
+  //friend inline real operator |(const real &a, const real &b) { return _mm256_or_pd(a,b); }
+  //friend inline real operator ^(const real &a, const real &b) { return _mm256_xor_pd(a,b); }
 
   // Arithmetics
   friend inline real operator +(const real &a, const real &b) { return _mm256_add_pd(a,b); }
   friend inline real operator -(const real &a, const real &b) { return _mm256_sub_pd(a,b); }
   friend inline real operator *(const real &a, const real &b) { return _mm256_mul_pd(a,b); }
+  // CLANG has a built-in candidate:
+  // operator/(__attribute__((__vector_size__(4 * sizeof(double)))) double,
+  //           __attribute__((__vector_size__(4 * sizeof(double)))) double)
+#ifndef __clang_major__
   friend inline real operator /(const real &a, const real &b) { return _mm256_div_pd(a,b); }
+#endif
 
   
   inline real& operator +=(const real &a) { return *this = _mm256_add_pd(vec,a); }
   inline real& operator -=(const real &a) { return *this = _mm256_sub_pd(vec,a); }
   inline real& operator *=(const real &a) { return *this = _mm256_mul_pd(vec,a); }
   inline real& operator /=(const real &a) { return *this = _mm256_div_pd(vec,a); }
-  inline real& operator &=(const real &a) { return *this = _mm256_and_pd(vec,a); }
-  inline real& operator |=(const real &a) { return *this = _mm256_or_pd(vec,a); }
-  inline real& operator ^=(const real &a) { return *this = _mm256_xor_pd(vec,a); }
+  //inline real& operator &=(const real &a) { return *this = _mm256_and_pd(vec,a); }
+  //inline real& operator |=(const real &a) { return *this = _mm256_or_pd(vec,a); }
+  //inline real& operator ^=(const real &a) { return *this = _mm256_xor_pd(vec,a); }
   
   inline real operator -() const { return _mm256_xor_pd (_mm256_set1_pd(-0.0), *this); }
 
@@ -215,7 +235,7 @@ struct __attribute__ ((aligned(32))) real {
 
 };
 
-inline double ReduceMinToDouble(Real r){
+inline double ReduceMinToDouble(real r){
   double mnx[2];
   const double *dtv = (double*) &r;
   mnx[0]=dtv[0]>dtv[1]?dtv[1]:dtv[0];
@@ -223,7 +243,7 @@ inline double ReduceMinToDouble(Real r){
   return mnx[0]>mnx[1]?mnx[1]:mnx[0];
 }
 
-inline double ReduceMaxToDouble(Real r){
+inline double ReduceMaxToDouble(real r){
   double mnx[2];
   const double *dtv = (double*) &r;
   mnx[0]=dtv[0]>dtv[1]?dtv[0]:dtv[1];
