@@ -40,140 +40,138 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_H
-#define _NABLA_H 
+with ℵ,ℝ²;
 
-#include <math.h>
-#include <stdio.h>
-#include <iso646.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <stdbool.h>
+// ****************************************************************************
+// * Déclaration des options
+// ****************************************************************************
+options{
+  ℝ option_deltat            = 0.0001;
+  ℝ option_δt_initial        = 0.0;
+  ℝ option_stoptime          = 0.1;
+  ℝ option_ini_temperature   = 300.0;
+  ℝ option_hot_temperature   = 700.0;
+  ℕ option_max_iterations    = 1;
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-10;
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 16384;
+  ℕ alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                   // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephSolverMethod     = 0; //PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephNumberOfCores    = 0;
+  Bool option_aleph_dump_matrix = true;
+};
 
 
 // ****************************************************************************
-// * Typedefs
+// * Déclaration des variables aux mailles
 // ****************************************************************************
-typedef enum {
-  NABLA_OK    = 0,
-  NABLA_ERROR = ~NABLA_OK
-} NABLA_STATUS;
-
-
-// ****************************************************************************
-// * Possible Backend Types: Arcane, Cuda or Okina
-// ****************************************************************************
-typedef enum {
-  BACKEND_VOID   = 0,
-  BACKEND_ARCANE = 1<<(0),
-  BACKEND_CUDA   = 1<<(1),
-  BACKEND_OKINA  = 1<<(2),
-  BACKEND_LAMBDA = 1<<(3),
-  BACKEND_RAJA   = 1<<(4),
-  BACKEND_KOKKOS = 1<<(5),
-  BACKEND_LOCI   = 1<<(6),
-  BACKEND_UINTAH = 1<<(7),
-  BACKEND_MMA    = 1<<(8)
-} BACKEND_SWITCH;
-
+cells{
+  ℝ θ;
+  ℝ² X;
+};
 
 // ****************************************************************************
-// * ! First shift value comes from last BACKEND_SWITCH+1 !
-// * Possible Variations:
-// *  - Arcane: Module|Service,
-// *  - Okina: std, sse, avx, avx2, mic and omp, cilk
-// *  - TILING, SOA, AOS are not yet or will be used (to be cleaned-up!)
+// * Déclaration des variables aux faces
 // ****************************************************************************
-typedef enum { 
-  BACKEND_COLOR_VOID           = 0,
-  BACKEND_COLOR_ARCANE_ALONE   = 1<<(9),
-  BACKEND_COLOR_ARCANE_MODULE  = 1<<(10),
-  BACKEND_COLOR_ARCANE_SERVICE = 1<<(11),
-  BACKEND_COLOR_OKINA_TILING   = 1<<(12),
-  BACKEND_COLOR_OKINA_STD      = 1<<(13),
-  BACKEND_COLOR_OKINA_SSE      = 1<<(14),
-  BACKEND_COLOR_OKINA_AVX      = 1<<(15),
-  BACKEND_COLOR_OKINA_AVX2     = 1<<(16),
-  BACKEND_COLOR_OKINA_MIC      = 1<<(17),
-  BACKEND_COLOR_OKINA_SEQ      = 1<<(18),
-  BACKEND_COLOR_OpenMP         = 1<<(19),
-  BACKEND_COLOR_CILK           = 1<<(20),
-  BACKEND_COLOR_GCC            = 1<<(21),
-  BACKEND_COLOR_ICC            = 1<<(22),
-  OPTION_TIME_DOT_STD          = 1<<(23),
-  OPTION_TIME_DOT_MMA          = 1<<(24)
-} BACKEND_COLORS;
+faces{
+  ℝ bcθ;
+  ℝ ih2;
+};
 
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
 
-// Enumération des phases possibles lors des génération des gather/scatter
-typedef enum{
-  GATHER_SCATTER_DECL=0,
-  GATHER_SCATTER_CALL
-} GATHER_SCATTER_PHASE;
+void ini(void) @ -10.0{
+  δt=option_deltat;
+}
 
+∀ cells void iniCells(void) out (cell θ) @ -10.0{
+  θ=option_ini_temperature;
+}
 
-// Enumération des actions à faire selon les cas de postfixs
-typedef enum{
-  postfixed_not_a_nabla_variable=0,
-  postfixed_nabla_system_keyword=1,
-  postfixed_nabla_variable_with_unknown=2,
-  postfixed_nabla_variable_with_item=2
-} what_to_do_with_the_postfix_expressions;
+∀ faces void iniFaces(void) out (face bcθ, face ih2) @ -10.0{
+  const ℝ³ s0=coord[0];
+  const ℝ³ s1=coord[1];
+  const ℝ f_length = norm(s0-s1);
+  ih2=1.0/f_length; 
+  bcθ=option_ini_temperature;
+}
+
+∀ own outer faces void iniHotFaces(void) @ -9.9{
+  // Si je ne suis pas sur XMIN ou YMIN, je laisse à option_ini_temperature
+  if (!((coord[0].x==0.0) || (coord[0].y==0.0))) continue;
+  // Sinon je force à option_hot_temperature
+  bcθ=option_hot_temperature;
+}
 
 
 // ****************************************************************************
-// * NABLA ENTRY_POINT_* DEFINES
-// * __builtin_nanf ("")
-// * __builtin_inff()
-// * IEEE positive infinity (-HUGE_VAL is negative infinity).
+// * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
-#define ENTRY_POINT_build         (- (double)(__builtin_nanf("")))
-#define ENTRY_POINT_init          (- (double)(__builtin_inff()))
-#define ENTRY_POINT_start_init    (- (double)(0.0))
-#define ENTRY_POINT_continue_init (- (double)(0.0))
-#define ENTRY_POINT_compute_loop  (+ (double)(0.0))
-#define ENTRY_POINT_exit          (+ (double)(__builtin_inff()))
 
+void rhsInit(void) @ 1.0{
+  ℵ rhs reset;
+  ℵ lhs reset;
+}
 
-// ****************************************************************************
-// * Forwwards
-// ****************************************************************************
-int fileno(FILE *stream);
-char *strdup(const char *s);
-int mkstemp(char *template);
-#define nablaError(...) nablaErrorVariadic(__FILE__,__LINE__,__VA_ARGS__)
-void nablaErrorVariadic(const char *,const int,const char *,...);
+∀ own cells void addRhsCellValues(void) in (cell θ) @ 1.1{
+  const ℝ value=θ;
+  ℵ rhs addValue(θ,this,value);
+}
 
+∀ own outer faces void setRhsFaceValues(void) in (cell θ, face ih2, face bcθ) @ 1.2{
+  const ℝ value = δt*ih2*bcθ;
+  ℵ rhs addValue(θ, cell(0), value);
+}
 
-// ****************************************************************************
-// * Nabla Hard-coded Definitions that should be removed
-// ****************************************************************************
-#define NABLA_LICENSE_HEADER 3360
-#define NABLA_MAX_FILE_NAME 8192
-#define NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH 8
-#define NABLA_JOB_WHEN_MAX 64
-#define NABLA_JOB_WHEN_HLT_FACTOR 3
-
+// ********************************************************
+// * Initialisation ℵ
+// * Could be done as: 'alephInitialize @ 2;'
+// ********************************************************
+void iniAleph(void) @ 2.0 { alephInitialize(); }
 
 // ****************************************************************************
-// * Std ∇ includes
+// * Partie de remplissage de la matrice
 // ****************************************************************************
-#include "frontend/frontend.h"
 
-#include "middlend/middlend.h"
+∀ inner faces void setInnerFacesValues(void) in (cell θ, face ih2) @ 2.1{
+  const ℝ δtDivSurface = -δt*ih2;
+  //info()<<"\n[setInnerFacesValues] backCell="<<backCell;
+//if (backCell.isOwn())
+    ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
+    //if (frontCell.isOwn())
+    ℵ matrix setValue(θ,frontCell, θ,backCell, δtDivSurface);
+}
 
-#include "backends/hooks.h"
-#include "backends/calls.h"
+∀ own cells void setCellsValues(void) in (cell θ/*, face ih2*/) @ 2.2{
+  ℝ diagonalTerme=0.0;
+  ∀ face diagonalTerme += ih2;
+  diagonalTerme*=δt;
+  diagonalTerme+=1.0;
+  ℵ matrix setValue(θ,this, θ,this, diagonalTerme);
+}
 
-#include "backends/cuda/cuda.h"
-#include "backends/okina/okina.h"
-#include "backends/arcane/arcane.h"
-#include "backends/lambda/lambda.h"
+// ****************************************************************************
+// * Aleph Solve
+// ****************************************************************************
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
 
-#include "toolbox/toolbox.h"
 
-#endif // _NABLA_H_
+// ****************************************************************************
+// * Récupération des résultats
+// ****************************************************************************
+∀ own cells void getCellResults(void) out (cell θ) @ 4.1{
+  θ=ℵ lhs getValue(θ, this);
+}
+
+
+// ****************************************************************************
+// * Sync & test for Quit
+// ****************************************************************************
+void testForQuit(void) @ 5.0{
+  synchronize(θ);
+  if (GlobalIteration >= option_max_iterations) exit;
+}

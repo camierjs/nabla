@@ -17,9 +17,10 @@ SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #mic mavx512f
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus
 
-CLANG_FLAGS = #-nobuiltininc -fno-builtin -fno-math-builtin
+CLANG_FLAGS = #-bf-by-func -bf-call-stack #-nobuiltininc -fno-builtin -fno-math-builtin
 
 CXX = ${CMAKE_CXX_COMPILER}
+# CLANG + ByFL
 #CXX=/usr/local/bin/bf-clang++
 CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -finline $(MESH_FLAGS)
 LIB_seq_GOMP = 

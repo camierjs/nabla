@@ -118,8 +118,15 @@ static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
                                                  nablaVariable *var,
                                                  char *postfix,
                                                  char *depth){  
+  const bool dim1D = (nabla->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (nabla->entity->libraries&(1<<with_real2))!=0;
   if (strncmp(var->name,"coord",5)==0){
-    if ((nabla->entity->libraries&(1<<with_real))!=0){
+    if (dim2D){
+      fprintf(nabla->entity->hdr,
+              "\nreal3 node_coord[NABLA_NB_NODES];");
+      return NABLA_OK;
+    }
+    if (dim1D){
       fprintf(nabla->entity->hdr,
               "\nreal/*3*/ node_coord[NABLA_NB_NODES];");
       return NABLA_OK;
@@ -132,9 +139,16 @@ static NABLA_STATUS lambdaGenerateSingleVariable(nablaMain *nabla,
     return NABLA_OK;
   }
   //nprintf(nabla,NULL,"\n\t// lambdaGenerateSingleVariable");
+  const char *type =
+    (var->item[0]!='g' && dim2D && strncmp(var->type,"real2",5)==0)?
+    "real3/*2D->3D*/":
+    var->type;
   if (var->dim==0)
     fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[%s];",
-            postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"",
+            postfix?"real":type,
+            var->item, var->name,
+            postfix?postfix:"",
+            depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
     fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*%s];",

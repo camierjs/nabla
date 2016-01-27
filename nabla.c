@@ -288,6 +288,11 @@ int main(int argc, char * argv[]){
        {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
        {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
     {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
+    {"raja",no_argument,NULL,BACKEND_RAJA},
+    {"kokkos",no_argument,NULL,BACKEND_KOKKOS},
+    {"loci",no_argument,NULL,BACKEND_LOCI},
+    {"uintah",no_argument,NULL,BACKEND_UINTAH},
+    {"mma",no_argument,NULL,BACKEND_MMA},
     {NULL,0,NULL,0}
   };
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
@@ -472,7 +477,47 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s",
           nabla_entity_name);
       break;
-       
+      
+      // ************************************************************
+      // * BACKEND RAJA en cours de construction
+      // ************************************************************
+    case BACKEND_RAJA:
+      backend=BACKEND_RAJA;
+      dbg("\n[nabla] RAJA BACKEND WIP!");
+      exit(NABLA_ERROR);
+    
+      // ************************************************************
+      // * BACKEND KOKKOS en cours de construction
+      // ************************************************************
+    case BACKEND_KOKKOS:
+      backend=BACKEND_KOKKOS;
+      dbg("\n[nabla] KOKKOS BACKEND WIP!");
+      exit(NABLA_ERROR);
+      
+      // ************************************************************
+      // * BACKEND LOCI en cours de construction
+      // ************************************************************
+    case BACKEND_LOCI:
+      backend=BACKEND_LOCI;
+      dbg("\n[nabla] LOCI BACKEND WIP!");
+      exit(NABLA_ERROR);
+      
+       // ************************************************************
+      // * BACKEND UINTAH en cours de construction
+      // ************************************************************
+   case BACKEND_UINTAH:
+      backend=BACKEND_UINTAH;
+      dbg("\n[nabla] UINTAH BACKEND WIP!");
+      exit(NABLA_ERROR);
+
+      // ************************************************************
+      // * BACKEND MMA en cours de construction
+      // ************************************************************
+    case BACKEND_MMA:
+      backend=BACKEND_MMA;
+      dbg("\n[nabla] MMA BACKEND WIP!");
+      exit(NABLA_ERROR);
+      
       // ************************************************************
       // * UNKNOWN OPTIONS
       // ************************************************************      

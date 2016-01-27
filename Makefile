@@ -75,6 +75,8 @@ tstg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
 tstp1g:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R p1apwb1D)
+tstp1gv:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R p1apwb1D_implicite)
 
 ###############
 # OKINA tests #
@@ -84,7 +86,7 @@ tstoua:
 tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
 tstolr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1_avx2_seq)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1 -E omp) #_avx2_seq)
 tstolg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_gen_1_std_seq)
 tstoa:
@@ -117,6 +119,10 @@ tstlag:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_gen_1_seq)
 tstlar:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
+tstla2d:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph2D_run)
+tstla2dr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph2D_run_1_seq)
 tstlbr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_amber_run_1_seq)
 tstlxr:

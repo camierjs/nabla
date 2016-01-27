@@ -69,7 +69,8 @@ typedef enum {
   with_cartesian,
   with_materials,
   with_mathematica,
-  with_real          // 1D only, no Real3 admitted
+  with_real,          // 1D only, no Real3 admitted
+  with_real2          // 2D only, no Real3 admitted
 } with_library;
 
 

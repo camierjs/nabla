@@ -43,6 +43,7 @@
    //.section ".rodata"
    .globl ${ABI_UNDERSCORE}laDebug_h
    .globl ${ABI_UNDERSCORE}laMsh1D_c
+   .globl ${ABI_UNDERSCORE}laMsh2D_c
    .globl ${ABI_UNDERSCORE}laMsh3D_c
    .globl ${ABI_UNDERSCORE}laItems_c
    .globl ${ABI_UNDERSCORE}laGather_h
@@ -60,6 +61,9 @@ ${ABI_UNDERSCORE}laDebug_h:
    .byte 0
 ${ABI_UNDERSCORE}laMsh1D_c: 
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/laMsh1D.c"
+   .byte 0
+${ABI_UNDERSCORE}laMsh2D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/laMsh2D.c"
    .byte 0
 ${ABI_UNDERSCORE}laMsh3D_c: 
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/laMsh3D.c"

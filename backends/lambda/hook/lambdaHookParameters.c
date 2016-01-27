@@ -140,7 +140,9 @@ void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParam
   // Si on est dans le cas 1D
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     nprintf(nabla, NULL, "\n\t\treal *node_coord");
-  else // Sinon pour l'instant c'est le 3D
+  else if ((nabla->entity->libraries&(1<<with_real2))!=0)
+    nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
+  else // Sinon c'est le 3D
     nprintf(nabla, NULL, "\n\t\treal3 *node_coord");
   *numParams+=1;
   // Et on rajoute les variables globales

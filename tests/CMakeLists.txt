@@ -245,13 +245,17 @@ nabla_add_lambda_test(heat 1 gen seq)
 nabla_add_lambda_test(aleph1D 1 gen seq)
 nabla_add_lambda_test(amber 1 gen seq)
 
+nabla_add_lambda_test(aleph2D 1 gen seq)
+
 nabla_add_lambda_test(hlt 1 gen seq)
 nabla_add_lambda_test(hlt 1 run seq)
 
 if (HYPRE_FOUND)
- nabla_add_lambda_test(heat 1 run seq)
- nabla_add_lambda_test(amber 1 run seq)
- nabla_add_lambda_test_with_defines(darcy 1 run seq -DALEPH_INDEX 100000)
+   nabla_add_lambda_test(aleph1D 1 run seq)
+   nabla_add_lambda_test(aleph2D 1 run seq)
+   nabla_add_lambda_test(heat 1 run seq)
+   nabla_add_lambda_test(amber 1 run seq)
+   nabla_add_lambda_test_with_defines(darcy 1 run seq -DALEPH_INDEX 100000)
 endif (HYPRE_FOUND)
 
 nabla_add_lambda_test_with_defines(deflex 1 run seq -DNO_DEFINES 100000)

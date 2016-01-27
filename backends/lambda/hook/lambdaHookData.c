@@ -246,8 +246,13 @@ static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "/**/");
     if (enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (enum_enum=='c' && (!isWithLibrary(arc,with_real)))  nprintf(arc, "/*CellVar c*/", "/*nc*/[c]");
-    if (enum_enum=='c' && isWithLibrary(arc,with_real))  nprintf(arc, "/*CellVar c*/", "[node_cell[2*n+c]]");
+    if (enum_enum=='c' && (!isWithLibrary(arc,with_real)&&
+                           !isWithLibrary(arc,with_real2)))
+      nprintf(arc, "/*CellVar c*/", "/*3D*/[c]");
+    if (enum_enum=='c' && isWithLibrary(arc,with_real))
+      nprintf(arc, "/*CellVar c*/", "/*1D*/[node_cell[2*n+c]]");
+    if (enum_enum=='c' && isWithLibrary(arc,with_real2))
+      nprintf(arc, "/*CellVar c*/", "/*2D*/[node_cell[2*n+c]]");
     //if (enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[c]");
     if (enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[cell->node");
     break;
@@ -270,7 +275,10 @@ static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[nlambda] NODES job lambdaHookTurnTokenToVariableForNodeJob\n"));
+  default:
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\n[nlambda] NODES job lambdaHookTurnTokenToVariableForNodeJob\n"));
   }
 }
 

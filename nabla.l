@@ -144,6 +144,7 @@ __asm__           { return tok(&yylval, ASM);}
 
 "ℝ³⨯ℝ³"	         { return tok(&yylval, REAL3x3);}
 "ℝ³"			      { return tok(&yylval, REAL3);}
+"ℝ²"			      { return tok(&yylval, REAL2);}
 "ℝ"			      { return tok(&yylval, REAL);}
 "ℤ"		         { return tok(&yylval, INTEGER);}
 "ℕ"		         { return tok(&yylval, NATURAL);}

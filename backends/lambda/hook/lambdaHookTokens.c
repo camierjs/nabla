@@ -278,13 +278,19 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*Real*/", "real ");
     break;
   }
+  case(REAL2):{
+    nprintf(nabla, "/*Real2*/", "real/*2*/3 ");
+    break;
+  }
   case(REAL3):{
-    if ((job->entity->libraries&(1<<with_real))!=0)
+    if ((job->entity->libraries&(1<<with_real))!=0/*||
+                                                    (job->entity->libraries&(1<<with_real2))!=0*/)
       exit(NABLA_ERROR|
            fprintf(stderr,
                    "[nLambdaHookSwitchToken] Real3 can't be used with R library!\n"));
     
     assert((job->entity->libraries&(1<<with_real))==0);
+    //assert((job->entity->libraries&(1<<with_real2))==0);
     nprintf(nabla, "/*Real3*/", "real3 ");
     break;
   }

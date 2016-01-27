@@ -63,6 +63,7 @@ extern char laScatter_h[];
 extern char laOStream_h[];
 extern char laTernary_h[];
 extern char laMsh1D_c[];
+extern char laMsh2D_c[];
 extern char laMsh3D_c[];
 
 
@@ -86,6 +87,8 @@ void nLambdaDumpHeader(nablaMain *nabla){
 void nLambdaDumpMesh(nablaMain *nabla){
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(laMsh1D_c));
+  else if ((nabla->entity->libraries&(1<<with_real2))!=0)
+    fprintf(nabla->entity->src,dumpExternalFile(laMsh2D_c));
   else
     fprintf(nabla->entity->src,dumpExternalFile(laMsh3D_c));
   fprintf(nabla->entity->hdr,dumpExternalFile(laItems_c));

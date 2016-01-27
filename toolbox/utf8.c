@@ -172,6 +172,11 @@ void toolUtf8(char **bkp){
     *bkp=strdup("Real3"); 
     return;
   }  
+  if (strcmp(p,"ℝ²")==0) {
+    //dbg("\n[nUtf8] hits Real^2!");
+    *bkp=strdup("Real2");
+    return;
+  }  
   if (strcmp(p,"ℾ")==0) { 
     //dbg("\n[nUtf8] hits Bool!");
     *bkp=strdup("Bool"); 

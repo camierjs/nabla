@@ -114,8 +114,6 @@ char* lambdaAlephHeader(nablaMain *nabla){
   }
   
   fprintf(nabla->entity->hdr, dumpExternalFile(nLambdaAleph_h));
-  //,          ((nabla->entity->libraries&(1<<with_real))!=0)?"real*":"real3*",
-//          str);
   lambdaAlephIni(nabla);
   return "";
 }

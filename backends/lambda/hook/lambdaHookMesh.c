@@ -72,10 +72,10 @@ static void nLambdaHookMesh1D(nablaMain *nabla){
 // ********************************************************\n\
 // * MESH GENERATION (1D)\n\
 // ********************************************************\n\
-const int NABLA_NODE_PER_CELL = 2;\
-const int NABLA_CELL_PER_NODE = 2;\
-const int NABLA_CELL_PER_FACE = 0;\
-const int NABLA_NODE_PER_FACE = 0;\
+const int NABLA_NODE_PER_CELL = 2;\n\
+const int NABLA_CELL_PER_NODE = 2;\n\
+const int NABLA_CELL_PER_FACE = 0;\n\
+const int NABLA_NODE_PER_FACE = 0;\n\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = 1;\n\
@@ -96,6 +96,69 @@ const int NABLA_NB_CELLS      = (NABLA_NB_CELLS_X_AXIS);\n\
 const int NABLA_NB_FACES         = 0;\n\
 \n\
 int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
+");
+}
+
+
+// ****************************************************************************
+// * nLambdaHookMesh2DConnectivity
+// ****************************************************************************
+static void nLambdaHookMesh2DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// ********************************************************\n\
+// * MESH CONNECTIVITY (2D)\n\
+// ********************************************************\
+\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
+\nint cell_next[2*NABLA_NB_CELLS];\
+\nint cell_prev[2*NABLA_NB_CELLS];\
+\nint node_cell[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint node_cell_corner[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
+\nint face_cell[NABLA_CELL_PER_FACE*NABLA_NB_FACES];\
+\nint face_node[NABLA_NODE_PER_FACE*NABLA_NB_FACES];\
+\n//int cell_face[NABLA_FACE_PER_CELL*NABLA_NB_CELLS];\
+\n\n\n");
+}
+
+
+// ****************************************************************************
+// * nLambdaHookMesh2D
+// ****************************************************************************
+static void nLambdaHookMesh2D(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * MESH GENERATION (2D)\n\
+// ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 4;\n\
+const int NABLA_CELL_PER_NODE = 4;\n\
+const int NABLA_CELL_PER_FACE = 2;\n\
+const int NABLA_NODE_PER_FACE = 4;\n\
+const int NABLA_FACE_PER_CELL = 4;\n\
+\n\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Z_AXIS = 1;\n\
+\n\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Z_AXIS = 1;\n\
+\n\
+const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS;\n\
+const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS;\n\
+const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\
+const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER;\n\
+const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\
+\n\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
+const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
+\n\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS);\n\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n \
+\n\
+int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 ");
 }
 
@@ -192,6 +255,9 @@ void nLambdaHookMeshCore(nablaMain *nabla){
   if (isWithLibrary(nabla,with_real)){
     nLambdaHookMesh1D(nabla);
     nLambdaHookMesh1DConnectivity(nabla);
+  }else if (isWithLibrary(nabla,with_real2)){
+    nLambdaHookMesh2D(nabla);
+    nLambdaHookMesh2DConnectivity(nabla);
   }else{
     nLambdaHookMesh3D(nabla);
     nLambdaHookMesh3DConnectivity(nabla);

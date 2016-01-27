@@ -252,6 +252,7 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
 void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   int i=numParams;
   bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
 
   // Dump des options du job
   //nablaOption *opt=job->used_options;
@@ -271,10 +272,11 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
             (i==0)?"":",",
             (var->in&&!var->out)?"":"",//const
-            // Si on est en 1D est qu'on a un real3,
-            // c'est qu'on joue peut-être avec les coord? => on force à real
-            (strcmp(var->type,"real3")==0&&dim1D)?"real":var->type,
-            var->item, var->name);
+            // Si on est en 1D ou 2D et qu'on a un real3,
+            // c'est qu'on joue peut-être avec les coords? => on force à real
+            (strncmp(var->type,"real3",5)==0&&dim1D)?"real":
+            (strncmp(var->type,"real3",5)==0&&dim2D)?"real3":var->type,
+            var->item,var->name);
 }
 
 

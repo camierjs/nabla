@@ -66,6 +66,13 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
     return;
   }
 
+  if (strncmp(n->children->token,"Real2",5)==0){
+    dbg("\n\t[nMiddleLibrariesSwitch] Real2 single_library hit!");
+    entity->libraries|=(1<<with_real2);
+    dbg("\n\t[nMiddleLibrariesSwitch] Real2 library=0x%X",entity->libraries);
+    return;
+  }
+  
   if (strncmp(n->children->token,"Real",4)==0){
     dbg("\n\t[nMiddleLibrariesSwitch] Real single_library hit!");
     entity->libraries|=(1<<with_real);
