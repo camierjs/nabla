@@ -71,7 +71,7 @@ options{
   ℝ option_ini_water_viscosity = 1.0;
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime = 0.01;
+  ℝ option_stoptime = 0.0012;
   ℕ option_max_iterations = -1;
   // Options d'Aleph
   // ! l'ε a l'air d'être très sensible

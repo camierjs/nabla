@@ -218,7 +218,7 @@ __attribute__((unused)) static void verifCorners(void){
 
 // ****************************************************************************
 // * Connectivité face->cell
-// * Un encodage des diresction est utilisé en poids faibles:
+// * Un encodage des directions est utilisé en poids faibles:
 // * bit:   2 1 0
 // *     sign|.|.
 // * MD_DirX => 1, MD_DirY => 2
@@ -334,6 +334,44 @@ void nabla_ini_shift_back_face_cell(void){
         face_cell[1*NABLA_NB_FACES+f]);
 }
 
+// ****************************************************************************
+// * Connectivité cell->face
+// ****************************************************************************
+static void addThisfaceToCellConnectivity(const int f, const int c){
+  dbg(DBG_INI,"\n\t\t[addThisfaceToCellConnectivity] Adding face #%%d to cell %%d ",f,c);
+  for(int i=0;i<NABLA_FACE_PER_CELL;i+=1){
+    // On scrute le premier emplacement 
+    if (cell_face[i*NABLA_NB_CELLS+c]>=0) continue;
+    dbg(DBG_INI,"[%%d] ",i);
+    cell_face[i*NABLA_NB_CELLS+c]=f;
+    break; // We're finished here
+  }
+}
+static void nabla_ini_cell_face(void){
+  dbg(DBG_INI,"\n[1;33mOn revient pour remplir cell->face:[m (flushing)");
+  for(int c=0;c<NABLA_NB_CELLS;c+=1){
+    for(int f=0;f<NABLA_FACE_PER_CELL;f+=1){
+      cell_face[f*NABLA_NB_CELLS+c]=-1;
+    }
+  }
+ 
+  for(int f=0;f<NABLA_NB_FACES;f+=1){
+    const int cell0 = face_cell[0*NABLA_NB_FACES+f];
+    const int cell1 = face_cell[1*NABLA_NB_FACES+f];
+    dbg(DBG_INI,"\n\t[nabla_ini_cell_face] Pushing face #%%d: %%d->%%d",f,cell0,cell1);
+    if (cell0>=0) addThisfaceToCellConnectivity(f,cell0);
+    if (cell1>=0) addThisfaceToCellConnectivity(f,cell1);
+  }
+
+  dbg(DBG_INI,"\n[1;33mOn revient pour dumper cell->face:[m");
+  for(int c=0;c<NABLA_NB_CELLS;c+=1){
+    for(int f=0;f<NABLA_FACE_PER_CELL;f+=1){
+      if (cell_face[f*NABLA_NB_CELLS+c]<0) continue;
+      dbg(DBG_INI,"\n\t[nabla_ini_cell_face] cell[%%d]_face[%%d] %%d",c,f,cell_face[f*NABLA_NB_CELLS+c]);
+    }
+  }
+}
+
 
 // ****************************************************************************
 // * Connectivité face->node
@@ -359,18 +397,15 @@ static const char* c2XY(const int c){
   return strdup(str);
 }
 static void setFWithTheseNodes(const int f, const int c,
-                               const int n0, const int n1,
-                               const int n2, const int n3){
+                               const int n0, const int n1){
   face_node[0*NABLA_NB_FACES+f]=cell_node[n0*NABLA_NB_CELLS+c];
   face_node[1*NABLA_NB_FACES+f]=cell_node[n1*NABLA_NB_CELLS+c];
-  face_node[2*NABLA_NB_FACES+f]=cell_node[n2*NABLA_NB_CELLS+c];
-  face_node[3*NABLA_NB_FACES+f]=cell_node[n3*NABLA_NB_CELLS+c];
 }
 static void nabla_ini_face_node(void){
   dbg(DBG_INI,"\n[1;33mOn associe a chaque faces ses noeuds:[m");
   // On flush toutes les connectivités face_noeuds
   for(int f=0;f<NABLA_NB_FACES;f+=1)
-    for(int n=0;n<NABLA_NODE_PER_FACE;++n)
+    for(int n=0;n<NABLA_NODE_PER_FACE;n+=1)
       face_node[n*NABLA_NB_FACES+f]=-1;
   
   for(int f=0;f<NABLA_NB_FACES;f+=1){
@@ -383,18 +418,22 @@ static void nabla_ini_face_node(void){
     const int d=backCell &MD_Mask;
     dbg(DBG_INI,"\t%%d ", c);
     assert(c>=0);
-    if (d==(MD_Plus|(MD_DirX+1))) { setFWithTheseNodes(f,c,1,2,5,6); continue; }
-    if (d==(MD_Negt|(MD_DirX+1))) { setFWithTheseNodes(f,c,0,3,4,7); continue; }
-    if (d==(MD_Plus|(MD_DirY+1))) { setFWithTheseNodes(f,c,2,3,6,7); continue; }
-    if (d==(MD_Negt|(MD_DirY+1))) { setFWithTheseNodes(f,c,0,1,4,5); continue; }
+    if (d==(MD_Plus|(MD_DirX+1))) { setFWithTheseNodes(f,c,1,2); continue; }
+    if (d==(MD_Negt|(MD_DirX+1))) { setFWithTheseNodes(f,c,0,3); continue; }
+    if (d==(MD_Plus|(MD_DirY+1))) { setFWithTheseNodes(f,c,2,3); continue; }
+    if (d==(MD_Negt|(MD_DirY+1))) { setFWithTheseNodes(f,c,0,1); continue; }
     fprintf(stderr,"[nabla_ini_face_node] Error!");
     exit(-1);
     //for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)
     //  dbg(DBG_INI,"%%d ", cell_node[n*NABLA_NB_CELLS+c]);
   }
-  for(int f=0;f<NABLA_NB_FACES;f+=1)
-    for(int n=0;n<NABLA_NODE_PER_FACE;++n)
-      assert(face_node[n*NABLA_NB_FACES+f]>=0);  
+  for(int f=0;f<NABLA_NB_FACES;f+=1){
+    dbg(DBG_INI,"\n\tface #%%d: nodes ",f);
+    for(int n=0;n<NABLA_NODE_PER_FACE;++n){
+      dbg(DBG_INI,"%%d ",face_node[n*NABLA_NB_FACES+f]);
+      assert(face_node[n*NABLA_NB_FACES+f]>=0);
+    }
+  }
 }
 
 
@@ -449,5 +488,6 @@ static void nabla_ini_connectivity(void){
   nabla_ini_face_cell();
   nabla_ini_face_node();
   nabla_ini_shift_back_face_cell();
+  nabla_ini_cell_face();
   dbg(DBG_INI,"\nIni done");
 }
