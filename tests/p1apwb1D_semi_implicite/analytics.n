@@ -52,7 +52,7 @@
   
 // Test 2 for linear  advection (discontinuous data)
 ℝ P_condlimi(ℝ x,ℝ t){
-  ℝ S ;
+  double S ;
   S=0;
   double  w[4], y[4];
   w[0] = 0.347854845137454;   y[0] = -0.861136311594053;

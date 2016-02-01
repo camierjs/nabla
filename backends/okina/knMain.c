@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){\n\
 \t//micTestReal();\n\
 \t//micTestReal3();\n\
 #endif\n\
-\tprintf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
+\t//printf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
 \tnabla_ini_variables();\n\
 \tnabla_ini_node_coords();\n\
 \t// Initialisation de la précision du cout\n\

@@ -1,5 +1,6 @@
 #######################
 # MacOS||Linux switch #
+# gcc -dM -E -x c++ /dev/null | less
 #######################
 ifeq ($(shell uname),Darwin)
 CMAKE_ROOT_PATH=/opt/local/bin
@@ -86,15 +87,19 @@ tstoua:
 tstou:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
 tstolr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1 -E omp) #_avx2_seq)
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1) # -E omp) #_avx2_seq)
 tstolg:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_gen_1_std_seq)
 tstoa:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_aecjs_gen_1)
+tstopr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_p1apwb1D_semi_implicite_run_1_std_seq)
 
 ################
 # LAMBDA tests #
 ################
+tstlpr:
+	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_p1apwb1D_implicite_run_1_std)
 tstlhltr:
 	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_hlt_run_1)
 tstlhltg:
@@ -258,3 +263,69 @@ sed2015:
 # PHONIES #
 ###########
 .PHONY: all cfg config bin tst cln clean
+
+
+
+###########
+# Speedup #
+###########
+PERF_PATH=/tmp/lulesh
+MAKEFILE_DUMP=TGT=lulesh\\nMESH ?= $$msh\\nSIMD ?= $$vec\\nPARALLEL ?= omp\\nLOG= \\\# -t \\\#-v $(TGT).log\\nADDITIONAL_NABLA_FILES=luleshGeom.n\\ninclude /tmp/nabla/tests/Makefile.nabla.okina
+
+
+SIMDs = std sse avx avx2
+MESHs = 16 24 32 40 48 56 64 72 80 88 96
+THREADs = 1 2 4 8 16 20 24 32 48 64
+ECHO=/bin/echo
+
+gen:
+	mkdir -v -p $(PERF_PATH)
+	@tput reset
+	@echo Now launching generation
+	@for vec in $(SIMDs);do\
+		for msh in $(MESHs);do\
+				$(ECHO) -e \\t$$vec\\t$$msh;\
+				mkdir -v -p $(PERF_PATH)/$$vec/$$msh;\
+				ln -fs $(shell pwd)/tests/lulesh/*.n $(PERF_PATH)/$$vec/$$msh;\
+				$(ECHO) -e $(MAKEFILE_DUMP) > $(PERF_PATH)/$$vec/$$msh/Makefile;\
+				(cd $(PERF_PATH)/$$vec/$$msh && make);\
+			done;\
+		done;\
+	done
+
+go:
+	@tput reset
+	@echo Now launching tests
+	@for vec in $(SIMDs);do\
+		for msh in $(MESHs);do\
+			for thr in $(THREADs);do\
+				$(ECHO) -e \\t$$vec\\t$$msh\\t$$thr;\
+				KMP_AFFINITY=scatter,granularity=fine OMP_NUM_THREADS=$$thr LC_NUMERIC=en_US.UTF8 perf stat -r 4 -e instructions,cycles,task-clock,cpu-clock \
+-o $(PERF_PATH)/$$vec/$$msh/lulesh"_"$$msh"_"omp"_"$$vec"_"$$thr.perf \
+   $(PERF_PATH)/$$vec/$$msh/lulesh"_"$$msh"_"omp"_"$$vec \> /dev/null;\
+			done;\
+		done;\
+	done
+
+get:
+	@tput reset
+	@echo Now collecting results
+	@for vec in $(SIMDs);do\
+		OUTPUT_FILE=/tmp/nablaLulesh"_"$$vec"."org;\
+		$(ECHO) -e \\tGenerating: $$OUTPUT_FILE;\
+		$(ECHO) -n > $$OUTPUT_FILE;\
+		for msh in $(MESHs);do\
+			$(ECHO) -e \\t\\tMESH=$$msh;\
+			VAL_ONE=`cat /tmp/lulesh/$$vec/$$msh/lulesh_$$msh"_"omp"_"$$vec"_"1.perf|grep elapsed|cut -d's' -f1|tr -d [:blank:]`;\
+			$(ECHO) $$VAL_ONE;\
+			$(ECHO) \* lulesh_$$msh"_"omp"_"$$vec >> $$OUTPUT_FILE &&\
+			for thr in $(THREADs);do\
+				$(ECHO) -e \\t\\t\\tTHREAD=$$thr;\
+				(sync && sync &&\
+					$(ECHO) -n \|$$vec\|$$thr\|$$msh\|$$VAL_ONE\| >> $$OUTPUT_FILE &&\
+					cat /tmp/lulesh/$$vec/$$msh/lulesh_$$msh"_"omp"_"$$vec"_"$$thr.perf|grep elapsed|cut -d's' -f1|tr -d [:blank:]|tr -d \\n >> $$OUTPUT_FILE &&\
+					$(ECHO) \| >> $$OUTPUT_FILE);\
+			done;\
+			$(ECHO) >> $$OUTPUT_FILE;\
+		done;\
+	done

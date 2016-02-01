@@ -81,7 +81,7 @@ options{
   ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
   Bool option_chaos           = false;
   ℝ option_chaos_seed         = 1.1234567890123;//456789;
-  ℕ option_max_iterations     = 32768;
+  ℕ option_max_iterations     = 128;
 };
 
 

@@ -77,7 +77,8 @@ typedef enum {
   BACKEND_KOKKOS = 1<<(5),
   BACKEND_LOCI   = 1<<(6),
   BACKEND_UINTAH = 1<<(7),
-  BACKEND_MMA    = 1<<(8)
+  BACKEND_MMA    = 1<<(8),
+  BACKEND_LIBRARY= 1<<(9)
 } BACKEND_SWITCH;
 
 
@@ -90,22 +91,22 @@ typedef enum {
 // ****************************************************************************
 typedef enum { 
   BACKEND_COLOR_VOID           = 0,
-  BACKEND_COLOR_ARCANE_ALONE   = 1<<(9),
-  BACKEND_COLOR_ARCANE_MODULE  = 1<<(10),
-  BACKEND_COLOR_ARCANE_SERVICE = 1<<(11),
-  BACKEND_COLOR_OKINA_TILING   = 1<<(12),
-  BACKEND_COLOR_OKINA_STD      = 1<<(13),
-  BACKEND_COLOR_OKINA_SSE      = 1<<(14),
-  BACKEND_COLOR_OKINA_AVX      = 1<<(15),
-  BACKEND_COLOR_OKINA_AVX2     = 1<<(16),
-  BACKEND_COLOR_OKINA_MIC      = 1<<(17),
-  BACKEND_COLOR_OKINA_SEQ      = 1<<(18),
-  BACKEND_COLOR_OpenMP         = 1<<(19),
-  BACKEND_COLOR_CILK           = 1<<(20),
-  BACKEND_COLOR_GCC            = 1<<(21),
-  BACKEND_COLOR_ICC            = 1<<(22),
-  OPTION_TIME_DOT_STD          = 1<<(23),
-  OPTION_TIME_DOT_MMA          = 1<<(24)
+  BACKEND_COLOR_ARCANE_ALONE   = 1<<(10),
+  BACKEND_COLOR_ARCANE_MODULE  = 1<<(11),
+  BACKEND_COLOR_ARCANE_SERVICE = 1<<(12),
+  BACKEND_COLOR_OKINA_TILING   = 1<<(13),
+  BACKEND_COLOR_OKINA_STD      = 1<<(14),
+  BACKEND_COLOR_OKINA_SSE      = 1<<(15),
+  BACKEND_COLOR_OKINA_AVX      = 1<<(16),
+  BACKEND_COLOR_OKINA_AVX2     = 1<<(17),
+  BACKEND_COLOR_OKINA_MIC      = 1<<(18),
+  BACKEND_COLOR_OKINA_SEQ      = 1<<(19),
+  BACKEND_COLOR_OpenMP         = 1<<(20),
+  BACKEND_COLOR_CILK           = 1<<(21),
+  BACKEND_COLOR_GCC            = 1<<(22),
+  BACKEND_COLOR_ICC            = 1<<(23),
+  OPTION_TIME_DOT_STD          = 1<<(24),
+  OPTION_TIME_DOT_MMA          = 1<<(25)
 } BACKEND_COLORS;
 
 

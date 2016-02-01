@@ -61,8 +61,8 @@ options{
   ℝ option_a = 1.0;
   ℝ xmin = 0.0;
   ℝ xmax = 1.0; // A mettre à jour en mleme temps dans le Makefile.nabla.okina
-  ℝ pi =atan(1)*4;
-  ℝ N=1000.0;  
+  ℝ pi =atan(1.0)*4.0;
+  ℝ N=1000;  
   ℝ I= 40;
   ℕ time_steps = 0.0005;       
   ℝ final_time = 5.0;
