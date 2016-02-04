@@ -59,7 +59,7 @@ void dbgt(const bool flag, const int fd, const char *msg, ...){
   if (flag != true) return;
   va_list args;
   va_start(args, msg);
-  if (vsprintf(bfrDbg, msg, args) < 0) return;
+  if (vsprintf(bfrDbg, msg, args) < 0){ va_end(args); return;}
   write(fd, bfrDbg, strlen(bfrDbg));/* fdDbg[1] */
   va_end(args);  
 }

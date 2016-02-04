@@ -67,183 +67,28 @@ install:bin
 ##################
 tst:
 	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS))
-test:tst
-tst1:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j 1)
-tstn:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -N)
-tstg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R gen)
-tstp1g:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -j $(NUMBR_PROCS) -R p1apwb1D)
-tstp1gv:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R p1apwb1D_implicite)
 
-###############
-# OKINA tests #
-###############
-tstoua:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwindAP_run_1_std_seq)
-tstou:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_upwind_run_1_std_seq)
-tstolr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_run_1) # -E omp) #_avx2_seq)
-tstolg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_lulesh_gen_1_std_seq)
-tstoa:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_aecjs_gen_1)
-tstopr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_okina_p1apwb1D_semi_implicite_run_1_std_seq)
-
-################
-# LAMBDA tests #
-################
-tstlpr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_p1apwb1D_implicite_run_1_std)
-tstlhltr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_hlt_run_1)
-tstlhltg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_hlt_gen_1)
-tstl:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda)
-tstllr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_seq)
-tstlllg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_llsh_gen_1_seq)
-tstlllr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_llsh_run_1_seq)
-tstllo:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_lulesh_run_1_omp)
-tstlau:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_upwindAP_run_1_seq)
-tstlhg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_gen_1_seq)
-tstlhr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_heat_run_1_seq)
-tstlag:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_gen_1_seq)
-tstlar:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph1D_run_1_seq)
-tstla2d:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph2D_run)
-tstla2dr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_aleph2D_run_1_seq)
-tstlbr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_amber_run_1_seq)
-tstlxr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_deflex_run_1_seq)
-tstldr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_darcy_run_1_seq)
-tstlgg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_lambda_gram_gen_1)
-
-################
-# ARCANE tests #
-################
-tstahltr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_hlt_run_1)
-tstahltg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_hlt_gen_1)
-tstaglocig:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gloci_gen_1)
-tstaanyg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_anyItem_gen_1)
-tstaanyr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_anyItem_run_1)
-tstadrcg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_drc_gen_1)
-tstashr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_shydro_run_1)
-tstamr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_mhydro_run_1)
-tstadg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_gen_1)
-tstadr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_1)
-tstadr4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_darcy_run_4)
-tstadrh:
-	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_darcy_run_1)
-tstasw:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_swirl_gen_1)
-tstabg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_amber_gen_1)
-tstaalfg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aleph1D_gen_1)
-tstahg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_gen_1)
-tstahr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_run_1)
-tstahr4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_heat_run_4)
-tstau:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_upwind_gen_1)
-tstagram:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gram_gen_1)
-tstagad:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_gad_run_1)
-tstacomd:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_comd_run_1)
-tstasr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
-tstas4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
-tstalr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_run_1)
-tstallg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_llsh_gen_1)
-tstalg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_lulesh_gen_1)
-tstagr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace_run_1)
-tstag2Dr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glace2D_run_1)
-tstaglcr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_glc_run_1)
-tsthas:
-	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_1)
-tsthas4:
-	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_schrodinger_run_4)
-tsts:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_1)
-tsths:
-	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_sethi_run_1)
-tsts4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_sethi_run_4)
-
-tstaag:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_aecjs_gen_1)
-
-tstapr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
-tstapg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_gen_1)
-tstmh:
-	(cd $(BUILD_PATH)/tests && $(HYODA) $(CTEST) -V -R nabla_arcane_pDDFV_run_1)
-tstm4:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_arcane_pDDFV_run_4)
-
-
-##############
-# CUDA tests #
-##############
-tstugg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_gram_gen_1)
-tstumg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_mhydro_gen_1)
-tstulg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_gen_1)
-tstulr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_lulesh_run_1)
-tstukg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_gen_1)
-tstukr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_nvknl_run_1)
-tstudg:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_darcy_gen_1)
-tstudr:
-	(cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_cuda_darcy_run_1)
-
+###################
+# CTESTS TEMPLATE #
+###################
+tests = heat #glace2D #lulesh
+#$(shell cd tests && find . -maxdepth 1 -type d -name [^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|sed -e "s/\\.\\// /g"|tr "\\n" " ")
+procs = 1 4
+types = gen run
+simds = std sse avx avx2 mic warp
+backends = arcane okina lambda cuda
+parallels = seq mpi omp cilk smp
+define CTEST_template =
+nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
+	(tput reset && cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6))
+endef
+$(foreach type,$(types),\
+	$(foreach backend,$(backends),\
+		$(foreach test,$(tests),\
+			$(foreach cpu,$(procs),\
+				$(foreach simd,$(simds),\
+					$(foreach parallel,$(parallels),\
+						$(eval $(call CTEST_template,$(type),$(backend),$(test),$(cpu),$(simd),$(parallel)))))))))
 
 ############
 # CLEANING #
@@ -265,19 +110,15 @@ sed2015:
 .PHONY: all cfg config bin tst cln clean
 
 
-
-###########
-# Speedup #
-###########
+#########################
+# PERF TESTS GEN/GO/GET #
+#########################
 PERF_PATH=/tmp/lulesh
 MAKEFILE_DUMP=TGT=lulesh\\nMESH ?= $$msh\\nSIMD ?= $$vec\\nPARALLEL ?= omp\\nLOG= \\\# -t \\\#-v $(TGT).log\\nADDITIONAL_NABLA_FILES=luleshGeom.n\\ninclude /tmp/nabla/tests/Makefile.nabla.okina
-
-
 SIMDs = std sse avx avx2
 MESHs = 16 24 32 40 48 56 64 72 80 88 96
 THREADs = 1 2 4 8 16 20 24 32 48 64
 ECHO=/bin/echo
-
 gen:
 	mkdir -v -p $(PERF_PATH)
 	@tput reset

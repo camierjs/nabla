@@ -107,10 +107,12 @@ static void nArcaneHLTIni(nablaMain *arc,
 // *************************************************************
 // *************************************************************
 static char* tab(int k){
-  char tabs[32]; assert(k<32);
+  char *rtrn,*tabs=(char *)malloc(k+1);
   for(int i=0;i<k;i+=1) tabs[i]='\t';
   tabs[k]=0;
-  return strdup(tabs);
+  rtrn=strdup(tabs);
+  free(tabs);
+  return rtrn;
 }
 
 // *****************************************************************************
@@ -135,6 +137,7 @@ void nArcaneHLTEntryPoint(nablaMain *arc,
 
   // Voici les fonction qui seront appelées lors des 'DIVE'
   for(int i=0;hlt_dive_when[i]!=0.0;i+=1){
+    char *tabs=tab(1+i);
     fprintf(hdr, "\n\tvoid hltDive%d(){\n\
       const int bkp_level=m_hlt_level;\n\
       m_hlt_level=%d;\n\
@@ -156,6 +159,7 @@ m_hlt_entry_points.at(level).at(i)->name()<<\"'[m\";\n \
      //info()<<\"[1;33m\"<<\"END \"<<level<<\"[m\";\n\
      m_hlt_dive[level] = false;\n\
      m_hlt_level=bkp_level;\n\
-   }",i,i,tab(1+i),tab(1+i),tab(1+i));//nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i])
+   }",i,i,tabs,tabs,tabs);//nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i])
+    free(tabs);
   }
 }

@@ -84,7 +84,7 @@ char *toolStrQuote(const char * str){
 // * 
 // *****************************************************************************
 const char* mkktemp(const char *prefix){
-  char *unique_temporary_kernel_name=NULL;
+  char *rtn,*unique_temporary_kernel_name=NULL;
   int n,size = NABLA_MAX_FILE_NAME;
   
   if ((unique_temporary_kernel_name=malloc(size))==NULL)
@@ -95,7 +95,9 @@ const char* mkktemp(const char *prefix){
     if (mkstemp(unique_temporary_kernel_name)==-1)
       nablaError("[mkktemp] Could not mkstemp our unique_temporary_kernel_name!");
   assert(strrchr(prefix,'_')==NULL);
-  return strdup(strrchr(unique_temporary_kernel_name,'_')+1);
+  rtn=strdup(strrchr(unique_temporary_kernel_name,'_')+1);
+  free(unique_temporary_kernel_name);
+  return rtn;
 }
 
 

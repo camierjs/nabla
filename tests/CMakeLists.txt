@@ -45,11 +45,11 @@ endfunction()
 #################################################
 # nabla_add_arcane_test_with_additional_defines #
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_CYAN}arcane${VT100_FG_WHITE}_${nb_proc}proc_${cmd}${VT100_RESET}")
+  info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_CYAN}arcane${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_mpi")
   set(backend arcane)
   set(subpath ${nb_proc}/${cmd})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
-  add_test(NAME nabla_arcane_${name}_${cmd}_${nb_proc}
+  add_test(NAME nabla_${cmd}_arcane_${name}_${nb_proc}_std_mpi
 				WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
 				COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction()
@@ -67,11 +67,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT
 # NABLA TEST MACRO FOR OKINA BACKEND #
 ######################################
 function(NABLA_ADD_OKINA_TEST name nb_proc cmd simd parallel)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_YELLOW}okina${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${simd}_${parallel}${VT100_RESET}")
+  info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_YELLOW}okina${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_${simd}_${parallel}")
   set(backend okina)
   set(subpath ${nb_proc}/${cmd}/${simd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
-  add_test(NAME nabla_okina_${name}_${cmd}_${nb_proc}_${simd}_${parallel}
+  add_test(NAME nabla_${cmd}_okina_${name}_${nb_proc}_${simd}_${parallel}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
 		COMMAND /bin/sh -c "PARALLEL=${parallel} SIMD=${simd} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction(NABLA_ADD_OKINA_TEST)
@@ -82,11 +82,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.okina ${CMAKE_CURRENT_
 # NABLA TEST MACRO FOR LAMBDA BACKEND #
 #######################################
 function(nabla_add_lambda_test_with_defines name nb_proc cmd parallel defines nb_particles)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_MAGENTA}lambda${VT100_FG_WHITE}_${nb_proc}proc_${VT100_FG_YELLOW}${cmd}${VT100_FG_WHITE}_${parallel}${VT100_RESET}")
+info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_MAGENTA}lambda${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_${parallel}")
   set(backend lambda)
   set(subpath ${nb_proc}/${cmd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
-  add_test(NAME nabla_lambda_${name}_${cmd}_${nb_proc}_${parallel}
+  add_test(NAME nabla_${cmd}_lambda_${name}_${nb_proc}_std_${parallel}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
 		COMMAND /bin/sh -c "ADDITIONAL_DEFINES='${defines} -DNB_PARTICLES=${nb_particles}' PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction(nabla_add_lambda_test_with_defines)
@@ -102,11 +102,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT
 # NABLA TEST MACRO FOR CUDA BACKEND #
 #####################################
 function(NABLA_ADD_CUDA_TEST name nb_proc cmd)
-  info("Adding ctest ${VT100_FG_WHITE}nabla_${name}_${VT100_FG_GREEN}cuda${VT100_FG_WHITE}_${VT100_FG_YELLOW}${cmd}${VT100_RESET}")
+info("Adding ctest  nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_GREEN}cuda${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_warp_smp")
   set(backend cuda)
   set(subpath ${nb_proc}/${cmd})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
-  add_test(NAME nabla_cuda_${name}_${cmd}_${nb_proc}
+  add_test(NAME nabla_${cmd}_cuda_${name}_${nb_proc}_std_smp
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
 		COMMAND ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc})
 endfunction(NABLA_ADD_CUDA_TEST)
@@ -230,6 +230,7 @@ nabla_add_okina_test(p1apwb1D_two_state_semi_implicte 1 run std seq)
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
+nabla_add_lambda_test(glace2D 1 gen seq)
 nabla_add_lambda_test(gram 1 gen seq)
 nabla_add_lambda_test(lulesh 1 gen seq)
 nabla_add_lambda_test(lulesh 1 run seq)

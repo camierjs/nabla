@@ -143,7 +143,7 @@ AnyItem::Family family;\
        variable != NULL; variable = variable->next){
     if (variable->item[0]=='g') continue;
     for(char *p=job->item_set;*p!=0;p+=5){
-      char item[5];
+      char item[6];
       item[0]=p[0]-32;// Majuscule
       item[1]=p[1];   // recopie de l'item en cours
       item[2]=p[2];
