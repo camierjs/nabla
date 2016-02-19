@@ -1,12 +1,18 @@
-TGT = glcNxtStp2
+TGT = ahosla
+#glcNxtStp2
+
+ZOOM = 16 # 5 is good
+#QUALITY = 100
+
+TAIL = 43 # 43 pour enlever header CeCILL
+HEAD = -0 # -0 pour tout
 
 EMACS_FLAGS = --no-site-lisp --no-init-file --no-site-file
-HTM2IMG_FLAGS = --encoding utf-8 --zoom 16.0 --quality 100
+HTM2IMG_FLAGS = --encoding utf-8 --zoom $(ZOOM) #--quality $(QUALITY)
 
 all:
 	/bin/echo -n -e > /tmp/$(TGT).n
-#	tail -n +43 $(TGT).n |cat -s >> /tmp/$(TGT).n
-	tail -n +43 glociStep2.n | head -n 48 |cat -s >> /tmp/$(TGT).n
+	tail -n +$(TAIL) $(TGT).n | head -n $(HEAD) |cat -s >> /tmp/$(TGT).n
 	/bin/echo -e \\n >> /tmp/$(TGT).n
 	emacs $(EMACS_FLAGS) --batch -u $(shell id -un) -l htmlz.el /tmp/$(TGT).n > /tmp/$(TGT).html
 # Now wkhtmltoimage html to /tmp/png file
