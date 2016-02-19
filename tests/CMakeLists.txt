@@ -116,9 +116,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_B
 
 ########################################
 # Now scan tests directory to add them #
-# Avoid '.', 'mesh' and gloci          #
+# Avoid '.', 'mesh' and ns4n           #
 ########################################
-execute_process(COMMAND find . -maxdepth 1 -type d -name [^\\.]*[^\(mesh\)]*[^\(gloci\)]*
+execute_process(COMMAND find . -maxdepth 1 -type d -name [^\\.]*[^\(mesh\)]*[^\(ns4n\)]*
 		          COMMAND sed -e "s/\\.\\// /g"
                 COMMAND tr "\\n" " "
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

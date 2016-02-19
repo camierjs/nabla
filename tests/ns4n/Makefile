@@ -1,4 +1,4 @@
-TGT = glociStep2
+TGT = glcNxtStp2
 
 EMACS_FLAGS = --no-site-lisp --no-init-file --no-site-file
 HTM2IMG_FLAGS = --encoding utf-8 --zoom 16.0 --quality 100
