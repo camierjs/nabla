@@ -1,0 +1,186 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// This NABLA port is an implementation of the Mini-App KRIPKE, a
+// simple, scalable, 3D Sn deterministic particle transport code
+///////////////////////////////////////////////////////////////////////////////
+// This work was produced at the Lawrence Livermore National Laboratory
+// (LLNL) under contract no. DE-AC-52-07NA27344 (Contract 44) between the
+// U.S. Department of Energy (DOE) and Lawrence Livermore National
+// Security, LLC (LLNS) for the operation of LLNL. The rights of the
+// Federal Government are reserved under Contract 44.
+///////////////////////////////////////////////////////////////////////////////
+// Main Contact: Adam J. Kunen <kunen1@llnl.gov>
+///////////////////////////////////////////////////////////////////////////////
+
+//with cartesian;
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℕ option_ngroups = 4;  // Number of energy groups
+  ℕ option_legendre = 1; // Scattering Legendre Expansion Order (0, 1, ...)
+  ℕ option_quad = 2;     // Define the quadrature set to use
+  ℕ option_zones = 4;    // Number of zones in x,y,z
+  
+  ℝ option_st0 = 1.0;    // Total material0 cross-sections
+  ℝ option_st1 = 1.0;    // Total material1 cross-sections
+  ℝ option_st2 = 1.0;    // Total material2 cross-sections
+
+  ℝ option_ss0 = 1.0;    // Scattering material0 cross-sections
+  ℝ option_ss1 = 1.0;    // Scattering material1 cross-sections
+  ℝ option_ss2 = 1.0;    // Scattering material2 cross-sections
+
+  ℕ option_dset = 8;     // Number of direction-sets
+  ℕ option_gset = 8;     // Number of energy group-sets
+  ℕ option_zset = 1;     // Number of zone-sets in x,y, and z
+
+  ℕ option_niter = 1;    // Number of solver iterations to run
+
+  ℾ option_test = false; // Run Kernel Test instead of solver
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  int nx, ny, nz;               // Number of spatial zones in x,y,z
+  int num_directions;           // Total number of directions
+  int num_groups;               // Total number of energy groups
+  int legendre_order;           // Scattering order (number Legendre coeff's - 1)
+  int quad_num_polar;           // Number of polar quadrature points (0 for dummy)
+  int quad_num_azimuthal;       // Number of azimuthal quadrature points (0 for dummy)
+
+  // On-Node Options
+  int nesting;                  // Data layout and loop ordering (of Psi)
+  
+  // Parallel Decomp
+  int npx, npy, npz;            // The number of processors in x,y,z
+  int num_dirsets;              // Number of direction sets
+  int num_groupsets;            // Number of energy group sets
+  int num_zonesets_dim[3];      // Number of zoneset in x, y, z  
+  int layout_pattern;           // Which subdomain/task layout to use
+  
+  // Physics and Solver Options
+  int niter;                    // number of solver iterations to run
+  int parallel_method;
+  double sigt[3];               // total cross section for 3 materials
+  double sigs[3];               // total scattering cross section for 3 materials
+
+};
+
+
+
+void ini(void){
+  int tid = omp_get_thread_num();
+  int core = sched_getcpu();
+  printf("Rank: %d Thread %d: Core %d\n", myid, tid, core);
+#pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+    if(omp_get_thread_num() == 0){
+      printf("OpenMP threads/task:   %d\n", num_threads);
+      printf("OpenMP total threads:  %d\n", num_threads*num_tasks);
+    }
+  }
+  /*printf("Processors:            %d x %d x %d\n", vars.npx, vars.npy, vars.npz);
+  printf("Zones:                 %d x %d x %d\n", vars.nx, vars.ny, vars.nz);
+  printf("Legendre Order:        %d\n", vars.legendre_order);
+  printf("Total X-Sec:           sigt=[%lf, %lf, %lf]\n", vars.sigt[0], vars.sigt[1], vars.sigt[2]);
+  printf("Scattering X-Sec:      sigs=[%lf, %lf, %lf]\n", vars.sigs[0], vars.sigs[1], vars.sigs[2]);
+  printf("Quadrature Set:        ");
+  if(vars.quad_num_polar == 0){
+    printf("Dummy S2 with %d points\n", vars.num_directions);
+  }
+  else {
+    printf("Gauss-Legendre, %d polar, %d azimuthal (%d points)\n", vars.quad_num_polar, vars.quad_num_azimuthal, vars.num_directions);
+  }
+  printf("Parallel method:       ");
+  if(vars.parallel_method == PMETHOD_SWEEP){
+    printf("Sweep\n");
+  }
+  else if(vars.parallel_method == PMETHOD_BJ){
+    printf("Block Jacobi\n");
+  }
+  printf("Loop Nesting Order     %s\n", nestingString(vars.nesting).c_str());        
+  printf("Number iterations:     %d\n", vars.niter);
+  printf("GroupSet/Groups:       %d sets, %d groups/set\n", vars.num_groupsets, vars.num_groups/vars.num_groupsets);
+  printf("DirSets/Directions:    %d sets, %d directions/set\n", vars.num_dirsets, vars.num_directions/vars.num_dirsets);
+  printf("Zone Sets:             %d,%d,%d\n", vars.num_zonesets_dim[0], vars.num_zonesets_dim[1], vars.num_zonesets_dim[2]);
+  */
+}
+
+
+
+// SweepSolver
+
+// Compute the RHS:  rhs = LPlus*S*L*psi + Q
+
+// Discrete to Moments transformation (phi = L*psi)
+//kernel_LTimes(grid_data);
+// Compute Scattering Source Term (psi_out = S*phi)
+//kernel->scattering(grid_data);
+
+// Compute External Source Term (psi_out = psi_out + Q)
+//kernel->source(grid_data);
+ 
+// Moments to Discrete transformation (rhs = LPlus*psi_out)
+//kernel->LPlusTimes(grid_data);
+
+
+// Create a list of all groups
+//std::vector<int> sdom_list(grid_data->subdomains.size());
+//for(int i = 0;i < grid_data->subdomains.size();++ i){
+//  sdom_list[i] = i;
+// }
+// Sweep everything
+//SweepSubdomains(sdom_list, grid_data, block_jacobi);
+
+//double part = grid_data->particleEdit();
+//if(mpi_rank==0){
+//  printf("iter %d: particle count=%e, change=%e\n", iter, part, (part-part_last)/part);
+// }
+//part_last = part;

@@ -40,86 +40,96 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "nabla.tab.h"
+#ifndef _NABLA_KOKKOS_HOOK_H_
+#define _NABLA_KOKKOS_HOOK_H_
 
-#include "backends/cuda/cuda.h"
-#include "backends/okina/okina.h"
-#include "backends/lambda/lambda.h"
-#include "backends/arcane/arcane.h"
+
+// ****************************************************************************
+// * HOOKS
+// ****************************************************************************
 backendHooks* kokkos(nablaMain*);
 
+void hookSourceOpen(nablaMain*);
+void hookSourceInclude(nablaMain*);
 
-// ****************************************************************************
-// * nMiddleInit
-// ****************************************************************************
-nablaMain *nMiddleInit(const char *nabla_entity_name){
-  nablaMain *nabla=(nablaMain*)calloc(1,sizeof(nablaMain));
-  nablaEntity *entity; 
-  nabla->name=strdup(nabla_entity_name);
-  dbg("\n\t[nablaMiddlendInit] setting nabla->name to '%s'", nabla->name);
-  dbg("\n\t[nablaMiddlendInit] Création de notre premier entity");
-  entity=nMiddleEntityNew(nabla);
-  dbg("\n\t[nablaMiddlendInit] Rajout du 'main'");
-  nMiddleEntityAddEntity(nabla, entity);
-  dbg("\n\t[nablaMiddlendInit] Rajout du nom de l'entity '%s'", nabla_entity_name);  
-  entity->name=strdup(nabla_entity_name);
-  entity->name_upcase=toolStrUpCase(nabla_entity_name);  // On lui rajoute son nom
-  dbg("\n\t[nablaMiddlendInit] Rajout du name_upcase de l'entity %s", entity->name_upcase);  
-  entity->main=nabla;                        // On l'ancre à l'unique entity pour l'instant
-  assert(nabla->name != NULL);
-  dbg("\n\t[nablaMiddlendInit] Returning nabla");
-  return nabla;
-}
+char* hookSysPrefix(void);
+char* hookPrevCell(int);
+char* hookNextCell(int);
+char* hookSysPostfix(void);
 
+void hookReduction(struct nablaMainStruct*,astNode*);
+void hookAddArguments(struct nablaMainStruct*,nablaJob*);
+void hookReturnFromArgument(nablaMain*,nablaJob*);
+void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+bool hookDfsVariable(void);
 
-// ****************************************************************************
-// * nMiddleSwitch
-// ****************************************************************************
-int nMiddleSwitch(astNode *root,
-                  const int optionDumpTree,
-                  const char *nabla_entity_name,
-                  const BACKEND_SWITCH backend,
-                  const BACKEND_COLORS colors,
-                  char *interface_name,
-                  char *interface_path,
-                  char *service_name){
-  nablaMain *nabla=nMiddleInit(nabla_entity_name);
-  dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
- (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
-  nabla->backend=backend;
-  nabla->colors=colors;
-  nabla->interface_name=interface_name;
-  nabla->interface_path=interface_path;
-  nabla->service_name=service_name;
-  nabla->optionDumpTree=optionDumpTree;
-  nabla->options=NULL;  
-  dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
-  middleGlobals(nabla);
-  dbg("\n\t[nablaMiddlendSwitch] Now switching...");
-  // Switching between our possible backends:
-  switch (backend){
-  case BACKEND_ARCANE: return arcane(nabla,root,nabla_entity_name);
-    // The CUDA backend now uses nMiddleBackendAnimate
-    // Hook structures are filled by the backend    
-  case BACKEND_CUDA: {
-    nabla->hook=cuda(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
-  case BACKEND_OKINA:  return okina(nabla,root,nabla_entity_name);
-    // The LAMBDA backend now uses nMiddleBackendAnimate
-    // Hook structures are filled by the backend
-  case BACKEND_LAMBDA: {
-    nabla->hook=lambda(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
-  case BACKEND_KOKKOS: {
-    nabla->hook=kokkos(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
-  default:
-    exit(NABLA_ERROR|fprintf(stderr,
-                  "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
-  }
-  return NABLA_ERROR;
-}
+// Pragmas: Ivdep, Align
+char *hookPragmaIccIvdep(void);
+char *hookPragmaGccIvdep(void);
+char *hookPragmaIccAlign(void);
+char *hookPragmaGccAlign(void);
+
+// Hooks: Header
+void hookHeaderDump(nablaMain *);
+void hookHeaderOpen(nablaMain *);
+void hookHeaderDefineEnumerates(nablaMain *);
+void hookHeaderPrefix(nablaMain *);
+void hookHeaderPostfix(nablaMain *);
+void hookHeaderIncludes(nablaMain *);
+
+NABLA_STATUS hookMainPrefix(nablaMain*);
+NABLA_STATUS hookMainPreInit(nablaMain*);
+NABLA_STATUS hookMainVarInitKernel(nablaMain*);
+NABLA_STATUS hookMainVarInitCall(nablaMain*);
+NABLA_STATUS hookMainPostInit(nablaMain*);
+NABLA_STATUS hookMainHLT(nablaMain*);
+NABLA_STATUS hookMainPostfix(nablaMain*);
+
+void hookVariablesInit(nablaMain*);
+void hookVariablesPrefix(nablaMain*);
+void hookVariablesMalloc(nablaMain*);
+void hookVariablesFree(nablaMain*);
+
+void hookMeshPrefix(nablaMain*);
+void hookMeshCore(nablaMain*);
+void hookMeshPostfix(nablaMain*);
+
+void hookIteration(struct nablaMainStruct*);
+void hookExit(struct nablaMainStruct*,nablaJob*);
+void hookTime(struct nablaMainStruct*);
+void hookFatal(struct nablaMainStruct*);
+void hookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+bool hookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+char* hookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
+void hookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+
+void hookFunctionName(nablaMain*);
+void hookFunction(nablaMain*, astNode*);
+void hookJob(nablaMain*, astNode*);
+void hookLibraries(astNode*, nablaEntity*);
+
+char* hookForAllPrefix(nablaJob*);
+char* hookForAllDump(nablaJob*);
+char* hookForAllPostfix(nablaJob*);
+char* hookForAllItem(nablaJob*,const char, const char, char);
+
+char* hookTokenPrefix(nablaMain*);
+char* hookTokenPostfix(nablaMain*);
+
+void hookSwitchToken(astNode*, nablaJob*);
+nablaVariable *hookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void hookSystem(astNode*,nablaMain*,const char,char);
+void hookAddExtraParameters(nablaMain*,nablaJob*,int*);
+void hookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
+void hookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
+void hookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
+void hookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+
+// Pour dumper les arguments necessaire dans le main
+void hookDumpNablaArgumentList(nablaMain*,astNode*,int*);
+void hookAddExtraArguments(nablaMain*,nablaJob*,int*);
+
+void hookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
+#endif // _NABLA_KOKKOS_HOOK_H_
+ 

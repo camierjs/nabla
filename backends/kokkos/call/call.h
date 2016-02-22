@@ -40,11 +40,34 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_KOKKOS_H_
-#define _NABLA_KOKKOS_H_
+#ifndef _NABLA_KOKKOS_CALL_H_
+#define _NABLA_KOKKOS_CALL_H_
 
-#include "backends/kokkos/call/call.h"
-#include "backends/kokkos/hook/hook.h"
+// ****************************************************************************
+// * CALLS
+// ****************************************************************************
+char* callBits(void);
+char* callGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* callScatter(nablaVariable*);
+char* callIncludes(void);
+// Cilk+ parallel color
+char *callParallelCilkSync(void);
+char *callParallelCilkSpawn(void);
+char *callParallelCilkLoop(nablaMain *);
+char *callParallelCilkIncludes(void);
+// OpenMP parallel color
+char *callParallelOpenMPSync(void);
+char *callParallelOpenMPSpawn(void);
+char *callParallelOpenMPLoop(nablaMain *);
+char *callParallelOpenMPIncludes(void);
+// Void parallel color
+char *callParallelVoidSync(void);
+char *callParallelVoidSpawn(void);
+char *callParallelVoidLoop(nablaMain *);
+char *callParallelVoidIncludes(void);
 
-#endif // _NABLA_KOKKOS_H_
+char* callFilterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
+char* callFilterScatter(nablaJob*);
+
+#endif // _NABLA_KOKKOS_CALL_H_
  

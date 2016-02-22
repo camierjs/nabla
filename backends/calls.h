@@ -49,7 +49,7 @@ typedef struct callHeaderStruct{
   const nWhatWith* typedefs;
 } callHeader;
 
-// Structure des hooks que l'on va utiliser afin de générer pour AVX ou MIC
+// Structure des calls que l'on va utiliser afin de générer pour AVX ou MIC
 typedef struct callSimdStruct{
   char* (*bits)(void);
   char* (*gather)(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
