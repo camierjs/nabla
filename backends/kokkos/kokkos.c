@@ -48,7 +48,7 @@
 // * CALLS
 // ****************************************************************************
 const static nWhatWith headerDefines[]={
-  {"opTernary(a,b,c)","((a)?b:c)"},
+  //{"opTernary(a,b,c)","((a)?b:c)"},
   {"NABLA_NB_GLOBAL","1"},
   {"Bool", "bool"},
   {"Integer", "int"},

@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lambda/lambda.h"
+#include "backends/lib/dump/dump.h"
 
 
 // ****************************************************************************
@@ -263,7 +264,7 @@ void nLambdaHookMeshCore(nablaMain *nabla){
     nLambdaHookMesh3D(nabla);
     nLambdaHookMesh3DConnectivity(nabla);
   }
-  nLambdaDumpMesh(nabla);
+  dumpMesh(nabla);
 }
 
 

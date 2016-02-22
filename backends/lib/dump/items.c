@@ -40,56 +40,28 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"   
 
+#ifndef _LAMBDA_ITEMS_H_
+#define _LAMBDA_ITEMS_H_
 
-// ****************************************************************************
-// * dumpExternalFile
-// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
-// ****************************************************************************
-static char *dumpExternalFile(char *file){
-  return file+NABLA_LICENSE_HEADER;
+// aux cells
+bool _isOwn_(int c){
+  if (c>=0) return true;
+  assert(c>=0);
+  return false;
 }
 
-
-// ****************************************************************************
-// * extern definitions from kokkosDump.S
-// ****************************************************************************
-extern char items_h[];
-extern char debug_h[];
-extern char types_h[];
-extern char gather_h[];
-extern char scatter_h[];
-extern char ostream_h[];
-extern char ternary_h[];
-extern char msh1D_c[];
-extern char msh2D_c[];
-extern char msh3D_c[];
-
-
-// ****************************************************************************
-// * kokkosHeader for Std, Avx or Mic
-// ****************************************************************************
-void dumpHeader(nablaMain *nabla){
-  assert(nabla->entity->name);
-  fprintf(nabla->entity->hdr,dumpExternalFile(types_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(ternary_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(gather_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(scatter_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(ostream_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
+// aux faces
+bool _isSubDomainBoundaryOutside_(int f){
+  assert(f>=0);
+  assert(face_cell[0*NABLA_NB_FACES+f]>=0);
+  assert(face_cell[1*NABLA_NB_FACES+f]<=0);
+  dbg(DBG_OFF,"\n\t[isSubDomainBoundaryOutside] %%d->%%d",
+      face_cell[0*NABLA_NB_FACES+f],
+      face_cell[1*NABLA_NB_FACES+f]);
+  // On ne retourne true que quand la direction est 'X+'
+  if (face_cell[1*NABLA_NB_FACES+f]==0) return true;
+  return false;
 }
 
-
-// ****************************************************************************
-// * kokkosHeader after parse
-// ****************************************************************************
-void dumpMesh(nablaMain *nabla){
-  if ((nabla->entity->libraries&(1<<with_real))!=0)
-    fprintf(nabla->entity->src,dumpExternalFile(msh1D_c));
-  else if ((nabla->entity->libraries&(1<<with_real2))!=0)
-    fprintf(nabla->entity->src,dumpExternalFile(msh2D_c));
-  else
-    fprintf(nabla->entity->src,dumpExternalFile(msh3D_c));
-  fprintf(nabla->entity->hdr,dumpExternalFile(items_h));
-}
+#endif //_LAMBDA_ITEMS_H_

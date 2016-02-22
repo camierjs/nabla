@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lambda/lambda.h"
+#include "backends/lib/dump/dump.h"
 
 
 // ****************************************************************************
@@ -92,7 +93,7 @@ bool *hlt_exit;\n\
 // ****************************************************************************
 void nLambdaHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
-  nLambdaDumpHeader(nabla);
+  dumpHeader(nabla);
 }
 
 // ****************************************************************************

@@ -40,8 +40,47 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+   .globl ${ABI_UNDERSCORE}items_c
+   .globl ${ABI_UNDERSCORE}msh1D_c
+   .globl ${ABI_UNDERSCORE}msh2D_c
+   .globl ${ABI_UNDERSCORE}msh3D_c
+   
+   .globl ${ABI_UNDERSCORE}debug_h
+   .globl ${ABI_UNDERSCORE}gather_h
+   .globl ${ABI_UNDERSCORE}scatter_h
+   .globl ${ABI_UNDERSCORE}ostream_h
+   .globl ${ABI_UNDERSCORE}ternary_h
+   .globl ${ABI_UNDERSCORE}types_h
+       
 
-#ifndef _KOKKOS_ITEMS_H_
-#define _KOKKOS_ITEMS_H_
+${ABI_UNDERSCORE}items_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/items.c"
+   .byte 0
+${ABI_UNDERSCORE}msh1D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh1D.c"
+   .byte 0
+${ABI_UNDERSCORE}msh2D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh2D.c"
+   .byte 0
+${ABI_UNDERSCORE}msh3D_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh3D.c"
+   .byte 0
 
-#endif //_KOKKOS_ITEMS_H_
+${ABI_UNDERSCORE}debug_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/debug.h"
+   .byte 0
+${ABI_UNDERSCORE}types_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/types.h"
+   .byte 0
+${ABI_UNDERSCORE}gather_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/gather.h"
+   .byte 0
+${ABI_UNDERSCORE}scatter_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/scatter.h"
+   .byte 0
+${ABI_UNDERSCORE}ostream_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/ostream.h"
+   .byte 0
+${ABI_UNDERSCORE}ternary_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/ternary.h"
+   .byte 0

@@ -40,53 +40,39 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KOKKOS_DBG_HPP_
-#define _KOKKOS_DBG_HPP_
+#ifndef _LIB_STD_TERNARY_H_
+#define _LIB_STD_TERNARY_H_
 
-#include <stdarg.h>
-
-/******************************************************************************
- * Outils de traces
- *****************************************************************************/
-
-void dbg(const unsigned int flag, const char *format, ...){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  va_list args;
-  va_start(args, format);
-  vprintf(format, args);
-  fflush(stdout);
-  va_end(args);
+// ****************************************************************************
+// * opTernary
+// ****************************************************************************
+inline int opTernary(const bool cond,
+                     const int ifStatement,
+                     const int elseStatement){
+  if (cond) return ifStatement;
+  return elseStatement;
 }
 
-//#define dbgFuncIn()  do{dbg(DBG_FUNC_IN,"\n\t > %%s",__FUNCTION__);}while(0)
-//#define dbgFuncOut() do{dbg(DBG_FUNC_OUT,"\n\t\t < %%s",__FUNCTION__);}while(0)
+inline real opTernary(const bool cond,
+                      const real ifStatement,
+                      const real elseStatement){
+  if (cond) return ifStatement;
+  return elseStatement;
+}
 
-
-
-inline void dbgReal3(const unsigned int flag, real3& v){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  double x[1];
-  double y[1];
-  double z[1];
-  store(x, v.x);
-  store(y, v.y);
-  store(z, v.z);
-  printf("\n\t\t\t[%%.14f,%%.14f,%%.14f]", x[0], y[0], z[0]);
-  fflush(stdout);
+inline real3 opTernary(const bool cond,
+                       const real3& ifStatement,
+                       const double elseStatement){
+  if (cond) return ifStatement;
+  return real3(elseStatement);
 }
 
 
-inline void dbgReal(const unsigned int flag, real v){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  double x[1];
-  store(x, v);
-  printf("[");
-  printf("%%.14f ", x[0]);
-  printf("]");
-  fflush(stdout);
+inline real3 opTernary(const bool cond,
+                       const double ifStatement,
+                       const real3&  elseStatement){
+  if (cond) return Real3(ifStatement);
+  return elseStatement;
 }
 
-#endif // _KOKKOS_DBG_HPP_
+#endif //  _LIB_STD_TERNARY_H_

@@ -98,10 +98,6 @@ void hookHeaderPrefix(nablaMain *);
 void hookHeaderPostfix(nablaMain *);
 void hookHeaderIncludes(nablaMain *);
 
-// Dump into Header & Source
-void dumpHeader(nablaMain *);
-void dumpMesh(nablaMain*);
-
 NABLA_STATUS hookMainPrefix(nablaMain*);
 NABLA_STATUS hookMainPreInit(nablaMain*);
 NABLA_STATUS hookMainVarInitKernel(nablaMain*);

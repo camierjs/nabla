@@ -40,48 +40,53 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-   .globl ${ABI_UNDERSCORE}msh1D_c
-   .globl ${ABI_UNDERSCORE}msh2D_c
-   .globl ${ABI_UNDERSCORE}msh3D_c
-   
-   .globl ${ABI_UNDERSCORE}debug_h
-   .globl ${ABI_UNDERSCORE}items_h
-   .globl ${ABI_UNDERSCORE}gather_h
-   .globl ${ABI_UNDERSCORE}scatter_h
-   .globl ${ABI_UNDERSCORE}ostream_h
-   .globl ${ABI_UNDERSCORE}ternary_h
-   .globl ${ABI_UNDERSCORE}types_h
-       
+#ifndef _KOKKOS_DBG_HPP_
+#define _KOKKOS_DBG_HPP_
 
-${ABI_UNDERSCORE}msh1D_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh1D.c"
-   .byte 0
-${ABI_UNDERSCORE}msh2D_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh2D.c"
-   .byte 0
-${ABI_UNDERSCORE}msh3D_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/msh3D.c"
-   .byte 0
+#include <stdarg.h>
 
-${ABI_UNDERSCORE}debug_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/debug.h"
-   .byte 0
-${ABI_UNDERSCORE}items_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/items.h"
-   .byte 0
-${ABI_UNDERSCORE}types_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/types.h"
-   .byte 0
-${ABI_UNDERSCORE}ternary_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/ternary.h"
-   .byte 0
-${ABI_UNDERSCORE}gather_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/gather.h"
-   .byte 0
-${ABI_UNDERSCORE}scatter_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/scatter.h"
-   .byte 0
-${ABI_UNDERSCORE}ostream_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/ostream.h"
-   .byte 0
+/******************************************************************************
+ * Outils de traces
+ *****************************************************************************/
 
+void dbg(const unsigned int flag, const char *format, ...){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  fflush(stdout);
+  va_end(args);
+}
+
+#define dbgFuncIn()  do{dbg(DBG_FUNC_IN,"\n\t > %%s",__FUNCTION__);}while(0)
+#define dbgFuncOut() do{dbg(DBG_FUNC_OUT,"\n\t\t < %%s",__FUNCTION__);}while(0)
+
+
+
+inline void dbgReal3(const unsigned int flag, real3& v){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  double x[1];
+  double y[1];
+  double z[1];
+  store(x, v.x);
+  store(y, v.y);
+  store(z, v.z);
+  printf("\n\t\t\t[%%.14f,%%.14f,%%.14f]", x[0], y[0], z[0]);
+  fflush(stdout);
+}
+
+
+inline void dbgReal(const unsigned int flag, real v){
+  if (!DBG_MODE) return;
+  if ((flag&DBG_LVL)==0) return;
+  double x[1];
+  store(x, v);
+  printf("[");
+  printf("%%.14f ", x[0]);
+  printf("]");
+  fflush(stdout);
+}
+
+#endif // _KOKKOS_DBG_HPP_

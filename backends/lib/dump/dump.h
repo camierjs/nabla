@@ -40,7 +40,10 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KOKKOS_STD_SCATTER_H_
-#define _KOKKOS_STD_SCATTER_H_
+#ifndef _NABLA_LIB_DUMP_H_
+#define _NABLA_LIB_DUMP_H_
 
-#endif //  _KOKKOS_STD_SCATTER_H_
+extern void dumpHeader(nablaMain *);
+extern void dumpMesh(nablaMain*);
+
+#endif // _NABLA_LIB_DUMP_H_

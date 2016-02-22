@@ -71,11 +71,13 @@ test:
 
 k:
 	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS) -R kokkos)
+l:
+	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS) -R lambda)
 
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = deflex llsh lulesh shydro sethi anyItem gad comd pDDFV # darcy mhydro #glace2D #lulesh
+tests = darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV # darcy mhydro #glace2D #lulesh
 #$(shell cd tests && find . -maxdepth 1 -type d -name [^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 #1 4
 types = gen run
