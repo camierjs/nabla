@@ -366,12 +366,12 @@ void hookSwitchToken(astNode *n, nablaJob *job){
     dbg("\n\t\t\t\t[hookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
     nprintf(nabla, "/*filterGather*/", "%s",
-            hookFilterGather(n,job,GATHER_SCATTER_CALL));
+            callFilterGather(n,job,GATHER_SCATTER_CALL));
     break;
   }
   case(FORALL_END):{
      dbg("\n\t\t\t\t[hookSwitchToken] FORALL_END");
-   nprintf(nabla, "/*filterScatter*/", hookFilterScatter(job));
+   nprintf(nabla, "/*filterScatter*/", callFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

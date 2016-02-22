@@ -44,14 +44,12 @@
 #include "nabla.tab.h"
 #include "frontend/ast.h"
 
+// ****************************************************************************
+// * hookDfsVariable
+// * 'true' means that this backend supports
+// * in/out scan for variable from middlend
+// ****************************************************************************
 bool hookDfsVariable(void){ return true; }
-
-
-// ****************************************************************************
-// * INCLUDES
-// ****************************************************************************
-char *hookBits(void){return "64";}
-char* hookIncludes(void){return "";}
 
 
 // ****************************************************************************
@@ -134,7 +132,6 @@ void hookDfsForCalls(struct nablaMainStruct *nabla,
 // * Dump du préfix des points d'entrées: inline ou pas
 // ****************************************************************************
 char* hookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
-  //return "";
   return "static inline";
 }
 

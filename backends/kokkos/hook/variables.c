@@ -224,7 +224,7 @@ void hookVariablesInit(nablaMain *nabla){
   nMiddleVariableAdd(nabla, iteration);
   iteration->axl_it=false;
   iteration->item=strdup("global");
-  iteration->type=strdup("integer");
+  iteration->type=strdup("int");
   iteration->name=strdup("iteration");
 }
 

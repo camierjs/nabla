@@ -48,55 +48,29 @@
 // * CALLS
 // ****************************************************************************
 const static nWhatWith headerDefines[]={
-  //{"opTernary(a,b,c)","((a)?b:c)"},
   {"NABLA_NB_GLOBAL","1"},
   {"Bool", "bool"},
   {"Integer", "int"},
   {"real", "Real"},
-  {"Real2", "real3"},
-  {"real2", "real3"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
   {"set1(cst)", "cst"},
   {"square_root(u)", "sqrt(u)"},
   {"cube_root(u)", "cbrt(u)"},
   {"store(u,_u)", "(*u=_u)"},
-  {"load(u)", "(*u)"},
   {"zero()", "0.0"},
   {"DBG_MODE", "(false)"},
   {"DBG_LVL", "(DBG_ALL)"},
   {"DBG_OFF", "0x0000ul"},
-  {"DBG_CELL_VOLUME", "0x0001ul"},
-  {"DBG_CELL_CQS", "0x0002ul"},
-  {"DBG_GTH", "0x0004ul"},
-  {"DBG_NODE_FORCE", "0x0008ul"},
-  {"DBG_INI_EOS", "0x0010ul"},
-  {"DBG_EOS", "0x0020ul"},
-  {"DBG_DENSITY", "0x0040ul"},
-  {"DBG_MOVE_NODE", "0x0080ul"},
   {"DBG_INI", "0x0100ul"},
-  {"DBG_INI_CELL", "0x0200ul"},
-  {"DBG_INI_NODE", "0x0400ul"},
-  {"DBG_LOOP", "0x0800ul"},
-  {"DBG_FUNC_IN", "0x1000ul"},
-  {"DBG_FUNC_OUT", "0x2000ul"},
-  {"DBG_VELOCITY", "0x4000ul"},
-  {"DBG_BOUNDARIES", "0x8000ul"},
   {"DBG_ALL", "0xFFFFul"},
   {"opAdd(u,v)", "(u+v)"},
   {"opSub(u,v)", "(u-v)"},
   {"opDiv(u,v)", "(u/v)"},
   {"opMul(u,v)", "(u*v)"},
-  {"opMod(u,v)", "(u%v)"},
   {"opScaMul(u,v)","dot3(u,v)"},
   {"opVecMul(u,v)","cross(u,v)"},    
-  {"dot", "dot3"},
   {"ReduceMinToDouble(a)","a"},
-  {"ReduceMaxToDouble(a)","a"},
-  {"knAt(a)",""},
-  {"fatal(a,b)","exit(-1)"},
-  {"mpi_reduce(how,what)","how##ToDouble(what)"},
-  {"xyz","int"},
   {"GlobalIteration", "global_iteration[0]"},
   {"MD_DirX","0"},
   {"MD_DirY","1"},
@@ -104,12 +78,7 @@ const static nWhatWith headerDefines[]={
   {"MD_Plus","0"},
   {"MD_Negt","4"},
   {"MD_Shift","3"},
-  {"MD_Mask","7"}, // [sign,..]
-  {"File", "std::ofstream&"},
-  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
-  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
-  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
+  {"MD_Mask","7"},
   {NULL,NULL}
 };
 
@@ -119,7 +88,6 @@ const nWhatWith headerTypedef[]={
   {"int","integer"},
   {"double","real"},
   {"struct real3","Real3"},
-  {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
@@ -130,31 +98,31 @@ const callHeader headerCalls={
 };
 
 const static callSimd simdCalls={
-  hookBits,
-  hookGather,
-  hookScatter,
-  hookIncludes
+  callBits,
+  callGather,
+  callScatter,
+  callIncludes
 };
 
 const static callParallel cilkCalls={
-  parallelCilkSync,
-  parallelCilkSpawn,
-  parallelCilkLoop,
-  parallelCilkIncludes
+  callParallelCilkSync,
+  callParallelCilkSpawn,
+  callParallelCilkLoop,
+  callParallelCilkIncludes
 };
 
 const static callParallel openMPCalls={
-  parallelOpenMPSync,
-  parallelOpenMPSpawn,
-  parallelOpenMPLoop,
-  parallelOpenMPIncludes
+  callParallelOpenMPSync,
+  callParallelOpenMPSpawn,
+  callParallelOpenMPLoop,
+  callParallelOpenMPIncludes
 };
 
 const static callParallel voidCalls={
-  parallelVoidSync,
-  parallelVoidSpawn,
-  parallelVoidLoop,
-  parallelVoidIncludes
+  callParallelVoidSync,
+  callParallelVoidSpawn,
+  callParallelVoidLoop,
+  callParallelVoidIncludes
 };
 
 backendCalls calls={

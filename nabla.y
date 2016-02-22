@@ -236,7 +236,7 @@ type_specifier
     if (type_precise){
       if (type_volatile) volatilePreciseY1($$,GMP_INTEGER)
       else preciseY1($$,GMP_INTEGER)
-    }else {rhs;};
+    }else {rhs;}
     type_precise=type_volatile=false;
   }
 | INT32 {rhs;}

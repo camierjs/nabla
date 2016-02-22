@@ -63,21 +63,5 @@ void hookAddArguments(nablaMain *nabla,
   // Si notre job a appelé des fonctions
   if (job->parse.function_call_name!=NULL){
     nMiddleArgsDumpFromDFS(nabla, job);
-/*
-    {
-      int numParams=1;
-      // On va chercher cette fonction
-      nablaJob *called=nMiddleJobFind(job->entity->jobs,
-                                      job->parse.function_call_name);
-      // Et on dump les argument nécessaire à cette fonction
-      nMiddleArgsAddGlobal(nabla, called, &numParams);
-      // S'il y a en plus des nabla in/inout/out de spécifiés,
-      // On les dump, *ou pas* si on le fait depuis le scan DFS de celles-ci
-      if (called->nblParamsNode != NULL)
-        nMiddleArgsDump(nabla,
-                        called->nblParamsNode,
-                        &numParams);
-     }
-*/
   }
 }

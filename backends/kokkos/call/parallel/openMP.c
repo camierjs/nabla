@@ -40,28 +40,36 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
 
-#ifndef _LAMBDA_ITEMS_H_
-#define _LAMBDA_ITEMS_H_
-
-// aux cells
-bool _isOwn_(int c){
-  if (c>=0) return true;
-  assert(c>=0);
-  return false;
+// ****************************************************************************
+// * OpenMP Sync
+// ****************************************************************************
+char *callParallelOpenMPSync(void){
+  return "";//#pragma omp barrier\n";
 }
 
-// aux faces
-bool _isSubDomainBoundaryOutside_(int f){
-  assert(f>=0);
-  assert(face_cell[0*NABLA_NB_FACES+f]>=0);
-  assert(face_cell[1*NABLA_NB_FACES+f]<=0);
-  dbg(DBG_OFF,"\n\t[isSubDomainBoundaryOutside] %%d->%%d",
-      face_cell[0*NABLA_NB_FACES+f],
-      face_cell[1*NABLA_NB_FACES+f]);
-  // On ne retourne true que quand la direction est 'X+'
-  if (face_cell[1*NABLA_NB_FACES+f]==0) return true;
-  return false;
+
+// ****************************************************************************
+// * OpenMP Spawn
+// ****************************************************************************
+char *callParallelOpenMPSpawn(void){
+  return "";//#pragma omp spawn ";
 }
 
-#endif //_LAMBDA_ITEMS_H_
+
+// ****************************************************************************
+// * OpenMP for loop
+// ****************************************************************************
+char *callParallelOpenMPLoop(struct nablaMainStruct *n){
+  return "\\\n_Pragma(\"omp callParallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
+  //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp callParallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
+}
+
+
+// ****************************************************************************
+// * OpenMP includes
+// ****************************************************************************
+char *callParallelOpenMPIncludes(void){
+  return "#include <omp.h>\n";
+}

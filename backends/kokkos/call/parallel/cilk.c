@@ -40,53 +40,35 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _LAMBDA_DBG_HPP_
-#define _LAMBDA_DBG_HPP_
+#include "nabla.h"
 
-#include <stdarg.h>
-
-/******************************************************************************
- * Outils de traces
- *****************************************************************************/
-
-void dbg(const unsigned int flag, const char *format, ...){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  va_list args;
-  va_start(args, format);
-  vprintf(format, args);
-  fflush(stdout);
-  va_end(args);
-}
-
-#define dbgFuncIn()  do{dbg(DBG_FUNC_IN,"\n\t > %%s",__FUNCTION__);}while(0)
-//#define dbgFuncOut() do{dbg(DBG_FUNC_OUT,"\n\t\t < %%s",__FUNCTION__);}while(0)
-
-
-
-inline void dbgReal3(const unsigned int flag, real3& v){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  double x[1];
-  double y[1];
-  double z[1];
-  store(x, v.x);
-  store(y, v.y);
-  store(z, v.z);
-  printf("\n\t\t\t[%%.14f,%%.14f,%%.14f]", x[0], y[0], z[0]);
-  fflush(stdout);
+// ****************************************************************************
+// * Cilk Sync
+// ****************************************************************************
+char *callParallelCilkSync(void){
+  return "cilk_sync;\n";
 }
 
 
-inline void dbgReal(const unsigned int flag, real v){
-  if (!DBG_MODE) return;
-  if ((flag&DBG_LVL)==0) return;
-  double x[1];
-  store(x, v);
-  printf("[");
-  printf("%%.14f ", x[0]);
-  printf("]");
-  fflush(stdout);
+// ****************************************************************************
+// * Cilk Spawn
+// ****************************************************************************
+char *callParallelCilkSpawn(void){
+  return "cilk_spawn ";
 }
 
-#endif // _LAMBDA_DBG_HPP_
+
+// ****************************************************************************
+// * Cilk for loop
+// ****************************************************************************
+char *callParallelCilkLoop(struct nablaMainStruct *n){
+  return "cilk_";
+}
+
+
+// ****************************************************************************
+// * Cilk includes
+// ****************************************************************************
+char *callParallelCilkIncludes(void){
+  return "#include <cilk/cilk.h>\n";
+}

@@ -12,7 +12,8 @@ set(BACKEND_KOKKOS_C kokkos.c)
 add_library(NablaKokkos ${BACKEND_KOKKOS_C})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/call)
 
-target_link_libraries(NablaKokkos NablaKokkosHook)
+target_link_libraries(NablaKokkos NablaKokkosHook NablaKokkosCall)
 
 add_dependencies(NablaKokkos libNabla)

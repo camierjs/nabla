@@ -80,8 +80,8 @@
 // * calcElemVelocityGradient
 // ****************************************************************************
 ℝ³ calcElemVelocityGradient(const ℝ³* restrict υ,
-                               const ℝ³* restrict B,
-                               const ℝ detJ){
+                            const ℝ³* restrict B,
+                            const ℝ detJ){
   const ℝ inv_detJ=1.0/detJ;
   const ℝ³ υ06=υ[0]-υ[6];
   const ℝ³ υ17=υ[1]-υ[7];
@@ -173,7 +173,7 @@ void Σ_FaceNormal(ℝ³* restrict β,
   }*/
 
 ℝ³ 𝜕Volume(const ℝ³ Χ0, const ℝ³ Χ1, const ℝ³ Χ2,
-              const ℝ³ Χ3, const ℝ³ Χ4, const ℝ³ Χ5){
+           const ℝ³ Χ3, const ℝ³ Χ4, const ℝ³ Χ5){
   const ℝ x0=Χ0.x; const ℝ x1=Χ1.x;
   const ℝ x2=Χ2.x; const ℝ x3=Χ3.x;
   const ℝ x4=Χ4.x; const ℝ x5=Χ5.x;

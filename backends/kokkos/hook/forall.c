@@ -68,14 +68,6 @@ char* hookForAllPrefix(nablaJob *job){
 // ****************************************************************************
 // *
 // ****************************************************************************
-/*static char * returnVariableNameForOpenMP(nablaJob *job){
-  char str[NABLA_MAX_FILE_NAME];
-  if (job->is_a_function) return "";
-  if (sprintf(str,"%s_per_thread",
-              dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
-    error(!0,0,"Could not patch format!");
-  return strdup(str);
-  }*/
 static char * hookReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
   char str[NABLA_MAX_FILE_NAME];
   if (job->is_a_function) return "";
@@ -229,7 +221,7 @@ char* hookForAllPostfix(nablaJob *job){
     //if (job->item[0]=='n') return "// Should test INNER nodes here!\n";
   }
   
-  if (job->xyz==NULL) return hookFilterGather(NULL,job,GATHER_SCATTER_DECL);
+  if (job->xyz==NULL) return callFilterGather(NULL,job,GATHER_SCATTER_DECL);
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
 \t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
 \t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\

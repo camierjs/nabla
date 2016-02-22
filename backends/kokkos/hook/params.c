@@ -43,8 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-
 // ****************************************************************************
 // * Dump dans le src des parametres nabla en in comme en out
 // * On va surtout remplir les variables 'in' utilisées de support différent
