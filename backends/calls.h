@@ -74,7 +74,7 @@ typedef struct callStruct{
   const callHeader *header;
   const callSimd *simd; 
   const callParallel *parallel;
-} calls;
+} backendCalls;
 
 
 #endif // _NABLA_BACKENDS_CALLS_H_

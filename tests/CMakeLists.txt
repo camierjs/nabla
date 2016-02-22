@@ -98,6 +98,30 @@ endfunction(nabla_add_lambda_test)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.lambda)
 
 
+########################################
+# NABLA TEST MACRO FOR GENERIC BACKEND #
+########################################
+function(nabla_add_test_with_defines backend name nb_proc cmd parallel defines nb_particles)
+info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_MAGENTA}${backend}${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_${parallel}")
+  set(backend ${backend})
+  set(subpath ${nb_proc}/${cmd}/${parallel})
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
+  add_test(NAME nabla_${cmd}_${backend}_${name}_${nb_proc}_std_${parallel}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
+		COMMAND /bin/sh -c "ADDITIONAL_DEFINES='${defines} -DNB_PARTICLES=${nb_particles}' PARALLEL=${parallel} ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
+endfunction(nabla_add_test_with_defines)
+
+function(nabla_add_test backend name nb_proc cmd parallel)
+   nabla_add_test_with_defines(${backend} ${name} ${nb_proc} ${cmd} ${parallel} -DALEPH_INDEX 0)
+endfunction(nabla_add_test)
+
+
+##################################
+# NABLA TESTS FOR KOKKOS BACKEND #
+##################################
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.kokkos ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.kokkos)
+
+
 #####################################
 # NABLA TEST MACRO FOR CUDA BACKEND #
 #####################################
@@ -230,47 +254,65 @@ nabla_add_okina_test(p1apwb1D_two_state_semi_implicte 1 run std seq)
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
-nabla_add_lambda_test(glace2D 1 gen seq)
-nabla_add_lambda_test(gram 1 gen seq)
-nabla_add_lambda_test(lulesh 1 gen seq)
-nabla_add_lambda_test(lulesh 1 run seq)
-nabla_add_lambda_test(lulesh 1 run omp)
+nabla_add_test(lambda glace2D 1 gen seq)
+nabla_add_test(lambda gram 1 gen seq)
+nabla_add_test(lambda lulesh 1 gen seq)
+nabla_add_test(lambda lulesh 1 run seq)
+nabla_add_test(lambda lulesh 1 run omp)
 
-nabla_add_lambda_test(llsh 1 gen seq)
-nabla_add_lambda_test(llsh 1 run seq)
+nabla_add_test(lambda llsh 1 gen seq)
+nabla_add_test(lambda llsh 1 run seq)
 
-nabla_add_lambda_test(upwindAP 1 gen seq)
-nabla_add_lambda_test(upwindAP 1 run seq)
+nabla_add_test(lambda upwindAP 1 gen seq)
+nabla_add_test(lambda upwindAP 1 run seq)
 
-nabla_add_lambda_test(heat 1 gen seq)
-nabla_add_lambda_test(aleph1D 1 gen seq)
-nabla_add_lambda_test(amber 1 gen seq)
+nabla_add_test(lambda heat 1 gen seq)
+nabla_add_test(lambda aleph1D 1 gen seq)
+nabla_add_test(lambda amber 1 gen seq)
 
-nabla_add_lambda_test(aleph2D 1 gen seq)
+nabla_add_test(lambda aleph2D 1 gen seq)
 
-nabla_add_lambda_test(hlt 1 gen seq)
-nabla_add_lambda_test(hlt 1 run seq)
+nabla_add_test(lambda hlt 1 gen seq)
+nabla_add_test(lambda hlt 1 run seq)
 
 if (HYPRE_FOUND)
-   nabla_add_lambda_test(aleph1D 1 run seq)
-   nabla_add_lambda_test(aleph2D 1 run seq)
-   nabla_add_lambda_test(heat 1 run seq)
-   nabla_add_lambda_test(amber 1 run seq)
-   nabla_add_lambda_test_with_defines(darcy 1 run seq -DALEPH_INDEX 100000)
+   nabla_add_test(lambda aleph1D 1 run seq)
+   nabla_add_test(lambda aleph2D 1 run seq)
+   nabla_add_test(lambda heat 1 run seq)
+   nabla_add_test(lambda amber 1 run seq)
+   nabla_add_test_with_defines(lambda darcy 1 run seq -DALEPH_INDEX 100000)
 endif (HYPRE_FOUND)
 
-nabla_add_lambda_test_with_defines(deflex 1 run seq -DNO_DEFINES 100000)
+nabla_add_test_with_defines(lambda deflex 1 run seq -DNO_DEFINES 100000)
 
-nabla_add_lambda_test(p1apwb1D_version_2 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_semi_implicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_two_state_nolinear 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_explicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_gosse 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_implicite 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_two_state_irregular_mesh 1 gen std seq)
-nabla_add_lambda_test(p1apwb1D_two_state_semi_implicte 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_version_2 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_semi_implicite 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_two_state_nolinear 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_explicite 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_gosse 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_implicite 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_two_state_irregular_mesh 1 gen std seq)
+nabla_add_test(lambda p1apwb1D_two_state_semi_implicte 1 gen std seq)
 
-nabla_add_lambda_test(p1apwb1D_implicite 1 run std seq)
+nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
+
+
+##########################
+# NABLA TESTS FOR KOKKOS #
+##########################
+set(TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS "shydro sethi anyItem gad comd pDDFV")
+foreach(TST ${NABLA_TESTS})
+  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS} ${TST} TEST_SHOULD_PASS)
+  if(${TEST_SHOULD_PASS} EQUAL -1)
+    nabla_add_test(kokkos ${TST} 1 gen seq)
+  endif()
+endforeach(TST)
+nabla_add_test(kokkos lulesh 1 run seq)
+nabla_add_test(kokkos lulesh 1 run omp)
+nabla_add_test(kokkos llsh 1 run seq)
+nabla_add_test(kokkos upwindAP 1 run seq)
+nabla_add_test(kokkos hlt 1 run seq)
+nabla_add_test_with_defines(kokkos deflex 1 run seq -DNO_DEFINES 100000)
 
 
 ########################

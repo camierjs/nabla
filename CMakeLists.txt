@@ -96,6 +96,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 info("root LAMBDA_ALEPH_LIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_LIB}${VT100_RESET}")
 info("root LAMBDA_ALEPH_HYPRE_LIBLIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_HYPRE_LIB}${VT100_RESET}")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/kokkos)
 
 ##################
 # Link libraries #
@@ -103,7 +104,7 @@ info("root LAMBDA_ALEPH_HYPRE_LIBLIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_HYPRE_
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
 target_link_libraries(nabla libNabla # without yywrap, no need to link with ${FLEX_LIBRARIES}
   NablaMiddlend 
-  NablaArcane NablaCuda NablaLambda NablaOkina
+  NablaArcane NablaCuda NablaLambda NablaKokkos NablaOkina
   NablaFrontend NablaMiddlend NablaToolbox)
 
 ###########

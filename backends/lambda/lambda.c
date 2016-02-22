@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
+#include "backends/lambda/lambda.h"
 
 // ****************************************************************************
 // * CALLS
@@ -155,7 +155,7 @@ const static callParallel lambdaVoidCalls={
   nLambdaParallelVoidIncludes
 };
 
-calls nLambdaCalls={
+backendCalls nLambdaCalls={
   &nLambdaHeader,
   &lambdaSimdCalls,
   &lambdaVoidCalls,
@@ -262,7 +262,7 @@ const static hookCall nLambdaHookCall={
   lambdaHookDumpNablaParameterListDFS
 };
 
-static hooks nLambdaHooks={
+static backendHooks nLambdaHooks={
   &nLHookForAll,
   &nLHookToken,
   &hookGram,
@@ -280,7 +280,7 @@ static hooks nLambdaHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-hooks* lambda(nablaMain *nabla){
+backendHooks* lambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     nLambdaCalls.parallel=&lambdaCilkCalls;
   

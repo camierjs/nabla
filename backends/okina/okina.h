@@ -214,7 +214,7 @@ char* nOkinaHookTokenPrefix(nablaMain*);
 char* nOkinaHookTokenPostfix(nablaMain*);
 
 // nOkina
-NABLA_STATUS nOkina(nablaMain*, astNode*, const char*);
+NABLA_STATUS okina(nablaMain*, astNode*, const char*);
 
 #endif // _NABLA_OKINA_H_
  

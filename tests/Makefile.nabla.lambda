@@ -11,7 +11,7 @@ SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall #-fPIC #-DNO_SSE2 -mno-avx
 
 LOG = -t #-v $(TGT).log
 
-PARALLEL_omp_FLAGS = #-fopenmp
+PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = #-fcilkplus
 
 CXX = ${CMAKE_CXX_COMPILER}
@@ -27,10 +27,10 @@ LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmp
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
 export Z_EDGE_ELEMS = $(MESH)
-export X_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l) # 1.125
-export Y_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l) # 1.125
-export Z_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l) # 1.125
-export LENGTH = $(shell echo 1.0) # 1.125
+export X_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
+export Y_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
+export Z_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
+export LENGTH = $(shell echo 1.0) 
 export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
 
 
@@ -52,11 +52,11 @@ cln:
 gen1:$(TGT).cc
 #	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
-#OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
 #	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
 	./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
-#OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
 	./$(TGT)_$(MESH)_$(PARALLEL)
 
 #############

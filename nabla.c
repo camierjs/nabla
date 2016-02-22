@@ -274,7 +274,6 @@ int main(int argc, char * argv[]){
        {"module",required_argument,NULL,BACKEND_COLOR_ARCANE_MODULE},
        {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
     {"cuda",required_argument,NULL,BACKEND_CUDA},
-    {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
        {"tiling",no_argument,NULL,BACKEND_COLOR_OKINA_TILING},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
@@ -288,13 +287,19 @@ int main(int argc, char * argv[]){
        {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
        {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
     {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
-    {"raja",no_argument,NULL,BACKEND_RAJA},
-    {"kokkos",no_argument,NULL,BACKEND_KOKKOS},
-    {"loci",no_argument,NULL,BACKEND_LOCI},
-    {"uintah",no_argument,NULL,BACKEND_UINTAH},
+    {"lambda",required_argument,NULL,BACKEND_LAMBDA},
+    {"raja",required_argument,NULL,BACKEND_RAJA},
+    {"kokkos",required_argument,NULL,BACKEND_KOKKOS},
+    {"loci",required_argument,NULL,BACKEND_LOCI},
+    {"uintah",required_argument,NULL,BACKEND_UINTAH},
     {"mma",no_argument,NULL,BACKEND_MMA},
+    {"library",required_argument,NULL,BACKEND_VHDL},
+    {"vhdl",required_argument,NULL,BACKEND_VHDL},
     {NULL,0,NULL,0}
   };
+  // Check BACKEND's options are still in a 32 bit register
+  assert(BACKEND_COLOR_LAST<32);
+
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   // Check for at least several arguments
@@ -491,8 +496,15 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_KOKKOS:
       backend=BACKEND_KOKKOS;
-      dbg("\n[nabla] KOKKOS BACKEND WIP!");
-      exit(NABLA_ERROR);
+      dbg("\n[nabla] Command line hits long option %s",
+          longopts[longindex].name);
+      nabla_entity_name=strdup(optarg);
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new KOKKOS nabla_entity_name: %s",
+          nabla_entity_name);
+      break;
+
       
       // ************************************************************
       // * BACKEND LOCI en cours de construction

@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-
+#include "backends/cuda/cuda.h"
 
 // ****************************************************************************
 // * CALLS
@@ -99,7 +99,7 @@ const static callSimd cudaSimdCalls={
   cuHookIncludes
 };
 
-calls cudaCalls={
+backendCalls cudaCalls={
   &cudaHeader,
   &cudaSimdCalls,
   NULL,
@@ -203,7 +203,7 @@ const static hookCall cuHookCall={
 };
 
 
-static hooks cuHooks={
+static backendHooks cuHooks={
   &cuHookForAll,
   &cuHookToken,
   &cuHookGrammar,
@@ -221,7 +221,7 @@ static hooks cuHooks={
 // ****************************************************************************
 // * nccCuda
 // ****************************************************************************
-hooks *cuda(nablaMain *nabla){
+backendHooks *cuda(nablaMain *nabla){
   nabla->call=&cudaCalls;
   return &cuHooks;
 }

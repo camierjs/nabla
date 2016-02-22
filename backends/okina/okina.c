@@ -43,14 +43,15 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "frontend/ast.h"
+#include "backends/okina/okina.h"
 
 
 // ****************************************************************************
 // * nOkina
 // ****************************************************************************
-NABLA_STATUS nOkina(nablaMain *nabla,
-                      astNode *root,
-                      const char *nabla_entity_name){
+NABLA_STATUS okina(nablaMain *nabla,
+                   astNode *root,
+                   const char *nabla_entity_name){
   char srcFileName[NABLA_MAX_FILE_NAME];
   char hdrFileName[NABLA_MAX_FILE_NAME];
   const callHeader nablaOkinaHeaderStdHeader={
@@ -231,7 +232,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     nOkinaHookParamsDumpList
   };
   // Definition of Okina's Hooks
-  hooks okinaBackendHooks={
+  backendHooks okinaBackendHooks={
     &nOkinaHookForAll,
     &nOkinaHookToken,
     &nOkinaHookGrammar,
@@ -245,7 +246,7 @@ NABLA_STATUS nOkina(nablaMain *nabla,
     NULL // main
   };
   // Par défaut, on est en mode 'std'
-  calls okinaBackendCalls={
+  backendCalls okinaBackendCalls={
     &nablaOkinaHeaderStdHeader,
     &nablaOkinaSimdStdCalls,
     &okinaVoidCalls // parallel

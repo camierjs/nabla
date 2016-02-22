@@ -43,33 +43,24 @@
 // *************************************************************
 // * ∇ - Temps logique ⇒ Temps discret - AHOSLA
 // *************************************************************
-// * Arbitrary high-order scheme
-// * for the linear advection and wave equations
-// * Stéphane Del Pino, Hervé Jourdren
-// * 2006 Académie des sciences, publishde by Elsevier SAS
-// * doi:10.1016/j.crma.2006.01.013
+// * Arbitrary high-order schemes for the linear advection eq.
+// * S. Del Pino, H. Jourdren - doi:10.1016/j.crma.2006.01.013
 // *************************************************************
 with ℝ; // 1D
 
-// *************************************************************
-// * Déclarations des options
-// *************************************************************
-ℕ Nx = 4;
-ℝ a = 1.0;
-ℝ L = 1.0;
-ℝ CFL = 1.0;
-ℕ order = 2;
+// Déclarations des options
+ℕ Nx = 4;       // Nombre de mailles
+ℝ a = 1.0;      // Coefficient d'advection
+ℝ L = 1.0;      // Longueur totale de mailles
+ℝ CFL = 1.0;    // Coefficient pour le calcul du δt
+ℕ order = 2;    // Ordre de la méthode
 
-// *************************************************************
-// * Déclarations des variables
-// *************************************************************
-ℝ t,δt,δx;  // Temps, pas-de-temps et pas-d'espace
-ℝ x,u,F;    // Position, solution et flux
-ℝ c,ν;      // Centre des mailles et coefficient a*δt/δx
+// Déclaration des variables
+ℝ t,δt,δx;      // Temps, pas-de-temps et pas-d'espace
+ℝ x,c;          // Position des noeuds et des centres de mailles
+ℝ u,F,ν;        // Solution, flux et coefficient (ν=a*δt/δx)
 
-// *************************************************************
-// * fact(N) & Cnp(n,p)
-// *************************************************************
+// Fonctions Maths - fact(N) & Cnp(n,p)
 ℕ fact(ℕ n){
   ℕ f=1;
   for(ℕ i=2;i<=n;i+=1) f*=i;
@@ -77,29 +68,21 @@ with ℝ; // 1D
 }
 ℕ C(ℕ n, ℕ p){return fact(n)/(fact(p)*fact(n-p));}
 
-// *************************************************************
-// * δx, δt & ν
-// *************************************************************
+// Calcul des constantes δx, δt & ν
 δx = L/Nx;
 δt = CFL*δx/a;
  ν = a*δt/δx;
 
-// *************************************************************
-// * Position & Centre des mailles
-// *************************************************************
+// Calcul des positions des noeuds & des centres de mailles
 ∀ j∈cells, xⱼ=j*δx;
 ∀ j∈cells, ∀ r∈nodes(j) cⱼ=½*Σᵣxᵣ;
 
-// *************************************************************
-// * Condition Initiale uⁿ⁼⁰ aux mailles
-// *************************************************************
-∀ j∈cells uⱼⁿ⁼⁰=sin(2.0*π*cⱼ);
+// Condition Initiale uⁿ⁼⁰ aux mailles
+∀ j∈cells, uⱼⁿ⁼⁰=sin(2.0*π*cⱼ);
 //∀ j∈cells uⱼⁿ⁼⁰=(cⱼ<0.5)?1.0:0.0;
 
-// *************************************************************
-// * Calcul des flux Fⁿ⁽ᴺ⁼⁰⁾ et Fⁿ⁽ᴺ⁺¹⁾ aux noeuds
-// * On utilise la connectivité node_to_cell_left (n2cl) (1D)
-// *************************************************************
+// Calcul des flux Fⁿ⁽ᴺ⁼⁰⁾ et Fⁿ⁽ᴺ⁺¹⁾ aux noeuds
+// On utilise la connectivité node_to_cell_left (n2cl) (1D)
 ∀ n∈ℕ, ∀ nodes Fⁿ⁽ᴺ⁼⁰⁾=0.0;
 ∀ n∈ℕ*, ∀ N∈[1..order], ∀ r∈nodes, j∈ℕ/j=n2cl(r), m∈ℕ/m=N/2
    Fᵣⁿ⁽ᴺ⁺¹⁾=Fᵣⁿ⁽ᴺ⁾-1.0/(fact(N+1))
@@ -107,8 +90,6 @@ with ℝ; // 1D
      *Σ_{k=0}^{N}(-1.0)^(k+N+1)*C(N,k)*uⁿ_{j+m-k};
 ∀ n∈ℕ*, ∀ nodes Fⁿ=Fⁿ⁽ᴺ⁼ᵒʳᵈᵉʳ⁾;
 
-// *************************************************************
-// * Calcul de uⁿ⁺¹ aux mailles
-// * Connectivités j+½ = node_right, j-½ = node_left (1D)
-// *************************************************************
-∀ n∈ℕ*, ∀ j∈cells uⁿ⁺¹ = uⁿ-ν*(Fⁿ_{j+½}-Fⁿ_{j-½});
+// Calcul de uⁿ⁺¹ aux mailles
+// Connectivités j+½ = node_right, j-½ = node_left (1D)
+∀ n∈ℕ*, ∀ j∈cells uⱼⁿ⁺¹ = uⱼⁿ-ν*(Fⁿ_{j+½}-Fⁿ_{j-½});

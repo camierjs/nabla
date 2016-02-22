@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
+#include "backends/cuda/cuda.h"
 
 
 void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){

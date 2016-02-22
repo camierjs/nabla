@@ -78,12 +78,13 @@ typedef enum {
   BACKEND_LOCI   = 1<<(6),
   BACKEND_UINTAH = 1<<(7),
   BACKEND_MMA    = 1<<(8),
-  BACKEND_LIBRARY= 1<<(9)
+  BACKEND_LIBRARY= 1<<(9),
+  BACKEND_VHDL   = 1<<(10)
 } BACKEND_SWITCH;
 
+#define BACKEND_LAST 10
 
 // ****************************************************************************
-// * ! First shift value comes from last BACKEND_SWITCH+1 !
 // * Possible Variations:
 // *  - Arcane: Module|Service,
 // *  - Okina: std, sse, avx, avx2, mic and omp, cilk
@@ -91,24 +92,25 @@ typedef enum {
 // ****************************************************************************
 typedef enum { 
   BACKEND_COLOR_VOID           = 0,
-  BACKEND_COLOR_ARCANE_ALONE   = 1<<(10),
-  BACKEND_COLOR_ARCANE_MODULE  = 1<<(11),
-  BACKEND_COLOR_ARCANE_SERVICE = 1<<(12),
-  BACKEND_COLOR_OKINA_TILING   = 1<<(13),
-  BACKEND_COLOR_OKINA_STD      = 1<<(14),
-  BACKEND_COLOR_OKINA_SSE      = 1<<(15),
-  BACKEND_COLOR_OKINA_AVX      = 1<<(16),
-  BACKEND_COLOR_OKINA_AVX2     = 1<<(17),
-  BACKEND_COLOR_OKINA_MIC      = 1<<(18),
-  BACKEND_COLOR_OKINA_SEQ      = 1<<(19),
-  BACKEND_COLOR_OpenMP         = 1<<(20),
-  BACKEND_COLOR_CILK           = 1<<(21),
-  BACKEND_COLOR_GCC            = 1<<(22),
-  BACKEND_COLOR_ICC            = 1<<(23),
-  OPTION_TIME_DOT_STD          = 1<<(24),
-  OPTION_TIME_DOT_MMA          = 1<<(25)
+  BACKEND_COLOR_ARCANE_ALONE   = 1<<(BACKEND_LAST+1),
+  BACKEND_COLOR_ARCANE_MODULE  = 1<<(BACKEND_LAST+2),
+  BACKEND_COLOR_ARCANE_SERVICE = 1<<(BACKEND_LAST+3),
+  BACKEND_COLOR_OKINA_TILING   = 1<<(BACKEND_LAST+4),
+  BACKEND_COLOR_OKINA_STD      = 1<<(BACKEND_LAST+5),
+  BACKEND_COLOR_OKINA_SSE      = 1<<(BACKEND_LAST+6),
+  BACKEND_COLOR_OKINA_AVX      = 1<<(BACKEND_LAST+7),
+  BACKEND_COLOR_OKINA_AVX2     = 1<<(BACKEND_LAST+8),
+  BACKEND_COLOR_OKINA_MIC      = 1<<(BACKEND_LAST+9),
+  BACKEND_COLOR_OKINA_SEQ      = 1<<(BACKEND_LAST+10),
+  BACKEND_COLOR_OpenMP         = 1<<(BACKEND_LAST+11),
+  BACKEND_COLOR_CILK           = 1<<(BACKEND_LAST+12),
+  BACKEND_COLOR_GCC            = 1<<(BACKEND_LAST+13),
+  BACKEND_COLOR_ICC            = 1<<(BACKEND_LAST+14),
+  OPTION_TIME_DOT_STD          = 1<<(BACKEND_LAST+15),
+  OPTION_TIME_DOT_MMA          = 1<<(BACKEND_LAST+16)
 } BACKEND_COLORS;
 
+#define BACKEND_COLOR_LAST BACKEND_LAST+16
 
 // Enumération des phases possibles lors des génération des gather/scatter
 typedef enum{
@@ -169,11 +171,6 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 
 #include "backends/hooks.h"
 #include "backends/calls.h"
-
-#include "backends/cuda/cuda.h"
-#include "backends/okina/okina.h"
-#include "backends/arcane/arcane.h"
-#include "backends/lambda/lambda.h"
 
 #include "toolbox/toolbox.h"
 

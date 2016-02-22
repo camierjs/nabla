@@ -169,6 +169,6 @@ typedef struct hookStruct{
   const hookMesh *mesh;
   const hookVars *vars;
   const hookMain *main;
-} hooks;
+} backendHooks;
 
 #endif // _NABLA_MIDDLEND_HOOKS_H_

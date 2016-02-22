@@ -43,6 +43,12 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+#include "backends/cuda/cuda.h"
+#include "backends/okina/okina.h"
+#include "backends/lambda/lambda.h"
+#include "backends/arcane/arcane.h"
+#include "backends/kokkos/kokkos.h"
+
 
 // ****************************************************************************
 // * nMiddleInit
@@ -93,18 +99,22 @@ int nMiddleSwitch(astNode *root,
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   // Switching between our possible backends:
   switch (backend){
-  case BACKEND_ARCANE: return nccArcane(nabla,root,nabla_entity_name);
+  case BACKEND_ARCANE: return arcane(nabla,root,nabla_entity_name);
     // The CUDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend    
   case BACKEND_CUDA: {
     nabla->hook=cuda(nabla);
     return nMiddleBackendAnimate(nabla,root);
   }
-  case BACKEND_OKINA:  return nOkina(nabla,root,nabla_entity_name);
+  case BACKEND_OKINA:  return okina(nabla,root,nabla_entity_name);
     // The LAMBDA backend now uses nMiddleBackendAnimate
     // Hook structures are filled by the backend
   case BACKEND_LAMBDA: {
     nabla->hook=lambda(nabla);
+    return nMiddleBackendAnimate(nabla,root);
+  }
+  case BACKEND_KOKKOS: {
+    nabla->hook=kokkos(nabla);
     return nMiddleBackendAnimate(nabla,root);
   }
   default:

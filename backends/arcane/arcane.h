@@ -131,7 +131,7 @@ char* nccArcLibAlephHeader(void);
 void nccArcLibAlephIni(nablaMain*);
 
 // Main Entry Backend
-NABLA_STATUS nccArcane(nablaMain*,astNode*, const char*);
+NABLA_STATUS arcane(nablaMain*,astNode*, const char*);
 
 // Hooks 
 void arcaneJob(nablaMain*, astNode*);

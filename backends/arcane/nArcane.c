@@ -44,6 +44,7 @@
 #include <strings.h>
 #include "nabla.tab.h"
 #include "frontend/ast.h"
+#include "backends/arcane/arcane.h"
 
 
 static char* arcaneEntryPointPrefix(nablaMain *nabla,
@@ -225,9 +226,9 @@ const hookHeader nablaArcaneHeaderHooks={
 /*****************************************************************************
  * ncc
  *****************************************************************************/
-NABLA_STATUS nccArcane(nablaMain *nabla,
-                       astNode *root,
-                       const char *nabla_entity_name){
+NABLA_STATUS arcane(nablaMain *nabla,
+                    astNode *root,
+                    const char *nabla_entity_name){
   char cfgFileName[NABLA_MAX_FILE_NAME];
   char axlFileName[NABLA_MAX_FILE_NAME];
   char srcFileName[NABLA_MAX_FILE_NAME];
@@ -285,7 +286,7 @@ NABLA_STATUS nccArcane(nablaMain *nabla,
     NULL  // dumpNablaParameterList
   };
   
-  hooks arcaneBackendHooks={
+  backendHooks arcaneBackendHooks={
     &nArcaneHookForAll,
     &nArcaneHookToken,
     &hookGrammar,
@@ -298,7 +299,7 @@ NABLA_STATUS nccArcane(nablaMain *nabla,
     NULL, // vars
     NULL // main
   };
-  calls arcaneBackendCalls={
+  backendCalls arcaneBackendCalls={
     NULL, // header
     &nablaArcaneSimdCalls, // simd
     NULL // parallel

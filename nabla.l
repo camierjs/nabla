@@ -151,6 +151,7 @@ __asm__           { return tok(&yylval, ASM);}
 "ℾ"		         { return tok(&yylval, BOOL);}
 
 "size_t"			   { return tok(&yylval, SIZE_T);}
+"bool"			   { return tok(&yylval, BOOL);}
 "Bool"			   { return tok(&yylval, BOOL);}
 "Real"			   { return tok(&yylval, REAL);}
 "Real2"			   { return tok(&yylval, REAL2);}

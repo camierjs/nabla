@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
+#include "backends/okina/okina.h"
 
 void okinaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){}
 

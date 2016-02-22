@@ -63,7 +63,7 @@ char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaV
 // * arcaneHookFunctionName
 // ****************************************************************************
 void arcaneHookFunctionName(nablaMain *arc){
-  nprintf(arc, NULL, "%s%s::", arc->name, nablaArcaneColor(arc));
+  nprintf(arc, NULL, "%s%s::", arc->name, "");//nablaArcaneColor(arc));
 }
 
 

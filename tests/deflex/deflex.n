@@ -20,7 +20,7 @@ ofstream histoData("/tmp/histo.data");
 options{
   // Paramètres d'entrée
   ℝ option_νδt = 0.05; // Fréquence de collision x pas de temps
-  Bool option_particle_frame = true;
+  ℾ option_particle_frame = true;
   // Numerical options
   ℝ option_ε_frame_change = 1.0e-15;
   ℝ option_Γα = 1.0+0.5;
@@ -92,7 +92,7 @@ void dbgLoop(void) @ 1.0 {
 // * particleFrameSampling, aucun in/out, on remplit l'histogramme directement
 // ****************************************************************************
 ∀ particles void particleFrameSampling(void) @ 2.0 {
-  Bool rejet=true;
+  ℾ rejet=true;
   ℝ θS3,sinθS3;
   if (uid==0) info()<<"[7;37m[particleFrameSampling][m";
   do{

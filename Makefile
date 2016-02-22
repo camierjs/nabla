@@ -69,16 +69,19 @@ tst:test
 test:
 	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS))
 
+k:
+	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS) -R kokkos)
+
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = heat #glace2D #lulesh
+tests = deflex llsh lulesh shydro sethi anyItem gad comd pDDFV # darcy mhydro #glace2D #lulesh
 #$(shell cd tests && find . -maxdepth 1 -type d -name [^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|sed -e "s/\\.\\// /g"|tr "\\n" " ")
-procs = 1 4
+procs = 1 #1 4
 types = gen run
-simds = std sse avx avx2 mic warp
-backends = arcane okina lambda cuda
-parallels = seq mpi omp cilk smp
+simds = std #std sse avx avx2 mic warp
+backends = kokkos lambda #arcane okina lambda cuda kokkos
+parallels = seq omp #seq mpi omp cilk smp
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
 	(tput reset && cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6))
