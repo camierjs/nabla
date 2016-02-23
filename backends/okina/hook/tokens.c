@@ -42,19 +42,33 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/okina/okina.h"
+#include "backends/okina/call/call.h"
 
+// ****************************************************************************
+// * okinaHookIsTest
+// ****************************************************************************
 void okinaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){}
+
 
 // ****************************************************************************
 // * nOkinaHookTokenPrefix
 // ****************************************************************************
 char* nOkinaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
 
+
 // ****************************************************************************
 // * nOkinaHookTokenPostfix
 // ****************************************************************************
 char* nOkinaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+
+
+// ****************************************************************************
+// * nOkinaHookTurnTokenToOption
+// ****************************************************************************
+void nOkinaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+  nprintf(nabla, "/*tt2o*/", "%s", opt->name);
+}
+
 
 // ****************************************************************************
 // * FORALL token switch
@@ -218,11 +232,11 @@ void nOkinaHookTokenSwitch(astNode *n, nablaJob *job){
     
   case(FORALL_INI):{
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*okinaGather*/", "%s",nOkinaHookGather(job));
+    nprintf(nabla, "/*okinaGather*/", "%s",gather(job));
     break;
   }
   case(FORALL_END):{
-    nprintf(nabla, "/*okinaScatter*/", nOkinaHookScatter(job));
+    nprintf(nabla, "/*okinaScatter*/", scatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

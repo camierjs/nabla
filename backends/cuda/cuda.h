@@ -142,7 +142,7 @@ void cuHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 void cuDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
-backendHooks* cuda(nablaMain*);
+hooks* cuda(nablaMain*);
 
 #endif // _NABLA_CUDA_H_
  

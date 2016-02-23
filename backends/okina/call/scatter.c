@@ -40,68 +40,68 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-   .globl ${ABI_UNDERSCORE}nLambdaAleph_h
-   
-   .globl ${ABI_UNDERSCORE}AlephStd_h
-   .globl ${ABI_UNDERSCORE}AlephStd_c
+#include "nabla.h"
+#include "nabla.tab.h"
 
-   .globl ${ABI_UNDERSCORE}Aleph_h
-   .globl ${ABI_UNDERSCORE}AlephTypesSolver_h
-   .globl ${ABI_UNDERSCORE}AlephParams_h
-   .globl ${ABI_UNDERSCORE}AlephVector_h
-   .globl ${ABI_UNDERSCORE}AlephMatrix_h
-   .globl ${ABI_UNDERSCORE}AlephKernel_h
-   .globl ${ABI_UNDERSCORE}AlephOrdering_h
-   .globl ${ABI_UNDERSCORE}AlephIndexing_h
-   .globl ${ABI_UNDERSCORE}AlephTopology_h
-	.globl ${ABI_UNDERSCORE}AlephInterface_h
-   
-   .globl ${ABI_UNDERSCORE}IAlephFactory_h
-   
-${ABI_UNDERSCORE}nLambdaAleph_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nLambdaAleph.h"
-   .byte 0
 
-   
-${ABI_UNDERSCORE}AlephStd_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.cc"
-   .byte 0
-${ABI_UNDERSCORE}AlephStd_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.h"
-   .byte 0
-   
-${ABI_UNDERSCORE}Aleph_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/Aleph.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephTypesSolver_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTypesSolver.h"
-   .byte 0
+// ****************************************************************************
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// ****************************************************************************
+static void okinaFlushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
+  if (real_variable==NULL)
+    nablaError("Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+}
 
-${ABI_UNDERSCORE}AlephParams_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephParams.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephVector_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephVector.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephMatrix_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephMatrix.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephKernel_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephKernel.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephOrdering_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephOrdering.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephIndexing_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephIndexing.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephTopology_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTopology.h"
-   .byte 0
-${ABI_UNDERSCORE}AlephInterface_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephInterface.h"
-   .byte 0
-   
-${ABI_UNDERSCORE}IAlephFactory_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/IAlephFactory.h"
-   .byte 0
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+char* scatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!okinaScatter*/");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
+
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    okinaFlushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,job->entity->main->call->simd->scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
+}
+

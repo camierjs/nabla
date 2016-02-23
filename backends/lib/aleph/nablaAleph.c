@@ -41,67 +41,81 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-
 
 // ****************************************************************************
-// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// * dumpExternalFile
+// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
 // ****************************************************************************
-static void okinaFlushRealVariable(nablaJob *job, nablaVariable *var){
-  // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-  if (real_variable==NULL)
-    nablaError("Could not find real variable from scattered variables!");
-  real_variable->is_gathered=false;
+static char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
+}
+
+extern char nablaAleph_h[];
+extern char AlephStd_h[];
+extern char AlephStd_c[];
+extern char Aleph_h[];
+extern char AlephTypesSolver_h[];
+extern char AlephParams_h[];
+extern char AlephVector_h[];
+extern char AlephMatrix_h[];
+extern char AlephKernel_h[];
+extern char AlephOrdering_h[];
+extern char AlephIndexing_h[];
+extern char AlephTopology_h[];
+extern char AlephInterface_h[];
+extern char IAlephFactory_h[];
+
+// *****************************************************************************
+// * lambdaAlephIni
+// *****************************************************************************
+void lambdaAlephIni(nablaMain *main){
+  nablaJob *alephIni=nMiddleJobNew(main->entity);
+  alephIni->is_an_entry_point=true;
+  alephIni->is_a_function=true;
+  alephIni->scope  = strdup("NoScope");
+  alephIni->region = strdup("NoRegion");
+  alephIni->item   = strdup("\0");
+  alephIni->return_type  = strdup("void");
+  alephIni->name   = strdup("alephIni");
+  alephIni->name_utf8 = strdup("ℵIni");
+  alephIni->xyz    = strdup("NoXYZ");
+  alephIni->direction  = strdup("NoDirection");
+  sprintf(&alephIni->at[0],"-huge_valf");
+  alephIni->when_index  = 1;
+  alephIni->whens[0] = ENTRY_POINT_init;
+  nMiddleJobAdd(main->entity, alephIni);  
 }
 
 
 // ****************************************************************************
-// * Filtrage du SCATTER
+// *
 // ****************************************************************************
-char* nOkinaHookScatter(nablaJob *job){
-  int i;
-  char scatters[1024];
-  nablaVariable *var;
-  scatters[0]='\0';
-  int nbToScatter=0;
-  int filteredNbToScatter=0;
-  
-  if (job->parse.selection_statement_in_compound_statement){
-    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!okinaScatter*/");
-    return "";
-  }
-  
-  // On récupère le nombre de variables potentielles à scatterer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToScatter+=1;
+char* lambdaAlephHeader(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n");
+  fprintf(nabla->entity->hdr,"/*'AlephStd_h'*/\n%s",dumpExternalFile(AlephStd_h));
+  fprintf(nabla->entity->hdr,"/*'AlephStd_c'*/\n%s",dumpExternalFile(AlephStd_c));
+  fprintf(nabla->entity->hdr,"/*'AlephTypesSolver_h'*/\n%s",dumpExternalFile(AlephTypesSolver_h));
+  fprintf(nabla->entity->hdr,"/*'AlephParams_h'*/\n%s",dumpExternalFile(AlephParams_h));
+  fprintf(nabla->entity->hdr,"/*'AlephVector_h'*/\n%s",dumpExternalFile(AlephVector_h));
+  fprintf(nabla->entity->hdr,"/*'AlephMatrix_h'*/\n%s",dumpExternalFile(AlephMatrix_h));
+  fprintf(nabla->entity->hdr,"/*'AlephKernel_h'*/\n%s",dumpExternalFile(AlephKernel_h));
+  fprintf(nabla->entity->hdr,"/*'AlephOrdering_h'*/\n%s",dumpExternalFile(AlephOrdering_h));
+  fprintf(nabla->entity->hdr,"/*'AlephIndexing_h'*/\n%s",dumpExternalFile(AlephIndexing_h));
+  fprintf(nabla->entity->hdr,"/*'AlephTopology_h'*/\n%s",dumpExternalFile(AlephTopology_h));
+  fprintf(nabla->entity->hdr,"/*'AlephInterface_h'*/\n%s",dumpExternalFile(AlephInterface_h));
+  fprintf(nabla->entity->hdr,"/*'IAlephFactory_h'*/\n%s",dumpExternalFile(IAlephFactory_h));
 
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToScatter==0) return "";
-  
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// okinaScatter enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToScatter+=1;
+  char str[NABLA_MAX_FILE_NAME];
+  str[0]=0;
+  // Et on rajoute les variables globales
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (strcmp(var->item, "global")!=0) continue;
+    strcat(str, (var->type[0]=='r')?",real*":(var->type[0]=='i')?",int*":"/*Unknown type*/");
   }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToScatter==0) return "";
   
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iScatter) continue;
-    okinaFlushRealVariable(job,var);
-    // Pour l'instant, on ne scatter pas les node_coord
-    if (strcmp(var->name,"coord")==0) continue;
-    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
-    if (var->inout==enum_in_variable) continue;
-    strcat(scatters,job->entity->main->call->simd->scatter(var));
-  }
-  job->parse.iScatter+=1;
-  return strdup(scatters);
+  fprintf(nabla->entity->hdr, dumpExternalFile(nablaAleph_h));
+  lambdaAlephIni(nabla);
+  return "";
 }
+
 

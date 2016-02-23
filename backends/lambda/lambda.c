@@ -262,7 +262,7 @@ const static hookCall nLambdaHookCall={
   lambdaHookDumpNablaParameterListDFS
 };
 
-static backendHooks nLambdaHooks={
+static hooks nLambdaHooks={
   &nLHookForAll,
   &nLHookToken,
   &hookGram,
@@ -280,7 +280,7 @@ static backendHooks nLambdaHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-backendHooks* lambda(nablaMain *nabla){
+hooks* lambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     nLambdaCalls.parallel=&lambdaCilkCalls;
   

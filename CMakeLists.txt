@@ -82,7 +82,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 if (NOT APPLE)
-set(CMAKE_EXE_LINKER_FLAGS "-static")
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+    #find_library(LIBC_LIBRARY NAMES libc.a PATHS /usr/lib/x86_64-redhat-linux5E/lib64)
+    #info("\t${VT100_FG_MAGENTA}LIBC_LIBRARY${VT100_RESET} has been found in ${VT100_BOLD}${LIBC_LIBRARY}${VT100_RESET}")
 endif()
 add_executable(nabla nabla.c)
 add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
@@ -100,17 +102,19 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/kokkos)
 # Libraries #
 #############
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lib)
-info("root LAMBDA_ALEPH_LIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_LIB}${VT100_RESET}")
-info("root LAMBDA_ALEPH_HYPRE_LIBLIB is ${VT100_FG_MAGENTA}${LAMBDA_ALEPH_HYPRE_LIB}${VT100_RESET}")
+if(HYPRE_FOUND)
+    info("root ALEPH_LIB is ${VT100_FG_MAGENTA}${ALEPH_LIB}${VT100_RESET}")
+    info("root ALEPH_HYPRE_LIB is ${VT100_FG_MAGENTA}${ALEPH_HYPRE_LIB}${VT100_RESET}")
+endif()
 
 ##################
 # Link libraries #
 ##################
 # Still NablaMiddlend x2 because of HWed calls to backend entry-points
-target_link_libraries(nabla libNabla # without yywrap, no need to link with ${FLEX_LIBRARIES}
+target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
-                      NablaLibs
+                      NablaLibDump
                       NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
                       NablaMiddlend)
 

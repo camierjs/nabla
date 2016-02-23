@@ -41,8 +41,15 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-//#include "backends/kokkos/.h"
 #include "backends/lib/dump/dump.h"
+
+// ****************************************************************************
+// * hookHeaderDump
+// ****************************************************************************
+void hookHeaderDump(nablaMain *nabla){
+  assert(nabla->entity->name);
+  dumpHeader(nabla);
+}
 
 
 // ****************************************************************************
@@ -55,58 +62,6 @@ void hookHeaderOpen(nablaMain *nabla){
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
-
-// ****************************************************************************
-// * hookHeaderIncludes
-// ****************************************************************************
-void hookHeaderIncludes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// *****************************************************************************\n\
-// * Backend includes\n\
-// *****************************************************************************\n\
-// Includes from nabla->simd->includes\n\%s\
-#include <sys/time.h>\n\
-#include <stdlib.h>\n\
-#include <iso646.h>\n\
-#include <stdio.h>\n\
-#include <string.h>\n\
-#include <vector>\n\
-#include <math.h>\n\
-#include <assert.h>\n\
-#include <stdarg.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-using namespace std;\n\
-int hlt_level;\n\
-bool *hlt_exit;\n\
-// Includes from nabla->parallel->includes()\n\%s",
-          nabla->call->simd->includes(),
-          nabla->call->parallel->includes());
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
-}
-
-
-// ****************************************************************************
-// * hookHeaderDump
-// ****************************************************************************
-void hookHeaderDump(nablaMain *nabla){
-  assert(nabla->entity->name);
-  dumpHeader(nabla);
-}
-
-// ****************************************************************************
-// * hookHeaderPrefix
-// ****************************************************************************
-void hookHeaderPrefix(nablaMain *nabla){
-  assert(nabla->entity->name);
-  fprintf(nabla->entity->hdr,
-          "#ifndef __BACKEND_%s_H__\n#define __BACKEND_%s_H__",
-          nabla->entity->name,
-          nabla->entity->name);
-}
 
 // ****************************************************************************
 // * ENUMERATES Hooks
@@ -145,6 +100,51 @@ void hookHeaderDefineEnumerates(nablaMain *nabla){
           parallel_prefix_for_loop, // FOR_EACH_NODE
           parallel_prefix_for_loop  // FOR_EACH_FACE
           );
+}
+
+
+// ****************************************************************************
+// * hookHeaderPrefix
+// ****************************************************************************
+void hookHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->hdr,
+          "#ifndef __BACKEND_%s_H__\n#define __BACKEND_%s_H__",
+          nabla->entity->name,
+          nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * hookHeaderIncludes
+// ****************************************************************************
+void hookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// *****************************************************************************\n\
+// * Backend includes\n\
+// *****************************************************************************\n\
+// Includes from nabla->simd->includes\n\%s\
+#include <sys/time.h>\n\
+#include <stdlib.h>\n\
+#include <iso646.h>\n\
+#include <stdio.h>\n\
+#include <string.h>\n\
+#include <vector>\n\
+#include <math.h>\n\
+#include <assert.h>\n\
+#include <stdarg.h>\n\
+#include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+using namespace std;\n\
+int hlt_level;\n\
+bool *hlt_exit;\n\
+// Includes from nabla->parallel->includes()\n\%s",
+          nabla->call->simd->includes(),
+          nabla->call->parallel->includes());
+  nMiddleDefines(nabla,nabla->call->header->defines);
+  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
+  nMiddleForwards(nabla,nabla->call->header->forwards);
 }
 
 

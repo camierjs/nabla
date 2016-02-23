@@ -357,9 +357,7 @@ void nMiddleFunctionDumpHeader(FILE*,astNode*);
 void nMiddleFunctionParse(astNode*,nablaJob*);
 void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
 
-// nMiddleAnimate
-NABLA_STATUS nMiddleBackendAnimate(nablaMain*,astNode*);
-
+NABLA_STATUS animate(nablaMain*,astNode*,struct hookStruct*);
 
 void nMiddleArgsAddExtra(nablaMain*,int*);
 void nMiddleArgsAddGlobal(nablaMain*,nablaJob*,int*);

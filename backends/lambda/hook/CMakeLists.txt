@@ -8,7 +8,11 @@ set(BACKEND_LAMBDA_HOOK_C
 
 add_library(NablaLambdaHook ${BACKEND_LAMBDA_HOOK_C})
 
-target_link_libraries(NablaLambdaHook NablaLambdaAleph NablaLibDump)
+target_link_libraries(NablaLambdaHook NablaLibDump)
+
+if(HYPRE_FOUND)
+    target_link_libraries(NablaLambdaHook NablaAleph)
+endif()
 
 add_dependencies(NablaLambdaHook NablaLambda)
 

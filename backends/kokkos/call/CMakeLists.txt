@@ -2,7 +2,7 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_KOKKOS_CALL_C
     call.c
     gather.c scatter.c
-    parallel/cilk.c parallel/openMP.c parallel/void.c)
+    cilk.c openMP.c sequential.c)
 
 add_library(NablaKokkosCall ${BACKEND_KOKKOS_CALL_C})
 

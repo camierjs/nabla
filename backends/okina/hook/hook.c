@@ -42,9 +42,76 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/okina/okina.h"
+#include "backends/okina/hook/hook.h"
 
+// ****************************************************************************
+// * okinaHookDfsVariable
+// * 'false' means that this backend DOES NOT support
+// * in/out scan for variable from middlend
+// ****************************************************************************
 bool okinaHookDfsVariable(void){ return false; }
+
+
+// ****************************************************************************
+// * ivdep/align ICC Pragmas
+// ****************************************************************************
+char *nOkinaPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
+char *nOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
+
+
+// ****************************************************************************
+// * ivdep/align  GCC Pragmas
+// ****************************************************************************
+char *nOkinaPragmaGccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
+char *nOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+
+
+// ****************************************************************************
+// * System Prefix
+// ****************************************************************************
+char* nOkinaHookSysPrefix(void){ return "/*nOkinaHookSysPrefix*/"; }
+
+
+// ****************************************************************************
+// * System Prev Cell
+// ****************************************************************************
+char* nOkinaHookPrevCell(int direction){
+  assert(NULL);
+  return NULL;
+}
+
+// ****************************************************************************
+// * System Next Cell
+// ****************************************************************************
+char* nOkinaNextCell(int direction){
+  assert(NULL);
+  return NULL;
+}
+
+// ****************************************************************************
+// * System Postfix
+// ****************************************************************************
+//char* hookSysPostfix(void){ return "/*hookSysPostfix*/)"; }
+char* nOkinaHookSysPostfix(void){ return "/*nOkinaHookSysPostfix*/)"; }
+
+
+// ****************************************************************************
+// * Function Hooks
+// ****************************************************************************
+// * Hook pour dumper le nom de la fonction
+// ****************************************************************************
+void nOkinaHookFunctionName(nablaMain *arc){
+  nprintf(arc, NULL, "%s", arc->name);
+}
+
+// ****************************************************************************
+// * Génération d'un kernel associé à une fonction
+// ****************************************************************************
+void nOkinaHookFunction(nablaMain *nabla, astNode *n){
+  nablaJob *fct=nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, fct);
+  nMiddleFunctionFill(nabla,fct,n,NULL);
+}
 
 // ****************************************************************************
 // * Dump des variables appelées
@@ -75,14 +142,12 @@ char* nOkinaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_
   return "static inline";
 }
 
-
 // ****************************************************************************
 // * nOkinaHookIteration
 // ****************************************************************************
 void nOkinaHookIteration(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*ITERATION*/", "okina_iteration()");
 }
-
 
 // ****************************************************************************
 // * nOkinaHookExit
@@ -91,7 +156,6 @@ void nOkinaHookExit(struct nablaMainStruct *nabla, nablaJob *job){
   nprintf(nabla, "/*EXIT*/", "exit(0.0)");
 }
 
-
 // ****************************************************************************
 // * nOkinaHookTime
 // ****************************************************************************
@@ -99,14 +163,12 @@ void nOkinaHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "global_time");
 }
 
-
 // ****************************************************************************
 // * nOkinaHookFatal
 // ****************************************************************************
 void nOkinaHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
-
 
 // ****************************************************************************
 // * nOkinaHookAddCallNames
@@ -128,53 +190,12 @@ void nOkinaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode 
   }
 }
 
-
-// ****************************************************************************
-// * nOkinaHookAddArguments
-// ****************************************************************************
-void nOkinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  // En Okina, par contre il faut les y mettre
-  if (fct->parse.function_call_name!=NULL){
-    //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
-    int numParams=1;
-    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    nOkinaArgsExtra(nabla, called, &numParams);
-    if (called->nblParamsNode != NULL)
-      nOkinaArgsList(nabla,called->nblParamsNode,&numParams);
-  }
-}
-
-
-// ****************************************************************************
-// * nOkinaHookTurnTokenToOption
-// ****************************************************************************
-void nOkinaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o okina*/", "%s", opt->name);
-}
-
-
 // ****************************************************************************
 // * Okina libraries
 // ****************************************************************************
 void nOkinaHookLibraries(astNode * n, nablaEntity *entity){
   fprintf(entity->src, "\n/*lib %s*/",n->children->token);
 }
-
-
-// ****************************************************************************
-// * Génération d'un kernel associé à un support
-// ****************************************************************************
-void nOkinaHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, job);
-  nMiddleJobFill(nabla,job,n,NULL);
-  // On teste *ou pas* que le job retourne bien 'void' dans le cas de OKINA
-  //if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
-  //  exit(NABLA_ERROR|fprintf(stderr, "\n[nOkinaHookJob] Error with return type which is not void\n"));
-}
-
-
-
 
 // ****************************************************************************
 // * okinaPrimaryExpressionToReturn
@@ -193,17 +214,40 @@ bool nOkinaHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNod
   return false;
 }
 
-
 // ****************************************************************************
-// * okinaReturnFromArgument
+// * Génération d'un kernel associé à un support
 // ****************************************************************************
-void nOkinaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
-  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,
-                                        rulenameToId("direct_declarator"));
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nprintf(nabla, NULL, "\
-\n\tint threads = omp_get_max_threads();\
-\n\treal *%s_per_thread=(real *)calloc(threads,sizeof(real));", rtnVariable);
+void nOkinaHookJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de OKINA
+  //if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
+  //  exit(NABLA_ERROR|fprintf(stderr, "\n[nOkinaHookJob] Error with return type which is not void\n"));
 }
 
+
+
+
+
+
+
+
+
+
+
+// ****************************************************************************
+// * Dump d'extra connectivity
+// ****************************************************************************
+/*void nOkinaArgsAddExtraConnectivities(nablaMain *nabla, int *numParams){
+  return;
+  }*/
+
+// ****************************************************************************
+// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+// ****************************************************************************
+/*void nOkinaArgsDumpNablaDebugFunctionFromOut(nablaMain *nabla,
+                                             astNode *n,
+                                             bool in_or_out){
+}*/
 

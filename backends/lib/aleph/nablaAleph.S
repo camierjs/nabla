@@ -40,26 +40,68 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "nabla.tab.h"
+   .globl ${ABI_UNDERSCORE}nablaAleph_h
+   
+   .globl ${ABI_UNDERSCORE}AlephStd_h
+   .globl ${ABI_UNDERSCORE}AlephStd_c
 
-char* nOkinaHookSysPrefix(void){ return "/*nOkinaHookSysPrefix*/"; }
-char* nOkinaHookSysPostfix(void){ return "/*nOkinaHookSysPostfix*/)"; }
+   .globl ${ABI_UNDERSCORE}Aleph_h
+   .globl ${ABI_UNDERSCORE}AlephTypesSolver_h
+   .globl ${ABI_UNDERSCORE}AlephParams_h
+   .globl ${ABI_UNDERSCORE}AlephVector_h
+   .globl ${ABI_UNDERSCORE}AlephMatrix_h
+   .globl ${ABI_UNDERSCORE}AlephKernel_h
+   .globl ${ABI_UNDERSCORE}AlephOrdering_h
+   .globl ${ABI_UNDERSCORE}AlephIndexing_h
+   .globl ${ABI_UNDERSCORE}AlephTopology_h
+	.globl ${ABI_UNDERSCORE}AlephInterface_h
+   
+   .globl ${ABI_UNDERSCORE}IAlephFactory_h
+   
+${ABI_UNDERSCORE}nablaAleph_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/nablaAleph.h"
+   .byte 0
 
-// ****************************************************************************
-// * Traitement des tokens NABLA ITEMS
-// ****************************************************************************
-char* nOkinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
-  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
-  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
-  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
-  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
-  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  nablaError("Could not switch in nOkinaHookItem!");
-  return NULL;
-}
+   
+${ABI_UNDERSCORE}AlephStd_c: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.cc"
+   .byte 0
+${ABI_UNDERSCORE}AlephStd_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.h"
+   .byte 0
+   
+${ABI_UNDERSCORE}Aleph_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/Aleph.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephTypesSolver_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTypesSolver.h"
+   .byte 0
+
+${ABI_UNDERSCORE}AlephParams_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephParams.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephVector_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephVector.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephMatrix_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephMatrix.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephKernel_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephKernel.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephOrdering_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephOrdering.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephIndexing_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephIndexing.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephTopology_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTopology.h"
+   .byte 0
+${ABI_UNDERSCORE}AlephInterface_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephInterface.h"
+   .byte 0
+   
+${ABI_UNDERSCORE}IAlephFactory_h:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/IAlephFactory.h"
+   .byte 0

@@ -45,46 +45,6 @@
 
 
 // ****************************************************************************
-// * okinaAddExtraConnectivitiesParameters
-// ****************************************************************************
-static void nOkinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  return;
-}
-
-
-// ****************************************************************************
-// * Dump d'extra paramètres
-// ****************************************************************************
-void nOkinaHookParamsAddExtra(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla, "/* direct return from okinaHookAddExtraParameters*/", NULL);
-  return;
-  // Rajout pour l'instant systématiquement des node_coords et du global_deltat
-  nablaVariable *var;
-  if (*numParams!=0) nprintf(nabla, NULL, ",");
-  // Si on est dans le cas 1D
-  if ((nabla->entity->libraries&(1<<with_real))!=0)
-    nprintf(nabla, NULL, "\n\t\treal *node_coords");
-  else // Sinon pour l'instant c'est le 3D
-    nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
-  
-  *numParams+=1;
-  // Et on rajoute les variables globales
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    //if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->item, "global")!=0) continue;
-    nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
-            (var->type[0]=='r')?"real":(var->type[0]=='i')?"int":"/*Unknown type*/",
-            var->name);
-    *numParams+=1;
-  }
-  
-  // Rajout pour l'instant systématiquement des connectivités
-  if (job->item[0]=='c')
-    nOkinaAddExtraConnectivitiesParameters(nabla, numParams);
-}
-
-
-// ****************************************************************************
 // * Dump dans le src des parametres nabla en in comme en out
 // * On va surtout remplir les variables 'in' utilisées de support différent
 // * pour préparer les GATHER/SCATTER
@@ -135,3 +95,50 @@ void nOkinaHookParamsDumpList(nablaMain *nabla,
   if (n->next != NULL) nOkinaHookParamsDumpList(nabla,job,n->next, numParams);
 }
 
+
+
+// ****************************************************************************
+// * okinaAddExtraConnectivitiesParameters
+// ****************************************************************************
+/*static void nOkinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
+  return;
+  }*/
+
+
+// ****************************************************************************
+// * Dump d'extra paramètres
+// ****************************************************************************
+void nOkinaHookParamsAddExtra(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla, "/* direct return from okinaHookAddExtraParameters*/", NULL);
+  return;
+  // Rajout pour l'instant systématiquement des node_coords et du global_deltat
+  nablaVariable *var;
+  if (*numParams!=0) nprintf(nabla, NULL, ",");
+  // Si on est dans le cas 1D
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    nprintf(nabla, NULL, "\n\t\treal *node_coords");
+  else // Sinon pour l'instant c'est le 3D
+    nprintf(nabla, NULL, "\n\t\treal3 *node_coords");
+  
+  *numParams+=1;
+  // Et on rajoute les variables globales
+  for(var=nabla->variables;var!=NULL;var=var->next){
+    //if (strcmp(var->name, "time")==0) continue;
+    if (strcmp(var->item, "global")!=0) continue;
+    nprintf(nabla, NULL, ",\n\t\t%s *global_%s",
+            (var->type[0]=='r')?"real":(var->type[0]=='i')?"int":"/*Unknown type*/",
+            var->name);
+    *numParams+=1;
+  }
+  
+  // Rajout pour l'instant systématiquement des connectivités
+  if (job->item[0]=='c')
+    nMiddleParamsAddExtra(nabla, numParams);
+  //nOkinaAddExtraConnectivitiesParameters(nabla, numParams);
+}
+
+void nOkinaHookParamsAddExtraDFS(nablaMain *nabla, nablaJob *job, int *numParams){}
+void nOkinaHookParamsDumpListDFS(nablaMain *nabla,
+                                 nablaJob *job,
+                                 astNode *n,
+                                 int *numParams){}

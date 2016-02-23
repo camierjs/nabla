@@ -46,10 +46,13 @@
 // * nMiddleBackendAnimate
 // ****************************************************************************
 //#warning nMiddleBackendAnimate a simplifier
-NABLA_STATUS nMiddleBackendAnimate(nablaMain *nabla, astNode *root){
-  ///////////////////////////////////////////////////////////
-  // Partie des hooks à remonter à termes dans le middlend //
-  ///////////////////////////////////////////////////////////
+NABLA_STATUS animate(nablaMain *nabla,
+                     astNode *root,
+                     struct hookStruct *hooks){
+  // Initialisation des hooks avant tout
+  nabla->hook=hooks;
+
+  // Partie des hooks à remonter à termes dans le middlend
   nabla->hook->vars->init(nabla);
   nabla->hook->source->open(nabla);
   nabla->hook->source->include(nabla);

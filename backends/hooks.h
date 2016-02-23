@@ -45,113 +45,113 @@
 
 // Structure des hooks utilisé pour la gestion des directions
 typedef struct hookXyzStruct{
-  char* (*prefix)(void);
-  char* (*prevCell)(int);
-  char* (*nextCell)(int);
-  char* (*postfix)(void);
+  char* (*prefix)(void); // variables
+  char* (*prevCell)(int); // variables
+  char* (*nextCell)(int); // variables
+  char* (*postfix)(void); // variables
 } hookXyz;
 
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
 typedef struct hookPragmaStruct{
   //char* (*ivdep)(void);
-  char* (*align)(void);
+  char* (*align)(void); // functions
 } hookPragma;
 
 typedef struct hookHeaderStruct{
-  void (*dump)(struct nablaMainStruct*);  
-  void (*open)(struct nablaMainStruct*);  
-  void (*enums)(struct nablaMainStruct*);  
-  void (*prefix)(struct nablaMainStruct*);  
-  void (*include)(struct nablaMainStruct*);  
-  void (*postfix)(struct nablaMainStruct*);
+  void (*dump)(struct nablaMainStruct*); // animate
+  void (*open)(struct nablaMainStruct*); // animate
+  void (*enums)(struct nablaMainStruct*); // animate
+  void (*prefix)(struct nablaMainStruct*); // animate
+  void (*include)(struct nablaMainStruct*); // animate
+  void (*postfix)(struct nablaMainStruct*); // animate
 } hookHeader;
 
 // Hooks for Sources
 typedef struct hookSourceStruct{
-  void (*open)(struct nablaMainStruct *);  
-  void (*include)(struct nablaMainStruct *);  
+  void (*open)(struct nablaMainStruct *); // animate
+  void (*include)(struct nablaMainStruct *); // animate
 } hookSource;
 
 // Hooks for Main
 typedef struct hookMainStruct{
-  NABLA_STATUS (*prefix)(struct nablaMainStruct *);  
-  NABLA_STATUS (*preInit)(struct nablaMainStruct *);  
-  NABLA_STATUS (*varInitKernel)(struct nablaMainStruct *);  
-  NABLA_STATUS (*varInitCall)(struct nablaMainStruct *);  
-  NABLA_STATUS (*main)(struct nablaMainStruct *);  
-  NABLA_STATUS (*postInit)(struct nablaMainStruct *);  
-  NABLA_STATUS (*postfix)(struct nablaMainStruct *);  
+  NABLA_STATUS (*prefix)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*preInit)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*varInitKernel)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*varInitCall)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*main)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*postInit)(struct nablaMainStruct *); // animate
+  NABLA_STATUS (*postfix)(struct nablaMainStruct *); // animate
 } hookMain;
 
 // Mesh Hooks
 typedef struct hookMeshStruct{
-  void (*prefix)(struct nablaMainStruct *);  
-  void (*core)(struct nablaMainStruct *);  
-  void (*postfix)(struct nablaMainStruct *);  
+  void (*prefix)(struct nablaMainStruct *); // animate
+  void (*core)(struct nablaMainStruct *); // animate
+  void (*postfix)(struct nablaMainStruct *); // animate
 } hookMesh;
 
 // Variables Hooks
 typedef struct hookVarsStruct{
-  void (*init)(struct nablaMainStruct *);  
-  void (*prefix)(struct nablaMainStruct *);  
-  void (*malloc)(struct nablaMainStruct *);  
-  void (*free)(struct nablaMainStruct *);  
+  void (*init)(struct nablaMainStruct *); // animate
+  void (*prefix)(struct nablaMainStruct *); // animate
+  void (*malloc)(struct nablaMainStruct *); // animate
+  void (*free)(struct nablaMainStruct *); // animate
 } hookVars;
 
 typedef struct hookForAllStruct{
   // Prefix à l'ENUMERATE_*
-  char* (*prefix)(nablaJob*);  
+  char* (*prefix)(nablaJob*); // jobs, functions
   // Dump l'ENUMERATE_*
-  char* (*dump)(nablaJob*);  
+  char* (*dump)(nablaJob*); // jobs, functions
   // Dump la référence à un item au sein d'un ENUMERATE_*
-  char* (*item)(nablaJob*,const char, const char, char);
+  char* (*item)(nablaJob*,const char, const char, char); // jobs
   // Dump l'ENUMERATE_*
-  char* (*postfix)(nablaJob*);  
+  char* (*postfix)(nablaJob*); // jobs, functions
 } hookForAll;
 
 typedef struct hookTokenStruct{
-  char* (*prefix)(struct nablaMainStruct *);  
+  char* (*prefix)(struct nablaMainStruct *); // variables
   // Gestion des différentes actions pour un job
-  void (*svvitch)(astNode*, nablaJob*);
+  void (*svvitch)(astNode*, nablaJob*); // jobs
   // Transformation de tokens en variables selon l'ENUMERATE_*
-  nablaVariable* (*variable)(astNode*, struct nablaMainStruct*, nablaJob*);
+  nablaVariable* (*variable)(astNode*, struct nablaMainStruct*, nablaJob*); // jobs, functions
   // Hook pour mettre en forme les options
-  void (*option)(struct nablaMainStruct*,nablaOption*);
-  void (*system)(astNode*, struct nablaMainStruct*, const char, char);
-  void (*iteration)(struct nablaMainStruct*);
+  void (*option)(struct nablaMainStruct*,nablaOption*); // options
+  void (*system)(astNode*, struct nablaMainStruct*, const char, char); // variables
+  void (*iteration)(struct nablaMainStruct*); // functions
   void (*exit)(struct nablaMainStruct*,nablaJob*);
-  void (*time)(struct nablaMainStruct*);
-  void (*fatal)(struct nablaMainStruct*);
-  void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char);
-  void (*isTest)(nablaMain*,nablaJob*,astNode*,int);
-  char* (*postfix)(nablaMain*);  
+  void (*time)(struct nablaMainStruct*); // functions
+  void (*fatal)(struct nablaMainStruct*); // functions
+  void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char); // jobs
+  void (*isTest)(nablaMain*,nablaJob*,astNode*,int); // jobs
+  char* (*postfix)(nablaMain*); // variables
 } hookToken;
 
 typedef struct hookGrammarStruct{
   // Hook de génération d'un kernel associé à une fonction
-  void (*function)(struct nablaMainStruct*, astNode*);
+  void (*function)(struct nablaMainStruct*, astNode*); // grammar
   // Génération d'un kernel associé à un support
-  void (*job)(struct nablaMainStruct*, astNode*);
+  void (*job)(struct nablaMainStruct*, astNode*); // grammar
   // Génération d'un kernel associé à une reduction
-  void (*reduction)(struct nablaMainStruct*, astNode*);
+  void (*reduction)(struct nablaMainStruct*, astNode*); // grammar
   // Should be removed: Hook pour transformer les variables à returner
-  bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*);
+  bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*); // jobs
   // Hook returnFromArgument for OKINA and OMP
-  void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*);
-  bool (*dfsVariable)(void);
+  void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*); // jobs
+  bool (*dfsVariable)(void); // jobs, functions
 } hookGrammar;
 
 typedef struct hookCallStruct{
   // Hooks pour rajouter au fur et à mesure qu'on les découvre
   // les fonctions appelées et les arguments
-  void (*addCallNames)(struct nablaMainStruct*,nablaJob*,astNode*);
-  void (*addArguments)(struct nablaMainStruct*,nablaJob*);
+  void (*addCallNames)(struct nablaMainStruct*,nablaJob*,astNode*); // functions
+  void (*addArguments)(struct nablaMainStruct*,nablaJob*); // functions
   // Hook pour préfixer les points d'entrée (à-la inline, par exemple)
-  char* (*entryPointPrefix)(struct nablaMainStruct*,nablaJob*);
+  char* (*entryPointPrefix)(struct nablaMainStruct*,nablaJob*); // arguments, jobs, functions
   // Hook pour associer aux fonctions appelées les arguments à rajouter
-  void (*dfsForCalls)(struct nablaMainStruct*,nablaJob*,astNode*,const char *,astNode *);
-  void (*addExtraParameters)(nablaMain*, nablaJob*, int*);
-  void (*dumpNablaParameterList)(nablaMain*, nablaJob*, astNode*,int*);
+  void (*dfsForCalls)(struct nablaMainStruct*,nablaJob*,astNode*,const char *,astNode *); // functions
+  void (*addExtraParameters)(nablaMain*, nablaJob*, int*); // jobs, functions
+  void (*dumpNablaParameterList)(nablaMain*, nablaJob*, astNode*,int*); // jobs
 } hookCall;
 
 // ****************************************************************************
@@ -169,6 +169,6 @@ typedef struct hookStruct{
   const hookMesh *mesh;
   const hookVars *vars;
   const hookMain *main;
-} backendHooks;
+} hooks;
 
 #endif // _NABLA_MIDDLEND_HOOKS_H_

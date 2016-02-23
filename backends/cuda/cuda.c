@@ -203,7 +203,7 @@ const static hookCall cuHookCall={
 };
 
 
-static backendHooks cuHooks={
+static hooks cuHooks={
   &cuHookForAll,
   &cuHookToken,
   &cuHookGrammar,
@@ -221,7 +221,7 @@ static backendHooks cuHooks={
 // ****************************************************************************
 // * nccCuda
 // ****************************************************************************
-backendHooks *cuda(nablaMain *nabla){
+hooks *cuda(nablaMain *nabla){
   nabla->call=&cudaCalls;
   return &cuHooks;
 }

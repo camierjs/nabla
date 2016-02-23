@@ -40,18 +40,67 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"
+#include "nabla.tab.h"
 
 
 // ****************************************************************************
-// * ivdep/align ICC Pragmas
+// * Filtrage du GATHER
+// * Une passe devrait être faite à priori afin de déterminer les contextes
+// * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
+// * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char *nOkinaPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *nOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
+char* gather(nablaJob *job){
+  int i;
+  char gathers[1024];
+  nablaVariable *var;
+  gathers[0]='\0';
+  int nbToGather=0;
+  int filteredNbToGather=0;
 
+  // Si l'on a trouvé un 'selection_statement_in_compound_statement'
+  // dans le corps du kernel, on débraye les gathers
+  // *ou pas*
+  if (job->parse.selection_statement_in_compound_statement){
+    //nprintf(job->entity->main,
+    //"/*selection_statement_in_compound_statement, nothing to do*/",
+    //"/*if=>!okinaGather*/");
+    //return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à gatherer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToGather+=1;
+  //nprintf(job->entity->main, NULL, "/* nbToGather=%d*/", nbToGather);
+  
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToGather==0) return "";
 
-// ****************************************************************************
-// * ivdep/align  GCC Pragmas
-// ****************************************************************************
-char *nOkinaPragmaGccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *nOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+  // On filtre suivant s'il y a des forall
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// okinaGather enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToGather+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToGather=%d*/", filteredNbToGather);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToGather==0) return "";
+  
+  strcat(gathers,job->entity->main->call->simd->gather(job,var,GATHER_SCATTER_DECL));
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le gather de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iGather) continue;
+    strcat(gathers,job->entity->main->call->simd->gather(job,var,GATHER_SCATTER_CALL));
+    // On informe la suite que cette variable est en train d'être gatherée
+    nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
+    if (real_variable==NULL)
+      nablaError("Could not find real variable from gathered variables!");
+    real_variable->is_gathered=true;
+  }
+  job->parse.iGather+=1;
+  return strdup(gathers);
+}
 

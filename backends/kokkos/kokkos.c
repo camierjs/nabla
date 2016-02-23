@@ -238,7 +238,7 @@ const static hookMain mains={
   hookMainPostfix
 };  
 
-static backendHooks hooks={
+static hooks kokkosHooks={
   &forall,
   &token,
   &gram,
@@ -256,7 +256,7 @@ static backendHooks hooks={
 // ****************************************************************************
 // * kokkos
 // ****************************************************************************
-backendHooks* kokkos(nablaMain *nabla){
+hooks* kokkos(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
     calls.parallel=&cilkCalls;
   
@@ -264,9 +264,9 @@ backendHooks* kokkos(nablaMain *nabla){
     calls.parallel=&openMPCalls;
   
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    hooks.pragma=&icc;
+    kokkosHooks.pragma=&icc;
 
   nabla->call=&calls;
-  return &hooks;
+  return &kokkosHooks;
   
 }

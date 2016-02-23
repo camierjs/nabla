@@ -41,10 +41,82 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "backends/okina/call/call.h"
+#include "backends/okina/hook/hook.h"
 
 
 // ****************************************************************************
-// * Backend OKINA - G�n�ration de la connectivit� du maillage cot� header
+// * okinaSourceMesh
+// ****************************************************************************
+extern char knMsh1D_c[];
+extern char knMsh3D_c[];
+static char *nOkinaMainSourceMeshAoS_vs_SoA(nablaMain *nabla){
+  return "node_coord[iNode]=real3(x,y,z);"; 
+}
+void nOkinaMainSourceMesh(nablaMain *nabla){
+  assert(nabla->entity->name!=NULL);
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    fprintf(nabla->entity->src,knMsh1D_c+NABLA_LICENSE_HEADER);
+  else
+    fprintf(nabla->entity->src,knMsh3D_c+NABLA_LICENSE_HEADER,nOkinaMainSourceMeshAoS_vs_SoA(nabla));
+  //fprintf(nabla->entity->src,knMsh_c);
+}
+
+
+// ****************************************************************************
+// * Backend OKINA - Génération de la connectivité du maillage coté header
+// ****************************************************************************
+static void nOkinaMesh1DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// ********************************************************\n\
+// * MESH CONNECTIVITY\n\
+// ********************************************************\
+\nint cell_node[2*NABLA_NB_CELLS] __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell[2*NABLA_NB_NODES] __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_corner[2*NABLA_NB_NODES] __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_next[1*NABLA_NB_CELLS] __attribute__ ((aligned(WARP_ALIGN)));\
+\nint cell_prev[1*NABLA_NB_CELLS] __attribute__ ((aligned(WARP_ALIGN)));\
+\nint node_cell_and_corner[2*2*NABLA_NB_NODES] __attribute__ ((aligned(WARP_ALIGN)));\
+\n\n\n");
+}
+
+
+// ****************************************************************************
+// * okinaMesh
+// * Adding padding for simd too 
+// ****************************************************************************
+void nOkinaMesh1D(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * MESH GENERATION\n\
+// ********************************************************\n\
+const int NABLA_NODE_PER_CELL = 2;\
+\n\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
+const int NABLA_NB_NODES_Y_AXIS = 0;\n\
+const int NABLA_NB_NODES_Z_AXIS = 0;\n\
+\n\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
+const int NABLA_NB_CELLS_Y_AXIS = 0;\n\
+const int NABLA_NB_CELLS_Z_AXIS = 0;\n\
+\n\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
+const double NABLA_NB_NODES_Y_TICK = 0.0;\n\
+const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
+\n\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
+const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
+  nOkinaMesh1DConnectivity(nabla);
+}
+
+
+
+
+// ****************************************************************************
+// * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
 static void nOkinaMesh3DConnectivity(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\n\
@@ -92,3 +164,45 @@ const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
   nOkinaMesh3DConnectivity(nabla);
 }
 
+
+
+// ****************************************************************************
+// * Backend OKINA - Allocation de la connectivité du maillage
+// ****************************************************************************
+void nOkinaMeshPrefix(nablaMain *nabla){
+  dbg("\n[nOkinaMainMeshPrefix]");
+  fprintf(nabla->entity->src,"//[nOkinaMainMeshPrefix]\n");
+}
+
+
+// ****************************************************************************
+// * hookMeshCore
+// * Ici, on revient une fois parsé!
+// ****************************************************************************
+void nOkinaMeshCore(nablaMain *nabla){
+  dbg("\n[hookMeshCore]");
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * hookMeshCore\n\
+// ********************************************************\n");
+  if (isWithLibrary(nabla,with_real)){
+    nOkinaMesh1D(nabla);
+    //nOkinaMesh1DConnectivity(nabla);
+  }/*else if (isWithLibrary(nabla,with_real2)){
+    hookMesh2D(nabla);
+    hookMesh2DConnectivity(nabla);
+    }*/else{
+    nOkinaMesh3D(nabla);
+    //nOkinaMesh3DConnectivity(nabla);
+  }
+  nOkinaMainSourceMesh(nabla);
+}
+
+
+// ****************************************************************************
+// * nOkinaMainMeshPostfix
+// ****************************************************************************
+void nOkinaMeshPostfix(nablaMain *nabla){
+  dbg("\n[nOkinaMainMeshPostfix]");
+  //fprintf(nabla->entity->src,"");
+}

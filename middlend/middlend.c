@@ -44,16 +44,17 @@
 #include "nabla.tab.h"
 
 #include "backends/cuda/cuda.h"
-#include "backends/okina/okina.h"
-#include "backends/lambda/lambda.h"
+//#include "backends/okina/okina.h"
 #include "backends/arcane/arcane.h"
-backendHooks* kokkos(nablaMain*);
+hooks* okina(nablaMain*);
+hooks* lambda(nablaMain*);
+hooks* kokkos(nablaMain*);
 
 
 // ****************************************************************************
 // * nMiddleInit
 // ****************************************************************************
-nablaMain *nMiddleInit(const char *nabla_entity_name){
+static nablaMain *nMiddleInit(const char *nabla_entity_name){
   nablaMain *nabla=(nablaMain*)calloc(1,sizeof(nablaMain));
   nablaEntity *entity; 
   nabla->name=strdup(nabla_entity_name);
@@ -75,6 +76,7 @@ nablaMain *nMiddleInit(const char *nabla_entity_name){
 
 // ****************************************************************************
 // * nMiddleSwitch
+// * The CUDA, KOKKOS & LAMBDA backends uses middlend/animate.c
 // ****************************************************************************
 int nMiddleSwitch(astNode *root,
                   const int optionDumpTree,
@@ -100,26 +102,15 @@ int nMiddleSwitch(astNode *root,
   // Switching between our possible backends:
   switch (backend){
   case BACKEND_ARCANE: return arcane(nabla,root,nabla_entity_name);
-    // The CUDA backend now uses nMiddleBackendAnimate
-    // Hook structures are filled by the backend    
-  case BACKEND_CUDA: {
-    nabla->hook=cuda(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
-  case BACKEND_OKINA:  return okina(nabla,root,nabla_entity_name);
-    // The LAMBDA backend now uses nMiddleBackendAnimate
-    // Hook structures are filled by the backend
-  case BACKEND_LAMBDA: {
-    nabla->hook=lambda(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
-  case BACKEND_KOKKOS: {
-    nabla->hook=kokkos(nabla);
-    return nMiddleBackendAnimate(nabla,root);
-  }
+  case BACKEND_CUDA:   return animate(nabla,root,cuda(nabla));
+    //case BACKEND_OKINA:  return okina(nabla,root,nabla_entity_name);
+  case BACKEND_OKINA:  return animate(nabla,root,okina(nabla));
+  case BACKEND_LAMBDA: return animate(nabla,root,lambda(nabla));
+  case BACKEND_KOKKOS: return animate(nabla,root,kokkos(nabla));
   default:
-    exit(NABLA_ERROR|fprintf(stderr,
-                  "\n[nablaMiddlendSwitch] Error while switching backend!\n"));
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\nError while switching backend!\n"));
   }
   return NABLA_ERROR;
 }

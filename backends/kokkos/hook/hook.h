@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-backendHooks* kokkos(nablaMain*);
+hooks* kokkos(nablaMain*);
 
 void hookSourceOpen(nablaMain*);
 void hookSourceInclude(nablaMain*);

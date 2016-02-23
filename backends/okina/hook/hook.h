@@ -40,81 +40,19 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OKINA_H_
-#define _NABLA_OKINA_H_
+#ifndef _NABLA_OKINA_HOOK_H_
+#define _NABLA_OKINA_HOOK_H_
 
-// simd/[std|sse|avx|mic]
-extern const char* nOkinaStdForwards[];
-extern const char* nOkinaSseForwards[];
-extern const char* nOkinaAvxForwards[];
-extern const char* nOkinaMicForwards[];
+void hookSourceOpen(nablaMain*);
+void hookSourceInclude(nablaMain*);
+ 
+void nOkinaMainSourceMesh(nablaMain*);
 
-extern const nWhatWith nOkinaStdDefines[];
-extern const nWhatWith nOkinaSseDefines[];
-extern const nWhatWith nOkinaAvxDefines[];
-extern const nWhatWith nOkinaMicDefines[];
-
-extern const nWhatWith nOkinaStdTypedef[];
-extern const nWhatWith nOkinaSseTypedef[];
-extern const nWhatWith nOkinaAvxTypedef[];
-extern const nWhatWith nOkinaMicTypedef[];
-
-char* nOkinaStdIncludes(void);
-char* nOkinaSseIncludes(void);
-char* nOkinaAvxIncludes(void);
-char* nOkinaMicIncludes(void);
-
-char* nOkinaStdBits(void);
-char* nOkinaSseBits(void);
-char* nOkinaAvxBits(void);
-char* nOkinaMicBits(void);
-
-char* nOkinaStdGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaSseGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaMicGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-
-char* nOkinaStdScatter(nablaVariable*);
-char* nOkinaSseScatter(nablaVariable*);
-char* nOkinaAvxScatter(nablaVariable*);
-char* nOkinaMicScatter(nablaVariable*);
+void nOkinaHeaderDump(nablaMain*);
+void nOkinaHeaderOpen(nablaMain*);
 
 char* nOkinaHookSysPrefix(void);
 char* nOkinaHookSysPostfix(void);
-
-char* nOkinaStdPrevCell(int);
-char* nOkinaSsePrevCell(int);
-char* nOkinaAvxPrevCell(int);
-char* nOkinaMicPrevCell(int);
-
-char* nOkinaStdNextCell(int);
-char* nOkinaSseNextCell(int);
-char* nOkinaAvxNextCell(int);
-char* nOkinaMicNextCell(int);
-
-// Cilk+ parallel color
-char *nOkinaParallelCilkSync(void);
-char *nOkinaParallelCilkSpawn(void);
-char *nOkinaParallelCilkLoop(nablaMain *);
-char *nOkinaParallelCilkIncludes(void);
-
-// OpenMP parallel color
-char *nOkinaParallelOpenMPSync(void);
-char *nOkinaParallelOpenMPSpawn(void);
-char *nOkinaParallelOpenMPLoop(nablaMain *);
-char *nOkinaParallelOpenMPIncludes(void);
-
-// Void parallel color
-char *nOkinaParallelVoidSync(void);
-char *nOkinaParallelVoidSpawn(void);
-char *nOkinaParallelVoidLoop(nablaMain *);
-char *nOkinaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *nOkinaPragmaIccIvdep(void);
-char *nOkinaPragmaGccIvdep(void);
-char *nOkinaPragmaIccAlign(void);
-char *nOkinaPragmaGccAlign(void);
 
 // nOkinaInit
 NABLA_STATUS nOkinaInitVariables(nablaMain*);
@@ -123,16 +61,21 @@ NABLA_STATUS nOkinaInitVariableDbg(nablaMain*);
 // nOkinaMain
 NABLA_STATUS nOkinaMainPrefix(nablaMain*);
 NABLA_STATUS nOkinaMainPreInit(nablaMain*);
+NABLA_STATUS nOkinaMainVarInitKernel(nablaMain*);
+NABLA_STATUS nOkinaMainVarInitCall(nablaMain*);
 NABLA_STATUS nOkinaMainPostInit(nablaMain*);
-NABLA_STATUS nOkinaMain(nablaMain*);
+NABLA_STATUS nOkinaMainHLT(nablaMain*);
 NABLA_STATUS nOkinaMainPostfix(nablaMain*);
 
 // nOkinaEnum
-void nOkinaEnumDefine(nablaMain*);
+void nOkinaHeaderDefineEnumerates(nablaMain*);
 
 // nOkinaVariables
-void okinaVariablesPrefix(nablaMain*);
-void okinaVariablesPostfix(nablaMain*);
+void nOkinaVariablesInit(nablaMain*);
+void nOkinaVariablesPrefix(nablaMain*);
+void nOkinaVariablesMalloc(nablaMain*);
+void nOkinaVariablesFree(nablaMain*);
+//void okinaVariablesPostfix(nablaMain*);
 
 // nOkinaHeader
 void nOkinaHeaderInclude(nablaMain *nabla);
@@ -183,11 +126,7 @@ char* nOkinaHookEnumerateDumpXYZ(nablaJob*);
 char* nOkinaHookEnumerateDump(nablaJob*);
 char* nOkinaHookEnumeratePostfix(nablaJob*);
 
-// hooks/nOkinaHookGather
-char* nOkinaHookGather(nablaJob*);
 
-// hooks/nOkinaHookScatter
-char* nOkinaHookScatter(nablaJob*);
 
 // hooks/nOkinaHookToken
 void nOkinaHookTokenSwitch(astNode*, nablaJob*);
@@ -196,6 +135,7 @@ void okinaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 // mesh/nOkinaMesh
 void nOkinaMeshPrefix(nablaMain*);
+void nOkinaMeshCore(nablaMain*);
 void nOkinaMeshPostfix(nablaMain*);
 void nOkinaMesh1D(nablaMain*);
 void nOkinaMesh3D(nablaMain*);
@@ -214,7 +154,8 @@ char* nOkinaHookTokenPrefix(nablaMain*);
 char* nOkinaHookTokenPostfix(nablaMain*);
 
 // nOkina
-NABLA_STATUS okina(nablaMain*, astNode*, const char*);
+//NABLA_STATUS oldOkina(nablaMain*, astNode*, const char*);
+hooks* okina(nablaMain *);
 
-#endif // _NABLA_OKINA_H_
+#endif // _NABLA_OKINA_HOOK_H_
  

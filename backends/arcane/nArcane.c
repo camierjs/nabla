@@ -286,7 +286,7 @@ NABLA_STATUS arcane(nablaMain *nabla,
     NULL  // dumpNablaParameterList
   };
   
-  backendHooks arcaneBackendHooks={
+  hooks arcaneBackendHooks={
     &nArcaneHookForAll,
     &nArcaneHookToken,
     &hookGrammar,

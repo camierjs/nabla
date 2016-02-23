@@ -40,40 +40,83 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "nabla.tab.h"
+#ifndef _NABLA_OKINA_CALL_H_
+#define _NABLA_OKINA_CALL_H_
 
+// simd/[std|sse|avx|mic]
+extern const char* nOkinaStdForwards[];
+extern const char* nOkinaSseForwards[];
+extern const char* nOkinaAvxForwards[];
+extern const char* nOkinaMicForwards[];
 
-// ****************************************************************************
-// * Dump d'extra connectivity
-// ****************************************************************************
-void nOkinaArgsAddExtraConnectivities(nablaMain *nabla, int *numParams){
-  return;
-}
+extern const nWhatWith nOkinaStdDefines[];
+extern const nWhatWith nOkinaSseDefines[];
+extern const nWhatWith nOkinaAvxDefines[];
+extern const nWhatWith nOkinaMicDefines[];
 
+extern const nWhatWith nOkinaStdTypedef[];
+extern const nWhatWith nOkinaSseTypedef[];
+extern const nWhatWith nOkinaAvxTypedef[];
+extern const nWhatWith nOkinaMicTypedef[];
 
-// ****************************************************************************
-// * Dump d'extra arguments
-// ****************************************************************************
-void nOkinaArgsExtra(nablaMain *nabla, nablaJob *job, int *numParams){
-  nprintf(nabla,"\n\t\t/*okinaAddExtraArguments*/",NULL);
-}
+char* nOkinaStdIncludes(void);
+char* nOkinaSseIncludes(void);
+char* nOkinaAvxIncludes(void);
+char* nOkinaMicIncludes(void);
 
+char* nOkinaStdBits(void);
+char* nOkinaSseBits(void);
+char* nOkinaAvxBits(void);
+char* nOkinaMicBits(void);
 
-// ****************************************************************************
-// * Dump dans le src des arguments nabla en in comme en out
-// ****************************************************************************
-void nOkinaArgsList(nablaMain *nabla, astNode *n, int *numParams){
-  nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
-}
+char* nOkinaStdGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaSseGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaAvxGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaMicGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
 
+char* nOkinaStdScatter(nablaVariable*);
+char* nOkinaSseScatter(nablaVariable*);
+char* nOkinaAvxScatter(nablaVariable*);
+char* nOkinaMicScatter(nablaVariable*);
 
-// ****************************************************************************
-// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
-// ****************************************************************************
-void nOkinaArgsDumpNablaDebugFunctionFromOut(nablaMain *nabla,
-                                                      astNode *n,
-                                                      bool in_or_out){
-  nprintf(nabla,"\n\t\t/*okinaDumpNablaDebugFunctionFromOutArguments*/",NULL);
-}
+char* nOkinaStdPrevCell(int);
+char* nOkinaSsePrevCell(int);
+char* nOkinaAvxPrevCell(int);
+char* nOkinaMicPrevCell(int);
 
+char* nOkinaStdNextCell(int);
+char* nOkinaSseNextCell(int);
+char* nOkinaAvxNextCell(int);
+char* nOkinaMicNextCell(int);
+
+// Cilk+ parallel color
+char *nOkinaParallelCilkSync(void);
+char *nOkinaParallelCilkSpawn(void);
+char *nOkinaParallelCilkLoop(nablaMain *);
+char *nOkinaParallelCilkIncludes(void);
+
+// OpenMP parallel color
+char *nOkinaParallelOpenMPSync(void);
+char *nOkinaParallelOpenMPSpawn(void);
+char *nOkinaParallelOpenMPLoop(nablaMain *);
+char *nOkinaParallelOpenMPIncludes(void);
+
+// Void parallel color
+char *nOkinaParallelVoidSync(void);
+char *nOkinaParallelVoidSpawn(void);
+char *nOkinaParallelVoidLoop(nablaMain *);
+char *nOkinaParallelVoidIncludes(void);
+
+// Pragmas: Ivdep, Align
+char *nOkinaPragmaIccIvdep(void);
+char *nOkinaPragmaGccIvdep(void);
+char *nOkinaPragmaIccAlign(void);
+char *nOkinaPragmaGccAlign(void);
+
+// hooks/nOkinaHookGather
+char* gather(nablaJob*);
+
+// hooks/nOkinaHookScatter
+char* scatter(nablaJob*);
+
+#endif // _NABLA_OKINA_CALL_H_

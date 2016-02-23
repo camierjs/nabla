@@ -41,39 +41,49 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
+#include "nabla.tab.h"
 
 // ****************************************************************************
-// * nOkinaEnumDefine
+// * Dump d'extra arguments
 // ****************************************************************************
-void nOkinaEnumDefine(nablaMain *nabla){
-  const char *parallel_prefix_for_loop=nabla->call->parallel->loop(nabla);
-  fprintf(nabla->entity->hdr,"\n\n\
-/*********************************************************\n\
- * Forward enumerates\n\
- *********************************************************/\n\
-#define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
-#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
-\n\
-#define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
-#define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
-\n\
-#define FOR_EACH_CELL_WARP_NODE(n)\\\n\
-  %sfor(int cn=WARP_SIZE*c+WARP_SIZE-1;cn>=WARP_SIZE*c;--cn)\\\n\
-    for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)\n\
-\n\
-#define FOR_EACH_NODE(n) /*%s*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
-#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
-\n\
-#define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
-\n\
-#define FOR_EACH_NODE_WARP_CELL(c)\\\n\
-    for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n",
-          parallel_prefix_for_loop, // FOR_EACH_CELL
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
-          parallel_prefix_for_loop, // FOR_EACH_NODE
-          parallel_prefix_for_loop  // FOR_EACH_NODE_WARP
-          );
+void nOkinaArgsExtra(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla,"\n\t\t/*okinaAddExtraArguments*/",NULL);
 }
+
+// ****************************************************************************
+// * Dump dans le src des arguments nabla en in comme en out
+// ****************************************************************************
+void nOkinaArgsList(nablaMain *nabla, astNode *n, int *numParams){
+  nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
+}
+
+
+// ****************************************************************************
+// * okinaReturnFromArgument
+// ****************************************************************************
+void nOkinaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
+  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,
+                                        rulenameToId("direct_declarator"));
+  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
+    nprintf(nabla, NULL, "\
+\n\tint threads = omp_get_max_threads();\
+\n\treal *%s_per_thread=(real *)calloc(threads,sizeof(real));", rtnVariable);
+}
+
+
+// ****************************************************************************
+// * nOkinaHookAddArguments
+// ****************************************************************************
+void nOkinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
+  // En Okina, par contre il faut les y mettre
+  if (fct->parse.function_call_name!=NULL){
+    //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
+    int numParams=1;
+    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
+    nOkinaArgsExtra(nabla, called, &numParams);
+    if (called->nblParamsNode != NULL)
+      nOkinaArgsList(nabla,called->nblParamsNode,&numParams);
+  }
+}
+
+

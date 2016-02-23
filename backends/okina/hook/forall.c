@@ -42,7 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/okina/okina.h"
+#include "backends/okina/call/call.h"
+#include "backends/okina/hook/hook.h"
 
 
 // ****************************************************************************
@@ -176,6 +177,24 @@ char* nOkinaHookEnumerateDump(nablaJob *job){
 }
 
 
+// ****************************************************************************
+// * Traitement des tokens NABLA ITEMS
+// ****************************************************************************
+char* nOkinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
+  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
+  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
+  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
+  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
+  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
+  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
+  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
+  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
+  nablaError("Could not switch in nOkinaHookItem!");
+  return NULL;
+}
+
 
 // ****************************************************************************
 // * Fonction postfix à l'ENUMERATE_*
@@ -183,7 +202,7 @@ char* nOkinaHookEnumerateDump(nablaJob *job){
 char* nOkinaHookEnumeratePostfix(nablaJob *job){
   if (job->is_a_function) return "";
   if (job->item[0]=='\0') return "// job nOkinaHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return nOkinaHookGather(job);
+  if (job->xyz==NULL) return gather(job);
   if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
 \t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
 \t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\

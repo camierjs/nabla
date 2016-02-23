@@ -8,8 +8,8 @@ include_directories(${MPI_INCLUDE_PATH})
 include_directories(${HYPRE_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(NablaLambdaAlephHYPRE IAlephHypre.cc)
+add_library(NablaAlephHYPRE IAlephHypre.cc)
 
-add_dependencies(NablaLambdaAlephHYPRE NablaLambdaAleph)
+add_dependencies(NablaAlephHYPRE NablaAleph)
 
-set(HYPRE_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaLambdaAlephHYPRE.a PARENT_SCOPE)
+set(HYPRE_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaAlephHYPRE.a PARENT_SCOPE)

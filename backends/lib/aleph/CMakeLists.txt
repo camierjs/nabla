@@ -8,11 +8,11 @@ set(ALEPH_SOURCES AlephKernel.cc   AlephMatrix.cc
                   AlephVector.cc   AlephParams.cc
                   AlephTopology.cc AlephOrdering.cc
                   AlephIndexing.cc AlephFactory.cc
-                  nLambdaAleph.c ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
+                  nablaAleph.c ${CMAKE_CURRENT_BINARY_DIR}/nablaAleph.S)
                 
-configure_file(nLambdaAleph.S ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S)
+configure_file(nablaAleph.S ${CMAKE_CURRENT_BINARY_DIR}/nablaAleph.S)
                 
-set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nLambdaAleph.S 
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nablaAleph.S 
   PROPERTY OBJECT_DEPENDS 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
@@ -43,8 +43,8 @@ endif()
 configure_file(Aleph.h ${CMAKE_CURRENT_BINARY_DIR}/Aleph.h)
 configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h)
 
-add_library(NablaLambdaAleph ${ALEPH_SOURCES})
+add_library(NablaAleph ${ALEPH_SOURCES})
 
-add_dependencies(NablaLambdaAleph NablaLambdaHook)
+#add_dependencies(NablaLibAleph NablaLambdaHook)
 
-set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaLambdaAleph.a PARENT_SCOPE)
+set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaAleph.a PARENT_SCOPE)

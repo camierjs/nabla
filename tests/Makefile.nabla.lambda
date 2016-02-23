@@ -19,7 +19,7 @@ CXX = ${CMAKE_CXX_COMPILER}
 #CXX = mpc_g++
 CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
-LIB_ALEPH = ${LAMBDA_ALEPH_LIB} ${LAMBDA_ALEPH_HYPRE_LIB}
+LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
 # A mettre lors du configure
 LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib

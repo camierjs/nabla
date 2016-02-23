@@ -409,8 +409,8 @@ static void hookTurnTokenToVariableForStdFunction(nablaMain *arc,
  * Transformation de tokens en variables selon les contextes dans le cas d'un '[Cell|node]Enumerator'
  *****************************************************************************/
 nablaVariable *hookTurnTokenToVariable(astNode * n,
-                                            nablaMain *nabla,
-                                            nablaJob *job){
+                                       nablaMain *nabla,
+                                       nablaJob *job){
   nablaVariable *var=nMiddleVariableFind(nabla->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;

@@ -4,35 +4,14 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#######################${VT100_RESET}")
 
 # BACKEND OKINA
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}OKINA${VT100_RESET}")
-set(BACKEND_OKINA_C 
-  knArgs.c  knEnum.c  knHeader.c  knInit.c  knMain.c  knPragma.c  knVariables.c  okina.c
-  ${CMAKE_CURRENT_BINARY_DIR}/okina.S)
-
-# On spécifie en plus que nOkinaDump.S va utiliser incbin pour se compiler
-set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/okina.S 
-             PROPERTY OBJECT_DEPENDS 
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/avx/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/maths/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/mic/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/sse/*.*
-             ${CMAKE_CURRENT_SOURCE_DIR}/dump/std/*.*)
-
-configure_file(okina.S ${CMAKE_CURRENT_BINARY_DIR}/okina.S)
+set(BACKEND_OKINA_C okina.c)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/simd)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/para)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/call)
 
-target_link_libraries(NablaOkina
-  NablaOkinaPara
-  NablaOkinaMesh
-  NablaOkinaSimd
-  NablaOkinaHook)
+target_link_libraries(NablaOkina NablaOkinaHook NablaOkinaCall)
 
 add_dependencies(NablaOkina libNabla)
 
