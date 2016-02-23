@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+extern char* lambdaAlephHeader(nablaMain*);
+
 // ****************************************************************************
 // * Backend PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
@@ -80,6 +82,8 @@ int main(int argc, char *argv[]){\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
 NABLA_STATUS hookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
+  if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+    fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
   fprintf(nabla->entity->src, BACKEND_MAIN_PREFIX);
   return NABLA_OK;
 }
@@ -142,7 +146,7 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
-      //if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
       if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
     }else{
       nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_NODE(n)");

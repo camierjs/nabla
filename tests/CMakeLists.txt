@@ -293,9 +293,9 @@ nabla_add_test(lambda p1apwb1D_gosse 1 gen std seq)
 nabla_add_test(lambda p1apwb1D_implicite 1 gen std seq)
 nabla_add_test(lambda p1apwb1D_two_state_irregular_mesh 1 gen std seq)
 nabla_add_test(lambda p1apwb1D_two_state_semi_implicte 1 gen std seq)
-
-nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
-
+if (HYPRE_FOUND)
+   nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
+endif (HYPRE_FOUND)
 
 ##########################
 # NABLA TESTS FOR KOKKOS #
@@ -313,6 +313,14 @@ nabla_add_test(kokkos llsh 1 run seq)
 nabla_add_test(kokkos upwindAP 1 run seq)
 nabla_add_test(kokkos hlt 1 run seq)
 nabla_add_test_with_defines(kokkos deflex 1 run seq -DNO_DEFINES 100000)
+if (HYPRE_FOUND)
+   nabla_add_test(kokkos aleph1D 1 run seq)
+   nabla_add_test(kokkos aleph2D 1 run seq)
+   nabla_add_test(kokkos heat 1 run seq)
+   nabla_add_test(kokkos amber 1 run seq)
+   nabla_add_test_with_defines(kokkos darcy 1 run seq -DALEPH_INDEX 100000)
+   nabla_add_test(kokkos p1apwb1D_implicite 1 run std seq)
+endif (HYPRE_FOUND)
 
 
 ########################

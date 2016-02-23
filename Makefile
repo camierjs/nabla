@@ -77,16 +77,19 @@ l:
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV # mhydro glace2D
-#$(shell cd tests && find . -maxdepth 1 -type d -name [^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|sed -e "s/\\.\\// /g"|tr "\\n" " ")
+tests = aleph1D kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV
+#$(shell cd tests && find . -maxdepth 1 -type d -name \
+	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
+		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 #1 4
 types = gen run
 simds = std #std sse avx avx2 mic warp
-backends = kokkos lambda arcane #arcane okina lambda cuda kokkos
-parallels = seq omp mpi #seq mpi omp cilk smp
+backends = kokkos lambda arcane #okina cuda 
+parallels = seq omp mpi #cilk smp
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
-	(tput reset && cd $(BUILD_PATH)/tests && $(CTEST) -V -R nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6))
+	(tput reset && cd $(BUILD_PATH)/tests && \
+		$(CTEST) -V -R nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6))
 endef
 $(foreach type,$(types),\
 	$(foreach backend,$(backends),\

@@ -72,6 +72,7 @@ const static nWhatWith headerDefines[]={
   {"opScaMul(u,v)","dot3(u,v)"},
   {"opVecMul(u,v)","cross(u,v)"},    
   {"ReduceMinToDouble(a)","a"},
+  {"ReduceMaxToDouble(a)","a"},
   {"GlobalIteration", "global_iteration[0]"},
   {"MD_DirX","0"},
   {"MD_DirY","1"},
@@ -80,6 +81,9 @@ const static nWhatWith headerDefines[]={
   {"MD_Negt","4"},
   {"MD_Shift","3"},
   {"MD_Mask","7"},
+  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
+  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
+  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}
 };
 
@@ -89,6 +93,7 @@ const nWhatWith headerTypedef[]={
   {"int","integer"},
   {"double","real"},
   {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
