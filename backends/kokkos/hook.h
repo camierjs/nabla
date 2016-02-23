@@ -43,12 +43,14 @@
 #ifndef _NABLA_KOKKOS_HOOK_H_
 #define _NABLA_KOKKOS_HOOK_H_
 
+const hooks* kokkos(nablaMain*);
+char* filterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
+char* filterScatter(nablaJob*);
+
 
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-hooks* kokkos(nablaMain*);
-
 void hookSourceOpen(nablaMain*);
 void hookSourceInclude(nablaMain*);
 
@@ -63,13 +65,8 @@ void hookReturnFromArgument(nablaMain*,nablaJob*);
 void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 bool hookDfsVariable(void);
 
-// Pragmas: Ivdep, Align
-char *hookPragmaIccIvdep(void);
-char *hookPragmaGccIvdep(void);
-char *hookPragmaIccAlign(void);
 char *hookPragmaGccAlign(void);
 
-// Hooks: Header
 void hookHeaderDump(nablaMain *);
 void hookHeaderOpen(nablaMain *);
 void hookHeaderDefineEnumerates(nablaMain *);
@@ -124,10 +121,6 @@ void hookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
 void hookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
 void hookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
 void hookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-
-// Pour dumper les arguments necessaire dans le main
-void hookDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void hookAddExtraArguments(nablaMain*,nablaJob*,int*);
 
 void hookIsTest(nablaMain*,nablaJob*,astNode*,int);
 

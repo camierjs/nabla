@@ -59,95 +59,10 @@ void nMiddleFunctionDumpHeader(FILE *file, astNode * n){
   if(n->next != NULL) nMiddleFunctionDumpHeader(file, n->next);
 }
 
-
-/*****************************************************************************
- * nMiddleFunctionDeclarationReal3
- *****************************************************************************/
-__attribute__((unused)) static void nMiddleFunctionDeclarationReal3(astNode * n){
-  if (n->ruleid != rulenameToId("declaration")
-      || n->children->token!=NULL) // Cela peut être le cas de PREPROCS
-    return;
-  // On va chercher le type
-  char *type = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
-  assert(type!=NULL);
-  dbg("\n\t[nablaFunctionDeclarationReal3] declaration with type '%s'",type);
-  if (strcmp(type,"Real3")!=0) return;
-  // On va chercher le nom de la variable locale
-  char *name = dfsFetchFirst(n->children,rulenameToId("direct_declarator"));
-  assert(name!=NULL);
-  dbg("\n\t[nablaFunctionDeclarationReal3] direct_declarator name is '%s'",name);
-  // On regarde si dans notre cas on a un '='
-  astNode *egal=dfsFetchTokenId(n,'=');
-  // On vérifie qu'on a bien hité
-  assert(egal!=NULL);
-  if (egal==NULL){
-    dbg("\n\t[nablaFunctionDeclarationReal3] NULL egal, returning");
-    return;
-  }
-  dbg("\n\t[nablaFunctionDeclarationReal3] egal id is '%d'",egal->tokenid);
-  // On regarde si dans notre cas on a un 'cross'
-  bool cross3=false;
-  astNode *nCross=dfsFetchRule(n->children,rulenameToId("primary_expression"));
-  // On vérifie qu'on a bien hité
-  if ((strcmp(nCross->children->token,"cross")==0) && nCross!=NULL){
-    cross3=true;
-    nCross->children->token=strdup("cross");
-    dbg("\n\t[nablaFunctionDeclarationReal3] nCross, work todo");
-  }
-  // Et on transforme ceci en un cpy3
-  dbg("\n\t[nablaFunctionDeclarationReal3] Et on transforme ceci en un cpy3");
-  egal->token=strdup(cross3?";":"; cpy3(");
-  astNode *point_virgule=dfsFetchTokenId(n->children,';');
-  assert(point_virgule!=NULL);
-  char end_of_line[1024];
-  snprintf(end_of_line, sizeof(end_of_line),(cross3==true)?";\n\t":", &%s);\n\t",name);
-  point_virgule->token=strdup(end_of_line);
-  // On flush l'ancien ';'
-  point_virgule->tokenid=0;
-}
-
-
-/*****************************************************************************
- * nMiddleFunctionDeclarationDouble
- *****************************************************************************/
-__attribute__((unused)) static void nMiddleFunctionDeclarationDouble(astNode * n){
-  if (n->ruleid != rulenameToId("declaration")
-      || n->children->token!=NULL) // Cela peut être le cas de PREPROCS
-    return;
-  // On va chercher le type
-  astNode *nType = dfsFetchRule(n->children,rulenameToId("type_specifier"));
-  dbg("\n\t[nablaFunctionDeclarationDouble] declaration with type '%s'",nType->children->token);
-  if (strcmp(nType->children->token,"double")!=0) return;
-  // On va chercher le nom de la variable locale
-  astNode *nName = dfsFetchRule(n->children,rulenameToId("direct_declarator"));
-  dbg("\n\t[nablaFunctionDeclarationDouble] direct_declarator name is '%s'",nName->children->token);
-  // On regarde si dans notre cas on a un '='
-  astNode *egal=dfsFetchTokenId(n,'=');
-  // On vérifie qu'on a bien hité
-  assert(egal!=NULL);
-  if (egal==NULL){
-    dbg("\n\t[nablaFunctionDeclarationDouble] NULL egal, returning");
-    return;
-  }
-  dbg("\n\t[nablaFunctionDeclarationDouble] egal id is '%d'",egal->tokenid);
-  astNode *nPointVirgule=dfsFetchTokenId(n,';');
-  if (nPointVirgule==NULL){
-    dbg("\n\t[nablaFunctionDeclarationDouble] NULL nPointVirgule, returning");
-    return;
-  }
-  // Et on transforme ceci en un Real3
-  nType->children->token=strdup("Real3");
-  egal->token=strdup("; doubletoReal3(");
-  char end_of_line[1024];
-  snprintf(end_of_line, sizeof(end_of_line),", &%s);\n\t",nName->children->token);
-  nPointVirgule->token=strdup(end_of_line);
-  nPointVirgule->tokenid=0;
-}
-
-  
+ 
 // ****************************************************************************
 // * nMiddleFunctionParse
-// *Action de parsing d'une fonction
+// * Action de parsing d'une fonction
 // ****************************************************************************
 void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
@@ -165,7 +80,7 @@ void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
     
     if(n->tokenid==CONST){
-      nprintf(nabla, "/*CONST*/", "%s const ", fct->entity->main->hook->pragma->align());
+      nprintf(nabla, "/*CONST*/", "%s const ", cHOOK(fct->entity->main,pragma,align));
       break;
     }
     
@@ -443,7 +358,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   nprintf(nabla, NULL, "){\n");
   // On prépare le bon ENUMERATE
   dbg("\n\t[nablaFctFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\t%s", nabla->hook->forall->prefix(fct));
+  nprintf(nabla, NULL, "\t%s", cHOOKj(nabla,forall,prefix,fct));
   dbg("\n\t[nablaFctFill] dumpEnumerate");
   nprintf(nabla, NULL, "\n\t%s", nabla->hook->forall->dump(fct));
   dbg("\n\t[nablaFctFill] postfixEnumerate");

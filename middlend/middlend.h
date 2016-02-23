@@ -204,6 +204,21 @@ typedef struct nablaJobStruct{
   struct nablaJobStruct *next;
 }nablaJob;
 
+#define cHOOK(nabla,stuct,fct)\
+  (nabla->hook->stuct!=NULL)?\
+  (nabla->hook->stuct->fct!=NULL)?\
+   nabla->hook->stuct->fct():"":""
+
+#define cHOOKn(nabla,stuct,fct)\
+  (nabla->hook->stuct!=NULL)?\
+  (nabla->hook->stuct->fct!=NULL)?\
+  nabla->hook->stuct->fct(nabla):strdup(""):strdup("")
+
+#define cHOOKj(nabla,stuct,fct,job)\
+  (nabla->hook->stuct!=NULL)?\
+  (nabla->hook->stuct->fct!=NULL)?\
+   nabla->hook->stuct->fct(job):"":""
+
 
 // ****************************************************************************
 // * Nabla SWIRL & HLT struct
@@ -257,7 +272,6 @@ typedef struct nablaMainStruct{
   struct hookStruct *hook;
   struct callStruct *call;
 } nablaMain;
-
 
 // ****************************************************************************
 // * Forward declaration

@@ -41,14 +41,12 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-
 
 
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* callGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
+static char* gatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
   bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   
   // Phase de déclaration
@@ -94,7 +92,7 @@ gather%sk(cell_face[f*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* callGatherNodes(nablaJob *job,
+static char* gatherNodes(nablaJob *job,
                                    nablaVariable* var,
                                    GATHER_SCATTER_PHASE phase){
   bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
@@ -125,7 +123,7 @@ gatherFromNode_%sk%s(node_cell[NABLA_NODE_PER_CELL*n+c],%s %s_%s, &gathered_%s_%
 // ****************************************************************************
 // * Gather for Faces
 // ****************************************************************************
-static char* callGatherFaces(nablaJob *job,
+static char* gatherFaces(nablaJob *job,
                                    nablaVariable* var,
                                    GATHER_SCATTER_PHASE phase){
   // Phase de déclaration
@@ -152,12 +150,12 @@ static char* callGatherFaces(nablaJob *job,
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-static char* callGather(nablaJob *job,nablaVariable* var,
+static char* gather(nablaJob *job,nablaVariable* var,
                         GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return callGatherCells(job,var,phase);
-  if (itm=='n') return callGatherNodes(job,var,phase);
-  if (itm=='f') return callGatherFaces(job,var,phase);
+  if (itm=='c') return gatherCells(job,var,phase);
+  if (itm=='n') return gatherNodes(job,var,phase);
+  if (itm=='f') return gatherFaces(job,var,phase);
   nablaError("Could not distinguish job item in callGather for job '%s'!", job->name);
   return NULL;
 }
@@ -170,7 +168,7 @@ static char* callGather(nablaJob *job,nablaVariable* var,
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* callFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
+char* filterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
   char *gather_src_buffer=NULL;
   
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
@@ -185,7 +183,7 @@ char* callFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
             (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
             var->name);
     dbg("\n\t\t\t\t[callFilterGather] strcat");
-    strcat(gather_src_buffer,callGather(job,var,phase));
+    strcat(gather_src_buffer,gather(job,var,phase));
   }
   dbg("\n\t\t\t\t[callFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");

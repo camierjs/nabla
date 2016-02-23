@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/kokkos/call/call.h"
+#include "backends/kokkos/hook.h"
 
 static void hookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
@@ -69,17 +69,6 @@ void hookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
   if (token==IS) return;
   if (token==IS_OP_END) hookIsTestEnd(nabla,job,n);
 }
-
-
-// ****************************************************************************
-// * hookTokenPrefix
-// ****************************************************************************
-char* hookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
-
-// ****************************************************************************
-// * hookTokenPostfix
-// ****************************************************************************
-char* hookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 
 // ****************************************************************************
@@ -266,11 +255,13 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(CONST):{
-    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->hook->pragma->align());
+    //nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->hook->pragma->align());
+    nprintf(nabla, "/*CONST*/", "%sconst ", cHOOK(job->entity->main,pragma,align));
     break;
   }
   case(ALIGNED):{
-    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
+    //nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
+    nprintf(nabla, "/*ALIGNED*/", "%s", cHOOK(job->entity->main,pragma,align));
     break;
   }
     
@@ -366,12 +357,12 @@ void hookSwitchToken(astNode *n, nablaJob *job){
     dbg("\n\t\t\t\t[hookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
     nprintf(nabla, "/*filterGather*/", "%s",
-            callFilterGather(n,job,GATHER_SCATTER_CALL));
+            filterGather(n,job,GATHER_SCATTER_CALL));
     break;
   }
   case(FORALL_END):{
      dbg("\n\t\t\t\t[hookSwitchToken] FORALL_END");
-   nprintf(nabla, "/*filterScatter*/", callFilterScatter(job));
+     nprintf(nabla, "/*filterScatter*/", filterScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

@@ -41,82 +41,105 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
+#include "backends/lib/dump/dump.h"
+const extern nWhatWith headerDefines[];
+const extern char* headerForwards[];
+const extern nWhatWith headerTypedef[];
 
 
 // ****************************************************************************
-// * Flush de la 'vraie' variable depuis celle déclarée en in/out
+// * hookHeaderDump
 // ****************************************************************************
-static void callFlushRealVariable(nablaJob *job, nablaVariable *var){
-  // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-  if (real_variable==NULL)
-    nablaError("Could not find real variable from scattered variables!");
-  real_variable->is_gathered=false;
+void hookHeaderDump(nablaMain *nabla){
+  assert(nabla->entity->name);
+  dumpHeader(nabla);
 }
 
 
 // ****************************************************************************
-// * Scatter
+// * hookHeaderOpen
 // ****************************************************************************
-static char* callScatter(nablaVariable* var){
-  char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
+void hookHeaderOpen(nablaMain *nabla){
+  char hdrFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier header
+  sprintf(hdrFileName, "%s.h", nabla->name);
+  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
 
-
 // ****************************************************************************
-// * Filtrage du SCATTER
+// * ENUMERATES Hooks
 // ****************************************************************************
-char* callFilterScatter(nablaJob *job){
-  int i;
-  char scatters[1024];
-  nablaVariable *var;
-  scatters[0]='\0';
-  int nbToScatter=0;
-  int filteredNbToScatter=0;
-  
-  if (job->parse.selection_statement_in_compound_statement){
-    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!scatter*/");
-    return "";
-  }
-  
-  // On récupère le nombre de variables potentielles à scatterer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToScatter+=1;
-
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToScatter==0) return "";
-  
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// scatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// scatter enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToScatter+=1;
-  }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToScatter==0) return "";
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iScatter) continue;
-    callFlushRealVariable(job,var);
-    // Pour l'instant, on ne scatter pas les node_coord
-    if (strcmp(var->name,"coord")==0) continue;
-    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
-    if (var->inout==enum_in_variable) continue;
-    strcat(scatters,callScatter(var));
-  }
-  job->parse.iScatter+=1;
-  return strdup(scatters);
+void hookHeaderDefineEnumerates(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+/*********************************************************\n\
+ * Forward enumerates\n\
+ *********************************************************/\n\
+#define FOR_EACH_PARTICLE(p) for(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\n\
+#define FOR_EACH_CELL(c) for(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\n\
+#define FOR_EACH_CELL_SHARED(c,local) for(int c=0;c<NABLA_NB_CELLS;c+=1)\n\n\
+#define FOR_EACH_NODE(n) for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
+#define FOR_EACH_NODE_CELL(c)\
+ for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
+//#define FOR_EACH_NODE_CELL(c) for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\n\
+#define FOR_EACH_FACE(f) for(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_INNER_FACE(f) for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OUTER_FACE(f)\
+ for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+// Pour l'instant un étant que multi-threadé, les 'own' sont les 'all'\n\
+#define FOR_EACH_OWN_INNER_FACE(f) for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OWN_OUTER_FACE(f)\
+ for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n");
 }
 
 
+// ****************************************************************************
+// * hookHeaderPrefix
+// ****************************************************************************
+void hookHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->hdr,
+          "#ifndef __BACKEND_%s_H__\n#define __BACKEND_%s_H__",
+          nabla->entity->name,nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * hookHeaderIncludes
+// ****************************************************************************
+void hookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// *****************************************************************************\n\
+// * Backend includes\n\
+// *****************************************************************************\n\
+#include <sys/time.h>\n\
+#include <stdlib.h>\n\
+#include <iso646.h>\n\
+#include <stdio.h>\n\
+#include <string.h>\n\
+#include <vector>\n\
+#include <math.h>\n\
+#include <assert.h>\n\
+#include <stdarg.h>\n\
+#include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+using namespace std;\n\
+int hlt_level;\n\
+bool *hlt_exit;\n\
+int omp_get_max_threads(void){return 1;}\n\
+int omp_get_thread_num(void){return 0;}\n\
+");
+  nMiddleDefines(nabla,headerDefines);
+  nMiddleTypedefs(nabla,headerTypedef);
+  nMiddleForwards(nabla,headerForwards);
+}
+
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void hookHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n#endif // __BACKEND_%s_H__\n",nabla->entity->name);
+}

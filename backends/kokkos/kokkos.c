@@ -41,13 +41,21 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/kokkos/call/call.h"
-#include "backends/kokkos/hook/hook.h"
-
+#include "backends/kokkos/hook.h"
 
 // ****************************************************************************
-// * CALLS
+// * DEFINES, FORWARDS & TYPEDEFS
 // ****************************************************************************
+const char* headerForwards[]={NULL};
+
+const nWhatWith headerTypedef[]={
+  {"int","integer"},
+  {"double","real"},
+  {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
+  {NULL,NULL}
+};
+
 const nWhatWith headerDefines[]={
   {"NABLA_NB_GLOBAL","1"},
   {"Bool", "bool"},
@@ -87,55 +95,19 @@ const nWhatWith headerDefines[]={
   {NULL,NULL}
 };
 
-const char* headerForwards[]={NULL};
-
-const nWhatWith headerTypedef[]={
-  {"int","integer"},
-  {"double","real"},
-  {"struct real3","Real3"},
-  {"struct real3x3","Real3x3"},
-  {NULL,NULL}
-};
-
-const callHeader headerCalls={
-  NULL,//headerForwards,
-  NULL,//headerDefines,
-  NULL,//headerTypedef
-};
-
-const static callSimd simdCalls={
-  NULL,
-  NULL,//callGather,
-  NULL,//callScatter,
-  NULL
-};
-
-const static callParallel voidCalls={
-  callParallelVoidSync,
-  callParallelVoidSpawn,
-  callParallelVoidLoop,
-  callParallelVoidIncludes
-};
-
-backendCalls calls={
-  NULL,//&headerCalls,
-  NULL,//&simdCalls,
-  NULL//&voidCalls,
-};
-
 
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
 const static hookForAll forall={
-  hookForAllPrefix,
+  NULL,
   hookForAllDump,
   hookForAllItem,
   hookForAllPostfix
 };
 
 const static hookToken token={
-  hookTokenPrefix,
+  NULL,//hookTokenPrefix,
   hookSwitchToken,
   hookTurnTokenToVariable,
   hookTurnTokenToOption,
@@ -146,7 +118,7 @@ const static hookToken token={
   hookFatal,
   hookTurnBracketsToParentheses,
   hookIsTest,
-  hookTokenPostfix
+  NULL // hookTokenPostfix
 };
 
 const static hookGrammar gram={
@@ -154,7 +126,7 @@ const static hookGrammar gram={
   hookJob,
   hookReduction,
   hookPrimaryExpressionToReturn,
-  hookReturnFromArgument,
+  NULL,
   hookDfsVariable
 };
 
@@ -168,17 +140,12 @@ const static hookCall call={
 };
 
 const static hookXyz xyz={
-  hookSysPrefix,
+  NULL,
   hookPrevCell,
   hookNextCell,
   hookSysPostfix
 };
 
-const static hookPragma gcc={
-  hookPragmaGccAlign
-};
-
-// Hooks pour le header
 const static hookHeader header={
   hookHeaderDump,
   hookHeaderOpen,
@@ -188,20 +155,17 @@ const static hookHeader header={
   hookHeaderPostfix
 };
 
-// Hooks pour le source
 const static hookSource source={
   hookSourceOpen,
   hookSourceInclude
 };
-  
-// Hooks pour le maillage
+
 const static hookMesh mesh={
   hookMeshPrefix,
   hookMeshCore,
   hookMeshPostfix
 };
-  
-// Hooks pour les variables
+
 const static hookVars vars={
   hookVariablesInit,
   hookVariablesPrefix,
@@ -209,7 +173,6 @@ const static hookVars vars={
   hookVariablesFree
 };  
 
-// Hooks pour le main
 const static hookMain mains={
   hookMainPrefix,
   hookMainPreInit,
@@ -220,13 +183,13 @@ const static hookMain mains={
   hookMainPostfix
 };  
 
-static hooks kokkosHooks={
+const static hooks kokkosHooks={
   &forall,
   &token,
   &gram,
   &call,
   &xyz,
-  &gcc,
+  NULL,
   &header,
   &source,
   &mesh,
@@ -234,12 +197,4 @@ static hooks kokkosHooks={
   &mains
 };
 
-
-// ****************************************************************************
-// * kokkos
-// ****************************************************************************
-hooks* kokkos(nablaMain *nabla){
-  nabla->call=&calls;
-  return &kokkosHooks;
-  
-}
+const hooks* kokkos(nablaMain *nabla){return &kokkosHooks;}

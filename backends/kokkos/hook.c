@@ -44,32 +44,25 @@
 #include "nabla.tab.h"
 #include "frontend/ast.h"
 
+
+// ****************************************************************************
+// * hookAddArguments
+// ****************************************************************************
+void hookAddArguments(nablaMain *nabla,
+                      nablaJob *job){
+  // Si notre job a appelé des fonctions
+  if (job->parse.function_call_name!=NULL){
+    nMiddleArgsDumpFromDFS(nabla, job);
+  }
+}
+
+
 // ****************************************************************************
 // * hookDfsVariable
 // * 'true' means that this backend supports
 // * in/out scan for variable from middlend
 // ****************************************************************************
 bool hookDfsVariable(void){ return true; }
-
-
-// ****************************************************************************
-// * IVDEP Pragma
-// ****************************************************************************
-char *hookPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *hookPragmaGccIvdep(void){ return "__declspec(align(64))"; }
-
-
-// ****************************************************************************
-// * ALIGN hooks
-// ****************************************************************************
-char *hookPragmaIccAlign(void){ return ""; }
-char *hookPragmaGccAlign(void){ return ""; }
-
-
-// ****************************************************************************
-// * System Prefix
-// ****************************************************************************
-char* hookSysPrefix(void){ return "/*hookSysPrefix*/"; }
 
 
 // ****************************************************************************
@@ -99,7 +92,7 @@ char* hookNextCell(int direction){
 // ****************************************************************************
 // * System Postfix
 // ****************************************************************************
-char* hookSysPostfix(void){ return "/*hookSysPostfix*/)"; }
+char* hookSysPostfix(void){ return "/*hookSysPostfix left parenthese!*/ )"; }
 
 
 // ****************************************************************************
@@ -119,11 +112,10 @@ void hookFunction(nablaMain *nabla, astNode *n){
 // * Dump des variables appelées
 // ****************************************************************************
 void hookDfsForCalls(struct nablaMainStruct *nabla,
-                             nablaJob *fct,
-                             astNode *n,
-                             const char *namespace,
-                             astNode *nParams){
-  //nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+                     nablaJob *fct,
+                     astNode *n,
+                     const char *namespace,
+                     astNode *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -202,10 +194,6 @@ void hookJob(nablaMain *nabla, astNode *n){
   nablaJob *job = nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,NULL);
-  
-  // On teste *ou pas* que le job retourne bien 'void'
-  //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
-  //  exit(NABLA_ERROR|fprintf(stderr, "\n[hookJob] Error with return type which is not void\n"));
 }
 
 

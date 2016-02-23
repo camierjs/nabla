@@ -197,7 +197,12 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   ////////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_job_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
+
     nabla->hook->grammar->job(nabla,n);
+    //nablaJob *job = nMiddleJobNew(nabla->entity);
+    //nMiddleJobAdd(nabla->entity, job);
+    //nMiddleJobFill(nabla,job,n,NULL);
+
     dbg("\n\t[nablaMiddlendParseAndHook] job done");
     goto step_next;
   }

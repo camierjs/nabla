@@ -110,9 +110,7 @@ void hookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
  * Prépare le nom de la variable
  *****************************************************************************/
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  nprintf(nabla, NULL, "%s_%s",
-          var->item,
-          var->name);
+  nprintf(nabla, NULL, "%s_%s",var->item,var->name);
 }
 
 
@@ -139,7 +137,6 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 static bool hookTurnTokenToGatheredVariable(nablaMain *arc,
                                                   nablaVariable *var,
                                                   nablaJob *job){
-  //nprintf(arc, NULL, "/*gathered variable '%s' ?*/",var->name);
   if (!var->is_gathered) return false;
   if (job->parse.enum_enum=='\0') return false;
   nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);

@@ -40,34 +40,81 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_KOKKOS_CALL_H_
-#define _NABLA_KOKKOS_CALL_H_
+#include "nabla.h"
+
 
 // ****************************************************************************
-// * CALLS
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
 // ****************************************************************************
-char* callBits(void);
-char* callGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* callScatter(nablaVariable*);
-char* callIncludes(void);
-// Cilk+ parallel color
-char *callParallelCilkSync(void);
-char *callParallelCilkSpawn(void);
-char *callParallelCilkLoop(nablaMain *);
-char *callParallelCilkIncludes(void);
-// OpenMP parallel color
-char *callParallelOpenMPSync(void);
-char *callParallelOpenMPSpawn(void);
-char *callParallelOpenMPLoop(nablaMain *);
-char *callParallelOpenMPIncludes(void);
-// Void parallel color
-char *callParallelVoidSync(void);
-char *callParallelVoidSpawn(void);
-char *callParallelVoidLoop(nablaMain *);
-char *callParallelVoidIncludes(void);
+static void flushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
+  if (real_variable==NULL)
+    nablaError("Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+}
 
-char* callFilterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
-char* callFilterScatter(nablaJob*);
 
-#endif // _NABLA_KOKKOS_CALL_H_
- 
+// ****************************************************************************
+// * Scatter
+// ****************************************************************************
+static char* scatter(nablaVariable* var){
+  char scatter[1024];
+  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+           strcmp(var->type,"real")==0?"":"3",
+           var->item, var->name,
+           var->item, var->name);
+  return strdup(scatter);
+}
+
+
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+char* filterScatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!scatter*/");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
+
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// scatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// scatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
+
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";
+  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    flushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
+}
+

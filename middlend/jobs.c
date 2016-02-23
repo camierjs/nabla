@@ -554,7 +554,7 @@ void nMiddleJobFill(nablaMain *nabla,
  }
   
   dbg("\n\t[nablaJobFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\n\t%s", nabla->hook->forall->prefix(job));
+  nprintf(nabla, NULL, "\n\t%s",  cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
   nprintf(nabla, NULL, "\n\t%s{", nabla->hook->forall->dump(job));// de l'ENUMERATE_
