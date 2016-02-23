@@ -13,11 +13,6 @@ add_library(NablaLambda ${BACKEND_LAMBDA_C})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/aleph)
-#info("Lambda ALEPH_LIB is ${VT100_FG_MAGENTA}${ALEPH_LIB}${VT100_RESET}")
-set(LAMBDA_ALEPH_LIB ${ALEPH_LIB} PARENT_SCOPE)
-set(LAMBDA_ALEPH_HYPRE_LIB ${ALEPH_HYPRE_LIB} PARENT_SCOPE)
-
 target_link_libraries(NablaLambda NablaLambdaHook)
 
 add_dependencies(NablaLambda libNabla)

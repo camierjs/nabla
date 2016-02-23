@@ -88,8 +88,8 @@ options{
 // ****************************************************************************
 global{
   int nx, ny, nz;               // Number of spatial zones in x,y,z
-  int num_directions;           // Total number of directions
-  int num_groups;               // Total number of energy groups
+  //int num_directions;           // Total number of directions
+  //int num_groups;               // Total number of energy groups
   int legendre_order;           // Scattering order (number Legendre coeff's - 1)
   int quad_num_polar;           // Number of polar quadrature points (0 for dummy)
   int quad_num_azimuthal;       // Number of azimuthal quadrature points (0 for dummy)
@@ -100,7 +100,7 @@ global{
   // Parallel Decomp
   int npx, npy, npz;            // The number of processors in x,y,z
   int num_dirsets;              // Number of direction sets
-  int num_groupsets;            // Number of energy group sets
+  //int num_groupsets;            // Number of energy group sets
   int num_zonesets_dim[3];      // Number of zoneset in x, y, z  
   int layout_pattern;           // Which subdomain/task layout to use
   
@@ -118,7 +118,7 @@ void ini(void){
   int tid = omp_get_thread_num();
   int core = sched_getcpu();
   printf("Rank: %d Thread %d: Core %d\n", myid, tid, core);
-#pragma omp parallel
+//#pragma omp parallel
   {
     num_threads = omp_get_num_threads();
     if(omp_get_thread_num() == 0){
