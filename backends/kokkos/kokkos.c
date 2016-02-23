@@ -48,7 +48,7 @@
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
-const static nWhatWith headerDefines[]={
+const nWhatWith headerDefines[]={
   {"NABLA_NB_GLOBAL","1"},
   {"Bool", "bool"},
   {"Integer", "int"},
@@ -98,30 +98,16 @@ const nWhatWith headerTypedef[]={
 };
 
 const callHeader headerCalls={
-  headerForwards,
-  headerDefines,
-  headerTypedef
+  NULL,//headerForwards,
+  NULL,//headerDefines,
+  NULL,//headerTypedef
 };
 
 const static callSimd simdCalls={
-  callBits,
-  callGather,
-  callScatter,
-  callIncludes
-};
-
-const static callParallel cilkCalls={
-  callParallelCilkSync,
-  callParallelCilkSpawn,
-  callParallelCilkLoop,
-  callParallelCilkIncludes
-};
-
-const static callParallel openMPCalls={
-  callParallelOpenMPSync,
-  callParallelOpenMPSpawn,
-  callParallelOpenMPLoop,
-  callParallelOpenMPIncludes
+  NULL,
+  NULL,//callGather,
+  NULL,//callScatter,
+  NULL
 };
 
 const static callParallel voidCalls={
@@ -132,9 +118,9 @@ const static callParallel voidCalls={
 };
 
 backendCalls calls={
-  &headerCalls,
-  &simdCalls,
-  &voidCalls,
+  NULL,//&headerCalls,
+  NULL,//&simdCalls,
+  NULL//&voidCalls,
 };
 
 
@@ -186,10 +172,6 @@ const static hookXyz xyz={
   hookPrevCell,
   hookNextCell,
   hookSysPostfix
-};
-
-const static hookPragma icc ={
-  hookPragmaIccAlign
 };
 
 const static hookPragma gcc={
@@ -257,15 +239,6 @@ static hooks kokkosHooks={
 // * kokkos
 // ****************************************************************************
 hooks* kokkos(nablaMain *nabla){
-  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    calls.parallel=&cilkCalls;
-  
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    calls.parallel=&openMPCalls;
-  
-  if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    kokkosHooks.pragma=&icc;
-
   nabla->call=&calls;
   return &kokkosHooks;
   

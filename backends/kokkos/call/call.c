@@ -41,7 +41,3 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-
-char *callBits(void){return "64";}
-char* callIncludes(void){return "";}

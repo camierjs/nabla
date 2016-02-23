@@ -42,6 +42,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lib/dump/dump.h"
+const extern nWhatWith headerDefines[];
+const extern char* headerForwards[];
+const extern nWhatWith headerTypedef[];
+
 
 // ****************************************************************************
 // * hookHeaderDump
@@ -67,7 +71,7 @@ void hookHeaderOpen(nablaMain *nabla){
 // * ENUMERATES Hooks
 // ****************************************************************************
 void hookHeaderDefineEnumerates(nablaMain *nabla){
-  const char *parallel_prefix_for_loop=nabla->call->parallel->loop(nabla);
+  const char *parallel_prefix_for_loop="";//nabla->call->parallel->loop(nabla);
   fprintf(nabla->entity->hdr,"\n\n\
 /*********************************************************\n\
  * Forward enumerates\n\
@@ -123,7 +127,6 @@ void hookHeaderIncludes(nablaMain *nabla){
 // *****************************************************************************\n\
 // * Backend includes\n\
 // *****************************************************************************\n\
-// Includes from nabla->simd->includes\n\%s\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <iso646.h>\n\
@@ -139,12 +142,12 @@ void hookHeaderIncludes(nablaMain *nabla){
 using namespace std;\n\
 int hlt_level;\n\
 bool *hlt_exit;\n\
-// Includes from nabla->parallel->includes()\n\%s",
-          nabla->call->simd->includes(),
-          nabla->call->parallel->includes());
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+int omp_get_max_threads(void){return 1;}\n\
+int omp_get_thread_num(void){return 0;}\n\
+");
+  nMiddleDefines(nabla,headerDefines);
+  nMiddleTypedefs(nabla,headerTypedef);
+  nMiddleForwards(nabla,headerForwards);
 }
 
 

@@ -57,6 +57,20 @@ static void callFlushRealVariable(nablaJob *job, nablaVariable *var){
 
 
 // ****************************************************************************
+// * Scatter
+// ****************************************************************************
+static char* callScatter(nablaVariable* var){
+  char scatter[1024];
+  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+           strcmp(var->type,"real")==0?"":"3",
+           var->item, var->name,
+           var->item, var->name);
+  return strdup(scatter);
+}
+
+
+
+// ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
 char* callFilterScatter(nablaJob *job){
@@ -99,23 +113,10 @@ char* callFilterScatter(nablaJob *job){
     if (strcmp(var->name,"coord")==0) continue;
     // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
     if (var->inout==enum_in_variable) continue;
-    strcat(scatters,job->entity->main->call->simd->scatter(var));
+    strcat(scatters,callScatter(var));
   }
   job->parse.iScatter+=1;
   return strdup(scatters);
 }
 
-
-
-// ****************************************************************************
-// * Scatter
-// ****************************************************************************
-char* callScatter(nablaVariable* var){
-  char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
-}
 

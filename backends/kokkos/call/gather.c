@@ -152,8 +152,8 @@ static char* callGatherFaces(nablaJob *job,
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* callGather(nablaJob *job,nablaVariable* var,
-                       GATHER_SCATTER_PHASE phase){
+static char* callGather(nablaJob *job,nablaVariable* var,
+                        GATHER_SCATTER_PHASE phase){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return callGatherCells(job,var,phase);
   if (itm=='n') return callGatherNodes(job,var,phase);
@@ -185,8 +185,7 @@ char* callFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
             (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
             var->name);
     dbg("\n\t\t\t\t[callFilterGather] strcat");
-    strcat(gather_src_buffer,
-           job->entity->main->call->simd->gather(job,var,phase));
+    strcat(gather_src_buffer,callGather(job,var,phase));
   }
   dbg("\n\t\t\t\t[callFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");

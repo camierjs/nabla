@@ -246,17 +246,16 @@ NABLA_STATUS hookMainHLT(nablaMain *n){
     // On provoque un parallel->sync
     // si l'on découvre un temps logique différent
     if (last_when!=entry_points[i].whens[0])
-      nprintf(n, NULL, "%s%s",
-              is_into_compute_loop?"\t\t":"\t",
-              n->call->parallel->sync());
+      nprintf(n, NULL, "%s",
+              is_into_compute_loop?"\t\t":"\t");
     last_when=entry_points[i].whens[0];
     
     // Dump de la tabulation et du nom du point d'entrée
     //#warning f or s?
-    nprintf(n, NULL, "\n%s/*@%f*/%s%s(",
+    nprintf(n, NULL, "\n%s/*@%f*/%s(",
             is_into_compute_loop?"\t\t":"\t",
             entry_points[i].whens[0],
-            n->call->parallel->spawn(),
+            //n->call->parallel->spawn(),
             entry_points[i].name);
     
     // Dump des arguments *ou pas*

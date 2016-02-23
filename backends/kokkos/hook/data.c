@@ -60,13 +60,6 @@ void hookTurnBracketsToParentheses(nablaMain* nabla,
       ||(cnfg=='e' && var->item[0]!='e')
       ||(cnfg=='m' && var->item[0]!='m')
       ){
-    if (!job->parse.selection_statement_in_compound_statement){
-      //nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*b2p !if: %c%c*/", cnfg, var->item[0]);
-      //nprintf(nabla, "/*turnBracketsToParentheses@true*/", NULL);
-    }else{
-      //nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
-    }
-    //nprintf(nabla, NULL,"/*b2p@true*/");
     job->parse.turnBracketsToParentheses=true;
   }else{
     if (job->parse.postfix_constant==true
@@ -118,7 +111,6 @@ void hookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
  *****************************************************************************/
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   nprintf(nabla, NULL, "%s_%s",
-          //var->is_gathered?"gathered_":"",
           var->item,
           var->name);
 }
