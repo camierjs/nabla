@@ -140,7 +140,7 @@ static bool hookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
   //nprintf(nabla, "/*hookSwitchAleph*/","/*hookSwitchAleph*/");
-  if (n->token) dbg("\n\t\t\t\t\t[hookSwitchAleph] token: '%s'?", n->token);
+  //if (n->token) dbg("\n\t\t\t\t\t[hookSwitchAleph] token: '%s'?", n->token);
   
   switch(n->tokenid){
   case(LIB_ALEPH):{
@@ -217,7 +217,7 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   const char forall=job->parse.enum_enum;
 
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
-  if (n->token) dbg("\n\t\t\t\t[hookSwitchToken] token: '%s'?", n->token);
+  if (n->token) dbg("\n\t\t\t\t[hookSwitchToken] '%s'", n->token);
  
   // On tests si c'est un token Aleph
   // Si c'est le cas, on a fini

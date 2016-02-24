@@ -1,0 +1,122 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+// these subroutines calculates the primitive variables from the
+// conservative variables and vice versa.
+//
+// This version is for non-relativistic MHD.
+// The thermal energy is calculated from the
+// total energy, whilst the magnetic field B is calculated from
+// the conserved variable B/rho.
+//
+// These subroutines would be used in the GR case, for all the 
+// variables. The evaluation would be far more complicated, however.
+
+
+
+// this subroutine is called after setting up the initial conditions
+// to set the initial values of the conserved variables
+// makes a call to density to calculate the density by summation
+// also sets the value of the initial smoothing length
+void primitive2conservative(void) @ -102.0 {
+  info()<<"[1;35m[primitive2conservative] calculate conserved density (and initial smoothing length)[m";
+}
+
+∀ particles void calculateConservedDensityAndInitialSmoothingLength(void)@-101.0{
+  rho = dens;
+  hh = option_hfact*pow(pmass/(rho + global_rhomin),global_dndim);
+  if (uid==0){
+    info()<<"[1;35m[primitive2conservative]  hfact = "<<option_hfact<<"[m";
+    info()<<"[1;35m[primitive2conservative]  pmass = "<<pmass<<"[m";
+    info()<<"[1;35m[primitive2conservative]    rho = "<<rho<<"[m";
+    //info()<<"[1;35m[primitive2conservative] rhomin ="<<global_rhomin<<"[m";
+    //info()<<"[1;35m[primitive2conservative]  dndim ="<<global_dndim<<"[m";
+    info()<<"[1;35m[primitive2conservative]     hh = "<<hh<<"[m";
+  }
+  // also work out what polyk should be if using iener = 0
+  if (uid==0) info()<<"[1;35m[primitive2conservative] Iterating density with kernel #3...[m";
+  // Calling iterate_density with ikernav =3
+  global_iktemp = global_ikernav;
+  global_ikernav = 3;
+}
+
+// Iterate_density @ -100
+
+
+
+∀ particles void setDensitySameAsRho(void) @ -100.0{
+  if (uid==0) info()<<"[1;35m[primitive2conservative] calculate conserved energy (or entropy) from the thermal energy"<<"[m";
+  global_ikernav = global_iktemp;
+  dens = rho;
+  //calculate conserved variable from the magnetic flux density B
+  //calculate conserved energy (or entropy) from the thermal energy
+  en = uu;
+}
+
+
+// call equation of state calculation @ -99
+
+// Could copy to ghosts
+
+// call derives for rates to get initial timesteps, div B etc @ -98
+
+
+
+
+
+
+∀ particles void conservative2primitive(void) @ -96.9 {
+  if (uid==0) info()<<"[1;35m[conservative2primitive]"<<"[m";
+  sqrtg = 1.0;
+  dens = rho;
+  // calculate magnetic flux density B from the conserved variable
+  // ...
+
+  // calculate thermal energy from the conserved energy (or entropy)
+  uu = en;
+}
+
+// call equation of state calculation @ -96.8
+
+// copy the primitive variables onto the ghost particles
+  

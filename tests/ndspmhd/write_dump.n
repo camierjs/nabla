@@ -1,0 +1,308 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+int wInt(Integer i,FILE *f){ return 4*fwrite(&i,4,1,f); }
+int wReal(Real rl,FILE *f){ return 4*fwrite(&rl,4,2,f); }
+int wChar(char *c,FILE *f){
+  int len=0;
+  while (*c!=0){
+    len+=fwrite(c,1,1,f);
+    c+=1;
+  }
+  return len;
+}
+
+
+
+void write_dump(void){
+  FILE* f;
+  int size;
+  char filename[1024];
+
+  sprintf(filename,"ndspmhd_%04d.dat",GlobalIteration);
+  
+  f=fopen(filename,"w");
+  info()<<"[1;33m[write_dump] "<<GlobalIteration<<"[m";
+  writeTimestepHeaderToDataFILE(f);
+  
+  wInt(0x12345678,f);
+  size=writeEssentialVariables(f,0,0); // X
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=writeEssentialVariables(f,0,1); // Y
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesVel(f,0,0); // velX
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesVel(f,0,1); // velY
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesVel(f,0,2); // velZ
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesHh(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesDens(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+  
+  wInt(0x12345678,f);
+  size=wParticlesUu(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesPmass(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesAlpha(f,0,0); // alpha X
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesAlpha(f,0,1); // alpha Y
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoPressure(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoDrhodtRho(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoGradh(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoForce(f,0,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoForce(f,0,1);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoForce(f,0,2);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=wParticlesInfoType(f,0);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  fclose(f);
+}
+
+
+
+void writeTimestepHeaderToDataFILE(FILE *f){
+  int ncolumns = option_ndim + 2*option_ndimV + 4 + 5;
+  Integer prefix_size=0x12345678ul;
+  Real t=time;
+  Integer npart=global_npart;
+  Integer nprint=global_npart;
+  Real gamma=option_gamma;
+  Real hfact=option_hfact;
+  Integer ndim=option_ndim;
+  Integer ndimV=option_ndimV;
+  //Integer ncolumns=17;
+  Integer iformat=1;
+  Integer ibound[2]={0,0};
+  Real xmin[2] ={0.0000000000000000, 0.0000000000000000};
+  Real xmax[2] ={1.0000000000000000, 1.0000000000000000};
+  Integer len_geom=12;
+  char geom[]="cartesian   ";
+  Integer size=0;
+  
+  info()<<"[1;33m[writeTimestepHeaderToDataFILE]"
+        <<" option_ndim="<<option_ndim
+        <<" option_ndimV="<<option_ndimV
+        <<" ncolumns="<<ncolumns
+        <<"[m";
+
+  fwrite(&prefix_size,4,1,f);
+  size+=wReal(t,f);
+  size+=wInt(npart,f);
+  size+=wInt(nprint,f);
+  size+=wReal(gamma,f);
+  size+=wReal(hfact,f);
+  size+=wInt(ndim,f);
+  size+=wInt(ndimV,f);
+  size+=wInt(ncolumns,f);
+  size+=wInt(iformat,f);
+  size+=wInt(ibound[0],f);
+  size+=wInt(ibound[1],f);
+  size+=wReal(xmin[0],f);
+  size+=wReal(xmin[1],f);
+  size+=wReal(xmax[0],f);
+  size+=wReal(xmax[1],f);
+  size+=wInt(len_geom,f);
+  size+=wChar(geom,f);
+  fwrite(&size,4,1,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  fwrite(&size,4,1,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+}
+
+∀ particles Integer writeEssentialVariables(FILE *f, Integer size,Integer dim){
+  size+=wReal(r[dim],f);
+  return size;
+}
+
+∀ particles Integer wParticlesVel(FILE *f, Integer size, Integer dim){
+  size+=wReal(vel[dim],f);
+  return size;
+}
+//#warning hh are not the same
+∀ particles Integer wParticlesHh(FILE *f, Integer size){
+  //if (uid==0) info()<<"hh="<<hh;
+  size+=wReal(hh,f);
+  return size;
+}
+∀ particles Integer wParticlesDens(FILE *f, Integer size){
+  size+=wReal(dens,f);
+  return size;
+}
+∀ particles Integer wParticlesUu(FILE *f, Integer size){
+  size+=wReal(uu,f);
+  return size;
+}
+∀ particles Integer wParticlesPmass(FILE *f, Integer size){
+  size+=wReal(pmass,f);
+  return size;
+}
+
+∀ particles Integer wParticlesAlpha(FILE *f, Integer size,Integer dim){
+  size+=wReal(alpha[dim],f);
+  return size;
+}
+
+∀ particles Integer wParticlesInfoPressure(FILE *f, Integer size){
+  size+=wReal(pr,f);
+  return size;
+}
+∀ particles Integer wParticlesInfoDrhodtRho(FILE *f, Integer size){
+  size+=wReal(-drhodt/rho,f);
+  return size;
+}
+∀ particles Integer wParticlesInfoGradh(FILE *f, Integer size){
+  size+=wReal(gradh,f);
+  return size;
+}
+∀ particles Integer wParticlesInfoForce(FILE *f, Integer size,Integer dim){
+  size+=wReal(force[dim],f);
+  return size;
+}
+
+∀ particles Integer wParticlesInfoType(FILE *f, Integer size){
+  size+=wInt(itype,f);
+  return size;
+}

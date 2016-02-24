@@ -1,0 +1,125 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+//* evolves the simulation through all timesteps
+//* this subroutine contains the main timestepping loop and calls 
+//* the output routines at the appropriate times
+
+
+
+// set initial timestep
+void setInitialTimestep(void) @ -1.0{
+ info()<<"[1;31m[evolve] set initial timestep[m";
+  δt = 0.01;
+  dt0 = min(option_C_cour*option_dtcourant,
+            option_C_force*option_dtforce);
+  if (dtfixed) dt = dt0;
+  dtscale = 1.0;
+  //dtrho = huge(dtrho);
+  tprint = 0.0;
+  t_start = 0.0;
+  t_end = 0.0;
+  global_nsteps = 0;
+  nevwrite = 1;  // frequency of writing to .ev file (could be read as parameter)
+  nsort = 1;     //! frequency of sorting (again, should be parameter)
+  detot = 0.0;
+  dmomtot = 0.0;
+  tzero = time;
+  //call evwrite();
+  info()<<"[1;31m[evolve] Total energy ="<<etotin
+        <<", Linear momentum ="<<momtotin<<"[m";
+  // write header for timestep table
+  info()<<"[1;31[evolve] --------------------- main loop ----------------------------------------[m";
+  // write initial conditions to output file
+  //output(time,nsteps);
+  noutput = 1;
+  tprint = tzero + option_tout;
+  // get starting cpu time
+  //cpu_time(t_start);
+  write_dump();
+}
+
+
+void mainLoop(void) @ 1.0{
+  info()<<"[1;31m[evolve][m";
+  info()<<"[1;31m[evolve][m";
+  info()<<"[1;31m[evolve] time = time + dt[m";
+  //time = time + dt;
+  global_nsteps = global_nsteps + 1;
+}
+
+
+
+
+void evolveDataForOneTimestep(void) @ 2.0 {
+  info()<<"evolve data for one timestep";
+}
+
+
+
+void writeLogEveryStep(void) @ 4.0{
+//#warning should be computed elsewhere
+  etotin=1.0;
+  momtotin=1.0;
+  
+  if (abs(dt-option_C_force*option_dtforce) < epsilon(0.))
+    info()<<"Time="<<time<<", dtforce = "<<option_C_force*option_dtforce;
+  else if (abs(dt-option_C_cour*option_dtcourant) < epsilon(0.))
+    info()<<"Time="<<time<<", dtcourant = "<<option_C_force*option_dtcourant;
+  else if (abs(dt-option_C_force*dtdrag) < epsilon(0.)) 
+    info()<<"Time="<<time<<", dtdrag = "<<option_C_force*option_dtcourant;
+  else if (abs(dt-option_C_force*dtvisc) < epsilon(0.)) 
+    info()<<"Time="<<time<<", dtvisc = "<<option_C_force*option_dtcourant;
+  else
+    info()<<"Time="<<time<<", dt(unknown)= "<<dt;
+  // print out total energy and momentum conservation
+  if (abs(momtotin) < tiny(momtotin))  momtotin = 1.0;
+  if (abs(etotin) < tiny(etotin)) etotin = 1.0;
+  info()<<"Max energy error="<<detot/abs(etotin)
+        <<", Max momentum error="<<dmomtot/abs(momtotin);
+}
+
+
+void writeDumpEveryStep(void) @ 6.0{
+  write_dump();
+}

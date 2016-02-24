@@ -386,8 +386,8 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   }
   
   if (n->ruleid==rulenameToId("primary_expression")){
-    dbg("\n\t\t\t[dfsVariables] primary_expression!");
     if (n->children->tokenid == IDENTIFIER){
+      //dbg("\n\t\t\t[dfsVariables] primary_expression!");
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
       char* token = n->children->token;
       // Est-ce une variable connue?

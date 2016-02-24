@@ -364,8 +364,8 @@ static void hookTurnTokenToVariableForParticleJob(nablaMain *nabla,
  * Tokens to variables 'Std Function' switch
  *****************************************************************************/
 static void hookTurnTokenToVariableForStdFunction(nablaMain *arc,
-                                                    nablaVariable *var,
-                                                    nablaJob *job){
+                                                  nablaVariable *var,
+                                                  nablaJob *job){
   const char cnfg=job->item[0];
   // Preliminary pertinence test
   if (cnfg != '\0') return;
@@ -387,6 +387,10 @@ static void hookTurnTokenToVariableForStdFunction(nablaMain *arc,
   }
   case('g'):{
     nprintf(arc, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
+    break;
+  }
+  case ('p'):{
+    nprintf(arc, "/*ParticleVar*/", NULL);
     break;
   }
   default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob hookTurnTokenToVariableForStdFunction\n"));

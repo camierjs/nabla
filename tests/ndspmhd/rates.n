@@ -1,0 +1,505 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+// Computes the rates of change of the conserved variables
+// (forces, energy etc)
+// This is the core of the SPH algorithm
+
+void get_rates(void) @ -95.9,3.0{
+  info()<<"\33[1m[get_rates] initialise quantities"<<"\33[m";
+}
+
+∀ particles void initialiseQuantities(void) @ -95.8,3.1 {
+  force = 0.0;
+  dudt = 0.0;
+  dendt = 0.0;
+  dBevoldt = 0.0;
+  daldt = 0.0;
+  dpsidt = 0.0;
+  gradpsi = 0.0;
+  fmag = 0.0;
+  divB = 0.0;
+  if (option_imhd>0) curlB = 0.0;
+  //curlBsym = 0.;
+  del2v = 0.;
+  xsphterm = 0.0;
+  //del2u = 0.0;
+  graddivv = 0.0;
+  //h1 = 1./hh;
+  if (option_icty>=1) {
+    drhodt = 0.;
+    gradh = 1.;
+    gradhn = 0.;
+    dhdt = 0.;
+  }
+  if (option_idust==1) {
+    ddustfracdt = 0.;
+    ddeltavdt = 0.;
+  }
+
+  if (option_imhd==0){
+    Brhoi = 0.0;
+    Brhoj = 0.0;
+    Brho2i = 0.0;
+    Brho2j = 0.0;
+    valfven2i = 0.0;
+    valfven2j = 0.0;
+    projBi = 0.0;
+    projBj = 0.0;
+    projBrhoi = 0.0;
+    projBrhoj = 0.0;
+    //alphaBi = 0.0;
+  }
+}
+
+∀ particles void setMHDQuantitiesToZeroIfMhdNotSet(void) @ -95.7,3.2 {
+  if (option_imhd!=0) continue; // these quantities are still used if mhd off
+  //Bi = 0.0;
+  //Bj = 0.0;
+}
+
+∀ particles void setAlternativeFormsForThe_SPH_EquationsHere(void) @ -95.6,3.3 {
+  if (uid==0) info()<<"\33[1m[get_rates] set alternative forms for the SPH equations here phi can be any scalar variable"<<"\33[m";
+  // phi can be any scalar variable
+  phi = 1.0 ;
+  if (option_iprterm==1) phi = rho;
+  if (option_iprterm==2) phi = sqrt(pr)/rho;
+  if (option_iprterm==3) phi = 1./rho;
+  if (option_iprterm==4) phi = 1./pow(rho,option_gamma);
+  if (option_iprterm==5) phi = pow(rho,option_gamma);
+  if (option_iprterm==6) phi = 1./en;
+  if (option_iprterm==7) phi = 1./uu;
+  if (option_iprterm==8) phi = 1./pr;
+  if (option_iprterm==9) phi = sqrt(rho);
+}
+
+
+// loop over all boxes in system via pairs
+∀ own cells void stepThroughAllViaPairs(void) @ -95.5,3.4 {
+  if (uid==0) info()<<"[1m[stepThroughAllViaPairs]"<<"[m";
+  stepThroughAllCells(*this,*this);            // itself
+  foreach cell stepThroughAllCells(*this,*cc); // neighbors
+}
+
+
+void stepThroughAllCells(Cell i, Cell j) {
+  Real wab,wabalt;
+  Real grkern,grkerni,grkernj;
+  Real grkernalti,grgrkernalti;
+  debug()<<"[1m[get_rates] Cells: [7m"<<1+i.uniqueId().asInteger()
+        <<"<=>"<<1+j.uniqueId().asInteger()<<"[m";
+  ∀ i particle{
+    debug()<<"[1m\t[get_rates] Doing particle #"<<id[pi]<<"[m";
+    Real3 xi = r[pi];
+    Integer itypei = itype[pi];
+    Real rhoi = rho[pi];
+    //Real rho2i = rhoi*rhoi;
+    //rhoi5 = sqrt(rhoi);
+    //Real rho1i = 1./rhoi;
+    //Real rho21i = rho1i*rho1i;
+    //Real dens1i = 1./dens[pi];
+    Real pri = max(pr[pi] - pext,0.);
+    Real prneti = pri - pequil(option_iexternal_force,xi,rhoi);
+    //Real pmassi = pmass[pi];
+    //Real Prho2i = pri*rho21i;
+    //Real spsoundi = spsound[pi];
+    //Real uui = uu[i];
+    Real3 veli = vel[pi];
+    //Real v2i = (veli⋅veli);
+    Real alphai = alpha[pi].x;
+    Real alphaui = alpha[pi].y;
+    //Real alphaBi = alpha[pi].z;
+    //Real phii = phi;
+    //Real phii1 = 1./phii;
+    //Real sqrtgi = sqrtg[pi];
+    //Real gdiagi = 1.;
+    //Real rhogasi  = rhoi;
+    //Real rhodusti = 0.;
+    //Real deltav2i = 0.;
+    // mhd definitions
+    //Real3 Bi = Bfield[pi];
+    //Brhoi = Bi*rho1i;
+    //Real BdotBexti = (Bi[pi]⋅Bconst[pi]);
+    //Real B2i = (Bi[pi]⋅Bi[pi]);
+    //Brho2i = B2i*rho21i;
+    //valfven2i = B2i*rho1i;
+    //if (imhd.lt.0) Bevoli(:) = Bevol(:,i)
+    Real gradhi = gradh[i];
+    Real gradhni = gradhn[i];
+    Real hi = hh[pi];
+    //if (hi.le.0.) then
+    //write(iprint,*) ' rates: h <= 0 particle',i,hi
+    //call quit
+    //endif
+    Real hi1 = 1.0/hi;//h1[i];
+    Real hi21 = hi1*hi1;
+    Real hfacwabi = pow(hi1,option_ndim);
+    Real hfacgrkerni = hfacwabi*hi1;
+    Real3 forcei = Real3(0.,0.,0.);
+    Real3 fextrai = Real3(0.,0.,0.);
+    //Real3 dBevoldti = Real3(0.,0.,0.);
+    ∀ j particle{
+      if (id[pj]==id[pi]) continue; // don't count particle with itself
+      Real hfacwabj,hfacgrkernj,grkernaltj,grgrkernaltj;
+      Real3 dx = xi - r[pj];
+      //Real3 velj = vel[pj];
+      //!print*,' ... neighbour, h=',j,hh(j),rho(j),x(:,j)
+      Real hj = hh[pj];
+      Real hj1 = 1./hj;//h1[j];// !!1./hj
+      Real hj21 = hj1*hj1;
+      Real rij2 = (dx⋅dx);
+      Real q2i = rij2*hi21;
+      Real q2j = rij2*hj21;
+      debug()<<"[1m\t[get_rates] Interacting with particle #"<<id[pj]<<"[m";
+      // do pairwise interaction if either particle is within range of the other
+      if ((q2i<global_radkern2)||(q2j<global_radkern2)) {  // if < 2h
+        //Real rhoj = rho[pj];
+        Real rij = sqrt(rij2);
+        Real3 dr=Real3(0.0,0.0,0.0);
+        //Real prj = max(pr[pj] - pext,0.);
+        dr = dx/rij; // unit vector           
+        if ((itype[pj]==itypei) ||
+            (itype[pj]==itypebnd || itype[pj]==itypebnd2) ||
+            (itypei  == itypebnd || itype[pj]==itypebnd2)){
+          debug()<<"[1m\t\t[rates_core]"<<"[m";
+          
+          if (option_ikernav) {
+            Real hav = 0.5*(hh[i] + hh[j]);
+            Real hav1 = 1.0/hav;
+            Real h21 = hav1*hav1;
+            Real hfacwab = pow(hav1,option_ndim);
+            Real hfacgrkern = hfacwab*hav1;
+            Real q2 = rij2*h21;
+            //Real wab;//,grkern;
+            interpolate_kernel(q2,&wab,&grkern);
+            wab = wab*hfacwab;
+            grkern = grkern*hfacgrkern;
+            grkerni = grkern;
+            grkernj = grkern;
+          }else{
+            //Real wab,wabalt;
+            Real wabi,wabalti;
+            Real wabj,wabaltj;
+            
+            // (using hi)
+            interpolate_kernels(q2i,&wabi,&grkerni,&grkernalti,&grgrkernalti);
+            wabi = wabi*hfacwabi;
+            wabalti = wabi;// !wabalti*hfacwabi
+            grkerni = grkerni*hfacgrkerni;
+            grkernalti = grkernalti*hfacgrkerni;
+            grgrkernalti = grgrkernalti*hfacgrkerni*hi1;
+            
+            // (using hj)
+            hfacwabj = pow(hj1,option_ndim);
+            hfacgrkernj = hfacwabj*hj1;
+            interpolate_kernels(q2j,&wabj,&grkernj,&grkernaltj,&grgrkernaltj);
+            wabj = wabj*hfacwabj;
+            wabaltj = wabj;// !wabaltj*hfacwabj
+            grkernj = grkernj*hfacgrkernj;
+            grkernaltj = grkernaltj*hfacgrkernj;
+            grgrkernaltj = grgrkernaltj*hfacgrkernj*hj1;
+            
+            // (calculate average)
+            wab = 0.5*(wabi + wabj);
+            wabalt = 0.5*(wabalti + wabaltj);
+            debug()<<"[1m\t\t[rates_core]    wab ="<<wab<<"[m";
+            debug()<<"[1m\t\t[rates_core] wabalt ="<<wabalt<<"[m";
+            
+            // (grad h terms)  
+            if (global_ikernav==3) { //  ! if using grad h corrections
+              if (option_usenumdens) {
+                // use these two lines for number density formulation
+                grkerni = grkerni*(1. + gradhni*gradhi/pmass[pj]);
+                grkernj = grkernj*(1. + gradhn[pj]*gradh[pj]/pmass[pi]);
+              }else{
+                // use these two lines for usual formulation
+                grkerni = grkerni*gradhi;
+                grkernj = grkernj*gradh[pj];
+              }
+              grkern = 0.5*(grkerni + grkernj);
+            }else{ // if not using grad h correction               
+              grkern = 0.5*(grkerni + grkernj);
+              grkerni = grkern;
+              grkernj = grkern;
+            }
+          } // if option_ikernav
+          debug()<<"[1m\t\t[rates_core] define local copies of quantities[m";
+          {
+            Real3 velj=vel[pj];
+            Real v2j = (velj⋅velj);
+            Real3 dvel = veli - velj;
+            Real dvdotr = (dvel⋅dr);
+            //Real projvi = (veli⋅dr);
+            //Real projvj = (velj⋅dr);
+            Real rhoj = rho[pj];
+            Real rho1j = 1./rhoj;
+            //Real rho2j = rhoj*rhoj;
+            //Real rho21j = rho1j*rho1j;
+            //Real rhoij = rhoi*rhoj;
+            Real rho1i = 1.0/rhoi;
+            Real rhoav1 = 0.5*(rho1i + rho1j);//   !2./(rhoi + rhoj);
+            //Real projdvgas = dvdotr;
+            //Real deltav2j = 0.0;
+            //Real rhogasj = rhoj;
+            Real prj = max(pr[pj] - pext,0.);
+            Real prnetj = prj - pequil(option_iexternal_force, r[pj], rhoj);
+            //Real Prho2j = prj*rho21j;
+            Real spsoundj = spsound[pj];
+            //Real uuj = uu[pj];
+    
+            //Real phii1 = 1.0/phii;
+            //Real phii_on_phij = phii/phi;
+            //Real phij_on_phii = phi*phii1;   
+            //Real sqrtgj = sqrtg[j];
+            //Real gdiagj = 1.0;
+  
+            //Real3 forcej = Real3(0.0,0.0,0.0);
+            //Real3 fextraj = Real3(0.0,0.0,0.0);
+  
+            // maximum velocity for timestep control
+            //Real vsig = 0.0;
+            //Real vsigu = 0.0;
+            //Real vsigav = 0.0;
+            //Real vsigdtc = 0.0;
+
+            // calculate signal velocity
+            // (this is used for timestep control and also in the artificial viscosity)
+            Real vsigi = spsound[i];
+            Real vsigj = spsoundj;
+            Real vsigB = 0.0;
+            
+            Real vsig = 0.5*(max(vsigi+vsigj-option_beta*dvdotr,0.0));
+            Real vsigu = sqrt(fabs(prneti-prnetj)*rhoav1);
+            Real vsigdtc = max(0.5*(vsigi+vsigj+option_beta*fabs(dvdotr)),vsigB);
+            Real dvsigdtc = 1./vsigdtc;
+            Real vsigmax = max(vsigmax,vsigdtc);
+
+            // time step control (courant and viscous)
+            if (vsigdtc>0.0)
+              global_dtcourant = min(global_dtcourant,min(hi*dvsigdtc,hj*dvsigdtc));
+            
+            //info()<<"[1m\t\t[rates_core] dr="<<dr<<"[m";
+            //info()<<"[1m\t\t[rates_core] veli="<<veli<<"[m";
+            //info()<<"[1m\t\t[rates_core] velj="<<velj<<"[m";
+            //info()<<"[1m\t\t[rates_core] dvel="<<dvel<<"[m";
+            //info()<<"[1m\t\t[rates_core] dvdotr="<<dvdotr<<"[m";
+
+            debug()<<"[1m\t\t[rates_core] Artificial Dissipation Terms[m";
+            if (option_iav>0){
+              // These are the artificial viscosity, thermal conduction and resistivity terms
+              // Change this to change the artificial viscosity algorithm
+              // Inherits the values of local variables from rates
+              // This version corresponds to the MHD dissipative terms
+              // described in Price & Monaghan (2004a), MNRAS 348, 137
+              Real v2i;//,v2j;//,B2i,B2j;
+              Real vissv,vissB,vissu;
+              Real visc;
+              Real alphaav = 0.5*(alphai + alpha[pj].x);
+              Real alphau = 0.5*(alphaui + alpha[pj].y);
+              //Real alphaB = 0.5*(alphaBi + alpha[pj].z);
+              //Real vsigav = max(alphaav,max(alphau,alphaB))*vsig;
+              Real dpmomdotr = -dvdotr;
+              // used for viscosity
+              Real term = vsig*rhoav1*grkern;
+              Real termv = term;
+              // used for thermal conductivity
+              Real termu = vsigu*rhoav1*grkern;
+              // used for resistivity
+              Real termB = vsigB*rhoav1*grkern;
+              /////////////////////////////////////////
+              // artificial viscosity in force equation
+              /////////////////////////////////////////
+              if (/*dvdotr<0 && */option_iav<=3){
+//#warning dpmomdotr not used
+                visc = alphaav*termv;//*dpmomdotr;//! viss=abs(dvdotr) defined in rates
+                //info()<<"[1m\t\t[rates_core] alphaav="<<alphaav<<"[m";
+                //info()<<"[1m\t\t[rates_core] termv="<<termv<<"[m";
+                //info()<<"[1m\t\t[rates_core] dpmomdotr="<<dpmomdotr<<"[m";
+                //info()<<"[1m\t\t[rates_core] visc="<<visc<<"[m";
+                force[pi] = force[pi] - pmass[pj]*visc*dr;
+                force[pj] = force[pj] + pmass[pi]*visc*dr;
+              }
+              if (option_iav==4){// ! using total energy, for approaching and receding
+                visc = alphaav*termv;
+                //!print*,'visc = ',i,j,vsig*alphaav*hh(i);
+                //!visc = visc*0.5*(hh(i) + hh(j))/rij;//  ! use this line to multiply viscosity by h/r
+                force[pi] = force[pi] + pmass[pj]*visc*dvel;
+                force[pj] = force[pj] - pmass[pi]*visc*dvel;
+              }
+              ////////////////////////////////////
+              // resistivity in induction equation
+              ////////////////////////////////////
+              if (option_imhd!=0){/* To do */}
+              /////////////////////////////////////////////////
+              // Dissipation terms in energy equation
+              // (viscosity + resistivity + thermal conduction)
+              // Total energy equation
+              /////////////////////////////////////////////////
+              if (option_iener==3){
+                Real qdiff = 0.0;
+                // kinetic energy terms - applied only when particles approaching
+                if (dvdotr < 0 && option_iav<=3){
+                  v2i = pow(veli⋅dr,2.0); // energy along line
+                  v2j = pow(velj⋅dr,2.0); // of sight
+                  qdiff = qdiff + term*alphaav*0.5*(v2i-v2j);
+                }
+                if (option_iav == 4){
+                  v2i = (veli⋅veli) ;// total energy
+                  v2j = (velj⋅velj);
+                  qdiff = qdiff + term*alphaav*0.5*(v2i-v2j);
+                }
+                // thermal energy terms - applied everywhere
+                qdiff = qdiff + alphau*termu*(uu[pi]-uu[pj]);
+                // magnetic energy terms - applied everywhere
+                if (option_imhd>0){/**/}
+                // add to total energy equation
+                dendt[pi] = dendt[pi] + pmass[pj]*qdiff;
+                dendt[pj] = dendt[pj] - pmass[pi]*qdiff;
+              }//option_iener==3
+              if (option_iener>0){ //kinetic energy terms
+                vissv = 0.0;
+                if (dvdotr<0 && option_iav<=3)
+                  vissv = -alphaav*0.5*pow((veli⋅dr)-(velj⋅dr),2.0);
+                if (option_iav>=4)
+                  vissv = -alphaav*0.5*(dvel⋅dvel);
+                //   thermal energy terms
+                if (option_iener == 1)
+                  vissu = 0.0;
+                else
+                  vissu = alphau*(uu[pi] - uu[pj]);
+                vissB = 0.0;
+                // add to thermal energy equation
+                if (option_damp<tiny(0.)){
+                  dudt[pi] = dudt[pi] + pmass[pj]*(term*(vissv) + termu*vissu + termB*(vissB));
+                  dudt[pj] = dudt[pj] + pmass[pi]*(term*(vissv) - termu*vissu + termB*(vissB));
+                  // entropy dissipation
+                  if (option_iener == 1){
+                    if (alphau > 0.0) fatal("error","thermal conduction in entropy equation is wrong");
+                    vissu = alphau*(en[pi]-en[pj]);
+                    dendt[pi] = dendt[pi] + pmass[pj]*(termu*(vissu));
+                    dendt[pj] = dendt[pj] + pmass[pi]*(termu*(-vissu));
+                  }
+                }
+              }
+            }//option_iav
+                   
+            debug()<<"[1m\t\t[rates_core] Physical viscosity terms[m";
+            if (option_ivisc>0){
+            }
+
+            debug()<<"[1m\t\t[rates_core] Pressure term (generalised form)[m";
+            if (option_iprterm>=0){
+            }
+          
+            // Lorentz force and time derivative of B terms
+  
+            debug()<<"[1m\t\t[rates_core] Total Energy Equation[m";
+            if (option_iener == 3){
+            }
+
+            debug()<<"[1m\t\t[rates_core] Grad u term for dissipation[m";
+            if (option_iav > 0){
+            }
+
+            // XSPH term for moving the particles
+  
+            debug()<<"[1m\t\t[rates_core] Continuity equation[m";
+            if (option_icty>=1){
+              drhodt[pi] = drhodt[pi] + pmass[pj]*dvdotr*grkerni;
+              drhodt[pj] = drhodt[pj] + pmass[pi]*dvdotr*grkernj;
+            }
+            
+          } // iav, ivisc, iprterm, iener, 
+        } // if good types
+      } // if < 2h
+    } // ∀ j
+      // add contributions to particle i from summation over j
+    force[pi] = force[pi] + fextrai + forcei;
+  } // ∀ i
+}
+
+
+// calculate gravitational force on all the particles
+/**/
+
+// loop over the particles again, subtracting external forces and source terms
+
+// compute JxB force from the Euler potentials (if using second derivs)
+// also divide by rho for J and div B calculated the "normal" way
+
+// add external (body) forces
+
+// make dhdt if density is not being done by summation
+// (otherwise this is done in iterate_density)
+
+
+// calculate maximum force/h for the timestep condition
+// also check for errors in the force
+
+// calculate resistive timestep (bootstrap onto force timestep)
+
+// calculate simpler estimate of vsig for divergence cleaning and 
+// in the dissipation switches
+
+
+// if evolving B instead of B/rho, add the extra term from the continuity eqn
+// (note that the dBevoldt term should be divided by rho)
+
+
+// if using the thermal energy equation, set the energy derivative
+// (note that dissipative terms are calculated in rates, but otherwise comes straight from cty)
+
+
+// calculate time derivative of alpha (artificial dissipation coefficients)
+// see Morris and Monaghan (1997) and Price and Monaghan (2004c)
+
+// calculate time derivative of divergence correction parameter psi
+
+// calculate timestep constraint from the forces
+// dtforce is returned together with dtcourant to the main timestepping loop
+
+// set rates to zero on ghosts/fixed particles
+
+void ratesCpuTime(void){
+  info()<<"\33[1m[ratesCpuTime]"<<"\33[m";
+}

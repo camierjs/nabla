@@ -1,0 +1,237 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+// Random number generator using the minimal standard generator of 
+//  Park & Miller (1988) + shuffling (see Press et al, Numerical Recipes)
+// 
+// Period is about 10**8
+// 
+// Returns a uniform random deviate between 0.0 and 1.0 (exclusive of 
+//  endpoints). Call with iseed < 0 to initialise, thereafter do not
+//  alter iseed between calls.
+
+void iniRandomParticleDistribution(void) @ -113.9 {
+  const Integer ia = 16807;
+  const Integer im=2147483647;
+  const Integer iq = 127773;
+  const Integer ir = 2836;
+  global_seed=-87682;
+  info()<<"[1;30m[iniRandomParticleDistribution] "
+        <<"initialise random number generator seed="
+        <<global_seed<<"[m";
+  for(int i=0;i<option_random_ntab;i+=1)
+    global_iv[i]=0;
+  global_iy=0;
+
+  global_seed = max(-global_seed,1);  // do not allow iseed = 0
+  for(int j=option_random_ntab+8;j>0;j-=1){
+    Integer k = global_seed/iq;
+    global_seed = ia*(global_seed-k*iq) - ir*k;
+    if (global_seed < 0) global_seed = global_seed + im;
+    if (j <= option_random_ntab) global_iv[j] = global_seed;
+  }
+  global_iy = global_iv[1];
+}
+
+  
+Real ran1(void){
+  Integer j,k;
+  const Integer ia = 16807;
+  const Integer im=2147483647;
+  const Real AM = 1./im;
+  const Integer iq = 127773;
+  const Integer ir = 2836;
+  const Integer ndiv = 1+(im-1)/option_random_ntab;
+  const Real eps = 1.2e-7;
+  const Real floatmax = 1.0-eps;
+
+  // generate random number
+  k = global_seed/iq;
+  global_seed = ia*(global_seed-k*iq) - ir*k;
+  if (global_seed < 0) global_seed = global_seed + im;
+  j = 1 + global_iy/ndiv;
+  global_iy = global_iv[j];
+  global_iv[j] = global_seed;
+  return min(AM*global_iy,floatmax);
+}
+
+
+
+//------------------------------------------------------------------------//
+// Long period random number generator (see Press et al, Numerical Recipes)
+// Period is about 2 x 10**18
+// Returns a uniform random deviate between 0.0 and 1.0 (exclusive of 
+//  endpoints). Call with iseed < 0 to initialise, thereafter do not
+//  alter iseed between calls.
+//------------------------------------------------------------------------//
+/*
+Real ran2(const Integer iseed){
+  const Integer im1=2147483563;
+  const Integer im2=2147483399;
+  const Integer imm1=im1-1;
+  const Integer ia1=40014;
+  const Integer ia2=40692;
+  const Integer iq1=53668;
+  const Integer iq2=52774;
+  const Integer ir1=12211;
+  const Integer ir2=3791;
+  const Integer ntab=32;
+  const Integer ndiv=1+imm1/ntab;
+  const Real am=1.0/im1;
+  const Real eps=1.2e-7;
+  const Real rnmx=1.-eps;
+  Integer iseed,j,k;
+  static Integer iseed2=123456789;
+  static Integer iv[ntab]={0,0,0,0,0,0,0,0,
+                           0,0,0,0,0,0,0,0,
+                           0,0,0,0,0,0,0,0,
+                           0,0,0,0,0,0,0,0};
+  static Integer iy=0;
+  //SAVE iv,iy,iseed2
+  //data iseed2/123456789/, iv/ntab*0/, iy/0/
+
+  // initialise random sequence
+  if (iseed <= 0){
+    iseed = max(-iseed,1); // iseed not zero
+    iseed2 = iseed;
+    for(int j=ntab+8,j>0,j-=1){
+      k = iseed/iq1;
+      iseed = ia1*(iseed-k*iq1) - k*ir1;
+      if (iseed<0) iseed = iseed + im1;
+      if (j<=ntab) iv[j] = iseed;
+    }
+    iy = iv[1];
+  }
+  k = iseed/iq1;
+  iseed = ia1*(iseed-k*iq1) - k*ir1;
+  if (iseed<0) iseed = iseed + im1;
+  k = iseed2/iq2;
+  iseed2 = ia2*(iseed2-k*iq2) - k*iq2;
+  if (iseed2<0) iseed2 = iseed2 + im2;
+  j = 1 + iy/ndiv;
+  iy = iv[j] - iseed2;
+  iv[j] = iseed;
+  if (iy<1) iy = iy + imm1;
+  return ran2 = min(am*iy,rnmx);
+}
+*/
+
+
+//-------------------------------------------------------------------------
+// Function returns a random number drawn from a Rayleigh distribution
+// P(r) = r*e^(-r^2/(2*s^2))/s^2
+// Useful for drawing amplitudes from a Gaussian distribution,
+// since the modulus is distributed according to a Rayleigh distribution.
+//-------------------------------------------------------------------------
+Real rayleigh_deviate(Integer iseed){
+  return sqrt(-log(ran1()));
+}
+
+
+//-------------------------------------------------------------------------
+// Quasi Random sobol sequence from numerical recipes
+//-------------------------------------------------------------------------
+/*void sobseq(Integer n, Real* x){
+  const Integer MAXBIT=30;
+  const Integer MAXDIM=6;
+  Integer i,im,in,ipp,j,k,l,ip[MAXDIM]={0,1,1,2,1,4};
+  Integer iu[MAXDIM][MAXBIT]={1,1,1,1,1,1,
+                              3,1,3,3,1,1,
+                              5,7,7,3,3,5,
+                              15,11,5,15,13,9,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0,
+                              0,0,0,0,0,0,  0,0,0,0,0,0};
+  Integer *iv,ix[MAXDIM]={0,0,0,0,0,0};
+  Integer mdeg[MAXDIM]={1,2,3,3,4,4};
+  Real fac;
+  // SAVE ip,mdeg,ix,iv,in,fac
+  // EQUIVALENCE (iv,iu)
+  iv=iu;
+  //DATA ip /0,1,1,2,1,4/, mdeg /1,2,3,3,4,4/, ix /6*0/
+  //DATA iv /6*1,3,1,3,3,1,1,5,7,7,3,3,5,15,11,5,15,13,9,156*0/
+  if (n < 0){
+    for(int k=1;k<=MAXDIM;k+=1){
+      for(int j=1,j>mdeg[k];j+=1){
+        iu[k,j]=iu[k,j]*2**(MAXBIT-j);
+      }
+      for(int j=mdeg[k]+1,j<=MAXBIT;j+=1){
+        ipp=ip[k];
+        i=iu[k,j-mdeg[k]];
+        i=ieor(i,i/2**mdeg[k]);
+        for(int l=mdeg[k]-1,l!=1,l-=1){
+          if(iand(ipp,1)!=0) i=ieor(i,iu[k,j-l]);
+          ipp=ipp/2;
+        }
+        iu[k,j]=i;
+      }
+    }
+    fac=1./2.**MAXBIT;
+    in=0;
+  }else{
+    im=in;
+    for(int j=1,j<=MAXBIT;j+=1){
+      if(iand(im,1)==0) goto gogogo;
+      im=im/2;
+    }
+    fatal()<<"MAXBIT too small in sobseq";
+  gogogo:
+    im=(j-1)*MAXDIM;
+    for(int k=1,k!=min(n,MAXDIM);k+=1){
+      ix(k)=ieor(ix(k),iv(im+k));
+      x(k)=ix(k)*fac;
+    }
+    in=in+1;
+  }
+}
+*/

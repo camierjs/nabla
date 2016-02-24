@@ -1,0 +1,414 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+//---------------------------------------------------------------------//
+//                     _                     _         _               //
+//           _ __   __| |___ _ __  _ __ ___ | |__   __| |              //
+//          | '_ \ / _` / __| '_ \| '_ ` _ \| '_ \ / _` |              //
+//          | | | | (_| \__ \ |_) | | | | | | | | | (_| |              //
+//          |_| |_|\__,_|___/ .__/|_| |_| |_|_| |_|\__,_|              //
+//                          |_|                                        //
+//        _   _     _   _   _   _   _   _     _   _   _   _   _        //
+//       / \ / \   / \ / \ / \ / \ / \ / \   / \ / \ / \ / \ / \       //
+//      ( B | y ) ( D | a | n | i | e | l ) ( P | r | i | c | e )      //
+//       \_/ \_/   \_/ \_/ \_/ \_/ \_/ \_/   \_/ \_/ \_/ \_/ \_/       //
+//                                                                     //
+//---------------------------------------------------------------------//
+// An N-D SPH code to handle compressible gas dynamics with MHD        //
+//                                                                     //
+// Written in Fortran 90                                               //
+//                                                                     //
+// By Daniel Price, Institute of Astronomy, Cambridge, UK, 2002-2004   //
+//                  University of Exeter, UK 2004-2008                 //
+//                  Monash University, Melbourne, Australia 2008-      //
+//                                                                     //
+// Email: daniel.price@monash.edu                                      //
+//                                                                     //
+// This version is designed to be as modular (and thus as adaptable)   //
+// as possible, as a testbed for SPH algorithms                        //
+//                                                                     //
+// Specific features include:                                          //
+//                                                                     //
+//  * options to choose continuity equation or density by              //
+//    direct summation                                                 //
+//                                                                     //
+//  * options to choose different energy eqn implementations           //
+//                                                                     //
+//  * different artificial viscosity prescriptions                     //
+//                                                                     //
+//  * choice of whether to use average h, average gradient             //
+//    of kernel or Springel/Hernquist (2001) type correction           //
+//    terms for varying h                                              //
+//                                                                     //
+//  * Morris and Monaghan (1997) artificial viscosity switch           //
+//    (turns off artificial viscosity away from shocks)                //
+//                                                                     //
+//  * ghost particle boundaries (reflective/periodic)                  //
+/////////////////////////////////////////////////////////////////////////
+with particles;
+
+
+#define itypegas  0
+#define itypebnd  1
+#define itypedust 2
+#define itypegas1 3
+#define itypegas2 4
+#define itypebnd2 11
+
+#define NDSPMHD_VERSION "v2.0 [21st Feb 2014]"
+
+#define NDSPMHD_IKERN 4000
+#define NDSPMHD_RAND_SIZE 32
+
+#define CONST_PI 3.1415926536
+
+options{
+  Integer option_nx   = 2;
+  Integer option_ny   = 2;
+  Integer option_nz   = 1;
+  
+  // Run & Geometric Options
+  Integer option_max_iterations=1;
+  Integer option_ndim = 2;
+  Integer option_ndimB = 3;
+  Integer option_ndimV = 3;
+  
+  // ndspmhd options
+  Real option_psep = 0.01;       // particle separation
+  Real option_C_cour = 0.3;           // Timestepping conditions
+  Real option_C_force = 0.25;
+  Real option_C_rho = 0.05;
+  Real option_dtforce = 0.0;
+  Real option_dtcourant = 0.0;
+  Real option_tmax = 1.0;
+  Real option_tout = 0.1;
+  Integer option_nmax = 1000000; //
+  Integer option_nout = -1;
+  Real option_gamma = 1.6666666666667;//5./3.; // Equation of state
+  Integer option_iener = 2;     // type of energy equation (3:total energy, 1:entropy variable, 4:volume thermal energy variable, 5:smooth_variable, default: thermal energy
+  Real option_polyk = 1.0;
+  Integer option_icty = 0;        // type of cty equation (0:direct sum 1:time deriv)
+  Integer option_ndirect = 1000000;//nmax;
+  Integer option_maxdensits = 250;
+  Integer option_iprterm = 0;     // type of pressure term (0:normal 1:pa+pb/rhoa*rhob 2:hernquist/katz)
+  Integer option_iav = 2;         // viscosity type
+  Real option_alphamin = 0.1;     // Artificial dissipative terms
+  Real option_alphaumin = 0.0;
+  Real option_alphaBmin = 1.0;
+  Real option_beta = 2.0;
+  Integer option_iavlimx = 2;     // viscosity limiter
+  Integer option_iavlimy = 1;     // conduction limiter
+  Integer option_iavlimz = 0;     // resistivity limiter
+  Real option_avdecayconst = 0.1; // cdecay constant
+  Integer option_ikernav = 3;     // type of kernel averaging (1:average h, 2:average grad wab 3:springel/hernquist)
+  Integer option_ihvar = 2;
+  Real option_hfact = 1.2;
+  Real option_tolh = 1.e-3;
+  Integer option_idumpghost = 1;  // dump ghost particles? (0: no 1: yes)
+  Integer option_imhd = 0;        // MHD (0:no 1-10:B >10:B/rho <0:A -3:GEPs)
+  Integer option_imagforce = 2;   // force type(1:vector 2:tensor)
+  Integer option_idivBzero = 0;   // divergence correction method (0:none 1:projection 2: hyperbolic/parabolic)
+  Real option_psidecayfact = 0.1;
+  Integer ioption_anticlump = 0;
+  Real option_eps = 0.8;
+  Integer option_neps = 4;
+  Integer option_iresist = 0;     // resistivity (0:off 1:explicit 2:implicit)
+  Real option_etamhd = 0.0;
+  Integer option_ixsph = 0;
+  Real option_xsphfac = 0.0;
+  Integer option_igravity = 0;   // self-gravity
+  Real option_hsoft=0.0;             // fixed softening length
+  Real option_damp = 0.0;        // artificial damping (0.0 or few percent)
+  Real option_dampr = 0.0;        // artificial damping 2D
+  Real option_dampz = 0.0;        // artificial damping 3D
+  Integer option_ikernel = 0;         // kernel type (0: cubic spline, 3:quintic)
+  Integer option_iexternal_force = 0; // external force (1: toy star, 2:1/r^2 )
+  Integer option_ikernelalt = 0;
+  Integer option_idim = 0;
+  Bool option_usenumdens = false;  // Use number density formulation of gradh
+  Integer option_idust = 0;        // dust (0:off 1:one-f, 2:two-f)
+  Integer option_idrag_nature = 0; // drag type
+  Integer option_idrag_structure = 0; // drag form
+  Real option_Kdrag = 0.0;
+  Integer option_ismooth = 0;
+  Integer option_ivisc=0;   // Physical viscosity
+  Real option_shearvisc=0.0;  // shear param (nu)
+  Real option_bulkvisc=0.0;   // bulk param (zeta)
+  // Random options
+  Integer option_random_ntab = 32;
+  
+  // Even others options
+  Bool option_trace = false;
+  //--for a Keplerian rotation, domegadr = -dlnOmega/dlnr = q = -2A/Omega0 = 1.5 
+  Real domegadr = 1.5; 
+  Real omegafixed = 1.0;
+  Bool dtfixed = false;// timestep
+  Real eta=0.005;// etavz factor
+  // Options/parameters for 2D-MRI simulations
+  Real Rcentre = 1.0;
+  Real Omega2 = 1.0;///Rcentre³;
+  Real Omega0 = 1.0;//Rcentre**(-1.5);
+};
+
+
+global{
+  Real global_dndim;
+  Integer global_nsteps;
+  Integer global_nbpts;
+  Real3 global_xmin;
+  Real3 global_xmax; // Min/Max boundaries
+  Real global_radkern;
+  Real global_radkern2;
+  // Boundaries
+  // 0:None, 1:Fixed particles, 2:Reflective ghosts,
+  // 3:Periodic (ghosts), 5:Shearing box (ghosts)
+  Integer global_ibound;
+  Integer global_idistin;
+  Real global_rmin;
+  Real global_rmax;  
+  Integer global_npart;
+  
+  // Random stuff
+  Integer global_seed;
+  Integer global_iv[NDSPMHD_RAND_SIZE];
+  Integer global_iy;
+
+  // Iterate Density
+  Integer global_itsdensitymax;
+  Integer global_itsdensity;
+  Integer global_ncalctotal;
+  Integer global_ncalc;
+  Bool global_redolink;
+  Integer global_ncalcprev;
+  
+  // Std kernels
+  Integer global_ikern;
+  Integer global_ikernav;
+  Integer global_iktemp;
+  Real global_dq2table;
+  Real global_ddq2table;
+
+  Real wij[NDSPMHD_IKERN];
+  Real grwij[NDSPMHD_IKERN];
+  Real grgrwij[NDSPMHD_IKERN];
+  // Alternates kernels
+  Real wijalt[NDSPMHD_IKERN];
+  Real grwijalt[NDSPMHD_IKERN];
+  Real grgrwijalt[NDSPMHD_IKERN];
+  // Other kernels stuff
+  Real potensoft[NDSPMHD_IKERN];
+  Real fsoft[NDSPMHD_IKERN];
+  Real dphidh[NDSPMHD_IKERN];
+  // Drag kernels
+  Real wijdrag[NDSPMHD_IKERN];
+  Real grwijdrag[NDSPMHD_IKERN];
+  Real grgrwijdrag[NDSPMHD_IKERN];
+
+  // Check_setup
+  Real3 global_xcentre;
+  Real global_sum_pmass;
+
+  // Other stuff
+  Real global_avfact;       // av source term x (1.0=isothermal)
+  Real global_rhomin;
+  Real global_vsig2max;
+
+  Real global_dtcourant;
+  
+  // Unknown yet 
+  Integer ikernelalt;
+  Integer ibiascorrection;
+  Real hhmax;
+  Real pext;
+  Integer itemp;    // to print debugging info for a specific particle
+  Real potengrav;
+  //initial particle separation, initial smoothing length (in units of psep)
+  Real R_grav;
+  Real xlayer;
+  Real Alayercs;
+  Real dwidthlayer;
+  // time stepping related quantities
+  Integer nsubsteps_divB;
+  Integer iseedMC;
+  Real dt;
+  Real hdt;
+  Real tzero;
+  Real etotin;
+  Real momtotin;
+  Real t_start;
+  Real t_end;
+  Real tprint;
+  Integer nevwrite;
+  Integer nsort;
+  Real detot;
+  Real dmomtot;
+  Integer noutput;
+  Real dt0;
+  Real dtscale;
+  Real dtrho;
+  Real dtav;
+  Real dtdrag;
+  Real dtvisc;
+  // xsph factor
+  Real xsphfac;
+  Real graddivv;
+  // Working In Progress
+  Real phi;
+  Real Brhoi;
+  Real Brhoj;
+  Real Brho2i;
+  Real Brho2j;
+  Real valfven2i;
+  Real valfven2j;
+  Real projBi;
+  Real projBj;
+  Real projBrhoi;
+  Real projBrhoj;
+//  Real alphaBi;
+};
+
+
+
+particles{
+  Integer id;
+  Real3 r; // Still required for nccArcLibParticlesPrivates 
+  Integer ireal; // boundary positions
+  // initial particle properties
+  Real pmass;
+  Real3 xin;
+  Real rhoin; Real hhin;
+  Real enin;  Real psiin;
+  Real3 velin;
+  Real3 Bevolin;
+  // particle properties and derivatives
+  //Real3 Χ;
+  Real3 vel;
+  Real3 force;
+  Real rho; Real drhodt;
+  Real uu;Real dudt; Real en;Real dendt;
+  Real3 alpha;Real3 alphain;Real3 daldt;
+  Real psi; Real dpsidt;
+  Real hh;
+  Real dhdt;Real gradh;Real gradhn;Real gradsoft;
+  Real gradgradh;
+  Real zeta; // if option_imhd
+  Real pr;
+  Real3 Bevol;
+  Real3 Bfield; Real3 dBevoldt; // mag field
+  Real3 gradpsi;
+  Real poten; // if option_igravity
+  // equation of state
+  Real spsound;
+  // particle type
+  Integer itype; Integer numneigh;
+  // mhd quantities and derivatives
+  Real3 fmag;  // Lorentz force
+  Real divB;   // divergence of the magnetic field
+  Real3 curlB; // curl of the magnetic field
+  // xsph
+  Real3 xsphterm;
+  // gr
+  Real sqrtg;
+  Real dens;
+  Real3 pmom; Real3 pmomin;
+  Real3 sourceterms; // if geom != cartesian
+  // dust if idust
+  Real dustfrac; Real dustfracin;
+  Real ddustfracdt;
+  Real3 deltav; Real3 deltavin;
+  Real3 ddeltavdt;
+  // physical viscosity if ivisc > 0
+  Real del2v;
+  // Density
+  Real unity;
+  Real densn;
+  Real dndt;
+  Real h1;
+  Bool converged;
+
+  // Other stuff not yet needed
+  //Real3 xran;
+  //Real3 Bfield;
+  //Real3 Bconst;
+  //Real prin;
+  //Real3 x3in;
+  //Real3 alphain;
+  //Real drhodtin;
+  //Real dendtin;
+  //Real dhdtin;
+  //Real dpsidtin;
+  //Real3 forcein;
+  //Real3 dBevoldtin;
+  //Real3 daldtin;
+  //Real gamma;
+  //Real polyk;
+  //Real del2u;
+  //Real3 curlBsym;
+  //Real3 Bi;
+  //Real3 Bj;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles (alias 'boxes')
+// ****************************************************************************
+cells{
+  Real3 cell_center;
+};
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+void nowCallTheMainTimeSteppingLoop(void) @ -1.0{
+  info()<<"[1;32m[ndspmhd] now call the main timestepping loop[m";
+}
+
+// ****************************************************************************
+// * Partie de calcul ]+0,+∞[ 
+// ****************************************************************************
+
+
+void testForQuit(void) @ 50.0{
+  if (GlobalIteration >= option_max_iterations) exit;
+}
+

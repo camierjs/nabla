@@ -1,0 +1,176 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+//* Computes the density by direct summation over the particles neighbours
+//* ie. rho_a = sum_b m_b W_ab (h_a)
+//* Also computes the variable smoothing length terms sum_b m_b dW_ab/dh_a
+
+//* This version computes the density on all particles
+//* and therefore only does each pairwise interaction once
+
+
+∀ particles void densityInitialiseQuantities(void) @ -100.39{
+  if (uid==0) info()<<"[1;32m\t\t[density] initialise quantities[m";
+  rhoin=rho;
+  rho=0.0;
+  drhodt=0.0;
+  densn = 0.0;
+  dndt = 0.0;
+  gradh = 0.0;
+  gradhn = 0.0;
+  gradsoft = 0.0;
+  gradgradh = 0.0;
+  dBevoldt = 0.0;
+  psi = 0.0;
+  unity = 0.0;
+  h1 = 1./hh;
+}
+
+void loopOverAllBoxesInSystemViaPairs(void) @ -100.385 {
+  debug()<<"[1;32m\t\t[density] Loop over all the link-list cells[m";
+}
+
+// loop over all boxes in system via pairs
+∀ own cells void densityLoopOverAllBoxesViaPairs(void) @ -100.38{
+  debug()<<"[1;32m\t\t[density] get the list of neighbours for the cell #"<<1+uid<<"[m";
+  densityLoopOverCells(*this,*this);            // itself
+  foreach cell densityLoopOverCells(*this,*cc); // neighbors
+}
+
+
+void densityLoopOverCells(Cell i, Cell j) {
+  Real wabi,grkerni,grgrkerni,wabalti,grkernalti;
+  Real wabj,grkernj,grgrkernj,wabaltj,grkernaltj;
+  Real dwdhi,dwdhj,dwaltdhi,dwaltdhj,dwdhdhi,dwdhdhj;
+  debug()<<"[1;32m\t\t[density] Cells: [7m"<<1+i.uniqueId().asInteger()
+        <<"<=>"<<1+j.uniqueId().asInteger()<<"[m";
+  foreach i particle{
+    debug()<<"[1;32m\t\t\t[density] Doing particle #"<<id[pi]<<"[m";
+    Real pmassi = pmass[pi];
+    //Real3 Χ=r[pi];
+    //Real3 veli = vel[pi];
+    //Real hi = hh[pi];
+    Real hi1 = h1[pi];
+    Real hfacwabi = pow(hi1,option_ndim);
+    Real hi21 = hi1*hi1;
+    //Integer itypei = itype[pi];
+    foreach j particle{
+      debug()<<"[1;32m\t\t\t\t[density] Interacting with particle #"<<id[pj]<<"[m";
+      // skip particles of different type
+      //if (itype[pj] != itype[pi] && itype[pj]!=1) continue;
+      //if (i==j) continue;
+      Real3 dx = r[pi] - r[pj];
+      //Real hj = hh[pj];
+      Real hj1 = h1[pj];
+      Real rij2 = dx⋅dx;
+      Real q2i = rij2*hi21;
+      Real q2j = rij2*hj1*hj1;
+      //debug()<<"ri="<<r[pi];
+      //debug()<<"rj="<<r[pj];
+      //debug()<<"dx="<<dx;
+      //assert(rij2!=0.0);
+      if ((q2i<global_radkern2)||(q2j<global_radkern2)){
+        debug()<<"[1;32m\t\t\t\t[density] first if"<<"[m";
+        Real rij = sqrt(rij2);
+        Real3 dr = dx/(rij+epsilon());
+        Real hfacwabj = pow(hj1,option_ndim);
+        //weight self contribution by 1/2
+        Real weight=(i==j)?0.5:1.0;
+        Real pmassj=pmass[pj];
+        // interpolate from kernel table
+        interpolate_kernels_dens(q2i,&wabi,&grkerni,&grgrkerni,&wabalti,&grkernalti);
+        interpolate_kernels_dens(q2j,&wabj,&grkernj,&grgrkernj,&wabaltj,&grkernaltj);
+        wabi = wabi*hfacwabi;
+        debug()<<"[1;32m\t\t\t\t[density]   (using hi), wabi="<<wabi<<"[m";
+        wabalti = wabalti*hfacwabi;
+        grkerni = grkerni*hfacwabi*hi1;
+        grkernalti = grkernalti*hfacwabi*hi1;
+        wabj = wabj*hfacwabj;
+        debug()<<"[1;32m\t\t\t\t[density]   (using hi), wabi="<<wabi<<"[m";
+        wabaltj = wabaltj*hfacwabj;
+        grkernj = grkernj*hfacwabj*hj1;
+        grkernaltj = grkernaltj*hfacwabj*hj1;
+        // derivative w.r.t. h for grad h correction terms (and dhdrho)
+        dwdhi = -rij*grkerni*hi1 - option_ndim*wabi*hi1;
+        dwdhj = -rij*grkernj*hj1 - option_ndim*wabj*hj1;
+        dwaltdhi = -rij*grkernalti*hi1 - option_ndim*wabalti*hi1;
+        dwaltdhj = -rij*grkernaltj*hj1 - option_ndim*wabaltj*hj1;
+        dwdhdhi = option_ndim*(option_ndim+1)*wabi*pow(hi1,2.)
+          + 2.*(option_ndim+1)*rij*pow(hi1,2.)*grkerni + pow(rij,2.)*pow(hi1,4.)*hfacwabi*grgrkerni;
+        dwdhdhj = option_ndim*(option_ndim+1)*wabj*pow(hj1,2.)
+          + 2.*(option_ndim+1)*rij*pow(hj1,2.)*grkernj + pow(rij,2.)*pow(hj1,4.)*hfacwabj*grgrkernj;
+        // calculate density and number density
+        rho[pi] = rho[pi] + pmassj*wabi*weight;
+        rho[pj] = rho[pj] + pmassi*wabj*weight;
+        densn[pi] = densn[pi] + wabalti*weight;
+        densn[pj] = densn[pj] + wabaltj*weight;
+        // drhodt, dndt
+        if (id[pi]!=id[pj]){
+          Real3 dvel = vel[pi] - vel[pj];
+          Real dvdotr = (dvel⋅dr);
+          debug()<<"[1;32m\t\t\t\t\t[density] i!=j[m";
+          drhodt[pi] = drhodt[pi] + pmassj*dvdotr*grkerni;
+          drhodt[pj] = drhodt[pj] + pmassi*dvdotr*grkernj;
+          dndt[pi] = dndt[pi] + dvdotr*grkernalti;
+          dndt[pj] = dndt[pj] + dvdotr*grkernaltj;
+          if (option_imhd==5){
+            projBi = (Bfield[pi]⋅dr);
+            projBj = (Bfield[pj]⋅dr);
+            dBevoldt[pi] = dBevoldt[pi] - pmassj*projBi*dvel*grkerni;
+            dBevoldt[pj] = dBevoldt[pj] - pmassi*projBj*dvel*grkernj;
+          }
+        }
+        if (global_ikernav==3){
+          gradh[pi] = gradh[pi] + weight*pmassj*dwdhi;
+          gradh[pj] = gradh[pj] + weight*pmassi*dwdhj;
+          gradhn[pi] = gradhn[pi] + weight*dwaltdhi;
+          gradhn[pj] = gradhn[pj] + weight*dwaltdhj;
+          gradgradh[pi] = gradgradh[pi] + weight*pmassj*dwdhdhi;
+          gradgradh[pj] = gradgradh[pj] + weight*pmassi*dwdhdhj;
+        }
+      }
+    }
+  }
+}
+
+//particles void density_partial(void){}

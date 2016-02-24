@@ -1,0 +1,106 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+
+
+∀ particles void equation_of_state(void) @ -99.0,-96.8 {
+  //Integer i,isize;
+  Real gamma1=option_gamma-1.0;
+  if (uid==0) info()<<"[1;32m[equation_of_state][m";
+  if (rho<0.0) fatal("eos", "rho -ve, exiting");
+  if (option_iener!=0 && uu<0.0) fatal("eos","u_therm -ve, exiting");
+  if (option_iener==0){ //polytropic (isothermal when gamma=1)
+    if (rho > 0. && itype==itypegas){
+      pr = option_polyk*pow(rho,option_gamma);
+      spsound = sqrt(option_gamma*pr/rho);
+    }
+    if (itype==itypegas1){pr = option_polyk*(rho - 1.);}
+    else if (itype==itypegas2){pr = option_polyk*(rho - 1.);} //4.*polyk*((rho/0.5) - 1.)
+    else pr = 0.0;
+    if (fabs(gamma1)>1.0e-3 && rho>0.0) uu = pr/(gamma1*rho);
+  }else{
+    if (uid==0) info()<<"[1;32m[equation_of_state] ! present gammai[m";
+    if (rho > 0.0){
+      pr=gamma1*uu*rho;
+      spsound = sqrt(option_gamma*pr/rho);
+    }
+  }
+}
+
+/*
+
+void equation_of_state1(Real* pr, Real* vsound, Real* uu,
+                        const Real rho,const Real gammai){
+  Real gamma1 = gamma - 1.0;
+  // exit gracefully if rho is negative
+  if (rho.lt.0.)
+    fatal()<<"eos1: rho -ve, exiting";
+  if ((iener!=0)&& uu<0.0)
+    fatal()<<"eos1: u_therm -ve, exiting";
+
+  if (iener==0) {   // polytropic (isothermal when gamma=1)
+    if (rho > 0.0) {
+      pr = polyk*rho**gamma;
+      vsound = sqrt(gamma*pr/rho);
+    }
+    if (abs(gamma1)>1.e-3){    
+      if (rho > 0.){
+        uu = pr/(gamma1*rho);
+      }
+    }   
+  }else{     //adiabatic
+    if (present(gammai)){
+      if (rho > 0.){
+        pr = (gammai-1.)*uu*rho;
+        vsound = sqrt(gammai*pr/rho);
+      }
+    }else{
+      if (rho > 0.) {
+        pr = gamma1*uu*rho;
+        vsound = sqrt(gamma*pr/rho);
+      }
+    }
+    //!print *,'here ',uu,rho
+  }
+}
+*/

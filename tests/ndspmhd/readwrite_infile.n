@@ -1,0 +1,104 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+void read_infile(void) @ -123.0{
+  // psep                           // particle separation
+  // tmax,tout,nmax,nout
+  // gamma
+  // iener,polyk                    // type of energy equation, polyk(for iener=0)
+  // icty,ndirect,maxdensits
+  // iprterm
+  // iav,alphamin,alphaumin,alphabmin,beta
+  // iavlim(:),avdecayconst
+  // ikernav
+  // ihvar,hfact,tolh
+  // idumpghost
+  // imhd,imagforce
+  // idivbzero,psidecayfact
+  // iresist,etamhd
+  // ixsph,xsphfac
+  // igravity,hsoft
+  // 3D: damp,dampr,dampz
+  // 2D: damp,dampr
+  // 1D: damp
+  // ikernel
+  // iexternal_force
+  // C_Cour, C_force
+  // usenumdens
+  // idust,idrag_nature,idrag_structure,Kdrag,ismooth
+  // ivisc,shearvisc,bulkvisc
+  
+  // check options for possible errors
+  info()<<"[1;31m[read_infile] check options for possible errors[0m";
+
+  if (option_psep<1.e-5) info()<< "psep < 1.e-5";
+  if (option_tout>option_tmax) info()<< "no output tout > tmax";
+  if (option_nout>option_nmax) info()<< "no output nout > nmax";
+  if (option_nout==0) fatal("error in input", "nout = 0");
+  if (option_gamma<1.0) info()<< "gamma < 1.0 ";
+  if ((fabs(option_gamma-1.)<1.e-3) && (option_iener!=0))
+    fatal("ERROR", "must use iener = 0 for isothermal eos");
+  if ((option_iener>0)&&((option_alphaumin<0.)||(option_alphaBmin<0.)))
+    info()<< "alphaumin or alphabmin < 0.";
+  if ((option_iener==0)&&(option_polyk<0.)) info()<< "polyk < 0."; 
+  if ((option_iav!=0)&&(option_alphamin<0. || option_beta<0.))
+    info()<< "av alpha or beta < 0.";   
+  if ((option_iavlimx>0)&&(option_alphamin>=1.))
+    info()<< "using av limiter, but alphamin set > 1.0";
+  if (option_iavlimx>0&&((option_avdecayconst<=0.01)||(option_avdecayconst>0.5))) 
+    info()<< "av decay constant not in range 0.01-0.5";
+  if ((option_ikernav<=0)||(option_ikernav>3))
+    info()<< "kernel averaging not set (ikernav)";
+  if ((option_hfact<=1.0)||(option_hfact>2.0))
+    info()<< "hfact too low/high (1.0 < hfact < 2.0)";
+  if (option_psidecayfact<0.0) info()<< "psidecayfact < 0.0";
+  if (option_tolh<1.e-12)
+    fatal("ERROR","tolh really, really tiny (probably zero)!!");
+  if (option_iresist<0 || option_iresist>3)
+    fatal("ERROR","invalid choice of resistivity formulation");
+  if (option_etamhd<0.)
+    fatal("ERROR","eta < 0 in resistivity");
+  if (option_shearvisc < 0.)
+    fatal("ERROR","invalid choice of shear viscosity parameter");
+  if (option_bulkvisc < 0.) info()<< "invalid choice of bulk viscosity parameter";
+}

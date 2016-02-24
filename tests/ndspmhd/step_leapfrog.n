@@ -1,0 +1,134 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+// Computes one timestep
+// Change this subroutine to change the timestepping algorithm
+// This version uses a leapfrog predictor-corrector
+// At the moment there is no XSPH and no direct summation replacements
+// Note that we cannot use leapfrog for the GR code as force.ne.dvel/dt
+
+void stepIni(void) @ 2.1{
+  info()<<"\33[7mEntering subroutine step"<<"\33[m";
+  hdt = 0.5*δt;
+}
+
+
+∀ particles void stepSetInitialQuantities(void) @ 2.2{
+  if (uid==0) info()<<"\33[7m[stepSetInitialQuantities]"<<"\33[m";
+  xin = r;
+  velin = vel;
+  Bevolin = Bevol;
+  rhoin = rho;
+  hhin = hh;
+  enin = en;
+  alphain = alpha;
+  psiin = psi;
+    
+  //forcein = force;
+  //dBevoldtin = dBevoldt;
+  //drhodtin = drhodt;
+  //dhdtin = dhdt;
+  //dendtin = dendt;
+  //daldtin = daldt;
+  //dpsidtin = dpsidt;
+}
+
+∀ particles void stepLeapfrogPredictorStep(void) @ 2.3 {
+  if (uid==0){
+    info()<<"\33[7m[stepLeapfrogPredictorStep]"<<"\33[m";
+    info()<<"\33[7m[stepLeapfrogPredictorStep] r="<<r<<"\33[m";
+    info()<<"\33[7m[stepLeapfrogPredictorStep] velin="<<velin<<"\33[m";
+    info()<<"\33[7m[stepLeapfrogPredictorStep] force="<<force<<"\33[m";
+  }
+  r= xin = xin + δt*velin + 0.5*δt*δt*force;
+  if (uid==0){
+    info()<<"\33[7m[stepLeapfrogPredictorStep] r="<<r<<"\33[m";
+  }
+  vel = vel + δt*force;
+  velin = velin + 0.5*δt*force;
+  if (option_imhd!=0 && option_iresist!=2) Bevol = Bevolin + dt*dBevoldt;
+  if (option_icty>=1) rho = rhoin + pow(dt,drhodt);
+  if (option_ihvar==1){
+    //hh(i) = hfact*(pmass(i)/rho(i))**dndim;        // my version
+    hh = hhin*pow(rhoin/rho,global_dndim);        // joe's           
+  }else if (option_ihvar==2 || option_ihvar==3){
+    hh = hh + δt*dhdt;
+  }
+  if (option_iener!=0) en = enin + δt*dendt;
+  //if (any(iavlim!=0)) alpha = min(alphain + dt*daldtin,1.0);
+  if (option_idivBzero>=2) psi = psiin + δt*dpsidt;
+}
+
+
+// Diving into derivates
+
+
+∀ particles void stepLeapfrogCorrectorStep(void) @4.0{
+  if (uid==0)  info()<<"\33[7m[stepLeapfrogCorrectorStep]"<<"\33[m";
+  vel = vel + hdt*force;// !+forcein(:,i));
+  if (option_imhd!=0){
+    if (option_iresist==2)
+      Bevol = Bevol + dt*dBevoldt;
+    else
+      Bevol = Bevol + hdt*(dBevoldt+dBevoldt);
+  }
+  if (option_icty>=1) rho = rhoin + hdt*(drhodt+drhodt);
+  if (option_ihvar==2) {
+    hh = hh + hdt*(dhdt+dhdt);
+    if (hh<=0.)fatal("step: hh -ve ',i,hh(i)");
+  }
+  if (option_iener!=0) en = enin + hdt*(dendt+dendt);
+  //if (any(iavlim.ne.0)) alpha = min(alphain + hdt*(daldt+daldtin),1.0);
+  if (option_idivBzero>=2) psi = psi + hdt*(dpsidt+dpsidt);
+  
+}
+
+
+void stepSetNewTimestepFromCourantForcesCondition(void) @ 4.1{
+  info()<<"\33[7m[stepSetNewTimestepFromCourantForcesCondition]"<<"\33[m";
+  info()<<"Exiting subroutine step";
+  if (dtfixed) return;
+  //δt = min(option_C_force*option_dtforce,option_C_cour*option_dtcourant);
+  //δt = min(δt,option_C_force*dtdrag);
+  //δt = min(δt,option_C_force*dtvisc);
+}

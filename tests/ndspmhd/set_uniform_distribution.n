@@ -1,0 +1,108 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+//  generic setup for a uniform density distribution of particles         //
+//   in cartesian geometry for 1, 2 and 3 dimensions                      //
+//                                                                        //
+//  in 3D, lattice can be close packed, body centred or cubic or random   //
+//     2D, lattice can be close packed or cubic or random                 //
+//     1D, uniform or random                                              //
+
+void set_uniform_cartesian(void)@-115{
+  info()<<"[1;35m[set_uniform_cartesian] entering subroutine uniform_cartesian"
+        <<" with idistin="<<global_idistin<<"[m";
+  //Real deltax = option_psep;
+  //Real deltay = 0.5*sqrt(3.)*option_psep;
+  //Real deltaz = sqrt(6.)/3.*option_psep;
+  //Integer npartx = int(0.999*(global_xmax.x-global_xmin.x)/deltax) + 1;
+  //Integer nparty = int(0.999*(global_xmax.y-global_xmin.y)/deltay) + 1;
+  //Integer npartz = 1;
+  //global_npart = npartx*nparty*npartz;// + npartin
+ iniRrandomParticleDistribution();
+}
+
+
+void iniRrandomParticleDistribution(void){
+  info()<<"[1;35m[set_uniform_cartesian] random particle distribution[m";
+  {
+    Integer ntot = pow(1.0/option_psep,option_ndim);
+    global_npart = ntot;
+    info()<<"[1;35m[set_uniform_cartesian] npart="<<ntot<<"[m";
+  }
+}
+
+
+// given x,y,z in world co-ordinates return the box in which those coordinates fall
+int getBoxIDWorldCoords(Real3 ρ){
+  int ibox,ibx[3];
+  ibx[0] = (int)(floor(option_nx*ρ.x));
+  ibx[1] = (int)(floor(option_ny*ρ.y));
+  ibx[2] = (int)(floor(option_nz*ρ.z));
+  ibox = ibx[0]+option_ny*ibx[1]+option_nx*option_ny*ibx[2];
+  return ibox;
+}
+
+void set_uniform_cartesian_02(void) @ -113.0{
+  Integer n=0;
+  Real3 ρ;
+  info()<<"[1;35m[set_uniform_cartesian_02] Filling particles, waist first ran1="<<ran1()<<"[m";
+  for(int i=0;i<global_npart;i+=1){
+    ρ.x=ran1();
+    //info()<<"[1;35m\t[set_uniform_cartesian_02] xran="<<ρ.x;
+    ρ.y=ran1();
+    //info()<<"[1;35m\t[set_uniform_cartesian_02] xran="<<ρ.y;
+//#warning 2D still here
+    ρ.z=0.0;//ran1();
+    //info()<<"[1;35m\t[set_uniform_cartesian_02] xran="<<ρ.z;
+    debug()<<"\t[set_uniform_cartesian_02] ρ="<<ρ;
+    //info()<<"[1;35m\t[set_uniform_cartesian_02] box="<<getBoxIDWorldCoords(ρ);
+    particleAddToCell(n,getBoxIDWorldCoords(ρ),ρ);
+    n+=1;
+  }
+  info()<<"[1;35m[set_uniform_cartesian_02] Now syncing to cells!"<<"[m";
+  particleSyncToCell();
+}
+
+∀ particles void setParticlesId(void) @ -112.0{
+  id=uid;
+}

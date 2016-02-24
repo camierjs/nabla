@@ -1,0 +1,387 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+
+void setkernels(void) @ -118.0 {
+  global_radkern = 2.0; // default value for kernel radius
+  global_ikern = NDSPMHD_IKERN;
+  info()<<"[1;37m[kernels::setkernels] setup kernel tables for primary kernel[m";
+}
+
+// ************************************
+// * Sets up the tables for the kernel
+// ************************************
+void setStdKernTable(void) @ -117.0 {
+  Real cnormk=0.0;
+  info() << "[1;37m[kernels::setStdKernTable] default is cubic spline"
+         << "(see monaghan 1992; monaghan & lattanzio 1985)[m";
+  //kernellabel = 'M_4 cubic spline'    
+  global_radkern = max(global_radkern, 2.0); // interaction radius of kernel
+  global_radkern2 = global_radkern*global_radkern;
+  global_dq2table = global_radkern*global_radkern/(global_ikern);
+  info() << "[1;37m[kernels::setStdKernTable] DEBUG: setting up M_4 with radkern=";
+  if (option_ndim==1) cnormk = 0.66666666666;
+  if (option_ndim==2) cnormk = 10./(7.*CONST_PI);
+  if (option_ndim==3) cnormk = 1./CONST_PI;
+  // setup kernel table
+  for(int i=0;i<global_ikern;i+=1){
+    Real q2 = i*global_dq2table;
+    Real q = sqrt(q2);
+    Real q4 = q2*q2;
+    // potential must be divided by h
+    // force must be divided by h^2
+    if (q < 1.0){
+      potensoft[i] = 2./3.*q2 - 0.3*q4 + 0.1*q4*q - 1.4;
+      fsoft[i] = 4./3.*q - 1.2*q2*q + 0.5*q4;
+      dphidh[i] = -2.*pow(q,2.0) + 1.5*q4 - 0.6*q4*q + 1.4;
+      wij[i] = 1. - 1.5*q2 + 0.75*q*q2;
+      grwij[i] = -3.*q+ 2.25*q2;
+      grgrwij[i] = -3. + 4.5*q;
+    }else if ((q>=1.0)&&(q<=2.0)) {
+      potensoft[i] = 4./3.*q2 - q2*q + 0.3*q4 - q4*q/30. - 1.6 + 1./(15.*q);
+      fsoft[i] = 8./3.*q - 3.*q2 + 1.2*q2*q - q4/6. - 1./(15.*q2);
+      dphidh[i] = -4.*q2 + 4.*q2*q - 1.5*q4 + 0.2*q4*q + 1.6;
+      wij[i] = 0.25*pow(2.-q,3.0);
+      grwij[i] = -0.75*pow(2.-q,2);
+      grgrwij[i] = 1.5*(2.-q);
+    }else{
+      potensoft[i] = -1./q;
+      fsoft[i] = 1.0;
+      dphidh[i] = 0.;
+      wij[i] = 0.0;
+      grwij[i] = 0.0;
+      grgrwij[i] = 0.;
+    }
+  }
+  info() << "[1;37m[kernels::setStdKernTable] normalise kernel";
+  for(int i=0;i<global_ikern;i+=1){
+    wij[i] = cnormk*wij[i];
+    grwij[i] = cnormk*grwij[i];
+    grgrwij[i] = cnormk*grgrwij[i];
+  }
+  info() << "[1;37mSmoothing kernel = M_4 cubic spline[m";
+  //the variable ddq2table is used in interpolate_kernel
+  global_ddq2table = 1./global_dq2table;
+}
+
+// ***************************************
+// * Sets up the tables for the ALT kernel
+// ***************************************
+void setAltKernTable(void) @ -117.0 {
+  Real cnormk=0.0;
+  info() << "[1;37m[kernels::set[1;31mAlt[1;37mKernTable] default is cubic spline"
+         << "(see monaghan 1992; monaghan & lattanzio 1985)[m";
+  global_radkern = max(global_radkern, 2.0); // interaction radius of kernel
+  global_radkern2 = global_radkern*global_radkern;
+  global_dq2table = global_radkern*global_radkern/(global_ikern);
+  info() << "[1;37m[kernels::set[1;31mAlt[1;37mKernTable] DEBUG: setting up M_4 with radkern=";
+  if (option_ndim==1) cnormk = 0.66666666666;
+  if (option_ndim==2) cnormk = 10./(7.*CONST_PI);
+  if (option_ndim==3) cnormk = 1./CONST_PI;
+  // setup kernel table
+  for(int i=0;i<global_ikern;i+=1){
+    Real q2 = i*global_dq2table;
+    Real q = sqrt(q2);
+    //Real q4 = q2*q2;
+    // potential must be divided by h
+    // force must be divided by h^2
+    if (q < 1.0){
+      //potensoft[i] = 2./3.*q2 - 0.3*q4 + 0.1*q4*q - 1.4;
+      //fsoft[i] = 4./3.*q - 1.2*q2*q + 0.5*q4;
+      //dphidh[i] = -2.*pow(q,2.0) + 1.5*q4 - 0.6*q4*q + 1.4;
+      wijalt[i] = 1. - 1.5*q2 + 0.75*q*q2;
+      grwijalt[i] = -3.*q+ 2.25*q2;
+      grgrwijalt[i] = -3. + 4.5*q;
+    }else if ((q>=1.0)&&(q<=2.0)) {
+      //potensoft[i] = 4./3.*q2 - q2*q + 0.3*q4 - q4*q/30. - 1.6 + 1./(15.*q);
+      //fsoft[i] = 8./3.*q - 3.*q2 + 1.2*q2*q - q4/6. - 1./(15.*q2);
+      //dphidh[i] = -4.*q2 + 4.*q2*q - 1.5*q4 + 0.2*q4*q + 1.6;
+      wijalt[i] = 0.25*pow(2.-q,3.0);
+      grwijalt[i] = -0.75*pow(2.-q,2);
+      grgrwijalt[i] = 1.5*(2.-q);
+    }else{
+      //potensoft[i] = -1./q;
+      //fsoft[i] = 1.0;
+      //dphidh[i] = 0.;
+      wijalt[i] = 0.0;
+      grwijalt[i] = 0.0;
+      grgrwijalt[i] = 0.;
+    }
+  }
+  info() << "[1;37m[kernels::set[1;31mAlt[1;37mKernTable] normalise kernel";
+  for(int i=0;i<global_ikern;i+=1){
+    wijalt[i] = cnormk*wijalt[i];
+    grwijalt[i] = cnormk*grwijalt[i];
+    grgrwijalt[i] = cnormk*grgrwijalt[i];
+  }
+}
+
+
+//----------------------------------------------------------------------
+// function to interpolate linearly from drag kernel tables
+//----------------------------------------------------------------------
+void  interpolate_kerneldrag(const Real q2, Real* w){
+/*  Integer index,index1;
+  Real dxx,dwdx;
+  //--find nearest index in kernel table
+  index = int(q2*global_ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+  //--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+  //--calculate slope for w and interpolate for each
+  dwdx =  (wijdrag[index1]-wijdrag[index])*global_ddq2table;
+  *w = (wijdrag[index]+ dwdx*dxx);
+  */
+}
+
+
+void interpolate_kernel(Real q2,
+                        Real *w, Real *gradw){
+  // find nearest index in kernel table
+  Integer index=lrint(q2*global_ddq2table); //round to the nearest integer value
+  Integer index1=index+1;
+  Real dxx,dwdx,dgrwdx;
+
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+  // find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+  // calculate slope for w, gradw and interpolate for each
+  dwdx =  (wij[index1]-wij[index])*global_ddq2table;
+  *w = (wij[index]+dwdx*dxx);
+  dgrwdx =  (grwij[index1]-grwij[index])*global_ddq2table;
+  *gradw = (grwij[index]+ dgrwdx*dxx);
+}
+
+
+//----------------------------------------------------------------------
+// same but for kernel *and* modified kernel in anticlumping term
+//----------------------------------------------------------------------
+void interpolate_kernels(const Real q2,
+                         Real *w,
+                         Real *gradw, Real *gradwalt, Real *gradgradwalt){
+  Integer index,index1;
+  Real dxx,dwdx,dgrwdx,dgrwaltdx,dgrgrwaltdx;
+  
+//--find nearest index in kernel table
+  index = lrint(q2*global_ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--calculate slope for w, gradw, waniso, gradwaniso
+//  and interpolate for each
+  *w = wij[index];
+  dwdx =  (wij[index1]-*w)*global_ddq2table;
+  *w = *w + dwdx*dxx;
+
+  *gradw = grwij[index];
+  dgrwdx =  (grwij[index1]-*gradw)*global_ddq2table;
+  *gradw = *gradw + dgrwdx*dxx;
+//--interpolate for alternative kernel and derivative
+// walt = wijalt(index)
+// dwaltdx =  (wijalt[index1]-walt)*ddq2table
+// walt = walt + dwaltdx*dxx
+
+  *gradwalt = grwijalt[index];
+  dgrwaltdx =  (grwijalt[index1]-*gradwalt)*global_ddq2table;
+  *gradwalt = *gradwalt + dgrwaltdx*dxx;
+
+  *gradgradwalt = grgrwijalt[index];
+  dgrgrwaltdx =  (grgrwijalt[index1]-*gradgradwalt)*global_ddq2table;
+  *gradgradwalt = *gradgradwalt + dgrgrwaltdx*dxx;
+}
+
+
+//----------------------------------------------------------------------
+// same but for kernel *and* modified kernel in anticlumping term
+//----------------------------------------------------------------------
+void interpolate_kernels2(const Real q2, Real* w, Real* walt, Real* gradw, Real* gradwalt){
+/*  Integer index,index1;
+  Real dxx,dwdx,dwaltdx,dgrwdx,dgrwaltdx;
+//--find nearest index in kernel table
+  index = int(q2*ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--calculate slope for w, gradw, waniso, gradwaniso
+//  and interpolate for each
+  w = wij[index];
+  dwdx =  (wij[index1]-w)*global_ddq2table;
+  w = w + dwdx*dxx;
+
+  gradw = grwij[index];
+  dgrwdx =  (grwij[index1]-gradw)*global_ddq2table;
+  gradw = gradw + dgrwdx*dxx;
+//--interpolate for alternative kernel and derivative
+  walt = wijalt[index];
+  dwaltdx =  (wijalt[index1]-walt)*global_ddq2table;
+  walt = walt + dwaltdx*dxx;
+
+  gradwalt = grwijalt[index];
+  dgrwaltdx =  (grwijalt[index1]-gradwalt)*global_ddq2table;
+  gradwalt = gradwalt + dgrwaltdx*dxx;
+*/}
+
+
+//----------------------------------------------------------------------
+// function to interpolate linearly from kernel tables
+// returns kernel and derivative given q^2 = (r_a-r_b)^2/h^2
+// must then divide returned w, grad w by h^ndim, h^ndim+1 respectively
+//----------------------------------------------------------------------
+void interpolate_softening(const Real q2, Real* phi, Real* force, Real* gradw){
+/*  Integer index,index1;
+  Real dxx,dphidx,dfdx,dgrwdx;
+//--find nearest index in kernel table
+  index = int(q2*ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--calculate slope for phi, force
+  dphidx =  (potensoft[index1]-potensoft[index])*global_ddq2table;
+  phi = (potensoft[index]+ dphidx*dxx);
+
+  dfdx =  (fsoft[index1]-fsoft[index])*global_ddq2table;
+  force = (fsoft[index]+ dfdx*dxx);
+
+  dgrwdx = (grwij[index1]-grwij[index])*global_ddq2table;
+  gradw = (grwij[index]+ dgrwdx*dxx);
+*/}
+
+
+//----------------------------------------------------------------------
+// function to interpolate linearly from kernel tables
+// returns kernel and derivative and dphidh given q^2 = (r_a-r_b)^2/h^2
+// must then divide returned w, grad w by h^ndim, h^ndim+1 respectively
+//----------------------------------------------------------------------
+void interpolate_kernel_soft(const Real q2, Real* w, Real* gradw, Real* dphidhi){
+/*  Integer index,index1;
+  Real dxx,dwdx,dgrwdx,dpotdx;
+//--find nearest index in kernel table
+  index = int(q2*ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--linear interpolation
+  dwdx =  (wij[index1]-wij[index])*global_ddq2table;
+  w = (wij[index]+ dwdx*dxx);
+
+  dgrwdx =  (grwij[index1]-grwij[index])*global_ddq2table;
+  gradw = (grwij[index]+ dgrwdx*dxx);
+
+  dpotdx =  (dphidh[index1]-dphidh[index])*global_ddq2table;
+  dphidhi = (dphidh[index] + dpotdx*dxx);
+*/}
+
+
+//----------------------------------------------------------------------
+// function to interpolate linearly from kernel tables
+// returns kernel and second derivative given q^2 = (r_a-r_b)^2/h^2
+// (required in the new densityiterate routine)
+// must then divide returned w, grad grad w by h^ndim, h^ndim+2 respectively
+//----------------------------------------------------------------------
+void interpolate_kernels_dens(const Real q2,
+                              Real* w,
+                              Real* gradw, Real* gradgradw,
+                              Real* walt, Real* gradwalt){
+  Integer index,index1;
+  Real dxx,dwdx,dgrwdx,dgrgrwdx,dwaltdx,dgrwaltdx;
+//--find nearest index in kernel table
+  index = (int)(q2*global_ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--calculate slope for w, gradw, gradgradw and interpolate for each
+  dwdx =  (wij[index1]-wij[index])*global_ddq2table;
+  *w = (wij[index]+ dwdx*dxx);
+
+  dgrwdx =  (grwij[index1]-grwij[index])*global_ddq2table;
+  *gradw = (grwij[index]+ dgrwdx*dxx);
+
+  dgrgrwdx =  (grgrwij[index1]-grgrwij[index])*global_ddq2table;
+  *gradgradw = (grgrwij[index]+ dgrgrwdx*dxx);
+//--interpolate for alternative kernel and derivative
+  *walt = wijalt[index];
+  dwaltdx =  (wijalt[index1]-*walt)*global_ddq2table;
+  *walt = *walt + dwaltdx*dxx;
+
+  *gradwalt = grwijalt[index];
+  dgrwaltdx =  (grwijalt[index1]-*gradwalt)*global_ddq2table;
+  *gradwalt = *gradwalt + dgrwaltdx*dxx;
+}
+
+
+//----------------------------------------------------------------------
+// kernels used in calculating the curl in get_curl.f90
+//----------------------------------------------------------------------
+void interpolate_kernel_curl(const Real q2, Real* gradwalt, Real* gradgradwalt){
+/*  Integer index,index1;
+  Real dxx,dgrwaltdx,dgrgrwaltdx;
+//--find nearest index in kernel table
+  index = int(q2*global_ddq2table);
+  index1 = index + 1;
+  if (index>global_ikern || index<0) index = global_ikern;
+  if (index1>global_ikern || index1<0) index1 = global_ikern;
+//--find increment from index point to actual value of q2
+  dxx = q2 - index*global_dq2table;
+//--calculate slope for w, gradw, waniso, gradwaniso
+//  and interpolate for each
+  gradwalt = grwijalt[index];
+  dgrwaltdx =  (grwijalt[index1]-gradwalt)*global_ddq2table;
+  gradwalt = gradwalt + dgrwaltdx*dxx;
+
+  gradgradwalt = grgrwijalt[index];
+  dgrgrwaltdx =  (grgrwijalt[index1]-gradgradwalt)*global_ddq2table;
+  gradgradwalt = gradgradwalt + dgrgrwaltdx*dxx;
+*/}

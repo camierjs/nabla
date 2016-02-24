@@ -1,0 +1,166 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+#include "assert.h"
+// read files and parameters and setup particles
+// This subroutine initialises everything needed for the run
+
+void initialise_01(void) @ -125.0{
+  info()<<"[1;33m[initialise_01] set some global parameters based on ndim"<<"[m";
+  global_dndim=1.0/option_ndim;
+  //time = 0.0;
+  global_nsteps = 0;
+  global_xmin = Real3(0.0,0.,0.);
+  global_xmax = Real3(0.0,0.,0.);
+  global_nbpts = 0;
+  global_vsig2max = 0.0;
+}
+
+∀ particles void initialise_02(void) @ -124.0{
+  info()<<"[1;33m[initialise_02]"<<"[m";
+  //Bconst = 0;
+}
+
+void initialise_03(void) @ -122.0{
+  info()<<"[1;33m[initialise_03] Work out multiplication factor for source term in morris and monaghan scheme[m";
+  // (just from gamma)
+  if (fabs(option_gamma-1.0)>1.0e-3) // adiabatic
+    global_avfact = log(4.)/(log((option_gamma+1.0)/(option_gamma-1.0)));
+  else
+    global_avfact = 1.0;           // isothermal
+}
+
+void initialise_04(void) @ -119.0{
+  info()<<"[1;33m[initialise_04] Setup kernel tables[m";
+  assert(option_ikernelalt == option_ikernel);
+}
+
+
+// On revient ici à -112 apres le setup
+
+// On revient ici à -105 apres le check_setup
+
+∀ particles void initialise_05(void) @ -103.0{
+  if (uid==0) info()<<"[1;33m[initialise_05] Setup additional quantities that are not done in setup[m";
+  if (option_iavlimx > 0)
+    alpha.x = 1.0;
+  else
+    alpha.x = option_alphamin;
+   
+  alpha.y = option_alphaumin;
+  alpha.z = option_alphaBmin;
+  gradh = 1.0;
+  divB = 0.0;
+  curlB = Real3(0.0,0.0,0.0);
+  fmag = Real3(0.0,0.0,0.0);
+  if (option_iprterm!=11) psi = 0.0;
+  sqrtg = 1.0;
+  if (option_imhd==0){
+    Bfield = 0.0;//  ! zero mag field if turned off
+    Bevol = 0.0;
+  }
+
+  if (uid==0) info()<<"[1;33m[initialise_05] set velocities to zero if damping is set[m";
+  if (option_damp > 0.0){
+    if (uid==0) info()<<"SETTING VELS TO ZERO FOR RELAXATION RUN";
+    vel = 0.0;
+  }
+
+  // set minimum density if using variable particle masses
+  // and density iterations
+  //if (any(pmass(1:npart) pmass(1)) && option_icty == 0 && option_ikernav==3){
+  // global_rhomin = 0.0;
+    //!!rhomin = minval(dens(1:npart))
+    //write(iprint,*) 'rhomin = ',rhomin
+  //}else{
+    global_rhomin = 0.0;
+    //info()<<"particle mass = "<<pmass;
+    //}
+
+   // if using fixed particle boundaries, set them up
+   //if (any(ibound == 1)) set_fixedbound();
+
+   if (uid==0) info()<<"[1;33m[initialise_05] Set derivatives to zero until calculated [m";
+   drhodt = 0.0;
+   dudt = 0.0;
+   dendt = 0.0;
+   force = 0.0;
+   dhdt = 0.0;
+   daldt = 0.0; 
+   dBevoldt = 0.0;
+   dpsidt = 0.0;
+   gradpsi = 0.0;
+}
+
+/*     
+   // calculate the conservative quantities (rho, en, B/rho)
+   // this also sets the smoothing length
+   primitive2conservative();
+}
+*/
+
+
+
+/*particles void copyToIn(void) @ -89 {
+  if (uid==0) info()<<"[1;33m[copyToIn]"<<"[m";
+  //x3in = xin;
+  velin = vel;
+  Bevolin = Bevol;
+  rhoin = rho;
+  hhin = hh;
+  enin = en;
+  alphain = alpha;
+  psiin = psi;
+}
+*/
+/*particles void copyAfterConservative(void){
+  xin = x;
+  velin = vel;
+  Bevolin = Bevol;
+  rhoin = rho;
+  hhin = hh;
+  enin = en;
+  alphain = alpha;
+  psiin = psi;
+}
+*/

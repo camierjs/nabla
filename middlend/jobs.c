@@ -252,8 +252,12 @@ char nMiddleScanForNablaJobForallItem(astNode * n){
   char it;
   if (n->tokenid==FORALL)
     return n->next->children->token[0];
-  if(n->children != NULL) if ((it=nMiddleScanForNablaJobForallItem(n->children))!='\0') return it;
-  if(n->next != NULL) if ((it=nMiddleScanForNablaJobForallItem(n->next))!='\0') return it;
+  if(n->children != NULL)
+    if ((it=nMiddleScanForNablaJobForallItem(n->children))!='\0')
+      return it;
+  if(n->next != NULL)
+    if ((it=nMiddleScanForNablaJobForallItem(n->next))!='\0')
+      return it;
   return '\0';
 }
 
@@ -267,7 +271,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
-  if (n->token) dbg("\n\t\t\t[nablaJobParse] token '%s'?", n->token);
+  //if (n->token) dbg("\n\t\t\t[nablaJobParse] token '%s'?", n->token);
 
   if (job->parse.got_a_return &&
       job->parse.got_a_return_and_the_semi_colon) return;

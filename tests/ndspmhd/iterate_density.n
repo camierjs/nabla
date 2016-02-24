@@ -1,0 +1,187 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
+// Iterates the density calculation so that rho and h are
+// calculated self-consistently. 
+//
+// rho_a is a function of h_a and vice versa
+// via the summation rho_a = sum_b m_b W_ab(h_a)
+// we assume h \propto 1/rho^(1/ndim)
+//
+// we determine the change in h and recalculate the density only 
+// for those particles where h changes significantly after the density
+// is calculated.
+//
+// For details see Price and Monaghan 2004, MNRAS 348, 139
+//
+// Number density option has been added Aug 2005.
+// IMPORTANT: if number density formalism is used, must change the
+//            relevant lines in rates also.
+
+
+void iterate_density_01(void) @ -100.9,-97.9{
+  //info()<<"\33[34;1m\t\t[iterate_density] from initialise"<<"\33[m";
+  // set maximum number of iterations to perform
+  if ((option_ikernav==3)&&(option_ihvar!=0)){
+    info()<<"\33[34;1m\t\t[iterate_density] perform 1 fixed point iteration\33[m";
+    global_itsdensitymax = option_maxdensits; // perform 1 fixed point iteration
+  }else{
+    info()<<"\33[34;1m\t\t[iterate_density] no iterations\33[m";
+    global_itsdensitymax = 0;          // no iterations
+  }
+    info()<<"\33[34;1m\t\t[iterate_density] Loop to find rho and h self-consistently\33[m";
+  global_itsdensity = 0;
+  global_ncalctotal = 0;
+  global_ncalc = global_npart;//   ! number of particles to calculate density on
+  global_redolink = false;
+  global_ncalcprev = 0;
+}
+
+
+∀ particles void iterate_density_01_ini(void) @ -100.8,-97.8 {
+  //if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_01_ini]"<<"\33[m";
+  gradh = 0.0;
+  gradhn = 0.0;
+  gradsoft = 0.0;
+  gradgradh = 0.0;
+  drhodt = 0.0;
+  dhdt = 0.0;
+  converged=false;
+}
+
+∀ particles void iterateDensityCopyHh(void) @ -100.7,-97.7{
+  //if (uid==0) info()<<"\33[34;1m[iterateDensityCopyHh]"<<"\33[m";
+  hhin = hh;
+  if (hh < tiny(hh))
+    fatal("error", "h <= 0 in density call");
+
+}
+
+void iterate_density_02(void) @ -100.6,-97.6{
+  //info()<<"\33[34;1m\t\t[iterate_density_02]"<<"\33[m";
+  //dhdni = 0.0;
+  //dhdrhoi = 0.0;
+}
+
+void iterateDensityTestPMass(void) @ -100.5,-97.5{
+  //info()<<"\33[34;1m\t\t[iterateDensityTestPMass]"<<"\33[m";
+  /*if (pmass.x!=pmass.x)
+    rhomin = 0.0; //  !!minval(rho(1:npart))
+    else*/
+  global_rhomin = 0.0;
+}
+
+void iterate_density_03_iterate(void) @ -100.4,-97.4{
+  info()<<"\33[34;1m\t\t[iterate_density_02] Calculate the density"<<"\33[m";
+  global_itsdensity = global_itsdensity + 1;
+}
+
+////////////////////////////////
+//  @ -100.3  density();//xin,pmass,hh,vel,rho,drhodt,densn,dndt,gradh,gradhn,gradsoft,gradgradh,npart);
+////////////////////////////////
+
+void iterate_density_re_global(void) @ -100.25,-97.25{
+  global_ncalctotal = global_ncalctotal + global_ncalc;
+  global_ncalcprev = global_ncalc;
+  //redolistprev(1:ncalcprev) = redolist(1:ncalcprev);
+  global_ncalc = 0;
+  global_redolink =  false;
+  //nrhosmall = 0;
+  //nwarn = 0;
+}
+
+
+∀ particles void iterate_density_else_usenumdens(void) @ -100.2,-97.2{
+  Real hnew, func, dfdh, d2hdrho2i;
+  Real rhoi = pmass/pow(hh/option_hfact,option_ndim)-global_rhomin;// ! this is the rho compatible with the old h
+  Real dhdrhoi = -hh/(option_ndim*(rho + global_rhomin));  // ! deriv of this
+  Real dwdhsumi = gradh;
+  Real omegai =  1. - dhdrhoi*gradh;
+  //if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_else_usenumdens]"<<"\33[m";
+  if (omegai < 1.e-5){
+    info()<<"warning: omega < 1.e-5";
+    if (fabs(omegai)==0.) omegai = 1.;
+  }
+  gradh = 1./omegai; //   ! this is what *multiplies* the kernel gradient in rates etc
+  func = rhoi - rho;
+  dfdh = omegai/dhdrhoi;
+  gradsoft = gradsoft*dhdrhoi;
+  //!--gradgradhi is the "zeta" term in Price (2009)
+  d2hdrho2i = hh*(option_ndim+1)/pow(rho*option_ndim,2);
+  gradgradh = rho*(d2hdrho2i*dwdhsumi + pow(dhdrhoi,2)*gradgradh);
+  
+  //if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_else_usenumdens] Perform Newton-Raphson iteration to get new h\33[m";
+  hnew = hh - func/dfdh;
+  if (hnew>1.2*hh) hnew = 1.2*hh;
+  if (hnew<0.8*hh) hnew = 0.8*hh;
+  
+  // overwrite if iterations are going wrong
+  hnew = option_hfact*pow(pmass/(rho+global_rhomin),global_dndim); // ie h proportional to 1/rho^dimen
+  // if this particle is not converged, add to list of particles to recalculate
+  //if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_else_usenumdens] converged?\33[m";
+  converged = (fabs((hnew-hh)/hhin) < option_tolh && omegai > 0.) || global_itsdensitymax==0;
+  //if (converged) info()<<"\33[34;1m\t\t[iterate_density_else_usenumdens] Yes\33[m";
+
+  //if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_else_usenumdens] normalise arrays\33[m";
+  drhodt = drhodt*gradh;
+  dhdt = dhdrhoi*drhodt;
+}
+
+
+∀ particles void iterate_density_04_ihvar(void) @ -100.1,-97.1 {//if (option_ihvar){
+  if (option_ihvar){
+    if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_04_ihvar]"<<"\33[m";
+    //ihvardhdrhoi = -hh/(ndim*(rho + rhomin)); // deriv of this
+    //dhdt = dhdrho*drhodt;
+  }
+}
+∀ particles void iterate_density_04_no_ihvar(void)  @ -100.1,-97.1{//if (!option_ihvar){
+  if (!option_ihvar){
+    if (uid==0) info()<<"\33[34;1m\t\t[iterate_density_04_no_ihvar]"<<"\33[m";
+    dhdt = 0.0;
+    gradh = 1.0;
+    gradhn = 0.0;
+    gradgradh = 0.0;
+  }
+}
+
