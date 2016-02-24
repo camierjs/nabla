@@ -50,4 +50,4 @@ static int rng(void){
 // ****************************************************************************
 int backCell(int f){ return rng();}
 int frontCell(int f){ return rng();}
-void synchronize(double*){}
+//void synchronize(double*){}

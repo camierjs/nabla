@@ -95,12 +95,65 @@ class __attribute__ ((aligned(8))) real3x3 {
   __attribute__ ((aligned(8))) struct real3 y;
   __attribute__ ((aligned(8))) struct real3 z;
   inline real3x3(){ x=0.0; y=0.0; z=0.0;}
+  inline real3x3(real3 r){ x=r; y=r; z=r;}
   inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
+  // Arithmetic operators
+  friend inline real3x3 operator+(const real3x3 &a, const real3x3& b) { return real3x3((a.x+b.x), (a.y+b.y), (a.z+b.z));}
+  friend inline real3x3 operator-(const real3x3 &a, const real3x3& b) { return real3x3((a.x-b.x), (a.y-b.y), (a.z-b.z));}
+  friend inline real3x3 operator*(const real3x3 &a, const real3x3& b) { return real3x3((a.x*b.x), (a.y*b.y), (a.z*b.z));}
+  friend inline real3x3 operator/(const real3x3 &a, const real3x3& b) { return real3x3((a.x/b.x), (a.y/b.y), (a.z/b.z));}
 
+  inline real3x3& operator+=(const real3x3& b) { return *this=real3x3((x+b.x),(y+b.y),(z+b.z));}
+  inline real3x3& operator-=(const real3x3& b) { return *this=real3x3((x-b.x),(y-b.y),(z-b.z));}
+  inline real3x3& operator*=(const real3x3& b) { return *this=real3x3((x*b.x),(y*b.y),(z*b.z));}
+  inline real3x3& operator/=(const real3x3& b) { return *this=real3x3((x/b.x),(y/b.y),(z/b.z));}
+  inline real3x3 operator-()const {return real3x3(0.0-x, 0.0-y, 0.0-z);}
+
+  inline real3x3& operator*=(const real& d) { return *this=real3x3(x*d,y*d,z*d);}
+  inline real3x3& operator/=(const real& d) { return *this=real3x3(x/d,y/d,z/d);}
+  
+  friend inline real3x3 operator*(real3x3 t, double d) { return real3x3(t.x*d,t.y*d,t.z*d);}
+  
   friend inline real3 opProdTensVec(real3x3 t,real3 v){
     return real3(dot3(t.x,v),dot3(t.y,v),dot3(t.z,v));
   }
- 
 };
+inline real3x3 opProdTens(real3 a,real3 b){
+  return real3x3(a.x*b,a.y*b,a.z*b);
+}
+inline real matrixDeterminant(real3x3 m) {
+  return (  m.x.x*(m.y.y*m.z.z-m.y.z*m.z.y)
+          + m.x.y*(m.y.z*m.z.x-m.y.x*m.z.z)
+          + m.x.z*(m.y.x*m.z.y-m.y.y*m.z.x));
+}
+inline real3x3 inverseMatrix(real3x3 m,real d){
+  Real3x3 inv(real3(m.y.y*m.z.z-m.y.z*m.z.y,-m.x.y*m.z.z+m.x.z*m.z.y,m.x.y*m.y.z-m.x.z*m.y.y),
+              real3(m.z.x*m.y.z-m.y.x*m.z.z,-m.z.x*m.x.z+m.x.x*m.z.z,m.y.x*m.x.z-m.x.x*m.y.z),
+              real3(-m.z.x*m.y.y+m.y.x*m.z.y,m.z.x*m.x.y-m.x.x*m.z.y,-m.y.x*m.x.y+m.x.x*m.y.y));
+  inv/=d;
+  return inv;
+}
+inline real3x3 matrix3x3Id(){
+  return real3x3(real3(1.0, 0.0, 0.0),
+                 real3(0.0, 1.0, 0.0),
+                 real3(0.0, 0.0, 1.0));
+}
+inline real3x3 opMatrixProduct(const real3x3 &t1,
+                               const real3x3 &t2) {
+  real3x3 temp ;
+  temp.x.x = t1.x.x*t2.x.x+t1.x.y*t2.y.x+t1.x.z*t2.z.x ;
+  temp.y.x = t1.y.x*t2.x.x+t1.y.y*t2.y.x+t1.y.z*t2.z.x ;
+  temp.z.x = t1.z.x*t2.x.x+t1.z.y*t2.y.x+t1.z.z*t2.z.x ;
+
+  temp.x.y = t1.x.x*t2.x.y+t1.x.y*t2.y.y+t1.x.z*t2.z.y ;
+  temp.y.y = t1.y.x*t2.x.y+t1.y.y*t2.y.y+t1.y.z*t2.z.y ;
+  temp.z.y = t1.z.x*t2.x.y+t1.z.y*t2.y.y+t1.z.z*t2.z.y ;
+
+  temp.x.z = t1.x.x*t2.x.z+t1.x.y*t2.y.z+t1.x.z*t2.z.z ;
+  temp.y.z = t1.y.x*t2.x.z+t1.y.y*t2.y.z+t1.y.z*t2.z.z ;
+  temp.z.z = t1.z.x*t2.x.z+t1.z.y*t2.y.z+t1.z.z*t2.z.z ;
+
+  return temp ;
+}
 
 #endif //  _KOKKOS_REAL3_H_

@@ -108,6 +108,7 @@ const static nWhatWith nLambdaHeaderDefines[]={
   {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
   {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
   {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
+  {"synchronize(v)",""},
   {NULL,NULL}
 };
 

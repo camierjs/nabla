@@ -49,7 +49,8 @@
 // * Gather for Cells
 // ****************************************************************************
 static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
-  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  //const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
   
   // Phase de déclaration
   if (phase==GATHER_SCATTER_DECL)
@@ -62,10 +63,10 @@ static char* lambdaHookGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCA
     snprintf(gather, 1024, "\n\t\t\t\
 %s gathered_%s_%s=%s(0.0);\n\t\t\t\
 gather%sk(cell_node[n*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
              var->item, var->name,
-             strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
-             strcmp(var->type,"real")==0?"":dim1D?"":"3",
+             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
              var->item, var->name,
              strcmp(var->type,"real")==0?"":"",
              var->item, var->name);
@@ -76,10 +77,10 @@ gather%sk(cell_node[n*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
      snprintf(gather, 1024, "\n\t\t\t\
 %s gathered_%s_%s=%s(0.0);\n\t\t\t\
 gather%sk(cell_face[f*NABLA_NB_CELLS+c],%s_%s%s,&gathered_%s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":"real3",
+             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
              var->item, var->name,
-             strcmp(var->type,"real")==0?"real":"real3",
-             strcmp(var->type,"real")==0?"":"3",
+             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
              var->item, var->name,
              strcmp(var->type,"real")==0?"":"",
              var->item, var->name);
@@ -112,8 +113,8 @@ gatherFromNode_%sk%s(node_cell[NABLA_NODE_PER_CELL*n+c],%s %s_%s, &gathered_%s_%
            strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            var->item,
            var->name,
-           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
-           strcmp(var->type,"real")==0?"":dim1D?"":"3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
            var->dim==0?"":"Array8",
            var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+c],",
            var->item, var->name,
@@ -138,8 +139,10 @@ static char* lambdaHookGatherFaces(nablaJob *job,
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\
 \n\t\t\tgatherFromFaces_%sk%s(face_node[NABLA_NB_FACES*n+f],%s\
 \n\t\t\t\t\t%s_%s, &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3", var->item, var->name, // ligne #1
-           strcmp(var->type,"real")==0?"real":"real3", strcmp(var->type,"real")==0?"":"3", // ligne #3
+           strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+           var->item, var->name, // ligne #1
+           strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+           strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3", // ligne #3
            var->dim==0?"":"Array8", // fin ligne #3
            var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+f],\n\t\t\t", // ligne #4
            var->item, var->name, // ligne #5

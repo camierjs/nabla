@@ -72,4 +72,11 @@ std::ostream& operator<<(std::ostream &os, const Real3 &a){
   return os << "("<<*x<<","<<*y<<","<<*z<< ")";
 }
 
+// ****************************************************************************
+// * REALS_3x3
+// ****************************************************************************
+std::ostream& operator<<(std::ostream &os, const Real3x3 &a){
+  return os << "(" << a.x <<","<< a.y <<","<< a.z <<")";
+}
+
 #endif // _KOKKOS_STD_OSTREAM_H_

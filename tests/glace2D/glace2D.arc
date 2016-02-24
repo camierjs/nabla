@@ -66,11 +66,11 @@
      <option_quads>true</option_quads>
      <option_triangles>false</option_triangles>
 
-     <option_dtt_ini>0.00001</option_dtt_ini>
+     <option_dtt_initial>0.00001</option_dtt_initial>
      <option_dtt_min>1e-12</option_dtt_min>
      <option_dtt_max>0.01</option_dtt_max>
      <option_dtt_control>0.15</option_dtt_control> <!-- CFL -->
-     <option_dtt_end>0.2</option_dtt_end>
+     <option_stoptime>0.2</option_stoptime>
 
      <option_x_min>0.0</option_x_min>
      <option_x_interface>0.5</option_x_interface>
@@ -88,6 +88,6 @@
      <option_ini_zd_rh>0.125</option_ini_zd_rh>
      <option_ini_zd_p>0.1</option_ini_zd_p>
 
-     <option_max_iterations>32768</option_max_iterations>
+     <option_max_iterations>8</option_max_iterations>
    </glace2-d>
 </case>

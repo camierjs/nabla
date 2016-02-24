@@ -40,35 +40,94 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-// Calcul des aires orientées des faces
-∀ cells void geom_computeSurfaceAndVolume_Triangle(void) @ -20.0,23.0 if (option_triangles){
-  const Real3 fst_edge = coord[2]-coord[0];
-  const Real3 snd_edge = coord[0]-coord[1];
-  V=½*cross2D(fst_edge,snd_edge);
+// This NABLA port is an implementation of the NDSPMHD software
+//----------------------------------------------------------------------------
+// Calculates the 1D solution to any Poisson equation
+//
+// \nabla^2 \phi = \eta 
+//
+// by a direct summation over the particles. 
+//
+// Use this to check the accuracy of the tree code
+//
+// Input: 
+//
+//   x(ndim,ntot)  : co-ordinates of the particles
+//   source(ntot)  : quantity to be summed over 
+//                   for an arbitrary quantity \eta, this is given by
+//                   source = particle mass * eta / (4.*pi*density)
+//               ie. source = particle mass for gravity
+//
+// Output:
+//
+//   phitot          : total potential phi
+//   gradphi(ndim,ntot) : gradient of the potential (for gravity this = force)
+//----------------------------------------------------------------------------
+∀ particles void direct_sum_poisson1D(const Real3* x,
+                                      const Real* source,
+                                      Real* phitot,
+                                      Real3* gradphi,
+                                      const Integer ntot){
+  //reset forces initially
+  phi = 0.0;
+  gradphi=0.0;;
+  // calculate gravitational force by direct summation
+  Real sourcei=source[i];
+  ∀ /*j*/ particle{
+    if (this==j) continue;
+    dx = x[i]-x[j];
+    gradphi+=source[j]*dx;
+  }
+  phitot=0.0;
+  }
+
+
+∀ /*∀ i*/ particles void direct_sum_poisson2D(const Real3* x,
+                                              const Real* source,
+                                              Real* phitot,
+                                              Real3* gradphi,
+                                              const Integer ntot){
+  //reset forces initially
+  phi = 0.0;
+  gradphi=0.0;;
+  // calculate gravitational force by direct summation
+  Real sourcei=source[i];
+  ∀ /*j*/ particle{
+    if (this!=j){
+      Real3 dx = x[i]-x[j];
+      Real3 rij2 = dot(dx,dx);
+      Real3 term = dx/rij2;
+      gradphi[i]+=source[j]*term;
+      gradphi[j]+=sourcei*term;
+    }
+  }
+  phitot=0.0;
 }
 
 
-// Calcul des résultantes aux sommets des mailles
-∀ cells void geom_computeNormal_Triangle(void) @ -20.0,24.0 if (option_triangles){
-  const Real3 s0=coord[0];
-  const Real3 s1=coord[1];
-  const Real3 s2=coord[2];
-  const Real3 c0 = ½*(s0+s1);
-  const Real3 c1 = ½*(s1+s2);
-  const Real3 c2 = ½*(s2+s0);
-  const Real3 c3 = s0;
-  const Real3 length20 = ½*(c2-c0);
-  const Real3 length31 = ½*(c3-c1);
-  CQs[0].x = -(2.0*length20.y);
-  CQs[0].y =  (2.0*length20.x);
-  CQs[0].z = 0.0;
-  absCQs[0]=CQs[0].abs();
-  CQs[1].x = -(length31.y-length20.y);
-  CQs[1].y =  (length31.x-length20.x); 
-  CQs[1].z = 0.0;
-  absCQs[1]=CQs[1].abs();
-  CQs[2].x = -(-length31.y-length20.y);
-  CQs[2].y =  (-length31.x-length20.x); 
-  CQs[2].z = 0.0;
-  absCQs[2]=CQs[2].abs();
+∀ /*∀ i*/ particles void direct_sum_poisson3D(const Real3* x,
+                                              const Real* source,
+                                              Real* phitot,
+                                              Real3* gradphi,
+                                              const Integer ntot){
+  //reset forces initially
+  phi = 0.0;
+  // calculate gravitational force by direct summation
+  ∀ /*j*/ particle{
+    if (this!=j){
+      Real3 dx = x[i]-x[j];
+      Real3 rij2 = √(dot(dx,dx) + psoft²);
+      Real rij = √rij2;
+      Real3 term = dx/(rij*rij2);
+      phi[i]-=source[j]/rij;
+      phi[j]-=sourcei/rij;
+      gradphi[i]-=source[j]*term;
+      gradphi[j]+=source[i]*term;
+    }
+  }
+  phitot=0.0;
+}
+
+∀ particles void direct_sum_poisson3D(void){
+  phitot += ½*source*phi;
 }

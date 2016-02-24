@@ -153,11 +153,11 @@ __asm__           { return tok(&yylval, ASM);}
 "size_t"			   { return tok(&yylval, SIZE_T);}
 "bool"			   { return tok(&yylval, BOOL);}
 "Bool"			   { return tok(&yylval, BOOL);}
-"Real"			   { return tok(&yylval, REAL);}
-"Real2"			   { return tok(&yylval, REAL2);}
+"Real3x3"		   { return tok(&yylval, REAL3x3);}
 "Real2x2"		   { return tok(&yylval, REAL2x2);}
 "Real3"			   { return tok(&yylval, REAL3);}
-"Real3x3"		   { return tok(&yylval, REAL3x3);}
+"Real2"			   { return tok(&yylval, REAL2);}
+"Real"			   { return tok(&yylval, REAL);}
 "Integer"		   { return tok(&yylval, INTEGER);}
 "Int32"		      { return tok(&yylval, INT32);}
 "Int64"		      { return tok(&yylval, INT64);}

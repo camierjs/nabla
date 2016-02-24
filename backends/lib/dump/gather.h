@@ -83,32 +83,53 @@ inline void gatherFromFaces_3k(const int a, real3 *data, real3 *gthr){
   *gthr=gather3k_and_zero_neg_ones(a,data);
 }
 
+inline real3x3 gather3x3k_and_zero_neg_ones(const int a, real3x3 *data){
+  if (a>=0) return *(data+a);
+  return real3x3(0.0);
+}
+inline void gatherFromFaces_3x3k(const int a, real3x3 *data, real3x3 *gthr){
+  *gthr=gather3x3k_and_zero_neg_ones(a,data);
+}
 
-/******************************************************************************
- * Gather avec des real3
- ******************************************************************************/
+
+// ****************************************************************************
+// * Gather avec des real3
+// ****************************************************************************
 inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
-  //debug()<<"gather3ki, i="<<i;
   double *p=(double *)data;
   double value=p[3*a+i];
   if (i==0) (*gthr).x=value;
   if (i==1) (*gthr).y=value;
   if (i==2) (*gthr).z=value;
 }
-
 inline void gather3k(const int a, real3 *data, real3 *gthr){
-  //debug()<<"gather3k";
   gather3ki(a, data, gthr, 0);
   gather3ki(a, data, gthr, 1);
   gather3ki(a, data, gthr, 2);
-  //debug()<<"gather3k done";
 }
 
 
+// ****************************************************************************
+// * Gather avec des real3x3
+// ****************************************************************************
+inline void gather3x3ki(const int a, real3x3 *data, real3x3 *gthr, int i){
+  real3 *p=(real3 *)data;
+  real3 value=p[3*a+i];
+  if (i==0) (*gthr).x=value;
+  if (i==1) (*gthr).y=value;
+  if (i==2) (*gthr).z=value;
+}
 
-/******************************************************************************
- * Gather avec des real3[nodes(#8)]
- ******************************************************************************/
+inline void gather3x3k(const int a, real3x3 *data, real3x3 *gthr){
+  gather3x3ki(a, data, gthr, 0);
+  gather3x3ki(a, data, gthr, 1);
+  gather3x3ki(a, data, gthr, 2);
+}
+
+
+// ****************************************************************************
+// * Gather avec des real3[nodes(#8)]
+// ****************************************************************************
 inline void gatherFromNode_3kiArray8(const int a, const int corner,
                                      real3 *data, real3 *gthr, int i){
   //debug()<<"gather3ki, i="<<i;

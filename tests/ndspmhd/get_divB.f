@@ -40,51 +40,89 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-// Calcul des aires orientées des faces
-inline Real thisCross2D(Real3 _u,Real3 _v){
-  return Real(_u.x*_v.y - _u.y*_v.x);
+// This NABLA port is an implementation of the NDSPMHD software
+// Computes an SPH estimate of div B
+// This version computes div B on all particles
+// and therefore only does each pairwise interaction once
+/*
+∀ particles void initialiseQuantities(void){
+  divBonrho=0.0;
 }
 
-/*∀ nodes @-21{
-  info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
-  }*/
-
-∀ cells void geom_computeSurfaceAndVolume_Quad(void)
-  @ -20.0,23.0 if (option_quads){
-  const Real3 fst_edge = coord[2]-coord[0];
-  const Real3 snd_edge = coord[0]-coord[1];
-  V=thisCross2D(fst_edge,snd_edge);
-  if (DEBUG)
-    printf("\n[37m[geo,std] V=%.15e[0m",V);
-}
-
-
-inline Real3 normal(Real3 a, Real3 b){
-  return Real3(b.y-a.y,-b.x+a.x,0.0);
-}
-
-// Calcul des résultantes aux sommets des mailles
-∀ cells void geom_computeNormal_Quad(void) @ -20.0,24.0 if (option_quads){
-  const Real3 X[4]= {coord[0],coord[1],coord[2],coord[3]};
-  ∀ node{
-    const int i=(#+nbNode-1)%nbNode;
-    const int j=(i+1)%nbNode;
-    CQs = 0.5*normal(X[i],X[j]);
-    absCQs=norm(CQs);
-    if (DEBUG) cout << "\n[37m[geo,std] CQs["<<#<<"]: "<<CQs<<"[0m";
+void cellComputeDivB(Cell i, Cell j){
+  foreach i particle{
+    Real hi = hh[i];
+    Real hi1 = 1.0/hi;
+    Real hi2 = hi*hi;
+    Real hfacwabi = hi1**ndim;
+    Real rho21i = 1./rho[i]**2;
+    // for each particle in the current cell, loop over its neighbours
+    foreach j particle{
+      if (j==i) continue;
+      Real3 dx = x[i] - x[j];
+      Real hj = hh[j];
+      Real hj1 = 1./hj;
+      Real hj2 = hj*hj;
+      // calculate averages of smoothing length if using this averaging
+      Real hav = 0.5*(hi + hj);
+      Real hav1 = 1./hav;
+      Real h2 = hav*hav;
+      Real hfacwab = hav1**ndim;
+      Real hfacwabj = hj1**ndim;
+      Real rho21j = 1./rho(j)**2;
+      Real rij2 = DOT_PRODUCT(dx,dx);
+      Real rij = SQRT(rij2);
+      Real q2 = rij2/h2;
+      Real q2i = rij2/hi2;
+      Real q2j = rij2/hj2     ;
+      dr.x = dx.x/rij; // unit vector
+      if (ndimV > ndim) dr.z=0.0;//(ndim+1:ndimV) = 0.
+      // do interaction if r/h < compact support size
+      // don't calculate interactions between ghost particles
+      if ((q2i < radkern2)||(q2j<radkern2)){
+        // interpolate from kernel table          
+        // (use either average h or average kernel gradient)
+        if (ikernav==1){
+          interpolate_kernel(q2,wab,grkern);
+          wab = wab*hfacwab;
+          grkern = grkern*hfacwab*hj1;
+        }else{
+          // (using hi)
+          interpolate_kernel(q2i,wabi,grkerni);
+          wabi = wabi*hfacwabi;
+          grkerni = grkerni*hfacwabi*hi1;
+          // (using hj)
+          interpolate_kernel(q2j,wabj,grkernj);
+          wabj = wabj*hfacwabj;
+          grkernj = grkernj*hfacwabj*hj1;
+          // (calculate average)            
+          wab = 0.5*(wabi + wabj);
+          grkern = 0.5*(grkerni + grkernj);
+        }
+        if (ikernav!=3){
+          grkerni = grkern;
+          grkernj = grkern;
+        }
+        // calculate div B
+        projdB = DOT_PRODUCT(Bfield[i]-Bfield[j],dr);
+        divBonrho[i] = divBonrho[i] - pmass[j]*projdB*grkerni;
+        divBonrho[j] = divBonrho[j] - pmass[i]*projdB*grkernj;        
+      }
+    }
   }
-  /*CQs[0] = 0.5*normal(s3,s1);
-  absCQs[0]=norm(CQs[0]);
-  CQs[1] = 0.5*normal(s0,s2);
-  absCQs[1]=norm(CQs[1]);
-  CQs[2] = 0.5*normal(s1,s3);
-  absCQs[2]=norm(CQs[2]);
-  CQs[3] = 0.5*normal(s2,s0);
-  absCQs[3]=norm(CQs[3]);
-  
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][0]: "<<CQs[0]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][1]: "<<CQs[1]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][2]: "<<CQs[2]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][3]: "<<CQs[3]<<"[0m";
-  */
+}
+*/
+
+∀ cells void get_divB(Real3* divBonrho, const Integer ntot){
+  foreach cell{
+    cellComputeDivB(*this,*cc);
+  }
+}
+
+
+∀ particles void finishDivBonrho(void){
+  if (ikernav == 3)
+    divBonrho = gradh*divBonrho/rho**2;
+  else
+    divBonrho = divBonrho/rho**2;
 }

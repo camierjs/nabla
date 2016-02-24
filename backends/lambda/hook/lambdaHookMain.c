@@ -132,6 +132,7 @@ void nabla_ini_variables(void){");
     if (strcmp(var->name, "coord")==0) continue;
     nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
     if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+    if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
     if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
     if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
     if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
@@ -155,6 +156,7 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
       if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
     }
   }

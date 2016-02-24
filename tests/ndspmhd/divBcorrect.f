@@ -40,80 +40,47 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the NDSPMHD software
 
-/*faces void spatialSchemeChicComputeFaceNormals2D(void) @ 8.9 if (option_chic && (option_quads||option_triangles)){
-  Real3 t = coord[1]-coord[0];
-  Real3 nrml=Real3(-½*t.y, ½*t.x, 0.);
-  face_normales[0] = nrml;
-  face_normales[1] = nrml;
-  }
-*/
+// * Interface subroutine for the div B correction by the projection method
 
-/*faces void spatialSchemeChicComputeFaceNormals3D(void)
-  @ 8.9 if (option_chic && (option_hexa||option_cylinder)){
-  Real3 X[8];
-  Real3 face_center=Real3(0.,0.,0.);
-  // Recopie des coordonnées locales
-  foreach node X[n] = coord;
-  // Calcul du centre de la face
-  foreach node face_center+=coord;
-  face_center*=1./nbNode;
-  // Calcul des aires orientées des triangles
-  foreach node{
-    const Real3 x0 = X[#];
-    const Real3 x1 = X[(#+1)%nbNode];
-    const Real3 xg = face_center;
-    faces_oriented_areas[#] = ½*((x0-xg)⨯(x1-xg));
-  }
-  // Calcul des normales aux sommets
-  foreach node{
-    face_normales[(#+1)%nbNode]=½*(faces_oriented_areas[#] + faces_oriented_areas[(#+1)%nbNode]);
-  }
- }
-*/
-/*int loopOnThisFaceToFindTheNode(Face fc, int node_uid){
-  int i=0;
-  foreach fc node{
-    if (node_uid==nfc->uniqueId()) break;
-    i+=1;
-  }
-  if (i==4) fatal("loopOnThisFaceToFindTheNode");
-  return i;
-  }*/
-
-/*cells void temporalScheme_spatialScheme_CHIC_computeAQsMatrices(void) @ 9.0 if (option_chic){
-  //const Real ρc = λ*ρ*c;
-  Real3x3 As[8];
-  //Integer cell_node_uid[8];
-
-  foreach node{
-    //cell_node_uid[#]=uid;
-    //As[#]=0.0;
-    }
-  
-  foreach face{
-    //const Real3 normale[8];
-    //node_number=loopOnThisFaceToFindTheNode(f,);
-    //normale[0]=face_normales[0];
-    
-    foreach node{
-      Integer node_number=-1;
-      for(int i=0;i<8;i++){
-        if (cell_node_uid[i]!=uid)continue;
-        node_number=i;
-        break;
-      }
-      {
-        Real3x3 A = As[node_number];
-        const Real3 n = normale[i];
-        const Real n_lenght = norm(n);
-        if (n_lenght > 0.0) {
-          Real3x3 mat_elem = math::prodTens(n,n);
-          mat_elem *= ρc/n_lenght;
-          A += mat_elem;
-        }
-      }
-      }
-  }
+Real dpi(void){
+  if (ndim==1) return   pi; // 1D
+  if (ndim==2) return ½*pi; // 2D
+  if (ndim==3) return ¼*pi; // 3D
+  //fatal();
 }
-*/
+
+
+∀ particles void divBcorrect_StandardProjectionMethod_ScalarPotential(void){
+  // get neighbours and calculate density if required
+  iterate_density();
+  // calculate div B source term for poisson equation
+  get_divB();
+  divB = rho*divBonrho;
+  // specify the source term for the Poisson equation
+  source = pmass*divBonrho*dpi;
+  // calculate the correction to the magnetic field
+  direct_sum_poisson(x,source,phi,gradphi,npart);
+  // correct the magnetic field
+  Bfield -= gradphi;
+  if (imhd>=11) Bevol = Bfield;
+  else Bevol = Bfield/rho;
+  
+}
+
+
+∀ particles void divBcorrect_CurrentProjectionMethod_VectorPotential(void){
+  // get neighbours and calculate density if required
+  iterate_density();
+  // calculate div B source term for poisson equation
+  get_curl();
+  // specify the source term for the Poisson equation
+  sourcevec = pmass*curlB/rho*dpi;
+  // calculate the correction to the magnetic field
+  direct_sum_poisson_vec(x,sourcevec,curlA,npts);
+  // correct the magnetic field
+  Bfield = curlA;
+  if (imhd>=11) Bevol = Bfield;
+  else Bevol = Bfield/rho;
+}

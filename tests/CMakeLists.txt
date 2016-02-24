@@ -256,6 +256,8 @@ nabla_add_okina_test(p1apwb1D_two_state_semi_implicte 1 run std seq)
 # NABLA TESTS FOR LAMBDA #
 ##########################
 nabla_add_test(lambda glace2D 1 gen seq)
+nabla_add_test(lambda glace2D 1 run seq)
+
 nabla_add_test(lambda gram 1 gen seq)
 nabla_add_test(lambda lulesh 1 gen seq)
 nabla_add_test(lambda lulesh 1 run seq)
