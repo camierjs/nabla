@@ -338,7 +338,7 @@ void stepThroughAllCells(Cell i, Cell j) {
               Real alphau = 0.5*(alphaui + alpha[pj].y);
               //Real alphaB = 0.5*(alphaBi + alpha[pj].z);
               //Real vsigav = max(alphaav,max(alphau,alphaB))*vsig;
-              Real dpmomdotr = -dvdotr;
+//              Real dpmomdotr = -dvdotr;
               // used for viscosity
               Real term = vsig*rhoav1*grkern;
               Real termv = term;

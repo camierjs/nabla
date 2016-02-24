@@ -39,7 +39,7 @@
     <option_ny>32</option_ny>
     <option_nz>1</option_nz>
 
-    <option_max_iterations>256</option_max_iterations>
+    <option_max_iterations>2</option_max_iterations>
 
     <!--############################
         nsplash ndspmhd_*.dat

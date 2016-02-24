@@ -170,6 +170,7 @@ endforeach(tst)
 # NABLA TESTS FOR ARCANE #
 ##########################
 if (ARCANE_FOUND)
+  nabla_add_arcane_test(ndspmhd 1 run)
   nabla_add_arcane_test(hlt 1 run)
   # No ICartesianMesh out of CEA # nabla_add_arcane_test(gad 1 run)
   nabla_add_arcane_test(anyItem 1 run)

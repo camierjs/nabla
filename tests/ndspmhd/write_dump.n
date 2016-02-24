@@ -66,92 +66,84 @@ void write_dump(void){
   writeTimestepHeaderToDataFILE(f);
   
   wInt(0x12345678,f);
-  size=writeEssentialVariables(f,0,0); // X
+  size=0;writeEssentialVariables(f,&size,0); // X
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=writeEssentialVariables(f,0,1); // Y
+  size=0;writeEssentialVariables(f,&size,1); // Y
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesVel(f,0,0); // velX
+  size=0;wParticlesVel(f,&size,0); // velX
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesVel(f,0,1); // velY
+  size=0;wParticlesVel(f,&size,1); // velY
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesVel(f,0,2); // velZ
+  size=0;wParticlesVel(f,&size,2); // velZ
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesHh(f,0);
+  size=0;wParticlesHh(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesDens(f,0);
+  size=0;wParticlesDens(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
   
   wInt(0x12345678,f);
-  size=wParticlesUu(f,0);
+  size=0;wParticlesUu(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesPmass(f,0);
+  size=0;wParticlesPmass(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesAlpha(f,0,0); // alpha X
+  size=0;wParticlesAlpha(f,&size,0); // alpha X
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesAlpha(f,0,1); // alpha Y
+  size=0;wParticlesAlpha(f,&size,1); // alpha Y
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
   fseek(f, +4+size+0, SEEK_CUR);
 
   wInt(0x12345678,f);
-  size=wParticlesInfoPressure(f,0);
-  wInt(size,f);
-  fseek(f, -4-size-4, SEEK_CUR);
-  wInt(size,f);
-  fseek(f, +4+size+0, SEEK_CUR);
-
-
-  wInt(0x12345678,f);
-  size=wParticlesInfoDrhodtRho(f,0);
+  size=0;wParticlesInfoPressure(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -159,7 +151,7 @@ void write_dump(void){
 
 
   wInt(0x12345678,f);
-  size=wParticlesInfoGradh(f,0);
+  size=0;wParticlesInfoDrhodtRho(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -167,7 +159,7 @@ void write_dump(void){
 
 
   wInt(0x12345678,f);
-  size=wParticlesInfoForce(f,0,0);
+  size=0;wParticlesInfoGradh(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -175,7 +167,7 @@ void write_dump(void){
 
 
   wInt(0x12345678,f);
-  size=wParticlesInfoForce(f,0,1);
+  size=0;wParticlesInfoForce(f,&size,0);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -183,7 +175,7 @@ void write_dump(void){
 
 
   wInt(0x12345678,f);
-  size=wParticlesInfoForce(f,0,2);
+  size=0;wParticlesInfoForce(f,&size,1);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -191,7 +183,15 @@ void write_dump(void){
 
 
   wInt(0x12345678,f);
-  size=wParticlesInfoType(f,0);
+  size=0;wParticlesInfoForce(f,&size,2);
+  wInt(size,f);
+  fseek(f, -4-size-4, SEEK_CUR);
+  wInt(size,f);
+  fseek(f, +4+size+0, SEEK_CUR);
+
+
+  wInt(0x12345678,f);
+  size=0;wParticlesInfoType(f,&size);
   wInt(size,f);
   fseek(f, -4-size-4, SEEK_CUR);
   wInt(size,f);
@@ -252,57 +252,45 @@ void writeTimestepHeaderToDataFILE(FILE *f){
   fseek(f, +4+size+0, SEEK_CUR);
 }
 
-∀ particles Integer writeEssentialVariables(FILE *f, Integer size,Integer dim){
-  size+=wReal(r[dim],f);
-  return size;
+∀ particles void writeEssentialVariables(FILE *f, Integer *size,Integer dim){
+  *size+=wReal(r[dim],f);
 }
 
-∀ particles Integer wParticlesVel(FILE *f, Integer size, Integer dim){
-  size+=wReal(vel[dim],f);
-  return size;
+∀ particles void wParticlesVel(FILE *f, Integer *size, Integer dim){
+  *size+=wReal(vel[dim],f);
 }
 //#warning hh are not the same
-∀ particles Integer wParticlesHh(FILE *f, Integer size){
+∀ particles void wParticlesHh(FILE *f, Integer *size){
   //if (uid==0) info()<<"hh="<<hh;
-  size+=wReal(hh,f);
-  return size;
+  *size+=wReal(hh,f);
 }
-∀ particles Integer wParticlesDens(FILE *f, Integer size){
-  size+=wReal(dens,f);
-  return size;
+∀ particles void wParticlesDens(FILE *f, Integer *size){
+  *size+=wReal(dens,f);
 }
-∀ particles Integer wParticlesUu(FILE *f, Integer size){
-  size+=wReal(uu,f);
-  return size;
+∀ particles void wParticlesUu(FILE *f, Integer *size){
+  *size+=wReal(uu,f);
 }
-∀ particles Integer wParticlesPmass(FILE *f, Integer size){
-  size+=wReal(pmass,f);
-  return size;
+∀ particles void wParticlesPmass(FILE *f, Integer *size){
+  *size+=wReal(pmass,f);
 }
 
-∀ particles Integer wParticlesAlpha(FILE *f, Integer size,Integer dim){
-  size+=wReal(alpha[dim],f);
-  return size;
+∀ particles void wParticlesAlpha(FILE *f, Integer *size,Integer dim){
+  *size+=wReal(alpha[dim],f);
 }
 
-∀ particles Integer wParticlesInfoPressure(FILE *f, Integer size){
-  size+=wReal(pr,f);
-  return size;
+∀ particles void wParticlesInfoPressure(FILE *f, Integer *size){
+  *size+=wReal(pr,f);
 }
-∀ particles Integer wParticlesInfoDrhodtRho(FILE *f, Integer size){
-  size+=wReal(-drhodt/rho,f);
-  return size;
+∀ particles void wParticlesInfoDrhodtRho(FILE *f, Integer *size){
+  *size+=wReal(-drhodt/rho,f);
 }
-∀ particles Integer wParticlesInfoGradh(FILE *f, Integer size){
-  size+=wReal(gradh,f);
-  return size;
+∀ particles void wParticlesInfoGradh(FILE *f, Integer *size){
+  *size+=wReal(gradh,f);
 }
-∀ particles Integer wParticlesInfoForce(FILE *f, Integer size,Integer dim){
-  size+=wReal(force[dim],f);
-  return size;
+∀ particles void wParticlesInfoForce(FILE *f, Integer *size,Integer dim){
+  *size+=wReal(force[dim],f);
 }
 
-∀ particles Integer wParticlesInfoType(FILE *f, Integer size){
-  size+=wInt(itype,f);
-  return size;
+∀ particles void wParticlesInfoType(FILE *f, Integer *size){
+  *size+=wInt(itype,f);
 }
