@@ -41,12 +41,11 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-//#warning Les valeurs autorisées sont: init, compute-loop, restore, on-mesh-changed, on-mesh-refinement, build, exit
+#include "backends/arcane/arcane.h"
 
 
 /*****************************************************************************
- * Backend ARCANE - Génération du fichier '.config'
+ * Backend ARCANE - GÃ©nÃ©ration du fichier '.config'
  *****************************************************************************/
 // Backend ARCANE - Header du fichier '.arc'
 #define ARC_CONFIG_HEADER "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> \
@@ -61,10 +60,36 @@
 \n\t\t\t\t<module name=\"ArcaneCheckpoint\" need=\"required\" />\
 \n\t\t\t</modules>\
 \n\n\t\t\t<entry-points where=\"init\">"
-NABLA_STATUS nccArcConfigHeader(nablaMain *arc){
+static NABLA_STATUS nccArcConfigHeader(nablaMain *arc){
    fprintf(arc->cfg, ARC_CONFIG_HEADER, arc->name, arc->name, arc->name, arc->name, arc->name);
 	return NABLA_OK;
 }
+
+
+// ****************************************************************************
+// ****************************************************************************
+static NABLA_STATUS nccArcaneEntityHeader(nablaMain *arc){ 
+  fprintf(arc->entity->src,"#include \"%s%s%s.h\"\
+\n#include <arcane/IParallelMng.h>\
+\n#include <arcane/ITimeLoopMng.h>\
+\n#include <arcane/anyitem/AnyItem.h>\
+\n#include <arcane/ItemPairGroup.h>\
+\n#include <arcane/ItemPairEnumerator.h>\n\n",
+          (isAnArcaneService(arc)||
+           (isAnArcaneModule(arc)&&(arc->interface_path!=NULL)))?arc->interface_path:"",
+          arc->entity->name,
+          nablaArcaneColor(arc));
+  return NABLA_OK;
+}
+
+// ****************************************************************************
+// ****************************************************************************
+static NABLA_STATUS nccArcaneBeginNamespace(nablaMain *arc){
+  fprintf(arc->entity->src,"\n\nusing namespace Arcane;\n\n%s\n\n",
+          isAnArcaneService(arc)?"ARCANE_BEGIN_NAMESPACE":"");
+  return NABLA_OK;
+}
+
 
 
 // Backend ARCANE - Footer du fichier '.config'
@@ -72,7 +97,79 @@ NABLA_STATUS nccArcConfigHeader(nablaMain *arc){
 \n\t\t</time-loop>\
 \n\t</time-loops>\
 \n</arcane-config>"
-NABLA_STATUS nccArcConfigFooter(nablaMain *arc){
+static NABLA_STATUS nccArcConfigFooter(nablaMain *arc){
    fprintf(arc->cfg, ARC_CONFIG_FOOTER);
 	return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * hookHeaderDump
+// ****************************************************************************
+void aHookHeaderDump(nablaMain *nabla){
+  nccAxlGenerateHeader(nabla);
+  nccArcaneEntityHeader(nabla);
+  // Dans le cas d'un service, on le fait maintenant
+  if (isAnArcaneService(nabla)){
+    if (nccArcaneEntityIncludes(nabla->entity)!=NABLA_OK)
+      printf("error: in service HDR generation!\n");
+    nccArcaneBeginNamespace(nabla);
+  }
+  // PremiÃ¨re passe pour les VARIABLES du fichier AXL
+  if (isAnArcaneModule(nabla))
+    nccArcConfigHeader(nabla);
+}
+
+
+// ****************************************************************************
+// * hookHeaderOpen
+// ****************************************************************************
+void aHookHeaderOpen(nablaMain *nabla){
+  char hdrFileName[NABLA_MAX_FILE_NAME];
+  dbg("\n[nccArcane] Ouverture du fichier HEADER du nabla dans le cas d'un module");
+  if (isAnArcaneModule(nabla)==true){
+    sprintf(hdrFileName, "%s%s.h", nabla->name, nablaArcaneColor(nabla));
+    if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
+  }
+}
+
+
+// ****************************************************************************
+// * ENUMERATES Hooks
+// ****************************************************************************
+void aHookHeaderEnums(nablaMain *nabla){}
+
+
+// ****************************************************************************
+// * hookHeaderPrefix
+// ****************************************************************************
+void aHookHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * hookHeaderIncludes
+// ****************************************************************************
+void aHookHeaderIncludes(nablaMain *nabla){}
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+void aHookHeaderPostfix(nablaMain *nabla){
+  if (isAnArcaneModule(nabla)==true){ // Fermeture du CONFIG dans le cas d'un module
+    nccArcConfigFooter(nabla); 
+    fclose(nabla->cfg);
+  }
+
+  // Fermeture de l'AXL
+  fprintf(nabla->axl,"\n</%s>\n",
+          (isAnArcaneModule(nabla)==true)?"module":"service");
+  fclose(nabla->axl);
+  
+  // Fermeture du header du entity
+  if (isAnArcaneModule(nabla)==true){ // Fermeture du HEADER dans le cas d'un module
+    fclose(nabla->entity->hdr);
+  }
 }

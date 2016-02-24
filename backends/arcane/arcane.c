@@ -41,38 +41,143 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "backends/arcane/arcane.h"
 
 
+
+static const hookHeader header={
+  aHookHeaderDump,
+  aHookHeaderOpen,
+  aHookHeaderEnums,
+  aHookHeaderPrefix,
+  aHookHeaderIncludes,
+  aHookHeaderPostfix
+};
+
+static const hookXyz xyz={
+  nccArcSystemPrefix,
+  NULL, NULL, NULL
+};
+
+static const hookForAll forall={
+  arcaneHookPrefixEnumerate,
+  arcaneHookDumpEnumerate,
+  arcaneHookItem,
+  arcaneHookPostfixEnumerate
+};
+
+static const hookToken token={
+  arcaneHookTokenPrefix,
+  arcaneHookSwitchToken,
+  arcaneHookTurnTokenToVariable,
+  arcaneTurnTokenToOption,
+  arcaneHookSystem,
+  arcaneIteration,
+  arcaneExit,
+  arcaneTime,
+  arcaneFatal,
+  arcaneHookTurnBracketsToParentheses,
+  arcaneHookIsTest,
+  arcaneHookTokenPostfix
+};
+
+static const hookCall call={
+  arcaneAddCallNames,
+  arcaneAddArguments,
+  arcaneEntryPointPrefix,
+  NULL,//aHookDfsForCalls,
+  NULL,//aHookAddExtraParametersDFS,
+  NULL//aHookDumpNablaParameterListDFS
+};
+
+static const hookGrammar grammar={
+  arcaneHookFunction,
+  arcaneJob,
+  arcaneHookReduction,
+  NULL,//aHookPrimaryExpressionToReturn,
+  NULL, // returnFromArgument
+  arcaneHookDfsVariable
+};
+
+const static hookSource source={
+  aHookSourceOpen,
+  aHookSourceInclude
+};
+
+const static hookMesh mesh={
+  aHookMeshPrefix,
+  aHookMeshCore,
+  aHookMeshPostfix
+};
+
+const static hookVars vars={
+  aHookVariablesInit,
+  aHookVariablesPrefix,
+  aHookVariablesMalloc,
+  aHookVariablesFree
+};
+
+const static hookMain mains={
+  aHookMainPrefix,
+  aHookMainPreInit,
+  aHookMainVarInitKernel,
+  aHookMainVarInitCall,
+  aHookMainHLT,
+  aHookMainPostInit,
+  aHookMainPostfix
+};
+
+static hooks arcaneBackendHooks={
+  &forall,
+  &token,
+  &grammar,
+  &call,
+  &xyz,
+  NULL, // pragma
+  &header,
+  &source,
+  &mesh,
+  &vars,
+  &mains
+};
+
 // ****************************************************************************
-// * functionGlobalVar
+// * arcane
 // ****************************************************************************
-char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var){
-  if (job->item[0] != '\0') return NULL; // On est bien une fonction
-  if (var->item[0] != 'g') return NULL;  // On a bien affaire à une variable globale
-  const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
-  const int scalar = var->dim==0;
-  const int resolve = job->parse.isPostfixed!=2;
-  dbg("\n\t\t[functionGlobalVar] name=%s, scalar=%d, resolve=%d",var->name, scalar,resolve);
-  //nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de récupérer les m_global_...()
-  if (left_of_assignment_operator || !scalar) return "/*global_*/";
-  return "()";
+NABLA_STATUS arcaneOld(nablaMain *nabla,
+                       astNode *root,
+                       const char *nabla_entity_name){
+  nabla->hook=&arcaneBackendHooks;
+  
+  dbg("\n* Backend ARCANE"); // org mode item
+  
+  aHookSourceOpen(nabla);
+  aHookHeaderOpen(nabla);
+  aHookHeaderDump(nabla);
+    
+  nMiddleGrammar(root,nabla);
+
+  aHookVariablesPrefix(nabla);
+
+
+  aHookMainPrefix(nabla);
+  aHookMainPreInit(nabla);
+  
+  aHookHeaderPostfix(nabla);
+  aHookMainPostfix(nabla);
+  
+  dbg("\n\t[nccArcane]  Deleting kernel names");
+  toolUnlinkKtemp(nabla->entity->jobs);
+
+  dbgCloseTraceFile();
+  return NABLA_OK;
 }
 
 
 // ****************************************************************************
-// * arcaneHookFunctionName
+// * arcane with middlend/animate
 // ****************************************************************************
-void arcaneHookFunctionName(nablaMain *arc){
-  nprintf(arc, NULL, "%s%s::", arc->name, "");//nablaArcaneColor(arc));
-}
-
-
-// *****************************************************************************
-// * Prise en charge d'une fonction
-// *****************************************************************************
-void arcaneHookFunction(nablaMain *arc, astNode *n){
-  dbg("\n\t\t[arcaneHookFunction]");
-  nablaJob *fct=nMiddleJobNew(arc->entity);
-  nMiddleJobAdd(arc->entity, fct);
-  nMiddleFunctionFill(arc,fct,n,arc->name);
+hooks* arcane(nablaMain *nabla){
+  dbg("\n* Backend ARCANE"); // org mode item
+  return &arcaneBackendHooks;
 }

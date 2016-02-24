@@ -43,26 +43,38 @@
 #include "nabla.h"
 
 
-/*****************************************************************************
- * Backend ARCANE - Génération du fichier 'main.cc'
- *****************************************************************************/
-#define ARC_MAIN "#include <iostream>\n//#include <mpi.h>\n#include <arcane/impl/ArcaneMain.h>\n\
-using namespace Arcane;\n\
-int main(int argc,char* argv[]){\n\
-  int r = 0;\n\
-  ArcaneMain::arcaneInitialize();\n\
-  {\n\
-    ApplicationInfo app_info(&argc,&argv,\"%s\",VersionInfo(1,0,0));\n\
-    r = ArcaneMain::arcaneMain(app_info);\n\
-  }\n\
-  ArcaneMain::arcaneFinalize();\n\
-  return r;\n\
-}\n"
+// ****************************************************************************
+// * functionGlobalVar
+// ****************************************************************************
+char *functionGlobalVar(const nablaMain *arc,
+                        const nablaJob *job,
+                        const nablaVariable *var){
+  if (job->item[0] != '\0') return NULL; // On est bien une fonction
+  if (var->item[0] != 'g') return NULL;  // On a bien affaire Ã  une variable globale
+  const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
+  const int scalar = var->dim==0;
+  const int resolve = job->parse.isPostfixed!=2;
+  dbg("\n\t\t[functionGlobalVar] name=%s, scalar=%d, resolve=%d",var->name, scalar,resolve);
+  //nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de rÃ©cupÃ©rer les m_global_...()
+  if (left_of_assignment_operator || !scalar) return "/*global_*/";
+  return "()";
+}
 
 
-NABLA_STATUS nccArcMain(nablaMain *arc){
-  if ((arc->main=fopen("main.cc", "w")) == NULL) exit(NABLA_ERROR); 
-  fprintf(arc->main, ARC_MAIN, arc->name);
-  fclose(arc->main);
-  return NABLA_OK;
+// ****************************************************************************
+// * arcaneHookFunctionName
+// ****************************************************************************
+void arcaneHookFunctionName(nablaMain *arc){
+  nprintf(arc, NULL, "%s%s::", arc->name, "");//nablaArcaneColor(arc));
+}
+
+
+// *****************************************************************************
+// * Prise en charge d'une fonction
+// *****************************************************************************
+void arcaneHookFunction(nablaMain *arc, astNode *n){
+  dbg("\n\t\t[arcaneHookFunction]");
+  nablaJob *fct=nMiddleJobNew(arc->entity);
+  nMiddleJobAdd(arc->entity, fct);
+  nMiddleFunctionFill(arc,fct,n,arc->name);
 }

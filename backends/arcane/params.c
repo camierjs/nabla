@@ -41,47 +41,25 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-
-char *nccArcBits(void){return "";}
-
-
+#include "nabla.tab.h"
 // ****************************************************************************
-// * Gather
+// *
 // ****************************************************************************
-char* nccArcGather(nablaJob* job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
-  return "";
+void aHookAddExtraParametersDFS(nablaMain *nabla,
+                                nablaJob *job,
+                                int *numParams){
+  nprintf(nabla, NULL, "/*nothing in hookAddExtraParametersDFS*/");
 }
 
 
 // ****************************************************************************
-// * Scatter
+// * Dump dans le src des parametres nabla en in comme en out
+// * On va surtout remplir les variables 'in' utilisées de support différent
+// * pour préparer les GATHER/SCATTER
 // ****************************************************************************
-char* nccArcScatter(nablaVariable* var){
-  return "";
+void aHookDumpNablaParameterListDFS(nablaMain *nabla,
+                                    nablaJob *job,
+                                    astNode *n,
+                                    int *numParams){
+  nprintf(nabla, NULL, "/*nothing in hookDumpNablaParameterListDFS*/");
 }
-
-
-// ****************************************************************************
-// * nHookXyz pre/post fix
-// ****************************************************************************
-char* nccArcSystemPrefix(void){ return "m_"; }
-char* nccArcSystemPostfix(void){ return ""; }
-
-
-// ****************************************************************************
-// * Prev Cell
-// ****************************************************************************
-char* nccArcPrevCell(int direction){
-  return "";//prevCell";
-}
-
-
-// ****************************************************************************
-// * Next Cell
-// ****************************************************************************
-char* nccArcNextCell(int direction){
-  return "";//nextCell";
-}
-
-char* nccArcIncludes(void){return "";}

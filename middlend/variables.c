@@ -191,28 +191,28 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
   case(NEXTCELL):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL UNKNOWN");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->nextCell(DIR_UNKNOWN);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_UNKNOWN);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(NEXTCELL_X):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL X");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->nextCell(DIR_X);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_X);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(NEXTCELL_Y):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL Y");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->nextCell(DIR_Y);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_Y);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(NEXTCELL_Z):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL Z");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->nextCell(DIR_Z);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_Z);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
@@ -220,42 +220,42 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
   case(PREVCELL):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL UNKNOWN");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->prevCell(DIR_UNKNOWN);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_UNKNOWN);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(PREVCELL_X):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL X");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->prevCell(DIR_X);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_X);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(PREVCELL_Y):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL Y");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->prevCell(DIR_Y);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_Y);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(PREVCELL_Z):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] PREVCELL Z");
     *prefix=cHOOK(nabla,xyz,prefix);
-    *system=nabla->hook->xyz->prevCell(DIR_Z);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_Z);
     *postfix=cHOOK(nabla,xyz,postfix);
     return;
   }
   case(BACKCELL):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] BACKCELL");
     *prefix=cHOOKn(nabla,token,prefix);
-    *system=strdup("");
+    *system="";
     *postfix=cHOOKn(nabla,token,postfix);
     return;
   }
   case(FRONTCELL):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] FRONTCELL");
     *prefix=cHOOKn(nabla,token,prefix);
-    *system=strdup("");
+    *system="";
     *postfix=cHOOKn(nabla,token,postfix);
     return;
   }

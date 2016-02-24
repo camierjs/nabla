@@ -212,7 +212,12 @@ typedef struct nablaJobStruct{
 #define cHOOKn(nabla,stuct,fct)\
   (nabla->hook->stuct!=NULL)?\
   (nabla->hook->stuct->fct!=NULL)?\
-  nabla->hook->stuct->fct(nabla):strdup(""):strdup("")
+  nabla->hook->stuct->fct(nabla):"":""
+
+#define cHOOKi(nabla,stuct,fct,i)\
+  (nabla->hook->stuct!=NULL)?\
+  (nabla->hook->stuct->fct!=NULL)?\
+  nabla->hook->stuct->fct(i):"":""
 
 #define cHOOKj(nabla,stuct,fct,job)\
   (nabla->hook->stuct!=NULL)?\

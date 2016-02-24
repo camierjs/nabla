@@ -41,75 +41,25 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
 
-#include "backends/cuda/cuda.h"
-//#include "backends/okina/okina.h"
-#include "backends/arcane/arcane.h"
-hooks* okina(nablaMain*);
-hooks* lambda(nablaMain*);
-hooks* kokkos(nablaMain*);
-
-
+//***************************************************************************** 
+// * Traitement des tokens SYSTEM
 // ****************************************************************************
-// * nMiddleInit
-// ****************************************************************************
-static nablaMain *nMiddleInit(const char *nabla_entity_name){
-  nablaMain *nabla=(nablaMain*)calloc(1,sizeof(nablaMain));
-  nablaEntity *entity; 
-  nabla->name=strdup(nabla_entity_name);
-  dbg("\n\t[nablaMiddlendInit] setting nabla->name to '%s'", nabla->name);
-  dbg("\n\t[nablaMiddlendInit] Création de notre premier entity");
-  entity=nMiddleEntityNew(nabla);
-  dbg("\n\t[nablaMiddlendInit] Rajout du 'main'");
-  nMiddleEntityAddEntity(nabla, entity);
-  dbg("\n\t[nablaMiddlendInit] Rajout du nom de l'entity '%s'", nabla_entity_name);  
-  entity->name=strdup(nabla_entity_name);
-  entity->name_upcase=toolStrUpCase(nabla_entity_name);  // On lui rajoute son nom
-  dbg("\n\t[nablaMiddlendInit] Rajout du name_upcase de l'entity %s", entity->name_upcase);  
-  entity->main=nabla;                        // On l'ancre à l'unique entity pour l'instant
-  assert(nabla->name != NULL);
-  dbg("\n\t[nablaMiddlendInit] Returning nabla");
-  return nabla;
-}
-
-
-// ****************************************************************************
-// * nMiddleSwitch
-// * The CUDA, KOKKOS & LAMBDA backends uses middlend/animate.c
-// ****************************************************************************
-int nMiddleSwitch(astNode *root,
-                  const int optionDumpTree,
-                  const char *nabla_entity_name,
-                  const BACKEND_SWITCH backend,
-                  const BACKEND_COLORS colors,
-                  char *interface_name,
-                  char *interface_path,
-                  char *service_name){
-  nablaMain *nabla=nMiddleInit(nabla_entity_name);
-  dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
- (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
-  nabla->backend=backend;
-  nabla->colors=colors;
-  nabla->interface_name=interface_name;
-  nabla->interface_path=interface_path;
-  nabla->service_name=service_name;
-  nabla->optionDumpTree=optionDumpTree;
-  nabla->options=NULL;  
-  dbg("\n\t[nablaMiddlendSwitch] On rajoute les variables globales");
-  middleGlobals(nabla);
-  dbg("\n\t[nablaMiddlendSwitch] Now switching...");
-  // Switching between our possible backends:
-  switch (backend){
-  case BACKEND_ARCANE: return animate(nabla,root,arcane(nabla));
-  case BACKEND_CUDA:   return animate(nabla,root,cuda(nabla));
-  case BACKEND_OKINA:  return animate(nabla,root,okina(nabla));
-  case BACKEND_LAMBDA: return animate(nabla,root,lambda(nabla));
-  case BACKEND_KOKKOS: return animate(nabla,root,kokkos(nabla));
-  default:
-    exit(NABLA_ERROR|
-         fprintf(stderr,
-                 "\nError while switching backend!\n"));
+void arcaneHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job,
+                                         nablaVariable *var, char cnfg){
+  dbg("\n\t[arcaneHookTurnBracketsToParentheses] primaryExpression hits Arcane variable");
+  if ((  cnfg=='c' && (var->item[0]!='c'))
+      ||(cnfg=='n' && (var->item[0]!='n'))           
+      ||(cnfg=='f' && (var->item[0]!='f'))
+      ||(cnfg=='e' && (var->item[0]!='e'))
+      ||(cnfg=='m' && (var->item[0]!='m'))
+      //||(cnfg=='c' && (var->item[0]!='f'))
+      ){
+    //nprintf(nabla, "/*tBktON*/", "/*tBktON:%c*/", var->item[0]);
+    nprintf(nabla, "/*tBktON*/", NULL);
+    job->parse.turnBracketsToParentheses=true;
+  }else{
+    nprintf(nabla, "/*tBktOFF*/", NULL);
+    job->parse.turnBracketsToParentheses=false;
   }
-  return NABLA_ERROR;
 }

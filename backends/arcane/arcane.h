@@ -43,17 +43,62 @@
 #ifndef _NABLA_ARCANE_H_
 #define _NABLA_ARCANE_H_
 
+NABLA_STATUS aHookMainPrefix(nablaMain*);
+NABLA_STATUS aHookMainPreInit(nablaMain*);
+NABLA_STATUS aHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS aHookMainVarInitCall(nablaMain*);
+NABLA_STATUS aHookMainHLT(nablaMain*);
+NABLA_STATUS aHookMainPostInit(nablaMain*);
+NABLA_STATUS aHookMainPostfix(nablaMain*);
+
+void aHookVariablesInit(nablaMain*);
+void aHookVariablesPrefix(nablaMain*);
+void aHookVariablesMalloc(nablaMain*);
+void aHookVariablesFree(nablaMain*);
+
+void aHookMeshPrefix(nablaMain*);
+void aHookMeshCore(nablaMain*);
+void aHookMeshPostfix(nablaMain*);
+
+void aHookSourceOpen(nablaMain*);
+void aHookSourceInclude(nablaMain*);
+
+bool aHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+
+void aHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
+void aHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
+void aHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+
+void aHookHeaderDump(nablaMain*);
+void aHookHeaderOpen(nablaMain*);
+void aHookHeaderEnums(nablaMain*);
+void aHookHeaderPrefix(nablaMain*);
+void aHookHeaderIncludes(nablaMain*);
+void aHookHeaderPostfix(nablaMain*);
+
+char *nArcanePragmaGccIvdep(void);
+char *nArcanePragmaGccAlign(void);
+char* arcaneEntryPointPrefix(nablaMain*,nablaJob*);
+void arcaneAddArguments(nablaMain*,nablaJob*);
+void arcaneAddCallNames(nablaMain*,nablaJob*,astNode*);
+void arcaneFatal(nablaMain*);
+void arcaneTime(nablaMain*);
+void arcaneExit(nablaMain*,nablaJob*);
+void arcaneIteration(nablaMain*);
+void arcaneTurnTokenToOption(nablaMain*,nablaOption*);
+void arcaneHookReduction(nablaMain*,astNode*);
+
 bool arcaneHookDfsVariable(void);
 
-char *nccArcBits(void);
-char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
-char* nccArcScatter(nablaVariable* var);
+//char *nccArcBits(void);
+//char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
+//char* nccArcScatter(nablaVariable* var);
 
 char* nccArcSystemPrefix(void);
-char* nccArcSystemPostfix(void);
-char* nccArcPrevCell(int);
-char* nccArcNextCell(int);
-char* nccArcIncludes(void);
+//char* nccArcSystemPostfix(void);
+//char* nccArcPrevCell(int);
+//char* nccArcNextCell(int);
+//char* nccArcIncludes(void);
 
 char *nablaArcaneColor(nablaMain*);
 bool isAnArcaneAlone(nablaMain*);
@@ -101,37 +146,38 @@ char* nccArcLibSlurmPrivates(void);
 void nccArcLibSlurmIni(nablaMain*);
 
 char* nccArcLibParticlesHeader(void);
-char* nccArcLibParticlesPrivates(nablaEntity*);
+char* nccArcLibParticlesPrivates(const nablaEntity*);
 void nccArcLibParticlesIni(nablaMain*);
 char *nccArcLibParticlesDelete(void);
-char* nccArcLibParticlesConstructor(nablaEntity*);
+char* nccArcLibParticlesConstructor(const nablaEntity*);
 
 
 NABLA_STATUS nccArcMain(nablaMain*);
-NABLA_STATUS nccArcConfigHeader(nablaMain*);
-NABLA_STATUS nccArcConfigFooter(nablaMain*);
+//NABLA_STATUS nccArcConfigHeader(nablaMain*);
+//NABLA_STATUS nccArcConfigFooter(nablaMain*);
 
 void nArcaneHLTInit(nablaMain*);
 char* nccAxlGeneratorEntryPointWhenName(double when);
 NABLA_STATUS nccAxlGenerateHeader(nablaMain*);
 
 NABLA_STATUS nccAxlGenerator(nablaMain*);
-NABLA_STATUS nccHdrEntityGeneratorInclude(nablaEntity*);
-NABLA_STATUS nccHdrEntityGeneratorConstructor(nablaEntity*);
-NABLA_STATUS nccHdrEntityGeneratorPrivates(nablaEntity*);
+NABLA_STATUS nccHdrEntityGeneratorInclude(const nablaEntity*);
+NABLA_STATUS nccHdrEntityGeneratorConstructor(const nablaEntity*);
+NABLA_STATUS nccHdrEntityGeneratorPrivates(const nablaEntity*);
 
-NABLA_STATUS nccArcaneEntityHeader(nablaMain*);
-NABLA_STATUS nccArcaneBeginNamespace(nablaMain *);
-NABLA_STATUS nccArcaneEntityIncludes(nablaEntity*);
-NABLA_STATUS nccArcaneEntityConstructor(nablaEntity*);
-NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity*);
-NABLA_STATUS nccArcaneEntityGeneratorPrivates(nablaEntity*);
+//NABLA_STATUS nccArcaneEntityHeader(nablaMain*);
+//NABLA_STATUS nccArcaneBeginNamespace(nablaMain *);
+NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity*);
+//NABLA_STATUS nccArcaneEntityConstructor(const nablaEntity*);
+NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity*);
+NABLA_STATUS nccArcaneEntityGeneratorPrivates(const nablaEntity*);
 
 char* nccArcLibAlephHeader(void);
 void nccArcLibAlephIni(nablaMain*);
 
 // Main Entry Backend
-NABLA_STATUS arcane(nablaMain*,astNode*, const char*);
+NABLA_STATUS arcaneOld(nablaMain*,astNode*, const char*);
+hooks* arcane(nablaMain*);
 
 // Hooks 
 void arcaneJob(nablaMain*, astNode*);

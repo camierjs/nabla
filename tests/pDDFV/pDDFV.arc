@@ -124,6 +124,6 @@
      <option_dag>false</option_dag>
 
      <option_quit_when_finish>true</option_quit_when_finish>
-     <option_only_one_iteration>false</option_only_one_iteration>
+     <option_only_one_iteration>true</option_only_one_iteration>
    </p-d-d-f-v>
 </case>

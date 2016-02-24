@@ -44,58 +44,124 @@
 #include "nabla.tab.h"
 #include "backends/arcane/arcane.h"
 
-extern bool adrs_it;
+// ****************************************************************************
+// * nHookXyz pre/post fix
+// ****************************************************************************
+char* nccArcSystemPrefix(void){ return "m_"; }
 
-bool arcaneHookDfsVariable(void){ return false; }
 
 // ****************************************************************************
-// * arcaneHookIsTest
+// * hookPrimaryExpressionToReturn
 // ****************************************************************************
-void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
-  // Arcane, traite le test en 'objets'
-  if (token!=IS) return;
-  assert(n->children && n->children->next && n->children->next->token);
-  const char *token2function = n->children->next->token;
-  if (n->children->next->tokenid==OWN)
-    nprintf(nabla, NULL, "/*IS*/.isOwn()");
-  else
-    nprintf(nabla, NULL, "/*IS*/.%s()", token2function);
-  // Et on purge le token pour pas qu'il soit parsé
-  n->children->next->token[0]=0;
+bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+  const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  dbg("\n\t[hookPrimaryExpressionToReturn] ?");
+  if (var!=NULL && strcmp(n->children->token,var)==0){
+    dbg("\n\t[hookPrimaryExpressionToReturn] primaryExpression hits returned argument");
+    nprintf(nabla, NULL, "%s_per_thread[tid]",var);
+    return true;
+  }else{
+    dbg("\n\t[hookPrimaryExpressionToReturn] ELSE");
+    //nprintf(nabla, NULL, "%s",n->children->token);
+  }
+  return false;
 }
 
 
 // ****************************************************************************
-// * nArcaneHookTokenPrefix
+// *
 // ****************************************************************************
-char* arcaneHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("m_");}
-
-// ****************************************************************************
-// * nArcaneHookTokenPostfix
-// ****************************************************************************
-char* arcaneHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+bool arcaneHookDfsVariable(void){ return false; }
 
 
-//***************************************************************************** 
-// * Traitement des tokens SYSTEM
+
 // ****************************************************************************
-void arcaneHookTurnBracketsToParentheses(nablaMain* nabla, nablaJob *job,
-                                         nablaVariable *var, char cnfg){
-  dbg("\n\t[arcaneHookTurnBracketsToParentheses] primaryExpression hits Arcane variable");
-  if ((  cnfg=='c' && (var->item[0]!='c'))
-      ||(cnfg=='n' && (var->item[0]!='n'))           
-      ||(cnfg=='f' && (var->item[0]!='f'))
-      ||(cnfg=='e' && (var->item[0]!='e'))
-      ||(cnfg=='m' && (var->item[0]!='m'))
-      //||(cnfg=='c' && (var->item[0]!='f'))
-      ){
-    //nprintf(nabla, "/*tBktON*/", "/*tBktON:%c*/", var->item[0]);
-    nprintf(nabla, "/*tBktON*/", NULL);
-    job->parse.turnBracketsToParentheses=true;
-  }else{
-    nprintf(nabla, "/*tBktOFF*/", NULL);
-    job->parse.turnBracketsToParentheses=false;
-  }
+// * Dump des variables appelÃ©es
+// ****************************************************************************
+void aHookDfsForCalls(struct nablaMainStruct *nabla,
+                      nablaJob *fct,
+                      astNode *n,
+                      const char *namespace,
+                      astNode *nParams){
+  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
+}
+
+
+/*
+ * nablaArcaneColor
+ */
+char *nablaArcaneColor(nablaMain *middlend){
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return "Module";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE) return "Module";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE) return "Service";
+  exit(NABLA_ERROR|fprintf(stderr,"[nablaArcaneColor] Unable to switch!"));
+  return NULL;
+}
+bool isAnArcaneAlone(nablaMain *middlend){
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return true;
+  return false;
+}
+bool isAnArcaneModule(nablaMain *middlend){
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return true;
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE) return true;
+  return false;
+}
+bool isAnArcaneService(nablaMain *middlend){
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE) return true;
+  return false;
+}
+
+
+char* arcaneEntryPointPrefix(nablaMain *nabla,
+                             nablaJob *entry_point){
+  return "";
+}
+
+
+void arcaneIteration(nablaMain *nabla){
+  nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
+}
+
+
+void arcaneExit(nablaMain *nabla,nablaJob *job){
+  // le token 'exit' doit Ãªtre appelÃ© depuis une fonction
+  assert(job->is_a_function);
+  nprintf(nabla, "/*EXIT*/","{\n\
+if (m_hlt_dive.at(m_hlt_level)){\n\
+   m_hlt_exit[m_hlt_level]=true;\n\
+}else{\n\
+   subDomain()->timeLoopMng()->stopComputeLoop(true);\n\
+}}");
+}
+
+
+void arcaneTime(nablaMain *nabla){
+  nprintf(nabla, "/*TIME*/", "subDomain()->commonVariables().globalTime()");
+}
+
+
+void arcaneFatal(nablaMain *nabla){
+  dbg("\n[arcaneFatal]");
+  nprintf(nabla, NULL, "throw FatalErrorException");
+} 
+
+
+void arcaneAddCallNames(nablaMain *nabla,
+                        nablaJob *job,
+                        astNode *n){
+  dbg("\n[arcaneAddCallNames]");
+  /*nothing to do*/
+}
+
+
+void arcaneAddArguments(nablaMain *nabla,nablaJob *job){
+  dbg("\n[arcaneAddArguments]");
+  /*nothing to do*/
+}
+
+
+void arcaneTurnTokenToOption(nablaMain *nabla,nablaOption *opt){
+  nprintf(nabla, "/*tt2o arc*/", "options()->%s()", opt->name);
 }
 
 
@@ -128,94 +194,3 @@ void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*nablaSystem NEXTLEFT*/", "[cn.nextLeft()]");
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*nablaSystem NEXTRIGHT*/", "[cn.nextRight()]");
 }
-
-
-
-//*****************************************************************************
-// * Transformation de tokens en variables Arcane
-// * selon les contextes dans le cas d'un '[Cell|node]Enumerator'
-// ****************************************************************************
-nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
-                                             nablaMain *arc,
-                                             nablaJob *job){
-  dbg("\n\t\t[arcaneHookTurnTokenToVariable]");
-  assert(job->item!=NULL);
-  const char cnfg=job->item[0];
-  //char enum_enum=job->parse.enum_enum;
-  //bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
-  //int isPostfixed=job->parse.isPostfixed;
-  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled but var!");
-  //nablaVariable *var=nMiddleVariableFind(arc->variables, n->token);
-  nablaVariable *var=/*(job->nb_in_item_set==0)?
-                       nMiddleVariableFind(arc->variables, n->token):*/
-    nMiddleVariableFindWithSameJobItem(arc,job,arc->variables, n->token);
-  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] local variabled!");
-      
-  // Si on ne trouve pas de variable, on a rien à faire
-  if (var == NULL){
-    //dbg("\n\t\t[arcaneHookTurnTokenToVariable] Pas une variable!");
-    //nprintf(arc,NULL,"/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
-    // Si on est dans une zone 'adrs_it' et que ce n'est PAS une variable, on rajoute l''&'
-    if (adrs_it==true) nprintf(arc, NULL, "&");
-    return NULL;
-  }
-  
-  // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
-  if (job->parse.alephKeepExpression==true){
-    nprintf(arc, NULL, "m_%s_%s", var->item, var->name);
-    return var;
-  }
-
-  // Si on est dans une zone 'adrs_it' et que c'est une variable, on rajoute l''adrs('
-  if (adrs_it==true) nprintf(arc, NULL, "adrs(");
-    
-  //dbg("\n\t\t[arcaneHookTurnTokenToVariable] m_%s_%s token=%s", var->item, var->name, n->token);
-  //nprintf(arc, NULL, "/*tt2a (isPostfixed=%d)(isLeft=%d)*/",isPostfixed,left_of_assignment_operator);
-  if (var->gmpRank==-1){
-    if (job->nb_in_item_set>0 && var->item[0]!='g'){
-      nprintf(arc, NULL, "anyone[iitem]");
-      return var;
-    }else{
-      nprintf(arc, NULL, "m_%s_%s", var->item, var->name);
-    }
-  }else{
-    if (cnfg=='c')
-      nprintf(arc, NULL, "m_gmp[%d][cell->localId()].get_mpz_t()", var->gmpRank);
-    if (cnfg=='g')
-      nprintf(arc, NULL, "m_gmp[%d].get_mpz_t()", var->gmpRank);
-    return var;
-  }
-  
-  // Lancement de tous les transformations connues au sein des Cells jobs
-  nprintf(arc,NULL,cellJobCellVar(arc,job,var),NULL);
-  nprintf(arc,NULL,cellJobNodeVar(arc,job,var),NULL);
-  nprintf(arc,NULL,cellJobFaceVar(arc,job,var),NULL);
-  nprintf(arc,NULL,cellJobParticleVar(arc,job,var),NULL);
-  nprintf(arc,NULL,cellJobGlobalVar(arc,job,var),NULL);
-
-  // Lancement de tous les transformations connues au sein des Nodes jobs
-  nprintf(arc,NULL,nodeJobNodeVar(arc,job,var),NULL);
-  nprintf(arc,NULL,nodeJobCellVar(arc,job,var),NULL);
-  nprintf(arc,NULL,nodeJobFaceVar(arc,job,var),NULL);
-  nprintf(arc,NULL,nodeJobGlobalVar(arc,job,var),NULL);
-
-  // Lancement de tous les transformations connues au sein des Faces jobs
-  nprintf(arc,NULL,faceJobCellVar(arc,job,var),NULL);
-  nprintf(arc,NULL,faceJobNodeVar(arc,job,var),NULL);
-  nprintf(arc,NULL,faceJobFaceVar(arc,job,var),NULL);
-  nprintf(arc,NULL,faceJobGlobalVar(arc,job,var),NULL);
-
-  // Lancement de tous les transformations connues au sein des Particles jobs
-  nprintf(arc,NULL,particleJobParticleVar(arc,job,var),NULL);
-  nprintf(arc,NULL,particleJobCellVar(arc,job,var),NULL);
-  nprintf(arc,NULL,particleJobGlobalVar(arc,job,var),NULL);
-
-
-// Lancement de tous les transformations connues au sein des fonctions
-  nprintf(arc,NULL,functionGlobalVar(arc,job,var),NULL);
-  
-  if (adrs_it==true) nprintf(arc, NULL, ")");
-
-  return var;
-}
-

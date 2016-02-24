@@ -44,29 +44,10 @@
 #include "backends/arcane/arcane.h"
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
-NABLA_STATUS nccArcaneEntityHeader(nablaMain *arc){ 
-  fprintf(arc->entity->src,"#include \"%s%s%s.h\"\
-\n#include <arcane/IParallelMng.h>\
-\n#include <arcane/ITimeLoopMng.h>\
-\n#include <arcane/anyitem/AnyItem.h>\
-\n#include <arcane/ItemPairGroup.h>\
-\n#include <arcane/ItemPairEnumerator.h>\n\n",
-          (isAnArcaneService(arc)
-           ||(isAnArcaneModule(arc)&&(arc->interface_path!=NULL)))?arc->interface_path:"",
-          arc->entity->name,
-          nablaArcaneColor(arc));
-  return NABLA_OK;
-}
-
-
-NABLA_STATUS nccArcaneBeginNamespace(nablaMain *arc){
-  fprintf(arc->entity->src,"\n\nusing namespace Arcane;\n\n%s\n\n",
-          isAnArcaneService(arc)?"ARCANE_BEGIN_NAMESPACE":"");
-  return NABLA_OK;
-}
+// ****************************************************************************
+// * Initialisation des besoins vis-Ã -vis des variables (globales)
+// ****************************************************************************
+void aHookVariablesInit(nablaMain *nabla){}
 
 
 /***************************************************************************** 
@@ -124,17 +105,18 @@ static nWhatWith arcaneOpCodesDefines[] ={
   {NULL,NULL}
 };
 
+
 /***************************************************************************** 
  *
  *****************************************************************************/
-NABLA_STATUS nccArcaneEntityIncludes(nablaEntity *entity){
+NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity *entity){
   FILE *target_file = isAnArcaneService(entity->main)?entity->src:entity->hdr;
-  // Pas de ça pour un service
+  // Pas de Ã§a pour un service
   if (isAnArcaneModule(entity->main))
     fprintf(target_file, "#ifndef %s_ENTITY_H\n#define %s_ENTITY_H\n\n",
             entity->name_upcase,
             entity->name_upcase);
-  // Ni ça
+  // Ni Ã§a
   if (isAnArcaneAlone(entity->main))
     fprintf(target_file, "\
 #include \"math.h\"\n\
@@ -165,7 +147,7 @@ NABLA_STATUS nccArcaneEntityIncludes(nablaEntity *entity){
 #include <arcane/IEntryPointMng.h>\n\
 #include <arcane/IParallelMng.h>\n\
 ");
-  // Mais ça encore, ne nous intéresse pas dans le cas d'un service
+  // Mais Ã§a encore, ne nous intÃ©resse pas dans le cas d'un service
   if (isAnArcaneModule(entity->main))
     fprintf(target_file, "\n\
 %s\n\
@@ -245,7 +227,7 @@ inline double unglitch(double a){\n\
 /***************************************************************************** 
  *
  *****************************************************************************/
-NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
+static NABLA_STATUS nccArcaneEntityConstructor(const nablaEntity *entity){
   nablaVariable *var;
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
   if (isAnArcaneService(entity->main)) return NABLA_OK;
@@ -287,11 +269,10 @@ NABLA_STATUS nccArcaneEntityConstructor(nablaEntity *entity){
   return NABLA_OK;
 }
 
-
 /***************************************************************************** 
  *
  *****************************************************************************/
-NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
+NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity *entity){
   nablaJob *job=entity->jobs;
 
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
@@ -303,10 +284,10 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
       fprintf(entity->hdr, ";");
       continue;
     }
-    // Cela se fait aussi lors de la génération de l'axl afin de pouvoir traiter les @ -4,4
+    // Cela se fait aussi lors de la gÃ©nÃ©ration de l'axl afin de pouvoir traiter les @ -4,4
     dbg("\n\t[nccArcaneEntityVirtuals] virtuals for job %s", job->name);
     // On remplit la ligne du fichier HDR
-    // Si c'est une réduction, on fait moins
+    // Si c'est une rÃ©duction, on fait moins
     if (strstr(job->name, "arcaneReduction_")!=NULL)
       fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
     else
@@ -318,23 +299,38 @@ NABLA_STATUS nccArcaneEntityVirtuals(nablaEntity *entity){
 }
 
 
-/***************************************************************************** 
- *
- *****************************************************************************/
-NABLA_STATUS nccArcaneEntityGeneratorPrivates(nablaEntity *entity){
-  // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
-  if (isAnArcaneService(entity->main)) return NABLA_OK;
-  fprintf(entity->hdr, "%s%s%s%s%s%s%s%s%s\n};\n#endif // %s_ENTITY_H\n",
-          ((entity->libraries&(1<<with_dft))!=0)?nccArcLibDftPrivates():"",
-          ((entity->libraries&(1<<with_gmp))!=0)?nccArcLibGmpPrivates():"",
-          ((entity->libraries&(1<<with_mail))!=0)?nccArcLibMailPrivates():"",
-          ((entity->libraries&(1<<with_aleph))!=0)?
-          isAnArcaneModule(entity->main)?nccArcLibAlephPrivates():nccArcLibSchemePrivates():"",
-          ((entity->libraries&(1<<with_slurm))!=0)?nccArcLibSlurmPrivates():"",
-          ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesPrivates(entity):"",
-          ((entity->libraries&(1<<with_cartesian))!=0)?nccArcLibCartesianPrivates():"",
-          ((entity->libraries&(1<<with_materials))!=0)?nccArcLibMaterialsPrivates():"",
-          ((entity->libraries&(1<<with_mathematica))!=0)?nccArcLibMathematicaPrivates():"",
-          entity->name_upcase);
-  return NABLA_OK;
+// ****************************************************************************
+// * Dump des variables dans le header
+// * Utile pour les variables static, par exemple
+// ****************************************************************************
+void aHookVariablesPrefix(nablaMain *nabla){
+
+  // Dans le cas d'un module, on le fait maintenant
+  if (isAnArcaneModule(nabla)){
+    dbg("\n[nccArcane] nccArcaneEntityIncludes initialization");
+    if (nccArcaneEntityIncludes(nabla->entity)!=NABLA_OK)
+      printf("error: in Includes generation!\n");
+  }
+  
+  dbg("\n[nccArcane] nccArcaneEntityConstructor initialization");
+  if (nccArcaneEntityConstructor(nabla->entity)!=NABLA_OK)
+    printf("error: in EntityConstructor generation!\n");
+
+  dbg("\n[nccArcane] nccArcaneEntityVirtuals initialization");
+  if (nccArcaneEntityVirtuals(nabla->entity)!=NABLA_OK)
+    printf("error: in EntityVirtuals generation!\n");
+}
+
+
+// ****************************************************************************
+// * Malloc des variables
+// ****************************************************************************
+void aHookVariablesMalloc(nablaMain *nabla){
+}
+
+
+// ****************************************************************************
+// * Variables Postfix
+// ****************************************************************************
+void aHookVariablesFree(nablaMain *nabla){
 }

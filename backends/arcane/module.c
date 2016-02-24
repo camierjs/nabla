@@ -41,5 +41,27 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
+#include "backends/arcane/arcane.h"
 
+
+
+/***************************************************************************** 
+ *
+ *****************************************************************************/
+NABLA_STATUS nccArcaneEntityGeneratorPrivates(const nablaEntity *entity){
+  // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
+  if (isAnArcaneService(entity->main)) return NABLA_OK;
+  fprintf(entity->hdr, "%s%s%s%s%s%s%s%s%s\n};\n#endif // %s_ENTITY_H\n",
+          ((entity->libraries&(1<<with_dft))!=0)?nccArcLibDftPrivates():"",
+          ((entity->libraries&(1<<with_gmp))!=0)?nccArcLibGmpPrivates():"",
+          ((entity->libraries&(1<<with_mail))!=0)?nccArcLibMailPrivates():"",
+          ((entity->libraries&(1<<with_aleph))!=0)?
+          isAnArcaneModule(entity->main)?nccArcLibAlephPrivates():nccArcLibSchemePrivates():"",
+          ((entity->libraries&(1<<with_slurm))!=0)?nccArcLibSlurmPrivates():"",
+          ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesPrivates(entity):"",
+          ((entity->libraries&(1<<with_cartesian))!=0)?nccArcLibCartesianPrivates():"",
+          ((entity->libraries&(1<<with_materials))!=0)?nccArcLibMaterialsPrivates():"",
+          ((entity->libraries&(1<<with_mathematica))!=0)?nccArcLibMathematicaPrivates():"",
+          entity->name_upcase);
+  return NABLA_OK;
+}

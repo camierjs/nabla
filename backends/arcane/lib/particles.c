@@ -66,7 +66,7 @@ char* nccArcLibParticlesHeader(void){
 // ****************************************************************************
 // * nccArcLibParticlesPrivates
 // ****************************************************************************
-char* nccArcLibParticlesPrivates(nablaEntity *entity){
+char* nccArcLibParticlesPrivates(const nablaEntity *entity){
   nablaVariable *var;
   const size_t local_size=1024;
   const size_t globl_size=8192;
@@ -111,7 +111,7 @@ char* nccArcLibParticlesPrivates(nablaEntity *entity){
 // ****************************************************************************
 // * nccArcLibParticlesConstructor
 // ****************************************************************************
-char* nccArcLibParticlesConstructor(nablaEntity *entity){
+char* nccArcLibParticlesConstructor(const nablaEntity *entity){
   nablaVariable *var;
   const size_t local_size=1024;
   const size_t globl_size=8192;
