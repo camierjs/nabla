@@ -43,9 +43,10 @@
 #ifndef _NABLA_OKINA_HOOK_H_
 #define _NABLA_OKINA_HOOK_H_
 
-void hookSourceOpen(nablaMain*);
-void hookSourceInclude(nablaMain*);
- 
+void oHookSourceOpen(nablaMain*);
+void oHookSourceInclude(nablaMain*);
+char* oHookSourceNamespace(nablaMain*);
+
 void nOkinaMainSourceMesh(nablaMain*);
 
 void nOkinaHeaderDump(nablaMain*);

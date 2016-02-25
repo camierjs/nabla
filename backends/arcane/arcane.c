@@ -91,17 +91,18 @@ static const hookCall call={
 };
 
 static const hookGrammar grammar={
-  arcaneHookFunction,
-  arcaneJob,
+  NULL,//arcaneHookFunction,
+  NULL,//arcaneJob,
   arcaneHookReduction,
   NULL,//aHookPrimaryExpressionToReturn,
-  NULL, // returnFromArgument
+  NULL,//returnFromArgument,
   arcaneHookDfsVariable
 };
 
 const static hookSource source={
   aHookSourceOpen,
-  aHookSourceInclude
+  aHookSourceInclude,
+  aHookSourceNamespace
 };
 
 const static hookMesh mesh={

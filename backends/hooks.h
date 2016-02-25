@@ -70,6 +70,7 @@ typedef struct hookHeaderStruct{
 typedef struct hookSourceStruct{
   void (*open)(struct nablaMainStruct *); // animate
   void (*include)(struct nablaMainStruct *); // animate
+  char* (*name)(struct nablaMainStruct *);
 } hookSource;
 
 // Hooks for Main

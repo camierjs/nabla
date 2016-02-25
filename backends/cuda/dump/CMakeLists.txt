@@ -13,7 +13,3 @@ set_property(SOURCE
 configure_file(cuda.S ${CMAKE_CURRENT_BINARY_DIR}/cuda.S)
 
 add_library(NablaCudaDump ${BACKEND_CUDA_DUMP_C})
-
-# We add a dependency in order to make sure the "nabla.tab.h" exists
-add_dependencies(NablaCudaDump NablaCudaHook)
-

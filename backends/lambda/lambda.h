@@ -43,8 +43,9 @@
 #ifndef _NABLA_LAMBDA_H_
 #define _NABLA_LAMBDA_H_
 
-void nLambdaHookSourceOpen(nablaMain*);
-void nLambdaHookSourceInclude(nablaMain*);
+void lHookSourceOpen(nablaMain*);
+void lHookSourceInclude(nablaMain*);
+char* lHookSourceNamespace(nablaMain*);
 
 char* lambdaHookBits(void);
 char* lambdaHookGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);

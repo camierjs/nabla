@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/kokkos/hook.h"
+#include "backends/kokkos/kokkos.h"
 
 // ****************************************************************************
 // * DEFINES, FORWARDS & TYPEDEFS
@@ -123,8 +123,8 @@ const static hookToken token={
 };
 
 const static hookGrammar gram={
-  hookFunction,
-  hookJob,
+  NULL,//hookFunction,
+  NULL,//hookJob,
   hookReduction,
   hookPrimaryExpressionToReturn,
   NULL,
@@ -157,8 +157,9 @@ const static hookHeader header={
 };
 
 const static hookSource source={
-  hookSourceOpen,
-  hookSourceInclude
+  kHookSourceOpen,
+  kHookSourceInclude,
+  kHookSourceNamespace
 };
 
 const static hookMesh mesh={

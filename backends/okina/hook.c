@@ -42,7 +42,50 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/okina/hook/hook.h"
+#include "backends/okina/okina.h"
+
+// ****************************************************************************
+// * Dump d'extra arguments
+// ****************************************************************************
+void nOkinaArgsExtra(nablaMain *nabla, nablaJob *job, int *numParams){
+  nprintf(nabla,"\n\t\t/*okinaAddExtraArguments*/",NULL);
+}
+
+// ****************************************************************************
+// * Dump dans le src des arguments nabla en in comme en out
+// ****************************************************************************
+void nOkinaArgsList(nablaMain *nabla, astNode *n, int *numParams){
+  nprintf(nabla,"\n\t\t/*okinaDumpNablaArgumentList*/",NULL);
+}
+
+
+// ****************************************************************************
+// * okinaReturnFromArgument
+// ****************************************************************************
+void nOkinaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
+  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,
+                                        rulenameToId("direct_declarator"));
+  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
+    nprintf(nabla, NULL, "\
+\n\tint threads = omp_get_max_threads();\
+\n\treal *%s_per_thread=(real *)calloc(threads,sizeof(real));", rtnVariable);
+}
+
+
+// ****************************************************************************
+// * nOkinaHookAddArguments
+// ****************************************************************************
+void nOkinaHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
+  // En Okina, par contre il faut les y mettre
+  if (fct->parse.function_call_name!=NULL){
+    //nprintf(nabla, "/*ShouldDumpParamsInOkina*/", "/*Arg*/");
+    int numParams=1;
+    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
+    nOkinaArgsExtra(nabla, called, &numParams);
+    if (called->nblParamsNode != NULL)
+      nOkinaArgsList(nabla,called->nblParamsNode,&numParams);
+  }
+}
 
 // ****************************************************************************
 // * okinaHookDfsVariable
@@ -102,15 +145,6 @@ char* nOkinaHookSysPostfix(void){ return "/*nOkinaHookSysPostfix*/)"; }
 // ****************************************************************************
 void nOkinaHookFunctionName(nablaMain *arc){
   nprintf(arc, NULL, "%s", arc->name);
-}
-
-// ****************************************************************************
-// * Génération d'un kernel associé à une fonction
-// ****************************************************************************
-void nOkinaHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, fct);
-  nMiddleFunctionFill(nabla,fct,n,NULL);
 }
 
 // ****************************************************************************

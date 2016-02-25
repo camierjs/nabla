@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/kokkos/hook.h"
+#include "backends/kokkos/kokkos.h"
 
 static void hookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);

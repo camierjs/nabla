@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * hookSourceOpen
 // ****************************************************************************
-void hookSourceOpen(nablaMain *nabla){
+void kHookSourceOpen(nablaMain *nabla){
   char srcFileName[NABLA_MAX_FILE_NAME];
   // Ouverture du fichier source
   sprintf(srcFileName, "%s.cc", nabla->name);
@@ -57,7 +57,12 @@ void hookSourceOpen(nablaMain *nabla){
 // ****************************************************************************
 // * include
 // ****************************************************************************
-void hookSourceInclude(nablaMain *nabla){
+void kHookSourceInclude(nablaMain *nabla){
   assert(nabla->entity->name);
   fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
+
+// ****************************************************************************
+// * kHookSourceName
+// ****************************************************************************
+char* kHookSourceNamespace(nablaMain *nabla){ return NULL;}

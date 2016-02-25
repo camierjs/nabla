@@ -91,23 +91,30 @@ void aHookDfsForCalls(struct nablaMainStruct *nabla,
  * nablaArcaneColor
  */
 char *nablaArcaneColor(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return "Module";
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE) return "Module";
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE) return "Service";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
+    return "Module";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE)
+    return "Module";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
+    return "Service";
   exit(NABLA_ERROR|fprintf(stderr,"[nablaArcaneColor] Unable to switch!"));
   return NULL;
 }
 bool isAnArcaneAlone(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return true;
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
+    return true;
   return false;
 }
 bool isAnArcaneModule(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE) return true;
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE) return true;
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
+    return true;
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE)
+    return true;
   return false;
 }
 bool isAnArcaneService(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE) return true;
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
+    return true;
   return false;
 }
 
@@ -194,3 +201,29 @@ void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*nablaSystem NEXTLEFT*/", "[cn.nextLeft()]");
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*nablaSystem NEXTRIGHT*/", "[cn.nextRight()]");
 }
+
+// ****************************************************************************
+// * functionGlobalVar
+// ****************************************************************************
+char *functionGlobalVar(const nablaMain *arc,
+                        const nablaJob *job,
+                        const nablaVariable *var){
+  if (job->item[0] != '\0') return NULL; // On est bien une fonction
+  if (var->item[0] != 'g') return NULL;  // On a bien affaire à une variable globale
+  const bool left_of_assignment_operator=job->parse.left_of_assignment_operator;
+  const int scalar = var->dim==0;
+  const int resolve = job->parse.isPostfixed!=2;
+  dbg("\n\t\t[functionGlobalVar] name=%s, scalar=%d, resolve=%d",var->name, scalar,resolve);
+  //nprintf(arc, "/*0*/", "%s",(left_of_assignment_operator)?"":"()"); // "()" permet de récupérer les m_global_...()
+  if (left_of_assignment_operator || !scalar) return "/*global_*/";
+  return "()";
+}
+
+
+// ****************************************************************************
+// * arcaneHookFunctionName
+// ****************************************************************************
+void arcaneHookFunctionName(nablaMain *arc){
+  nprintf(arc, NULL, "%s%s::", arc->name, "");//nablaArcaneColor(arc));
+}
+

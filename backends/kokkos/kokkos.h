@@ -40,53 +40,90 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
+#ifndef _NABLA_KOKKOS_HOOK_H_
+#define _NABLA_KOKKOS_HOOK_H_
+
+const hooks* kokkos(nablaMain*);
+char* filterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
+char* filterScatter(nablaJob*);
 
 
-/*****************************************************************************
- * Diffraction
- *****************************************************************************/
-void cuHookJobDiffractStatement(nablaMain *nabla, nablaJob *job, astNode **n){
-  // On backup les statements qu'on rencontre pour éventuellement les diffracter (real3 => _x, _y & _z)
-  // Et on amorce la diffraction
-  if ((*n)->ruleid == rulenameToId("expression_statement")
-      && (*n)->children->ruleid == rulenameToId("expression")
-      //&& (*n)->children->children->ruleid == rulenameToId("expression")
-      //&& job->parse.statementToDiffract==NULL
-      //&& job->parse.diffractingXYZ==0
-      ){
-      dbg("\n[cuHookJobDiffractStatement] amorce la diffraction");
-//#warning Diffracting is turned OFF
-      job->parse.statementToDiffract=NULL;//*n;
-      // We're juste READY, not diffracting yet!
-      job->parse.diffractingXYZ=0;      
-      nprintf(nabla, "/* DiffractingREADY */",NULL);
-  }
-  
-  // On avance la diffraction
-  if ((*n)->tokenid == ';'
-      && job->parse.diffracting==true
-      && job->parse.statementToDiffract!=NULL
-      && job->parse.diffractingXYZ>0
-      && job->parse.diffractingXYZ<3){
-    dbg("\n[cuHookJobDiffractStatement] avance dans la diffraction");
-    job->parse.isDotXYZ=job->parse.diffractingXYZ+=1;
-    (*n)=job->parse.statementToDiffract;
-    nprintf(nabla, NULL, ";\n\t");
-    nprintf(nabla, "\t/*<REdiffracting>*/", "/*diffractingXYZ=%d*/", job->parse.diffractingXYZ);
-  }
+// ****************************************************************************
+// * HOOKS
+// ****************************************************************************
+void kHookSourceOpen(nablaMain*);
+void kHookSourceInclude(nablaMain*);
+char* kHookSourceNamespace(nablaMain*);
 
-  // On flush la diffraction 
-  if ((*n)->tokenid == ';' 
-      && job->parse.diffracting==true
-      && job->parse.statementToDiffract!=NULL
-      && job->parse.diffractingXYZ>0
-      && job->parse.diffractingXYZ==3){
-    dbg("\n[cuHookJobDiffractStatement] Flush de la diffraction");
-    job->parse.diffracting=false;
-    job->parse.statementToDiffract=NULL;
-    job->parse.isDotXYZ=job->parse.diffractingXYZ=0;
-    nprintf(nabla, "/*<end of diffracting>*/",NULL);
-  }
-  //dbg("\n[cuHookJobDiffractStatement] return from token %s", (*n)->token?(*n)->token:"Null");
-}
+char* hookSysPrefix(void);
+char* hookPrevCell(int);
+char* hookNextCell(int);
+char* hookSysPostfix(void);
+
+void hookReduction(struct nablaMainStruct*,astNode*);
+void hookAddArguments(struct nablaMainStruct*,nablaJob*);
+//void hookReturnFromArgument(nablaMain*,nablaJob*);
+void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
+bool hookDfsVariable(void);
+
+char *hookPragmaGccAlign(void);
+
+void hookHeaderDump(nablaMain *);
+void hookHeaderOpen(nablaMain *);
+void hookHeaderDefineEnumerates(nablaMain *);
+void hookHeaderPrefix(nablaMain *);
+void hookHeaderPostfix(nablaMain *);
+void hookHeaderIncludes(nablaMain *);
+
+NABLA_STATUS hookMainPrefix(nablaMain*);
+NABLA_STATUS hookMainPreInit(nablaMain*);
+NABLA_STATUS hookMainVarInitKernel(nablaMain*);
+NABLA_STATUS hookMainVarInitCall(nablaMain*);
+NABLA_STATUS hookMainPostInit(nablaMain*);
+NABLA_STATUS hookMainHLT(nablaMain*);
+NABLA_STATUS hookMainPostfix(nablaMain*);
+
+void hookVariablesInit(nablaMain*);
+void hookVariablesPrefix(nablaMain*);
+void hookVariablesMalloc(nablaMain*);
+void hookVariablesFree(nablaMain*);
+
+void hookMeshPrefix(nablaMain*);
+void hookMeshCore(nablaMain*);
+void hookMeshPostfix(nablaMain*);
+
+void hookIteration(struct nablaMainStruct*);
+void hookExit(struct nablaMainStruct*,nablaJob*);
+void hookTime(struct nablaMainStruct*);
+void hookFatal(struct nablaMainStruct*);
+void hookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+bool hookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+char* hookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
+void hookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+
+void hookFunctionName(nablaMain*);
+void hookFunction(nablaMain*, astNode*);
+void hookJob(nablaMain*, astNode*);
+void hookLibraries(astNode*, nablaEntity*);
+
+char* hookForAllPrefix(nablaJob*);
+char* hookForAllDump(nablaJob*);
+char* hookForAllPostfix(nablaJob*);
+char* hookForAllItem(nablaJob*,const char, const char, char);
+
+char* hookTokenPrefix(nablaMain*);
+char* hookTokenPostfix(nablaMain*);
+
+void hookSwitchToken(astNode*, nablaJob*);
+nablaVariable *hookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void hookSystem(astNode*,nablaMain*,const char,char);
+void hookAddExtraParameters(nablaMain*,nablaJob*,int*);
+void hookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
+void hookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
+void hookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
+void hookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+
+void hookIsTest(nablaMain*,nablaJob*,astNode*,int);
+
+#endif // _NABLA_KOKKOS_HOOK_H_
+ 

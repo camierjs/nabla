@@ -62,6 +62,7 @@ void aHookMeshPostfix(nablaMain*);
 
 void aHookSourceOpen(nablaMain*);
 void aHookSourceInclude(nablaMain*);
+char* aHookSourceNamespace(nablaMain*);
 
 bool aHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
 

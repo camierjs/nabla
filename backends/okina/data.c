@@ -112,25 +112,7 @@ void nOkinaHookVariablesSystem(astNode * n,nablaMain *arc, const char cnf, char 
 // * Prépare le nom de la variable
 // ****************************************************************************
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-//  if (!job->parse.selection_statement_in_compound_statement){
-    nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-//  }else{
-//    nprintf(nabla,NULL,"/*%s*/",var->type);
-//    if (strcmp(var->type,"real")==0)
-//      nprintf(nabla, "/*tt2a(if+real)*/", "((double*)%s_%s)", var->item, var->name);
-//    if (strcmp(var->type,"integer")==0)
-//      nprintf(nabla, "/*tt2a(if+int)*/", "((int*)%s_%s)", var->item, var->name);
-//    if (strcmp(var->type,"real3")==0)
-//      nprintf(nabla, "/*tt2a(if+real3)*/",
-//              "/*if+real3 still in real3 vs double3*/%s_%s",
-//              var->item, var->name);
-//    //nprintf(nabla, "/*tt2a(if+real3)*/", "((double3*)%s_%s)", var->item, var->name);
-//  }
-  if (strcmp(var->type,"real3")!=0){
-    nprintf(nabla, "/*nvar no diffraction possible here*/",NULL);
-    return;
-  }
-  return;
+  nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
 }
 
 
@@ -157,8 +139,8 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 static bool nOkinaHookTurnTokenToGatheredVariable(nablaMain *arc,
                                                  nablaVariable *var,
                                                  nablaJob *job){
-  //nprintf(arc, NULL, "/*gathered variable?*/");
   if (!var->is_gathered) return false;
+  if (job->parse.enum_enum=='\0') return false;
   nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
   return true;
 }
@@ -168,8 +150,8 @@ static bool nOkinaHookTurnTokenToGatheredVariable(nablaMain *arc,
 // * Tokens to variables 'CELL Job' switch
 // ****************************************************************************
 static void nOkinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                                    nablaVariable *var,
+                                                    nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;

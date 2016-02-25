@@ -11,4 +11,3 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/cuSolver.S
   ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
 add_library(NablaCuSolver ${CUSOLVER_SOURCES})
-add_dependencies(NablaCuSolver NablaCudaHook)

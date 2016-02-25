@@ -41,39 +41,28 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-
 
 // ****************************************************************************
-// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+// * cuHookSourceOpen
 // ****************************************************************************
-void cuDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
-                                                astNode *n,
-                                                bool in_or_out){
-  if (n==NULL) return;
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
-  if (n->tokenid=='@') return;
-  if (n->tokenid==OUT) in_or_out=false;
-  if (n->tokenid==INOUT) in_or_out=false;
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
-    if (!in_or_out){
-      nprintf(nabla,NULL,"\n\t\t//printf(\"\\n%sVariable%sDim%s_%s:\");",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-      nprintf(nabla,NULL,"//dbg%sVariable%sDim%s_%s();",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-    }
-  }
-  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
-  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
+void cuHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source du entity
+  sprintf(srcFileName, "%sEntity.cu", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
+
+  
+// ****************************************************************************
+// * cudaInclude
+// ****************************************************************************
+void cuHookSourceInclude(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * cuHookSourceName
+// ****************************************************************************
+char* cuHookSourceNamespace(nablaMain *nabla){ return NULL;}

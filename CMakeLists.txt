@@ -110,13 +110,16 @@ endif()
 ##################
 # Link libraries #
 ##################
-# Still NablaMiddlend x2 because of HWed calls to backend entry-points
 target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
-                      NablaLibDump
                       NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
+                      NablaLibDump
                       NablaMiddlend)
+if(HYPRE_FOUND)
+    target_link_libraries(nabla NablaAleph)
+endif()
+
 
 ###########
 # INSTALL #

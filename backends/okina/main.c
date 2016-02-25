@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/okina/hook/hook.h"
+#include "backends/okina/okina.h"
 
 
 // ****************************************************************************

@@ -44,6 +44,11 @@
 #include "nabla.tab.h"
 #include "backends/cuda/cuda.h"
 
+void cuHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+  nprintf(nabla, "/*tt2o cuda*/", "%s", opt->name);
+}
+
+
 static void lambdaHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
   assert(isNode);

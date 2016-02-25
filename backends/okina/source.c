@@ -42,38 +42,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char *cuHookBits(void){return "Not relevant here";}
-char* cuHookIncludes(void){return "";}
-
-bool cudaHookDfsVariable(void){ return false; }
-
-
 // ****************************************************************************
-// * cudaPragmas
+// * hookSourceOpen
 // ****************************************************************************
-char *cuHookPragmaGccIvdep(void){ return ""; }
-char *cuHookPragmaGccAlign(void){ return "__align__(8)"; }
-
-
-
-
-/*****************************************************************************
- * Génération d'un kernel associé à un support
- *****************************************************************************/
-void cuHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, job);
-  nMiddleJobFill(nabla,job,n,NULL);
-  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
-  if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
-    exit(NABLA_ERROR|fprintf(stderr, "\n[cuHookJob] Error with return type which is not void\n"));
+void oHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source
+  sprintf(srcFileName, "%s.cc", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
-
-/*****************************************************************************
- * Cuda libraries
- *****************************************************************************/
-void cuHookLibraries(astNode * n, nablaEntity *entity){
-  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
+  
+// ****************************************************************************
+// * include
+// ****************************************************************************
+void oHookSourceInclude(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
 
+// ****************************************************************************
+// * cuHookSourceName
+// ****************************************************************************
+char* oHookSourceNamespace(nablaMain *nabla){ return NULL; }

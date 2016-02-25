@@ -193,8 +193,9 @@ const static hookHeader nLHookHeader={
 
 // Hooks pour le source
 const static hookSource nLHookSource={
-  nLambdaHookSourceOpen,
-  nLambdaHookSourceInclude
+  lHookSourceOpen,
+  lHookSourceInclude,
+  lHookSourceNamespace
 };
   
 // Hooks pour le maillage
@@ -246,8 +247,8 @@ const static hookToken nLHookToken={
 };
 
 const static hookGrammar hookGram={
-  lambdaHookFunction,
-  lambdaHookJob,
+  NULL,//lambdaHookFunction,
+  NULL,//lambdaHookJob,
   lambdaHookReduction,
   lambdaHookPrimaryExpressionToReturn,
   lambdaHookReturnFromArgument,

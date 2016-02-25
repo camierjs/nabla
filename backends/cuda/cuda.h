@@ -57,8 +57,9 @@ void cuHeaderItems(nablaMain*);
 // ****************************************************************************
 // * CUDA HOOKS
 // ****************************************************************************
-void cuHookSourceOpen(nablaMain *nabla);
-void cuHookSourceInclude(nablaMain *nabla);
+void cuHookSourceOpen(nablaMain*);
+void cuHookSourceInclude(nablaMain*);
+char* cuHookSourceNamespace(nablaMain*);
 
 char *cuHookBits(void);
 char* cuHookGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);

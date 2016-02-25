@@ -42,21 +42,27 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+
 // ****************************************************************************
-// * cuHookSourceOpen
+// * nLambdaHookSourceOpen
 // ****************************************************************************
-void cuHookSourceOpen(nablaMain *nabla){
+void lHookSourceOpen(nablaMain *nabla){
   char srcFileName[NABLA_MAX_FILE_NAME];
-  // Ouverture du fichier source du entity
-  sprintf(srcFileName, "%sEntity.cu", nabla->name);
+  // Ouverture du fichier source
+  sprintf(srcFileName, "%s.cc", nabla->name);
   if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
   
 // ****************************************************************************
-// * cudaInclude
+// * lambdaInclude
 // ****************************************************************************
-void cuHookSourceInclude(nablaMain *nabla){
+void lHookSourceInclude(nablaMain *nabla){
   assert(nabla->entity->name);
-  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
+
+// ****************************************************************************
+// * lHookSourceName
+// ****************************************************************************
+char* lHookSourceNamespace(nablaMain *nabla){ return NULL;}

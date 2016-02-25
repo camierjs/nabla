@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/kokkos/hook.h"
+#include "backends/kokkos/kokkos.h"
 
 
 /*****************************************************************************

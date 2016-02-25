@@ -41,9 +41,32 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-#include "frontend/ast.h"
 
+
+// ****************************************************************************
+// * lambdaHookReturnFromArgument
+// ****************************************************************************
+void lambdaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
+  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
+    nprintf(nabla, NULL, "\
+\n\tint threads = omp_get_max_threads();\
+\n\tReal %s_per_thread[threads];", rtnVariable);
+}
+
+
+// ****************************************************************************
+// * lambdaHookAddArguments
+// ****************************************************************************
+void lambdaHookAddArguments(nablaMain *nabla,nablaJob *job){
+  if (job->parse.function_call_name!=NULL)
+    nMiddleArgsDumpFromDFS(nabla, job);
+}
+
+
+// ****************************************************************************
+// *
+// ****************************************************************************
 bool lambdaHookDfsVariable(void){ return true; }
 
 
@@ -110,12 +133,6 @@ char* lambdaHookSysPostfix(void){ return "/*lambdaHookSysPostfix*/)"; }
 void lambdaHookFunctionName(nablaMain *arc){
   nprintf(arc, NULL, "%s", arc->name);
 }
-void lambdaHookFunction(nablaMain *nabla, astNode *n){
-  nablaJob *fct=nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, fct);
-  nMiddleFunctionFill(nabla,fct,n,NULL);
-}
-
 
 // ****************************************************************************
 // * Dump des variables appelées

@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/okina/call/call.h"
-#include "backends/okina/hook/hook.h"
+#include "backends/okina/okina.h"
 
 
 // ****************************************************************************
@@ -150,7 +150,7 @@ const hookToken token={
 };
 
 const hookGrammar gram={
-  nOkinaHookFunction,
+  NULL,//nOkinaHookFunction,
   nOkinaHookJob,
   nOkinaHookReduction,
   nOkinaHookPrimaryExpressionToReturn,
@@ -209,8 +209,9 @@ const hookHeader header={
   };
 
 const static hookSource source={
-  hookSourceOpen,
-  hookSourceInclude
+  oHookSourceOpen,
+  oHookSourceInclude,
+  oHookSourceNamespace
 };
 
 const static hookMesh mesh={

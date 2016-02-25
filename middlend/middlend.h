@@ -204,6 +204,10 @@ typedef struct nablaJobStruct{
   struct nablaJobStruct *next;
 }nablaJob;
 
+
+// ****************************************************************************
+// * HOOKs DEFINEs
+// ****************************************************************************
 #define cHOOK(nabla,stuct,fct)\
   (nabla->hook->stuct!=NULL)?\
   (nabla->hook->stuct->fct!=NULL)?\
@@ -373,7 +377,6 @@ NABLA_STATUS nMiddleTimeTreeSave(nablaMain*,nablaJob*,int);
 
 // nMiddleFunctions
 void nMiddleFunctionDumpHeader(FILE*,astNode*);
-void nMiddleFunctionParse(astNode*,nablaJob*);
 void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
 
 NABLA_STATUS animate(nablaMain*,astNode*,struct hookStruct*);

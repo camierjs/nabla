@@ -131,7 +131,8 @@ const static hookHeader cuHookHeader={
 // Hooks pour le source
 const static hookSource cuHookSource={
   cuHookSourceOpen,
-  cuHookSourceInclude
+  cuHookSourceInclude,
+  cuHookSourceNamespace
 };
   
 // Hooks pour le maillage
@@ -184,8 +185,8 @@ const static hookToken cuHookToken={
 };
 
 const static hookGrammar cuHookGrammar={
-  cuHookFunction,
-  cuHookJob,
+  NULL,//cuHookFunction,
+  NULL,//cuHookJob,
   cuHookReduction,
   NULL, // primary_expression_to_return
   NULL, // returnFromArgument

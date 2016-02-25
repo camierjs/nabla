@@ -43,12 +43,11 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-#include "backends/cuda/cuda.h"
-//#include "backends/okina/okina.h"
-#include "backends/arcane/arcane.h"
-hooks* okina(nablaMain*);
+hooks* arcane(nablaMain*);
+hooks* cuda(nablaMain*);
 hooks* lambda(nablaMain*);
 hooks* kokkos(nablaMain*);
+hooks* okina(nablaMain*);
 
 
 // ****************************************************************************

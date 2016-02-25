@@ -135,8 +135,8 @@ static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
  * Tokens to gathered  variables
  *****************************************************************************/
 static bool hookTurnTokenToGatheredVariable(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                            nablaVariable *var,
+                                            nablaJob *job){
   if (!var->is_gathered) return false;
   if (job->parse.enum_enum=='\0') return false;
   nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
@@ -148,8 +148,8 @@ static bool hookTurnTokenToGatheredVariable(nablaMain *arc,
  * Tokens to variables 'CELL Job' switch
  *****************************************************************************/
 static void hookTurnTokenToVariableForCellJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                              nablaVariable *var,
+                                              nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;

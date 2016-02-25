@@ -45,6 +45,41 @@
 
 
 // ****************************************************************************
+// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
+// ****************************************************************************
+void cuDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
+                                              astNode *n,
+                                              bool in_or_out){
+  if (n==NULL) return;
+  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
+  if (n->ruleid==rulenameToId("compound_statement")) return;
+  if (n->tokenid=='@') return;
+  if (n->tokenid==OUT) in_or_out=false;
+  if (n->tokenid==INOUT) in_or_out=false;
+  if (n->ruleid==rulenameToId("direct_declarator")){
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
+    // Si on ne trouve pas de variable, on a rien à faire
+    if (var == NULL)
+      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
+    if (!in_or_out){
+      nprintf(nabla,NULL,"\n\t\t//printf(\"\\n%sVariable%sDim%s_%s:\");",
+              (var->item[0]=='n')?"Node":"Cell",
+              (strcmp(var->type,"real3")==0)?"XYZ":"",
+              (var->dim==0)?"0":"1",
+              var->name);
+      nprintf(nabla,NULL,"//dbg%sVariable%sDim%s_%s();",
+              (var->item[0]=='n')?"Node":"Cell",
+              (strcmp(var->type,"real3")==0)?"XYZ":"",
+              (var->dim==0)?"0":"1",
+              var->name);
+    }
+  }
+  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
+  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
+}
+
+
+// ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
 char* cuHookSysPrefix(void){ return "/*cuHookSysPrefix*/"; }
@@ -149,3 +184,117 @@ void cuHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*chs NEXTRIGHT*/", "[cn.nextRight()]");
   //error(!0,0,"Could not switch Cuda Hook System!");
 }
+
+char *cuHookBits(void){return "Not relevant here";}
+char* cuHookIncludes(void){return "";}
+
+bool cudaHookDfsVariable(void){ return false; }
+
+
+// ****************************************************************************
+// * cudaPragmas
+// ****************************************************************************
+char *cuHookPragmaGccIvdep(void){ return ""; }
+char *cuHookPragmaGccAlign(void){ return "__align__(8)"; }
+
+
+void cuHookIteration(struct nablaMainStruct *nabla){
+  nprintf(nabla, "/*ITERATION*/", "cuda_iteration()");
+}
+
+
+void cuHookExit(struct nablaMainStruct *nabla,nablaJob *job){
+  nprintf(nabla, "/*EXIT*/", "cudaExit(global_deltat)");
+}
+
+
+void cuHookTime(struct nablaMainStruct *nabla){
+  nprintf(nabla, "/*TIME*/", "*global_time");
+}
+
+
+void cuHookFatal(struct nablaMainStruct *nabla){
+  nprintf(nabla, NULL, "fatal");
+}
+
+
+
+
+void cuHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
+  nablaJob *foundJob;
+  char *callName=n->next->children->children->token;
+  nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
+  fct->parse.function_call_name=NULL;
+  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
+    if (foundJob->is_a_function!=true){
+      nprintf(nabla, "/*isNablaJob*/", NULL);
+      fct->parse.function_call_name=strdup(callName);
+    }else{
+      nprintf(nabla, "/*isNablaFunction*/", NULL);
+    }
+  }else{
+    nprintf(nabla, "/*has not been found*/", NULL);
+  }
+}
+
+
+void cuHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
+  // En Cuda, par contre il faut les y mettre
+  if (fct->parse.function_call_name!=NULL){
+    nprintf(nabla, "/*ShouldDumpParamsIcuda*/", "/*cudaAddArguments*/");
+    int numParams=1;
+    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
+    nMiddleArgsAddGlobal(nabla, called, &numParams);
+    nprintf(nabla, "/*ShouldDumpParamsIcuda*/", "/*cudaAddArguments done*/");
+    if (called->nblParamsNode != NULL)
+      nMiddleArgsDump(nabla,called->nblParamsNode,&numParams);
+  }
+}
+
+
+
+char* cuHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
+  if (entry_point->is_an_entry_point) return "__global__";
+  return "__device__ inline";
+}
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void cuHookDfsForCalls(struct nablaMainStruct *nabla,
+                         nablaJob *fct, astNode *n,
+                         const char *namespace,
+                         astNode *nParams){
+  //nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
+}
+
+
+/*****************************************************************************
+ * Hook pour dumper le nom de la fonction
+ *****************************************************************************/
+void cuHookFunctionName(nablaMain *arc){
+  //nprintf(arc, NULL, "%sEntity::", arc->name);
+}
+
+
+/*****************************************************************************
+ * Génération d'un kernel associé à un support
+ *****************************************************************************/
+void cuHookJob(nablaMain *nabla, astNode *n){
+  nablaJob *job = nMiddleJobNew(nabla->entity);
+  nMiddleJobAdd(nabla->entity, job);
+  nMiddleJobFill(nabla,job,n,NULL);
+  // On teste *ou pas* que le job retourne bien 'void' dans le cas de CUDA
+  if ((strcmp(job->return_type,"void")!=0) && (job->is_an_entry_point==true))
+    exit(NABLA_ERROR|fprintf(stderr, "\n[cuHookJob] Error with return type which is not void\n"));
+}
+
+
+/*****************************************************************************
+ * Cuda libraries
+ *****************************************************************************/
+void cuHookLibraries(astNode * n, nablaEntity *entity){
+  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
+}
+

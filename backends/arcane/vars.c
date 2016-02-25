@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "nabla.tab.h"
 #include "backends/arcane/arcane.h"
 
 
@@ -269,14 +270,16 @@ static NABLA_STATUS nccArcaneEntityConstructor(const nablaEntity *entity){
   return NABLA_OK;
 }
 
-/***************************************************************************** 
- *
- *****************************************************************************/
+
+// ****************************************************************************
+// *
+// ****************************************************************************
 NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity *entity){
   nablaJob *job=entity->jobs;
 
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
   if (isAnArcaneService(entity->main)) return NABLA_OK;
+  
   for(;job!=NULL;job=job->next){
     if (job->is_a_function){
       fprintf(entity->hdr, "\n\t virtual ");

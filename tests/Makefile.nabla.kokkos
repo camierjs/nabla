@@ -9,7 +9,7 @@ BYFL_FLAGS  = #-bf-verbose -bf-vectors #-bf-every-bb -bf-vectors -bf-inst-mix -b
 
 SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall #-fPIC #-DNO_SSE2 -mno-avx 
 
-LOG = -t #-v $(TGT).log
+LOG = -t -v $(TGT).log
 
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus
