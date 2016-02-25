@@ -68,4 +68,14 @@ inline void scatter3k(const int a, real3 *scatter, real3 *data){
   p[3*a+2]=s[2];
 }
 
+
+// *****************************************************************************
+// * Scatter for real3x3
+// *****************************************************************************
+inline void scatter3k(const int a, real3x3 *s, real3x3 *data){
+  scatter3k(a,&s->x,&data->x);
+  scatter3k(a,&s->y,&data->y);
+  scatter3k(a,&s->z,&data->z);
+}
+
 #endif //  _LIB_STD_SCATTER_H_

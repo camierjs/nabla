@@ -47,7 +47,7 @@ with ℝ²;
 
 // Options Hydro-Glace Euler/Sans reconstruction
 options{
-  Bool DEBUG = false;
+  Bool DEBUG = true;
   Bool option_glace = true;
   Bool option_chic = false;
   Real γ = 1.4;
@@ -214,14 +214,16 @@ void hydroInit(void) @ -25.0{
     node_u_matrix += local_matrix;
     node_u_second_member += local_matrix ⨂ reconstructed_u;
     node_u_second_member += CQs*reconstructed_p;
+    printf("\n\t[32m[std] node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",#,
+           node_u_second_member.x,node_u_second_member.y,node_u_second_member.z);
   }
 }
-/*∀ nodes @ 12.1{
-  printf("\n\t[31m[std] node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",uid,
+∀ nodes @ 12.1{
+  printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",uid,
          node_u_second_member.x,
          node_u_second_member.y,
          node_u_second_member.z);
-         }*/
+  }
 
 
 // Boundaries ici

@@ -366,13 +366,13 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL_INI):{
     dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*lambdaFilterGather*/", "%s",
+    nprintf(nabla, "/*lambdaFilterGather*/",
             lambdaHookFilterGather(n,job,GATHER_SCATTER_CALL));
     break;
   }
   case(FORALL_END):{
-     dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_END");
-   nprintf(nabla, "/*lambdaFilterScatter*/", lambdaHookFilterScatter(job));
+    dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_END");
+    nprintf(nabla, "/*lambdaFilterScatter*/", lambdaHookFilterScatter(n,job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

@@ -59,7 +59,7 @@ char* lambdaHookSysPostfix(void);
 char* lambdaHookIncludes(void);
 
 char* lambdaHookFilterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
-char* lambdaHookFilterScatter(nablaJob*);
+char* lambdaHookFilterScatter(astNode*,nablaJob*);
 
 void lambdaHookReduction(struct nablaMainStruct*,astNode*);
 void lambdaHookAddArguments(struct nablaMainStruct*,nablaJob*);

@@ -167,7 +167,6 @@ char* lambdaHookGather(nablaJob *job,nablaVariable* var,
 
 
 // ****************************************************************************
-// * Devrait être un Call!
 // * Filtrage du GATHER
 // * Une passe devrait être faite à priori afin de déterminer les contextes
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
@@ -176,20 +175,26 @@ char* lambdaHookGather(nablaJob *job,nablaVariable* var,
 char* lambdaHookFilterGather(astNode *n,nablaJob *job,GATHER_SCATTER_PHASE phase){
   char *gather_src_buffer=NULL;
   
+  nprintf(job->entity->main, NULL,
+          "/*filterGather %s*/",
+          (phase==GATHER_SCATTER_DECL)?"DECL":"CALL");
+  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
     nablaError("[lambdaHookFilterGather] Could not malloc our gather_src_buffer!");
 
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     dbg("\n\t\t\t\t[lambdaHookFilterGather] var '%s'", var->name);
+    nprintf(job->entity->main, NULL, "\n\t/*?var %s*/",var->name);
     if (!var->is_gathered) continue;
+    nprintf(job->entity->main, NULL, "/*gathered!*/");
     if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)) continue;
+    nprintf(job->entity->main, NULL, "/*dfsUsedInThisForall!*/");    
     nprintf(job->entity->main, NULL,
             "\n\t\t// gather %s for variable '%s'",
             (phase==GATHER_SCATTER_DECL)?"DECL":"CALL",
             var->name);
     dbg("\n\t\t\t\t[lambdaHookFilterGather] strcat");
-    strcat(gather_src_buffer,
-           job->entity->main->call->simd->gather(job,var,phase));
+    strcat(gather_src_buffer,lambdaHookGather(job,var,phase));
   }
   dbg("\n\t\t\t\t[lambdaHookFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");

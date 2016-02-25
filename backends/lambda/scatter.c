@@ -47,64 +47,13 @@
 // ****************************************************************************
 // * Flush de la 'vraie' variable depuis celle déclarée en in/out
 // ****************************************************************************
-static void lambdaHookFlushRealVariable(nablaJob *job, nablaVariable *var){
+/*static void lambdaHookFlushRealVariable(nablaJob *job, nablaVariable *var){
   // On informe la suite que cette variable est en train d'être scatterée
   nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
   if (real_variable==NULL)
     nablaError("Could not find real variable from scattered variables!");
   real_variable->is_gathered=false;
-}
-
-
-// ****************************************************************************
-// * Filtrage du SCATTER
-// ****************************************************************************
-char* lambdaHookFilterScatter(nablaJob *job){
-  int i;
-  char scatters[1024];
-  nablaVariable *var;
-  scatters[0]='\0';
-  int nbToScatter=0;
-  int filteredNbToScatter=0;
-  
-  if (job->parse.selection_statement_in_compound_statement){
-    nprintf(job->entity->main, "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!lambdaScatter*/");
-    return "";
-  }
-  
-  // On récupère le nombre de variables potentielles à scatterer
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
-    nbToScatter+=1;
-
-  // S'il y en a pas, on a rien d'autre à faire
-  if (nbToScatter==0) return "";
-  
-  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
-    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaScatter on %s for variable %s_%s", job->item, var->item, var->name);
-    //nprintf(job->entity->main, NULL, "\n\t\t// lambdaScatter enum_enum=%c", job->parse.enum_enum);
-    if (job->parse.enum_enum=='\0') continue;
-    filteredNbToScatter+=1;
-  }
-  //nprintf(job->entity->main, NULL, "/*filteredNbToScatter=%d*/", filteredNbToScatter);
-
-  // S'il reste rien après le filtre, on a rien d'autre à faire
-  if (filteredNbToScatter==0) return "";
-  
-  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
-    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
-    if (i!=job->parse.iScatter) continue;
-    lambdaHookFlushRealVariable(job,var);
-    // Pour l'instant, on ne scatter pas les node_coord
-    if (strcmp(var->name,"coord")==0) continue;
-    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
-    if (var->inout==enum_in_variable) continue;
-    strcat(scatters,job->entity->main->call->simd->scatter(var));
-  }
-  job->parse.iScatter+=1;
-  return strdup(scatters);
-}
-
+  }*/
 
 
 // ****************************************************************************
@@ -112,10 +61,47 @@ char* lambdaHookFilterScatter(nablaJob *job){
 // ****************************************************************************
 char* lambdaHookScatter(nablaVariable* var){
   char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+  snprintf(scatter, 1024,
+           "\n\tscatter%sk(cell_node[n*NABLA_NB_CELLS+c], &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
            var->item, var->name,
            var->item, var->name);
   return strdup(scatter);
+}
+
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+char* lambdaHookFilterScatter(astNode *n,nablaJob *job){
+  char *scatters=NULL;
+  int nbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main,
+            "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!lambdaScatter*/");
+    return "";
+  }
+  
+  if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
+    nablaError("[lambdaHookFilterScatter] Could not malloc our scatters!");
+
+  // On récupère le nombre de variables potentielles à scatterer
+//#warning variables_to_gather_scatter seem NULL!
+  //for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+  for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+    dbg("\n\t\t\t\t[lambdaHookFilterScatter] var '%s'", var->name);
+    nprintf(job->entity->main, NULL, "\n\t/*?var %s*/",var->name);
+    if (!var->is_gathered) continue;
+    nprintf(job->entity->main, NULL, "/*gathered!*/");
+    if (!var->out) continue;
+    nprintf(job->entity->main, NULL, "/*out!*/");    
+
+    nprintf(job->entity->main, NULL, "/*%s*/",var->name);
+    nbToScatter+=1;
+    strcat(scatters,lambdaHookScatter(var));
+  }
+  return strdup(scatters);
 }
 

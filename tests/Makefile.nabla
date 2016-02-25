@@ -1,5 +1,5 @@
 TGT=${name}
-MESH=8
+MESH=4
 #SIMD=std
 #PARALLEL=omp
 LOG= # -t #-v $(TGT).log

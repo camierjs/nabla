@@ -45,9 +45,9 @@ inline Real thisCross2D(Real3 _u,Real3 _v){
   return Real(_u.x*_v.y - _u.y*_v.x);
 }
 
-/*∀ nodes @-21{
+∀ nodes @-21{
   info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
-  }*/
+  }
 
 ∀ cells void geom_computeSurfaceAndVolume_Quad(void)
   @ -20.0,23.0 if (option_quads){

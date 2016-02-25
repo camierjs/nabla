@@ -45,15 +45,15 @@
          <y set='false' delta='1.0'>4</y>
      </sod-->
      <cartesian>
-			<nsd>8 1 1</nsd>
+			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="32" prx="1.0">1.0</lx>
-			<ly ny="4" pry="1.0">4.0</ly>
+			<lx nx="4" prx="1.0">1.0</lx>
+			<ly ny="4" pry="1.0">1.0</ly>
 	  </cartesian> 
 	  </meshgenerator>
 	</mesh>
    <glace2-d>
-     <DEBUG>false</DEBUG>
+     <DEBUG>true</DEBUG>
      
      <option_chic>false</option_chic>
      <option_glace>true</option_glace>
@@ -77,7 +77,7 @@
      <option_x_max>1.0</option_x_max>
 
      <option_y_min>0.0</option_y_min>
-     <option_y_max>4.0</option_y_max>
+     <option_y_max>1.0</option_y_max>
 
      <option_z_min>0.0</option_z_min>
      <option_z_max>0.0</option_z_max>
@@ -88,6 +88,6 @@
      <option_ini_zd_rh>0.125</option_ini_zd_rh>
      <option_ini_zd_p>0.1</option_ini_zd_p>
 
-     <option_max_iterations>8</option_max_iterations>
+     <option_max_iterations>1</option_max_iterations>
    </glace2-d>
 </case>

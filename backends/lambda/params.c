@@ -106,7 +106,7 @@ void lambdaHookDumpNablaParameterList(nablaMain *nabla,
 
     // Si elles n'ont pas le même support, c'est qu'il va falloir insérer un gather/scatter
     if (var->item[0] != job->item[0]){
-      //nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
+      nprintf(nabla, NULL, "\n\t\t/* gather/scatter for %s_%s*/", var->item, var->name);
       // Création d'une nouvelle in_out_variable
       nablaVariable *new = nMiddleVariableNew(NULL);
       new->name=strdup(var->name);
