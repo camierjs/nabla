@@ -15,15 +15,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 ##################
 # Library: ALEPH #
 ##################
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/aleph)
 if(HYPRE_FOUND)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/aleph)
     set(ALEPH_LIB ${ALEPH_LIB} PARENT_SCOPE)
     set(ALEPH_HYPRE_LIB ${ALEPH_HYPRE_LIB} PARENT_SCOPE)
 endif(HYPRE_FOUND)
-
-#####################
-# Library INTERFACE #
-#####################
-#add_library(NablaLibs)
-#target_link_libraries(NablaLibs NablaLibDump)
-

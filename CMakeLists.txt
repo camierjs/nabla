@@ -114,12 +114,8 @@ target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
                       NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
-                      NablaLibDump
+                      NablaLibDump NablaAleph
                       NablaMiddlend)
-if(HYPRE_FOUND)
-    target_link_libraries(nabla NablaAleph)
-endif()
-
 
 ###########
 # INSTALL #

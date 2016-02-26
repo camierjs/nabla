@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-extern char* lambdaAlephHeader(nablaMain*);
+extern char* nablaAlephHeader(nablaMain*);
 
 // ****************************************************************************
 // * Backend PREFIX - Génération du 'main'
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){\n\
 NABLA_STATUS hookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
   if ((nabla->entity->libraries&(1<<with_aleph))!=0)
-    fprintf(nabla->entity->hdr, "%s", lambdaAlephHeader(nabla));
+    fprintf(nabla->entity->hdr, "%s", nablaAlephHeader(nabla));
   fprintf(nabla->entity->src, BACKEND_MAIN_PREFIX);
   return NABLA_OK;
 }

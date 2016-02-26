@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * real3
 // ****************************************************************************
-class __attribute__ ((aligned(8))) real3 {
+struct __attribute__ ((aligned(8))) real3 {
  public:
   __attribute__ ((aligned(8))) double x;
   __attribute__ ((aligned(8))) double y;
@@ -89,7 +89,7 @@ inline real norm(real u){ return ::fabs(u);}
 // ****************************************************************************
 // * real3x3 
 // ****************************************************************************
-class __attribute__ ((aligned(8))) real3x3 {
+struct __attribute__ ((aligned(8))) real3x3 {
  public:
   __attribute__ ((aligned(8))) struct real3 x;
   __attribute__ ((aligned(8))) struct real3 y;

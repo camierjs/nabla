@@ -66,9 +66,9 @@ extern char AlephInterface_h[];
 extern char IAlephFactory_h[];
 
 // *****************************************************************************
-// * lambdaAlephIni
+// * nablaAlephIni
 // *****************************************************************************
-void lambdaAlephIni(nablaMain *main){
+void nablaAlephIni(nablaMain *main){
   nablaJob *alephIni=nMiddleJobNew(main->entity);
   alephIni->is_an_entry_point=true;
   alephIni->is_a_function=true;
@@ -90,7 +90,7 @@ void lambdaAlephIni(nablaMain *main){
 // ****************************************************************************
 // *
 // ****************************************************************************
-char* lambdaAlephHeader(nablaMain *nabla){
+char* nablaAlephHeader(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n");
   fprintf(nabla->entity->hdr,"/*'AlephStd_h'*/\n%s",dumpExternalFile(AlephStd_h));
   fprintf(nabla->entity->hdr,"/*'AlephStd_c'*/\n%s",dumpExternalFile(AlephStd_c));
@@ -114,7 +114,7 @@ char* lambdaAlephHeader(nablaMain *nabla){
   }
   
   fprintf(nabla->entity->hdr, dumpExternalFile(nablaAleph_h));
-  lambdaAlephIni(nabla);
+  nablaAlephIni(nabla);
   return "";
 }
 

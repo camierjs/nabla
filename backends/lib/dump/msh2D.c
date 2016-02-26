@@ -287,7 +287,7 @@ static void nabla_ini_face_cell_XY(int *f, const int c,
                                    const int i, const int MD_Dir){
   const int n =
     (MD_Dir==MD_DirX)?NABLA_NB_CELLS_X_AXIS:
-    (MD_Dir==MD_DirY)?NABLA_NB_CELLS_Y_AXIS:-0xDEADBEEFull;  
+    (MD_Dir==MD_DirY)?NABLA_NB_CELLS_Y_AXIS:-0xDEADBEEF;  
   if (i<n-1)  f[0]+=nabla_ini_face_cell_inner(f,c,i,MD_Dir);
   if (i==0)   f[1]+=nabla_ini_face_cell_outer_minus(f,c,i,MD_Dir);
   if (i==n-1) f[1]+=nabla_ini_face_cell_outer_plus(f,c,i,MD_Dir);

@@ -5,8 +5,9 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 SIMD = std
 PARALLEL = seq
 
-BYFL_FLAGS  = #-bf-verbose -bf-vectors #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
+BYFL_FLAGS  = #-bf-verbose #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
 
+AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
 SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall #-fPIC #-DNO_SSE2 -mno-avx 
 
 LOG = -t #-v $(TGT).log
@@ -24,13 +25,25 @@ LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
 LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
 
+
+#XYZ_GEOMETRY_64 = -DX_EDGE_ELEMS=64 -DY_EDGE_ELEMS=63 -DZ_EDGE_ELEMS=63 -DX_EDGE_TICK=.017307 -DY_EDGE_TICK=.017578 -DZ_EDGE_TICK=.017578 -DLENGTH=1.125
+#XYZ_GEOMETRY = $(XYZ_GEOMETRY_40)
+#export X_EDGE_ELEMS = 64
+#export Y_EDGE_ELEMS = 63
+#export Z_EDGE_ELEMS = 63
+#export X_EDGE_TICK = 0.017307
+#export Y_EDGE_TICK = 0.017578
+#export Z_EDGE_TICK = 0.017578
+#export LENGTH = 1.125
+#export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
+
+export LENGTH = $(shell echo 1.125)
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
 export Z_EDGE_ELEMS = $(MESH)
-export X_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export Y_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export Z_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export LENGTH = $(shell echo 1.0) #1.125
+export X_EDGE_TICK = $(shell echo "scale=6;$(LENGTH)/$(MESH)"|bc -l)
+export Y_EDGE_TICK = $(shell echo "scale=6;$(LENGTH)/$(MESH)"|bc -l)
+export Z_EDGE_TICK = $(shell echo "scale=6;$(LENGTH)/$(MESH)"|bc -l)
 export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
 
 
@@ -54,10 +67,10 @@ gen1:$(TGT).cc
 run1:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
 #	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
-	./$(TGT)_$(MESH)_$(PARALLEL)
+#	./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
-	./$(TGT)_$(MESH)_$(PARALLEL)
+#	./$(TGT)_$(MESH)_$(PARALLEL)
 
 #############
 # DOT 2 PNG #
