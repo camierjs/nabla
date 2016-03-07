@@ -50,7 +50,6 @@
 // ****************************************************************************
 void nLambdaHookHeaderOpen(nablaMain *nabla){
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  // Ouverture du fichier header
   sprintf(hdrFileName, "%s.h", nabla->name);
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
@@ -64,7 +63,6 @@ void nLambdaHookHeaderIncludes(nablaMain *nabla){
 // *****************************************************************************\n\
 // * Lambda includes\n\
 // *****************************************************************************\n\
-// Includes from nabla->simd->includes\n\%s\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
@@ -80,7 +78,6 @@ using namespace std;\n\
 int hlt_level;\n\
 bool *hlt_exit;\n\
 // Includes from nabla->parallel->includes()\n\%s",
-          nabla->call->simd->includes(),
           nabla->call->parallel->includes());
   nMiddleDefines(nabla,nabla->call->header->defines);
   nMiddleTypedefs(nabla,nabla->call->header->typedefs);

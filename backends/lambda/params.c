@@ -44,16 +44,15 @@
 #include "nabla.tab.h"
 
 
-
 // ****************************************************************************
 // * Dump dans le src des parametres nabla en in comme en out
 // * On va surtout remplir les variables 'in' utilisées de support différent
 // * pour préparer les GATHER/SCATTER
 // ****************************************************************************
 void lambdaHookDumpNablaParameterList(nablaMain *nabla,
-                                     nablaJob *job,
-                                     astNode *n,
-                                     int *numParams){
+                                      nablaJob *job,
+                                      astNode *n,
+                                      int *numParams){
   //nprintf(nabla, NULL, "/*lambdaHookDumpNablaParameterList*/");
   // S'il n'y a pas de in ni de out, on a rien à faire
   if (n==NULL) return;
@@ -158,27 +157,4 @@ void lambdaHookAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParam
   if (job->item[0]=='c' || job->item[0]=='n')
     nMiddleParamsAddExtra(nabla, numParams);
   //nprintf(nabla, NULL, "/*eolambdaHookAddExtraParameters*/");
-}
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-void lambdaHookAddExtraParametersDFS(nablaMain *nabla,
-                                     nablaJob *job,
-                                     int *numParams){
-  nprintf(nabla, NULL, "/*nothing in lambdaHookAddExtraParametersDFS*/");
-}
-
-
-// ****************************************************************************
-// * Dump dans le src des parametres nabla en in comme en out
-// * On va surtout remplir les variables 'in' utilisées de support différent
-// * pour préparer les GATHER/SCATTER
-// ****************************************************************************
-void lambdaHookDumpNablaParameterListDFS(nablaMain *nabla,
-                                     nablaJob *job,
-                                     astNode *n,
-                                     int *numParams){
-  nprintf(nabla, NULL, "/*nothing in lambdaHookDumpNablaParameterListDFS*/");
 }

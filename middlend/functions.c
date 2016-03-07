@@ -348,6 +348,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   //dbg("\n\t[nablaFctFill] launching dfsForCalls");
   if (nabla->hook->call->dfsForCalls)
     nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
+  //nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
     
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");

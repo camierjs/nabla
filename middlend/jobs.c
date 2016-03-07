@@ -503,7 +503,7 @@ void nMiddleJobFill(nablaMain *nabla,
   }else{
     numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
     //nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-    if (nabla->hook->grammar->dfsVariable())
+    if (nabla->hook->grammar->dfsVariable()) // Okina still is false here
       nMiddleParamsDumpFromDFS(nabla,job,numParams);
   }
   

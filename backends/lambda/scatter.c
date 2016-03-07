@@ -45,21 +45,9 @@
 
 
 // ****************************************************************************
-// * Flush de la 'vraie' variable depuis celle déclarée en in/out
-// ****************************************************************************
-/*static void lambdaHookFlushRealVariable(nablaJob *job, nablaVariable *var){
-  // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=nMiddleVariableFind(job->entity->main->variables, var->name);
-  if (real_variable==NULL)
-    nablaError("Could not find real variable from scattered variables!");
-  real_variable->is_gathered=false;
-  }*/
-
-
-// ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* lambdaHookScatter(nablaVariable* var){
+static char* lambdaHookScatter(nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024,
            "\n\tscatter%sk(cell_node[n*NABLA_NB_CELLS+c], &gathered_%s_%s, %s_%s);",
@@ -92,9 +80,8 @@ char* lambdaHookFilterScatter(astNode *n,nablaJob *job){
   //for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     dbg("\n\t\t\t\t[lambdaHookFilterScatter] var '%s'", var->name);
-    nprintf(job->entity->main, NULL, "\n\t/*?var %s*/",var->name);
     if (!var->is_gathered) continue;
-    nprintf(job->entity->main, NULL, "/*gathered!*/");
+    nprintf(job->entity->main, NULL, "/*%s gathered!*/",var->name);
     if (!var->out) continue;
     nprintf(job->entity->main, NULL, "/*out!*/");    
 

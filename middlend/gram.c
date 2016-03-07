@@ -215,7 +215,6 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   //////////////////////////////
   if (n->ruleid == rulenameToId("nabla_reduction")){
     const astNode *global_node = n->children->next;
-    //const astNode *reduction_operation_node = n->children->next->next;
     const astNode *item_node =n->children->next->next->next;
     char *global_var_name = global_node->token;
     char *item_var_name = item_node->token;

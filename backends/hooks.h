@@ -53,7 +53,6 @@ typedef struct hookXyzStruct{
 
 // Structure des hooks que l'on va utiliser afin de générer les pragmas
 typedef struct hookPragmaStruct{
-  //char* (*ivdep)(void);
   char* (*align)(void); // functions
 } hookPragma;
 
@@ -70,7 +69,7 @@ typedef struct hookHeaderStruct{
 typedef struct hookSourceStruct{
   void (*open)(struct nablaMainStruct *); // animate
   void (*include)(struct nablaMainStruct *); // animate
-  char* (*name)(struct nablaMainStruct *);
+  char* (*name)(struct nablaMainStruct *); // gram
 } hookSource;
 
 // Hooks for Main

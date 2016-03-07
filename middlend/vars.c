@@ -342,17 +342,21 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
 
 
 // ****************************************************************************
-// * 
+// * We check if the given variable name is used
+// * in the current forall statement, given from the 'n' astNode
 // ****************************************************************************
 bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char *name){
   nablaVariable *var=NULL;
-  if (n==NULL) return false;
+  if (n==NULL){
+    dbg("\n\t\t\t\t\t[dfsUsedInThisForall] NULL, returning");
+    return false;
+  }
   if (n->ruleid==rulenameToId("primary_expression")){
-    //dbg("\n\t\t\t\t\t[dfsUsedInThisForall] primary_expression");
+    dbg("\n\t\t\t\t\t[dfsUsedInThisForall] primary_expression");
     if (n->children->token!=NULL){
-      //dbg(", token: '%s'",n->children->token?n->children->token:"id");
+      dbg(", token: '%s'",n->children->token?n->children->token:"id");
       if ((var=nMiddleVariableFind(nabla->variables,n->children->token))!=NULL){
-        //dbg(", var-name: '%s' vs '%s'",var->name,name);
+        dbg(", var-name: '%s' vs '%s'",var->name,name);
         if (strcmp(var->name,name)==0) return true;
       }
     }

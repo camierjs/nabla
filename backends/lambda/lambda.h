@@ -47,10 +47,6 @@ void lHookSourceOpen(nablaMain*);
 void lHookSourceInclude(nablaMain*);
 char* lHookSourceNamespace(nablaMain*);
 
-char* lambdaHookBits(void);
-char* lambdaHookGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* lambdaHookScatter(nablaVariable*);
-
 char* lambdaHookSysPrefix(void);
 char* lambdaHookPrevCell(int);
 char* lambdaHookNextCell(int);
@@ -58,12 +54,12 @@ char* lambdaHookSysPostfix(void);
 
 char* lambdaHookIncludes(void);
 
-char* lambdaHookFilterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
+char* lambdaHookFilterGather(astNode*,nablaJob*);
 char* lambdaHookFilterScatter(astNode*,nablaJob*);
 
 void lambdaHookReduction(struct nablaMainStruct*,astNode*);
 void lambdaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
+//void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
 void lambdaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 bool lambdaHookDfsVariable(void);
 
@@ -88,8 +84,8 @@ char *nLambdaParallelVoidIncludes(void);
 // Pragmas: Ivdep, Align
 char *lambdaHookPragmaIccIvdep(void);
 char *lambdaHookPragmaGccIvdep(void);
-char *lambdaHookPragmaIccAlign(void);
-char *lambdaHookPragmaGccAlign(void);
+//char *lambdaHookPragmaIccAlign(void);
+//char *lambdaHookPragmaGccAlign(void);
 
 // Hooks: Header
 void nLambdaHookHeaderDump(nablaMain *);
@@ -131,25 +127,19 @@ char* lambdaHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
 void lambdaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
 
 void lambdaHookFunctionName(nablaMain*);
-void lambdaHookFunction(nablaMain*, astNode*);
-void lambdaHookJob(nablaMain*, astNode*);
 void lambdaHookLibraries(astNode*, nablaEntity*);
 
-char* lambdaHookForAllPrefix(nablaJob*);
 char* lambdaHookForAllDump(nablaJob*);
 char* lambdaHookForAllPostfix(nablaJob*);
 char* lambdaHookForAllItem(nablaJob*,const char, const char, char);
-
-char* lambdaHookTokenPrefix(nablaMain*);
-char* lambdaHookTokenPostfix(nablaMain*);
 
 void lambdaHookSwitchToken(astNode*, nablaJob*);
 nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void lambdaHookSystem(astNode*,nablaMain*,const char,char);
 void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-void lambdaHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
-void lambdaHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
+//void lambdaHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
+//void lambdaHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
 void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 // Pour dumper les arguments necessaire dans le main

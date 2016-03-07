@@ -44,6 +44,10 @@
 #include "nabla.tab.h"
 #include "backends/lambda/lambda.h"
 
+
+// ****************************************************************************
+// * lambdaHookIsTest
+// ****************************************************************************
 static void lambdaHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
   assert(isNode);
@@ -56,31 +60,15 @@ static void lambdaHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   // Et on purge le token pour pas qu'il soit parsé
   isNode->next->token[0]=0;
 }
-//static void lambdaHookIsTestIs(nablaMain *nabla, nablaJob *job, astNode *n){}
 static void lambdaHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
   nprintf(nabla, "/*IS_OP_END*/", ")");
 }
-
-// *****************************************************************************
-// *
-// *****************************************************************************
 void lambdaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
   assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
   if (token==IS_OP_INI) lambdaHookIsTestIni(nabla,job,n);
   if (token==IS) return;
   if (token==IS_OP_END) lambdaHookIsTestEnd(nabla,job,n);
 }
-
-
-// ****************************************************************************
-// * lambdaHookTokenPrefix
-// ****************************************************************************
-char* lambdaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
-
-// ****************************************************************************
-// * lambdaHookTokenPostfix
-// ****************************************************************************
-char* lambdaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
 
 
 // ****************************************************************************
@@ -267,11 +255,11 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(CONST):{
-    nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->hook->pragma->align());
+    nprintf(nabla, "/*CONST*/", "%sconst ", cHOOK(nabla,pragma,align));
     break;
   }
   case(ALIGNED):{
-    nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
+    nprintf(nabla, "/*ALIGNED*/", "%s", cHOOK(nabla,pragma,align));
     break;
   }
     
@@ -367,7 +355,7 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
     nprintf(nabla, "/*lambdaFilterGather*/",
-            lambdaHookFilterGather(n,job,GATHER_SCATTER_CALL));
+            lambdaHookFilterGather(n,job));
     break;
   }
   case(FORALL_END):{
@@ -421,7 +409,6 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
       nprintf(nabla, NULL, "]");
     }
     job->parse.isPostfixed=0;
-    // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
     break;
   }
@@ -473,11 +460,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
     if (cnfgem=='f') nprintf(nabla, NULL, "NABLA_NODE_PER_FACE");
     break;
   }    
-    //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
-    //case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}
-    //case (PREVCELL):{ nprintf(nabla, "/*token PREVCELL*/", "prevCell"); break;}
   case (NEXTNODE):{ nprintf(nabla, "/*token NEXTNODE*/", "nextNode"); break; }
   case (PREVNODE):{ nprintf(nabla, "/*token PREVNODE*/", "prevNode"); break; }
   case (PREVLEFT):{ nprintf(nabla, "/*token PREVLEFT*/", "cn.previousLeft()"); break; }

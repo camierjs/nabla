@@ -44,18 +44,6 @@
 
 
 // ****************************************************************************
-// * lambdaHookReturnFromArgument
-// ****************************************************************************
-void lambdaHookReturnFromArgument(nablaMain *nabla, nablaJob *job){
-  const char *rtnVariable=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nprintf(nabla, NULL, "\
-\n\tint threads = omp_get_max_threads();\
-\n\tReal %s_per_thread[threads];", rtnVariable);
-}
-
-
-// ****************************************************************************
 // * lambdaHookAddArguments
 // ****************************************************************************
 void lambdaHookAddArguments(nablaMain *nabla,nablaJob *job){
@@ -68,33 +56,6 @@ void lambdaHookAddArguments(nablaMain *nabla,nablaJob *job){
 // *
 // ****************************************************************************
 bool lambdaHookDfsVariable(void){ return true; }
-
-
-// ****************************************************************************
-// * INCLUDES
-// ****************************************************************************
-char *lambdaHookBits(void){return "64";}
-char* lambdaHookIncludes(void){return "";}
-
-
-// ****************************************************************************
-// * IVDEP Pragma
-// ****************************************************************************
-char *lambdaHookPragmaIccIvdep(void){ return "\\\n_Pragma(\"ivdep\")"; }
-char *lambdaHookPragmaGccIvdep(void){ return "__declspec(align(64))"; }
-
-
-// ****************************************************************************
-// * ALIGN hooks
-// ****************************************************************************
-char *lambdaHookPragmaIccAlign(void){ return ""; }
-char *lambdaHookPragmaGccAlign(void){ return ""; }
-
-
-// ****************************************************************************
-// * System Prefix
-// ****************************************************************************
-char* lambdaHookSysPrefix(void){ return "/*lambdaHookSysPrefix*/"; }
 
 
 // ****************************************************************************
@@ -124,25 +85,24 @@ char* lambdaHookNextCell(int direction){
 // ****************************************************************************
 // * System Postfix
 // ****************************************************************************
-char* lambdaHookSysPostfix(void){ return "/*lambdaHookSysPostfix*/)"; }
+char* lambdaHookSysPostfix(void){ return ")"; }
 
 
 // ****************************************************************************
 // * Function Hooks
 // ****************************************************************************
-void lambdaHookFunctionName(nablaMain *arc){
-  nprintf(arc, NULL, "%s", arc->name);
+void lambdaHookFunctionName(nablaMain *nabla){
+  nprintf(nabla, NULL, "%s", nabla->name);
 }
 
 // ****************************************************************************
 // * Dump des variables appelées
 // ****************************************************************************
-void lambdaHookDfsForCalls(struct nablaMainStruct *nabla,
-                             nablaJob *fct,
-                             astNode *n,
-                             const char *namespace,
-                             astNode *nParams){
-  //nMiddleDfsForCalls(nabla,fct,n,namespace,nParams);
+void lambdaHookDfsForCalls(nablaMain *nabla,
+                           nablaJob *fct,
+                           astNode *n,
+                           const char *namespace,
+                           astNode *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -150,27 +110,27 @@ void lambdaHookDfsForCalls(struct nablaMainStruct *nabla,
 // ****************************************************************************
 // * Dump du préfix des points d'entrées: inline ou pas
 // ****************************************************************************
-char* lambdaHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){
-  //return "";
+char* lambdaHookEntryPointPrefix(nablaMain *nabla,
+                                 nablaJob *entry_point){
   return "static inline";
 }
 
-void lambdaHookIteration(struct nablaMainStruct *nabla){
+void lambdaHookIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "lambda_iteration()");
 }
-void lambdaHookExit(struct nablaMainStruct *nabla, nablaJob *job){
+void lambdaHookExit(nablaMain *nabla, nablaJob *job){
   if (job->when_depth==0)
     nprintf(nabla, "/*EXIT*/", "/*lambdaHookExit*/exit(0.0)");
   else
     nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
-void lambdaHookTime(struct nablaMainStruct *nabla){
+void lambdaHookTime(nablaMain *nabla){
   nprintf(nabla, "/*TIME*/", "global_time[0]");
 }
-void lambdaHookFatal(struct nablaMainStruct *nabla){
+void lambdaHookFatal(nablaMain *nabla){
   nprintf(nabla, NULL, "fatal");
 }
-void lambdaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
+void lambdaHookAddCallNames(nablaMain *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
@@ -186,46 +146,4 @@ void lambdaHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode 
     nprintf(nabla, "/*has not been found*/", NULL);
   }
 }
-
-
-/*****************************************************************************
- * Lambda libraries
- *****************************************************************************/
-void lambdaHookLibraries(astNode * n, nablaEntity *entity){
-  fprintf(entity->src, "\n/*lib %s*/",n->children->token);
-}
-
-
-// ****************************************************************************
-// * lambdaHookPrimaryExpressionToReturn
-// ****************************************************************************
-bool lambdaHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
-  const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-  dbg("\n\t[lambdaHookPrimaryExpressionToReturn] ?");
-  if (var!=NULL && strcmp(n->children->token,var)==0){
-    dbg("\n\t[lambdaHookPrimaryExpressionToReturn] primaryExpression hits returned argument");
-    nprintf(nabla, NULL, "%s_per_thread[tid]",var);
-    return true;
-  }else{
-    dbg("\n\t[lambdaHookPrimaryExpressionToReturn] ELSE");
-    //nprintf(nabla, NULL, "%s",n->children->token);
-  }
-  return false;
-}
-
-
-
-/*****************************************************************************
- * Génération d'un kernel associé à un support
- *****************************************************************************/
-void lambdaHookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, job);
-  nMiddleJobFill(nabla,job,n,NULL);
-  
-  // On teste *ou pas* que le job retourne bien 'void' dans le cas de LAMBDA
-  //if ((strcmp(job->rtntp,"void")!=0) && (job->is_an_entry_point==true))
-  //  exit(NABLA_ERROR|fprintf(stderr, "\n[lambdaHookJob] Error with return type which is not void\n"));
-}
-
 

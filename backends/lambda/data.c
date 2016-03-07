@@ -113,54 +113,20 @@ void lambdaHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
 }
 
 
-/*****************************************************************************
- * Prépare le nom de la variable
- *****************************************************************************/
+// ****************************************************************************
+// * Prépare le nom de la variable
+// ****************************************************************************
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  nprintf(nabla, NULL, "%s_%s",
-          //var->is_gathered?"gathered_":"",
-          var->item,
-          var->name);
+  nprintf(nabla, NULL, "%s_%s",var->item,var->name);
 }
 
 
-/*****************************************************************************
- * Postfix d'un .x|y|z slon le isDotXYZ
- *****************************************************************************/
-static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  switch (job->parse.isDotXYZ){
-  case(0): break;
-  case(1): {nprintf(nabla, "/*setDotX+flush*/", ""); break;}
-  case(2): {nprintf(nabla, "/*setDotY+flush*/", ""); break;}
-  case(3): {nprintf(nabla, "/*setDotZ+flush*/", ""); break;}
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[setDotXYZ] Switch isDotXYZ error\n"));
-  }
-  // Flush isDotXYZ
-  job->parse.isDotXYZ=0;
-  job->parse.turnBracketsToParentheses=false;
-}
-
-
-/*****************************************************************************
- * Tokens to gathered  variables
- *****************************************************************************/
-static bool lambdaHookTurnTokenToGatheredVariable(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
-  //nprintf(arc, NULL, "/*gathered variable '%s' ?*/",var->name);
-  if (!var->is_gathered) return false;
-  if (job->parse.enum_enum=='\0') return false;
-  nprintf(arc, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
-  return true;
-}
-
-
-/*****************************************************************************
- * Tokens to variables 'CELL Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'CELL Job' switch
+// ****************************************************************************
 static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                                    nablaVariable *var,
+                                                    nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;
@@ -199,8 +165,6 @@ static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
         nprintf(arc, NULL, "/*NodeVar + postfix_constant*/[");
       else nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
     }
-    //if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
-    if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
     if (isPostfixed==2 && enum_enum=='\0') {
       if (job->parse.postfix_constant==true){
         nprintf(arc, NULL, "/*NodeVar + postfix_constant*/[");
@@ -224,12 +188,12 @@ static void lambdaHookTurnTokenToVariableForCellJob(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'NODE Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'NODE Job' switch
+// ****************************************************************************
 static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                                    nablaVariable *var,
+                                                    nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;
@@ -283,12 +247,12 @@ static void lambdaHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'FACE Job' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'FACE Job' switch
+// ****************************************************************************
 static void lambdaHookTurnTokenToVariableForFaceJob(nablaMain *arc,
-                                                  nablaVariable *var,
-                                                  nablaJob *job){
+                                                    nablaVariable *var,
+                                                    nablaJob *job){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;
@@ -335,8 +299,6 @@ static void lambdaHookTurnTokenToVariableForParticleJob(nablaMain *nabla,
                                                         nablaVariable *var,
                                                         nablaJob *job){
   const char cnfg=job->item[0];
-  //char enum_enum=job->parse.enum_enum;
-  //int isPostfixed=job->parse.isPostfixed;
 
   // Preliminary pertinence test
   if (cnfg != 'p') return;
@@ -371,12 +333,12 @@ static void lambdaHookTurnTokenToVariableForParticleJob(nablaMain *nabla,
 }
 
 
-/*****************************************************************************
- * Tokens to variables 'Std Function' switch
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to variables 'Std Function' switch
+// ****************************************************************************
 static void lambdaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
-                                                    nablaVariable *var,
-                                                    nablaJob *job){
+                                                        nablaVariable *var,
+                                                        nablaJob *job){
   const char cnfg=job->item[0];
   // Preliminary pertinence test
   if (cnfg != '\0') return;
@@ -405,45 +367,41 @@ static void lambdaHookTurnTokenToVariableForStdFunction(nablaMain *arc,
 }
 
 
-/*****************************************************************************
- * Transformation de tokens en variables selon les contextes dans le cas d'un '[Cell|node]Enumerator'
- *****************************************************************************/
+// ****************************************************************************
+// * Tokens to gathered  variables
+// ****************************************************************************
+static bool lambdaHookTurnTokenToGatheredVariable(nablaMain *nabla,
+                                                  nablaVariable *var,
+                                                  nablaJob *job){
+  if (!var->is_gathered) return false;
+  if (job->parse.enum_enum=='\0') return false;
+  return true;
+}
+
+
+// ****************************************************************************
+// * Transformation de tokens en variables selon les contextes
+// ****************************************************************************
 nablaVariable *lambdaHookTurnTokenToVariable(astNode * n,
-                                            nablaMain *nabla,
-                                            nablaJob *job){
+                                             nablaMain *nabla,
+                                             nablaJob *job){
   nablaVariable *var=nMiddleVariableFind(nabla->variables, n->token);
   // Si on ne trouve pas de variable, on a rien à faire
   if (var == NULL) return NULL;
-
   // On récupère la variable de ce job pour ces propriétés
-  //nablaVariable *used=nMiddleVariableFind(job->used_variables, n->token);
   nablaVariable *used=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, n->token);
   assert(used);
-  
   dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
-  if (used->is_gathered)
-    dbg("\n\t[lambdaHookTurnTokenToVariable] %s_%s will be GATHERED here!", var->item, var->name);
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
-  if (job->parse.alephKeepExpression==true){
+  if (job->parse.alephKeepExpression){
     nprintf(nabla, "/*lambdaHookTurnTokenToVariable*/", "/*aleph*/%s_%s", var->item, var->name);
     return var;
   }
 
-  // Set good isDotXYZ
-  if (job->parse.isDotXYZ==0 &&
-      strcmp(var->type,"real3")==0 &&
-      job->parse.left_of_assignment_operator==true){
-//    #warning Diffracting OFF
-    //nprintf(nabla, NULL, "/* DiffractingNOW */");
-    //job->parse.diffracting=true;
-    //job->parse.isDotXYZ=job->parse.diffractingXYZ=1;
-  }
-  //nprintf(nabla, NULL, "\n\t/*lambdaHookTurnTokenToVariable::isDotXYZ=%d, job->parse.diffractingXYZ=%d*/", job->parse.isDotXYZ, job->parse.diffractingXYZ);
-
   // Check whether this variable is being gathered
   if (lambdaHookTurnTokenToGatheredVariable(nabla,used,job)){
-    dbg("\n\t[lambdaHookTurnTokenToVariable] lambdaHookTurnTokenToGatheredVariable!");
+    nprintf(nabla, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
     return var;
   }
   
