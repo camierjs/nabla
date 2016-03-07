@@ -55,27 +55,27 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
   dbg("\n\t\t[lambdaHookSelectEnumerate] function?");
   if (itm=='\0') return "\n";
   dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
-  if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE(p";
-  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER cells\n\tFOR_EACH_CELL(c";
-  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_CELL(c";
+  if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE(p)";
+  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL(c)";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL(c)";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER cells\n\tFOR_EACH_CELL(c)";
+  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_CELL(c)";
   dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
-  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n";
-  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_NODE(n";
-  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "\n\tFOR_EACH_NODE(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n";
+  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE(n)";
+  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "FOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
   dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
-  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE(f";
-  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "\n\tFOR_EACH_INNER_FACE(f";
-  if (itm=='f' && grp==NULL && rgn[0]=='o')   return "\n\tFOR_EACH_OUTER_FACE(f";
+  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE(f)";
+  if (itm=='f' && grp==NULL && rgn[0]=='i')   return "FOR_EACH_INNER_FACE(f)";
+  if (itm=='f' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_FACE(f)";
   // ! Tester grp==NULL avant ces prochains:
-  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "\n\tFOR_EACH_FACE(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "\n\tFOR_EACH_OWN_OUTER_FACE(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "\n\tFOR_EACH_OWN_INNER_FACE(f";
+  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_FACE(f)";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "FOR_EACH_OWN_OUTER_FACE(f)";
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "FOR_EACH_OWN_INNER_FACE(f)";
   dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
@@ -87,10 +87,9 @@ static char* lambdaHookSelectEnumerate(nablaJob *job){
 // ****************************************************************************
 char* lambdaHookForAllDump(nablaJob *job){
   char format[NABLA_MAX_FILE_NAME];
-  const char *forall=strdup(lambdaHookSelectEnumerate(job));
+  const char *forall=lambdaHookSelectEnumerate(job);
   // On prépare le format grace à la partie du forall
-  if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
-              forall,job->is_a_function?"":")")<=0)
+  if (sprintf(format,"%s",forall)<=0)
     nablaError("Could not patch format!");
   dbg("\n\t[lambdaHookDumpEnumerate] format='%s'",format);
   return strdup(format);

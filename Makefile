@@ -92,8 +92,8 @@ tests = upwindAP lulesh darcy ndspmhd mhydro glace2D #p1apwb1D_gosse heat aleph1
 procs = 1 #1 4
 types = gen run
 simds = std #std sse avx avx2 mic warp
-backends = kokkos lambda arcane okina # cuda 
-parallels = seq omp mpi #cilk smp
+backends = kokkos lambda arcane okina cuda 
+parallels = seq omp mpi smp #cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
 	(tput reset && cd $(BUILD_PATH)/tests && \

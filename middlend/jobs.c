@@ -278,22 +278,15 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
    
   // On regarde si on a un appel de fonction avec l'argument_expression_list
   if ((n->ruleid == rulenameToId("argument_expression_list"))
-      && (job->parse.function_call_arguments==false)){
-    nprintf(nabla, "/*function_call_arguments*/", NULL);
+      && (job->parse.function_call_arguments==false))
     job->parse.function_call_arguments=true;
-  }
 
     // On regarde de quel coté d'un assignment nous sommes
-  if (n->ruleid == rulenameToId("assignment_expression")){
-    if (n->children!=NULL){
-      if (n->children->next!=NULL){
-        if (n->children->next->ruleid == rulenameToId("assignment_operator")){
+  if (n->ruleid == rulenameToId("assignment_expression"))
+    if (n->children!=NULL)
+      if (n->children->next!=NULL)
+        if (n->children->next->ruleid == rulenameToId("assignment_operator"))
           job->parse.left_of_assignment_operator=true;
-          nprintf(nabla, "/*isLeft*/", NULL);
-        }
-      }
-    }
-  }
   
   // On cherche les doubles postfix_expression suivies d'un '[' pour gestion des variables
   // nablaVariables retourne
@@ -304,50 +297,35 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
     if (n->children->ruleid == rulenameToId("postfix_expression"))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '[')
-          if ((job->parse.isPostfixed=nMiddleVariables(nabla,n,cnfgem,job->parse.enum_enum))==1){
-            //nprintf(nabla, NULL, "/*isPostfixed=1, but returning*/",NULL);
+          if ((job->parse.isPostfixed=nMiddleVariables(nabla,n,cnfgem,job->parse.enum_enum))==1)
             return;
-          }
+          
 
   // On on va chercher les .[x|y|z]
   if (n->ruleid == rulenameToId("postfix_expression"))
     if (n->children->ruleid == rulenameToId("postfix_expression"))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '.')
-          if (n->children->next->next != NULL){
+          if (n->children->next->next != NULL)
             if ((n->children->next->next->token[0] == 'x') ||
                 (n->children->next->next->token[0] == 'y') ||
-                (n->children->next->next->token[0] == 'z')
-                ){
-              //nprintf(nabla, NULL, "/*.%c*/", n->children->next->next->token[0]);
-              //nprintf(nabla, "/*SettingIsDotXYZ*/", NULL);
+                (n->children->next->next->token[0] == 'z'))
               job->parse.isDotXYZ=n->children->next->next->token[0]-'w';
-              // On flush cette postfix_expression pour la masquer de la génération
-//#warning Should be a hook, but let it be for now
-//              if (nabla->backend==BACKEND_CUDA) n->children->next=NULL;
-              //nprintf(nabla, NULL, "/*nJob:isDotXYZ=%d*/", job->parse.isDotXYZ);
-            }
-          }
   
   // C'est le cas primary_expression suivi d'un nabla_item
   if ((n->ruleid == rulenameToId("primary_expression"))
-      && (n->children->ruleid == rulenameToId("nabla_item"))){
-    dbg("\n\t[nablaJobParse] C'est le cas primary_expression suivi d'un nabla_item");
+      && (n->children->ruleid == rulenameToId("nabla_item")))
     nprintf(nabla, "/*nabla_item*/", "\t%s",
             nabla->hook->forall->item(job,
                                       cnfgem,
                                       n->children->children->token[0],
                                       job->parse.enum_enum));
-  }
-  
+    
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
-  if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL)){
-    if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL){
-      dbg("\n\t[nablaJobParse] primaryExpression hits option");
+  if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL))
+    if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL)
       return;
-    }
-  }
-
+  
   // Dés qu'on a une primary_expression,
   // on teste pour voir si ce n'est pas un argument que l'on return
   // A confirmer si cela est toujours utile
@@ -361,7 +339,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
         return;
     }else{
        dbg("\n\t\t[nablaJobParse] ELSE primary_expression_to_return");
-   }
+    }
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
@@ -381,18 +359,10 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if (n->ruleid == rulenameToId("is_test")) nabla->hook->token->isTest(nabla,job,n,IS);
 
   // On fait le switch du token
-  //dbg("\n\t\t\t[nablaJobParse] On fait le switch du token!");
   nabla->hook->token->svvitch(n, job);
-  //dbg("\n\t[nablaJobParse] done!");
 
-  // On continue en s'enfonçant
-  if (n->children != NULL)
-    nMiddleJobParse(n->children, job);
-   
-  // On continue en allant à droite
-  if (n->next != NULL)
-    nMiddleJobParse(n->next, job);
-
+  if (n->children != NULL) nMiddleJobParse(n->children, job);
+  if (n->next != NULL) nMiddleJobParse(n->next, job);
 }
 
 
@@ -561,7 +531,7 @@ void nMiddleJobFill(nablaMain *nabla,
   nprintf(nabla, NULL, "\n\t%s",  cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
-  nprintf(nabla, NULL, "\n\t%s{", nabla->hook->forall->dump(job));// de l'ENUMERATE_
+  nprintf(nabla, NULL, "%s{", nabla->hook->forall->dump(job));// de l'ENUMERATE_
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
   nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
@@ -572,6 +542,7 @@ void nMiddleJobFill(nablaMain *nabla,
 
   if (!job->parse.got_a_return)
     nprintf(nabla, NULL, "}");// de l'ENUMERATE
+  
   nprintf(nabla, NULL, "\n}\n");// du job, on rajoute un \n pour les preproc possibles
   dbg("\n\t[nablaJobFill] done");
 }

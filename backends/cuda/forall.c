@@ -94,16 +94,16 @@ char* cuHookForAllDump(nablaJob *job){
   
   if (itm=='c' && grp==NULL && rgn==NULL) return "";//FOR_EACH_CELL_WARP(c)";
   if (itm=='c' && grp!=NULL && grp[0]=='o' && rgn==NULL) return "";
-  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER\n";
-  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER\n";
+  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='i') return "\n#warning Should be INNER\n";
+  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='o') return "\n#warning Should be OUTER\n";
   
   if (itm=='n' && grp==NULL && rgn==NULL) return "";//FOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "#warning Should be INNER\n";
-  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "#warning Should be OUTER\n";
+  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "\n#warning Should be INNER\n";
+  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "\n#warning Should be OUTER\n";
   if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "";
-  if (itm=='n' && grp!=NULL && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "#warning Should be INNER\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "#warning Should be OUTER\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='a' && rgn==NULL)   return "\n#warning Should be ALL\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "\n#warning Should be INNER\n";
+  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "\n#warning Should be OUTER\n";
   
   if (itm=='f' && grp==NULL && rgn==NULL) return "";//FOR_EACH_FACE_WARP(f)";
   if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "";
