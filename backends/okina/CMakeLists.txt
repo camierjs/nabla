@@ -13,7 +13,6 @@ set(BACKEND_OKINA_C okina.c
     header.c
     params.c
     reduce.c
-    source.c
     tokens.c)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})

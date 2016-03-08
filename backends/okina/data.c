@@ -44,92 +44,12 @@
 #include "nabla.tab.h"
 
 
-// ****************************************************************************
-// * Traitement des transformations '[', '(' & ''
-// ****************************************************************************
-void nOkinaHookVariablesTurnBracketsToParentheses(nablaMain* nabla,
-                                                  nablaJob *job,
-                                                  nablaVariable *var,
-                                                  char cnfg){
-  dbg("\n\t[actJobItemParse] primaryExpression hits variable");
-  if (  (cnfg=='c' && var->item[0]=='n')
-      ||(cnfg=='c' && var->item[0]=='f')
-      ||(cnfg=='n' && var->item[0]!='n')            
-      ||(cnfg=='f' && var->item[0]!='f')
-      ||(cnfg=='e' && var->item[0]!='e')
-      ||(cnfg=='m' && var->item[0]!='m')
-      ){
-    // Le test upwind a de 'if' qu'il ne faut pas "cell_node["'er
-    //if (!job->parse.selection_statement_in_compound_statement){
-      nprintf(nabla, "/*turnBracketsToParentheses@true*/", "/*%c %c*/", cnfg, var->item[0]);
-      //}else{
-      //  nprintf(nabla, "/*turnBracketsToParentheses+if@true*/", "cell_node[", cnfg, var->item[0]);
-      //}
-    job->parse.turnBracketsToParentheses=true;
-  }else{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) return;
-    if (job->parse.isDotXYZ==1) nprintf(nabla, "/*nOkinaHookTurnBracketsToParentheses_X*/", NULL);
-    if (job->parse.isDotXYZ==2) nprintf(nabla, "/*nOkinaHookTurnBracketsToParentheses_Y*/", NULL);
-    if (job->parse.isDotXYZ==3) nprintf(nabla, "/*nOkinaHookTurnBracketsToParentheses_Z*/", NULL);
-    job->parse.isDotXYZ=0;
-    job->parse.turnBracketsToParentheses=false;
-  }
-}
-
-
-// ****************************************************************************
-// * Traitement des tokens SYSTEM
-// ****************************************************************************
-void nOkinaHookVariablesSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
-  char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
-  char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
-  if (n->tokenid == LID)           nprintf(arc, "/*chs*/", "[%s->localId()]",itm);//asInteger
-  if (n->tokenid == SID)           nprintf(arc, "/*chs*/", "[subDomain()->subDomainId()]");
-  if (n->tokenid == THIS)          nprintf(arc, "/*chs THIS*/", NULL);
-  if (n->tokenid == NBNODE)        nprintf(arc, "/*chs NBNODE*/", NULL);
-  if (n->tokenid == NBCELL)        nprintf(arc, "/*chs NBCELL*/", NULL);
-  //if (n->tokenid == INODE)         nprintf(arc, "/*chs INODE*/", NULL);
-  if (n->tokenid == BOUNDARY_CELL) nprintf(arc, "/*chs BOUNDARY_CELL*/", NULL);
-  if (n->tokenid == FATAL)         nprintf(arc, "/*chs*/", "throw FatalErrorException");
-  if (n->tokenid == BACKCELL)      nprintf(arc, "/*chs*/", "[%s->backCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*chs*/", "[%s->backCell().uniqueId()]",itm);
-  if (n->tokenid == FRONTCELL)     nprintf(arc, "/*chs*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
-  if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*chs*/", "[%s->frontCell().uniqueId()]",itm);
-  if (n->tokenid == NEXTCELL)      nprintf(arc, NULL, ")");
-  if (n->tokenid == PREVCELL)      nprintf(arc, NULL, ")");
-  if (n->tokenid == NEXTNODE)      nprintf(arc, NULL, "[n])+nextNode))");
-  if (n->tokenid == PREVNODE)      nprintf(arc, NULL, "[n])-prevNode))");
-  if (n->tokenid == PREVLEFT)      nprintf(arc, "/*chs PREVLEFT*/", "[cn.previousLeft()]");
-  if (n->tokenid == PREVRIGHT)     nprintf(arc, "/*chs PREVRIGHT*/", "[cn.previousRight()]");
-  if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*chs NEXTLEFT*/", "[cn.nextLeft()]");
-  if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*chs NEXTRIGHT*/", "[cn.nextRight()]");
-  //error(!0,0,"Could not switch Okina Hook System!");
-}
-
 
 // ****************************************************************************
 // * Prépare le nom de la variable
 // ****************************************************************************
 static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
   nprintf(nabla, "/*tt2a*/", "%s_%s", var->item, var->name);
-}
-
-
-// ****************************************************************************
-// * Postfix d'un .x|y|z slon le isDotXYZ
-// ****************************************************************************
-static void setDotXYZ(nablaMain *nabla, nablaVariable *var, nablaJob *job){
-  switch (job->parse.isDotXYZ){
-  case(0): break;
-  case(1): {nprintf(nabla, "/*setDotX+flush*/", ""); break;}
-  case(2): {nprintf(nabla, "/*setDotY+flush*/", ""); break;}
-  case(3): {nprintf(nabla, "/*setDotZ+flush*/", ""); break;}
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[setDotXYZ] Switch isDotXYZ error\n"));
-  }
-  // Flush isDotXYZ
-  job->parse.isDotXYZ=0;
-  job->parse.turnBracketsToParentheses=false;
 }
 
 
@@ -192,7 +112,6 @@ static void nOkinaHookTurnTokenToVariableForCellJob(nablaMain *arc,
         nprintf(arc, "/*NodeVar 0*/", "[cell_node_");
     }
     if (isPostfixed==2 && enum_enum=='\0') nprintf(arc, "/*NodeVar 2&0*/", "[cell_node_");
-    if (job->parse.postfix_constant!=true) setDotXYZ(arc,var,job);
     break;
   }
   case ('f'):{

@@ -41,64 +41,8 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/okina/okina.h"
 
-
-// ****************************************************************************
-// * Backend OKINA PREFIX - Génération du 'main'
-// * look at c++/4.7/bits/ios_base.h for cout options
-// ****************************************************************************
-#define OKINA_MAIN_PREFIX "\n\n\n\
-// ******************************************************************************\n\
-// * Main d'Okina\n\
-// ******************************************************************************\n\
-int main(int argc, char *argv[]){\n\
-\tfloat cputime=0.0;\n\
-\tstruct timeval st, et;\n\
-\t//int iteration=1;\n\
-#ifdef __AVX__\n\
-\t//avxTest();\n\
-#endif\n\
-#if defined(__MIC__)||defined(__AVX512F__)\n\
-\t//micTestReal();\n\
-\t//micTestReal3();\n\
-#endif\n\
-\t//printf(\"%%d noeuds, %%d mailles\",NABLA_NB_NODES,NABLA_NB_CELLS);\n\
-\tnabla_ini_variables();\n\
-\tnabla_ini_node_coords();\n\
-\t// Initialisation de la précision du cout\n\
-\tstd::cout.precision(21);\n\
-\t//std::cout.setf(std::ios::floatfield);\n\
-\tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
-\t// Initialisation du temps et du deltaT\n\
-\tglobal_time=0.0;\n\
-\tglobal_iteration=1;\n\
-\tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e,\
- Global Iteration is #%%d\\33[m\",global_time,global_iteration);"
-// ****************************************************************************
-// * nOkinaMainPrefix
-// ****************************************************************************
-NABLA_STATUS nOkinaMainPrefix(nablaMain *nabla){
-  dbg("\n[nOkinaMainPrefix]");
-  fprintf(nabla->entity->src, OKINA_MAIN_PREFIX);
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
-// * Backend OKINA INIT - Génération du 'main'
-// ****************************************************************************
-#define OKINA_MAIN_PREINIT "\n\t//OKINA_MAIN_PREINIT"
-// ****************************************************************************
-// * nOkinaMainPreInit
-// ****************************************************************************
-NABLA_STATUS nOkinaMainPreInit(nablaMain *nabla){
-  dbg("\n[nOkinaMainPreInit]");
-  fprintf(nabla->entity->src, OKINA_MAIN_PREINIT);
-  return NABLA_OK;
-}
-
+extern char* nablaAlephHeader(nablaMain*);
 
 // ****************************************************************************
 // * nOkinaInitVariables
@@ -134,7 +78,7 @@ void nabla_ini_variables(void){");
       if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
     }else{
       nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
-      nprintf(nabla,NULL," %s_%s[n+8*c]=",var->item,var->name);
+      nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
@@ -147,44 +91,19 @@ void nabla_ini_variables(void){");
 
 
 // ****************************************************************************
-// * hookMainVarInitCall
-// ****************************************************************************
-NABLA_STATUS nOkinaMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[hookMainVarInitCall]");
-  nprintf(nabla,NULL,"\n\
-\t// ***************************************************************************\n\
-\t// * hookMainVarInitCall\n\
-\t// ***************************************************************************\n");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
 // * nOkinaMain
 // ****************************************************************************
 NABLA_STATUS nOkinaMainHLT(nablaMain *n){
   nablaVariable *var;
   nablaJob *entry_points;
-  int i,numParams,number_of_entry_points;
+  int i,number_of_entry_points;
   bool is_into_compute_loop=false;
   double last_when;
   
   dbg("\n[nOkinaMain]");
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
   entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
+  
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
    for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
      if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0)continue;
@@ -213,18 +132,10 @@ NABLA_STATUS nOkinaMainHLT(nablaMain *n){
             entry_points[i].whens[0],
             n->call->parallel->spawn(), 
             entry_points[i].name);
-    // Dump des arguments *ou pas*
-    if (entry_points[i].stdParamsNode != NULL){
-      //nprintf(n, "/*entry_points[i].stdParamsNode != NULL*/",NULL);
-      //numParams=dumpParameterTypeList(n->entity->src, entry_points[i].stdParamsNode);
-    }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
-    
-    // On s'autorise un endroit pour insérer des arguments
-    nOkinaArgsExtra(n, &entry_points[i], &numParams);
     
     // Et on dump les in et les out
     if (entry_points[i].nblParamsNode != NULL){
-      nOkinaArgsList(n,entry_points[i].nblParamsNode,&numParams);
+      //nOkinaArgsList(n,entry_points[i].nblParamsNode,&numParams);
     }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
 
     // Si on doit appeler des jobs depuis cette fonction @ée
@@ -242,40 +153,4 @@ NABLA_STATUS nOkinaMainHLT(nablaMain *n){
   }
   return NABLA_OK;
 }
-
-
-
-// ****************************************************************************
-// * Backend OKINA POSTFIX - Génération du 'main'
-// ****************************************************************************
-#define OKINA_MAIN_POSTINIT "\n\t//OKINA_MAIN_POSTINIT"
-NABLA_STATUS nOkinaMainPostInit(nablaMain *nabla){
-  dbg("\n[nOkinaMainPostInit]");
-  fprintf(nabla->entity->src, OKINA_MAIN_POSTINIT);
-  return NABLA_OK;
-}
-
-
-// ****************************************************************************
-// * Backend OKINA POSTFIX - Génération du 'main'
-// * \n\tprintf(\"\\n\\t\\33[7m[#%%04d]\\33[m time=%%e, delta_t=%%e\", iteration+=1, global_time, *(double*)&global_del
-// ****************************************************************************
-#define OKINA_MAIN_POSTFIX "\n//OKINA_MAIN_POSTFIX\
-\n\tglobal_time+=*(double*)&global_deltat[0];\
-\n\tglobal_iteration+=1;\
-\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
-\n\t}\
-\tgettimeofday(&et, NULL);\n\
-\tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\",\
- global_iteration-1, cputime/1000.0);\n\n}\n"
-NABLA_STATUS nOkinaMainPostfix(nablaMain *nabla){
-  dbg("\n[nOkinaMainPostfix] OKINA_MAIN_POSTFIX");
-  fprintf(nabla->entity->src, OKINA_MAIN_POSTFIX);
-  //dbg("\n[nOkinaMainPostfix] okinaSourceMesh");
-  //nOkinaMainSourceMesh(nabla);
-  //dbg("\n[nOkinaMainPostfix] NABLA_OK");
-  return NABLA_OK;
-}
-
 

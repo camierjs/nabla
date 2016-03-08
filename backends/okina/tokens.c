@@ -44,31 +44,6 @@
 #include "nabla.tab.h"
 #include "backends/okina/call/call.h"
 
-// ****************************************************************************
-// * okinaHookIsTest
-// ****************************************************************************
-void okinaHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){}
-
-
-// ****************************************************************************
-// * nOkinaHookTokenPrefix
-// ****************************************************************************
-char* nOkinaHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("");}
-
-
-// ****************************************************************************
-// * nOkinaHookTokenPostfix
-// ****************************************************************************
-char* nOkinaHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
-
-
-// ****************************************************************************
-// * nOkinaHookTurnTokenToOption
-// ****************************************************************************
-void nOkinaHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
-  nprintf(nabla, "/*tt2o*/", "%s", opt->name);
-}
-
 
 // ****************************************************************************
 // * FORALL token switch

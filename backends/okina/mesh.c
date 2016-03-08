@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "backends/x86/dump/dump.h"
 #include "backends/okina/call/call.h"
 #include "backends/okina/okina.h"
 
@@ -108,8 +109,12 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS);\n\
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
 const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS);\n\
-const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
-  nOkinaMesh1DConnectivity(nabla);
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
+\n\
+const int NABLA_NB_FACES      = 0;\n\
+\n\
+int NABLA_NB_PARTICLES;\n\
+");
 }
 
 
@@ -152,6 +157,16 @@ const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
 \n\
+const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Z_INNER = (Z_EDGE_ELEMS-1)*X_EDGE_ELEMS*Y_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
+const int NABLA_NB_FACES_Z_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;\n\
+const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_Z_INNER+NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\
+const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER+NABLA_NB_FACES_Z_OUTER;\n\
+const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\
+\n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
 const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\
@@ -160,19 +175,11 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*N
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
 const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
-const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);");
-  nOkinaMesh3DConnectivity(nabla);
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\
+\n\
+int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n");
 }
 
-
-
-// ****************************************************************************
-// * Backend OKINA - Allocation de la connectivité du maillage
-// ****************************************************************************
-void nOkinaMeshPrefix(nablaMain *nabla){
-  dbg("\n[nOkinaMainMeshPrefix]");
-  fprintf(nabla->entity->src,"//[nOkinaMainMeshPrefix]\n");
-}
 
 
 // ****************************************************************************
@@ -187,22 +194,13 @@ void nOkinaMeshCore(nablaMain *nabla){
 // ********************************************************\n");
   if (isWithLibrary(nabla,with_real)){
     nOkinaMesh1D(nabla);
-    //nOkinaMesh1DConnectivity(nabla);
-  }/*else if (isWithLibrary(nabla,with_real2)){
-    hookMesh2D(nabla);
-    hookMesh2DConnectivity(nabla);
-    }*/else{
+    nOkinaMesh1DConnectivity(nabla);
+  }else if (isWithLibrary(nabla,with_real2)){
+    //xHookMesh2D(nabla);
+    //xHookMesh2DConnectivity(nabla);
+  }else{
     nOkinaMesh3D(nabla);
-    //nOkinaMesh3DConnectivity(nabla);
+    nOkinaMesh3DConnectivity(nabla);
   }
   nOkinaMainSourceMesh(nabla);
-}
-
-
-// ****************************************************************************
-// * nOkinaMainMeshPostfix
-// ****************************************************************************
-void nOkinaMeshPostfix(nablaMain *nabla){
-  dbg("\n[nOkinaMainMeshPostfix]");
-  //fprintf(nabla->entity->src,"");
 }

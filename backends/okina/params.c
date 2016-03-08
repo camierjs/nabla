@@ -98,14 +98,6 @@ void nOkinaHookParamsDumpList(nablaMain *nabla,
 
 
 // ****************************************************************************
-// * okinaAddExtraConnectivitiesParameters
-// ****************************************************************************
-/*static void nOkinaAddExtraConnectivitiesParameters(nablaMain *nabla, int *numParams){
-  return;
-  }*/
-
-
-// ****************************************************************************
 // * Dump d'extra paramètres
 // ****************************************************************************
 void nOkinaHookParamsAddExtra(nablaMain *nabla, nablaJob *job, int *numParams){
@@ -136,9 +128,3 @@ void nOkinaHookParamsAddExtra(nablaMain *nabla, nablaJob *job, int *numParams){
     nMiddleParamsAddExtra(nabla, numParams);
   //nOkinaAddExtraConnectivitiesParameters(nabla, numParams);
 }
-
-void nOkinaHookParamsAddExtraDFS(nablaMain *nabla, nablaJob *job, int *numParams){}
-void nOkinaHookParamsDumpListDFS(nablaMain *nabla,
-                                 nablaJob *job,
-                                 astNode *n,
-                                 int *numParams){}

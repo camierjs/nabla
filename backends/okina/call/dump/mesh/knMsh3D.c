@@ -274,3 +274,11 @@ __attribute__((unused)) static void verifNextPrev(void){
         cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
   }
 }
+
+
+// ****************************************************************************
+// * nabla_ini_connectivity
+// ****************************************************************************
+static void nabla_ini_connectivity(void){
+  nabla_ini_node_coords();
+}

@@ -83,7 +83,6 @@ static void nOkinaHeaderSimd(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal3_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicTernary_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicGather_h));
@@ -104,7 +103,6 @@ static void nOkinaHeaderSimd(nablaMain *nabla){
   }else if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal3_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseTernary_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseGather_h));
@@ -113,7 +111,6 @@ static void nOkinaHeaderSimd(nablaMain *nabla){
   }else{
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdReal_h));
-    //if ((nabla->colors&BACKEND_COLOR_OKINA_SOA)!=BACKEND_COLOR_OKINA_SOA)
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdReal3_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdTernary_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdGather_h));
@@ -147,62 +144,6 @@ void nOkinaHeaderDump(nablaMain *nabla){
   nOkinaHeaderMth(nabla);
 }
 
-// ****************************************************************************
-// * nOkinaHeaderOpen
-// ****************************************************************************
-void nOkinaHeaderOpen(nablaMain *nabla){
-  char hdrFileName[NABLA_MAX_FILE_NAME];
-  // Ouverture du fichier header
-  sprintf(hdrFileName, "%s.h", nabla->name);
-  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
-}
-
-
-// ****************************************************************************
-// * nOkinaEnumDefine
-// ****************************************************************************
-void nOkinaHeaderDefineEnumerates(nablaMain *nabla){
-  const char *parallel_prefix_for_loop=nabla->call->parallel->loop(nabla);
-  fprintf(nabla->entity->hdr,"\n\n\
-/*********************************************************\n\
- * Forward enumerates\n\
- *********************************************************/\n\
-#define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
-#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
-\n\
-#define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
-#define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
-\n\
-#define FOR_EACH_CELL_WARP_NODE(n)\\\n\
-  %sfor(int cn=WARP_SIZE*c+WARP_SIZE-1;cn>=WARP_SIZE*c;--cn)\\\n\
-    for(int n=NABLA_NODE_PER_CELL-1;n>=0;--n)\n\
-\n\
-#define FOR_EACH_NODE(n) /*%s*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
-#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
-\n\
-#define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
-\n\
-#define FOR_EACH_NODE_WARP_CELL(c)\\\n\
-    for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n",
-          parallel_prefix_for_loop, // FOR_EACH_CELL
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
-          parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
-          parallel_prefix_for_loop, // FOR_EACH_NODE
-          parallel_prefix_for_loop  // FOR_EACH_NODE_WARP
-          );
-}
-
-
-// ****************************************************************************
-// * nOkinaHeaderPrefix
-// ****************************************************************************
-void nOkinaHeaderPrefix(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,
-          "#ifndef __OKINA_%s_H__\n#define __OKINA_%s_H__",
-          nabla->entity->name,nabla->entity->name);
-}
 
 
 // ****************************************************************************
@@ -228,29 +169,12 @@ void nOkinaHeaderIncludes(nablaMain *nabla){
 #include <sstream>\n\
 #include <fstream>\n\
 using namespace std;\n\
-%s // fromnabla->parallel->includes()\n",
+int hlt_level;\n\
+bool *hlt_exit;\n\
+%s // from nabla->parallel->includes()\n",
           nabla->call->simd->includes(),
           nabla->call->parallel->includes());
   nMiddleDefines(nabla,nabla->call->header->defines);
   nMiddleTypedefs(nabla,nabla->call->header->typedefs);
   nMiddleForwards(nabla,nabla->call->header->forwards);
-}
-
-
-
-
-// ****************************************************************************
-// * okinaInclude
-// ****************************************************************************
-void nOkinaHeaderInclude(nablaMain *nabla){
-  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
-}
-
-
-
-// ****************************************************************************
-// * nOkinaHeaderPostfix
-// ****************************************************************************
-void nOkinaHeaderPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n#endif // __OKINA_%s_H__\n",nabla->entity->name);
 }

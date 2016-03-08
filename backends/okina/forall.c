@@ -47,60 +47,6 @@
 
 
 // ****************************************************************************
-// * Fonction prefix à l'ENUMERATE_*
-// ****************************************************************************
-char* nOkinaHookEnumeratePrefix(nablaJob *job){
-  char prefix[NABLA_MAX_FILE_NAME];
-  //const nablaMain* nabla=job->entity->main;
-              
-  if (job->parse.returnFromArgument){
-    const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-    if (sprintf(prefix,"dbgFuncIn();\n\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = %s;",var,var)<=0){
-      nablaError("Error in nOkinaHookPrefixEnumerate!");
-    }
-  }else{
-    if (sprintf(prefix,"dbgFuncIn();")<=0)
-      nablaError("Error in nOkinaHookPrefixEnumerate!");
-  }
-      
-  //const register char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //nprintf(job->entity->main, "\n\t/*nOkinaHookPrefixEnumerate*/", "/*itm=%c*/", itm);
-  return strdup(prefix);
-}
-
-
-// ****************************************************************************
-// * Fonction produisant l'ENUMERATE_* avec XYZ
-// ****************************************************************************
-char* nOkinaHookEnumerateDumpXYZ(nablaJob *job){
-  //char *xyz=job->xyz;// Direction
-  //nprintf(job->entity->main, "\n\t/*nOkinaHookDumpEnumerateXYZ*/", "/*xyz=%s, drctn=%s*/", xyz, job->drctn);
-  return "// nOkinaHookDumpEnumerateXYZ has xyz drctn";
-}
-
-
-// ****************************************************************************
-// *
-// ****************************************************************************
-/*static char * okinaReturnVariableNameForOpenMP(nablaJob *job){
-  char str[NABLA_MAX_FILE_NAME];
-  if (job->is_a_function) return "";
-  if (sprintf(str,"%s_per_thread",
-              dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
-    error(!0,0,"Could not patch format!");
-  return strdup(str);
-  }*/
-static char* okinaReturnVariableNameForOpenMPWitoutPerThread(nablaJob *job){
-  char str[NABLA_MAX_FILE_NAME];
-  if (job->is_a_function) return "";
-  if (sprintf(str,"%s",
-              dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator")))<=0)
-    nablaError("Could not patch format!");
-  return strdup(str);
-}
-
-
-// ****************************************************************************
 // * Fonction produisant l'ENUMERATE_*
 // ****************************************************************************
 static char* okinaSelectEnumerate(nablaJob *job){
@@ -133,9 +79,9 @@ static char* okinaSelectEnumerate(nablaJob *job){
 
 
 // ****************************************************************************
-// * nOkinaHookDumpEnumerate
+// * oHookForAllDump
 // ****************************************************************************
-char* nOkinaHookEnumerateDump(nablaJob *job){
+char* oHookForAllDump(nablaJob *job){
   const char *forall=strdup(okinaSelectEnumerate(job));
   const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
   char format[NABLA_MAX_FILE_NAME];
@@ -143,56 +89,18 @@ char* nOkinaHookEnumerateDump(nablaJob *job){
   dbg("\n\t[nOkinaHookDumpEnumerate] Preparing:");
   dbg("\n\t[nOkinaHookDumpEnumerate]\t\tforall=%s",forall);
   dbg("\n\t[nOkinaHookDumpEnumerate]\t\twarping=%s",warping);
-
-  // On prépare le format grace à la partie du forall,
-  // on rajoute l'extension suivant si on a une returnVariable
-  if (job->parse.returnFromArgument){
-    const char *ompOkinaLocal=job->parse.returnFromArgument?"_SHARED":"";
-    //const char *ompOkinaReturnVariable=okinaReturnVariableNameForOpenMP(job);
-    const char *ompOkinaReturnVariableWitoutPerThread=okinaReturnVariableNameForOpenMPWitoutPerThread(job);
-    //const char *ompOkinaLocalVariableComa=",";//job->parse.returnFromArgument?",":"";
-    //const char *ompOkinaLocalVariableName=job->parse.returnFromArgument?ompOkinaReturnVariable:"";
-    if (sprintf(format,"%s%%s%%s)",forall)<=0)
-      nablaError("Could not patch format!");
-    if (sprintf(str,format,    // FOR_EACH_XXX%s%s(
-                warping,       // _WARP or not
-                ompOkinaLocal, // _SHARED or not
-                ",",           //ompOkinaLocalVariableComa,
-                ompOkinaReturnVariableWitoutPerThread)<=0)
-      nablaError("Could not patch warping within ENUMERATE!");
-  }else{
-    dbg("\n\t[nOkinaHookDumpEnumerate] No returnFromArgument");
-    if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
-                forall,
-                job->is_a_function?"":")")<=0)
-      nablaError("Could not patch format!");
-    dbg("\n[nOkinaHookDumpEnumerate] format=%s",format);
-    if (sprintf(str,format,
-                warping,
-                "",
-                "")<=0)
-      nablaError("Could not patch warping within ENUMERATE!");
-  }
+  dbg("\n\t[nOkinaHookDumpEnumerate] No returnFromArgument");
+  if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
+              forall,
+              job->is_a_function?"":")")<=0)
+    nablaError("Could not patch format!");
+  dbg("\n[nOkinaHookDumpEnumerate] format=%s",format);
+  if (sprintf(str,format,
+              warping,
+              "",
+              "")<=0)
+    nablaError("Could not patch warping within ENUMERATE!");
   return strdup(str);
-}
-
-
-// ****************************************************************************
-// * Traitement des tokens NABLA ITEMS
-// ****************************************************************************
-char* nOkinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum){
-  if (job=='c' && enum_enum=='\0' && itm=='c') return "/*chi-c0c*/c";
-  if (job=='c' && enum_enum=='\0' && itm=='n') return "/*chi-c0n*/c->";
-  if (job=='c' && enum_enum=='f'  && itm=='n') return "/*chi-cfn*/f->";
-  if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
-  if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
-  if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/f->";
-  if (job=='f' && enum_enum=='\0' && itm=='c') return "/*chi-f0c*/f->";
-  nablaError("Could not switch in nOkinaHookItem!");
-  return NULL;
 }
 
 
@@ -200,19 +108,5 @@ char* nOkinaHookItem(nablaJob *j, const char job, const char itm, char enum_enum
 // * Fonction postfix à l'ENUMERATE_*
 // ****************************************************************************
 char* nOkinaHookEnumeratePostfix(nablaJob *job){
-  if (job->is_a_function) return "";
-  if (job->item[0]=='\0') return "// job nOkinaHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return gather(job);
-  if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
-\t\tconst int __attribute__((unused)) max_x = NABLA_NB_CELLS_X_AXIS;\n\
-\t\tconst int __attribute__((unused)) max_y = NABLA_NB_CELLS_Y_AXIS;\n\
-\t\tconst int __attribute__((unused)) max_z = NABLA_NB_CELLS_Z_AXIS;\n\
-\t\tconst int delta_x = NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
-\t\tconst int delta_y = 1;\n\
-\t\tconst int delta_z = NABLA_NB_CELLS_Y_AXIS;\n\
-\t\tconst int delta = (direction==MD_DirX)?delta_x:(direction==MD_DirY)?delta_y:delta_z;\n\
-\t\tconst int __attribute__((unused)) prevCell=delta;\n\
-\t\tconst int __attribute__((unused)) nextCell=delta;\n";
-  nablaError("Could not switch in nOkinaHookPostfixEnumerate!");
-  return NULL;
+  return gather(job);
 }

@@ -91,7 +91,7 @@ tests = upwindAP lulesh darcy ndspmhd mhydro glace2D #p1apwb1D_gosse heat aleph1
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 #1 4
 types = gen run
-simds = std #std sse avx avx2 mic warp
+simds = std sse #avx avx2 mic warp
 backends = kokkos lambda arcane okina cuda 
 parallels = seq omp mpi smp #cilk
 define CTEST_template =

@@ -47,10 +47,10 @@
 // * enums pour les différents dumps à faire: déclaration, malloc et free
 // ****************************************************************************
 typedef enum {
-  OKINA_VARIABLES_DECLARATION=0,
-  OKINA_VARIABLES_MALLOC,
-  OKINA_VARIABLES_FREE
-} OKINA_VARIABLES_SWITCH;
+  VARIABLES_DECLARATION=0,
+  VARIABLES_MALLOC,
+  VARIABLES_FREE
+} VARIABLES_SWITCH;
 
 
 // ****************************************************************************
@@ -63,9 +63,11 @@ typedef NABLA_STATUS (*pFunDump)(nablaMain*,nablaVariable*,char*,char*);
 // * Upcase de la chaîne donnée en argument
 // ****************************************************************************
 static inline char *itemUPCASE(const char *itm){
-  if (itm[0]=='c') return "CELLS";
-  if (itm[0]=='n') return "NODES";
-  if (itm[0]=='g') return "GLOBAL";
+  if (itm[0]=='c') return "NABLA_NB_CELLS";
+  if (itm[0]=='n') return "NABLA_NB_NODES";
+  if (itm[0]=='f') return "NABLA_NB_FACES";
+  if (itm[0]=='g') return "NABLA_NB_GLOBAL";
+  if (itm[0]=='p') return "NABLA_NB_PARTICLES";
   dbg("\n\t[itemUPCASE] itm=%s", itm);
   exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;
@@ -75,11 +77,20 @@ static inline char *itemUPCASE(const char *itm){
 // ****************************************************************************
 // * Dump d'un MALLOC d'une variables dans le fichier source
 // ****************************************************************************
-static NABLA_STATUS okinaGenerateSingleVariableMalloc(nablaMain *nabla,
-                                                      nablaVariable *var,
-                                                      char *postfix,
-                                                      char *depth){
-  nprintf(nabla,"\n\t// okinaGenerateSingleVariableMalloc",NULL);
+static NABLA_STATUS generateSingleVariableMalloc(nablaMain *nabla,
+                                                 nablaVariable *var,
+                                                 char *postfix,
+                                                 char *depth){
+  // Pour l'instant, on ne teste que sur les variables particulaires
+  /*if (var->item[0]!='p') return NABLA_OK;
+  nprintf(nabla,NULL,"\n\t// generateSingleVariableMalloc %s",var->name);
+  if (var->dim==0)
+    fprintf(nabla->entity->src,"\n\t%s_%s=(%s*)malloc(sizeof(%s)*%s);",
+            var->item,
+            var->name,
+            var->type,
+            var->type,
+            itemUPCASE(var->item));*/
   return NABLA_OK;
 }
 
@@ -87,11 +98,15 @@ static NABLA_STATUS okinaGenerateSingleVariableMalloc(nablaMain *nabla,
 // ****************************************************************************
 // * Dump d'un FREE d'une variables dans le fichier source
 // ****************************************************************************
-static NABLA_STATUS okinaGenerateSingleVariableFree(nablaMain *nabla,
+static NABLA_STATUS generateSingleVariableFree(nablaMain *nabla,
                                                     nablaVariable *var,
                                                     char *postfix,
                                                     char *depth){  
-  nprintf(nabla,"\n\t// okinaGenerateSingleVariableFree",NULL);
+  /*if (var->item[0]!='p') return NABLA_OK;
+  nprintf(nabla,NULL,"\n\t// generateSingleVariableFree %s",var->name);
+  if (var->dim==0)
+    fprintf(nabla->entity->src,"\n\tfree(%s_%s);",
+    var->item, var->name);*/
   return NABLA_OK;
 }
 
@@ -99,11 +114,10 @@ static NABLA_STATUS okinaGenerateSingleVariableFree(nablaMain *nabla,
 // ****************************************************************************
 // * Dump d'une variables dans le fichier
 // ****************************************************************************
-static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
-                                                nablaVariable *var,
-                                                char *postfix,
-                                                char *depth){  
-  nprintf(nabla,"\n\t// okinaGenerateSingleVariable",NULL);
+static NABLA_STATUS generateSingleVariable(nablaMain *nabla,
+                                           nablaVariable *var,
+                                           char *postfix,
+                                           char *depth){  
   if (strncmp(var->name,"coord",5)==0){
     if ((nabla->entity->libraries&(1<<with_real))!=0){
       fprintf(nabla->entity->hdr,
@@ -113,7 +127,7 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
   }
   if (var->dim==0)
     fprintf(nabla->entity->hdr,
-            "\n%s %s_%s%s%s[NABLA_NB_%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));",
+            "\n%s %s_%s%s%s[%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type,
             var->item,
             var->name,
@@ -121,7 +135,7 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
             depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*NABLA_NB_%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));;",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*%s_WARP] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type,
             var->item,
             var->name,
@@ -135,11 +149,11 @@ static NABLA_STATUS okinaGenerateSingleVariable(nablaMain *nabla,
 // ****************************************************************************
 // * Retourne quelle fonction selon l'enum donné
 // ****************************************************************************
-static pFunDump witch2func(OKINA_VARIABLES_SWITCH witch){
+static pFunDump witch2func(VARIABLES_SWITCH witch){
   switch (witch){
-  case (OKINA_VARIABLES_DECLARATION): return okinaGenerateSingleVariable;
-  case (OKINA_VARIABLES_MALLOC): return okinaGenerateSingleVariableMalloc;
-  case (OKINA_VARIABLES_FREE): return okinaGenerateSingleVariableFree;
+  case (VARIABLES_DECLARATION): return generateSingleVariable;
+  case (VARIABLES_MALLOC): return generateSingleVariableMalloc;
+  case (VARIABLES_FREE): return generateSingleVariableFree;
   default: exit(NABLA_ERROR|fprintf(stderr, "\n[witch2switch] Error with witch\n"));
   }
 }
@@ -149,11 +163,8 @@ static pFunDump witch2func(OKINA_VARIABLES_SWITCH witch){
 // * Dump d'une variables de dimension 1
 // ****************************************************************************
 static NABLA_STATUS okinaGenericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
-  //int i;
-  //char depth[]="[0]";
   dbg("\n[okinaGenerateVariableDim1] variable %s", var->name);
-  //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1) fDump(nabla, var, NULL, depth);
-  fDump(nabla, var, NULL, "/*8*/");
+  fDump(nabla, var, NULL, "");
   return NABLA_OK;
 }
 
@@ -167,9 +178,6 @@ static NABLA_STATUS okinaGenericVariableDim0(nablaMain *nabla, nablaVariable *va
     return fDump(nabla, var, NULL, NULL);
   else
     return fDump(nabla, var, NULL, NULL);
-  /*return fDump(nabla, var, "_x", NULL)|
-           fDump(nabla, var, "_y", NULL)|
-           fDump(nabla, var, "_z", NULL);*/
   return NABLA_ERROR;
 }
 
@@ -188,18 +196,6 @@ static NABLA_STATUS okinaGenericVariable(nablaMain *nabla, nablaVariable *var, p
   exit(NABLA_ERROR|fprintf(stderr, "\n[okinaGenericVariable] Error with given variable\n"));
 }
 
-
-// ****************************************************************************
-// * Initialisation des besoins vis-à-vis des variables (globales)
-// ****************************************************************************
-void nOkinaVariablesInit(nablaMain *nabla){
-  nablaVariable *iteration = nMiddleVariableNew(nabla);
-  nMiddleVariableAdd(nabla, iteration);
-  iteration->axl_it=false;
-  iteration->item=strdup("global");
-  iteration->type=strdup("integer");
-  iteration->name=strdup("iteration");
-}
 
 
 // ****************************************************************************
@@ -241,7 +237,7 @@ void nOkinaVariablesPrefix(nablaMain *nabla){
 // * Variables\n\
 // ********************************************************");
   for( nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
-    if (okinaGenericVariable(nabla, var, witch2func(OKINA_VARIABLES_DECLARATION))==NABLA_ERROR)
+    if (okinaGenericVariable(nabla, var, witch2func(VARIABLES_DECLARATION))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[okinaVariables] Error with variable %s\n", var->name));
   }
   okinaOptions(nabla);
@@ -258,7 +254,7 @@ void nOkinaVariablesMalloc(nablaMain *nabla){
 // * Malloc Variables\n\
 // ********************************************************");
   for( nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
-    if (okinaGenericVariable(nabla, var, witch2func(OKINA_VARIABLES_MALLOC))==NABLA_ERROR)
+    if (okinaGenericVariable(nabla, var, witch2func(VARIABLES_MALLOC))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[okinaVariables] Error with variable %s\n", var->name));
   }
 }
@@ -274,28 +270,7 @@ void nOkinaVariablesFree(nablaMain *nabla){
 // ********************************************************\n\
 void nabla_free_variables(void){");
   for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next)
-    if (okinaGenericVariable(nabla, var, witch2func(OKINA_VARIABLES_FREE))==NABLA_ERROR)
+    if (okinaGenericVariable(nabla, var, witch2func(VARIABLES_FREE))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[okinaVariables] Error with variable %s\n", var->name));
   fprintf(nabla->entity->src,"\n}\n");
 }
-
-
-// ****************************************************************************
-// * nOkinaMainVarInitKernel
-// ****************************************************************************
-/*NABLA_STATUS nOkinaInitVariableDbg(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[nOkinaInitVariableDbg]");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
-  return NABLA_OK;
-  }*/

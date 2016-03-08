@@ -79,7 +79,6 @@ void nOkinaVariablesFree(nablaMain*);
 //void okinaVariablesPostfix(nablaMain*);
 
 // nOkinaHeader
-void nOkinaHeaderInclude(nablaMain *nabla);
 void nOkinaHeaderPrefix(nablaMain *nabla);
 void nOkinaHeaderIncludes(nablaMain *nabla);
 void nOkinaHeaderSimd(nablaMain *nabla);
@@ -124,7 +123,7 @@ void nOkinaHookDiffraction(nablaMain*, nablaJob*, astNode**);
 // hooks/nOkinaHookEnumerate
 char* nOkinaHookEnumeratePrefix(nablaJob*);
 char* nOkinaHookEnumerateDumpXYZ(nablaJob*);
-char* nOkinaHookEnumerateDump(nablaJob*);
+char* oHookForAllDump(nablaJob*);
 char* nOkinaHookEnumeratePostfix(nablaJob*);
 
 

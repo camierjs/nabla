@@ -56,6 +56,8 @@ const nWhatWith headerTypedef[]={
 };
 
 const nWhatWith headerDefines[]={
+  {"WARP_SIZE", "1"},
+  {"WARP_ALIGN", "8"}, 
   {"NABLA_NB_GLOBAL","1"},
   {"Bool", "bool"},
   {"Integer", "int"},
@@ -104,7 +106,7 @@ const nWhatWith headerDefines[]={
   {"fatal(a,b)","exit(-1)"},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},
-  {"GlobalIteration", "global_iteration[0]"},
+  {"GlobalIteration", "global_iteration"},
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
@@ -200,7 +202,7 @@ void xHookDfsForCalls(nablaMain *nabla,
 // * Dump du préfix des points d'entrées: inline ou pas
 // ****************************************************************************
 char* xHookEntryPointPrefix(nablaMain *nabla,
-                                 nablaJob *entry_point){
+                            nablaJob *entry_point){
   return "static inline";
 }
 
@@ -211,7 +213,7 @@ void xHookExit(struct nablaMainStruct *nabla, nablaJob *job){
     nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
 void xHookTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time[0]");
+  nprintf(nabla, "/*TIME*/", "global_time");
 }
 void xHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");

@@ -42,10 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-
-/***************************************************************************** 
- * enums pour les différents dumps à faire: déclaration, malloc et free
- *****************************************************************************/
+// ****************************************************************************
+// * enums pour les différents dumps à faire: déclaration, malloc et free
+// ****************************************************************************
 typedef enum {
   VARIABLES_DECLARATION=0,
   VARIABLES_MALLOC,
@@ -53,8 +52,10 @@ typedef enum {
 } VARIABLES_SWITCH;
 
 
-// Pointeur de fonction vers une qui dump ce que l'on souhaite
-typedef NABLA_STATUS (*pFunDump)(nablaMain *nabla, nablaVariable *var, char *postfix, char *depth);
+// ****************************************************************************
+// * Pointeur de fonction vers une qui dump ce que l'on souhaite
+// ****************************************************************************
+typedef NABLA_STATUS (*pFunDump)(nablaMain*,nablaVariable*,char*,char*);
 
 
 // ****************************************************************************
@@ -124,18 +125,18 @@ static NABLA_STATUS generateSingleVariable(nablaMain *nabla,
   if (strncmp(var->name,"coord",5)==0){
     if (dim2D){
       fprintf(nabla->entity->hdr,
-              "\nreal3 node_coord[NABLA_NB_NODES];");
+              "\nreal3 node_coord[NABLA_NB_NODES] __attribute__ ((aligned(WARP_ALIGN)));");
       return NABLA_OK;
     }
     if (dim1D){
       fprintf(nabla->entity->hdr,
-              "\nreal/*3*/ node_coord[NABLA_NB_NODES];");
+              "\nreal/*3*/ node_coord[NABLA_NB_NODES] __attribute__ ((aligned(WARP_ALIGN)));");
       return NABLA_OK;
     }
   }
   // Dans le cas d'une particule, on test le malloc
   if (var->item[0]=='p'){
-    fprintf(nabla->entity->hdr,"\n%s *%s_%s%s%s;",
+    fprintf(nabla->entity->hdr,"\n%s *%s_%s%s%s __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type, var->item, var->name, postfix?postfix:"", depth?depth:"");
     return NABLA_OK;
   }
@@ -145,14 +146,14 @@ static NABLA_STATUS generateSingleVariable(nablaMain *nabla,
     "real3/*2D->3D*/":
     var->type;
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[%s];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s%s[%s] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":type,
             var->item, var->name,
             postfix?postfix:"",
             depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*%s];",
+    fprintf(nabla->entity->hdr,"\n%s %s_%s%s[%ld*%s] __attribute__ ((aligned(WARP_ALIGN)));",
             postfix?"real":var->type,
             var->item,var->name,
             postfix?postfix:"",
@@ -179,11 +180,7 @@ static pFunDump witch2func(VARIABLES_SWITCH witch){
  * Dump d'une variables de dimension 1
  *****************************************************************************/
 static NABLA_STATUS genericVariableDim1(nablaMain *nabla, nablaVariable *var, pFunDump fDump){
-  //int i;
-  //char depth[]="[0]";
-  dbg("\n[generateVariableDim1] variable %s", var->name);
-  //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1) fDump(nabla, var, NULL, depth);
-  fDump(nabla, var, NULL, "/*NABLA_NODE_PER_CELL*/");
+  fDump(nabla, var, NULL, "");
   return NABLA_OK;
 }
 
@@ -255,8 +252,8 @@ static void globals(nablaMain *nabla){
 // * Temps de la simulation\n\
 // ********************************************************\n\
 Real global_deltat[1];\n\
-int global_iteration[1];\n\
-double global_time[1];\n");
+int global_iteration;\n\
+double global_time;\n");
 }
 
 
@@ -273,8 +270,6 @@ void xHookVariablesPrefix(nablaMain *nabla){
   for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
     if (genericVariable(nabla, var, witch2func(VARIABLES_DECLARATION))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
-    //if (genericVariable(nabla, var, witch2func(VARIABLES_MALLOC))==NABLA_ERROR)
-    //exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
   }
   options(nabla);
   globals(nabla);

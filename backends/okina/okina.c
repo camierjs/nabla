@@ -43,6 +43,7 @@
 #include "nabla.h"
 #include "backends/okina/call/call.h"
 #include "backends/okina/okina.h"
+#include "backends/x86/hook/hook.h"
 
 
 // ****************************************************************************
@@ -128,68 +129,76 @@ backendCalls okinaCalls={
 // * HOOKS
 // ****************************************************************************
 const hookForAll forall={
-  nOkinaHookEnumeratePrefix,
-  nOkinaHookEnumerateDump,
-  nOkinaHookItem,
+  NULL,
+  oHookForAllDump,
+  xHookForAllItem,
   nOkinaHookEnumeratePostfix
 };
 
 const hookToken token={
-  nOkinaHookTokenPrefix,
-  nOkinaHookTokenSwitch,
+  NULL,
+  nOkinaHookTokenSwitch,//xHookSwitchToken,
   nOkinaHookVariablesTurnTokenToVariable,
-  nOkinaHookTurnTokenToOption,
-  nOkinaHookVariablesSystem,
-  nOkinaHookIteration,
-  nOkinaHookExit,
+  xHookTurnTokenToOption,
+  xHookSystem,//nOkinaHookVariablesSystem,
+  xHookIteration,
+  xHookExit,
   nOkinaHookTime,
-  nOkinaHookFatal,
-  nOkinaHookVariablesTurnBracketsToParentheses,
-  okinaHookIsTest,
-  nOkinaHookTokenPostfix
+  xHookFatal,
+  xHookTurnBracketsToParentheses,
+  xHookIsTest,
+  NULL
 };
 
 const hookGrammar gram={
-  NULL,//nOkinaHookFunction,
-  nOkinaHookJob,
+  NULL,
+  NULL,
   nOkinaHookReduction,
-  nOkinaHookPrimaryExpressionToReturn,
-  nOkinaHookReturnFromArgument,
+  NULL,
+  NULL,
   okinaHookDfsVariable
 };
 
 const hookCall call={
-  nOkinaHookAddCallNames,
+  xHookAddCallNames,
   nOkinaHookAddArguments,
-  nOkinaHookEntryPointPrefix,
+  xHookEntryPointPrefix,
   nOkinaHookDfsForCalls,
   nOkinaHookParamsAddExtra,
   nOkinaHookParamsDumpList
-};
+  };
+/*const hookCall call={
+  xHookAddCallNames,
+  xHookAddArguments,
+  xHookEntryPointPrefix,
+  xHookDfsForCalls,
+  NULL,
+  NULL
+  };*/
 
 const hookXyz xyzStd={
-  nOkinaHookSysPrefix,
+  NULL,
   nOkinaStdPrevCell,
   nOkinaStdNextCell,
-  nOkinaHookSysPostfix
+  xHookSysPostfix
 };
 const hookXyz xyzSse={
-  nOkinaHookSysPrefix,
+  NULL,
   nOkinaSsePrevCell,
   nOkinaSseNextCell,
-  nOkinaHookSysPostfix
+  xHookSysPostfix
 };
 const hookXyz xyzAvx={
-  nOkinaHookSysPrefix,
+  NULL,
   nOkinaAvxPrevCell,
   nOkinaAvxNextCell,
-  nOkinaHookSysPostfix
+  xHookSysPostfix
 };
 const hookXyz xyzMic={ 
-  nOkinaHookSysPrefix,
+  NULL,
   nOkinaMicPrevCell,
   nOkinaMicNextCell,
-  nOkinaHookSysPostfix
+  xHookSysPostfix
 };
 
 const hookPragma icc ={
@@ -201,40 +210,40 @@ const hookPragma gcc={
 
 const hookHeader header={
   nOkinaHeaderDump,
-  nOkinaHeaderOpen,
-  nOkinaHeaderDefineEnumerates,
-  nOkinaHeaderPrefix,
+  xHookHeaderOpen,
+  xHookHeaderDefineEnumerates,
+  xHookHeaderPrefix,
   nOkinaHeaderIncludes,
-  nOkinaHeaderPostfix
+  xHookHeaderPostfix
   };
 
 const static hookSource source={
-  oHookSourceOpen,
-  oHookSourceInclude,
-  oHookSourceNamespace
+  xHookSourceOpen,
+  xHookSourceInclude,
+  xHookSourceNamespace
 };
 
 const static hookMesh mesh={
-  nOkinaMeshPrefix,
+  xHookMeshPrefix,
   nOkinaMeshCore,
-  nOkinaMeshPostfix
+  xHookMeshPostfix
 };
 
 const static hookVars vars={
-  nOkinaVariablesInit,
+  xHookVariablesInit,
   nOkinaVariablesPrefix,
   nOkinaVariablesMalloc,
   nOkinaVariablesFree
 };
 
 const static hookMain mains={
-  nOkinaMainPrefix,
-  nOkinaMainPreInit,
+  xHookMainPrefix,
+  xHookMainPreInit,
   nOkinaMainVarInitKernel,
-  nOkinaMainVarInitCall,
+  xHookMainVarInitCall,
   nOkinaMainHLT,
-  nOkinaMainPostInit,
-  nOkinaMainPostfix
+  xHookMainPostInit,
+  xHookMainPostfix
 };
 
 // Definition of Okina's Hooks
@@ -283,7 +292,6 @@ hooks* okina(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
     nabla->call->parallel=&okinaOpenMP;
 
-   
   // Hook des directions
   if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
     nabla->hook->xyz=&xyzSse;  
@@ -294,134 +302,9 @@ hooks* okina(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
     nabla->hook->xyz=&xyzMic;
 
-  // Hook du header
-  /*if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-    nabla->hook->header=&headerSse;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-    nabla->hook->header=&headerAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-    nabla->hook->header=&headerAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-  nabla->hook->header=&headerMic;*/
-
   // Hook between ICC or GCC pragmas
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
     nabla->hook->pragma=&icc;
 
   return &okinaHooks;
 }
-
-
-// ****************************************************************************
-// * Old okina way
-// ****************************************************************************
-/*NABLA_STATUS oldOkina(nablaMain *nabla,
-                   astNode *root,
-                   const char *nabla_entity_name){
-  char srcFileName[NABLA_MAX_FILE_NAME];
-  char hdrFileName[NABLA_MAX_FILE_NAME];
-
-  nabla->call=&okinaCalls;
-  nabla->hook=&okinaHooks;
-
-  // Switch between STD, SSE, AVX, MIC
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
-    nabla->call->simd=&okinaSimdSse;
-    nabla->call->header=&okinaHeaderSse;
-  }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX){
-    nabla->call->simd=&okinaSimdAvx;
-    nabla->call->header=&okinaHeaderAvx;
-  }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2){
-    nabla->call->simd=&okinaSimdAvx;
-    nabla->call->header=&okinaHeaderAvx;
-  }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
-    nabla->call->simd=&okinaSimdMic;
-    nabla->call->header=&okinaHeaderMic;
-  }
-
-  // Gestion des directions
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-    nabla->hook->xyz=&xyzSse;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-    nabla->hook->xyz=&xyzAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-    nabla->hook->xyz=&xyzAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-    nabla->hook->xyz=&xyzMic;
-
-  // Gestion du header
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-    nabla->hook->header=&headerSse;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-    nabla->hook->header=&headerAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-    nabla->hook->header=&headerAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-    nabla->hook->header=&headerMic;
-
-  // Switch between parallel modes
-  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nabla->call->parallel=&okinaCilk;
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nabla->call->parallel=&okinaOpenMP;
-
-  // Switch between ICC or GCC pragmas
-  // Par defaut, on met GCC
-  if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    nabla->hook->pragma=&icc;
-
-
-  // Rajout de la variable globale 'iteration'
-  
-  // Dump dans le HEADER: includes, typedefs, defines, debug, maths & errors stuff
-  nOkinaHeaderPrefix(nabla);
-  nOkinaHeaderIncludes(nabla);
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
-
-  // On inclue les fichiers kn'SIMD'
-  nOkinaHeaderSimd(nabla);
-  nOkinaHeaderDbg(nabla);
-  nOkinaHeaderMth(nabla);
-
-  // Dump dans le fichier SOURCE de l'include de l'entity
-  nOkinaHeaderInclude(nabla);
-
-  // Parse du code préprocessé et lance les hooks associés
-  nMiddleGrammar(root,nabla);
-  
-  // On rajoute le kernel d'initialisation des variable
-  nOkinaInitVariables(nabla);
-
-  nOkinaEnumDefine(nabla);
-  
-  // Partie PREFIX
-  nOkinaMainPrefix(nabla);
-  okinaVariablesPrefix(nabla);
-  nOkinaMeshPrefix(nabla);
-
-  // Partie Pré Init
-  nOkinaMainPreInit(nabla);
-  nOkinaInitVariableDbg(nabla);
-      
-  // Dump des entry points dans le main
-  nOkinaMain(nabla);
-
-  // Partie Post Init
-  nOkinaMainPostInit(nabla);
-  
-  // Partie POSTFIX
-  nOkinaHeaderPostfix(nabla); 
-  nOkinaMeshPostfix(nabla);
-  okinaVariablesPostfix(nabla);
-  nOkinaMainPostfix(nabla);
-  
-  dbg("\n\t[nOkina]  Deleting kernel names");
-  toolUnlinkKtemp(nabla->entity->jobs);
-  return NABLA_OK;
-}
-*/
