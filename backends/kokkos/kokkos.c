@@ -42,60 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/kokkos/kokkos.h"
-
-// ****************************************************************************
-// * DEFINES, FORWARDS & TYPEDEFS
-// ****************************************************************************
-const char* headerForwards[]={NULL};
-
-const nWhatWith headerTypedef[]={
-  {"int","integer"},
-  {"double","real"},
-  {"struct real3","Real3"},
-  {"struct real3x3","Real3x3"},
-  {NULL,NULL}
-};
-
-const nWhatWith headerDefines[]={
-  {"NABLA_NB_GLOBAL","1"},
-  {"Bool", "bool"},
-  {"Integer", "int"},
-  {"real", "Real"},
-  {"rabs(a)","fabs(a)"},
-  {"set(a)", "a"},
-  {"set1(cst)", "cst"},
-  {"square_root(u)", "sqrt(u)"},
-  {"cube_root(u)", "cbrt(u)"},
-  {"store(u,_u)", "(*u=_u)"},
-  {"zero()", "0.0"},
-  {"DBG_MODE", "(false)"},
-  {"DBG_LVL", "(DBG_ALL)"},
-  {"DBG_OFF", "0x0000ul"},
-  {"DBG_INI", "0x0100ul"},
-  {"DBG_ALL", "0xFFFFul"},
-  {"opAdd(u,v)", "(u+v)"},
-  {"opSub(u,v)", "(u-v)"},
-  {"opDiv(u,v)", "(u/v)"},
-  {"opMul(u,v)", "(u*v)"},
-  {"opScaMul(u,v)","dot3(u,v)"},
-  {"opVecMul(u,v)","cross(u,v)"},    
-  {"ReduceMinToDouble(a)","a"},
-  {"ReduceMaxToDouble(a)","a"},
-  {"GlobalIteration", "global_iteration[0]"},
-  {"MD_DirX","0"},
-  {"MD_DirY","1"},
-  {"MD_DirZ","2"},
-  {"MD_Plus","0"},
-  {"MD_Negt","4"},
-  {"MD_Shift","3"},
-  {"MD_Mask","7"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
-  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
-  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
-  {"synchronize(v)",""},
-  {NULL,NULL}
-};
-
+#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * HOOKS
@@ -108,43 +55,43 @@ const static hookForAll forall={
 };
 
 const static hookToken token={
-  NULL,//hookTokenPrefix,
+  NULL,
   hookSwitchToken,
   hookTurnTokenToVariable,
   hookTurnTokenToOption,
   hookSystem,
-  hookIteration,
-  hookExit,
-  hookTime,
-  hookFatal,
+  kHookIteration,
+  xHookExit,
+  xHookTime,
+  xHookFatal,
   hookTurnBracketsToParentheses,
   hookIsTest,
-  NULL // hookTokenPostfix
+  NULL
 };
 
 const static hookGrammar gram={
-  NULL,//hookFunction,
-  NULL,//hookJob,
-  hookReduction,
-  hookPrimaryExpressionToReturn,
   NULL,
-  hookDfsVariable
+  NULL,
+  hookReduction,
+  NULL,
+  NULL,
+  xHookDfsVariable
 };
 
 const static hookCall call={
-  hookAddCallNames,
-  hookAddArguments,
-  hookEntryPointPrefix,
-  hookDfsForCalls,
+  xHookAddCallNames,
+  xHookAddArguments,
+  xHookEntryPointPrefix,
+  xHookDfsForCalls,
   hookAddExtraParametersDFS,
   hookDumpNablaParameterListDFS
 };
 
 const static hookXyz xyz={
   NULL,
-  hookPrevCell,
-  hookNextCell,
-  hookSysPostfix
+  xHookPrevCell,
+  xHookNextCell,
+  xHookSysPostfix
 };
 
 const static hookHeader header={

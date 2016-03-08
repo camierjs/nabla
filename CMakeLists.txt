@@ -98,10 +98,10 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/kokkos)
 
-#############
-# Libraries #
-#############
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lib)
+#################
+# x86 Libraries #
+#################
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/x86)
 if(HYPRE_FOUND)
     info("root ALEPH_LIB is ${VT100_FG_MAGENTA}${ALEPH_LIB}${VT100_RESET}")
     info("root ALEPH_HYPRE_LIB is ${VT100_FG_MAGENTA}${ALEPH_HYPRE_LIB}${VT100_RESET}")
@@ -114,7 +114,7 @@ target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
                       NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
-                      NablaLibDump NablaAleph
+                      NablaX86Aleph NablaX86Dump NablaX86Hook
                       NablaMiddlend)
 
 ###########

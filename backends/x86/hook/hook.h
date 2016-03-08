@@ -40,8 +40,32 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
+#ifndef _NABLA_X86_HOOK_H_
+#define _NABLA_X86_HOOK_H_
 
-void lambdaHookIteration(nablaMain *nabla){
-  nprintf(nabla, "/*ITERATION*/", "lambda_iteration()");
-}
+extern const nWhatWith headerDefines[];
+extern const char* headerForwards[];
+extern const nWhatWith headerTypedef[];
+
+void xHookAddArguments(nablaMain*,nablaJob*);
+bool xHookDfsVariable(void);
+
+char* xHookPrevCell(int);
+char* xHookNextCell(int);
+char* xHookSysPostfix(void);
+
+void xHookDfsForCalls(struct nablaMainStruct*,
+                      nablaJob*,
+                      astNode*,
+                      const char*,
+                      astNode*);
+
+char* xHookEntryPointPrefix(struct nablaMainStruct*,
+                            nablaJob*);
+void xHookExit(struct nablaMainStruct*,nablaJob*);
+void xHookTime(struct nablaMainStruct*);
+void xHookFatal(struct nablaMainStruct*);
+void xHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+
+#endif // _NABLA_X86_HOOK_H_
+ 

@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lambda/lambda.h"
-#include "backends/lib/dump/dump.h"
+#include "backends/x86/dump/dump.h"
 
 
 // ****************************************************************************

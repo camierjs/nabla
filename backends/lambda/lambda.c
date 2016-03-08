@@ -42,91 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lambda/lambda.h"
+#include "backends/x86/hook/hook.h"
 
-// ****************************************************************************
-// * CALLS
-// ****************************************************************************
-const static nWhatWith nLambdaHeaderDefines[]={
-  {"NABLA_NB_GLOBAL","1"},
-  {"Bool", "bool"},
-  {"Integer", "int"},
-  {"real", "Real"},
-  {"Real2", "real3"},
-  {"real2", "real3"},
-  {"rabs(a)","fabs(a)"},
-  {"set(a)", "a"},
-  {"set1(cst)", "cst"},
-  {"square_root(u)", "sqrt(u)"},
-  {"cube_root(u)", "cbrt(u)"},
-  {"store(u,_u)", "(*u=_u)"},
-  {"load(u)", "(*u)"},
-  {"zero()", "0.0"},
-  {"DBG_MODE", "(false)"},
-  {"DBG_LVL", "(DBG_ALL)"},
-  {"DBG_OFF", "0x0000ul"},
-  {"DBG_CELL_VOLUME", "0x0001ul"},
-  {"DBG_CELL_CQS", "0x0002ul"},
-  {"DBG_GTH", "0x0004ul"},
-  {"DBG_NODE_FORCE", "0x0008ul"},
-  {"DBG_INI_EOS", "0x0010ul"},
-  {"DBG_EOS", "0x0020ul"},
-  {"DBG_DENSITY", "0x0040ul"},
-  {"DBG_MOVE_NODE", "0x0080ul"},
-  {"DBG_INI", "0x0100ul"},
-  {"DBG_INI_CELL", "0x0200ul"},
-  {"DBG_INI_NODE", "0x0400ul"},
-  {"DBG_LOOP", "0x0800ul"},
-  {"DBG_FUNC_IN", "0x1000ul"},
-  {"DBG_FUNC_OUT", "0x2000ul"},
-  {"DBG_VELOCITY", "0x4000ul"},
-  {"DBG_BOUNDARIES", "0x8000ul"},
-  {"DBG_ALL", "0xFFFFul"},
-  {"opAdd(u,v)", "(u+v)"},
-  {"opSub(u,v)", "(u-v)"},
-  {"opDiv(u,v)", "(u/v)"},
-  {"opMul(u,v)", "(u*v)"},
-  {"opMod(u,v)", "(u%v)"},
-  {"opScaMul(u,v)","dot3(u,v)"},
-  {"opVecMul(u,v)","cross(u,v)"},    
-  {"dot", "dot3"},
-  {"ReduceMinToDouble(a)","a"},
-  {"ReduceMaxToDouble(a)","a"},
-  {"knAt(a)",""},
-  {"fatal(a,b)","exit(-1)"},
-  {"mpi_reduce(how,what)","how##ToDouble(what)"},
-  {"xyz","int"},
-  {"GlobalIteration", "global_iteration[0]"},
-  {"MD_DirX","0"},
-  {"MD_DirY","1"},
-  {"MD_DirZ","2"},
-  {"MD_Plus","0"},
-  {"MD_Negt","4"},
-  {"MD_Shift","3"},
-  {"MD_Mask","7"}, // [sign,..]
-  {"File", "std::ofstream&"},
-  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
-  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
-  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
-  {"synchronize(v)",""},
-  {NULL,NULL}
-};
-
-const char* nLambdaHeaderForwards[]={NULL};
-
-const nWhatWith nLambdaHeaderTypedef[]={
-  {"int","integer"},
-  {"double","real"},
-  {"struct real3","Real3"},
-  {"struct real3x3","Real3x3"},
-  {NULL,NULL}
-};
-
-const callHeader nLambdaHeader={
-  nLambdaHeaderForwards,
-  nLambdaHeaderDefines,
-  nLambdaHeaderTypedef
-};
 
 const static callParallel lambdaCilkCalls={
   nLambdaParallelCilkSync,
@@ -149,8 +66,8 @@ const static callParallel lambdaVoidCalls={
   nLambdaParallelVoidIncludes
 };
 
-backendCalls nLambdaCalls={
-  &nLambdaHeader,
+backendCalls lambdaCalls={
+  NULL,
   NULL,
   &lambdaVoidCalls,
 };
@@ -159,15 +76,61 @@ backendCalls nLambdaCalls={
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
-const static hookXyz lambdaXyzHooks={
+const static hookForAll forall={
   NULL,
-  lambdaHookPrevCell,
-  lambdaHookNextCell,
-  lambdaHookSysPostfix
+  lambdaHookForAllDump,
+  lambdaHookForAllItem,
+  lambdaHookForAllPostfix
+};
+
+const static hookToken token={
+  NULL,
+  lambdaHookSwitchToken,
+  lambdaHookTurnTokenToVariable,
+  lambdaHookTurnTokenToOption,
+  lambdaHookSystem,
+  lambdaHookIteration,
+  xHookExit,
+  xHookTime,
+  xHookFatal,
+  lambdaHookTurnBracketsToParentheses,
+  lambdaHookIsTest,
+  NULL
+};
+
+const static hookGrammar gram={
+  NULL,
+  NULL,
+  lambdaHookReduction,
+  NULL,
+  NULL,
+  xHookDfsVariable
+};
+
+const static hookCall call={
+  xHookAddCallNames,
+  xHookAddArguments,
+  xHookEntryPointPrefix,
+  xHookDfsForCalls,
+  NULL,
+  NULL
+};
+
+
+
+
+
+
+
+const static hookXyz xyz={
+  NULL,
+  xHookPrevCell,
+  xHookNextCell,
+  xHookSysPostfix
 };
 
 // Hooks pour le header
-const static hookHeader nLHookHeader={
+const static hookHeader header={
   nLambdaHookHeaderDump,
   nLambdaHookHeaderOpen,
   nLambdaHookHeaderDefineEnumerates,
@@ -177,21 +140,21 @@ const static hookHeader nLHookHeader={
 };
 
 // Hooks pour le source
-const static hookSource nLHookSource={
+const static hookSource source={
   lHookSourceOpen,
   lHookSourceInclude,
   lHookSourceNamespace
 };
   
 // Hooks pour le maillage
-const static hookMesh nLHookMesh={
+const static hookMesh mesh={
   nLambdaHookMeshPrefix,
   nLambdaHookMeshCore,
   nLambdaHookMeshPostfix
 };
   
 // Hooks pour les variables
-const static hookVars nLHookVars={
+const static hookVars vars={
   nLambdaHookVariablesInit,
   nLambdaHookVariablesPrefix,
   nLambdaHookVariablesMalloc,
@@ -199,7 +162,7 @@ const static hookVars nLHookVars={
 };  
 
 // Hooks pour le main
-const static hookMain nLHookMain={
+const static hookMain mains={
   nLambdaHookMainPrefix,
   nLambdaHookMainPreInit,
   nLambdaHookMainVarInitKernel,
@@ -209,58 +172,18 @@ const static hookMain nLHookMain={
   nLambdaHookMainPostfix
 };  
 
-const static hookForAll nLHookForAll={
+static hooks lambdaHooks={
+  &forall,
+  &token,
+  &gram,
+  &call,
+  &xyz,
   NULL,
-  lambdaHookForAllDump,
-  lambdaHookForAllItem,
-  lambdaHookForAllPostfix
-};
-
-const static hookToken nLHookToken={
-  NULL,
-  lambdaHookSwitchToken,
-  lambdaHookTurnTokenToVariable,
-  lambdaHookTurnTokenToOption,
-  lambdaHookSystem,
-  lambdaHookIteration,
-  lambdaHookExit,
-  lambdaHookTime,
-  lambdaHookFatal,
-  lambdaHookTurnBracketsToParentheses,
-  lambdaHookIsTest,
-  NULL
-};
-
-const static hookGrammar hookGram={
-  NULL,
-  NULL,
-  lambdaHookReduction,
-  NULL,
-  NULL,
-  lambdaHookDfsVariable
-};
-
-const static hookCall nLambdaHookCall={
-  lambdaHookAddCallNames,
-  lambdaHookAddArguments,
-  lambdaHookEntryPointPrefix,
-  lambdaHookDfsForCalls,
-  NULL,
-  NULL
-};
-
-static hooks nLambdaHooks={
-  &nLHookForAll,
-  &nLHookToken,
-  &hookGram,
-  &nLambdaHookCall,
-  &lambdaXyzHooks,
-  NULL,
-  &nLHookHeader,
-  &nLHookSource,
-  &nLHookMesh,
-  &nLHookVars,
-  &nLHookMain
+  &header,
+  &source,
+  &mesh,
+  &vars,
+  &mains
 };
 
 
@@ -269,12 +192,12 @@ static hooks nLambdaHooks={
 // ****************************************************************************
 hooks* lambda(nablaMain *nabla){
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    nLambdaCalls.parallel=&lambdaCilkCalls;
+    lambdaCalls.parallel=&lambdaCilkCalls;
   
   if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    nLambdaCalls.parallel=&lambdaOpenMPCalls;
+    lambdaCalls.parallel=&lambdaOpenMPCalls;
   
-  nabla->call=&nLambdaCalls;
-  return &nLambdaHooks;
+  nabla->call=&lambdaCalls;
+  return &lambdaHooks;
   
 }

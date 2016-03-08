@@ -42,8 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/lambda/lambda.h"
-#include "backends/lib/dump/dump.h"
-
+#include "backends/x86/dump/dump.h"
+#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * nLambdaHookHeaderOpen
@@ -79,9 +79,9 @@ int hlt_level;\n\
 bool *hlt_exit;\n\
 // Includes from nabla->parallel->includes()\n\%s",
           nabla->call->parallel->includes());
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+  nMiddleDefines(nabla,headerDefines);
+  nMiddleTypedefs(nabla,headerTypedef);
+  nMiddleForwards(nabla,headerForwards);
 }
 
 

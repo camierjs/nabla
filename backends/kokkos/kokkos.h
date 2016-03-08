@@ -55,16 +55,8 @@ void kHookSourceOpen(nablaMain*);
 void kHookSourceInclude(nablaMain*);
 char* kHookSourceNamespace(nablaMain*);
 
-char* hookSysPrefix(void);
-char* hookPrevCell(int);
-char* hookNextCell(int);
-char* hookSysPostfix(void);
-
 void hookReduction(struct nablaMainStruct*,astNode*);
-void hookAddArguments(struct nablaMainStruct*,nablaJob*);
-//void hookReturnFromArgument(nablaMain*,nablaJob*);
 void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-bool hookDfsVariable(void);
 
 char *hookPragmaGccAlign(void);
 
@@ -92,14 +84,7 @@ void hookMeshPrefix(nablaMain*);
 void hookMeshCore(nablaMain*);
 void hookMeshPostfix(nablaMain*);
 
-void hookIteration(struct nablaMainStruct*);
-void hookExit(struct nablaMainStruct*,nablaJob*);
-void hookTime(struct nablaMainStruct*);
-void hookFatal(struct nablaMainStruct*);
-void hookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
-bool hookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
-char* hookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
-void hookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
+void kHookIteration(struct nablaMainStruct*);
 
 void hookFunctionName(nablaMain*);
 void hookFunction(nablaMain*, astNode*);

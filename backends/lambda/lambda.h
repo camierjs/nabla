@@ -47,10 +47,6 @@ void lHookSourceOpen(nablaMain*);
 void lHookSourceInclude(nablaMain*);
 char* lHookSourceNamespace(nablaMain*);
 
-char* lambdaHookSysPrefix(void);
-char* lambdaHookPrevCell(int);
-char* lambdaHookNextCell(int);
-char* lambdaHookSysPostfix(void);
 
 char* lambdaHookIncludes(void);
 
@@ -58,10 +54,7 @@ char* lambdaHookFilterGather(astNode*,nablaJob*);
 char* lambdaHookFilterScatter(astNode*,nablaJob*);
 
 void lambdaHookReduction(struct nablaMainStruct*,astNode*);
-void lambdaHookAddArguments(struct nablaMainStruct*,nablaJob*);
-//void lambdaHookReturnFromArgument(nablaMain*,nablaJob*);
 void lambdaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-bool lambdaHookDfsVariable(void);
 
 // Cilk+ parallel color
 char *nLambdaParallelCilkSync(void);
@@ -118,13 +111,7 @@ void nLambdaHookMeshCore(nablaMain*);
 void nLambdaHookMeshPostfix(nablaMain*);
 
 void lambdaHookIteration(struct nablaMainStruct*);
-void lambdaHookExit(struct nablaMainStruct*,nablaJob*);
-void lambdaHookTime(struct nablaMainStruct*);
-void lambdaHookFatal(struct nablaMainStruct*);
-void lambdaHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
 bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
-char* lambdaHookEntryPointPrefix(struct nablaMainStruct*, nablaJob*);
-void lambdaHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
 
 void lambdaHookFunctionName(nablaMain*);
 void lambdaHookLibraries(astNode*, nablaEntity*);
@@ -138,8 +125,6 @@ nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 void lambdaHookSystem(astNode*,nablaMain*,const char,char);
 void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-//void lambdaHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
-//void lambdaHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
 void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 // Pour dumper les arguments necessaire dans le main

@@ -12,6 +12,11 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 #################
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 
+#################
+# Library: HOOK #
+#################
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hook)
+
 ##################
 # Library: ALEPH #
 ##################

@@ -10,4 +10,4 @@ set_property(SOURCE
 
 configure_file(dump.S ${CMAKE_CURRENT_BINARY_DIR}/dump.S)
 
-add_library(NablaLibDump ${BACKEND_LIB_DUMP_C})
+add_library(NablaX86Dump ${BACKEND_LIB_DUMP_C})

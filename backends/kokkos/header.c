@@ -41,11 +41,8 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/lib/dump/dump.h"
-const extern nWhatWith headerDefines[];
-const extern char* headerForwards[];
-const extern nWhatWith headerTypedef[];
-
+#include "backends/x86/dump/dump.h"
+#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * hookHeaderDump
