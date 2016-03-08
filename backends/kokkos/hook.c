@@ -41,19 +41,3 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-
-void kHookIteration(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*ITERATION*/", "backend_iteration()");
-}
-
-/*****************************************************************************
- * Génération d'un kernel associé à un support
- *****************************************************************************/
-void hookJob(nablaMain *nabla, astNode *n){
-  nablaJob *job = nMiddleJobNew(nabla->entity);
-  nMiddleJobAdd(nabla->entity, job);
-  nMiddleJobFill(nabla,job,n,NULL);
-}
-
-

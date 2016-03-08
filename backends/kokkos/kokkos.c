@@ -49,22 +49,22 @@
 // ****************************************************************************
 const static hookForAll forall={
   NULL,
-  hookForAllDump,
-  hookForAllItem,
-  hookForAllPostfix
+  xHookForAllDump,
+  xHookForAllItem,
+  xHookForAllPostfix
 };
 
 const static hookToken token={
   NULL,
   hookSwitchToken,
-  hookTurnTokenToVariable,
+  xHookTurnTokenToVariable,
   hookTurnTokenToOption,
-  hookSystem,
-  kHookIteration,
+  xHookSystem,
+  xHookIteration,
   xHookExit,
   xHookTime,
   xHookFatal,
-  hookTurnBracketsToParentheses,
+  xHookTurnBracketsToParentheses,
   hookIsTest,
   NULL
 };
@@ -83,8 +83,8 @@ const static hookCall call={
   xHookAddArguments,
   xHookEntryPointPrefix,
   xHookDfsForCalls,
-  hookAddExtraParametersDFS,
-  hookDumpNablaParameterListDFS
+  NULL,
+  NULL
 };
 
 const static hookXyz xyz={
@@ -95,12 +95,12 @@ const static hookXyz xyz={
 };
 
 const static hookHeader header={
-  hookHeaderDump,
-  hookHeaderOpen,
-  hookHeaderDefineEnumerates,
-  hookHeaderPrefix,
-  hookHeaderIncludes,
-  hookHeaderPostfix
+  xHookHeaderDump,
+  xHookHeaderOpen,
+  xHookHeaderDefineEnumerates,
+  xHookHeaderPrefix,
+  xHookHeaderIncludes,
+  xHookHeaderPostfix
 };
 
 const static hookSource source={
@@ -110,26 +110,26 @@ const static hookSource source={
 };
 
 const static hookMesh mesh={
-  hookMeshPrefix,
-  hookMeshCore,
-  hookMeshPostfix
+  xHookMeshPrefix,
+  xHookMeshCore,
+  xHookMeshPostfix
 };
 
 const static hookVars vars={
-  hookVariablesInit,
-  hookVariablesPrefix,
-  hookVariablesMalloc,
-  hookVariablesFree
+  xHookVariablesInit,
+  xHookVariablesPrefix,
+  xHookVariablesMalloc,
+  xHookVariablesFree
 };  
 
 const static hookMain mains={
-  hookMainPrefix,
-  hookMainPreInit,
-  hookMainVarInitKernel,
-  hookMainVarInitCall,
-  hookMainHLT,
-  hookMainPostInit,
-  hookMainPostfix
+  xHookMainPrefix,
+  xHookMainPreInit,
+  xHookMainVarInitKernel,
+  xHookMainVarInitCall,
+  xHookMainHLT,
+  xHookMainPostInit,
+  xHookMainPostfix
 };  
 
 const static hooks kokkosHooks={

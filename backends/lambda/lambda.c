@@ -44,56 +44,27 @@
 #include "backends/lambda/lambda.h"
 #include "backends/x86/hook/hook.h"
 
-
-const static callParallel lambdaCilkCalls={
-  nLambdaParallelCilkSync,
-  nLambdaParallelCilkSpawn,
-  nLambdaParallelCilkLoop,
-  nLambdaParallelCilkIncludes
-};
-
-const static callParallel lambdaOpenMPCalls={
-  nLambdaParallelOpenMPSync,
-  nLambdaParallelOpenMPSpawn,
-  nLambdaParallelOpenMPLoop,
-  nLambdaParallelOpenMPIncludes
-};
-
-const static callParallel lambdaVoidCalls={
-  nLambdaParallelVoidSync,
-  nLambdaParallelVoidSpawn,
-  nLambdaParallelVoidLoop,
-  nLambdaParallelVoidIncludes
-};
-
-backendCalls lambdaCalls={
-  NULL,
-  NULL,
-  &lambdaVoidCalls,
-};
-
-
 // ****************************************************************************
 // * HOOKS
 // ****************************************************************************
 const static hookForAll forall={
   NULL,
-  lambdaHookForAllDump,
-  lambdaHookForAllItem,
-  lambdaHookForAllPostfix
+  xHookForAllDump,
+  xHookForAllItem,
+  xHookForAllPostfix
 };
 
 const static hookToken token={
   NULL,
   lambdaHookSwitchToken,
-  lambdaHookTurnTokenToVariable,
+  xHookTurnTokenToVariable,
   lambdaHookTurnTokenToOption,
-  lambdaHookSystem,
-  lambdaHookIteration,
+  xHookSystem,
+  xHookIteration,
   xHookExit,
   xHookTime,
   xHookFatal,
-  lambdaHookTurnBracketsToParentheses,
+  xHookTurnBracketsToParentheses,
   lambdaHookIsTest,
   NULL
 };
@@ -116,12 +87,6 @@ const static hookCall call={
   NULL
 };
 
-
-
-
-
-
-
 const static hookXyz xyz={
   NULL,
   xHookPrevCell,
@@ -131,12 +96,12 @@ const static hookXyz xyz={
 
 // Hooks pour le header
 const static hookHeader header={
-  nLambdaHookHeaderDump,
-  nLambdaHookHeaderOpen,
-  nLambdaHookHeaderDefineEnumerates,
-  nLambdaHookHeaderPrefix,
-  nLambdaHookHeaderIncludes,
-  nLambdaHookHeaderPostfix
+  xHookHeaderDump,
+  xHookHeaderOpen,
+  xHookHeaderDefineEnumerates,
+  xHookHeaderPrefix,
+  xHookHeaderIncludes,
+  xHookHeaderPostfix
 };
 
 // Hooks pour le source
@@ -148,28 +113,28 @@ const static hookSource source={
   
 // Hooks pour le maillage
 const static hookMesh mesh={
-  nLambdaHookMeshPrefix,
-  nLambdaHookMeshCore,
-  nLambdaHookMeshPostfix
+  xHookMeshPrefix,
+  xHookMeshCore,
+  xHookMeshPostfix
 };
   
 // Hooks pour les variables
 const static hookVars vars={
-  nLambdaHookVariablesInit,
-  nLambdaHookVariablesPrefix,
-  nLambdaHookVariablesMalloc,
-  nLambdaHookVariablesFree
+  xHookVariablesInit,
+  xHookVariablesPrefix,
+  xHookVariablesMalloc,
+  xHookVariablesFree
 };  
 
 // Hooks pour le main
 const static hookMain mains={
-  nLambdaHookMainPrefix,
-  nLambdaHookMainPreInit,
-  nLambdaHookMainVarInitKernel,
-  nLambdaHookMainVarInitCall,
-  nLambdaHookMain,
-  nLambdaHookMainPostInit,
-  nLambdaHookMainPostfix
+  xHookMainPrefix,
+  xHookMainPreInit,
+  xHookMainVarInitKernel,
+  xHookMainVarInitCall,
+  xHookMainHLT,
+  xHookMainPostInit,
+  xHookMainPostfix
 };  
 
 static hooks lambdaHooks={
@@ -190,14 +155,4 @@ static hooks lambdaHooks={
 // ****************************************************************************
 // * nLambda
 // ****************************************************************************
-hooks* lambda(nablaMain *nabla){
-  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
-    lambdaCalls.parallel=&lambdaCilkCalls;
-  
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
-    lambdaCalls.parallel=&lambdaOpenMPCalls;
-  
-  nabla->call=&lambdaCalls;
-  return &lambdaHooks;
-  
-}
+hooks* lambda(nablaMain *nabla){return &lambdaHooks;}

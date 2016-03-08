@@ -77,40 +77,17 @@ char *nLambdaParallelVoidIncludes(void);
 // Pragmas: Ivdep, Align
 char *lambdaHookPragmaIccIvdep(void);
 char *lambdaHookPragmaGccIvdep(void);
-//char *lambdaHookPragmaIccAlign(void);
-//char *lambdaHookPragmaGccAlign(void);
-
-// Hooks: Header
-void nLambdaHookHeaderDump(nablaMain *);
-void nLambdaHookHeaderOpen(nablaMain *);
-void nLambdaHookHeaderDefineEnumerates(nablaMain *);
-void nLambdaHookHeaderPrefix(nablaMain *);
-void nLambdaHookHeaderPostfix(nablaMain *);
-void nLambdaHookHeaderIncludes(nablaMain *);
 
 // Dump into Header & Source
 void nLambdaDumpSource(nablaMain*);
 void nLambdaDumpHeader(nablaMain *);
 void nLambdaDumpMesh(nablaMain*);
 
-NABLA_STATUS nLambdaHookMainPrefix(nablaMain*);
-NABLA_STATUS nLambdaHookMainPreInit(nablaMain*);
-NABLA_STATUS nLambdaHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS nLambdaHookMainVarInitCall(nablaMain*);
-NABLA_STATUS nLambdaHookMainPostInit(nablaMain*);
-NABLA_STATUS nLambdaHookMain(nablaMain*);
-NABLA_STATUS nLambdaHookMainPostfix(nablaMain*);
-
-void nLambdaHookVariablesInit(nablaMain*);
-void nLambdaHookVariablesPrefix(nablaMain*);
-void nLambdaHookVariablesMalloc(nablaMain*);
-void nLambdaHookVariablesFree(nablaMain*);
-
 void nLambdaHookMeshPrefix(nablaMain*);
 void nLambdaHookMeshCore(nablaMain*);
 void nLambdaHookMeshPostfix(nablaMain*);
 
-void lambdaHookIteration(struct nablaMainStruct*);
+void lHookIteration(struct nablaMainStruct*);
 bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
 
 void lambdaHookFunctionName(nablaMain*);
@@ -121,11 +98,8 @@ char* lambdaHookForAllPostfix(nablaJob*);
 char* lambdaHookForAllItem(nablaJob*,const char, const char, char);
 
 void lambdaHookSwitchToken(astNode*, nablaJob*);
-nablaVariable *lambdaHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void lambdaHookSystem(astNode*,nablaMain*,const char,char);
 void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-void lambdaHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 // Pour dumper les arguments necessaire dans le main
 void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);

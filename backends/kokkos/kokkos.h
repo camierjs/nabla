@@ -60,26 +60,6 @@ void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 
 char *hookPragmaGccAlign(void);
 
-void hookHeaderDump(nablaMain *);
-void hookHeaderOpen(nablaMain *);
-void hookHeaderDefineEnumerates(nablaMain *);
-void hookHeaderPrefix(nablaMain *);
-void hookHeaderPostfix(nablaMain *);
-void hookHeaderIncludes(nablaMain *);
-
-NABLA_STATUS hookMainPrefix(nablaMain*);
-NABLA_STATUS hookMainPreInit(nablaMain*);
-NABLA_STATUS hookMainVarInitKernel(nablaMain*);
-NABLA_STATUS hookMainVarInitCall(nablaMain*);
-NABLA_STATUS hookMainPostInit(nablaMain*);
-NABLA_STATUS hookMainHLT(nablaMain*);
-NABLA_STATUS hookMainPostfix(nablaMain*);
-
-void hookVariablesInit(nablaMain*);
-void hookVariablesPrefix(nablaMain*);
-void hookVariablesMalloc(nablaMain*);
-void hookVariablesFree(nablaMain*);
-
 void hookMeshPrefix(nablaMain*);
 void hookMeshCore(nablaMain*);
 void hookMeshPostfix(nablaMain*);
@@ -100,13 +80,10 @@ char* hookTokenPrefix(nablaMain*);
 char* hookTokenPostfix(nablaMain*);
 
 void hookSwitchToken(astNode*, nablaJob*);
-nablaVariable *hookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void hookSystem(astNode*,nablaMain*,const char,char);
 void hookAddExtraParameters(nablaMain*,nablaJob*,int*);
 void hookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
 void hookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
 void hookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
-void hookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 void hookIsTest(nablaMain*,nablaJob*,astNode*,int);
 

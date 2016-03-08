@@ -10,6 +10,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(NablaAlephHYPRE IAlephHypre.cc)
 
-add_dependencies(NablaAlephHYPRE NablaAleph)
+add_dependencies(NablaAlephHYPRE NablaX86Aleph)
 
 set(HYPRE_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaAlephHYPRE.a PARENT_SCOPE)

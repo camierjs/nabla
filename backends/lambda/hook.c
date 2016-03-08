@@ -41,7 +41,3 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-
-void lambdaHookIteration(nablaMain *nabla){
-  nprintf(nabla, "/*ITERATION*/", "lambda_iteration()");
-}

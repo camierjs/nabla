@@ -43,7 +43,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "backends/lambda/lambda.h"
-
+#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * lambdaHookIsTest
@@ -354,8 +354,8 @@ void lambdaHookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL_INI):{
     dbg("\n\t\t\t\t[lambdaHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*lambdaFilterGather*/",
-            lambdaHookFilterGather(n,job));
+    nprintf(nabla, "/*xHookFilterGather*/",
+            xHookFilterGather(n,job));
     break;
   }
   case(FORALL_END):{

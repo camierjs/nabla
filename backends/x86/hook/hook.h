@@ -54,18 +54,54 @@ char* xHookPrevCell(int);
 char* xHookNextCell(int);
 char* xHookSysPostfix(void);
 
-void xHookDfsForCalls(struct nablaMainStruct*,
+void xHookDfsForCalls(nablaMain*,
                       nablaJob*,
                       astNode*,
                       const char*,
                       astNode*);
 
-char* xHookEntryPointPrefix(struct nablaMainStruct*,
-                            nablaJob*);
-void xHookExit(struct nablaMainStruct*,nablaJob*);
-void xHookTime(struct nablaMainStruct*);
-void xHookFatal(struct nablaMainStruct*);
-void xHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
+char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
+void xHookExit(nablaMain*,nablaJob*);
+void xHookTime(nablaMain*);
+void xHookFatal(nablaMain*);
+void xHookIteration(nablaMain*);
+
+void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
+
+void xHookHeaderOpen(nablaMain*);
+void xHookHeaderDump(nablaMain*);
+void xHookHeaderDefineEnumerates(nablaMain*);
+void xHookHeaderPrefix(nablaMain*);
+void xHookHeaderPostfix(nablaMain*);
+void xHookHeaderIncludes(nablaMain*);
+
+char* xHookForAllDump(nablaJob*);
+char* xHookForAllItem(nablaJob*,const char,const char,char);
+char* xHookForAllPostfix(nablaJob*);
+
+char* xHookFilterGather(astNode*,nablaJob*);
+
+NABLA_STATUS xHookMainPrefix(nablaMain*);
+NABLA_STATUS xHookMainPreInit(nablaMain*);
+NABLA_STATUS xHookMainVarInitKernel(nablaMain*);
+NABLA_STATUS xHookMainVarInitCall(nablaMain*);
+NABLA_STATUS xHookMainHLT(nablaMain*);
+NABLA_STATUS xHookMainPostInit(nablaMain*);
+NABLA_STATUS xHookMainPostfix(nablaMain*);
+
+
+void xHookVariablesInit(nablaMain*);
+void xHookVariablesPrefix(nablaMain*);
+void xHookVariablesMalloc(nablaMain*);
+void xHookVariablesFree(nablaMain*);
+
+void xHookMeshPrefix(nablaMain*);
+void xHookMeshPostfix(nablaMain*);
+void xHookMeshCore(nablaMain*);
+
+void xHookSystem(astNode*,nablaMain*,const char,char);
+void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+nablaVariable *xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 
 #endif // _NABLA_X86_HOOK_H_
  

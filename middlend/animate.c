@@ -90,9 +90,10 @@ NABLA_STATUS animate(nablaMain *nabla,
   nabla->hook->main->postfix(nabla);
   nabla->hook->vars->free(nabla);
   
-  dbg("\n\t[nMiddleBackendAnimate]  Deleting kernel names");
+  dbg("\n\t[nMiddleBackendAnimate] Deleting kernel names");
   toolUnlinkKtemp(nabla->entity->jobs);
-
+  
+  dbg("\n\t[nMiddleBackendAnimate] done, NABLA_OK!");
   return NABLA_OK;
 }
 

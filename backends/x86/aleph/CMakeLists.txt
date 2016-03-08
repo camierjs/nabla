@@ -45,6 +45,6 @@ configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h
 
 add_library(NablaX86Aleph ${ALEPH_SOURCES})
 
-#add_dependencies(NablaLibAleph NablaLambdaHook)
+#add_dependencies(NablaLibAleph NablaX86Hook)
 
 set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaX86Aleph.a PARENT_SCOPE)

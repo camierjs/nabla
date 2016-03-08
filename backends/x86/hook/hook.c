@@ -216,6 +216,10 @@ void xHookTime(struct nablaMainStruct *nabla){
 void xHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
+void xHookIteration(nablaMain *nabla){
+  nprintf(nabla, "/*ITERATION*/", "iteration()");
+}
+
 void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
@@ -231,4 +235,33 @@ void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   }else{
     nprintf(nabla, "/*has not been found*/", NULL);
   }
+}
+
+// ****************************************************************************
+// * xHookHeaderIncludes
+// ****************************************************************************
+void xHookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\n\
+// *****************************************************************************\n\
+// * Includes\n\
+// *****************************************************************************\n\
+#include <sys/time.h>\n\
+#include <stdlib.h>\n\
+#include <stdio.h>\n\
+#include <string.h>\n\
+#include <vector>\n\
+#include <math.h>\n\
+#include <assert.h>\n\
+#include <stdarg.h>\n\
+#include <iostream>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+using namespace std;\n\
+int hlt_level;\n\
+bool *hlt_exit;\n\
+int omp_get_max_threads(void){return 1;}\n\
+int omp_get_thread_num(void){return 0;}\n");
+  nMiddleDefines(nabla,headerDefines);
+  nMiddleTypedefs(nabla,headerTypedef);
+  nMiddleForwards(nabla,headerForwards);
 }

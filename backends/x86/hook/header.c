@@ -40,10 +40,71 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LIB_DUMP_H_
-#define _NABLA_LIB_DUMP_H_
+#include "nabla.h"
+#include "backends/x86/dump/dump.h"
 
-void dumpHeader(nablaMain*);
-void dumpMesh(nablaMain*);
+// ****************************************************************************
+// * xHookHeaderOpen
+// ****************************************************************************
+void xHookHeaderOpen(nablaMain *nabla){
+  char hdrFileName[NABLA_MAX_FILE_NAME];
+  sprintf(hdrFileName, "%s.h", nabla->name);
+  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
+}
 
-#endif // _NABLA_LIB_DUMP_H_
+
+// ****************************************************************************
+// * xHookHeaderDump
+// ****************************************************************************
+void xHookHeaderDump(nablaMain *nabla){
+  assert(nabla->entity->name);
+  dumpHeader(nabla);
+}
+
+// ****************************************************************************
+// * hookHeaderPrefix
+// ****************************************************************************
+void xHookHeaderPrefix(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->hdr,
+          "#ifndef __BACKEND_%s_H__\n#define __BACKEND_%s_H__",
+          nabla->entity->name,
+          nabla->entity->name);
+}
+
+
+/***************************************************************************** 
+ * 
+ *****************************************************************************/
+void xHookHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,
+          "\n\n#endif // __BACKEND_%s_H__\n",
+          nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * ENUMERATES Hooks
+// ****************************************************************************
+void xHookHeaderDefineEnumerates(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+/*********************************************************\n\
+ * Forward enumerates\n\
+ *********************************************************/\n\
+#define FOR_EACH_PARTICLE(p) for(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\n\
+#define FOR_EACH_CELL(c) for(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\n\
+#define FOR_EACH_CELL_SHARED(c,local) for(int c=0;c<NABLA_NB_CELLS;c+=1)\n\n\
+#define FOR_EACH_NODE(n) for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
+#define FOR_EACH_NODE_CELL(c)\
+ for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
+//#define FOR_EACH_NODE_CELL(c) for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\n\
+#define FOR_EACH_FACE(f) for(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_INNER_FACE(f) for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OUTER_FACE(f)\
+ for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+// Pour l'instant un étant que multi-threadé, les 'own' sont les 'all'\n\
+#define FOR_EACH_OWN_INNER_FACE(f) for(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OWN_OUTER_FACE(f)\
+ for(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n");
+}

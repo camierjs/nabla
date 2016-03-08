@@ -43,6 +43,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "backends/kokkos/kokkos.h"
+#include "backends/x86/hook/hook.h"
 
 static void hookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
@@ -356,8 +357,8 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL_INI):{
     dbg("\n\t\t\t\t[hookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*filterGather*/", "%s",
-            filterGather(n,job,GATHER_SCATTER_CALL));
+    nprintf(nabla, "/*xHookFilterGather*/", "%s",
+            xHookFilterGather(n,job));
     break;
   }
   case(FORALL_END):{
