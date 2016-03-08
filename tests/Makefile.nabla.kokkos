@@ -2,8 +2,8 @@ NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
-SIMD ?= std
-PARALLEL ?= seq
+SIMD = std
+PARALLEL = seq
 
 BYFL_FLAGS  = #-bf-verbose -bf-vectors #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
 

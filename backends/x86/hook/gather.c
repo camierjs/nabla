@@ -46,8 +46,8 @@
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* xHookGatherCells(nablaJob *job,
-                                   nablaVariable* var){
+static char* xGatherCells(nablaJob *job,
+                          nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
 
@@ -81,8 +81,8 @@ static char* xHookGatherCells(nablaJob *job,
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* xHookGatherNodes(nablaJob *job,
-                                   nablaVariable* var){
+static char* xGatherNodes(nablaJob *job,
+                          nablaVariable* var){
   bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t\
@@ -100,8 +100,8 @@ static char* xHookGatherNodes(nablaJob *job,
 // ****************************************************************************
 // * Gather for Faces
 // ****************************************************************************
-static char* xHookGatherFaces(nablaJob *job,
-                                   nablaVariable* var){
+static char* xGatherFaces(nablaJob *job,
+                          nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(face_node[NABLA_NB_FACES*n+f],%s %s_%s);\n\t\t\t",
@@ -117,12 +117,12 @@ static char* xHookGatherFaces(nablaJob *job,
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-static char* xHookGather(nablaJob *job,nablaVariable* var){
+static char* xGather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return xHookGatherCells(job,var);
-  if (itm=='n') return xHookGatherNodes(job,var);
-  if (itm=='f') return xHookGatherFaces(job,var);
-  nablaError("Could not distinguish job item in xHookGather for job '%s'!", job->name);
+  if (itm=='c') return xGatherCells(job,var);
+  if (itm=='n') return xGatherNodes(job,var);
+  if (itm=='f') return xGatherFaces(job,var);
+  nablaError("Could not distinguish job item in xGather for job '%s'!", job->name);
   return NULL;
 }
 
@@ -133,26 +133,26 @@ static char* xHookGather(nablaJob *job,nablaVariable* var){
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
-char* xHookFilterGather(astNode *n,nablaJob *job){
+char* xFilterGather(astNode *n,nablaJob *job){
   char *gather_src_buffer=NULL;  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[xHookFilterGather] Could not malloc our gather_src_buffer!");
+    nablaError("[xFilterGather] Could not malloc our gather_src_buffer!");
   
   nprintf(job->entity->main, NULL,"/*filterGather*/");
 
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     if (!var->is_gathered) continue;
-    dbg("\n\t\t\t\t[xHookFilterGather] var '%s'", var->name);
+    dbg("\n\t\t\t\t[xFilterGather] var '%s'", var->name);
     nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
     if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)){
       nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
       continue;
     }
     nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
-    dbg("\n\t\t\t\t[xHookFilterGather] strcat");
-    strcat(gather_src_buffer,xHookGather(job,var));
+    dbg("\n\t\t\t\t[xFilterGather] strcat");
+    strcat(gather_src_buffer,xGather(job,var));
   }
-  dbg("\n\t\t\t\t[xHookFilterGather] gather_src_buffer='%s'",
+  dbg("\n\t\t\t\t[xFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");
   return gather_src_buffer;
 }

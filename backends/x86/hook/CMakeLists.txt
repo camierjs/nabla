@@ -8,6 +8,11 @@ set(BACKEND_LIB_HOOK_C
     main.c
     vars.c
     mesh.c
-    data.c)
+    data.c
+    reduce.c
+    scatter.c
+    source.c
+    tokens.c)
 
 add_library(NablaX86Hook ${BACKEND_LIB_HOOK_C})
+add_dependencies(NablaX86Hook libNabla)

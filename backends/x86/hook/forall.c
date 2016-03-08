@@ -124,5 +124,5 @@ char* xHookForAllItem(nablaJob *j,
 // ****************************************************************************
 char* xHookForAllPostfix(nablaJob *job){
   dbg("\n\t[xHookForAllPostfix]");
-  return xHookFilterGather(NULL,job);
+  return xFilterGather(NULL,job);
 }

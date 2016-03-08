@@ -356,6 +356,10 @@ static void xHookTurnTokenToVariableForStdFunction(nablaMain *nabla,
     nprintf(nabla, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
+  case ('p'):{
+    nprintf(nabla, "/*ParticleVar*/", NULL);
+    break;
+  }
   default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob xHookTurnTokenToVariableForStdFunction\n"));
   }
 }

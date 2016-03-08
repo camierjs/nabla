@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/lambda/lambda.h"
 #include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
@@ -56,23 +55,23 @@ const static hookForAll forall={
 
 const static hookToken token={
   NULL,
-  lambdaHookSwitchToken,
+  xHookSwitchToken,
   xHookTurnTokenToVariable,
-  lambdaHookTurnTokenToOption,
+  xHookTurnTokenToOption,
   xHookSystem,
   xHookIteration,
   xHookExit,
   xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,
-  lambdaHookIsTest,
+  xHookIsTest,
   NULL
 };
 
 const static hookGrammar gram={
   NULL,
   NULL,
-  lambdaHookReduction,
+  xHookReduction,
   NULL,
   NULL,
   xHookDfsVariable
@@ -94,7 +93,6 @@ const static hookXyz xyz={
   xHookSysPostfix
 };
 
-// Hooks pour le header
 const static hookHeader header={
   xHookHeaderDump,
   xHookHeaderOpen,
@@ -104,21 +102,18 @@ const static hookHeader header={
   xHookHeaderPostfix
 };
 
-// Hooks pour le source
 const static hookSource source={
-  lHookSourceOpen,
-  lHookSourceInclude,
-  lHookSourceNamespace
+  xHookSourceOpen,
+  xHookSourceInclude,
+  xHookSourceNamespace
 };
-  
-// Hooks pour le maillage
+
 const static hookMesh mesh={
   xHookMeshPrefix,
   xHookMeshCore,
   xHookMeshPostfix
 };
-  
-// Hooks pour les variables
+
 const static hookVars vars={
   xHookVariablesInit,
   xHookVariablesPrefix,
@@ -126,7 +121,6 @@ const static hookVars vars={
   xHookVariablesFree
 };  
 
-// Hooks pour le main
 const static hookMain mains={
   xHookMainPrefix,
   xHookMainPreInit,
@@ -151,8 +145,4 @@ static hooks lambdaHooks={
   &mains
 };
 
-
-// ****************************************************************************
-// * nLambda
-// ****************************************************************************
-hooks* lambda(nablaMain *nabla){return &lambdaHooks;}
+const hooks* lambda(nablaMain *nabla){return &lambdaHooks;}

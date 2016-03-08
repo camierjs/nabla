@@ -47,40 +47,63 @@ extern const nWhatWith headerDefines[];
 extern const char* headerForwards[];
 extern const nWhatWith headerTypedef[];
 
-void xHookAddArguments(nablaMain*,nablaJob*);
-bool xHookDfsVariable(void);
-
-char* xHookPrevCell(int);
-char* xHookNextCell(int);
-char* xHookSysPostfix(void);
-
-void xHookDfsForCalls(nablaMain*,
-                      nablaJob*,
-                      astNode*,
-                      const char*,
-                      astNode*);
-
-char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
-void xHookExit(nablaMain*,nablaJob*);
-void xHookTime(nablaMain*);
-void xHookFatal(nablaMain*);
-void xHookIteration(nablaMain*);
-
-void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
-
-void xHookHeaderOpen(nablaMain*);
-void xHookHeaderDump(nablaMain*);
-void xHookHeaderDefineEnumerates(nablaMain*);
-void xHookHeaderPrefix(nablaMain*);
-void xHookHeaderPostfix(nablaMain*);
-void xHookHeaderIncludes(nablaMain*);
-
+// forall
 char* xHookForAllDump(nablaJob*);
 char* xHookForAllItem(nablaJob*,const char,const char,char);
 char* xHookForAllPostfix(nablaJob*);
 
-char* xHookFilterGather(astNode*,nablaJob*);
+// token
+void xHookSwitchToken(astNode*, nablaJob*);
+nablaVariable* xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void xHookTurnTokenToOption(nablaMain*,nablaOption*);
+void xHookSystem(astNode*,nablaMain*,const char,char);
+void xHookIteration(nablaMain*);
+void xHookExit(nablaMain*,nablaJob*);
+void xHookTime(nablaMain*);
+void xHookFatal(nablaMain*);
+void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
+void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
 
+// gram
+void xHookReduction(nablaMain*,astNode*);
+bool xHookDfsVariable(void);
+
+// call
+void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
+void xHookAddArguments(nablaMain*,nablaJob*);
+char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
+void xHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+
+// xyz
+char* xHookPrevCell(int);
+char* xHookNextCell(int);
+char* xHookSysPostfix(void);
+
+// header
+void xHookHeaderDump(nablaMain*);
+void xHookHeaderOpen(nablaMain*);
+void xHookHeaderDefineEnumerates(nablaMain*);
+void xHookHeaderPrefix(nablaMain*);
+void xHookHeaderIncludes(nablaMain*);
+void xHookHeaderPostfix(nablaMain*);
+
+// source
+void xHookSourceOpen(nablaMain*);
+void xHookSourceInclude(nablaMain*);
+char* xHookSourceNamespace(nablaMain*);
+
+// mesh
+void xHookMeshPrefix(nablaMain*);
+void xHookMeshCore(nablaMain*);
+void xHookMeshPostfix(nablaMain*);
+
+// vars
+void xHookVariablesInit(nablaMain*);
+void xHookVariablesPrefix(nablaMain*);
+void xHookVariablesMalloc(nablaMain*);
+void xHookVariablesFree(nablaMain*);
+
+// main
 NABLA_STATUS xHookMainPrefix(nablaMain*);
 NABLA_STATUS xHookMainPreInit(nablaMain*);
 NABLA_STATUS xHookMainVarInitKernel(nablaMain*);
@@ -89,19 +112,10 @@ NABLA_STATUS xHookMainHLT(nablaMain*);
 NABLA_STATUS xHookMainPostInit(nablaMain*);
 NABLA_STATUS xHookMainPostfix(nablaMain*);
 
+// gather/scatter
+char* xFilterGather(astNode*,nablaJob*);
+char* xFilterScatter(nablaJob*);
 
-void xHookVariablesInit(nablaMain*);
-void xHookVariablesPrefix(nablaMain*);
-void xHookVariablesMalloc(nablaMain*);
-void xHookVariablesFree(nablaMain*);
-
-void xHookMeshPrefix(nablaMain*);
-void xHookMeshPostfix(nablaMain*);
-void xHookMeshCore(nablaMain*);
-
-void xHookSystem(astNode*,nablaMain*,const char,char);
-void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-nablaVariable *xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
 
 #endif // _NABLA_X86_HOOK_H_
  

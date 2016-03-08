@@ -44,25 +44,109 @@
 
 
 // ****************************************************************************
-// * hookSourceOpen
+// * Flush de la 'vraie' variable depuis celle déclarée en in/out
 // ****************************************************************************
-void kHookSourceOpen(nablaMain *nabla){
-  char srcFileName[NABLA_MAX_FILE_NAME];
-  // Ouverture du fichier source
-  sprintf(srcFileName, "%s.cc", nabla->name);
-  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
+/*static void flushRealVariable(nablaJob *job, nablaVariable *var){
+  // On informe la suite que cette variable est en train d'être scatterée
+  nablaVariable *real_variable=
+    nMiddleVariableFind(job->entity->main->variables, var->name);
+  if (real_variable==NULL)
+    nablaError("Could not find real variable from scattered variables!");
+  real_variable->is_gathered=false;
+  }*/
+
+
+// ****************************************************************************
+// * Scatter
+// ****************************************************************************
+static char* scatter(nablaVariable* var){
+  char scatter[1024];
+  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+           strcmp(var->type,"real")==0?"":"3",
+           var->item, var->name,
+           var->item, var->name);
+  return strdup(scatter);
 }
 
+
+
+// ****************************************************************************
+// * Filtrage du SCATTER
+// ****************************************************************************
+/*char* xFilterScatter(nablaJob *job){
+  int i;
+  char scatters[1024];
+  nablaVariable *var;
+  scatters[0]='\0';
+  int nbToScatter=0;
+  int filteredNbToScatter=0;
   
-// ****************************************************************************
-// * include
-// ****************************************************************************
-void kHookSourceInclude(nablaMain *nabla){
-  assert(nabla->entity->name);
-  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main, NULL,"//if=>!scatter\n");
+    return "";
+  }
+  
+  // On récupère le nombre de variables potentielles à scatterer
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next)
+    nbToScatter+=1;
+
+  // S'il y en a pas, on a rien d'autre à faire
+  if (nbToScatter==0) return "";
+  
+  for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+    //nprintf(job->entity->main, NULL, "\n\t\t// scatter on %s for variable %s_%s", job->item, var->item, var->name);
+    //nprintf(job->entity->main, NULL, "\n\t\t// scatter enum_enum=%c", job->parse.enum_enum);
+    if (job->parse.enum_enum=='\0') continue;
+    filteredNbToScatter+=1;
+  }
+  // S'il reste rien après le filtre, on a rien d'autre à faire
+  if (filteredNbToScatter==0) return "";  
+  for(i=0,var=job->variables_to_gather_scatter;var!=NULL;var=var->next,i+=1){
+    // Si c'est pas le scatter de l'ordre de la déclaration, on continue
+    if (i!=job->parse.iScatter) continue;
+    flushRealVariable(job,var);
+    // Pour l'instant, on ne scatter pas les node_coord
+    if (strcmp(var->name,"coord")==0) continue;
+    // Si c'est le cas d'une variable en 'in', pas besoin de la scaterer
+    if (var->inout==enum_in_variable) continue;
+    strcat(scatters,scatter(var));
+  }
+  job->parse.iScatter+=1;
+  return strdup(scatters);
 }
+*/
+
 
 // ****************************************************************************
-// * kHookSourceName
+// * Filtrage du SCATTER
 // ****************************************************************************
-char* kHookSourceNamespace(nablaMain *nabla){ return NULL;}
+char* xFilterScatter(astNode *n,nablaJob *job){
+  char *scatters=NULL;
+  int nbToScatter=0;
+  
+  if (job->parse.selection_statement_in_compound_statement){
+    nprintf(job->entity->main,
+            "/*selection_statement_in_compound_statement, nothing to do*/",
+            "/*if=>!lambdaScatter*/");
+    return "";
+  }
+  
+  if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
+    nablaError("[lambdaHookFilterScatter] Could not malloc our scatters!");
+
+  // On récupère le nombre de variables potentielles à scatterer
+//#warning variables_to_gather_scatter seem NULL!
+  //for(var=job->variables_to_gather_scatter;var!=NULL;var=var->next){
+  for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+    dbg("\n\t\t\t\t[lambdaHookFilterScatter] var '%s'", var->name);
+    if (!var->is_gathered) continue;
+    nprintf(job->entity->main, NULL, "/*%s gathered!*/",var->name);
+    if (!var->out) continue;
+    nprintf(job->entity->main, NULL, "/*out!*/");    
+
+    nprintf(job->entity->main, NULL, "/*%s*/",var->name);
+    nbToScatter+=1;
+    strcat(scatters,scatter(var));
+  }
+  return strdup(scatters);
+}

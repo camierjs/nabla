@@ -42,13 +42,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-//#include "frontend/ast.h"
-
 
 // ****************************************************************************
 // * hookReduction
 // ****************************************************************************
-void hookReduction(struct nablaMainStruct *nabla, astNode *n){
+void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
   //int fakeNumParams=0;
   const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);

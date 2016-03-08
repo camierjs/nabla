@@ -44,48 +44,6 @@
 #define _NABLA_KOKKOS_HOOK_H_
 
 const hooks* kokkos(nablaMain*);
-char* filterGather(astNode*,nablaJob*,GATHER_SCATTER_PHASE);
-char* filterScatter(nablaJob*);
-
-
-// ****************************************************************************
-// * HOOKS
-// ****************************************************************************
-void kHookSourceOpen(nablaMain*);
-void kHookSourceInclude(nablaMain*);
-char* kHookSourceNamespace(nablaMain*);
-
-void hookReduction(struct nablaMainStruct*,astNode*);
-void hookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-
-char *hookPragmaGccAlign(void);
-
-void hookMeshPrefix(nablaMain*);
-void hookMeshCore(nablaMain*);
-void hookMeshPostfix(nablaMain*);
-
-void kHookIteration(struct nablaMainStruct*);
-
-void hookFunctionName(nablaMain*);
-void hookFunction(nablaMain*, astNode*);
-void hookJob(nablaMain*, astNode*);
-void hookLibraries(astNode*, nablaEntity*);
-
-char* hookForAllPrefix(nablaJob*);
-char* hookForAllDump(nablaJob*);
-char* hookForAllPostfix(nablaJob*);
-char* hookForAllItem(nablaJob*,const char, const char, char);
-
-char* hookTokenPrefix(nablaMain*);
-char* hookTokenPostfix(nablaMain*);
-
-void hookSwitchToken(astNode*, nablaJob*);
-void hookAddExtraParameters(nablaMain*,nablaJob*,int*);
-void hookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-void hookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
-void hookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
-
-void hookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 #endif // _NABLA_KOKKOS_HOOK_H_
  

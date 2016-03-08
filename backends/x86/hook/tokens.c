@@ -42,10 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/kokkos/kokkos.h"
 #include "backends/x86/hook/hook.h"
 
-static void hookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
+static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
   assert(isNode);
   const char *token2function = isNode->next->token;
@@ -54,36 +53,38 @@ static void hookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
     nprintf(nabla, "/*IS_OP_INI*/", "_isOwn_(");
   else
     nprintf(nabla, "/*IS_OP_INI*/", "_%s_(", token2function);
-  // Et on purge le token pour pas qu'il soit parsé
+  // Et on purge le token pour pas qu'il soit parsÃ©
   isNode->next->token[0]=0;
 }
-static void hookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
+static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
   nprintf(nabla, "/*IS_OP_END*/", ")");
 }
+
 
 // *****************************************************************************
 // *
 // *****************************************************************************
-void hookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+void xHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
   assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
-  if (token==IS_OP_INI) hookIsTestIni(nabla,job,n);
+  if (token==IS_OP_INI) xHookIsTestIni(nabla,job,n);
   if (token==IS) return;
-  if (token==IS_OP_END) hookIsTestEnd(nabla,job,n);
+  if (token==IS_OP_END) xHookIsTestEnd(nabla,job,n);
 }
 
 
 // ****************************************************************************
 // * hookTurnTokenToOption
 // ****************************************************************************
-void hookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
+void xHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
   nprintf(nabla, "/*tt2o*/", "%s", opt->name);
 }
 
   
+ 
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static bool hookSwitchForall(astNode *n, nablaJob *job){
+static bool xHookSwitchForall(astNode *n, nablaJob *job){
   const char cnfg=job->item[0];
 
 // Preliminary pertinence test
@@ -122,49 +123,49 @@ static bool hookSwitchForall(astNode *n, nablaJob *job){
   }
   default: dbg("\n\t\t\t\t\t[hookSwitchForall] UNKNOWN!");
   }
-  // Attention au cas où on a un @ au lieu d'un statement
+  // Attention au cas oÃ¹ on a un @ au lieu d'un statement
   if (n->next->next->tokenid == AT){
     dbg("\n\t\t\t\t\t[hookSwitchForall] @ au lieu d'un statement!");
     nprintf(job->entity->main, "/* Found AT */", NULL);
   }
-  // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
-//#warning SKIP du nabla_item qui nous a renseigné sur le type de forall
+  // On skip le 'nabla_item' qui nous a renseignÃ© sur le type de forall
+//#warning SKIP du nabla_item qui nous a renseignÃ© sur le type de forall
   *n=*n->next->next;
   return true;
 }
 
 
 // *****************************************************************************
-// * hookSwitchAleph
+// * xHookSwitchAleph
 // *****************************************************************************
-static bool hookSwitchAleph(astNode *n, nablaJob *job){
+static bool xHookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
-  //nprintf(nabla, "/*hookSwitchAleph*/","/*hookSwitchAleph*/");
-  //if (n->token) dbg("\n\t\t\t\t\t[hookSwitchAleph] token: '%s'?", n->token);
+  //nprintf(nabla, "/*xHookSwitchAleph*/","/*xHookSwitchAleph*/");
+  if (n->token) dbg("\n\t\t\t\t\t[xHookSwitchAleph] token: '%s'?", n->token);
   
   switch(n->tokenid){
   case(LIB_ALEPH):{
-    dbg("\n\t\t\t\t\t[hookSwitchAleph] LIB_ALEPH");
+    dbg("\n\t\t\t\t\t[xHookSwitchAleph] LIB_ALEPH");
     nprintf(nabla, "/*LIB_ALEPH*/","/*LIB_ALEPH*/");
     return true;
   }
   case(ALEPH_RHS):{
-    dbg("\n\t\t\t\t\t[hookSwitchAleph] ALEPH_RHS");
+    dbg("\n\t\t\t\t\t[xHookSwitchAleph] ALEPH_RHS");
     nprintf(nabla, "/*ALEPH_RHS*/","rhs");
     // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
     job->parse.alephKeepExpression=true;
     return true;
   }
   case(ALEPH_LHS):{
-    dbg("\n\t\t\t\t\t[hookSwitchAleph] ALEPH_LHS");
+    dbg("\n\t\t\t\t\t[xHookSwitchAleph] ALEPH_LHS");
     nprintf(nabla, "/*ALEPH_LHS*/","lhs");
     // On utilise le 'alephKeepExpression' pour indiquer qu'on est sur des vecteurs
     job->parse.alephKeepExpression=true;
     return true;
   }
   case(ALEPH_MTX):{
-    dbg("\n\t\t\t\t\t[hookSwitchAleph] ALEPH_MTX");
+    dbg("\n\t\t\t\t\t[xHookSwitchAleph] ALEPH_MTX");
     nprintf(nabla, "/*ALEPH_MTX*/","mtx");
     job->parse.alephKeepExpression=true;
     return true;
@@ -210,26 +211,26 @@ static bool hookSwitchAleph(astNode *n, nablaJob *job){
 }
 
 /*****************************************************************************
- * Différentes actions pour un job Nabla
+ * DiffÃ©rentes actions pour un job Nabla
  *****************************************************************************/
-void hookSwitchToken(astNode *n, nablaJob *job){
+void xHookSwitchToken(astNode *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   const char forall=job->parse.enum_enum;
 
   //if (n->token) nprintf(nabla, NULL, "\n/*token=%s*/",n->token);
-  if (n->token) dbg("\n\t\t\t\t[hookSwitchToken] '%s'", n->token);
+  if (n->token) dbg("\n\t\t\t\t[xHookSwitchToken] token: '%s'?", n->token);
  
   // On tests si c'est un token Aleph
   // Si c'est le cas, on a fini
-  if (hookSwitchAleph(n,job)) return;
+  if (xHookSwitchAleph(n,job)) return;
   
-  //if (hookSwitchForall(n,job)) return;
-  hookSwitchForall(n,job);
+  //if (xHookSwitchForall(n,job)) return;
+  xHookSwitchForall(n,job);
   
   switch(n->tokenid){
     
-    // 'is_test' est traité dans le hook 'hookIsTest'
+    // 'is_test' est traitÃ© dans le hook 'xHookIsTest'
   case (IS): break;
   case (IS_OP_INI): break;
   case (IS_OP_END): break;
@@ -256,13 +257,11 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   }
 
   case(CONST):{
-    //nprintf(nabla, "/*CONST*/", "%sconst ", job->entity->main->hook->pragma->align());
-    nprintf(nabla, "/*CONST*/", "%sconst ", cHOOK(job->entity->main,pragma,align));
+    nprintf(nabla, "/*CONST*/", "%sconst ", cHOOK(nabla,pragma,align));
     break;
   }
   case(ALIGNED):{
-    //nprintf(nabla, "/*ALIGNED*/", "%s", job->entity->main->hook->pragma->align());
-    nprintf(nabla, "/*ALIGNED*/", "%s", cHOOK(job->entity->main,pragma,align));
+    nprintf(nabla, "/*ALIGNED*/", "%s", cHOOK(nabla,pragma,align));
     break;
   }
     
@@ -279,7 +278,7 @@ void hookSwitchToken(astNode *n, nablaJob *job){
                                                     (job->entity->libraries&(1<<with_real2))!=0*/)
       exit(NABLA_ERROR|
            fprintf(stderr,
-                   "[hookSwitchToken] Real3 can't be used with R library!\n"));
+                   "[nXHookSwitchToken] Real3 can't be used with R library!\n"));
     
     assert((job->entity->libraries&(1<<with_real))==0);
     //assert((job->entity->libraries&(1<<with_real2))==0);
@@ -309,18 +308,18 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   }    
     // On regarde si on hit un appel de fonction
   case(CALL):{
-    dbg("\n\t[hookSwitchToken] CALL?!");
-    // S'il y a des appels Aleph derrière, on ne déclenche pas la suite
+    dbg("\n\t[xHookSwitchToken] CALL?!");
+    // S'il y a des appels Aleph derriÃ¨re, on ne dÃ©clenche pas la suite
     if (n->next)
       if (n->next->children)
         if (n->next->children->tokenid==LIB_ALEPH) break;
-    dbg("\n\t[hookSwitchToken] JOB_CALL");
+    dbg("\n\t[xHookSwitchToken] JOB_CALL");
     nablaJob *foundJob;
     nprintf(nabla, "/*JOB_CALL*/", NULL);
     if ( n->next->children->children->token){
-      dbg("\n\t[hookSwitchToken] JOB_CALL next children children");
+      dbg("\n\t[xHookSwitchToken] JOB_CALL next children children");
       if (n->next->children->children->token){
-        dbg("\n\t[hookSwitchToken] JOB_CALL next children children token");
+        dbg("\n\t[xHookSwitchToken] JOB_CALL next children children token");
         char *callName=n->next->children->children->token;
         nprintf(nabla, "/*got_call*/", NULL);
         if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
@@ -334,7 +333,7 @@ void hookSwitchToken(astNode *n, nablaJob *job){
         }
       }
     }
-    dbg("\n\t[hookSwitchToken] JOB_CALL done");
+    dbg("\n\t[xHookSwitchToken] JOB_CALL done");
     break;
   }
 
@@ -355,15 +354,15 @@ void hookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case(FORALL_INI):{
-    dbg("\n\t\t\t\t[hookSwitchToken] FORALL_INI");
+    dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*xHookFilterGather*/", "%s",
-            xHookFilterGather(n,job));
+    nprintf(nabla, "/*xFilterGather*/",
+            xFilterGather(n,job));
     break;
   }
   case(FORALL_END):{
-     dbg("\n\t\t\t\t[hookSwitchToken] FORALL_END");
-     nprintf(nabla, "/*filterScatter*/", filterScatter(job));
+    dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_END");
+    nprintf(nabla, "/*xFilterScatter*/", xFilterScatter(job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;
@@ -412,7 +411,6 @@ void hookSwitchToken(astNode *n, nablaJob *job){
       nprintf(nabla, NULL, "]");
     }
     job->parse.isPostfixed=0;
-    // On flush le isDotXYZ
     job->parse.isDotXYZ=0;
     break;
   }
@@ -464,11 +462,8 @@ void hookSwitchToken(astNode *n, nablaJob *job){
     if (cnfgem=='f') nprintf(nabla, NULL, "NABLA_NODE_PER_FACE");
     break;
   }    
-    //case (INODE):{ if (cnfgem=='c') nprintf(nabla, NULL, "cell->node"); break; }    
 
   case (XYZ):{ nprintf(nabla, "/*XYZ*/", NULL); break;}
-    //case (NEXTCELL):{ nprintf(nabla, "/*token NEXTCELL*/", "nextCell"); break;}
-    //case (PREVCELL):{ nprintf(nabla, "/*token PREVCELL*/", "prevCell"); break;}
   case (NEXTNODE):{ nprintf(nabla, "/*token NEXTNODE*/", "nextNode"); break; }
   case (PREVNODE):{ nprintf(nabla, "/*token PREVNODE*/", "prevNode"); break; }
   case (PREVLEFT):{ nprintf(nabla, "/*token PREVLEFT*/", "cn.previousLeft()"); break; }

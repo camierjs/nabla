@@ -43,33 +43,25 @@
 #include "nabla.h"
 
 // ****************************************************************************
-// * OpenMP Sync
+// * nLambdaHookSourceOpen
 // ****************************************************************************
-char *nLambdaParallelOpenMPSync(void){
-  return "";//#pragma omp barrier\n";
+void xHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source
+  sprintf(srcFileName, "%s.cc", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
-
+  
 // ****************************************************************************
-// * OpenMP Spawn
+// * lambdaInclude
 // ****************************************************************************
-char *nLambdaParallelOpenMPSpawn(void){
-  return "";//#pragma omp spawn ";
+void xHookSourceInclude(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
 
-
 // ****************************************************************************
-// * OpenMP for loop
+// * lHookSourceName
 // ****************************************************************************
-char *nLambdaParallelOpenMPLoop(struct nablaMainStruct *n){
-  return "\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
-  //return "\\\n_Pragma(\"ivdep\")\\\n_Pragma(\"vector aligned\")\\\n_Pragma(\"omp parallel for firstprivate(NABLA_NB_CELLS,NABLA_NB_CELLS,NABLA_NB_NODES)\")\\\n";
-}
-
-
-// ****************************************************************************
-// * OpenMP includes
-// ****************************************************************************
-char *nLambdaParallelOpenMPIncludes(void){
-  return "#include <omp.h>\n";
-}
+char* xHookSourceNamespace(nablaMain *nabla){ return NULL;}

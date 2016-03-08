@@ -40,74 +40,10 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LAMBDA_H_
-#define _NABLA_LAMBDA_H_
+#ifndef _NABLA_LAMBDA_HOOK_H_
+#define _NABLA_LAMBDA_HOOK_H_
 
-void lHookSourceOpen(nablaMain*);
-void lHookSourceInclude(nablaMain*);
-char* lHookSourceNamespace(nablaMain*);
+const hooks* lambda(nablaMain*);
 
-
-char* lambdaHookIncludes(void);
-
-char* lambdaHookFilterGather(astNode*,nablaJob*);
-char* lambdaHookFilterScatter(astNode*,nablaJob*);
-
-void lambdaHookReduction(struct nablaMainStruct*,astNode*);
-void lambdaHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
-
-// Cilk+ parallel color
-char *nLambdaParallelCilkSync(void);
-char *nLambdaParallelCilkSpawn(void);
-char *nLambdaParallelCilkLoop(nablaMain *);
-char *nLambdaParallelCilkIncludes(void);
-
-// OpenMP parallel color
-char *nLambdaParallelOpenMPSync(void);
-char *nLambdaParallelOpenMPSpawn(void);
-char *nLambdaParallelOpenMPLoop(nablaMain *);
-char *nLambdaParallelOpenMPIncludes(void);
-
-// Void parallel color
-char *nLambdaParallelVoidSync(void);
-char *nLambdaParallelVoidSpawn(void);
-char *nLambdaParallelVoidLoop(nablaMain *);
-char *nLambdaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *lambdaHookPragmaIccIvdep(void);
-char *lambdaHookPragmaGccIvdep(void);
-
-// Dump into Header & Source
-void nLambdaDumpSource(nablaMain*);
-void nLambdaDumpHeader(nablaMain *);
-void nLambdaDumpMesh(nablaMain*);
-
-void nLambdaHookMeshPrefix(nablaMain*);
-void nLambdaHookMeshCore(nablaMain*);
-void nLambdaHookMeshPostfix(nablaMain*);
-
-void lHookIteration(struct nablaMainStruct*);
-bool lambdaHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
-
-void lambdaHookFunctionName(nablaMain*);
-void lambdaHookLibraries(astNode*, nablaEntity*);
-
-char* lambdaHookForAllDump(nablaJob*);
-char* lambdaHookForAllPostfix(nablaJob*);
-char* lambdaHookForAllItem(nablaJob*,const char, const char, char);
-
-void lambdaHookSwitchToken(astNode*, nablaJob*);
-void lambdaHookAddExtraParameters(nablaMain*,nablaJob*,int*);
-void lambdaHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int*);
-
-// Pour dumper les arguments necessaire dans le main
-void nLambdaHookDumpNablaArgumentList(nablaMain*,astNode*,int*);
-void nLambdaHookAddExtraArguments(nablaMain*,nablaJob*,int*);
-
-void lambdaHookIsTest(nablaMain*,nablaJob*,astNode*,int);
-
-hooks* lambda(nablaMain*);
-
-#endif // _NABLA_LAMBDA_H_
+#endif // _NABLA_LAMBDA_HOOK_H_
  

@@ -41,7 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/kokkos/kokkos.h"
 #include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
@@ -56,23 +55,23 @@ const static hookForAll forall={
 
 const static hookToken token={
   NULL,
-  hookSwitchToken,
+  xHookSwitchToken,
   xHookTurnTokenToVariable,
-  hookTurnTokenToOption,
+  xHookTurnTokenToOption,
   xHookSystem,
   xHookIteration,
   xHookExit,
   xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,
-  hookIsTest,
+  xHookIsTest,
   NULL
 };
 
 const static hookGrammar gram={
   NULL,
   NULL,
-  hookReduction,
+  xHookReduction,
   NULL,
   NULL,
   xHookDfsVariable
@@ -104,9 +103,9 @@ const static hookHeader header={
 };
 
 const static hookSource source={
-  kHookSourceOpen,
-  kHookSourceInclude,
-  kHookSourceNamespace
+  xHookSourceOpen,
+  xHookSourceInclude,
+  xHookSourceNamespace
 };
 
 const static hookMesh mesh={
