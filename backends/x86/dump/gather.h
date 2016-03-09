@@ -55,8 +55,9 @@ inline real3 rgather3k(const int a, const real3 *data){
   return real3(p[3*a+0],p[3*a+1],p[3*a+2]);
 }
 inline real3x3 rgather3x3k(const int a, const real3x3 *data){
-  const real3 *p=(real3*)data;
-  return real3x3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  //const real3 *p=(real3*)data;
+  //return real3x3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  return *(data+a);
 }
 
 inline real rGatherAndZeroNegOnes(const int a, const real *data){
@@ -155,9 +156,10 @@ inline void gather3x3ki(const int a, real3x3 *data, real3x3 *gthr, int i){
   if (i==2) (*gthr).z=value;
 }
 inline void gather3x3k(const int a, real3x3 *data, real3x3 *gthr){
-  gather3x3ki(a, data, gthr, 0);
-  gather3x3ki(a, data, gthr, 1);
-  gather3x3ki(a, data, gthr, 2);
+  //gather3x3ki(a, data, gthr, 0);
+  //gather3x3ki(a, data, gthr, 1);
+  //gather3x3ki(a, data, gthr, 2);
+  *gthr=*(data+a);
 }
 
 // ****************************************************************************

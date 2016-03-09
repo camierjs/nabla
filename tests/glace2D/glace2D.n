@@ -47,7 +47,7 @@ with ℝ²;
 
 // Options Hydro-Glace Euler/Sans reconstruction
 options{
-  Bool DEBUG = true;
+  Bool DEBUG = false;
   Bool option_glace = true;
   Bool option_chic = false;
   Real γ = 1.4;
@@ -60,18 +60,18 @@ options{
   Real option_x_min = 0.0;
   Real option_y_min = 0.0;
   Real option_z_min = 0.0;
-  Real option_x_max = 1.0;
-  Real option_y_max = 1.0;
-  Real option_z_max = 1.0;
+  Real option_x_max = 1.125;
+  Real option_y_max = 1.125;
+  Real option_z_max = 1.125;
   Real option_δt_initial = 0.0001;         // ! utilisé en dur dans le backend lambda !
   Real option_δt_min = 1e-12;
   Real option_δt_max = 0.01;
-  Real option_stoptime = 0.01;             // ! utilisé en dur dans le backend lambda !
-  Real option_δt_control = 0.9;            // Contrôle du pas de temps hydrodynamique
+  Real option_stoptime = 0.1/*15*/;        // ! utilisé en dur dans le backend lambda !
+  Real option_δt_control = 0.1;            // Contrôle du pas de temps hydrodynamique
   Real option_δt_min_variation = 0.99;     // Décroissance maximale tolérée du pas de temps
   Real option_δt_max_variation = 0.10;     // Amplitude maximale de croissance du pas de temps
   Bool option_δt_last_exact = true;
-  Integer option_max_iterations = 1;
+  Integer option_max_iterations = 32768;
   Real option_ini_zg_ρ = 1.0;
   Real option_ini_zd_ρ = 0.125;
   Real option_ini_zg_p = 1.0; 
@@ -214,12 +214,21 @@ void hydroInit(void) @ -25.0{
     node_u_matrix += local_matrix;
     node_u_second_member += local_matrix ⨂ reconstructed_u;
     node_u_second_member += CQs*reconstructed_p;
-    printf("\n\t[32m[std] node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",#,
-           node_u_second_member.x,node_u_second_member.y,node_u_second_member.z);
+    /*printf("\n\t[32m[std] node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",#,
+      node_u_second_member.x,node_u_second_member.y,node_u_second_member.z);*/
   }
 }
 ∀ nodes @ 12.1{
-  printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",uid,
+  if (DEBUG)
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_matrix[%d]=\n\t\t[\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]][0m",uid,
+         node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
+         node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
+         node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
+  if (DEBUG)
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",uid,
          node_u_second_member.x,
          node_u_second_member.y,
          node_u_second_member.z);
@@ -253,8 +262,7 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
          node_u_second_member.x,
          node_u_second_member.y,
          node_u_second_member.z);
-#warning [1;31mNO assert(determinent!=0.0)[m
-  //assert(determinent!=0.0);
+  assert(determinent!=0.0);
   node_u_matrix = inverseMatrix(node_u_matrix, determinent);
   node_u = node_u_matrix ⨂ node_u_second_member;
   node_u.z=0.0;
@@ -337,7 +345,7 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 ∀ cells void computeTotalSoundSpeed(void) @ -18.0,28.0{
   c=√(γ*p/ρ);
   if (DEBUG) printf("\n\t[31m[eos,n+1] c=%.15e[0m",c);
-  //if (uid==0) printf("\t[31m[eos,n+1] c[%d]=%.15e[0m\n",uid,c);
+  if (uid==0) printf("\t[31m[eos,n+1] c[%d]=%.15e[0m\n",uid,c);
 }
 
 // Calcul du δt par maille

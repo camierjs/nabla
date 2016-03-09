@@ -62,7 +62,7 @@ void cuHookSourceInclude(nablaMain*);
 char* cuHookSourceNamespace(nablaMain*);
 
 char *cuHookBits(void);
-char* cuHookGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* cuHookGather(nablaJob*,nablaVariable*);
 char* cuHookScatter(nablaVariable*);
 
 char* cuHookSysPrefix(void);

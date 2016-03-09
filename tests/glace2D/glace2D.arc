@@ -47,13 +47,13 @@
      <cartesian>
 			<nsd>4 1 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
-			<lx nx="4" prx="1.0">1.0</lx>
-			<ly ny="4" pry="1.0">1.0</ly>
+			<lx nx="8" prx="1.0">1.125</lx>
+			<ly ny="8" pry="1.0">1.125</ly>
 	  </cartesian> 
 	  </meshgenerator>
 	</mesh>
    <glace2-d>
-     <DEBUG>true</DEBUG>
+     <!--DEBUG>true</DEBUG>
      
      <option_chic>false</option_chic>
      <option_glace>true</option_glace>
@@ -66,21 +66,21 @@
      <option_quads>true</option_quads>
      <option_triangles>false</option_triangles>
 
-     <option_dtt_initial>0.00001</option_dtt_initial>
+     <option_dtt_initial>0.0001</option_dtt_initial>
      <option_dtt_min>1e-12</option_dtt_min>
      <option_dtt_max>0.01</option_dtt_max>
-     <option_dtt_control>0.15</option_dtt_control> <!-- CFL -->
+     <option_dtt_control>0.15</option_dtt_control>
      <option_stoptime>0.2</option_stoptime>
 
      <option_x_min>0.0</option_x_min>
      <option_x_interface>0.5</option_x_interface>
-     <option_x_max>1.0</option_x_max>
+     <option_x_max>1.125</option_x_max>
 
      <option_y_min>0.0</option_y_min>
-     <option_y_max>1.0</option_y_max>
+     <option_y_max>1.125</option_y_max>
 
      <option_z_min>0.0</option_z_min>
-     <option_z_max>0.0</option_z_max>
+     <option_z_max>0.125</option_z_max>
 
      <option_ini_zg_rh>1.0</option_ini_zg_rh>
      <option_ini_zg_p>1.0</option_ini_zg_p>
@@ -88,6 +88,6 @@
      <option_ini_zd_rh>0.125</option_ini_zd_rh>
      <option_ini_zd_p>0.1</option_ini_zd_p>
 
-     <option_max_iterations>1</option_max_iterations>
+     <option_max_iterations>8</option_max_iterations-->
    </glace2-d>
 </case>

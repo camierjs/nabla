@@ -42,27 +42,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-
-// ****************************************************************************
-// * Flush de la 'vraie' variable depuis celle déclarée en in/out
-// ****************************************************************************
-/*static void flushRealVariable(nablaJob *job, nablaVariable *var){
-  // On informe la suite que cette variable est en train d'être scatterée
-  nablaVariable *real_variable=
-    nMiddleVariableFind(job->entity->main->variables, var->name);
-  if (real_variable==NULL)
-    nablaError("Could not find real variable from scattered variables!");
-  real_variable->is_gathered=false;
-  }*/
-
+//#warning no WARP_BIT here
 
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* xCallScatter(nablaVariable* var){
+char* xCallScatterCells(nablaJob *job,
+                        nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char scatter[1024];
-  snprintf(scatter, 1024, "\n\t\tscatter%sk(cell_node[n*NABLA_NB_CELLS+c], &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":"3",
+  snprintf(scatter, 1024,
+           "\n\t\tscatter%sk(cell_node[NABLA_NB_CELLS*n+c], &gathered_%s_%s, %s_%s);",
+           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
            var->item, var->name,
            var->item, var->name);
   return strdup(scatter);
@@ -70,33 +61,54 @@ char* xCallScatter(nablaVariable* var){
 
 
 // ****************************************************************************
+// * Scatter for Faces
+// ****************************************************************************
+static char* xCallScatterFaces(nablaJob *job,
+                              nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  char scatter[1024];
+  snprintf(scatter, 1024,
+           "\n\t\tscatter%sk(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
+           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+           var->item, var->name,
+           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+f],",
+           var->item, var->name);
+  return strdup(scatter);
+}
+
+
+// ****************************************************************************
+// * Gather switch
+// ****************************************************************************
+char* xCallScatter(nablaJob *job,
+                   nablaVariable* var){
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  if (itm=='c') return xCallScatterCells(job,var);
+  //if (itm=='n') return xCallScatterNodes(job,var);
+  if (itm=='f') return xCallScatterFaces(job,var);
+  nablaError("Could not distinguish job item in xCallScatter for job '%s'!", job->name);
+  return NULL;
+}
+
+
+
+// ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
 char* xCallFilterScatter(astNode *n,nablaJob *job){
   char *scatters=NULL;
-  int nbToScatter=0;
-  
-  if (job->parse.selection_statement_in_compound_statement){
-    nprintf(job->entity->main,
-            "/*selection_statement_in_compound_statement, nothing to do*/",
-            "/*if=>!lambdaScatter*/");
-    return "";
-  }
-  
+    
   if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[lambdaHookFilterScatter] Could not malloc our scatters!");
+    nablaError("[xCallFilterScatter] Could not malloc our scatters!");
 
   // On récupère le nombre de variables potentielles à scatterer
    for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
-    dbg("\n\t\t\t\t[lambdaHookFilterScatter] var '%s'", var->name);
+    dbg("\n\t\t\t\t[xCallFilterScatter] var '%s'", var->name);
     if (!var->is_gathered) continue;
-    nprintf(job->entity->main, NULL, "/*%s gathered!*/",var->name);
+    nprintf(job->entity->main, NULL, "\n\t/*gathered %s?*/",var->name);
     if (!var->out) continue;
-    nprintf(job->entity->main, NULL, "/*out!*/");    
-
-    nprintf(job->entity->main, NULL, "/*%s*/",var->name);
-    nbToScatter+=1;
-    strcat(scatters,xCallScatter(var));
+    nprintf(job->entity->main, NULL, "/*out: %s*/",var->name);
+    strcat(scatters,xCallScatter(job,var));
   }
   return strdup(scatters);
 }

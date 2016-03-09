@@ -50,32 +50,30 @@
 // * data:    |....|....|....|....|..A.|....|....|....|B...|...C|..D.|....|....|
 // * ! à la séquence car quand c et d sont sur le même warp, ça percute
 // ******************************************************************************
-inline void scatterk(const int a, real *scatter, real *data){
-  double *s=(double *)scatter;
-  double *p=(double *)data;
-  p[a]=s[0];
+inline void scatterk(const int a, real *gathered, real *data){
+  *(data+a)=*gathered;
 }
 
 
 // *****************************************************************************
 // * Scatter for real3
 // *****************************************************************************
-inline void scatter3k(const int a, real3 *scatter, real3 *data){
-  double *s=(double *)scatter;
+inline void scatter3k(const int a, real3 *gathered, real3 *data){
   double *p=(double *)data;
-  p[3*a+0]=s[0];
-  p[3*a+1]=s[1];
-  p[3*a+2]=s[2];
+  p[3*a+0]=(*gathered).x;
+  p[3*a+1]=(*gathered).y;
+  p[3*a+2]=(*gathered).z;
 }
 
 
 // *****************************************************************************
 // * Scatter for real3x3
 // *****************************************************************************
-inline void scatter3k(const int a, real3x3 *s, real3x3 *data){
-  scatter3k(a,&s->x,&data->x);
-  scatter3k(a,&s->y,&data->y);
-  scatter3k(a,&s->z,&data->z);
+inline void scatter3x3k(const int a, real3x3 *gathered, real3x3 *data){
+  //scatter3k(a,&((*gathered).x),&((*data).x));
+  //scatter3k(a,&((*gathered).y),&((*data).y));
+  //scatter3k(a,&((*gathered).z),&((*data).z));
+  *(data+a)=*gathered;
 }
 
 #endif //  _LIB_STD_SCATTER_H_
