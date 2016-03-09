@@ -377,7 +377,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   
   // Par défault, left_of_assignment_expression arrive à false
   // Si on tombe sur un assignment_expression, et un en fils en unary_expression
-  // c'est qu'on passe à gauche du '=' et on 'écrit'
+  // c'est qu'on passe à gauche du '=' et qu'on 'écrit'
   if (n->ruleid==rulenameToId("assignment_expression")&&
       (n->children->ruleid==rulenameToId("unary_expression"))){
     //dbg("\n\t\t\t[dfsVariables] left_of_assignment_expression @ TRUE!");
@@ -413,7 +413,6 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
           if (left_of_assignment_expression) new->out|=true;
           if (!left_of_assignment_expression) new->in|=true;
           // Si elles n'ont pas le même support,
-          
           // c'est qu'il va falloir insérer un gather/scatter
           dbg("\n\t[dfsVariables] new->item='%s' vs job->item='%s'",
               new->item, job->item);
@@ -423,7 +422,6 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
             //var->is_gathered=true;
             new->is_gathered=true;
          }
-
           // Rajout à notre liste
           if (job->used_variables==NULL)
             job->used_variables=new;
@@ -437,7 +435,6 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
           new->in|=true;
         //if (!left_of_assignment_expression) new->in|=true;
       }
-      
       // Est-ce une option connue?
       const nablaOption *opt=nMiddleOptionFindName(nabla->options,token);
       if (opt!=NULL){
@@ -469,12 +466,21 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
                  left_of_assignment_expression);
 }
 
+
+// ****************************************************************************
+// * inout
+// ****************************************************************************
 static char* inout(const nablaVariable *var){
   if (var->in && var->out) return "inout";
   if (var->in && !var->out) return "in";
   if (!var->in && var->out) return "out";
   exit(NABLA_ERROR|fprintf(stderr, "\n[inout] in/inout/out error!\n"));
 }
+
+
+// ****************************************************************************
+// * dfsVariablesDump
+// ****************************************************************************
 void dfsVariablesDump(nablaMain *nabla, nablaJob *job, astNode *n){
   nablaVariable *var=job->used_variables;
   dbg("\n\t[dfsVariablesDump]:");

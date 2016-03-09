@@ -69,10 +69,10 @@ char* nOkinaSseBits(void);
 char* nOkinaAvxBits(void);
 char* nOkinaMicBits(void);
 
-char* nOkinaStdGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaSseGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
-char* nOkinaMicGather(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+char* nOkinaStdGather(nablaJob*,nablaVariable*);
+char* nOkinaSseGather(nablaJob*,nablaVariable*);
+char* nOkinaAvxGather(nablaJob*,nablaVariable*);
+char* nOkinaMicGather(nablaJob*,nablaVariable*);
 
 char* nOkinaStdScatter(nablaVariable*);
 char* nOkinaSseScatter(nablaVariable*);
@@ -114,7 +114,7 @@ char *nOkinaPragmaIccAlign(void);
 char *nOkinaPragmaGccAlign(void);
 
 // hooks/nOkinaHookGather
-char* gather(nablaJob*);
+char* gather(astNode*,nablaJob*);
 
 // hooks/nOkinaHookScatter
 char* scatter(nablaJob*);

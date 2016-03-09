@@ -46,6 +46,8 @@
 // ****************************************************************************
 // * nOkinaHeader for Std, Avx or Mic
 // ****************************************************************************
+extern char debug_h[];
+
 extern char knStdReal_h[];
 extern char knStdReal3_h[];
 extern char knStdInteger_h[];
@@ -53,6 +55,7 @@ extern char knStdGather_h[];
 extern char knStdScatter_h[];
 extern char knStdOStream_h[];
 extern char knStdTernary_h[];
+
 extern char knSseReal_h[];
 extern char knSseReal3_h[];
 extern char knSseInteger_h[];
@@ -60,6 +63,7 @@ extern char knSseGather_h[];
 extern char knSseScatter_h[];
 extern char knSseOStream_h[];
 extern char knSseTernary_h[];
+
 extern char knAvxReal_h[];
 extern char knAvxReal3_h[];
 extern char knAvxInteger_h[];
@@ -68,6 +72,7 @@ extern char knAvx2Gather_h[];
 extern char knAvxScatter_h[];
 extern char knAvxOStream_h[];
 extern char knAvxTernary_h[];
+
 extern char knMicReal_h[];
 extern char knMicReal3_h[];
 extern char knMicInteger_h[];
@@ -75,10 +80,16 @@ extern char knMicGather_h[];
 extern char knMicScatter_h[];
 extern char knMicOStream_h[];
 extern char knMicTernary_h[];
+
 static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
-static void nOkinaHeaderSimd(nablaMain *nabla){
+
+
+// ****************************************************************************
+// * nOkinaHeaderDump
+// ****************************************************************************
+void nOkinaHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
@@ -117,64 +128,5 @@ static void nOkinaHeaderSimd(nablaMain *nabla){
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdScatter_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdOStream_h));
   }
-}
-// ****************************************************************************
-// * nOkinaHeader for Dbg
-// ****************************************************************************
-extern char knDbg_h[];
-static void nOkinaHeaderDbg(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(knDbg_h));
-}
-// ****************************************************************************
-// * nOkinaHeader for Maths
-// ****************************************************************************
-extern char knMth_h[];
-static void nOkinaHeaderMth(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(knMth_h));
-}
-// ****************************************************************************
-// * nOkinaHeaderDump
-// ****************************************************************************
-void nOkinaHeaderDump(nablaMain *nabla){
-  assert(nabla->entity->name);
-  nOkinaHeaderSimd(nabla);
-  nOkinaHeaderDbg(nabla);
-  nOkinaHeaderMth(nabla);
-}
-
-
-
-// ****************************************************************************
-// * nOkinaHeaderIncludes
-// ****************************************************************************
-void nOkinaHeaderIncludes(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// *****************************************************************************\n\
-// * Okina includes\n\
-// *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
-#include <sys/time.h>\n\
-#include <stdlib.h>\n\
-#include <stdio.h>\n\
-#include <string.h>\n\
-#include <vector>\n\
-#include <math.h>\n\
-#include <assert.h>\n\
-#include <stdarg.h>\n\
-//#include <mathimf.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-using namespace std;\n\
-int hlt_level;\n\
-bool *hlt_exit;\n\
-%s // from nabla->parallel->includes()\n",
-          nabla->call->simd->includes(),
-          nabla->call->parallel->includes());
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+  fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
 }

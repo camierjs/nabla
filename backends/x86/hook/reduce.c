@@ -47,7 +47,6 @@
 // * hookReduction
 // ****************************************************************************
 void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  //int fakeNumParams=0;
   const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
   const astNode *global_var_node = n->children->next;
@@ -133,9 +132,14 @@ void %s(",item_var_name,global_var_name,job_name);
   nprintf(nabla, NULL,"){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
 \tconst int threads = omp_get_max_threads();\n\
-\tReal %s_per_thread[threads];\n\
+#ifndef __APPLE__\n\
+\treal *%s_per_thread=(real*)aligned_alloc(WARP_ALIGN,sizeof(real)*threads);\n\
+#else\n\
+\treal %s_per_thread[threads];\n\
+#endif\n\
+\t// GCC OK, not CLANG real %%s_per_thread[threads];\n\
 \tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
-\tFOR_EACH_%s_SHARED(%s,reduction_init){\n\
+\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
 \t\tconst int tid = omp_get_thread_num();\n\
 \t\t%s_per_thread[tid] = m%s(%s_%s[%s],%s_per_thread[tid]);\n\
 \t}\n\
@@ -145,8 +149,12 @@ void %s(",item_var_name,global_var_name,job_name);
 \t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])%sReduceM%sToDouble(real_global_%s))?\n\
 \t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
 \t}\n\
-}\n\n",   at_single_cst_node->token, // @ %s
+#ifndef __APPLE__\n\
+\tdelete [] %s_per_thread;\n\
+#endif\n}\n\n",
+          at_single_cst_node->token, // @ %s
           reduction_init,            // reduction_init=%e
+          global_var_name, // %s_per_thread
           global_var_name, // %s_per_thread
           global_var_name, // %s_per_thread
           (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
@@ -158,6 +166,6 @@ void %s(",item_var_name,global_var_name,job_name);
           global_var_name,
           global_var_name,global_var_name,global_var_name, // global_%s & real_global_%s & global_%s
           global_var_name,mix,global_var_name,min_or_max_operation,mix,global_var_name,
-          mix,global_var_name,mix,global_var_name
-          );  
+          mix,global_var_name,mix,global_var_name,
+          global_var_name);  
 }

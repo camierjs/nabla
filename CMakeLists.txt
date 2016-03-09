@@ -114,7 +114,7 @@ target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
                       NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
-                      NablaX86Hook NablaX86Dump NablaX86Aleph
+                      NablaX86Call NablaX86Hook NablaX86Dump NablaX86Aleph
                       NablaMiddlend)
 
 ###########

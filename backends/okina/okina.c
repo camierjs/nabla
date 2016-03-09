@@ -47,6 +47,18 @@
 
 
 // ****************************************************************************
+// * ivdep/align ICC Pragmas
+// ****************************************************************************
+char *nOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
+
+
+// ****************************************************************************
+// * ivdep/align  GCC Pragmas
+// ****************************************************************************
+char *nOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+
+
+// ****************************************************************************
 // * CALLS
 // ****************************************************************************
 const callHeader okinaHeaderStd={
@@ -130,20 +142,20 @@ backendCalls okinaCalls={
 // ****************************************************************************
 const hookForAll forall={
   NULL,
-  oHookForAllDump,
+  xHookForAllDump,
   xHookForAllItem,
-  nOkinaHookEnumeratePostfix
+  xHookForAllPostfix
 };
 
 const hookToken token={
   NULL,
-  nOkinaHookTokenSwitch,//xHookSwitchToken,
-  nOkinaHookVariablesTurnTokenToVariable,
+  xHookSwitchToken,
+  xHookTurnTokenToVariable,
   xHookTurnTokenToOption,
-  xHookSystem,//nOkinaHookVariablesSystem,
+  xHookSystem,
   xHookIteration,
   xHookExit,
-  nOkinaHookTime,
+  xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,
   xHookIsTest,
@@ -153,33 +165,25 @@ const hookToken token={
 const hookGrammar gram={
   NULL,
   NULL,
-  nOkinaHookReduction,
+  xHookReduction,
   NULL,
   NULL,
-  okinaHookDfsVariable
+  xHookDfsVariable
 };
 
 const hookCall call={
-  xHookAddCallNames,
-  nOkinaHookAddArguments,
-  xHookEntryPointPrefix,
-  nOkinaHookDfsForCalls,
-  nOkinaHookParamsAddExtra,
-  nOkinaHookParamsDumpList
-  };
-/*const hookCall call={
   xHookAddCallNames,
   xHookAddArguments,
   xHookEntryPointPrefix,
   xHookDfsForCalls,
   NULL,
   NULL
-  };*/
+  };
 
 const hookXyz xyzStd={
   NULL,
-  nOkinaStdPrevCell,
-  nOkinaStdNextCell,
+  xHookPrevCell,
+  xHookNextCell,
   xHookSysPostfix
 };
 const hookXyz xyzSse={
@@ -201,10 +205,10 @@ const hookXyz xyzMic={
   xHookSysPostfix
 };
 
-const hookPragma icc ={
+const hookPragma pragmaICC ={
   nOkinaPragmaIccAlign
 };
-const hookPragma gcc={
+const hookPragma pragmaGCC={
   nOkinaPragmaGccAlign
 };
 
@@ -213,7 +217,7 @@ const hookHeader header={
   xHookHeaderOpen,
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
-  nOkinaHeaderIncludes,
+  xHookHeaderIncludes,
   xHookHeaderPostfix
   };
 
@@ -225,23 +229,23 @@ const static hookSource source={
 
 const static hookMesh mesh={
   xHookMeshPrefix,
-  nOkinaMeshCore,
+  xHookMeshCore,
   xHookMeshPostfix
 };
 
 const static hookVars vars={
   xHookVariablesInit,
-  nOkinaVariablesPrefix,
-  nOkinaVariablesMalloc,
-  nOkinaVariablesFree
+  xHookVariablesPrefix,
+  xHookVariablesMalloc,
+  xHookVariablesFree
 };
 
 const static hookMain mains={
   xHookMainPrefix,
   xHookMainPreInit,
-  nOkinaMainVarInitKernel,
+  xHookMainVarInitKernel,
   xHookMainVarInitCall,
-  nOkinaMainHLT,
+  xHookMainHLT,
   xHookMainPostInit,
   xHookMainPostfix
 };
@@ -253,7 +257,7 @@ static hooks okinaHooks={
   &gram,
   &call,
   &xyzStd,
-  &gcc,
+  &pragmaGCC,
   &header,
   &source,
   &mesh,
@@ -304,7 +308,7 @@ hooks* okina(nablaMain *nabla){
 
   // Hook between ICC or GCC pragmas
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
-    nabla->hook->pragma=&icc;
+    nabla->hook->pragma=&pragmaICC;
 
   return &okinaHooks;
 }

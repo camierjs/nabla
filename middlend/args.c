@@ -282,6 +282,8 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   // Dunp des variables du job
   nablaVariable *var=job->used_variables;
   for(;var!=NULL;var=var->next,i+=1)
-    nprintf(nabla, NULL, "%s%s_%s",
-            (i==0)?"":",", var->item, var->name);
+    nprintf(nabla, NULL, "%s/*item:%s*/%s_%s",
+            (i==0)?"":",",
+            var->item,var->item,
+            var->name);
 }

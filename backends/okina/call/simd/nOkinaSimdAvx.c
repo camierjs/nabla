@@ -103,14 +103,11 @@ char* nOkinaAvxNextCell(int direction){
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nOkinaAvxGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL){
-    return strdup("int __attribute__((unused)) cw,ia,ib,ic,id;");
-  }
-  // Phase function call
+char* nOkinaAvxGatherCells(nablaJob *job,nablaVariable* var){
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+  snprintf(gather, 1024, "\
+\nint __attribute__((unused)) cw,ia,ib,ic,id;\
+\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 cw=(c<<WARP_BIT);\n\t\t\t\
 gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          ib=cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
@@ -131,14 +128,9 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* nOkinaAvxGatherNodes(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL){
-    return strdup("int nw;");
-  }
-  // Phase function call
+static char* nOkinaAvxGatherNodes(nablaJob *job,nablaVariable* var){ 
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+  snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
 gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
 			node_cell[8*(nw+1)+c],\n\t\t\t\%s\
@@ -167,10 +159,10 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaAvxGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
+char* nOkinaAvxGather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return nOkinaAvxGatherCells(job,var,phase);
-  if (itm=='n') return nOkinaAvxGatherNodes(job,var,phase);
+  if (itm=='c') return nOkinaAvxGatherCells(job,var);
+  if (itm=='n') return nOkinaAvxGatherNodes(job,var);
   nablaError("Could not distinguish job item in nOkinaAvxGather!");
   return NULL;
 }
@@ -207,7 +199,7 @@ const nWhatWith nOkinaAvxDefines[]={
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL","WARP_SIZE"},
   {"reducemin(a)","0.0"},
   {"rabs(a)","(opTernary(((a)<0.0),(-a),(a)))"},
   {"add(u,v)", "_mm256_add_pd(u,v)"},
@@ -259,6 +251,10 @@ const nWhatWith nOkinaAvxDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
   {NULL,NULL}
 };
 
@@ -272,9 +268,6 @@ const char* nOkinaAvxForwards[]={
   "static inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "static inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "static inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void nabla_ini_node_coords(void);",
-  //"static void verifCoords(void);",
-  //"static void avxTest(void);",
   NULL
 };
 

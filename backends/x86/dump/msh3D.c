@@ -486,7 +486,7 @@ static void nabla_ini_node_coord(void){
   for(int iNode=0; iNode<NABLA_NB_NODES; iNode+=1){
     const int n=iNode;
     Real x,y,z;
-/*#if defined(__MIC__)||defined(__AVX512F__)
+#if defined(__MIC__)||defined(__AVX512F__)
     x=set(xOf7(n+7), xOf7(n+6), xOf7(n+5), xOf7(n+4), xOf7(n+3), xOf7(n+2), xOf7(n+1), xOf7(n));
     y=set(yOf7(n+7), yOf7(n+6), yOf7(n+5), yOf7(n+4), yOf7(n+3), yOf7(n+2), yOf7(n+1), yOf7(n));
     z=set(zOf7(n+7), zOf7(n+6), zOf7(n+5), zOf7(n+4), zOf7(n+3), zOf7(n+2), zOf7(n+1), zOf7(n));
@@ -498,11 +498,11 @@ static void nabla_ini_node_coord(void){
     x=set(xOf7(n+1), xOf7(n));
     y=set(yOf7(n+1), yOf7(n));
     z=set(zOf7(n+1), zOf7(n));
-#else*/
+#else
     x=set(xOf7(n));
     y=set(yOf7(n));
     z=set(zOf7(n));
-//#endif
+#endif
     node_coord[iNode]=Real3(x,y,z);
     //dbgReal3(DBG_INI,node_coord[iNode]);
   }

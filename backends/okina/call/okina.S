@@ -40,12 +40,7 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-   //.section ".rodata"
-	.globl ${ABI_UNDERSCORE}knDbg_h
-	.globl ${ABI_UNDERSCORE}knMsh1D_c
-	.globl ${ABI_UNDERSCORE}knMsh3D_c
-	.globl ${ABI_UNDERSCORE}knMth_h
-	        
+  
 	.globl ${ABI_UNDERSCORE}knStdReal_h
 	.globl ${ABI_UNDERSCORE}knStdReal3_h
 	.globl ${ABI_UNDERSCORE}knStdInteger_h
@@ -78,20 +73,6 @@
    .globl ${ABI_UNDERSCORE}knMicGather_h
    .globl ${ABI_UNDERSCORE}knMicScatter_h
    .globl ${ABI_UNDERSCORE}knMicOStream_h
-        
-${ABI_UNDERSCORE}knDbg_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/debug/knDbg.h"
-   .byte 0
-${ABI_UNDERSCORE}knMsh1D_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh1D.c"
-   .byte 0
-${ABI_UNDERSCORE}knMsh3D_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/mesh/knMsh3D.c"
-   .byte 0
-${ABI_UNDERSCORE}knMth_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/dump/maths/knMth.h"
-   .byte 0
-
 
         
 ${ABI_UNDERSCORE}knStdReal_h:

@@ -329,23 +329,19 @@ void nMiddleFunctionFill(nablaMain *nabla,
 
   // On va chercher les paramètres standards
   // Si used_options et used_variables ont été utilisées
-  if (fct->used_options==NULL && fct->used_variables==NULL){
-    numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
-    nprintf(nabla, NULL,
-            "/*fct nMiddleDumpParameterTypeList numParams=%d*/",numParams);
-  }else{
-    numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
-    nprintf(nabla, NULL,"/*numParams=%d*/",numParams);
-    if (nabla->hook->grammar->dfsVariable())
-      nMiddleParamsDumpFromDFS(nabla,fct,numParams);
-  }
-    
+  numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
+  nprintf(nabla, NULL,"/*fct numParams=%d*/",numParams);
+  if (nabla->hook->grammar->dfsVariable())
+    nMiddleParamsDumpFromDFS(nabla,fct,numParams);
+      
   // On s'autorise un endroit pour insérer des paramètres
   //dbg("\n\t[nablaFctFill] adding ExtraParameters");
+  nprintf(nabla, NULL,"/*ExtraParameters*/");
   if (nabla->hook->call->addExtraParameters!=NULL && fct->is_an_entry_point)
     nabla->hook->call->addExtraParameters(nabla, fct, &numParams);
   
   //dbg("\n\t[nablaFctFill] launching dfsForCalls");
+  nprintf(nabla, NULL,"/*dfsForCalls*/");
   if (nabla->hook->call->dfsForCalls)
     nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
   //nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
@@ -360,7 +356,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   //dbg("\n\t[nablaFctFill] n rule is finally '%s'", n->rule);
   // On saute le premier '{'
   n=n->children->next;
-  nprintf(nabla, NULL, "){\n");
+  nprintf(nabla, NULL, "){");
   // On prépare le bon ENUMERATE
   dbg("\n\t[nablaFctFill] prefixEnumerate");
   nprintf(nabla, NULL, "\t%s", cHOOKj(nabla,forall,prefix,fct));

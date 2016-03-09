@@ -59,9 +59,9 @@
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-static char* scatter(nablaVariable* var){
+char* xScatter(nablaVariable* var){
   char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
+  snprintf(scatter, 1024, "\n\t\tscatter%sk(cell_node[n*NABLA_NB_CELLS+c], &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
            var->item, var->name,
            var->item, var->name);
@@ -146,7 +146,7 @@ char* xFilterScatter(astNode *n,nablaJob *job){
 
     nprintf(job->entity->main, NULL, "/*%s*/",var->name);
     nbToScatter+=1;
-    strcat(scatters,scatter(var));
+    strcat(scatters,xScatter(var));
   }
   return strdup(scatters);
 }

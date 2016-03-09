@@ -92,12 +92,8 @@ char* nOkinaSseNextCell(int direction){
 // * Gather pour un job sur les cells
 // ****************************************************************************
 static char* nOkinaSseGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL)
-    return strdup("int __attribute__((unused)) cw,ia,ib;");
-  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+  snprintf(gather, 1024, "int __attribute__((unused)) cw,ia,ib;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 cw=(c<<WARP_BIT);\n\t\t\t\
 gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          ib=cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
@@ -118,13 +114,8 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * En SSE, le gather aux nodes N'est PAS le même qu'aux cells
 // ****************************************************************************
 static char* nOkinaSseGatherNodes(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL){
-    return strdup("int nw;");
-  }
-  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
+  snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
 gatherFromNode_%sk%s(node_cell[8*nw+c],\n\t\t\t\
 %s\
@@ -192,7 +183,7 @@ const nWhatWith nOkinaSseDefines[]={
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL","WARP_SIZE"},
   {"reducemin(a)","0.0"},
   {"rabs(a)","(opTernary(((a)<0.0),(-a),(a)))"},
   {"set(a,b)", "_mm_set_pd(a,b)"},
@@ -240,6 +231,10 @@ const nWhatWith nOkinaSseDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
   {NULL,NULL}
 };
 
@@ -253,7 +248,6 @@ const char* nOkinaSseForwards[]={
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void nabla_ini_node_coords(void);",
   "static void verifCoords(void);",
   NULL
 };

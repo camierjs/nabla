@@ -52,7 +52,7 @@ typedef struct callHeaderStruct{
 // Structure des calls que l'on va utiliser afin de générer pour AVX ou MIC
 typedef struct callSimdStruct{
   char* (*bits)(void);
-  char* (*gather)(nablaJob*,nablaVariable*,GATHER_SCATTER_PHASE);
+  char* (*gather)(nablaJob*,nablaVariable*);
   char* (*scatter)(nablaVariable*);
   char* (*includes)(void);
 } callSimd;

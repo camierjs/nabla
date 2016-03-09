@@ -41,72 +41,13 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "nabla.tab.h"
-#include "backends/okina/call/call.h"
-#include "backends/okina/okina.h"
 
 
 // ****************************************************************************
-// * Fonction produisant l'ENUMERATE_*
+// * calls
 // ****************************************************************************
-static char* okinaSelectEnumerate(nablaJob *job){
-  const char *grp=job->scope;   // OWN||ALL
-  const char *rgn=job->region;  // INNER, OUTER
-  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //if (job->xyz!=NULL) return nOkinaHookDumpEnumerateXYZ(job);
-  if (itm=='\0') return "\n";// function nOkinaHookDumpEnumerate\n";
-  if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_CELL%s%s(c";
-  if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "//#warning Should be OUTER\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "#warning Should be ALL\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_NODE%s%s(n";
-  if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "#warning Should be OWN\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER OWN\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER OWN\n\tFOR_EACH_FACE%s%s(f";
-  if (itm=='e' && grp==NULL && rgn==NULL)     return "FOR_EACH_ENV%s%s(e";
-  if (itm=='m' && grp==NULL && rgn==NULL)     return "FOR_EACH_MAT%s%s(m";
-  
-  nablaError("Could not distinguish ENUMERATE!");
-  return NULL;
-}
-
-
-// ****************************************************************************
-// * oHookForAllDump
-// ****************************************************************************
-char* oHookForAllDump(nablaJob *job){
-  const char *forall=strdup(okinaSelectEnumerate(job));
-  const char *warping=job->parse.selection_statement_in_compound_statement?"":"_WARP";
-  char format[NABLA_MAX_FILE_NAME];
-  char str[NABLA_MAX_FILE_NAME];
-  dbg("\n\t[nOkinaHookDumpEnumerate] Preparing:");
-  dbg("\n\t[nOkinaHookDumpEnumerate]\t\tforall=%s",forall);
-  dbg("\n\t[nOkinaHookDumpEnumerate]\t\twarping=%s",warping);
-  dbg("\n\t[nOkinaHookDumpEnumerate] No returnFromArgument");
-  if (sprintf(format,"%s%s",  // FOR_EACH_XXX%s%s(x + ')'
-              forall,
-              job->is_a_function?"":")")<=0)
-    nablaError("Could not patch format!");
-  dbg("\n[nOkinaHookDumpEnumerate] format=%s",format);
-  if (sprintf(str,format,
-              warping,
-              "",
-              "")<=0)
-    nablaError("Could not patch warping within ENUMERATE!");
-  return strdup(str);
-}
-
-
-// ****************************************************************************
-// * Fonction postfix à l'ENUMERATE_*
-// ****************************************************************************
-char* nOkinaHookEnumeratePostfix(nablaJob *job){
-  return gather(job);
+char *xParallelLoop(nablaMain *nabla){return "";}
+char *xParallelIncludes(void){
+  return "int omp_get_max_threads(void){return 1;}\n\
+int omp_get_thread_num(void){return 0;}\n";
 }

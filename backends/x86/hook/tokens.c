@@ -362,7 +362,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   }
   case(FORALL_END):{
     dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_END");
-    nprintf(nabla, "/*xFilterScatter*/", xFilterScatter(job));
+    nprintf(nabla, "/*xFilterScatter*/", xFilterScatter(n,job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

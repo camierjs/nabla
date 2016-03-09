@@ -95,6 +95,7 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
  * Forward enumerates\n\
  *********************************************************/\n\
 #define FOR_EACH_PARTICLE(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
+#define FOR_EACH_PARTICLE_WARP(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
 \n\
 #define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 #define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
@@ -114,14 +115,22 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
     for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\
 \n\
 #define FOR_EACH_FACE(f) %sfor(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES;f+=1)\n\
 #define FOR_EACH_INNER_FACE(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_INNER_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
 #define FOR_EACH_OUTER_FACE(f)\
+ %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+#define FOR_EACH_OUTER_FACE_WARP(f)\
  %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
 // Pour l'instant en étant que multi-threadé, les 'own' sont les 'all'\n\
 #define FOR_EACH_OWN_INNER_FACE(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
+#define FOR_EACH_OWN_INNER_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
 #define FOR_EACH_OWN_OUTER_FACE(f)\
+ %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+#define FOR_EACH_OWN_OUTER_FACE_WARP(f)\
  %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n",
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE
+          parallel_prefix_for_loop, // FOR_EACH_PARTICLE_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
@@ -130,9 +139,14 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
           parallel_prefix_for_loop, // FOR_EACH_NODE
           parallel_prefix_for_loop, // FOR_EACH_NODE_WARP
           parallel_prefix_for_loop, // FOR_EACH_FACE
+          parallel_prefix_for_loop, // FOR_EACH_FACE_WARP
           parallel_prefix_for_loop, // FOR_EACH_INNER_FACE
+          parallel_prefix_for_loop, // FOR_EACH_INNER_FACE_WARP
           parallel_prefix_for_loop, // FOR_EACH_OUTER_FACE
+          parallel_prefix_for_loop, // FOR_EACH_OUTER_FACE_WARP
           parallel_prefix_for_loop, // FOR_EACH_OWN_INNER_FACE
-          parallel_prefix_for_loop  // FOR_EACH_OWN_OUTER_FACE
+          parallel_prefix_for_loop, // FOR_EACH_OWN_INNER_FACE_WARP
+          parallel_prefix_for_loop, // FOR_EACH_OWN_OUTER_FACE
+          parallel_prefix_for_loop  // FOR_EACH_OWN_OUTER_FACE_WARP
           );
 }

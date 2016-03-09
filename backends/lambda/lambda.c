@@ -42,6 +42,35 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/x86/hook/hook.h"
+#include "backends/x86/call/call.h"
+
+
+// ****************************************************************************
+// * CALLS
+// ****************************************************************************
+static const callHeader xHeader={
+  headerForwards,
+  headerDefines,
+  headerTypedef
+};
+static const callSimd simd={
+  NULL,
+  xGather,
+  xScatter,
+  NULL
+};
+static const callParallel parallel={
+  NULL,
+  NULL,
+  xParallelLoop,
+  xParallelIncludes
+};
+static backendCalls calls={
+  &xHeader,
+  &simd,
+  &parallel
+};
+
 
 // ****************************************************************************
 // * HOOKS
@@ -137,7 +166,7 @@ static hooks lambdaHooks={
   &gram,
   &call,
   &xyz,
-  NULL,
+  NULL,//pragma
   &header,
   &source,
   &mesh,
@@ -145,4 +174,11 @@ static hooks lambdaHooks={
   &mains
 };
 
-const hooks* lambda(nablaMain *nabla){return &lambdaHooks;}
+
+// ****************************************************************************
+// * lambda
+// ****************************************************************************
+const hooks* lambda(nablaMain *nabla){
+  nabla->call=&calls;
+  return &lambdaHooks;
+}

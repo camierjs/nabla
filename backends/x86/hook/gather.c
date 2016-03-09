@@ -117,7 +117,7 @@ static char* xGatherFaces(nablaJob *job,
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-static char* xGather(nablaJob *job,nablaVariable* var){
+char* xGather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   if (itm=='c') return xGatherCells(job,var);
   if (itm=='n') return xGatherNodes(job,var);
@@ -150,7 +150,11 @@ char* xFilterGather(astNode *n,nablaJob *job){
     }
     nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
     dbg("\n\t\t\t\t[xFilterGather] strcat");
-    strcat(gather_src_buffer,xGather(job,var));
+    if (job->entity->main->call){
+      strcat(gather_src_buffer,
+             job->entity->main->call->simd->gather(job,var));
+    }else
+      strcat(gather_src_buffer,xGather(job,var));
   }
   dbg("\n\t\t\t\t[xFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");

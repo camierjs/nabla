@@ -46,47 +46,13 @@ char* nOkinaStdIncludes(void){return "";}
 
 char *nOkinaStdBits(void){return "64";}
 
-
-// ****************************************************************************
-// * Prev Cell
-// ****************************************************************************
-char* nOkinaStdPrevCell(int direction){
-  if (direction==DIR_X)
-    return "gatherk_and_zero_neg_ones(cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  if (direction==DIR_Y)
-    return "gatherk_and_zero_neg_ones(cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  if (direction==DIR_Z)
-    return "gatherk_and_zero_neg_ones(cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  assert(NULL);
-  return NULL;
-}
-
-
-// ****************************************************************************
-// * Next Cell
-// ****************************************************************************
-char* nOkinaStdNextCell(int direction){
-  if (direction==DIR_X)
-    return "gatherk_and_zero_neg_ones(cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  if (direction==DIR_Y)
-    return "gatherk_and_zero_neg_ones(cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  if (direction==DIR_Z)
-    return "gatherk_and_zero_neg_ones(cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],";
-  assert(NULL);
-  return NULL;
-}
-
-
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
 static char* nOkinaStdGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL)
-    return strdup("int __attribute__((unused)) cw,ia;");
-  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+  snprintf(gather, 1024, "int __attribute__((unused)) cw,ia;\n\
+\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 cw=(c<<WARP_BIT);\n\t\t\t\
 gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
@@ -110,13 +76,8 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
 static char* nOkinaStdGatherNodes(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
-  // Phase de déclaration
-  if (phase==GATHER_SCATTER_DECL){
-    return strdup("int nw;");
-  }
-  // Phase function call
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
+  snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
 //#warning continue node_cell_corner\n\
 //if (node_cell_corner[8*nw+c]==-1) continue;\n\
@@ -185,7 +146,7 @@ const nWhatWith nOkinaStdDefines[]={
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
-  {"NABLA_NB_GLOBAL_WARP","WARP_SIZE"},
+  {"NABLA_NB_GLOBAL","WARP_SIZE"},
   {"reducemin(a)","0.0"},
   {"rabs(a)","fabs(a)"},
   {"set(a)", "a"},
@@ -233,8 +194,15 @@ const nWhatWith nOkinaStdDefines[]={
   {"MD_DirX","0"},
   {"MD_DirY","1"},
   {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
   {"File", "std::ofstream&"},
   {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
+  {"xs_node_cell(c)", "node_cell[n*NABLA_NODE_PER_CELL+c]"},
+  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
+  {"xs_face_node(n)", "face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}
 };
 
@@ -247,7 +215,6 @@ const char* nOkinaStdForwards[]={
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void nabla_ini_node_coords(void);",
   "static void verifCoords(void);",
   NULL
 };

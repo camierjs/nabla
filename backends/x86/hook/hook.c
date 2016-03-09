@@ -247,6 +247,7 @@ void xHookHeaderIncludes(nablaMain *nabla){
 // *****************************************************************************\n\
 // * Includes\n\
 // *****************************************************************************\n\
+%s // from nabla->simd->includes\n\
 #include <sys/time.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
@@ -261,9 +262,10 @@ void xHookHeaderIncludes(nablaMain *nabla){
 using namespace std;\n\
 int hlt_level;\n\
 bool *hlt_exit;\n\
-int omp_get_max_threads(void){return 1;}\n\
-int omp_get_thread_num(void){return 0;}\n");
-  nMiddleDefines(nabla,headerDefines);
-  nMiddleTypedefs(nabla,headerTypedef);
-  nMiddleForwards(nabla,headerForwards);
+%s // from nabla->parallel->includes()\n",
+          cCALL(nabla,simd,includes),
+          cCALL(nabla,parallel,includes));
+  nMiddleDefines(nabla,nabla->call->header->defines);
+  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
+  nMiddleForwards(nabla,nabla->call->header->forwards);
 }

@@ -113,8 +113,11 @@ NABLA_STATUS xHookMainPostInit(nablaMain*);
 NABLA_STATUS xHookMainPostfix(nablaMain*);
 
 // gather/scatter
+char* xGather(nablaJob*,nablaVariable*);
+char* xScatter(nablaVariable*);
+
 char* xFilterGather(astNode*,nablaJob*);
-char* xFilterScatter(nablaJob*);
+char* xFilterScatter(astNode*,nablaJob*);
 
 
 #endif // _NABLA_X86_HOOK_H_

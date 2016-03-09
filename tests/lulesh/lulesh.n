@@ -171,9 +171,7 @@ void ini(void) @ -10.0{
   δt=(option_chaos)?option_δt_initial*option_chaos_seed:0.0;
   δt_hydro=option_δt_hydro;
   δt_courant=option_δt_courant;
-//  if (option_eosvmax==0.) fatal("ini", "option_eosvmax==0.");
-//  if (option_eosvmin==0.) fatal("ini", "option_eosvmin==0.");
-//  atexit(dumpFinalEnergy);
+  //atexit(dumpFinalEnergy);
 }
 
 ∀ nodes void choasNodes(void) out (node coord) @ -12.0{
@@ -1027,8 +1025,6 @@ void dumpTimeConstraintsForElems(void) @ 12.3{
   //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
   //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
-
-
 
 
 // ****************************************************************************

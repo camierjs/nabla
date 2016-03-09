@@ -40,7 +40,11 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_MATH_HPP_
-#define _KN_MATH_HPP_
+#ifndef _NABLA_X86_CALL_H_
+#define _NABLA_X86_CALL_H_
 
-#endif // _KN_MATH_HPP_
+char *xParallelLoop(nablaMain*);
+char *xParallelIncludes(void);
+
+#endif // _NABLA_X86_CALL_H_
+ 
