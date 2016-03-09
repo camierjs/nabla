@@ -56,6 +56,7 @@ const nWhatWith headerTypedef[]={
 };
 
 const nWhatWith headerDefines[]={
+  {"WARP_BIT", "0"},
   {"WARP_SIZE", "1"},
   {"WARP_ALIGN", "8"}, 
   {"NABLA_NB_GLOBAL","1"},

@@ -49,18 +49,20 @@ char *nOkinaStdBits(void){return "64";}
 // ****************************************************************************
 // * Gather for Cells
 // ****************************************************************************
-static char* nOkinaStdGatherCells(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
+static char* nOkinaStdGatherCells(nablaJob *job,
+                                  nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
-  snprintf(gather, 1024, "int __attribute__((unused)) cw,ia;\n\
+  snprintf(gather, 1024, "\
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-cw=(c<<WARP_BIT);\n\t\t\t\
-gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
+const int cw=(c<<WARP_BIT);\n\t\t\t\
+gather%sk(cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            var->item,
            var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            strcmp(var->type,"real")==0?"":"3",
            var->item,
            var->name,
@@ -75,7 +77,9 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // * Gather for Nodes
 // * En STD, le gather aux nodes est le même qu'aux cells
 // ****************************************************************************
-static char* nOkinaStdGatherNodes(nablaJob *job, nablaVariable* var, GATHER_SCATTER_PHASE phase){
+static char* nOkinaStdGatherNodes(nablaJob *job,
+                                  nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
   snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
@@ -85,11 +89,11 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 %s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            var->item,
            var->name,
-           strcmp(var->type,"real")==0?"real":"real3",
-           strcmp(var->type,"real")==0?"":"3",
+           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+           strcmp(var->type,"real")==0?"":dim1D?"":"3",
            var->dim==0?"":"Array8",
            var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
            var->item,
@@ -104,10 +108,10 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaStdGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
+char* nOkinaStdGather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return nOkinaStdGatherCells(job,var,phase);
-  if (itm=='n') return nOkinaStdGatherNodes(job,var,phase);
+  if (itm=='c') return nOkinaStdGatherCells(job,var);
+  if (itm=='n') return nOkinaStdGatherNodes(job,var);
   nablaError("Could not distinguish job item in nOkinaStdGather!");
   return NULL;
 }

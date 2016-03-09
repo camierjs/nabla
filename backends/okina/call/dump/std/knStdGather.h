@@ -44,6 +44,42 @@
 #define _KN_STD_GATHER_H_
 
 
+// ****************************************************************************
+// * Rgather*
+// ****************************************************************************
+inline real rgatherk(const int a, const real *data){
+  return *(data+a);
+}
+inline real3 rgather3k(const int a, const real3 *data){
+  const double *p=(double*)data;
+  return real3(p[3*a+0],p[3*a+1],p[3*a+2]);
+}
+/*inline real3x3 rgather3x3k(const int a, const real3x3 *data){
+  const real3 *p=(real3*)data;
+  return real3x3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  }*/
+
+inline real rGatherAndZeroNegOnes(const int a, const real *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+inline real3 rGatherAndZeroNegOnes(const int a, const real3 *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+/*inline real3x3 rGatherAndZeroNegOnes(const int a,const  real3x3 *data){
+  if (a>=0) return *(data+a);
+  return real3x3(0.0);
+  }*/
+inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const real3 *data){
+  const int i=3*8*a+3*corner;
+  const double *p=(double*)data;
+  if (a>=0) return real3(p[i+0],p[i+1],p[i+2]);
+  return 0.0;
+}
+
+
+
 /******************************************************************************
  * Gather: (X is the data @ offset x)       a            b       c   d
  * data:   |....|....|....|....|....|....|..A.|....|....|B...|...C|..D.|....|      

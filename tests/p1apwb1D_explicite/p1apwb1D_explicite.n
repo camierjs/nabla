@@ -214,7 +214,7 @@ void tstForQuit(void) @ 4.0 {
   if ((time<(option_stoptime-δt))) return;
   if (option_dump_output){
     file(results,plot);
-    dumpSolution(results);
+    dumpSolution(results,center,cP,&n_time);
   }else printf("\n");
   exit;
 }

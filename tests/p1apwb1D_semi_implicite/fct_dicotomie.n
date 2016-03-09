@@ -45,8 +45,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "math.h"
 
-ℝ fct_dicotomie(ℝ x,ℝ y,ℝ u,ℝ v){
-  const ℝ e1=tau*δt/(epsilon²);
+ℝ fct_dicotomie(ℝ x,ℝ y,ℝ u,ℝ v,ℝ deltaT){
+  const ℝ e1=tau*deltaT/(epsilon²);
   const ℝ e2=e1/(e1+1);
   ℝ a2 =1.0;
   ℝ y1 =y;

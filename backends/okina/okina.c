@@ -68,8 +68,8 @@ const callHeader okinaHeaderStd={
 };
 const callSimd okinaSimdStd={
   nOkinaStdBits,
-  nOkinaStdGather,
-  nOkinaStdScatter,
+  xGather,//nOkinaStdGather,
+  xScatter,//nOkinaStdScatter,
   nOkinaStdIncludes
 };
 

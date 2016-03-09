@@ -180,7 +180,7 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     }
     
     if (n->tokenid == END_OF_CALL){
-      nabla->hook->call->addArguments(nabla,fct);
+      //nabla->hook->call->addArguments(nabla,fct);
       break;
     }
 
@@ -344,7 +344,6 @@ void nMiddleFunctionFill(nablaMain *nabla,
   nprintf(nabla, NULL,"/*dfsForCalls*/");
   if (nabla->hook->call->dfsForCalls)
     nabla->hook->call->dfsForCalls(nabla,fct,n,namespace,nParams);
-  //nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
     
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");

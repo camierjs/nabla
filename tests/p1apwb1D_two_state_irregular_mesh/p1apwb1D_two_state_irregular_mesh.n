@@ -206,19 +206,16 @@ void dbgLoop(void) @ 1.0{
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File AP4)
-  in (cell cU, cell cP, cell cT, cell cM){
-      AP4 << "\t" <<center
+∀ cells void dumpSolution(File AP4){
+      AP4 << "\t" << center
           << "\t" << cP
-          <<"\t"<<P_condlimi(center,n_time)
+          << "\t" << P_condlimi(center,n_time)
           << "\n";  
 }
 
-∀ cells void dumpOutput(void)
-  in (cell cU, cell cP, cell cT, cell cM){
+∀ cells void dumpOutput(void){
   if  (center!=0.005) continue;
   output << n_time
-    //<< "\t" << cU
          << "\t" << cP
          << "\n";
 }  
@@ -227,7 +224,7 @@ void tstForQuit(void) @ 4.0 {
   //printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
   //    GlobalIteration, time,(double)δt);
   if (option_dump_output){
-    dumpOutput();
+    dumpOutput(center,&n_time,cP);
     output << "\n";
   }
   // file(resultsvstime ,plot);
@@ -237,7 +234,7 @@ void tstForQuit(void) @ 4.0 {
     file(AP4,plot);
     //printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-    dumpSolution(AP4);
+    dumpSolution(AP4,center,cP,&n_time);
   }else printf("\n");
   exit;
 }
