@@ -51,6 +51,7 @@ static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
 
+
 // ****************************************************************************
 // * extern definitions from dDump.S
 // ****************************************************************************
@@ -70,7 +71,7 @@ extern char msh3D_c[];
 // ****************************************************************************
 // * dumpHeader
 // ****************************************************************************
-void dumpHeader(nablaMain *nabla){
+void xDumpHeader(nablaMain *nabla){
   assert(nabla->entity->name);
   fprintf(nabla->entity->hdr,dumpExternalFile(types_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(ternary_h));
@@ -80,10 +81,11 @@ void dumpHeader(nablaMain *nabla){
   fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
 }
 
+
 // ****************************************************************************
 // * dumpMesh
 // ****************************************************************************
-void dumpMesh(nablaMain *nabla){
+void xDumpMesh(nablaMain *nabla){
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(msh1D_c));
   else if ((nabla->entity->libraries&(1<<with_real2))!=0)

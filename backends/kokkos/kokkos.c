@@ -49,14 +49,14 @@
 // * CALLS
 // ****************************************************************************
 const static callHeader xHeader={
-  headerForwards,
-  headerDefines,
-  headerTypedef
+  xCallHeaderForwards,
+  xCallHeaderDefines,
+  xCallHeaderTypedef
 };
 const static callSimd simd={
   NULL,
-  xGather,
-  xScatter,
+  xCallGather,
+  xCallScatter,
   NULL
 };
 const static callParallel parallel={

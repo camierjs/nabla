@@ -58,7 +58,7 @@ void xHookHeaderOpen(nablaMain *nabla){
 // ****************************************************************************
 void xHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
-  dumpHeader(nabla);
+  xDumpHeader(nabla);
 }
 
 // ****************************************************************************

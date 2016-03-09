@@ -4,13 +4,11 @@ set(BACKEND_LIB_HOOK_C
     hook.c
     header.c
     forall.c
-    gather.c
     main.c
     vars.c
     mesh.c
     data.c
     reduce.c
-    scatter.c
     source.c
     tokens.c)
 

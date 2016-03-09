@@ -41,35 +41,36 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/okina/call/call.h"
 #include "backends/okina/okina.h"
 #include "backends/x86/hook/hook.h"
+#include "backends/x86/call/call.h"
+#include "backends/okina/call/call.h"
 
 
 // ****************************************************************************
 // * ivdep/align ICC Pragmas
 // ****************************************************************************
-char *nOkinaPragmaIccAlign(void){ return "__declspec(align(64)) "; }
+char *nOkinaPragmaIccAlign(void){return "__declspec(align(WARP_ALIGN)) ";}
 
 
 // ****************************************************************************
 // * ivdep/align  GCC Pragmas
 // ****************************************************************************
-char *nOkinaPragmaGccAlign(void){ return "__attribute__ ((aligned(WARP_ALIGN))) "; }
+char *nOkinaPragmaGccAlign(void){return "__attribute__ ((aligned(WARP_ALIGN))) ";}
 
 
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
 const callHeader okinaHeaderStd={
-  nOkinaStdForwards,
-  nOkinaStdDefines,
-  nOkinaStdTypedef
+  nOkinaStdForwards, //xCallHeaderForwards,
+  nOkinaStdDefines, //xCallHeaderDefines,
+  nOkinaStdTypedef // xCallHeaderTypedef
 };
 const callSimd okinaSimdStd={
   nOkinaStdBits,
-  xGather,//nOkinaStdGather,
-  xScatter,//nOkinaStdScatter,
+  xCallGather,
+  xCallScatter,
   nOkinaStdIncludes
 };
 

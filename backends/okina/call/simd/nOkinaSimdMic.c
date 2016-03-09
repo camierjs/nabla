@@ -125,7 +125,7 @@ char* nOkinaMicNextCell(int direction){
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
+char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "int __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;\n\
 \n\t\t\t%s gathered_%s_%s;\n\t\t\t\
@@ -152,7 +152,7 @@ gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){ 
+static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var){ 
   char gather[1024];
   snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
@@ -191,10 +191,10 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],%s\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaMicGather(nablaJob *job,nablaVariable* var, GATHER_SCATTER_PHASE phase){
+char* nOkinaMicGather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return nOkinaMicGatherCells(job,var,phase);
-  if (itm=='n') return nOkinaMicGatherNodes(job,var,phase);
+  if (itm=='c') return nOkinaMicGatherCells(job,var);
+  if (itm=='n') return nOkinaMicGatherNodes(job,var);
   nablaError("Could not distinguish job item in nOkinaMicGather!");
   return NULL;
 }

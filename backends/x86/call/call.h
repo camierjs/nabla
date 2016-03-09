@@ -43,8 +43,19 @@
 #ifndef _NABLA_X86_CALL_H_
 #define _NABLA_X86_CALL_H_
 
+extern const nWhatWith xCallHeaderDefines[];
+extern const char* xCallHeaderForwards[];
+extern const nWhatWith xCallHeaderTypedef[];
+
 char *xParallelLoop(nablaMain*);
 char *xParallelIncludes(void);
+
+// gather/scatter
+char* xCallGather(nablaJob*,nablaVariable*);
+char* xCallScatter(nablaVariable*);
+
+char* xCallFilterGather(astNode*,nablaJob*);
+char* xCallFilterScatter(astNode*,nablaJob*);
 
 #endif // _NABLA_X86_CALL_H_
  

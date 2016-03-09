@@ -43,10 +43,6 @@
 #ifndef _NABLA_X86_HOOK_H_
 #define _NABLA_X86_HOOK_H_
 
-extern const nWhatWith headerDefines[];
-extern const char* headerForwards[];
-extern const nWhatWith headerTypedef[];
-
 // forall
 char* xHookForAllDump(nablaJob*);
 char* xHookForAllItem(nablaJob*,const char,const char,char);
@@ -111,14 +107,6 @@ NABLA_STATUS xHookMainVarInitCall(nablaMain*);
 NABLA_STATUS xHookMainHLT(nablaMain*);
 NABLA_STATUS xHookMainPostInit(nablaMain*);
 NABLA_STATUS xHookMainPostfix(nablaMain*);
-
-// gather/scatter
-char* xGather(nablaJob*,nablaVariable*);
-char* xScatter(nablaVariable*);
-
-char* xFilterGather(astNode*,nablaJob*);
-char* xFilterScatter(astNode*,nablaJob*);
-
 
 #endif // _NABLA_X86_HOOK_H_
  

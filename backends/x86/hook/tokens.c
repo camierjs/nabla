@@ -43,6 +43,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "backends/x86/hook/hook.h"
+#include "backends/x86/call/call.h"
 
 static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
@@ -356,13 +357,13 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL_INI):{
     dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*xFilterGather*/",
-            xFilterGather(n,job));
+    nprintf(nabla, "/*xCallFilterGather*/",
+            xCallFilterGather(n,job));
     break;
   }
   case(FORALL_END):{
     dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_END");
-    nprintf(nabla, "/*xFilterScatter*/", xFilterScatter(n,job));
+    nprintf(nabla, "/*xCallFilterScatter*/", xCallFilterScatter(n,job));
     nprintf(nabla, "/*FORALL_END*/", "\n\t\t}\n\t");//FORALL_END
     job->parse.enum_enum='\0';
     job->parse.turnBracketsToParentheses=false;

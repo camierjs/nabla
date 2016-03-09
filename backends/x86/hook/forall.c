@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/x86/hook/hook.h"
+#include "backends/x86/call/call.h"
 
 // ****************************************************************************
 // * Fonction produisant l'ENUMERATE_*
@@ -130,5 +131,5 @@ char* xHookForAllItem(nablaJob *j,
 // ****************************************************************************
 char* xHookForAllPostfix(nablaJob *job){
   dbg("\n\t[xHookForAllPostfix]");
-  return xFilterGather(NULL,job);
+  return xCallFilterGather(NULL,job);
 }

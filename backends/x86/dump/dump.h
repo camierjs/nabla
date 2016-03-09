@@ -43,7 +43,7 @@
 #ifndef _NABLA_LIB_DUMP_H_
 #define _NABLA_LIB_DUMP_H_
 
-void dumpHeader(nablaMain*);
-void dumpMesh(nablaMain*);
+void xDumpHeader(nablaMain*);
+void xDumpMesh(nablaMain*);
 
 #endif // _NABLA_LIB_DUMP_H_

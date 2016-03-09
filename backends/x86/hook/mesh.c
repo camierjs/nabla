@@ -267,7 +267,7 @@ void xHookMeshCore(nablaMain *nabla){
     xHookMesh3D(nabla);
     xHookMesh3DConnectivity(nabla);
   }
-  dumpMesh(nabla);
+  xDumpMesh(nabla);
 }
 
 
