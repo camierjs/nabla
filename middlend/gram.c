@@ -109,8 +109,6 @@ static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
 // *    - function_definition
 // *    - nabla_job_definition
 // *    - nabla_reduction
-// *    - (nabla_materials_definition)
-// *    - (nabla_environments_definition)
 // ****************************************************************************
 void nMiddleGrammar(astNode * n, nablaMain *nabla){
     
@@ -126,7 +124,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // Règle de définitions des preprocs 
   /////////////////////////////////////
   if (n->ruleid == rulenameToId("preproc")){
-    // We do not want preprocs declarations up to source file
+    // We do not want preprocs declarations down to the source file
     //nprintf(nabla, NULL, "%s\n", n->children->token);
     dbg("\n\t[nablaMiddlendParseAndHook] preproc '%s'", n->children->token);
   }
@@ -238,9 +236,6 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     nabla->hook->grammar->reduction(nabla,n);
     dbg("\n\t[nablaMiddlendParseAndHook] reduction done");
   }
-
-  // nabla_materials_definition
-  // nabla_environments_definition
   
   //////////////////
   // DFS standard //

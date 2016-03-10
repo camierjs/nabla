@@ -45,56 +45,50 @@ with ℝ²;
 
 // Cette version serait à comparer avec tests/ns4n/glcNxtStp2.n
 
-// Options Hydro-Glace Euler/Sans reconstruction
+// ****************************************************************************
+// * Options du schéma Glace Euler/Sans reconstruction
+// ****************************************************************************
 options{
   Bool DEBUG = false;
-  Bool option_glace = true;
-  Bool option_chic = false;
+  Bool option_test_sod = true;
+      
   Real γ = 1.4;
-  Bool option_test_sod = true;  
-  Bool option_quads = true;  
-  Bool option_triangles = false;
-  Bool option_hexa = false;
-  Bool option_cylinder = false;
-  Real option_x_interface = 0.5;
-  Real option_x_min = 0.0;
-  Real option_y_min = 0.0;
-  Real option_z_min = 0.0;
-  Real option_x_max = 1.125;
-  Real option_y_max = 1.125;
-  Real option_z_max = 1.125;
-  Real option_δt_initial = 0.0001;         // ! utilisé en dur dans le backend lambda !
-  Real option_δt_min = 1e-12;
-  Real option_δt_max = 0.01;
-  Real option_stoptime = 0.1/*15*/;        // ! utilisé en dur dans le backend lambda !
-  Real option_δt_control = 0.1;            // Contrôle du pas de temps hydrodynamique
-  Real option_δt_min_variation = 0.99;     // Décroissance maximale tolérée du pas de temps
-  Real option_δt_max_variation = 0.10;     // Amplitude maximale de croissance du pas de temps
-  Bool option_δt_last_exact = true;
-  Integer option_max_iterations = 32768;
+  Real option_u_ini = 0.0;
   Real option_ini_zg_ρ = 1.0;
   Real option_ini_zd_ρ = 0.125;
   Real option_ini_zg_p = 1.0; 
   Real option_ini_zd_p = 0.1;
-  Real option_u_ini = 0.0;
+
+  Real option_x_min = 0.0;
+  Real option_y_min = 0.0;
+  Real option_x_interface = 0.5625;
+  Real option_x_max = 1.125;
+  Real option_y_max = 1.125;
+  
+  Real option_δt_initial = 0.0001;         // ! utilisé en dur dans le backend lambda !
+  Real option_δt_min = 1e-12;
+  Real option_δt_max = 0.01;
+  Real option_stoptime = 0.1;              // ! utilisé en dur dans le backend lambda !
+  Real option_δt_control = 0.1;            // Contrôle du pas de temps hydrodynamique
+  Real option_δt_min_variation = 0.99;     // Décroissance maximale tolérée du pas de temps
+  Real option_δt_max_variation = 0.10;     // Amplitude maximale de croissance du pas de temps
+  Bool option_δt_last_exact = true;
+  
+  Integer option_max_iterations = 32768;   // ! utilisé en dur dans le backend lambda !
 };
 
-// Déclaration des variables aux faces
-faces{
-  Real3 face_normales[nodes];               // Pour Chic
-  Real3 faces_oriented_areas[nodes];
-};
-
-// Déclaration des variables aux noeuds
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
 nodes{
-  //Bool    node_got_tgt;
-  Real3   node_tangent;
   Real3   node_u;                          // Vitesse nodale du maillage
   Real3x3 node_u_matrix;                   // Matrice aux sommets pour le calcul de la vitesse
   Real3   node_u_second_member;            // Second membre aux sommets pour le calcul de la vitesse
 };
 
-// Déclaration des variables aux mailles
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
 cells{  
   Real ZG;                                 // Group ZG
   Real ZD;                                 // Group ZD
@@ -104,7 +98,6 @@ cells{
   Real p;                                  // Pression
   Real3 u;                                 // Vitesse moyenne
   Real c;
-  //Real S;                                  // Surface de la maille
   Real glace_δt;
   Real absCQs[nodes];
   Real3 CQs[nodes];                        // Résultantes aux sommets
@@ -117,7 +110,6 @@ cells{
   Real total_energy_fluxes_Σ;
 };
 
-
 // ****************************************************************************
 // * Globals
 // ****************************************************************************
@@ -125,57 +117,16 @@ global{
   ℝ global_δt;
 };
 
-
-// ****************************************************************************
-// * Partie d'initialisation ]-∞,-0.0[
-// ****************************************************************************
-
-void hydroInit(void) @ -25.0{
-  δt=option_δt_initial;
-  assert(option_triangles^option_quads^option_hexa^option_cylinder);
-}
-
-∀ cells void cellHydroMaterialInitZone(void) @ -25.0{
-  Real3 centre; 
-  foreach node centre+=coord;
-  centre/=nbNode;
-  // On regarde si le centre de la maille est à G ou D de la frontière
-  if ((option_test_sod && (centre.x < option_x_interface))
-      ||(!option_test_sod && (√(centre⋅centre) < option_x_interface))){
-    ρ=option_ini_zg_ρ;
-    p=option_ini_zg_p;
-    ZG=p;
-  }else{
-    ρ=option_ini_zd_ρ;
-    p=option_ini_zd_p;
-    ZD=p;
-  }
-  if (DEBUG)
-    printf("\n[35m[eos,ini] rho_ic=%f, p_ic=%f[0m",ρ,p);
-}
-
-∀ cells void cellIniMassCompute(void) @ -19.0 {
-  u=0.0;
-  m=ρ*V;
-  if (DEBUG)
-    printf("\n[35m[eos,ini] m=%f[m",m);
-}
-
-∀ cells void iniEOS(void) @ -18.0{
-  ρΕ = p/((γ-1.0)*ρ);
-  if (DEBUG)
-    printf("\n[35m[eos,ini] rhoE=%f[0m",ρΕ);
-}
-
-
 // ****************************************************************************
 // * Partie boucle de calcul ]+0.0,+∞[ 
 // ****************************************************************************
 
-∀ cells void temporalScheme_spatialScheme_GLACE_computeAQsMatrices(void)
-  @ 9.0 if (option_glace){ // 18%
+// ****************************************************************************
+// * computeAQsMatrices
+// ****************************************************************************
+∀ cells @ 9.0 {
   const Real ρc = ρ*c;
-  foreach node{
+  ∀ node{
     AQs = CQs⊗CQs;
     AQs *= ρc/absCQs;
     if (DEBUG)
@@ -184,8 +135,12 @@ void hydroInit(void) @ -25.0{
       cout<<AQs<<"[0m";
   }
 }
-∀ cells void temporalSchemeReconstructPressure(void) @ 10.0{
-  foreach node{
+
+// ****************************************************************************
+// * temporalSchemeReconstructPressure
+// ****************************************************************************
+∀ cells @ 10.0{
+  ∀ node{
     reconstructed_p=p;
     if (DEBUG)
       printf("\n\t[32m[std] reconstructed_p=%.15e[0m",
@@ -193,8 +148,11 @@ void hydroInit(void) @ -25.0{
   }
 }
 
-∀ cells void temporalSchemeReconstructVelocity(void) @ 10.0{
-  foreach node{
+// ****************************************************************************
+// * temporalSchemeReconstructVelocity
+// ****************************************************************************
+∀ cells @ 10.0{
+  ∀ node{
     reconstructed_u=u;
     if (DEBUG)
       printf("\n\t[32m[std] reconstructed_u=(%.15e,%.15e,%.15e)[0m",
@@ -202,61 +160,66 @@ void hydroInit(void) @ -25.0{
   }
 }
 
-∀ nodes void temporalSchemeIniMatricesAndSecondMember(void) @ 11.0{
+// ****************************************************************************
+// * temporalSchemeIniMatricesAndSecondMember
+// ****************************************************************************
+∀ nodes @ 11.0{
   node_u_matrix=Real3x3();
   node_u_matrix.z=Real3(0,0,1);
   node_u_second_member=0;
 }
 
-∀ cells void temporalSchemeAssembleMatricesAndSecondMember(void) @ 12.0{ // 16%
-  foreach node{
+// ****************************************************************************
+// * temporalSchemeAssembleMatricesAndSecondMember
+// ****************************************************************************
+∀ cells @ 12.0{
+  ∀ node{
     const Real3x3 local_matrix = AQs;
     node_u_matrix += local_matrix;
     node_u_second_member += local_matrix ⨂ reconstructed_u;
     node_u_second_member += CQs*reconstructed_p;
-    /*printf("\n\t[32m[std] node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",#,
-      node_u_second_member.x,node_u_second_member.y,node_u_second_member.z);*/
   }
 }
-∀ nodes @ 12.1{
+∀ nodes @ 12.1{ // On revient APRES les écritures aux noeuds pour dumper
   if (DEBUG)
     printf("\n\t[31m[std] Before BOUNDARIES node_u_matrix[%d]=\n\t\t[\
 [%.15e %.15e %.15e]\n\t\t\
 [%.15e %.15e %.15e]\n\t\t\
 [%.15e %.15e %.15e]][0m",uid,
-         node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
-         node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
-         node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
+           node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
+           node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
+           node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
   if (DEBUG)
-    printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=(%.15e,%.15e,%.15e)[0m",uid,
-         node_u_second_member.x,
-         node_u_second_member.y,
-         node_u_second_member.z);
-  }
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=\
+(%.15e,%.15e,%.15e)[0m",uid,
+           node_u_second_member.x,
+           node_u_second_member.y,
+           node_u_second_member.z);
+}
 
+// ****************************************************************************
+// * Le calcul aux boundaries se fait ici @ 13.1,13.2
+// ****************************************************************************
 
-// Boundaries ici
-
-void eieioNode_u_matrix_second_member(void)@ 13.4{
+// ****************************************************************************
+// * synchronize pour Arcane node_u_matrix & node_u_matrix_second_member
+// ****************************************************************************
+void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
   synchronize(node_u_matrix);
   synchronize(node_u_second_member);
 }
 
-∀ nodes void temporalSchemeComputeNodesVelocity(void) @ 14.0{ // 11%
+// ****************************************************************************
+// * temporalSchemeComputeNodesVelocity
+// ****************************************************************************
+∀ nodes @ 14.0{
   if (DEBUG)
-    printf("\n\t[31m[std] node_u_matrix=[0m");
-  if (DEBUG)
-    printf("\n\t\t[31m[\
-[%.15e %.15e %.15e]\n\t\t\
-[%.15e %.15e %.15e]\n\t\t\
-[%.15e %.15e %.15e]][0m",
+    printf("\n\t[31m[std] node_u_matrix=[0m\n\t\t[31m[\
+[%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]][0m",
          node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
          node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
          node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
-  //if (DEBUG) cout<<"[ "<<node_u_matrix<<"][0m"<<endl;
   const Real determinent = matrixDeterminant(node_u_matrix);
-  if (false)
-    printf("\n\t[31m[std] determinent=%.15e[0m",determinent);
   if (DEBUG)
     printf("\n\t[31m[std] node_u_second_member=(%.15e,%.15e,%.15e)[0m",
          node_u_second_member.x,
@@ -271,11 +234,18 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
            uid,node_u.x,node_u.y,node_u.z);
 }
   
-∀ cells void temporalSchemeIniFluxesSum(void) @ 15.0{
+// ****************************************************************************
+// * temporalSchemeIniFluxesSum
+// ****************************************************************************
+∀ cells @ 15.0{
   momentum_fluxes_Σ=total_energy_fluxes_Σ=0.0;
 }
-∀ cells void temporalSchemeComputeStandardFluxesSum(void) @ 16.0{ // 14%
-  foreach node{
+
+// ****************************************************************************
+// * temporalSchemeComputeStandardFluxesSum
+// ****************************************************************************
+∀ cells @ 16.0{
+  ∀ node{
     const Real3 Δu = reconstructed_u-node_u;
     Real3 FQs = AQs ⨂ Δu;
     FQs += reconstructed_p*CQs;
@@ -284,19 +254,27 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
   }
 }
 
-∀ cells void temporalSchemeApplyFluxesStandard(void) @ 19.0{
+// ****************************************************************************
+// * temporalSchemeApplyFluxesStandard
+// ****************************************************************************
+∀ cells @ 19.0{
   if (DEBUG) printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
   if (DEBUG) printf("\n\t[32m[n+1] pre u=(%.15e,%.15e,%.15e)[0m",u.x,u.y,u.z);
   if (DEBUG)
     printf("\n\t[32m[n+1] momentum_fluxes_Σ=(%.15e,%.15e,%.15e)[0m",
-    momentum_fluxes_Σ.x,momentum_fluxes_Σ.y,momentum_fluxes_Σ.z);
+           momentum_fluxes_Σ.x,
+           momentum_fluxes_Σ.y,
+           momentum_fluxes_Σ.z);
   u += δt*momentum_fluxes_Σ/m;
   if (DEBUG)
     printf("\n\t[32m[n+1] post u=(%.15e,%.15e,%.15e)[0m",u.x,u.y,u.z);
   ρΕ += δt*total_energy_fluxes_Σ/m;
 }
 
-∀ nodes void temporalSchemeMoveNodes(void) @ 22.0{
+// ****************************************************************************
+// * temporalSchemeMoveNodes
+// ****************************************************************************
+∀ nodes @ 22.0{
   if (DEBUG)
     printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
   coord += δt*node_u;
@@ -305,61 +283,23 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
          uid, coord.x, coord.y, coord.z);
 }
 
-//geom_computeSurfaceAndVolume_Quad
+// ****************************************************************************
+// * geomComputeCQsQuad @ 23.0
+// * geomComputeSurfaceAndVolume @ 24.0 
+// ****************************************************************************
 
-∀ cells void updatePhysicalDensity(void)
-  in (cell m, cell V) out (cell ρ) @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
-}
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
+// ****************************************************************************
+// * glaceEOS vient se placer ici: [26.0 → 30.0]
+// ****************************************************************************
 
-∀ cells void computeTotalInternalEnergyFromTotalEnergy(void) @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
-}
-
-∀ cells void updateTotalPressure(void) @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
-}
-
-/*∀ cells void updateTotalPressureZgZd(void) @ 28.0{
-  Real3 centre; 
-  ∀ node centre+=coord;
-  centre/=nbNode;
-  // On regarde si le centre de la maille est à G ou D de la frontière
-  if ((option_test_sod && (centre.x < option_x_interface))
-      ||(!option_test_sod && (centre.abs() < option_x_interface))){
-    ZG=p;
-  }else{
-    ZD=p;
-  }
-  }*/
-
-∀ cells void computeTotalSoundSpeed(void) @ -18.0,28.0{
-  c=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] c=%.15e[0m",c);
-  if (uid==0) printf("\t[31m[eos,n+1] c[%d]=%.15e[0m\n",uid,c);
-}
-
-// Calcul du δt par maille
-∀ cells void hydroTimeStepCtrlCells(void) out (cell glace_δt) @ 30.0{ // 8%
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(c*Σljr);
-  if (DEBUG)
-    printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
-}
-
-// Réduction min vers le global_δt
+// ****************************************************************************
+// * Réduction min vers le global_δt
+// ****************************************************************************
 ∀ cells global_δt <?= glace_δt @ 31.0;
 
+// ****************************************************************************
+// * glaceTimeStepCtrl
+// ****************************************************************************
 void hydroTimeStepCtrl(void) @ 35.0{
   Real new_δt=option_δt_control*global_δt;
   if (DEBUG)

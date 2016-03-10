@@ -40,52 +40,47 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-// Calcul des aires orientées des faces
-inline Real thisCross2D(Real3 _u,Real3 _v){
+
+// ****************************************************************************
+// * Fonctions locales de géométrie
+// ****************************************************************************
+inline Real geomCross2D(Real3 _u,Real3 _v){
   return Real(_u.x*_v.y - _u.y*_v.x);
 }
+inline Real3 geomNormal(Real3 a, Real3 b){
+  return Real3(b.y-a.y,-b.x+a.x,0.0);
+}
 
-∀ nodes @-21{
+// ****************************************************************************
+// * debug des positions des noeuds
+// ****************************************************************************
+∀ nodes @ -21.0{
   if (DEBUG)
     info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
-  }
+}
 
-∀ cells void geom_computeSurfaceAndVolume_Quad(void)
-  @ -20.0,23.0 if (option_quads){
+// ****************************************************************************
+// * geomComputeSurfaceAndVolume @ -20.0 & 23.0
+// ****************************************************************************
+∀ cells @ -20.0,23.0 {
   const Real3 fst_edge = coord[2]-coord[0];
   const Real3 snd_edge = coord[0]-coord[1];
-  V=thisCross2D(fst_edge,snd_edge);
+  V=geomCross2D(fst_edge,snd_edge);
   if (DEBUG)
     printf("\n[37m[geo,std] V=%.15e[0m",V);
 }
 
-
-inline Real3 normal(Real3 a, Real3 b){
-  return Real3(b.y-a.y,-b.x+a.x,0.0);
-}
-
-// Calcul des résultantes aux sommets des mailles
-∀ cells void geom_computeNormal_Quad(void) @ -20.0,24.0 if (option_quads){
-  const Real3 X[4]= {coord[0],coord[1],coord[2],coord[3]};
+// ****************************************************************************
+// * Calcul des résultantes aux sommets des mailles
+// * geomComputeCQsQuad @ -20.0,24.0
+// ****************************************************************************
+∀ cells @ -20.0,24.0 {
+  const Real3 X[4] = {coord[0],coord[1],coord[2],coord[3]};
   ∀ node{
     const int i=(#+nbNode-1)%nbNode;
     const int j=(i+1)%nbNode;
-    CQs = 0.5*normal(X[i],X[j]);
+    CQs = 0.5*geomNormal(X[i],X[j]);
     absCQs=norm(CQs);
     if (DEBUG) cout << "\n[37m[geo,std] CQs["<<#<<"]: "<<CQs<<"[0m";
   }
-  /*CQs[0] = 0.5*normal(s3,s1);
-  absCQs[0]=norm(CQs[0]);
-  CQs[1] = 0.5*normal(s0,s2);
-  absCQs[1]=norm(CQs[1]);
-  CQs[2] = 0.5*normal(s1,s3);
-  absCQs[2]=norm(CQs[2]);
-  CQs[3] = 0.5*normal(s2,s0);
-  absCQs[3]=norm(CQs[3]);
-  
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][0]: "<<CQs[0]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][1]: "<<CQs[1]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][2]: "<<CQs[2]<<"[0m";
-  if (DEBUG) cout << "\n[37m[geo,std] CQs[][3]: "<<CQs[3]<<"[0m";
-  */
 }

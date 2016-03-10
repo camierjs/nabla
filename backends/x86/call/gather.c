@@ -52,7 +52,7 @@ static char* xCallGatherCells(nablaJob *job,
   char gather[1024];
 
   if (var->item[0]=='n')
-    snprintf(gather, 1024, "\n\t\t\t\
+    snprintf(gather, 1024, "\
 %s gathered_%s_%s=rgather%sk(cell_node[n*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
              strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
              var->item,
@@ -63,7 +63,7 @@ static char* xCallGatherCells(nablaJob *job,
              strcmp(var->type,"real")==0?"":"");
 
   if (var->item[0]=='f')
-     snprintf(gather, 1024, "\n\t\t\t\
+     snprintf(gather, 1024, "\
 %s gathered_%s_%s=rgather%sk(cell_face[f*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
               strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
               var->item,
@@ -85,7 +85,7 @@ static char* xCallGatherNodes(nablaJob *job,
                               nablaVariable* var){
   bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t\
+  snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(node_cell[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],%s %s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            var->item,
@@ -103,7 +103,7 @@ static char* xCallGatherNodes(nablaJob *job,
 static char* xCallGatherFaces(nablaJob *job,
                               nablaVariable* var){
   char gather[1024];
-  snprintf(gather, 1024, "\n\t\t\t\
+  snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
            var->item,
@@ -138,17 +138,17 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
     nablaError("[xFilterGather] Could not malloc our gather_src_buffer!");
   
-  nprintf(job->entity->main, NULL,"/*filterGather*/");
+  //nprintf(job->entity->main, NULL,"/*filterGather*/");
 
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     if (!var->is_gathered) continue;
     dbg("\n\t\t\t\t[xFilterGather] var '%s'", var->name);
-    nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
+    //nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
     if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)){
-      nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
+      //nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
       continue;
     }
-    nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
+    //nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
     dbg("\n\t\t\t\t[xFilterGather] strcat");
     if (job->entity->main->call){
       strcat(gather_src_buffer,

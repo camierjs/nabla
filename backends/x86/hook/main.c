@@ -217,8 +217,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);\n\
-\twhile (global_time<option_stoptime){\
-\t// && global_iteration!=option_max_iterations){");
+\twhile ((global_time<option_stoptime) && (global_iteration!=option_max_iterations)){");
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1)){
@@ -250,9 +249,9 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     
     // Dump de la tabulation et du nom du point d'entrée
     //#warning f or s?
-    nprintf(n, NULL, "\n%s/*@%f*/%s(",
+    nprintf(n, NULL, "%s%s(",
             is_into_compute_loop?"\t\t":"\t",
-            entry_points[i].whens[0],
+            ///*@%f*/entry_points[i].whens[0],
             //n->call->parallel->spawn(),
             entry_points[i].name);
     

@@ -459,7 +459,7 @@ void nMiddleJobFill(nablaMain *nabla,
   // Dump dans les fichiers
   
   // On remplit la ligne du fichier SRC
-  nprintf(nabla, NULL, "\n\n\n\
+  nprintf(nabla, NULL, "\n\
 // ********************************************************\n\
 // * %s job\n\
 // ********************************************************\n\
@@ -473,7 +473,7 @@ void nMiddleJobFill(nablaMain *nabla,
   // On va chercher les paramètres standards
   // Si used_options et used_variables ont été utilisées
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
-  nprintf(nabla, NULL,"/*job numParams=%d*/",numParams);
+  //nprintf(nabla, NULL,"/*job numParams=%d*/",numParams);
   if (nabla->hook->grammar->dfsVariable()) // Okina still is false here
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     

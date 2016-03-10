@@ -70,6 +70,7 @@ options{
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.00010;
   ℝ option_stoptime= 0.01;     
+  ℕ option_max_iterations = 32768;
   ℝ tau =1.0;           
   ℝ epsilon =0.01;         
   ℝ CFL= 0.75;  

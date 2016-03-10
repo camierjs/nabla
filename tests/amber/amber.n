@@ -24,7 +24,8 @@ options{
   // Yet required options for Okina 
   ℝ option_δt_initial = 0.0001;
   ℝ option_stoptime=0.2;
-  
+  ℕ option_max_iterations = 32768;   // ! utilisé en dur dans les backends
+
   // Options d'Aleph
   ℝ alephEpsilon          = 1.e-14;
   ℕ alephUnderlyingSolver = 2;

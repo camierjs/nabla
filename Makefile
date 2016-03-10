@@ -11,7 +11,7 @@ ifeq ($(shell uname),Linux)
   CMAKE_ROOT_PATH = /usr/bin
   COMPILER_ROOT_PATH = /usr/bin
 endif
-ifeq ($(shell [ -f /etc/redhat-release] && cat /etc/redhat-release|cut -b 1-6),CentOS)
+ifeq ($(shell [ -f /etc/redhat-release ] && cat /etc/redhat-release|cut -b 1-6),CentOS)
   CMAKE_ROOT_PATH = /usr/bin
   COMPILER_ROOT_PATH = /usr/local/gcc/bin
 endif
@@ -86,15 +86,15 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = glace2D lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
+tests = glace2D lulesh upwind #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
 #p1apwb1D_gosse heat aleph1D kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 #1 4
-types = run #gen run
+types = gen run
 simds = std #sse avx # avx2 mic warp
-backends = lambda #kokkos lambda arcane okina cuda 
+backends = lambda okina #kokkos lambda arcane okina cuda 
 parallels = seq #omp mpi smp #cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):

@@ -40,75 +40,57 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-
-//#warning no WARP_BIT here
 
 // ****************************************************************************
-// * Scatter
+// * updatePhysicalDensity
 // ****************************************************************************
-char* xCallScatterCells(nablaJob *job,
-                        nablaVariable* var){
-  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
-  char scatter[1024];
-  snprintf(scatter, 1024,
-           "\n\t\tscatter%sk(cell_node[NABLA_NB_CELLS*n+c], &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
+∀ cells @ 26.0{
+  ρ = m/V;
+  if (DEBUG)
+    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
 }
 
+// ****************************************************************************
+// * 
+// ****************************************************************************
+∀ cells @ 26.1 if (DEBUG){
+  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
+ }
 
 // ****************************************************************************
-// * Scatter for Faces
+// * computeTotalInternalEnergyFromTotalEnergy
 // ****************************************************************************
-static char* xCallScatterFaces(nablaJob *job,
-                              nablaVariable* var){
-  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
-  char scatter[1024];
-  snprintf(scatter, 1024,
-           "\n\t\tscatter%sk(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-           var->item, var->name,
-           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+f],",
-           var->item, var->name);
-  return strdup(scatter);
+∀ cells @ -16.0,26.2{
+  ιΕ = ρΕ-½*u.abs2();
+  if (DEBUG)
+    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
 }
 
-
 // ****************************************************************************
-// * Gather switch
+// * updateTotalPressure
 // ****************************************************************************
-char* xCallScatter(nablaJob *job,
-                   nablaVariable* var){
-  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return xCallScatterCells(job,var);
-  //if (itm=='n') return xCallScatterNodes(job,var);
-  if (itm=='f') return xCallScatterFaces(job,var);
-  nablaError("Could not distinguish job item in xCallScatter for job '%s'!", job->name);
-  return NULL;
+∀ cells @ 27.0{
+  p=(γ-1.0)*ρ*ιΕ;
+  if (DEBUG)
+    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
 }
 
-
+// ****************************************************************************
+// * computeTotalSoundSpeed
+// ****************************************************************************
+∀ cells @ -18.0,28.0{
+  c=√(γ*p/ρ);
+  if (DEBUG) printf("\n\t[31m[eos,n+1] c=%.15e[0m",c);
+  if (uid==0) printf("\t[31m[eos,n+1] c[%d]=%.15e[0m\n",uid,c);
+}
 
 // ****************************************************************************
-// * Filtrage du SCATTER
+// * hydroTimeStepCtrlCells: Calcul du δt par maille
 // ****************************************************************************
-char* xCallFilterScatter(astNode *n,nablaJob *job){
-  char *scatters=NULL;
-    
-  if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[xCallFilterScatter] Could not malloc our scatters!");
-
-  // On récupère le nombre de variables potentielles à scatterer
-   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
-    dbg("\n\t\t\t\t[xCallFilterScatter] var '%s'", var->name);
-    if (!var->is_gathered) continue;
-    //nprintf(job->entity->main, NULL, "\n\t/*gathered %s?*/",var->name);
-    if (!var->out) continue;
-    //nprintf(job->entity->main, NULL, "/*out: %s*/",var->name);
-    strcat(scatters,xCallScatter(job,var));
-  }
-  return strdup(scatters);
+∀ cells @ 30.0{
+  Real Σljr=0.0;
+  ∀ node Σljr+=absCQs;
+  glace_δt=2.0*V/(c*Σljr);
+  if (DEBUG)
+    printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
 }

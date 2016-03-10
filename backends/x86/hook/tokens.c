@@ -108,8 +108,12 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
       nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
     else{
       assert(cnfg=='c'||cnfg=='f');
-      if (cnfg=='c') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_CELL;++n)");
-      if (cnfg=='f') nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_FACE;++n)");
+      if (cnfg=='c')
+        nprintf(job->entity->main,
+                "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_CELL;++n)");
+      if (cnfg=='f')
+        nprintf(job->entity->main,
+                "/*chsf n*/", "for(int n=0;n<NABLA_NODE_PER_FACE;++n)");
     }
     break;
   }

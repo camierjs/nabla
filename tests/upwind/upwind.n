@@ -17,9 +17,10 @@ options{
   ℝ ε=Φ-1.0;
   ℝ α=Φ;
   ℝ β=1.0;
-  // Yet required options for Okina
+  // Yet required options for backends
   ℝ option_δt_initial = 0.005;
   ℝ option_stoptime =1.0;
+  ℕ option_max_iterations = 32768;
 };
 
 

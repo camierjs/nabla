@@ -127,7 +127,7 @@ char* xHookEntryPointPrefix(nablaMain *nabla,
 
 void xHookExit(struct nablaMainStruct *nabla, nablaJob *job){
   if (job->when_depth==0)
-    nprintf(nabla, "/*EXIT*/", "/*hookExit*/exit(0.0)");
+    nprintf(nabla, "/*EXIT*/", "exit(0.0)");
   else
     nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
@@ -144,7 +144,7 @@ void xHookIteration(nablaMain *nabla){
 void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
   char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
+  nprintf(nabla, "/*function_got_call*/", NULL);//"/*xHookAddCallNames*/");
   fct->parse.function_call_name=NULL;
   if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
     if (foundJob->is_a_function!=true){

@@ -28,6 +28,7 @@ options{
   // Yet required options for backend
   ℝ option_δt_initial = 0.1;
   ℝ option_stoptime = 1.0;
+  ℕ option_max_iterations = 32768;   // ! utilisé en dur dans les backends
 };
 
 

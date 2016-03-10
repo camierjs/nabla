@@ -40,75 +40,62 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-
-//#warning no WARP_BIT here
 
 // ****************************************************************************
-// * Scatter
+// * Partie d'initialisation ]-∞,-0.0]
 // ****************************************************************************
-char* xCallScatterCells(nablaJob *job,
-                        nablaVariable* var){
-  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
-  char scatter[1024];
-  snprintf(scatter, 1024,
-           "\n\t\tscatter%sk(cell_node[NABLA_NB_CELLS*n+c], &gathered_%s_%s, %s_%s);",
-           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-           var->item, var->name,
-           var->item, var->name);
-  return strdup(scatter);
+
+// ****************************************************************************
+// * hydroInit
+// ****************************************************************************
+void hydroInit(void) @ -25.0{
+  δt=option_δt_initial;
 }
 
-
 // ****************************************************************************
-// * Scatter for Faces
+// * iniCellZone
 // ****************************************************************************
-static char* xCallScatterFaces(nablaJob *job,
-                              nablaVariable* var){
-  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
-  char scatter[1024];
-  snprintf(scatter, 1024,
-           "\n\t\tscatter%sk(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-           var->item, var->name,
-           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+f],",
-           var->item, var->name);
-  return strdup(scatter);
-}
-
-
-// ****************************************************************************
-// * Gather switch
-// ****************************************************************************
-char* xCallScatter(nablaJob *job,
-                   nablaVariable* var){
-  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return xCallScatterCells(job,var);
-  //if (itm=='n') return xCallScatterNodes(job,var);
-  if (itm=='f') return xCallScatterFaces(job,var);
-  nablaError("Could not distinguish job item in xCallScatter for job '%s'!", job->name);
-  return NULL;
-}
-
-
-
-// ****************************************************************************
-// * Filtrage du SCATTER
-// ****************************************************************************
-char* xCallFilterScatter(astNode *n,nablaJob *job){
-  char *scatters=NULL;
-    
-  if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[xCallFilterScatter] Could not malloc our scatters!");
-
-  // On récupère le nombre de variables potentielles à scatterer
-   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
-    dbg("\n\t\t\t\t[xCallFilterScatter] var '%s'", var->name);
-    if (!var->is_gathered) continue;
-    //nprintf(job->entity->main, NULL, "\n\t/*gathered %s?*/",var->name);
-    if (!var->out) continue;
-    //nprintf(job->entity->main, NULL, "/*out: %s*/",var->name);
-    strcat(scatters,xCallScatter(job,var));
+∀ cells @ -25.0{
+  Real3 centre; 
+  ∀ node centre+=coord;
+  centre/=nbNode;
+  // On regarde si le centre de la maille est à G ou D de la frontière
+  if ((option_test_sod && (centre.x < option_x_interface))
+      // Ou suivant une autre règle géométrique arbitraire
+      ||(!option_test_sod && (√(centre⋅centre) < option_x_interface))){
+    ρ=option_ini_zg_ρ;
+    p=option_ini_zg_p;
+    ZG=p;
+  }else{
+    ρ=option_ini_zd_ρ;
+    p=option_ini_zd_p;
+    ZD=p;
   }
-  return strdup(scatters);
+  if (DEBUG)
+    printf("\n[35m[eos,ini] rho_ic=%f, p_ic=%f[0m",ρ,p);
 }
+
+// ****************************************************************************
+// * geomComputeCQsQuad @ -20.0
+// * geomComputeSurfaceAndVolume @ -20.0 
+// ****************************************************************************
+
+// ****************************************************************************
+// * iniCellMass
+// ****************************************************************************
+∀ cells @ -19.0 {
+  u=0.0;
+  m=ρ*V;
+  if (DEBUG)
+    printf("\n[35m[eos,ini] m=%f[m",m);
+}
+
+// ****************************************************************************
+// * iniEOS
+// ****************************************************************************
+∀ cells @ -18.0{
+  ρΕ = p/((γ-1.0)*ρ);
+  if (DEBUG)
+    printf("\n[35m[eos,ini] rhoE=%f[0m",ρΕ);
+}
+

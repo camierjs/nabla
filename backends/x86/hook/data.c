@@ -194,7 +194,7 @@ static void xHookTurnTokenToVariableForNodeJob(nablaMain *nabla,
 
   // Preliminary pertinence test
   if (cnfg != 'n') return;
-  nprintf(nabla, NULL, "/*NodeJob*/");
+  //nprintf(nabla, NULL, "/*NodeJob*/");
 
   // On dump le nom de la variable trouvée, sauf pour les globals qu'on doit faire précédé d'un '*'
   if (var->item[0]!='g') nvar(nabla,var,job);
@@ -345,7 +345,7 @@ static void xHookTurnTokenToVariableForStdFunction(nablaMain *nabla,
     break;
   }
   case ('n'):{
-    nprintf(nabla, "/*NodeVar*/", "/*xHookTurnTokenToVariableForStdFunction*/"); // NODE variable
+    nprintf(nabla, "/*NodeVar*/", NULL); // NODE variable
     break;
   }
   case ('f'):{
