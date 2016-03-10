@@ -132,7 +132,7 @@ void %s(",item_var_name,global_var_name,job_name);
   nprintf(nabla, NULL,"){ // @ %s\n\
 \tconst double reduction_init=%e;\n\
 \tconst int threads = omp_get_max_threads();\n\
-#if not defined(__APPLE__) and not defined(__GXX_WEAK__)\n\
+#if not defined(__APPLE__) and defined(__STDC_NO_THREADS__)\n\
 \treal *%s_per_thread=(real*)aligned_alloc(WARP_ALIGN,sizeof(real)*threads);\n\
 #else\n\
 \treal %s_per_thread[threads];\n\
@@ -149,7 +149,7 @@ void %s(",item_var_name,global_var_name,job_name);
 \t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])%sReduceM%sToDouble(real_global_%s))?\n\
 \t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
 \t}\n\
-#if not defined(__APPLE__) and not defined(__GXX_WEAK__)\n\
+#if not defined(__APPLE__) and defined(__STDC_NO_THREADS__)\n\
 \tdelete [] %s_per_thread;\n\
 #endif\n}\n\n",
           at_single_cst_node->token, // @ %s
