@@ -1,17 +1,19 @@
-#######################
-# MacOS||Linux switch #
-# gcc -dM -E -x c++ /dev/null | less
-#######################
+###############################
+# MacOS||Linux switch||CentOS #
+# gcc -dM -E -x c++ /dev/null #
+###############################
 ifeq ($(shell uname),Darwin)
-CMAKE_ROOT_PATH=/opt/local/bin
-COMPILER_ROOT_PATH=/opt/local/bin
-COMPILER_POSTFIX= #-mp-4.9
-else
-CMAKE_ROOT_PATH = /usr/bin
-COMPILER_ROOT_PATH = /usr/bin
-#COMPILER_ROOT_PATH = /usr/local/gcc/4.9.2/bin
-#COMPILER_ROOT_PATH = /usr/local/gcc-4.8.2/bin
-COMPILER_POSTFIX=
+  CMAKE_ROOT_PATH=/opt/local/bin
+  COMPILER_ROOT_PATH=/opt/local/bin
+  COMPILER_POSTFIX= #-mp-4.9
+endif
+ifeq ($(shell uname),Linux)
+  CMAKE_ROOT_PATH = /usr/bin
+  COMPILER_ROOT_PATH = /usr/bin
+endif
+ifeq ($(shell [ -f /etc/redhat-release] && cat /etc/redhat-release|cut -b 1-6),CentOS)
+  CMAKE_ROOT_PATH = /usr/bin
+  COMPILER_ROOT_PATH = /usr/local/gcc/bin
 endif
 
 ####################
@@ -22,7 +24,6 @@ C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
 export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
 export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
-#export LD_LIBRARY_PATH=$(COMPILER_ROOT_PATH)/../lib64:${LD_LIBRARY_PATH}
 
 #################
 # CMAKE OPTIONS #
@@ -85,16 +86,16 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
+tests = glace2D lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
 #p1apwb1D_gosse heat aleph1D kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 #1 4
-types = gen run
-simds = std sse avx # avx2 mic warp
-backends = kokkos lambda arcane okina cuda 
-parallels = seq omp mpi smp #cilk
+types = run #gen run
+simds = std #sse avx # avx2 mic warp
+backends = lambda #kokkos lambda arcane okina cuda 
+parallels = seq #omp mpi smp #cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
 	(tput reset && cd $(BUILD_PATH)/tests && \
