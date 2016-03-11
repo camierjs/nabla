@@ -90,10 +90,10 @@
 ∀ cells m = ρ⁰*V⁰;
 
 // *************************************************************
-// * Calcul des Cⱼᵣ et des variables qui en découlant
+// * Calcul des Cⱼᵣ et des variables qui en découlent
 // *************************************************************
 ℝ³ ⟂(ℝ³ s0, ℝ³ s1){return ℝ³(s1.y-s0.y,-s1.x+s0.x,0);}
-∀ j∈cells, ∀ r∈nodes(j) C_{jr}=½*⟂(Χ_{(j-1)%4},Χ_{(j+1)%4});
+∀ j∈cells, ∀ r∈nodes(j) C_{jr}=½*⟂(Χ_{(r-1)%4},Χ_{(r+1)%4});
 ∀ j∈cells Vⱼ = ½*∑ᵣCⱼᵣ⋅Χᵣ;
 ∀ j∈cells glace_δtⱼ = 2.0*Vⱼ/(cⱼ*Σᵣ‖Cⱼᵣ‖);
 

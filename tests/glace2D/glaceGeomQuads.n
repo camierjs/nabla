@@ -78,7 +78,7 @@ inline Real3 geomNormal(Real3 a, Real3 b){
   const Real3 X[4] = {coord[0],coord[1],coord[2],coord[3]};
   ∀ node{
     const int i=(#+nbNode-1)%nbNode;
-    const int j=(i+1)%nbNode;
+    const int j=(#+nbNode+1)%nbNode;
     CQs = 0.5*geomNormal(X[i],X[j]);
     absCQs=norm(CQs);
     if (DEBUG) cout << "\n[37m[geo,std] CQs["<<#<<"]: "<<CQs<<"[0m";
