@@ -47,17 +47,6 @@ extern char* cuSparseHeader(nablaMain *);
 
 
 // ****************************************************************************
-// * cuHookHeaderOpen
-// ****************************************************************************
-void cuHookHeaderOpen(nablaMain *nabla){
-  char hdrFileName[NABLA_MAX_FILE_NAME];
-  sprintf(hdrFileName, "%sEntity.h", nabla->name);
-  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
-}
-
-
-
-// ****************************************************************************
 // *
 // ****************************************************************************
 void cuHookHeaderIncludes(nablaMain *nabla){
@@ -92,7 +81,7 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
 // * Includes from nabla->parallel->includes()\n\
 // *****************************************************************************\n\
 %s",
-          nabla->call->simd->includes(),
+          nabla->call->simd->includes?nabla->call->simd->includes():"",
           "");//nabla->call->parallel->includes());
   
   fprintf(nabla->entity->hdr,"\n\n\
@@ -124,16 +113,6 @@ void cuHookHeaderDump(nablaMain *nabla){
   cuHeaderItems(nabla);
 }
 
-
-// ****************************************************************************
-// *
-//*****************************************************************************
-void cuHookHeaderPrefix(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,
-          "#ifndef __CUDA_%s_H__\n#define __CUDA_%s_H__",
-          nabla->entity->name,nabla->entity->name);
-}
 
 
 // ****************************************************************************
@@ -170,6 +149,7 @@ void cuHookHeaderEnumerates(nablaMain *nabla){
   if (tid>=(NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER)) return;\n\
 \n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)\n\
+#define FOR_EACH_NODE_CELL(c) for(int c=0;c<8;c+=1)\n\
 \n\
 #define FOR_EACH_CELL_WARP(c) \n\
 \n\
@@ -182,13 +162,5 @@ void cuHookHeaderEnumerates(nablaMain *nabla){
 #define CUDA_LAUNCHER_FUNCTION_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
   if (tid>=NABLA_NB_CELLS) return;\n");
-}
-
-
-// ****************************************************************************
-// *
-//*****************************************************************************
-void cuHookHeaderPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n#endif // __CUDA_%s_H__\n",nabla->entity->name);
 }
 

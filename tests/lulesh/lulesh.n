@@ -183,9 +183,9 @@ void ini(void) @ -10.0{
 }
 /*nodes void dumpCorners(void)@-12.0{
   foreach cell{
-    const int corner = node_cell_corner[8*tnid+i];
+    const int corner = node_cell_corner[8*n+i];
     if (corner==-1) continue;
-    if (uid==31) printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,node_cell_corner[8*tnid+i],node_cell[8*tnid+i]);
+    if (uid==31) printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,node_cell_corner[8*n+i],node_cell[8*n+i]);
   }
 }*/
 
@@ -250,9 +250,9 @@ void ini(void) @ -10.0{
 ∀ nodes void iniNodalMass(void) in (cell calc_volume) out (node nodalMass) @ -6.9{
   //const int nid=uid;
   nodalMass=0.0;
-  //if (nid==0) printf("\n[iniNodalMass] tnid=%d, Node #%d, nodalMass=%.21e",tnid,nid,nodalMass);
+  //if (nid==0) printf("\n[iniNodalMass] n=%d, Node #%d, nodalMass=%.21e",n,nid,nodalMass);
   ∀ cell{
-    //int cid=node_cell[8*tnid+i];
+    //int cid=node_cell[8*n+i];
     //if (cid<0) continue;
     //if (nid==0) printf("\n\tprefix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
     nodalMass+=calc_volume/8.0;
@@ -337,9 +337,9 @@ void timeIncrement(void) @ 0.1 {
 ∀ nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   ℝ³ Σ=0.0;
   ∀ cell{
-    //const int corner = node_cell_corner[8*tnid+i];
+    //const int corner = node_cell_corner[8*n+i];
     //if (corner==-1) continue;
-    //printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,corner,node_cell[8*tnid+i]);
+    //printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,corner,node_cell[8*n+i]);
     Σ+=cForce;
   }
   nForce=Σ;

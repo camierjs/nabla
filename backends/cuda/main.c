@@ -95,7 +95,7 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 // * CUDA_MAIN_PREINIT pour la génération du 'main'
 // ****************************************************************************
 #define CUDA_MAIN_PREINIT "\n\
-\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,node_cell_corner_idx,%s);\n\
+\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,node_cell_corner_idx,node_coord);\n\
 \tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node);\n\
 \tnabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(cell_node,cell_prev,cell_next,node_cell,node_cell_corner,node_cell_corner_idx);\n\
 \thost_set_corners();\n\
@@ -112,45 +112,7 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 // ****************************************************************************
 NABLA_STATUS cuHookMainPreInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPreInit]");
-  //if ((nabla->colors&BACKEND_COLOR_SOA)!=BACKEND_COLOR_SOA)
-    fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coord");
-  //else
-    //fprintf(nabla->entity->src, CUDA_MAIN_PREINIT, "node_coordx,node_coordy,node_coordz");
-  return NABLA_OK;
-}
-
-// ****************************************************************************
-// * nccCudaMainVarInitKernel
-// * We now calloc things, so this init is now anymore usefull
-// * #warning Formal parameter space overflowed (256 bytes max)
-// ****************************************************************************
-NABLA_STATUS cuHookMainVarInitKernel(nablaMain *nabla){ return NABLA_OK; }
-
-
-
-// ****************************************************************************
-// * nccCudaMainVarInitCall
-// ****************************************************************************
-NABLA_STATUS cuHookMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[nccCudaMainVarInitCall]"); 
-  //nprintf(nabla,NULL,"\n#warning HWed nccCudaMainVarInitCall\n\t\t//nccCudaMainVarInitCall:");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    // Si les variables sont globales, on ne les debug pas
-    if (var->item[0]=='g') continue;
-    //if (strcmp(var->name, "iteration")==0) continue;
-    //#warning continue dbgsVariable
-    //continue;
-    nprintf(nabla,NULL,"\n\t\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
+  fprintf(nabla->entity->src, CUDA_MAIN_PREINIT);
   return NABLA_OK;
 }
 

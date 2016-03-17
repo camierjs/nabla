@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _NABLA_X86_HOOK_H_
 #define _NABLA_X86_HOOK_H_
+bool xHookSwitchForall(astNode *n, nablaJob *job);
+bool xHookSwitchAleph(astNode *n, nablaJob *job);
 
 // forall
 char* xHookForAllDump(nablaJob*);

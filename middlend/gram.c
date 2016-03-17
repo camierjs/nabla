@@ -185,7 +185,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     //nabla->hook->grammar->function(nabla,n);
     nablaJob *fct = nMiddleJobNew(nabla->entity);
     nMiddleJobAdd(nabla->entity, fct);
-    nMiddleFunctionFill(nabla,fct,n,nabla->hook->source->name(nabla));
+    nMiddleFunctionFill(nabla,fct,n,nabla->hook->source->name?nabla->hook->source->name(nabla):NULL);
     dbg("\n\t[nablaMiddlendParseAndHook] function done");
     goto step_next;
     // On continue sans s'engouffrer dans la fonction
@@ -202,7 +202,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     //nabla->hook->grammar->job(nabla,n);
     nablaJob *job = nMiddleJobNew(nabla->entity);
     nMiddleJobAdd(nabla->entity, job);
-    nMiddleJobFill(nabla,job,n,nabla->hook->source->name(nabla));
+    nMiddleJobFill(nabla,job,n,nabla->hook->source->name?nabla->hook->source->name(nabla):NULL);
 
     dbg("\n\t[nablaMiddlendParseAndHook] job done");
     goto step_next;

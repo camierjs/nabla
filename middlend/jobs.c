@@ -319,7 +319,8 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   
   // C'est le cas primary_expression suivi d'un nabla_item
   if ((n->ruleid == rulenameToId("primary_expression"))
-      && (n->children->ruleid == rulenameToId("nabla_item")))
+      && (n->children->ruleid == rulenameToId("nabla_item"))
+      && (nabla->hook->forall->item))
     nprintf(nabla, "/*nabla_item*/", "\t%s",
             nabla->hook->forall->item(job,
                                       cnfgem,
@@ -526,10 +527,13 @@ void nMiddleJobFill(nablaMain *nabla,
   nprintf(nabla, NULL, "\n\t%s",  cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
-  nprintf(nabla, NULL, "%s{", nabla->hook->forall->dump(job));// de l'ENUMERATE_
+  if (nabla->hook->forall->dump)
+    nprintf(nabla, NULL, "%s", nabla->hook->forall->dump(job));// de l'ENUMERATE_
+  nprintf(nabla, NULL, "{");
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
-  nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
+  if (nabla->hook->forall->postfix)
+    nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
   dbg("\n\t[nablaJobFill] NOW PARSING...");

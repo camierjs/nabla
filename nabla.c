@@ -72,26 +72,28 @@ static char *unique_temporary_file_name=NULL;
 [1;4;35mTARGET[0m can be:\n\
 \t[1;35m--cuda  [36;4mname[0m\tCode generation for the target CUDA\n\
 \t[1;35m--okina [36;4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
-\t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
-\t\t[36m--sse[0m\t\tExplicit code generation with SSE intrinsics\n\
-\t\t[36m--avx[0m\t\tExplicit code generation with AVX intrinsics\n\
-\t\t[36m--avx2[0m\t\tExplicit code generation with AVX2 intrinsics\n\
-\t\t[36m--mic[0m\t\tExplicit code generation with MIC intrinsics\n\
-\t\t[36m--seq[0m\t\tSequential code generation (default)\n\
-\t\t[36m--omp[0m\t\tOpenMP parallel implementation\n\
-\t\t[36m--cilk[0m\t\tCilk+ parallel implementation\n\
+\t\t[36m--stc Generate static structures\n\
+\t\t[36m--dyn Generate dynamic structues\n\
+\t\t[36m--std[0m\tStandard code generation with no explicit vectorization\n\
+\t\t[36m--sse[0m\tExplicit code generation with SSE intrinsics\n\
+\t\t[36m--avx[0m\tExplicit code generation with AVX intrinsics\n\
+\t\t[36m--avx2[0m\tExplicit code generation with AVX2 intrinsics\n\
+\t\t[36m--mic[0m\tExplicit code generation with MIC intrinsics\n\
+\t\t[36m--seq[0m\tSequential code generation (default)\n\
+\t\t[36m--omp[0m\tOpenMP parallel implementation\n\
+\t\t[36m--cilk[0m\tCilk+ parallel implementation\n\
 \t\t\t\t(still experimental with latest GNU GCC)\n\
-\t\t[36m--gcc[0m\t\tGNU GCC pragma generation (default)\n\
-\t\t[36m--icc[0m\t\tIntel ICC pragma generation\n\
+\t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
+\t\t[36m--icc[0m\tIntel ICC pragma generation\n\
 \t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
 \t[1;35m--kokkos [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for KOKKOS\n\
 \t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
-\t\t[36m--alone[0m\t\tGenerate a [4mstand-alone[0m application\n\
-\t\t[36m--module[0m\tGenerate a [4mmodule[0m\n\
-\t\t[36m--service[0m\tGenerate a [4mservice[0m\n\
-\t\t\t[36m-I [4mname[0m\t\tInterface name to use\n\
-\t\t\t[36m-p [4mpath[0m\t\tPath of the interface file\n\
-\t\t\t[36m-n [4mname[0m\t\tService name that will be generate\n\
+\t\t[36m--alone[0m\tGenerate a [4mstand-alone[0m application\n\
+\t\t[36m--module[0m  Generate a [4mmodule[0m\n\
+\t\t[36m--service[0m Generate a [4mservice[0m\n\
+\t\t\t[36m-I [4mname[0m Interface name to use\n\
+\t\t\t[36m-p [4mpath[0m Path of the interface file\n\
+\t\t\t[36m-n [4mname[0m Service name that will be generate\n\
 \t[1;35m--raja   [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for RAJA\n \
 \t[1;35m--loci   [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for LOCI\n\
 \t[1;35m--uintah [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for UINTAH\n\
@@ -285,6 +287,8 @@ int main(int argc, char * argv[]){
     {"cuda",required_argument,NULL,BACKEND_CUDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
     //{"tiling",no_argument,NULL,BACKEND_COLOR_OKINA_TILING},
+       {"stc",no_argument,NULL,BACKEND_COLOR_OKINA_STC},
+       {"dyn",no_argument,NULL,BACKEND_COLOR_OKINA_DYN},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
        {"sse",no_argument,NULL,BACKEND_COLOR_OKINA_SSE},
        {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
@@ -419,6 +423,14 @@ int main(int argc, char * argv[]){
       //backend_color=BACKEND_COLOR_OKINA_TILING;
       //dbg("\n[nabla] Command line specifies OKINA's tiling option");
       //break;
+    case BACKEND_COLOR_OKINA_STC:
+      backend_color|=BACKEND_COLOR_OKINA_STC;
+      dbg("\n[nabla] Command line specifies OKINA's STC option");
+      break;
+    case BACKEND_COLOR_OKINA_DYN:
+      backend_color|=BACKEND_COLOR_OKINA_DYN;
+      dbg("\n[nabla] Command line specifies OKINA's DYN option");
+      break;
     case BACKEND_COLOR_OKINA_STD:
       backend_color|=BACKEND_COLOR_OKINA_STD;
       dbg("\n[nabla] Command line specifies OKINA's STD option");

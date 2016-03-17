@@ -48,21 +48,8 @@
 void cuHookSourceOpen(nablaMain *nabla){
   char srcFileName[NABLA_MAX_FILE_NAME];
   // Ouverture du fichier source du entity
-  sprintf(srcFileName, "%sEntity.cu", nabla->name);
+  sprintf(srcFileName, "%s.cu", nabla->name);
   if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
   
-// ****************************************************************************
-// * cudaInclude
-// ****************************************************************************
-void cuHookSourceInclude(nablaMain *nabla){
-  assert(nabla->entity->name);
-  fprintf(nabla->entity->src,"#include \"%sEntity.h\"\n", nabla->entity->name);
-}
-
-
-// ****************************************************************************
-// * cuHookSourceName
-// ****************************************************************************
-char* cuHookSourceNamespace(nablaMain *nabla){ return NULL;}

@@ -112,9 +112,9 @@ static void cuHookTurnTokenToVariableForCellJob(nablaMain *arc,
     nvar(arc,var,job);
     nprintf(arc, "/*CellVar*/",
             "%s",
-            ((var->dim==0)? (isPostfixed==2)?"":"[tcid":
-             (enum_enum!='\0')?"[n+8*(tcid)":
-             (var->dim==1)?"[8*(tcid)":"[tcid"));
+            ((var->dim==0)? (isPostfixed==2)?"":"[c":
+             (enum_enum!='\0')?"[n+8*(c)":
+             (var->dim==1)?"[8*(c)":"[c"));
     job->parse.variableIsArray=(var->dim==1)?true:false;
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true)
@@ -126,7 +126,7 @@ static void cuHookTurnTokenToVariableForCellJob(nablaMain *arc,
   case ('n'):{
     nvar(arc,var,job);
     if (enum_enum=='f') nprintf(arc, "/*f*/", "[");
-    if (enum_enum=='n') nprintf(arc, "/*n*/", "[cell_node[tcid+n*NABLA_NB_CELLS]]");
+    if (enum_enum=='n') nprintf(arc, "/*n*/", "[cell_node[c+n*NABLA_NB_CELLS]]");
     if (isPostfixed!=2 && enum_enum=='\0'){
       if (job->parse.postfix_constant==true)
         nprintf(arc, "/*NodeVar + postfix_constant*/", "[");
@@ -139,7 +139,7 @@ static void cuHookTurnTokenToVariableForCellJob(nablaMain *arc,
   }
   case ('f'):{
     nvar(arc,var,job);
-    if (enum_enum=='f') nprintf(arc, "/*FaceVar*/", "/*cellJob+f*/[tfid]");
+    if (enum_enum=='f') nprintf(arc, "/*FaceVar*/", "/*cellJob+f*/[f]");
     if (enum_enum=='\0') nprintf(arc, "/*FaceVar*/", "[cell->face");
     break;
   }
@@ -171,24 +171,24 @@ static void cuHookTurnTokenToVariableForNodeJob(nablaMain *arc,
 
   switch (var->item[0]){
   case ('c'):{
-    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[node_cell[8*tnid+i]]");//tcid][c");
+    if (var->dim!=0)     nprintf(arc, "/*CellVar dim!0*/", "[node_cell[8*n+c]]");
     if (var->dim==0 && enum_enum=='f')  nprintf(arc, "/*CellVar f*/", "[");
     if (var->dim==0 && enum_enum=='n')  nprintf(arc, "/*CellVar n*/", "[n]");
-    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[node_cell[8*tnid+i]]");//[8*tnid+i]");
+    if (var->dim==0 && enum_enum=='c')  nprintf(arc, "/*CellVar c*/", "[node_cell[8*n+c]]");
     if (var->dim==0 && enum_enum=='\0') nprintf(arc, "/*CellVar 0*/", "[node_cell");
     break;
   }
   case ('n'):{
-    if ((isPostfixed!=2) && enum_enum=='f')  nprintf(arc, "/*NodeVar !2f*/", "[tnid]");
+    if ((isPostfixed!=2) && enum_enum=='f')  nprintf(arc, "/*NodeVar !2f*/", "[n]");
     if ((isPostfixed==2) && enum_enum=='f')  ;//nprintf(arc, NULL);
     if ((isPostfixed==2) && enum_enum=='\0') nprintf(arc, "/*NodeVar 20*/", NULL);
     if ((isPostfixed!=2) && enum_enum=='n')  nprintf(arc, "/*NodeVar !2n*/", "[n]");
-    if ((isPostfixed!=2) && enum_enum=='c')  nprintf(arc, "/*NodeVar !2c*/", "[tnid]");
-    if ((isPostfixed!=2) && enum_enum=='\0') nprintf(arc, "/*NodeVar !20*/", "[tnid]");
+    if ((isPostfixed!=2) && enum_enum=='c')  nprintf(arc, "/*NodeVar !2c*/", "[n]");
+    if ((isPostfixed!=2) && enum_enum=='\0') nprintf(arc, "/*NodeVar !20*/", "[n]");
     break;
   }
   case ('f'):{
-    if (enum_enum=='f')  nprintf(arc, "/*FaceVar f*/", "[tfid]");
+    if (enum_enum=='f')  nprintf(arc, "/*FaceVar f*/", "[f]");
     if (enum_enum=='\0') nprintf(arc, "/*FaceVar 0*/", "[face]");
     break;
   }
@@ -223,17 +223,17 @@ static void cuHookTurnTokenToVariableForFaceJob(nablaMain *arc,
             "%s",
             ((var->dim==0)?
              ((enum_enum=='\0')?
-              (isPostfixed==2)?"[face_cell[tfid+NABLA_NB_FACES*":""
+              (isPostfixed==2)?"[face_cell[f+NABLA_NB_FACES*":""
               :"[c")
              :"[cell][node->cell")); 
     break;
   }
   case ('n'):{
-    nprintf(arc, "/*NodeVar*/", "[face_node[tfid+NABLA_NB_FACES*");
+    nprintf(arc, "/*NodeVar*/", "[face_node[f+NABLA_NB_FACES*");
     break;
   }
   case ('f'):{
-    nprintf(arc, "/*FaceVar*/", "/*FaceVar*/[tfid]");
+    nprintf(arc, "/*FaceVar*/", "/*FaceVar*/[f]");
     break;
   }
   case ('g'):{

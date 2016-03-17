@@ -48,7 +48,7 @@
 static char* cuGatherCells(nablaJob *job, nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
-gather%sk(cell_node[n*NABLA_NB_CELLS+tcid],\n\t\t\t\
+gather%sk(cell_node[n*NABLA_NB_CELLS+c],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
@@ -71,8 +71,8 @@ static char* cuGatherNodes(nablaJob *job, nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 //#warning continue node_cell_corner\n\
-//if (node_cell_corner[8*tnid+i]==-1) continue;\n\
-gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
+//if (node_cell_corner[8*n+c]==-1) continue;\n\
+gatherFromNode_%sk%s(node_cell[8*n+c],\n\
 %s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
@@ -82,7 +82,7 @@ gatherFromNode_%sk%s(node_cell[8*tnid+i],\n\
            strcmp(var->type,"real")==0?"real":"real3",
            strcmp(var->type,"real")==0?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*tnid+i],\n\t\t\t",
+           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*n+c],\n\t\t\t",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"":"",
@@ -98,14 +98,14 @@ static char* cuGatherFaces(nablaJob *job, nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "\
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\
-\n\t\t\tgatherFromFace_%sk%s(face_node[NABLA_NB_FACES*n+tfid],\
+\n\t\t\tgatherFromFace_%sk%s(face_node[NABLA_NB_FACES*n+f],\
 \n\t\t\t\t\t%s\
 \n\t\t\t\t\t%s_%s,\
 \n\t\t\t\t\t&gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3", var->item, var->name, // ligne #1
            strcmp(var->type,"real")==0?"real":"real3", strcmp(var->type,"real")==0?"":"3", // ligne #3
            var->dim==0?"":"Array8", // fin ligne #3
-           var->dim==0?"":"\t\t\t\t\t\tface_node[4*n+tfid],\n\t\t\t", // ligne #4
+           var->dim==0?"":"\t\t\t\t\t\tface_node[4*n+f],\n\t\t\t", // ligne #4
            var->item, var->name, // ligne #5
            var->item, var->name  // ligne #6
            );

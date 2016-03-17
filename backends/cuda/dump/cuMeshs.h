@@ -168,8 +168,7 @@ __global__ void nabla_set_next_prev(int *cell_node,
                                     int *node_cell,
                                     int *node_cell_corner,
                                     int *node_cell_corner_idx){
-  CUDA_INI_CELL_THREAD(tcid);
-  const int c=tcid;
+  CUDA_INI_CELL_THREAD(c);
   // On met des valeurs négatives afin que le gatherk_and_zero_neg_ones puisse les reconaitre
   {// Dans la direction X
     const int i=c;

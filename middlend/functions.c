@@ -356,13 +356,6 @@ void nMiddleFunctionFill(nablaMain *nabla,
   // On saute le premier '{'
   n=n->children->next;
   nprintf(nabla, NULL, "){\n\t");
-  // On prépare le bon ENUMERATE
-  //dbg("\n\t[nablaFctFill] prefixEnumerate");
-  //nprintf(nabla, NULL, "\t%s", cHOOKj(nabla,forall,prefix,fct));
-  //dbg("\n\t[nablaFctFill] dumpEnumerate");
-  //nprintf(nabla, NULL, "\n\t%s", nabla->hook->forall->dump(fct));
-  //dbg("\n\t[nablaFctFill] postfixEnumerate");
-  //nprintf(nabla, NULL, "\t%s", nabla->hook->forall->postfix(fct));
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nMiddleFunctionParse(n,fct);

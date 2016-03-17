@@ -202,15 +202,7 @@ static NABLA_STATUS cudaGenericVariableDim1(nablaMain *nabla,
 static NABLA_STATUS cudaGenericVariableDim0(nablaMain *nabla,
                                             nablaVariable *var,
                                             pFunDump fDump){  
-  dbg("\n[cudaGenerateVariableDim0] variable %s", var->name);
-  if (strcmp(var->type,"real3")!=0)
-    return fDump(nabla, var, NULL, NULL);
-  else
-    return fDump(nabla, var, NULL, NULL);
-  /*return fDump(nabla, var, "_x", NULL)|
-           fDump(nabla, var, "_y", NULL)|
-           fDump(nabla, var, "_z", NULL);*/
-  return NABLA_ERROR;
+  return fDump(nabla, var, NULL, NULL);
 }
 
 // **************************************************************************** 

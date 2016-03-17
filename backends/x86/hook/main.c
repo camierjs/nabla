@@ -254,27 +254,10 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
             ///*@%f*/entry_points[i].whens[0],
             //n->call->parallel->spawn(),
             entry_points[i].name);
-    
-    // Dump des arguments *ou pas*
-//    if (entry_points[i].stdParamsNode != NULL){
-//      //nprintf(n, NULL,"/*entry_points[i].stdParamsNode != NULL*/");
-//      numParams=nMiddleDumpParameterTypeList(n,n->entity->src,
-//                                             entry_points[i].stdParamsNode);
-//      //nprintf(n, NULL,"/*done*/");
-//    }//else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
-    
+        
     // On s'autorise un endroit pour insérer des arguments
     nMiddleArgsDumpFromDFS(n,&entry_points[i]);
     
-    /*if (entry_points[i].used_options==NULL &&
-        entry_points[i].used_variables==NULL)
-        nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);*/
-    
-    // Et on dump les in et les out
-//   if (entry_points[i].nblParamsNode != NULL){
-//      nMiddleArgsDump(n,entry_points[i].nblParamsNode,&numParams);
-//    } //else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
-
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
       if (!entry_points[i].reduction)

@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+#define HOOK(h,f) if (nabla->hook->h->f) nabla->hook->h->f(nabla)
+
 // ****************************************************************************
 // * nMiddleBackendAnimate
 // ****************************************************************************
@@ -53,42 +55,43 @@ NABLA_STATUS animate(nablaMain *nabla,
   nabla->hook=hooks;
 
   // Partie des hooks à remonter à termes dans le middlend
-  nabla->hook->vars->init(nabla);
-  nabla->hook->source->open(nabla);
-  nabla->hook->source->include(nabla);
+  HOOK(vars,init);
+  HOOK(source,open);
+  HOOK(source,include);
 
   // Le header
-  nabla->hook->header->open(nabla);
-  nabla->hook->header->prefix(nabla);
-  nabla->hook->header->include(nabla);
-  nabla->hook->mesh->prefix(nabla);
-  nabla->hook->header->enums(nabla);
-  nabla->hook->header->dump(nabla);
+  HOOK(header,open);
+  HOOK(header,prefix);
+  HOOK(header,include);
+  HOOK(mesh,prefix);
+  HOOK(header,enums);
+  HOOK(header,dump);
 
   // Parse du code préprocessé et lance les hooks associés
   // On en profite pour dumper dans le header les forwards des fonctions
   nMiddleGrammar(root,nabla);
 
   // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
-  nabla->hook->mesh->core(nabla);
+  HOOK(mesh,core);
+
   // Rapidement on place dans le header les variables et options
   // qui pourront etre utilisées par d'autres dump
-  nabla->hook->vars->prefix(nabla);
+  HOOK(vars,prefix);
 
-  nabla->hook->main->varInitKernel(nabla);
-  nabla->hook->main->prefix(nabla);
-  nabla->hook->vars->malloc(nabla);
+  HOOK(main,varInitKernel);
+  HOOK(main,prefix);
+  HOOK(vars,malloc);
   
-  nabla->hook->main->preInit(nabla);
-  nabla->hook->main->varInitCall(nabla);
-  nabla->hook->main->main(nabla);
-  nabla->hook->main->postInit(nabla);
+  HOOK(main,preInit);
+  HOOK(main,varInitCall);
+  HOOK(main,main);
+  HOOK(main,postInit);
   
   // Partie POSTFIX  
-  nabla->hook->header->postfix(nabla); 
-  nabla->hook->mesh->postfix(nabla);
-  nabla->hook->main->postfix(nabla);
-  nabla->hook->vars->free(nabla);
+  HOOK(header,postfix);
+  HOOK(mesh,postfix);
+  HOOK(main,postfix);
+  HOOK(vars,free);
   
   dbg("\n\t[nMiddleBackendAnimate] Deleting kernel names");
   toolUnlinkKtemp(nabla->entity->jobs);

@@ -42,22 +42,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-
-
-/*****************************************************************************
- * Fonction prefix à l'ENUMERATE_*
- *****************************************************************************/
+// ****************************************************************************
+// * Fonction prefix à l'ENUMERATE_*
+// ****************************************************************************
 char* cuHookForAllPrefix(nablaJob *job){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   const char rgn=(job->region!=NULL)?job->region[0]:0;  // INNER, OUTER
-  //if (j->xyz==NULL) return "// void ENUMERATE prefix";
-  //nprintf(job->entity->main, "\n\t/*cuHookPrefixEnumerate*/", "/*itm=%c*/", itm);
-  if (itm=='c'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_CELL_THREAD(tcid);";
-  if (itm=='f'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_FACE_THREAD(tfid);";
-  if (itm=='f'  && rgn=='i' && strcmp(job->return_type,"void")==0) return "CUDA_INI_INNER_FACE_THREAD(tfid);";
-  if (itm=='f'  && rgn=='o' && strcmp(job->return_type,"void")==0) return "CUDA_INI_OUTER_FACE_THREAD(tfid);";
-  if (itm=='c'  && strcmp(job->return_type,"real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(tcid);";
-  if (itm=='n') return "CUDA_INI_NODE_THREAD(tnid);";
+  if (itm=='c'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_CELL_THREAD(c);";
+  if (itm=='f'  && strcmp(job->return_type,"void")==0) return "CUDA_INI_FACE_THREAD(f);";
+  if (itm=='f'  && rgn=='i' && strcmp(job->return_type,"void")==0)
+    return "CUDA_INI_INNER_FACE_THREAD(f);";
+  if (itm=='f'  && rgn=='o' && strcmp(job->return_type,"void")==0)
+    return "CUDA_INI_OUTER_FACE_THREAD(f);";
+  if (itm=='c'  && strcmp(job->return_type,"real")==0) return "CUDA_INI_CELL_THREAD_RETURN_REAL(c);";
+  if (itm=='n') return "CUDA_INI_NODE_THREAD(n);";
   if (itm=='\0' && job->is_an_entry_point
       && job->called_variables!=NULL) return "CUDA_LAUNCHER_FUNCTION_THREAD(tid);";
   if (itm=='\0' && job->is_an_entry_point
@@ -65,84 +63,5 @@ char* cuHookForAllPrefix(nablaJob *job){
   if (itm=='\0' && job->is_an_entry_point) return "CUDA_INI_FUNCTION_THREAD(tid);";
   if (itm=='\0' && !job->is_an_entry_point) return "/*std function*/";
   nablaError("Could not distinguish PREFIX Enumerate!");
-  return NULL;
-}
-
-
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_* avec XYZ
- *****************************************************************************/
-char* cuHookForAllDumpXYZ(nablaJob *job){
-  char *xyz=job->xyz;// Direction
-  nprintf(job->entity->main, NULL, "/*xyz=%s, drctn=%s*/", xyz, job->direction);
-  return "// cuHookDumpEnumerateXYZ has xyz direction";
-}
-
-
-/*****************************************************************************
- * Fonction produisant l'ENUMERATE_*
- *****************************************************************************/
-char* cuHookForAllDump(nablaJob *job){
-  //nprintf(job->entity->main, NULL, "/*cuHookDumpEnumerate*/");
-  //dbg("\n\t\t[cuHookDumpEnumerate]\n"); fflush(stdout);
-  char *grp=job->scope;   // OWN||ALL
-  char *rgn=job->region;  // INNER, OUTER
-  char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  //dbg("\n\t\t[cuHookDumpEnumerate] itm=%c", itm);
-  //if (job->xyz!=NULL) return cuHookDumpEnumerateXYZ(job);
-  if (itm=='\0') return "// function cuHookDumpEnumerate\n";
-  
-  if (itm=='c' && grp==NULL && rgn==NULL) return "";//FOR_EACH_CELL_WARP(c)";
-  if (itm=='c' && grp!=NULL && grp[0]=='o' && rgn==NULL) return "";
-  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='i') return "\n#warning Should be INNER\n";
-  if (itm=='c' && grp==NULL && rgn!=NULL && rgn[0]=='o') return "\n#warning Should be OUTER\n";
-  
-  if (itm=='n' && grp==NULL && rgn==NULL) return "";//FOR_EACH_NODE_WARP(n)";
-  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "\n#warning Should be INNER\n";
-  if (itm=='n' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "\n#warning Should be OUTER\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "";
-  if (itm=='n' && grp!=NULL && grp[0]=='a' && rgn==NULL)   return "\n#warning Should be ALL\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "\n#warning Should be INNER\n";
-  if (itm=='n' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "\n#warning Should be OUTER\n";
-  
-  if (itm=='f' && grp==NULL && rgn==NULL) return "";//FOR_EACH_FACE_WARP(f)";
-  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='o')   return "";
-  if (itm=='f' && grp==NULL && rgn!=NULL && rgn[0]=='i')   return "";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn==NULL)   return "";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='o') return "";
-  if (itm=='f' && grp!=NULL && grp[0]=='o' && rgn!=NULL && rgn[0]=='i') return "";
-  
-  if (itm=='e' && grp==NULL && rgn==NULL) return "";//FOR_EACH_ENV_WARP(e)";
-  if (itm=='m' && grp==NULL && rgn==NULL) return "";//FOR_EACH_MAT_WARP(m)";
-  
-  nablaError("Could not distinguish ENUMERATE!");
-  return NULL;
-}
-
-
-// **************************************************************************** 
-// * Traitement des tokens NABLA ITEMS
-// ****************************************************************************
-char* cuHookForAllItem(nablaJob *j,
-                          const char job,
-                          const char itm,
-                          char enum_enum){
-  nprintf(j->entity->main, "/*cuHookItem*/", "/*cuHookItem*/");
-  return "";
-  //nablaError("Could not switch in cuHookItem!");
-  //return NULL;
-}
-
-
-/*****************************************************************************
- * Fonction postfix à l'ENUMERATE_*
- *****************************************************************************/
-char* cuHookForAllPostfix(nablaJob *job){
-  if (job->item[0]=='\0') return "// functioncuHookPostfixEnumerate\n";
-  if (job->xyz==NULL) return "";//// void ENUMERATE postfix\n\t";
-  if (job->xyz!=NULL) return "// Postfix ENUMERATE with xyz direction\n\
-\t\t//int prevCell=tcid-1;\n\
-\t\t//int nextCell=tcid+1;\n";
-  nablaError("Could not switch in cuHookPostfixEnumerate!");
   return NULL;
 }

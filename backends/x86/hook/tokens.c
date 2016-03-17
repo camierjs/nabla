@@ -85,7 +85,7 @@ void xHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static bool xHookSwitchForall(astNode *n, nablaJob *job){
+bool xHookSwitchForall(astNode *n, nablaJob *job){
   const char cnfg=job->item[0];
 
 // Preliminary pertinence test
@@ -143,7 +143,7 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
 // *****************************************************************************
 // * xHookSwitchAleph
 // *****************************************************************************
-static bool xHookSwitchAleph(astNode *n, nablaJob *job){
+bool xHookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
   //nprintf(nabla, "/*xHookSwitchAleph*/","/*xHookSwitchAleph*/");
@@ -253,6 +253,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case (MIN_ASSIGN):{
     job->parse.left_of_assignment_operator=false;
     nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/=ReduceMinToDouble");
+    //nprintf(nabla, "/*MIN_ASSIGN*/", "/*MIN_ASSIGN*/");
     break;
   }
   case (MAX_ASSIGN):{

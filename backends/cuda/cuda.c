@@ -43,6 +43,7 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "backends/cuda/cuda.h"
+#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * CALLS
@@ -76,8 +77,8 @@ const nWhatWith cuHeaderDefines[]={
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
-  {"xs_cell_node(n)", "cell_node[tcid*NABLA_NODE_PER_CELL+n]"},
-  {"xs_face_cell(c)", "face_cell[tfid+NABLA_NB_FACES*c]"},
+  {"xs_cell_node(n)", "cell_node[c*NABLA_NODE_PER_CELL+n]"},
+  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
   {NULL,NULL}
 };
 
@@ -93,10 +94,10 @@ const callHeader cudaHeader={
 };
 
 const static callSimd cudaSimdCalls={
-  cuHookBits,
+  NULL,
   cuHookGather,
   cuHookScatter,
-  cuHookIncludes
+  NULL
 };
 
 backendCalls cudaCalls={
@@ -109,37 +110,37 @@ backendCalls cudaCalls={
 // * HOOKS
 // ****************************************************************************
 const hookXyz cuHookXyz={
-  cuHookSysPrefix,
-  cuHookPrevCell,
-  cuHookNextCell,
-  cuHookSysPostfix
+  NULL,
+  xHookPrevCell,
+  xHookNextCell,
+  xHookSysPostfix // cuHookSysPostfix
 };
 
 const static hookPragma cuHookPragma={
-  cuHookPragmaGccAlign
+  NULL 
 };
 
 const static hookHeader cuHookHeader={
   cuHookHeaderDump,
-  cuHookHeaderOpen,
+  xHookHeaderOpen,
   cuHookHeaderEnumerates,
-  cuHookHeaderPrefix,
+  xHookHeaderPrefix,
   cuHookHeaderIncludes,
-  cuHookHeaderPostfix
+  xHookHeaderPostfix
 };
 
 // Hooks pour le source
 const static hookSource cuHookSource={
   cuHookSourceOpen,
-  cuHookSourceInclude,
-  cuHookSourceNamespace
+  xHookSourceInclude,
+  NULL
 };
   
 // Hooks pour le maillage
 const static hookMesh cuHookMesh={
   cuHookMeshPrefix,
   cuHookMeshCore,
-  cuHookMeshPostfix
+  NULL
 };
   
 // Hooks pour les variables
@@ -154,8 +155,8 @@ const static hookVars cuHookVars={
 const static hookMain cuHookMain={
   cuHookMainPrefix,
   cuHookMainPreInit,
-  cuHookMainVarInitKernel,
-  cuHookMainVarInitCall,
+  NULL,
+  xHookMainVarInitCall,
   cuHookMainCore,
   cuHookMainPostInit,
   cuHookMainPostfix
@@ -164,24 +165,24 @@ const static hookMain cuHookMain={
   
 const static hookForAll cuHookForAll={
   cuHookForAllPrefix,
-  cuHookForAllDump,
-  cuHookForAllItem,
-  cuHookForAllPostfix
+  NULL,
+  NULL,
+  NULL
 };
 
 const static hookToken cuHookToken={
-  cuHookTokenPrefix, // prefix
+  NULL, // prefix
   cuHookSwitchToken, // svvitch
   cuHookTurnTokenToVariable, // variable
-  cuHookTurnTokenToOption, // option
-  cuHookSystem, // system
-  cuHookIteration,
+  xHookTurnTokenToOption,
+  xHookSystem,
+  xHookIteration,
   cuHookExit,
   cuHookTime,
-  cuHookFatal,
-  cuHookTurnBracketsToParentheses,
-  cuHookIsTest,
-  cuHookTokenPostfix
+  xHookFatal,
+  xHookTurnBracketsToParentheses,
+  xHookIsTest,
+  NULL
 };
 
 const static hookGrammar cuHookGrammar={
@@ -198,7 +199,7 @@ const static hookCall cuHookCall={
   cuHookAddCallNames,
   cuHookAddArguments,
   cuHookEntryPointPrefix,
-  cuHookDfsForCalls,
+  xHookDfsForCalls,
   cuHookAddExtraParameters,
   cuHookDumpNablaParameterList
 };
@@ -210,7 +211,7 @@ static hooks cuHooks={
   &cuHookGrammar,
   &cuHookCall,
   &cuHookXyz,
-  &cuHookPragma,
+  NULL,
   &cuHookHeader,
   &cuHookSource,
   &cuHookMesh,

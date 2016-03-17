@@ -58,42 +58,26 @@ void cuHeaderItems(nablaMain*);
 // * CUDA HOOKS
 // ****************************************************************************
 void cuHookSourceOpen(nablaMain*);
-void cuHookSourceInclude(nablaMain*);
-char* cuHookSourceNamespace(nablaMain*);
 
-char *cuHookBits(void);
 char* cuHookGather(nablaJob*,nablaVariable*);
 char* cuHookScatter(nablaVariable*);
-
-char* cuHookSysPrefix(void);
-char* cuHookSysPostfix(void);
-char* cuHookPrevCell(int);
-char* cuHookNextCell(int);
-
-char* cuHookIncludes(void);
 
 char* cuHookFilterGather(nablaJob*);
 char* cuHookFilterScatter(nablaJob*);
 
 void cuHookReduction(struct nablaMainStruct*,astNode*);
 void cuHookAddArguments(struct nablaMainStruct*,nablaJob*);
-void cuHookTurnTokenToOption(struct nablaMainStruct*,nablaOption*);
 bool cudaHookDfsVariable(void);
 
 char* cuHookPragmaGccIvdep(void);
 char* cuHookPragmaGccAlign(void);
 
 void cuHookHeaderDump(nablaMain*);
-void cuHookHeaderOpen(nablaMain*);
 void cuHookHeaderEnumerates(nablaMain*);
-void cuHookHeaderPrefix(nablaMain*);
-void cuHookHeaderPostfix(nablaMain*);
 void cuHookHeaderIncludes(nablaMain*);
 
 NABLA_STATUS cuHookMainPrefix(nablaMain*);
 NABLA_STATUS cuHookMainPreInit(nablaMain*);
-NABLA_STATUS cuHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS cuHookMainVarInitCall(nablaMain*);
 NABLA_STATUS cuHookMainCore(nablaMain*);
 NABLA_STATUS cuHookMainPostInit(nablaMain*);
 NABLA_STATUS cuHookMainPostfix(nablaMain*);
@@ -106,16 +90,12 @@ void cuHookVariablesFree(nablaMain*);
 
 void cuHookMeshPrefix(nablaMain*);
 void cuHookMeshCore(nablaMain*);
-void cuHookMeshPostfix(nablaMain*);
 void cuHookMeshConnectivity(nablaMain*);
 
-void cuHookIteration(struct nablaMainStruct*);
 void cuHookExit(struct nablaMainStruct*,nablaJob*);
 void cuHookTime(struct nablaMainStruct*);
-void cuHookFatal(struct nablaMainStruct*);
 void cuHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
 char* cuHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
-void cuHookDfsForCalls(struct nablaMainStruct*,nablaJob*,astNode*,const char*,astNode*);
 
 void cuHookFunctionName(nablaMain*);
 void cuHookFunction(nablaMain*,astNode*);
@@ -123,23 +103,13 @@ void cuHookJob(nablaMain*,astNode*);
 void cuHookLibraries(astNode*,nablaEntity*);
 
 char* cuHookForAllPrefix(nablaJob*);
-char* cuHookForAllDumpXYZ(nablaJob*);
-char* cuHookForAllDump(nablaJob*);
-char* cuHookForAllPostfix(nablaJob*);
-char* cuHookForAllItem(nablaJob*,const char,const char,char);
-
-char* cuHookTokenPrefix(nablaMain*);
-char* cuHookTokenPostfix(nablaMain*);
 
 void cuHookSwitchToken(astNode*,nablaJob*);
 nablaVariable *cuHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void cuHookSystem(astNode*,nablaMain*,const char,char);
 void cuHookAddExtraParameters(nablaMain*, nablaJob*, int*);
 void cuHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
-void cuHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
 
 void cuHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-void cuHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 void cuDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 

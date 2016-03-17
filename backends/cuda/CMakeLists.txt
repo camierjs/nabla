@@ -23,4 +23,5 @@ add_dependencies(NablaCuda libNabla)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/cuSolver)
+
 target_link_libraries(NablaCuda NablaCuSolver NablaCudaDump)

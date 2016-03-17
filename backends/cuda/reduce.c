@@ -101,8 +101,8 @@ __global__ void %s(", item_var_name, global_var_name, job_name);
   cuHookAddExtraParameters(nabla,redjob,&fakeNumParams);
   nprintf(nabla, NULL,",real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
-\tCUDA_INI_CELL_THREAD(tcid);\n\
-\t/**global_%s=*/Reduce%sToDouble((double)(cell_%s[tcid]));\n\
+\tCUDA_INI_CELL_THREAD(c);\n\
+\t/**global_%s=*/Reduce%sToDouble((double)(cell_%s[c]));\n\
 }\n\n", item_var_name,
           at_single_cst_node->token,
           reduction_init,
