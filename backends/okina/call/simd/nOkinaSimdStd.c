@@ -120,7 +120,7 @@ char* nOkinaStdGather(nablaJob *job,nablaVariable* var){
 // ****************************************************************************
 // * Scatter
 // ****************************************************************************
-char* nOkinaStdScatter(nablaVariable* var){
+char* nOkinaStdScatter(nablaJob *job,nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%sk(ia, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",

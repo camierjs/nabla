@@ -74,10 +74,10 @@ char* nOkinaSseGather(nablaJob*,nablaVariable*);
 char* nOkinaAvxGather(nablaJob*,nablaVariable*);
 char* nOkinaMicGather(nablaJob*,nablaVariable*);
 
-char* nOkinaStdScatter(nablaVariable*);
-char* nOkinaSseScatter(nablaVariable*);
-char* nOkinaAvxScatter(nablaVariable*);
-char* nOkinaMicScatter(nablaVariable*);
+char* nOkinaStdScatter(nablaJob*,nablaVariable*);
+char* nOkinaSseScatter(nablaJob*,nablaVariable*);
+char* nOkinaAvxScatter(nablaJob*,nablaVariable*);
+char* nOkinaMicScatter(nablaJob*,nablaVariable*);
 
 char* nOkinaStdPrevCell(int);
 char* nOkinaSsePrevCell(int);

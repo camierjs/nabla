@@ -255,11 +255,41 @@ class __attribute__ ((aligned(8))) real3x3 {
   __attribute__ ((aligned(8))) struct real3 y;
   __attribute__ ((aligned(8))) struct real3 z;
   __device__ inline real3x3(){ x=0.0; y=0.0; z=0.0;}
+  __device__ inline real3x3(real3 r){ x=r; y=r; z=r;}
   __device__ inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
   __device__ friend inline real3 opProdTensVec(real3x3 t,real3 v){
     return real3(dot3(t.x,v),dot3(t.y,v),dot3(t.z,v));
   }
 };
+
+
+
+
+// ****************************************************************************
+// * NEW Rgather*
+// ****************************************************************************
+__device__ inline real3 rgather3k(const int a, const real3 *data){
+  const double *p=(double*)data;
+  return real3(p[3*a+0],p[3*a+1],p[3*a+2]);
+}
+__device__ inline real rGatherAndZeroNegOnes(const int a, const real *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+__device__ inline real3 rGatherAndZeroNegOnes(const int a, const real3 *data){
+  if (a>=0) return *(data+a);
+  return 0.0;
+}
+__device__ inline real3x3 rGatherAndZeroNegOnes(const int a,const  real3x3 *data){
+  if (a>=0) return *(data+a);
+  return real3x3(0.0);
+}
+__device__ inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const real3 *data){
+  const int i=3*8*a+3*corner;
+  const double *p=(double*)data;
+  if (a>=0) return real3(p[i+0],p[i+1],p[i+2]);
+  return 0.0;
+}
 
 
 /******************************************************************************

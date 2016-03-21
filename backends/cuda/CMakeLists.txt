@@ -8,13 +8,9 @@ set(BACKEND_CUDA_C cuda.c
     main.c
     vars.c
     mesh.c
-    data.c
     header.c
-    tokens.c
     source.c
-    gather.c
     forall.c
-    scatter.c
     params.c
     reduce.c)
 

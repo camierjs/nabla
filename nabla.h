@@ -174,6 +174,9 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #include "backends/hooks.h"
 #include "backends/calls.h"
 
+#include "backends/x86/call/call.h"
+#include "backends/x86/hook/hook.h"
+
 #include "toolbox/toolbox.h"
 
 #endif // _NABLA_H_

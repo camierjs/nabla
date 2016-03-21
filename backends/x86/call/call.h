@@ -52,7 +52,7 @@ char *xParallelIncludes(void);
 
 // gather/scatter
 char* xCallGather(nablaJob*,nablaVariable*);
-char* xCallScatter(nablaVariable*);
+char* xCallScatter(nablaJob*,nablaVariable*);
 
 char* xCallFilterGather(astNode*,nablaJob*);
 char* xCallFilterScatter(astNode*,nablaJob*);

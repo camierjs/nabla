@@ -59,9 +59,6 @@ void cuHeaderItems(nablaMain*);
 // ****************************************************************************
 void cuHookSourceOpen(nablaMain*);
 
-char* cuHookGather(nablaJob*,nablaVariable*);
-char* cuHookScatter(nablaVariable*);
-
 char* cuHookFilterGather(nablaJob*);
 char* cuHookFilterScatter(nablaJob*);
 

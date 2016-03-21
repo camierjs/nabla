@@ -203,7 +203,7 @@ char* nOkinaMicGather(nablaJob *job,nablaVariable* var){
 // ****************************************************************************
 // * MIC Scatter
 // ****************************************************************************
-char* nOkinaMicScatter(nablaVariable* var){
+char* nOkinaMicScatter(nablaJob *job,nablaVariable* var){
   char scatter[1024];
   snprintf(scatter, 1024, "\tscatter%s(ia,ib,ic,id,ie,iff,ig,ih, %s_%s, gathered_%s_%s);",
            strcmp(var->type,"real")==0?"":"3",

@@ -43,7 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 #include "backends/cuda/cuda.h"
-#include "backends/x86/hook/hook.h"
 
 // ****************************************************************************
 // * CALLS
@@ -56,6 +55,10 @@ const nWhatWith cuHeaderTypedef[]={
 };
 
 const nWhatWith cuHeaderDefines[]={
+  {"WARP_BIT", "0"},
+  {"WARP_SIZE", "1"},
+  {"WARP_ALIGN", "8"}, 
+  {"NABLA_NB_GLOBAL","1"},
   {"Real3","real3"},
   {"Real","real"},
   {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
@@ -95,8 +98,8 @@ const callHeader cudaHeader={
 
 const static callSimd cudaSimdCalls={
   NULL,
-  cuHookGather,
-  cuHookScatter,
+  xCallGather,
+  xCallScatter,
   NULL
 };
 
@@ -113,7 +116,7 @@ const hookXyz cuHookXyz={
   NULL,
   xHookPrevCell,
   xHookNextCell,
-  xHookSysPostfix // cuHookSysPostfix
+  xHookSysPostfix
 };
 
 const static hookPragma cuHookPragma={
@@ -171,9 +174,9 @@ const static hookForAll cuHookForAll={
 };
 
 const static hookToken cuHookToken={
-  NULL, // prefix
-  cuHookSwitchToken, // svvitch
-  cuHookTurnTokenToVariable, // variable
+  NULL,
+  xHookSwitchToken,
+  xHookTurnTokenToVariable,
   xHookTurnTokenToOption,
   xHookSystem,
   xHookIteration,

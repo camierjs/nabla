@@ -53,7 +53,7 @@ typedef struct callHeaderStruct{
 typedef struct callSimdStruct{
   char* (*bits)(void);
   char* (*gather)(nablaJob*,nablaVariable*);
-  char* (*scatter)(nablaVariable*);
+  char* (*scatter)(nablaJob*,nablaVariable*);
   char* (*includes)(void);
 } callSimd;
 
