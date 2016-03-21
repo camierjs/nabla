@@ -41,8 +41,6 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/x86/hook/hook.h"
-#include "backends/x86/call/call.h"
 
 // ****************************************************************************
 // * Fonction produisant l'ENUMERATE_*

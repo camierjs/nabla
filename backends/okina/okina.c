@@ -42,8 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/okina/okina.h"
-#include "backends/x86/hook/hook.h"
-#include "backends/x86/call/call.h"
 #include "backends/okina/call/call.h"
 
 

@@ -475,7 +475,7 @@ void nMiddleJobFill(nablaMain *nabla,
   // Si used_options et used_variables ont été utilisées
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   //nprintf(nabla, NULL,"/*job numParams=%d*/",numParams);
-  if (nabla->hook->grammar->dfsVariable()) // Okina still is false here
+  if (nabla->hook->grammar->dfsVariable()) 
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     
   // On va chercher les paramètres nabla in/out/inout

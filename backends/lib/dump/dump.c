@@ -40,3 +40,58 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "nabla.h"   
+
+
+// ****************************************************************************
+// * dumpExternalFile
+// * NABLA_LICENSE_HEADER is tied and defined in nabla.h
+// ****************************************************************************
+static char *dumpExternalFile(char *file){
+  return file+NABLA_LICENSE_HEADER;
+}
+
+
+// ****************************************************************************
+// * extern definitions from dDump.S
+// ****************************************************************************
+extern char debug_h[];
+extern char types_h[];
+extern char gather_h[];
+extern char scatter_h[];
+extern char ostream_h[];
+extern char ternary_h[];
+
+extern char items_c[];
+extern char msh1D_c[];
+extern char msh2D_c[];
+extern char msh3D_c[];
+
+
+// ****************************************************************************
+// * dumpHeader
+// ****************************************************************************
+void xDumpHeader(nablaMain *nabla){
+  assert(nabla->entity->name);
+  fprintf(nabla->entity->hdr,dumpExternalFile(types_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(ternary_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(gather_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(scatter_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(ostream_h));
+  fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
+}
+
+
+// ****************************************************************************
+// * dumpMesh
+// ****************************************************************************
+void xDumpMesh(nablaMain *nabla){
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    fprintf(nabla->entity->src,dumpExternalFile(msh1D_c));
+  else
+    if ((nabla->entity->libraries&(1<<with_real2))!=0)
+    fprintf(nabla->entity->src,dumpExternalFile(msh2D_c));
+  else
+    fprintf(nabla->entity->src,dumpExternalFile(msh3D_c));
+  fprintf(nabla->entity->hdr,dumpExternalFile(items_c));
+}

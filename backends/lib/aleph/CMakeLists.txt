@@ -43,8 +43,6 @@ endif()
 configure_file(Aleph.h ${CMAKE_CURRENT_BINARY_DIR}/Aleph.h)
 configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h)
 
-add_library(NablaX86Aleph ${ALEPH_SOURCES})
+add_library(NablaLibAleph ${ALEPH_SOURCES})
 
-#add_dependencies(NablaLibAleph NablaX86Hook)
-
-set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaX86Aleph.a PARENT_SCOPE)
+set(ALEPH_LIB ${CMAKE_CURRENT_BINARY_DIR}/libNablaLibAleph.a PARENT_SCOPE)

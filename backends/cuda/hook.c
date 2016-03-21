@@ -44,41 +44,6 @@
 #include "nabla.tab.h"
 
 
-// ****************************************************************************
-// * Dump dans le src l'appel des fonction de debug des arguments nabla  en out
-// ****************************************************************************
-void cuDumpNablaDebugFunctionFromOutArguments(nablaMain *nabla,
-                                              astNode *n,
-                                              bool in_or_out){
-  if (n==NULL) return;
-  // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
-  if (n->tokenid=='@') return;
-  if (n->tokenid==OUT) in_or_out=false;
-  if (n->tokenid==INOUT) in_or_out=false;
-  if (n->ruleid==rulenameToId("direct_declarator")){
-    nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
-    // Si on ne trouve pas de variable, on a rien à faire
-    if (var == NULL)
-      return exit(NABLA_ERROR|fprintf(stderr, "\n[cudaDumpNablaDebugFunctionFromOutArguments] Variable error\n"));
-    if (!in_or_out){
-      nprintf(nabla,NULL,"\n\t\t//printf(\"\\n%sVariable%sDim%s_%s:\");",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-      nprintf(nabla,NULL,"//dbg%sVariable%sDim%s_%s();",
-              (var->item[0]=='n')?"Node":"Cell",
-              (strcmp(var->type,"real3")==0)?"XYZ":"",
-              (var->dim==0)?"0":"1",
-              var->name);
-    }
-  }
-  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->children, in_or_out);
-  cuDumpNablaDebugFunctionFromOutArguments(nabla, n->next, in_or_out);
-}
-
-
 bool cudaHookDfsVariable(void){ return false; }
 
 
@@ -90,40 +55,6 @@ void cuHookExit(struct nablaMainStruct *nabla,nablaJob *job){
 void cuHookTime(struct nablaMainStruct *nabla){
   nprintf(nabla, "/*TIME*/", "*global_time");
 }
-
-
-
-void cuHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
-  nablaJob *foundJob;
-  char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", "/*%s*/",callName);
-  fct->parse.function_call_name=NULL;
-  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
-    if (foundJob->is_a_function!=true){
-      nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=strdup(callName);
-    }else{
-      nprintf(nabla, "/*isNablaFunction*/", NULL);
-    }
-  }else{
-    nprintf(nabla, "/*has not been found*/", NULL);
-  }
-}
-
-
-void cuHookAddArguments(struct nablaMainStruct *nabla,nablaJob *fct){
-  // En Cuda, par contre il faut les y mettre
-  if (fct->parse.function_call_name!=NULL){
-    nprintf(nabla, "/*ShouldDumpParamsIcuda*/", "/*cudaAddArguments*/");
-    int numParams=1;
-    nablaJob *called=nMiddleJobFind(fct->entity->jobs,fct->parse.function_call_name);
-    nMiddleArgsAddGlobal(nabla, called, &numParams);
-    nprintf(nabla, "/*ShouldDumpParamsIcuda*/", "/*cudaAddArguments done*/");
-    if (called->nblParamsNode != NULL)
-      nMiddleArgsDump(nabla,called->nblParamsNode,&numParams);
-  }
-}
-
 
 
 char* cuHookEntryPointPrefix(struct nablaMainStruct *nabla, nablaJob *entry_point){

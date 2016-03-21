@@ -150,6 +150,7 @@ const static hookMesh cuHookMesh={
 const static hookVars cuHookVars={
   cuHookVariablesInit,
   cuHookVariablesPrefix,
+  //xHookVariablesMalloc,
   cuHookVariablesMalloc,
   cuHookVariablesFree
 };  
@@ -194,13 +195,13 @@ const static hookGrammar cuHookGrammar={
   cuHookReduction,
   NULL, // primary_expression_to_return
   NULL, // returnFromArgument
-  cudaHookDfsVariable
+  cudaHookDfsVariable //xHookDfsVariable
 };
   
   
 const static hookCall cuHookCall={
-  cuHookAddCallNames,
-  cuHookAddArguments,
+  xHookAddCallNames,
+  xHookAddArguments,
   cuHookEntryPointPrefix,
   xHookDfsForCalls,
   cuHookAddExtraParameters,

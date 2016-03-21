@@ -194,7 +194,6 @@ NABLA_STATUS cuHookMainCore(nablaMain *n){
 
     
     nprintf(n, NULL, ");");
-    cuDumpNablaDebugFunctionFromOutArguments(n,entry_points[i].nblParamsNode,true);
 
     if (entry_points[i].reduction==true){
       nprintf(n, NULL,"\

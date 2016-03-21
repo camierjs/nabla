@@ -229,14 +229,7 @@ static NABLA_STATUS cudaGenericVariable(nablaMain *nabla,
 // * Initialisation des besoins vis-à-vis des variables (globales)
 // ****************************************************************************
 void cuHookVariablesInit(nablaMain *nabla){
-  // Rajout de la variable globale 'iteration'
-  nablaVariable *iteration = nMiddleVariableNew(nabla);
-  nMiddleVariableAdd(nabla, iteration);
-  iteration->axl_it=false;
-  iteration->item=strdup("global");
-  iteration->type=strdup("integer");
-  iteration->name=strdup("iteration");
-
+  xHookVariablesInit(nabla);
   // Rajout de la variable globale 'min_array'
   // Pour la réduction aux blocs
   nablaVariable *device_shared_reduce_results = nMiddleVariableNew(nabla);
@@ -315,12 +308,11 @@ void cuHookVariablesPostfix(nablaMain *nabla){
 // * Malloc des variables
 // ****************************************************************************
 void cuHookVariablesMalloc(nablaMain *nabla){
-  nablaVariable *var;
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
 \t// * cuHookVariablesMalloc\n\
 \t// ********************************************************");
-  for(var=nabla->variables;var!=NULL;var=var->next){
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
     if (cudaGenericVariable(nabla,
                             var,
                             witch2func(CUDA_VARIABLES_MALLOC))==NABLA_ERROR)

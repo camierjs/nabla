@@ -48,7 +48,7 @@
 // ****************************************************************************
 // * nabla_ini_node_coords
 // ****************************************************************************
-static void verifCoords(void);
+static void verifCoords(Real*);
 static void verifCorners(void);
 static void verifNextPrev(void);
 static void verifConnectivity(void);
@@ -69,7 +69,7 @@ static double xOf7(const int n){
 //static double yOf7(const int n){ return 0.0; }
 //static double zOf7(const int n){ return 0.0; }
 
-static void nabla_ini_node_coords(void){
+static void nabla_ini_node_coords(Real *node_coord){
   dbg(DBG_OFF,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
   assert((NABLA_NB_CELLS %% 1)==0);
     
@@ -90,7 +90,7 @@ static void nabla_ini_node_coords(void){
     dbg(DBG_OFF,"\nSetting nodes-vector #%%d @", n);
     dbgReal(DBG_OFF,node_coord[iNode]);
   }
-  verifCoords();
+  verifCoords(node_coord);
 
   dbg(DBG_OFF,"\nOn associe à chaque maille ses noeuds");
   int node_bid,cell_uid,iCell=0;
@@ -163,7 +163,7 @@ static void nabla_ini_node_coords(void){
 }
 
 
-__attribute__((unused)) static void verifCoords(void){
+__attribute__((unused)) static void verifCoords(Real *node_coord){
   dbg(DBG_OFF,"\nVérification des coordonnés des noeuds");
   FOR_EACH_NODE(n){
     // dbg(DBG_OFF,"\nFocusing on nodes-vector %%d",n);
@@ -216,7 +216,7 @@ __attribute__((unused)) static void verifNextPrev(void){
 // ****************************************************************************
 // * nabla_ini_connectivity
 // ****************************************************************************
-static void nabla_ini_connectivity(void){
-  nabla_ini_node_coords();
+static void nabla_ini_connectivity(Real *node_coord){
+  nabla_ini_node_coords(node_coord);
 }
 

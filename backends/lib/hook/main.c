@@ -48,10 +48,7 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Backend PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
-#define BACKEND_MAIN_PREFIX "\n\n\n\
-static void nabla_ini_connectivity(void);\n\
-static void nabla_free_variables(void);\n\
-\n\
+#define BACKEND_MAIN_PREFIX "\n\n\
 // ******************************************************************************\n \
 // * Main\n\
 // ******************************************************************************\n\
@@ -63,7 +60,6 @@ int main(int argc, char *argv[]){\n\
 \t\tNABLA_NB_PARTICLES=1000;\n\
 \telse\n\
 \t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
-\tnabla_ini_connectivity();\n\
 \t// Initialisation des swirls\n\
 \thlt_level=0;\n\
 \thlt_exit=(bool*)calloc(64,sizeof(bool));\n\
@@ -89,10 +85,88 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
 // * Backend PREINIT - Génération du 'main'
 // ****************************************************************************
 #define BACKEND_MAIN_PREINIT "\n\n\t//BACKEND_MAIN_PREINIT\n\
-\tnabla_ini_variables();\n"
+\t//nabla_ini_variables();\n\
+\tnabla_ini_connectivity(node_coord);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
+  int i;
   dbg("\n[hookMainPreInit]");
   fprintf(nabla->entity->src, BACKEND_MAIN_PREINIT);
+  nprintf(nabla,NULL,"\n\
+\t// ****************************************************************\n\
+\t// Initialisation des variables\n\
+\t// ****************************************************************");
+  // Variables Particulaires
+  i=0;
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='p') continue;
+    i+=1;
+  }
+  if (i>0){
+    nprintf(nabla,NULL,"/*i=%d*/",i);
+    nprintf(nabla,NULL,"\n\tFOR_EACH_PARTICLE(p){");
+    for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+      if (var->item[0]!='p') continue;
+      nprintf(nabla,NULL,"\n\t\t%s_%s[p]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+    }
+    nprintf(nabla,NULL,"\n\t}");
+  }
+  
+  // Variables aux noeuds
+  i=0;
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='n') continue;
+    if (strcmp(var->name, "coord")==0) continue;
+    i+=1;
+  }
+  if (i>0){
+    nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
+    for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+      if (var->item[0]!='n') continue;
+      if (strcmp(var->name, "coord")==0) continue;
+      nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
+      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+      if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
+      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
+      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+    }
+    nprintf(nabla,NULL,"\n\t}");
+  }
+  
+  // Variables aux mailles
+  i=0;
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (var->item[0]!='c') continue;
+    i+=1;
+  }
+  if (i>0){
+    nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
+    for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+      if (var->item[0]!='c') continue;
+      if (var->dim==0){
+        nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
+        if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
+        if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
+        if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+        if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+        if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
+        if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
+      }else{
+        nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
+        nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
+        if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
+        if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
+        if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
+        if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
+        if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+      }
+    }
+    nprintf(nabla,NULL,"\n\t}");
+  }
   return NABLA_OK;
 }
 
@@ -101,87 +175,16 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
 // * lambdaMainVarInitKernel
 // ****************************************************************************
 NABLA_STATUS xHookMainVarInitKernel(nablaMain *nabla){
-  //int i,iVar;
-  nablaVariable *var;
-  dbg("\n[lambdaMainVarInit]");
-  nprintf(nabla,NULL,"\n\
-// ******************************************************************************\n\
-// * Kernel d'initialisation des variables\n\
-// ******************************************************************************\n\
-void nabla_ini_variables(void){");
-  // Variables Particulaires
-  nprintf(nabla,NULL,"\n\tFOR_EACH_PARTICLE(p){");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='p') continue;
-    nprintf(nabla,NULL,"\n\t\t%s_%s[p]=",var->item,var->name);
-    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
-    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
-  }
-  nprintf(nabla,NULL,"\n\t}");  
-  // Variables aux noeuds
-  nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='n') continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
-    if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
-    if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
-    if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
-    if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
-  }
-  nprintf(nabla,NULL,"\n\t}");  
-  // Variables aux mailles real
-  nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (var->item[0]!='c') continue;
-    if (var->dim==0){
-      nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
-      if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
-      if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
-      if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
-    }else{
-      nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
-      nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
-      if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
-      if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
-      if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
-      if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
-    }
-  }
-  nprintf(nabla,NULL,"\n\t}");
-  nprintf(nabla,NULL,"\n}");
+  nprintf(nabla,NULL,"\n// xHookMainVarInitKernel");
   return NABLA_OK;
 }
+
 
 // ****************************************************************************
 // * hookMainVarInitKernel
 // ****************************************************************************
 NABLA_STATUS xHookMainVarInitCall(nablaMain *nabla){
-  nablaVariable *var;
-  dbg("\n[hookMainVarInitCall]");
-  nprintf(nabla,NULL,"\n\
-\t// ***************************************************************************\n\
-\t// * hookMainVarInitCall\n\
-\t// ***************************************************************************\n");
-  for(var=nabla->variables;var!=NULL;var=var->next){
-    if (strcmp(var->name, "deltat")==0) continue;
-    if (strcmp(var->name, "time")==0) continue;
-    if (strcmp(var->name, "coord")==0) continue;
-    continue;
-    nprintf(nabla,NULL,"\n\t//printf(\"\\ndbgsVariable %s\"); dbg%sVariable%sDim%s_%s();",
-            var->name,
-            (var->item[0]=='n')?"Node":"Cell",
-            (strcmp(var->type,"real3")==0)?"XYZ":"",
-            (var->dim==0)?"0":"1",
-            var->name);
-  }
+  nprintf(nabla,NULL,"\n\t/*xHookMainVarInitCall*/");
   return NABLA_OK;
 }
 
@@ -286,17 +289,16 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 // ****************************************************************************
 // * Backend POSTFIX - Génération du 'main'
 // ****************************************************************************
-#define BACKEND_MAIN_POSTFIX "\n//BACKEND_MAIN_POSTFIX\
-\n\tglobal_time+=*(double*)&global_deltat[0];\
-\n\tglobal_iteration+=1;\
-\n\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
+#define BACKEND_MAIN_POSTFIX "\n\t\t//BACKEND_MAIN_POSTFIX\
+\n\t\tglobal_time+=*(double*)&global_deltat[0];\
+\n\t\tglobal_iteration+=1;\
+\n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
 \n\t}\
-\tgettimeofday(&et, NULL);\n\
+\n\tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n\
-\tnabla_free_variables();\n\
-\treturn 0;\n\
-\n}\n"
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n"
+
+
 // ****************************************************************************
 // * hookMainPostfix
 // ****************************************************************************

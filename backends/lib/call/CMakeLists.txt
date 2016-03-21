@@ -2,5 +2,5 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 
 set(BACKEND_LIB_CALL_C call.c gather.c scatter.c)
 
-add_library(NablaX86Call ${BACKEND_LIB_CALL_C})
-add_dependencies(NablaX86Call libNabla)
+add_library(NablaLibCall ${BACKEND_LIB_CALL_C})
+add_dependencies(NablaLibCall libNabla)

@@ -63,7 +63,6 @@ char* cuHookFilterGather(nablaJob*);
 char* cuHookFilterScatter(nablaJob*);
 
 void cuHookReduction(struct nablaMainStruct*,astNode*);
-void cuHookAddArguments(struct nablaMainStruct*,nablaJob*);
 bool cudaHookDfsVariable(void);
 
 char* cuHookPragmaGccIvdep(void);
@@ -91,7 +90,6 @@ void cuHookMeshConnectivity(nablaMain*);
 
 void cuHookExit(struct nablaMainStruct*,nablaJob*);
 void cuHookTime(struct nablaMainStruct*);
-void cuHookAddCallNames(struct nablaMainStruct*,nablaJob*,astNode*);
 char* cuHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
 
 void cuHookFunctionName(nablaMain*);
@@ -107,8 +105,6 @@ void cuHookAddExtraParameters(nablaMain*, nablaJob*, int*);
 void cuHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
 
 void cuHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
-
-void cuDumpNablaDebugFunctionFromOutArguments(nablaMain*,astNode*,bool);
 
 hooks* cuda(nablaMain*);
 
