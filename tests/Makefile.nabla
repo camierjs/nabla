@@ -1,6 +1,6 @@
 TGT=${name}
 
-MESH = 8
+MESH = 3
 #SIMD = std
 #PARALLEL = seq
 #LOG = -t #-v $(TGT).log 

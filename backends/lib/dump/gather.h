@@ -48,23 +48,28 @@
 // * That is for now for Lambda
 // ****************************************************************************
 inline real rgatherk(const int a, const real *data){
+  //assert(a>=0);
   return *(data+a);
 }
 inline real3 rgather3k(const int a, const real3 *data){
-  const double *p=(double*)data;
-  return real3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  //const double *p=(double*)data;
+  //return real3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  //assert(a>=0);
+  return data[a];
 }
 inline real3x3 rgather3x3k(const int a, const real3x3 *data){
   //const real3 *p=(real3*)data;
   //return real3x3(p[3*a+0],p[3*a+1],p[3*a+2]);
+  //assert(a>=0);
   return *(data+a);
 }
 
 inline real rGatherAndZeroNegOnes(const int a, const real *data){
-  if (a>=0) return *(data+a);
-  return 0.0;
+  //assert(a>=0);
+  return *(data+a);
 }
 inline real3 rGatherAndZeroNegOnes(const int a, const real3 *data){
+  printf("gth(%%d,real3)",a);
   if (a>=0) return *(data+a);
   return 0.0;
 }

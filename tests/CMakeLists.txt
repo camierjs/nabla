@@ -142,7 +142,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.cuda ${CMAKE_CURRENT_B
 # Now scan tests directory to add them #
 # Avoid '.', 'mesh' and ns4n           #
 ########################################
-execute_process(COMMAND find . -maxdepth 1 -type d -name [^\\.]*[^\(mesh\)]*[^\(ns4n\)]*
+execute_process(COMMAND find . -maxdepth 1 -type d -name [^.]*[^\(ns4n||mesh\)]*
+                COMMAND sort
 		          COMMAND sed -e "s/\\.\\// /g"
                 COMMAND tr "\\n" " "
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -152,8 +153,9 @@ execute_process(COMMAND find . -maxdepth 1 -type d -name [^\\.]*[^\(mesh\)]*[^\(
 if (${RESULT_NABLA_TESTS})
   message(SEND_ERROR "Error: Could not load tests directories!")
 endif (${RESULT_NABLA_TESTS})
+info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
 separate_arguments(NABLA_TESTS)
-#info("Loading NABLA_TESTS: ${NABLA_TESTS}${VT100_RESET}")
+#info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
 
 foreach(tst ${NABLA_TESTS})
   #info("\tFocusing on test ${tst}")
@@ -255,48 +257,27 @@ nabla_add_okina_test(p1apwb1D_two_state_semi_implicite 1 run std seq)
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
-nabla_add_test(lambda glace2D 1 gen seq)
+set(TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA "shydro sethi anyItem gad comd pDDFV")
+foreach(TST ${NABLA_TESTS})
+  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA} ${TST} TEST_SHOULD_PASS)
+  if(${TEST_SHOULD_PASS} EQUAL -1)
+    nabla_add_test(lambda ${TST} 1 gen seq)
+  endif()
+endforeach(TST)
+nabla_add_test(lambda xst 1 run seq)
 nabla_add_test(lambda glace2D 1 run seq)
-
-nabla_add_test(lambda gram 1 gen seq)
-nabla_add_test(lambda lulesh 1 gen seq)
 nabla_add_test(lambda lulesh 1 run seq)
 nabla_add_test(lambda lulesh 1 run omp)
-
-nabla_add_test(lambda llsh 1 gen seq)
 nabla_add_test(lambda llsh 1 run seq)
-
-nabla_add_test(lambda upwindAP 1 gen seq)
 nabla_add_test(lambda upwindAP 1 run seq)
-
-nabla_add_test(lambda heat 1 gen seq)
-nabla_add_test(lambda aleph1D 1 gen seq)
-nabla_add_test(lambda amber 1 gen seq)
-
-nabla_add_test(lambda aleph2D 1 gen seq)
-
-nabla_add_test(lambda hlt 1 gen seq)
 nabla_add_test(lambda hlt 1 run seq)
-
+nabla_add_test_with_defines(lambda deflex 1 run seq -DNO_DEFINES 100000)
 if (HYPRE_FOUND)
    nabla_add_test(lambda aleph1D 1 run seq)
    nabla_add_test(lambda aleph2D 1 run seq)
    nabla_add_test(lambda heat 1 run seq)
    nabla_add_test(lambda amber 1 run seq)
    nabla_add_test_with_defines(lambda darcy 1 run seq -DALEPH_INDEX 100000)
-endif (HYPRE_FOUND)
-
-nabla_add_test_with_defines(lambda deflex 1 run seq -DNO_DEFINES 100000)
-
-nabla_add_test(lambda p1apwb1D_version_2 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_semi_implicite 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_two_state_nolinear 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_explicite 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_gosse 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_implicite 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_two_state_irregular_mesh 1 gen std seq)
-nabla_add_test(lambda p1apwb1D_two_state_semi_implicite 1 gen std seq)
-if (HYPRE_FOUND)
    nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
 endif (HYPRE_FOUND)
 
@@ -310,6 +291,8 @@ foreach(TST ${NABLA_TESTS})
     nabla_add_test(kokkos ${TST} 1 gen seq)
   endif()
 endforeach(TST)
+nabla_add_test(kokkos xst 1 run seq)
+nabla_add_test(kokkos glace2D 1 run seq)
 nabla_add_test(kokkos lulesh 1 run seq)
 nabla_add_test(kokkos lulesh 1 run omp)
 nabla_add_test(kokkos llsh 1 run seq)
@@ -329,6 +312,13 @@ endif (HYPRE_FOUND)
 ########################
 # NABLA TESTS FOR CUDA #
 ########################
+#set(TESTS_NOT_YET_SUPPORTED_WITH_CUDA "shydro sethi anyItem gad comd pDDFV")
+#foreach(TST ${NABLA_TESTS})
+#  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_CUDA} ${TST} TEST_SHOULD_PASS)
+#  if(${TEST_SHOULD_PASS} EQUAL -1)
+#    nabla_add_test(cuda ${TST} 1 gen seq)
+#  endif()
+#endforeach(TST)
 nabla_add_cuda_test(gram 1 gen)
 nabla_add_cuda_test(nvknl 1 gen)
 nabla_add_cuda_test(lulesh 1 gen)

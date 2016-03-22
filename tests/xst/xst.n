@@ -1,0 +1,106 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+with ℝ²;
+
+options{  
+  ℝ option_δt_initial = 0.0001;
+  ℝ option_stoptime=0.2;
+  ℕ option_max_iterations = 2;
+};
+
+cells{ℝ x;};
+faces{ℝ σ;};
+nodes{ℝ³ 𝜕x;};
+
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+∀ nodes @ -1.0 { 𝜕x = 0.0; }
+∀ faces @ -1.0 { σ = 0.0; }
+
+∀ nodes @ -21.0{
+  info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
+}
+
+
+// ****************************************************************************
+// * Compute loop @ ]+0,+∞[
+// ****************************************************************************
+∀ faces @ +1.0 {
+  const ℝ³ X[2]={coord[0],coord[1]};
+  printf("\nface[%d]: (%f,%f)->(%f,%f)",
+         uid,
+         X[0].x, X[0].y,
+         X[1].x, X[1].y);
+  ∀ node{
+    const int iNode=face_node[NABLA_NB_FACES*#+f];
+    printf(", %d",iNode);
+    printf(", coord[%d]=(%f,%f)",iNode,coord.x,coord.y);
+    coord += 0.;
+    const ℝ³ crd=X[#];
+    assert(coord.x==crd.x);
+    assert(coord.y==crd.y);
+  }
+}
+
+∀ cells @ +1.0 {
+  const ℝ³ X[4]={coord[0],coord[1],coord[2],coord[3]};
+  printf("%c\ncell[%d]:",uid==0?'\n':' ',uid);
+  printf("\n(%f,%f)->(%f,%f)->(%f,%f)->(%f,%f)",
+         uid,
+         X[0].x, X[0].y,
+         X[1].x, X[1].y,
+         X[2].x, X[2].y,
+         X[3].x, X[3].y
+         );
+  ∀ node {
+    printf("\n\t#%d",cell_node[n*NABLA_NB_CELLS+(c<<WARP_BIT)]);
+    printf(",coord[%d]=(%f,%f,%f)",#,coord.x,coord.y,coord.z);
+    coord += 0.0;
+    const ℝ³ crd=X[#];
+    assert(coord.x==crd.x);
+    assert(coord.y==crd.y);
+    assert(coord.z==crd.z);
+  }
+}
