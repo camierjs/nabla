@@ -98,6 +98,7 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 #define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
+#define FOR_EACH_OUTER_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=nxtOuterCellOffset(c))\n \
 #define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\n\
 #define FOR_EACH_CELL_WARP_NODE(n)\\\n\
@@ -127,11 +128,16 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
 #define FOR_EACH_OWN_OUTER_FACE(f)\
  %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
 #define FOR_EACH_OWN_OUTER_FACE_WARP(f)\
- %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n",
+ %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
+\n\
+#define FOR_EACH_FACE_CELL(c)\\\n\
+    for(int c=0;c<NABLA_NODE_PER_FACE;c+=1)\n\
+",
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
+          parallel_prefix_for_loop, // FOR_EACH_OUTER_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
           parallel_prefix_for_loop, // FOR_EACH_CELL_SHARED

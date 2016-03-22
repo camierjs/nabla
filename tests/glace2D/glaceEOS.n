@@ -79,9 +79,9 @@
 // * computeTotalSoundSpeed
 // ****************************************************************************
 ∀ cells @ -18.0,28.0{
-  c=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] c=%.15e[0m",c);
-  if (uid==0) printf("\t[31m[eos,n+1] c[%d]=%.15e[0m\n",uid,c);
+  css=√(γ*p/ρ);
+  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
+  if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
 }
 
 // ****************************************************************************
@@ -90,7 +90,7 @@
 ∀ cells @ 30.0{
   Real Σljr=0.0;
   ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(c*Σljr);
+  glace_δt=2.0*V/(css*Σljr);
   if (DEBUG)
     printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
 }

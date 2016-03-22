@@ -162,6 +162,16 @@ const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);
 \n\
 const int NABLA_NB_NODES_WARP   = (NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
+const int NABLA_NB_OUTER_CELLS_WARP   = ((2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4)/WARP_SIZE);\n\
+int nxtOuterCellOffset(const int c){\n\
+  //printf(\"NABLA_NB_OUTER_CELLS_WARP=%%d, NABLA_NB_CELLS_X_AXIS=%%d\",NABLA_NB_OUTER_CELLS_WARP,NABLA_NB_CELLS_X_AXIS);\n\
+  if (c<NABLA_NB_CELLS_X_AXIS) {printf(\"1\"); return 1;}\n\
+  if (c>=(NABLA_NB_CELLS-NABLA_NB_CELLS_X_AXIS)) {printf(\"4\"); return 1;}\n \
+  if ((c%%(NABLA_NB_CELLS_X_AXIS))==0) {printf(\"2\"); return NABLA_NB_CELLS_X_AXIS-1;}\n\
+  if (((c+1)%%(NABLA_NB_CELLS_X_AXIS))==0) {printf(\"3\"); return 1;}\n\
+  printf(\"else\");\n\
+  return NABLA_NB_CELLS_X_AXIS-1;\n\
+}\n\
 \n\
 int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 ");

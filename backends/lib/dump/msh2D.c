@@ -57,7 +57,6 @@ static int comparNodeCellAndCorner(const void*, const void*);
 static double xOf7(const int);
 static double yOf7(const int);
 
-//#warning cell_face
 
 // ****************************************************************************
 // * Connectivité cell->node

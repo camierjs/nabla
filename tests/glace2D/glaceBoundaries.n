@@ -44,10 +44,18 @@
 // **********************************************************
 // * Conditions aux limites dans le cas 2D
 // **********************************************************
-/*∀ outer faces @ 13.09{
-  //ρ[cell(0)]=0;
+/*∀ outer faces void ofCell(void)@ 13.09{
+  printf("\n\t[36m[ofCell] face[%d]:",uid);
+  ∀ cell{
+    printf(" face_cell=#%d",face_cell[NABLA_NB_FACES*(c<<WARP_BIT)+f]);
+    ρ=0.;
+    printf(", rho[cell(%d)]=%f",#,ρ);
+  }
+}
+∀ outer cells void oCell(void)@ 13.091{
+  printf("\n\t[36m[oCell] cell[%d]:",uid);
+  ρ=0.;
   }*/
-
 
 
 ∀ outer faces void ofBoundaries(void)@ 13.1{

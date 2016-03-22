@@ -65,11 +65,9 @@ void hydroInit(void) @ -25.0{
       ||(!option_test_sod && (√(centre⋅centre) < option_x_interface))){
     ρ=option_ini_zg_ρ;
     p=option_ini_zg_p;
-    ZG=p;
   }else{
     ρ=option_ini_zd_ρ;
     p=option_ini_zd_p;
-    ZD=p;
   }
   if (DEBUG)
     printf("\n[35m[eos,ini] rho_ic=%f, p_ic=%f[0m",ρ,p);

@@ -55,7 +55,7 @@ static char* xHookSelectEnumerate(nablaJob *job){
   if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE%s(p)";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s(c)";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL%s(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER cells\n\tFOR_EACH_CELL%s(c)";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_CELL%s(c)";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_CELL%s(c)";
   dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
   if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE%s(n)";

@@ -103,13 +103,24 @@ static char* xCallGatherNodes(nablaJob *job,
 static char* xCallGatherFaces(nablaJob *job,
                               nablaVariable* var){
   char gather[1024];
-  snprintf(gather, 1024, "\
+  
+  if (var->item[0]=='n')
+    snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
-           var->item,
-           var->name,
-           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+f],",
-           var->item, var->name);
+             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             var->item,
+             var->name,
+             var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+f],",
+             var->item, var->name);
+  
+  if (var->item[0]=='c')
+    snprintf(gather, 1024, "\
+%s gathered_%s_%s=rGatherAndZeroNegOnes(face_cell[NABLA_NB_FACES*(c<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             var->item,
+             var->name,
+             var->dim==0?"":"/*xCallGatherFaces and var->dim==1*/",
+             var->item, var->name);
   return strdup(gather);
 }
 

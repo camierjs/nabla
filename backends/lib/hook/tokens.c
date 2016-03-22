@@ -93,10 +93,14 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
   
   // Now we're allowed to work
   switch(n->next->children->tokenid){
+    
   case(CELL):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] CELL");
     job->parse.enum_enum='c';
-    nprintf(job->entity->main, "/*chsf c*/", "FOR_EACH_NODE_CELL(c)");
+    if (job->item[0]=='f')
+      nprintf(job->entity->main, "/*f_foreach_c*/", "FOR_EACH_FACE_CELL(c)");
+    if (job->item[0]=='n')
+      nprintf(job->entity->main, "/*n_foreach_c*/", "FOR_EACH_NODE_CELL(c)");
     break;
   }
   case(NODE):{

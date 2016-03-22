@@ -23,7 +23,7 @@
       <variable>node_node_u_second_member</variable-->
       <!--variable>cell_rh</variable-->
       <variable>cell_p</variable>
-      <variable>cell_ZG</variable>
+      <!--variable>cell_ZG</variable-->
       <!--variable>cell_ZD</variable-->
       <!--variable>cell_rhEp</variable>
       <variable>cell_itEp</variable>

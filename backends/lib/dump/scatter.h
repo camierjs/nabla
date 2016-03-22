@@ -43,7 +43,6 @@
 #ifndef _LIB_STD_SCATTER_H_
 #define _LIB_STD_SCATTER_H_
 
-
 // *****************************************************************************
 // * Scatter: (X is the data @ offset x)
 // * scatter: |ABCD| and offsets:    a                 b       c   d
@@ -51,28 +50,26 @@
 // * ! à la séquence car quand c et d sont sur le même warp, ça percute
 // ******************************************************************************
 inline void scatterk(const int a, real *gathered, real *data){
+  if (a<0) return; // Skipping to fake write
   *(data+a)=*gathered;
 }
-
 
 // *****************************************************************************
 // * Scatter for real3
 // *****************************************************************************
 inline void scatter3k(const int a, real3 *gathered, real3 *data){
+  if (a<0) return; // Skipping to fake write
   double *p=(double *)data;
   p[3*a+0]=(*gathered).x;
   p[3*a+1]=(*gathered).y;
   p[3*a+2]=(*gathered).z;
 }
 
-
 // *****************************************************************************
 // * Scatter for real3x3
 // *****************************************************************************
 inline void scatter3x3k(const int a, real3x3 *gathered, real3x3 *data){
-  //scatter3k(a,&((*gathered).x),&((*data).x));
-  //scatter3k(a,&((*gathered).y),&((*data).y));
-  //scatter3k(a,&((*gathered).z),&((*data).z));
+  if (a<0) return; // Skipping to fake write
   *(data+a)=*gathered;
 }
 

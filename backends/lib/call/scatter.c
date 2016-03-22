@@ -67,12 +67,21 @@ static char* xCallScatterFaces(nablaJob *job,
                               nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char scatter[1024];
-  snprintf(scatter, 1024,
-           "\n\t\tscatter%sk(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-           var->item, var->name,
-           var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+f],",
-           var->item, var->name);
+  if (var->item[0]=='n')
+    snprintf(scatter, 1024,
+             "\n\t\tscatter%sk(face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+             var->item, var->name,
+             var->dim==0?"":"node_cell_corner[NABLA_NODE_PER_CELL*n+f],",
+             var->item, var->name);
+  if (var->item[0]=='c')
+    snprintf(scatter, 1024,
+             "\n\t\tscatter%sk(face_cell[NABLA_NB_FACES*(c<<WARP_BIT)+f], &gathered_%s_%s, %s %s_%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+             var->item, var->name,
+             var->dim==0?"":"/*xCallScatterFaces var->dim==1*/,",
+             var->item, var->name);
+  
   return strdup(scatter);
 }
 
