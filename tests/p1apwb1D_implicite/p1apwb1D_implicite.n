@@ -152,7 +152,7 @@ void iniGlobals(void) @ -5.0{
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void dbgLoop(void) @ 1.0{
-  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", iteration,time);
 } 
 
     

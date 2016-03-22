@@ -429,5 +429,5 @@ void assembleAndSolve(void) @ 4.0 { ℵ solve; }
 void testForQuit(void) @ 5.0{
   synchronize(cell_θ);
   synchronize(node_θ);
-  if (GlobalIteration >= option_max_iterations) exit;
+  if (iteration >= option_max_iterations) exit;
 }

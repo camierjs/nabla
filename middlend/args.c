@@ -107,10 +107,6 @@ void nMiddleDfsForCalls(nablaMain *nabla,
       nprintf(nabla, NULL, ",\n\t\t/*used_called_variable*/%s *%s_%s",var->type, var->item, var->name);
     }
   }
-
-  // Si le job is_an_entry_point, il sera placé avant le main
-  // donc pas besoin de le déclarer
-  if (job->is_an_entry_point) return;
 }
 
 
@@ -247,16 +243,58 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
 
 
 // ****************************************************************************
+// ****************************************************************************
+static char* xsArgs(const char j,const char v,const char d){
+  if (j=='c' and v=='n' and d=='0') return ", cell_node";
+  if (j=='c' and v=='f' and d=='0') return ", cell_face";
+  
+  if (j=='n' and v=='c' and d=='0') return ", node_cell";
+  if (j=='n' and v=='f' and d=='0') return ", node_face";
+  if (j=='n' and v=='c' and d=='1') return ", node_cell, node_cell_corner";
+  
+  if (j=='f' and v=='n' and d=='0') return ", face_node";
+  if (j=='f' and v=='c' and d=='0') return ", face_cell";
+  assert(NULL);
+  return NULL;
+}
+// ****************************************************************************
+// ****************************************************************************
+static char* xsParam(const char j,const char v,const char d){
+  if (j=='c' and v=='n' and d=='0') return ", int *cell_node";
+  if (j=='c' and v=='f' and d=='0') return ", int *cell_face";
+
+  if (j=='n' and v=='c' and d=='0') return ", int *node_cell";
+  if (j=='n' and v=='f' and d=='0') return ", int *node_face";
+  if (j=='n' and v=='c' and d=='1') return ", int *node_cell, int *node_cell_corner";
+  
+  if (j=='f' and v=='n' and d=='0') return ", int *face_node";
+  if (j=='f' and v=='c' and d=='0') return ", int *face_cell";
+  assert(NULL);
+  return NULL;
+}
+
+// ****************************************************************************
+// ****************************************************************************
+static bool isInXS(const char j,const char v,const char d,
+                   const char *XS, const int m){
+  for(int i=0;i<m;i+=3)
+    if (j==XS[i] and v==XS[i+1] and d==XS[i+2]) return true;
+  return false;
+}
+
+// ****************************************************************************
 // * Dump dans le src des arguments depuis le scan DFS
 // ****************************************************************************
 void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   int i=numParams;
+  nablaVariable *var;
+  int nXS=0;
+  char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
   
-  // Dunp des variables du job
-  nablaVariable *var=job->used_variables;
-  for(;var!=NULL;var=var->next,i+=1)
+  // Dump des variables du job
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
     nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
             (i==0)?"":",",
             (var->in&&!var->out)?"":"",//const
@@ -266,6 +304,27 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
             (strncmp(var->type,"real3x3",7)==0&&dim2D)?"real3x3":
             (strncmp(var->type,"real3",5)==0&&dim2D)?"real3":var->type,
             var->item,var->name);
+
+  // Dump des XS des variables du job
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
+    if (!var->is_gathered) continue;
+    const char j=job->item[0];
+    const char v=var->item[0];
+    const char d='0'+var->dim;
+    //nprintf(nabla, NULL,"/*isInXS(%c,%c,%c,\"%s\",%d)?*/",j,v,d,XS,nXS);
+    if (isInXS(j,v,d,XS,nXS)){
+      nprintf(nabla, NULL,"/*isInXS, continuing!*/");
+      continue;
+    }
+    nprintf(nabla, NULL, "/*new XS:%c->%c%c*/",j,v,d);
+    nprintf(nabla, NULL, xsParam(j,v,d));
+    // Et on rajoute cette connectivité
+    XS[3*nXS+0]=j;
+    XS[3*nXS+1]=v;
+    XS[3*nXS+2]=d;
+    nXS+=1;
+  }
+  free(XS);
 }
 
 
@@ -274,15 +333,34 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
 // ****************************************************************************
 void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   int i=0;
-  // Dump des options du job
+  nablaVariable *var;
+  
+  int nXS=0;
+  char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
+
+// Dump des options du job
   //nablaOption *opt=job->used_options;
   //for(i=0;opt!=NULL;opt=opt->next,i+=1)
   //  nprintf(nabla, NULL, "%s%s", (i==0)?"":",", opt->name);
   
-  // Dunp des variables du job
-  nablaVariable *var=job->used_variables;
-  for(;var!=NULL;var=var->next,i+=1)
+  // Dump des variables du job
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
     nprintf(nabla, NULL, "%s%s_%s",
             (i==0)?"":",",
             var->item,var->name);
+  
+  // Dump des XS des variables du job
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
+    if (!var->is_gathered) continue;
+    const char j=job->item[0];
+    const char v=var->item[0];
+    const char d='0'+var->dim;
+    if (isInXS(j,v,d,XS,nXS)) continue;
+    nprintf(nabla, NULL, xsArgs(j,v,d));
+    XS[3*nXS+0]=j;
+    XS[3*nXS+1]=v;
+    XS[3*nXS+2]=d;
+    nXS+=1;
+  }
+  free(XS);
 }

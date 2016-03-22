@@ -83,7 +83,7 @@ void iniGlobals(void) @ -5.0{
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void dbgLoop(void) @ 1.0 {
-  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", iteration,time);
 }
 
 
@@ -91,8 +91,8 @@ void dbgLoop(void) @ 1.0 {
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
 void tstForQuit(void) @ 4.0 {
-  printf("\n\t[testForQuit] GlobalIteration=%d, time=%f, delta_t=%f",
-         GlobalIteration, time,(double)δt);
+  printf("\n\t[testForQuit] iteration=%d, time=%f, delta_t=%f",
+         iteration, time,(double)δt);
   //if ((time<(option_stoptime-δt))) return;
   exit;
 }

@@ -319,5 +319,5 @@ void hydroTimeStepCtrl(void) @ 35.0{
   δt=new_δt;
   if (DEBUG)
     printf("\n[1;33m final δt=%.15e[0m\n",δt);
-  if (option_max_iterations!=0 && GlobalIteration >= option_max_iterations) exit;
+  if (option_max_iterations!=0 && iteration >= option_max_iterations) exit;
 }

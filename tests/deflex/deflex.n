@@ -86,7 +86,7 @@ void iniRandom(void) @ -5.0 {
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void dbgLoop(void) @ 1.0 {
-  printf("\n[7;36m[Loop] #%3d, time=%f[m", GlobalIteration,time);
+  printf("\n[7;36m[Loop] #%3d, time=%f[m", iteration,time);
 }
 
 // ****************************************************************************
@@ -152,7 +152,7 @@ void dbgLoop(void) @ 1.0 {
 // ****************************************************************************
 void tstForQuit(void) @ 4.0 {
   info()<<"[7;37m[tstForQuit][m";
-  //printf("\n\t[testForQuit] Iteration=%d, time=%f, delta_t=%f", GlobalIteration, time,δt);
+  //printf("\n\t[testForQuit] Iteration=%d, time=%f, delta_t=%f", iteration, time,δt);
   //if (time<option_stoptime) return;
   //printf("\n[7m[tstForQuit] Quit![m");
   dumpSpectrum();

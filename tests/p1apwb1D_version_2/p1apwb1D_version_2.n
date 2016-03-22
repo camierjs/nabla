@@ -132,7 +132,7 @@ void iniGlobals(void) @ -5.0{
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void dbgLoop(void) @ 1.0 {
-  printf("\n\33[7m[Loop] #%d, time=%f\33[m", GlobalIteration,time);
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", iteration,time);
 }
 
 
@@ -230,16 +230,16 @@ void dbgLoop(void) @ 1.0 {
 
 void tstForQuit(void) @ 4.0 {
   printf("\n\t[testForQuit] GlobalIteraution =%d, time=%f, delta_t=%f",
-         GlobalIteration, time,(double)δt);
+         iteration, time,(double)δt);
   dumpOutput(&n_time,center,cU,cP,cT);
   output << "\n";
   //file(resultsvstime ,plot);
   //dumpVsTimeSolution(resultsvstime);
   if ((time<(option_stoptime-δt))) return;
-  //if ((GlobalIteration==time_steps)){
+  //if ((iteration==time_steps)){
   {
     file(results,plot);
-    printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
+    printf("\n\t[testForQuit] iteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
     dumpSolution(results,center,cU,cP,cT);
   }

@@ -132,13 +132,13 @@ void xHookExit(struct nablaMainStruct *nabla, nablaJob *job){
     nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
 void xHookTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time");
+  nprintf(nabla, "/*TIME*/", "global_time[0]");
 }
 void xHookFatal(struct nablaMainStruct *nabla){
   nprintf(nabla, NULL, "fatal");
 }
 void xHookIteration(nablaMain *nabla){
-  nprintf(nabla, "/*ITERATION*/", "iteration()");
+  nprintf(nabla, "/*ITERATION*/", "global_iteration[0]");
 }
 
 void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){

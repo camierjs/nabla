@@ -108,8 +108,8 @@ const static hookCall call={
   xHookAddArguments,
   xHookEntryPointPrefix,
   xHookDfsForCalls,
-  NULL,
-  NULL
+  NULL, // addExtraParameters
+  NULL  // dumpNablaParameterList
 };
 
 const static hookXyz xyz={

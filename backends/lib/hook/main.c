@@ -67,11 +67,13 @@ int main(int argc, char *argv[]){\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
 \tstd::cout.setf(std::ios::scientific, std::ios::floatfield);\n\
+\t// ********************************************************\n\
 \t// Initialisation du temps et du deltaT\n\
-\tglobal_time=option_dtt_initial;// Arcane fait comme cela!;\n\
-\tglobal_iteration=1;\n\
-\tglobal_deltat[0] = set1(option_dtt_initial);// @ 0;\n\
-\t//printf(\"\\n\\33[7;32m[main] time=%%e, Global Iteration is #%%d\\33[m\",global_time,global_iteration);\n"
+\t// ********************************************************\n\
+\tReal global_time[1]={option_dtt_initial};// Arcane fait comme cela!;\n\
+\tint global_iteration[1]={1};\n\
+\tReal global_deltat[1] = {set1(option_dtt_initial)};// @ 0;\n\
+\t//printf(\"\\n\\33[7;32m[main] time=%%e, iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
 NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
   if ((nabla->entity->libraries&(1<<with_aleph))!=0)
@@ -220,7 +222,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);\n\
-\twhile ((global_time<option_stoptime) && (global_iteration!=option_max_iterations)){");
+\twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1)){
@@ -290,13 +292,13 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 // * Backend POSTFIX - Génération du 'main'
 // ****************************************************************************
 #define BACKEND_MAIN_POSTFIX "\n\t\t//BACKEND_MAIN_POSTFIX\
-\n\t\tglobal_time+=*(double*)&global_deltat[0];\
-\n\t\tglobal_iteration+=1;\
-\n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time, *(double*)&global_deltat[0]);\
+\n\t\tglobal_time[0]+=*(double*)&global_deltat[0];\
+\n\t\tglobal_iteration[0]+=1;\
+\n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
 \tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration-1, cputime/1000.0);\n"
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n"
 
 
 // ****************************************************************************

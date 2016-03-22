@@ -288,7 +288,12 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 
   // Dump des tokens possibles
   switch(n->tokenid){
-    
+
+  case (ITERATION):{
+    nprintf(arc, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
+    break;
+  }
+
     // 'is_test' est traité dans le hook 'arcaneHookIsTest'
   case (IS): break;
   case (IS_OP_INI): break;

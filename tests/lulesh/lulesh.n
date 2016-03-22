@@ -282,22 +282,22 @@ void timeIncrement(void) @ 0.1 {
   const ℝ new_δt_courant = (δt_courant < max_δt)?½*δt_courant:max_δt;
   const ℝ new_δt_courant_hydro = (δt_hydro < new_δt_courant)?δt_hydro*2.0/3.0:new_δt_courant;
   const ℝ now_δt = new_δt_courant_hydro ;
-  const ℝ old_δt = (GlobalIteration==1)?option_δt_initial:δt;
+  const ℝ old_δt = (iteration==1)?option_δt_initial:δt;
   const ℝ ratio = now_δt / old_δt ;
   const ℝ up_new_δt = (ratio >= 1.0)?(ratio < option_δt_mult_lower_b)?old_δt:now_δt:now_δt;//option_δt_mult_lower_b
   const ℝ dw_new_δt = (ratio >= 1.0)?(ratio > option_δt_mult_upper_b)?old_δt*option_δt_mult_upper_b:up_new_δt:up_new_δt;
   const ℝ new_δt = (dw_new_δt > option_dtmax)?option_dtmax:dw_new_δt;
-  const ℝ δτ = (option_dtfixed <= 0.0)?(GlobalIteration != 1)?new_δt:old_δt:old_δt;
+  const ℝ δτ = (option_dtfixed <= 0.0)?(iteration != 1)?new_δt:old_δt:old_δt;
   const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = scaled_δt ;
-  //δt = (GlobalIteration>1)?1.0-07;
-  //δt = (GlobalIteration==2)?1.199999999999999892758e-07;
-  //δt = (GlobalIteration==3)?1.439999999999999924249e-07;
+  //δt = (iteration>1)?1.0-07;
+  //δt = (iteration==2)?1.199999999999999892758e-07;
+  //δt = (iteration==3)?1.439999999999999924249e-07;
   //δt <?= (scaled_δt);
-  //info()<<"ITERATION "<<GlobalIteration;
-  //printf("\nITERATION %d, δt=%.21e",GlobalIteration,δt[0]);
-  if (GlobalIteration >= option_max_iterations) exit;
+  //info()<<"ITERATION "<<iteration;
+  //printf("\nITERATION %d, δt=%.21e",iteration,δt[0]);
+  if (iteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//0]
   //printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);
   //if (δt == 0.) exit;
@@ -1036,7 +1036,7 @@ void dumpTimeConstraintsForElems(void) @ 12.3{
   ℝ MaxRelDiff = 0.0;
   int edgeElems=X_EDGE_ELEMS;
   debug()<<"   Problem size = "<<edgeElems;
-  debug()<<"   Iteration count = "<<GlobalIteration-1;
+  debug()<<"   Iteration count = "<<iteration-1;
   debug()<<"   Final Origin Energy = "<<e[0];
   debug()<<"";
   for(int j=0; j < edgeElems; ++j){

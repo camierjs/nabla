@@ -269,21 +269,6 @@ static void options(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * Dump des globals
- *****************************************************************************/
-static void globals(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * Temps de la simulation\n\
-// ********************************************************\n\
-Real global_deltat[1];\n\
-int global_iteration;\n\
-double global_time;\n");
-}
-
-
-
 // ****************************************************************************
 // * Dump des variables dans le header
 // * Utile pour les variables static, par exemple
@@ -298,7 +283,6 @@ void xHookVariablesPrefix(nablaMain *nabla){
       exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
   }
   options(nabla);
-  globals(nabla);
 }
 
 

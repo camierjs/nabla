@@ -233,6 +233,8 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
     
+  case (TIME):{ nprintf(nabla, NULL, "global_time[0]"); break;}
+    
     // 'is_test' est traité dans le hook 'xHookIsTest'
   case (IS): break;
   case (IS_OP_INI): break;

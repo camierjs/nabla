@@ -44,7 +44,13 @@
 // **********************************************************
 // * Conditions aux limites dans le cas 2D
 // **********************************************************
-∀ outer faces @ 13.1{
+/*∀ outer faces @ 13.09{
+  //ρ[cell(0)]=0;
+  }*/
+
+
+
+∀ outer faces void ofBoundaries(void)@ 13.1{
   const Real Y_MIN = option_y_min; // ! On utilise en dur la géométrie du cas
   const Real Y_MAX = option_y_max;
   const Real3x3 I = matrix3x3Id();

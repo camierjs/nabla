@@ -320,7 +320,7 @@ void rhsInit(void) @ 1.0{
 // ****************************************************************************
 ∀ own outer faces void setStdRhsEdgesOnBorders(void) in (face edge_density_re,
                                                        face edge_density_im)@ 1.4{
-  const double ini=(GlobalIteration>option_ini_iterations)?0.0:option_ini_borders;
+  const double ini=(iteration>option_ini_iterations)?0.0:option_ini_borders;
   ℵ rhs setValue(edge_density_re,this, +ini);
   ℵ rhs setValue(edge_density_im,this, -ini); 
   if (node(0).isOwn()){
@@ -504,6 +504,6 @@ void testForQuit(void) @ 5.0{
   synchronize(node_density);
   synchronize(node_density_re);
   synchronize(node_density_im);
-  info()<< "\33[7m[testForQuit] GlobalIteration="<<GlobalIteration<<"\33[m";
-  if (GlobalIteration >= option_max_iterations) exit;
+  info()<< "\33[7m[testForQuit] iteration="<<iteration<<"\33[m";
+  if (iteration >= option_max_iterations) exit;
 }
