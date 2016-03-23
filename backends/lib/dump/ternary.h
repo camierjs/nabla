@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _LIB_STD_TERNARY_H_
-#define _LIB_STD_TERNARY_H_
+#ifndef _NABLA_LIB_TERNARY_H_
+#define _NABLA_LIB_TERNARY_H_
 
 // ****************************************************************************
 // * opTernary
@@ -75,4 +75,4 @@ inline real3 opTernary(const bool cond,
   return elseStatement;
 }
 
-#endif //  _LIB_STD_TERNARY_H_
+#endif //  _NABLA_LIB_TERNARY_H_

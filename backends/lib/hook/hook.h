@@ -92,6 +92,10 @@ char* xHookSourceNamespace(nablaMain*);
 
 // mesh
 void xHookMeshPrefix(nablaMain*);
+void xHookMesh1DConnectivity(nablaMain*);
+void xHookMesh2DConnectivity(nablaMain*);
+void xHookMesh3DConnectivity(nablaMain*);
+void xHookMeshFreeConnectivity(nablaMain*);
 void xHookMeshCore(nablaMain*);
 void xHookMeshPostfix(nablaMain*);
 

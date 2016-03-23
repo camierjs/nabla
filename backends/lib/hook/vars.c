@@ -317,7 +317,7 @@ void xHookVariablesFree(nablaMain *nabla){
   for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next)
     if (genericVariable(nabla, var, witch2func(VARIABLES_FREE))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
-  fprintf(nabla->entity->src, "\n\treturn 0;\n}");
+  fprintf(nabla->entity->src, "\n\n\treturn 0;\n}");
 }
 
 

@@ -127,7 +127,6 @@ faces{
   ℝ³ face_normal;
   ℝ transmissivity;
   ℝ total_velocity;
-  ℝ face_water_saturation[cells];
 };
 
 

@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KOKKOS_DBG_HPP_
-#define _KOKKOS_DBG_HPP_
+#ifndef _NABLA_LIB_DBG_HPP_
+#define _NABLA_LIB_DBG_HPP_
 
 #include <stdarg.h>
 
@@ -89,4 +89,4 @@ inline void dbgReal(const unsigned int flag, real v){
   fflush(stdout);
 }
 
-#endif // _KOKKOS_DBG_HPP_
+#endif // _NABLA_LIB_DBG_HPP_

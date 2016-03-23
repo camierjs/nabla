@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _LIB_STD_SCATTER_H_
-#define _LIB_STD_SCATTER_H_
+#ifndef _NABLA_LIB_SCATTER_H_
+#define _NABLA_LIB_SCATTER_H_
 
 // *****************************************************************************
 // * Scatter: (X is the data @ offset x)
@@ -73,4 +73,4 @@ inline void scatter3x3k(const int a, real3x3 *gathered, real3x3 *data){
   *(data+a)=*gathered;
 }
 
-#endif //  _LIB_STD_SCATTER_H_
+#endif //  _NABLA_LIB_SCATTER_H_

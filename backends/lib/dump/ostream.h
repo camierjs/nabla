@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KOKKOS_STD_OSTREAM_H_
-#define _KOKKOS_STD_OSTREAM_H_
+#ifndef _NABLA_OSTREAM_H_
+#define _NABLA_OSTREAM_H_
 
 // ****************************************************************************
 // * ostream stuffs
@@ -79,4 +79,4 @@ std::ostream& operator<<(std::ostream &os, const Real3x3 &a){
   return os << "(" << a.x <<","<< a.y <<","<< a.z <<")";
 }
 
-#endif // _KOKKOS_STD_OSTREAM_H_
+#endif // _NABLA_OSTREAM_H_

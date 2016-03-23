@@ -86,13 +86,25 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
 // ****************************************************************************
 // * Backend PREINIT - Génération du 'main'
 // ****************************************************************************
-#define BACKEND_MAIN_PREINIT "\n\n\t//BACKEND_MAIN_PREINIT\n\
-\t//nabla_ini_variables();\n\
-\tnabla_ini_connectivity(node_coord);\n"
+#define BACKEND_MAIN_PREINIT "\tnabla_ini_connectivity(node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;
   dbg("\n[hookMainPreInit]");
+  
+  fprintf(nabla->entity->src, "\n\n\t//BACKEND_MAIN_PREINIT");
+  
+  // On pousse dans le main les connectivités
+  if (isWithLibrary(nabla,with_real))
+    xHookMesh1DConnectivity(nabla);
+  else if (isWithLibrary(nabla,with_real2))
+    xHookMesh2DConnectivity(nabla);
+  else
+    xHookMesh3DConnectivity(nabla);
+
+  // Puis le BACKEND_MAIN_PREINIT
+  // qui lance le nabla_ini_connectivity
   fprintf(nabla->entity->src, BACKEND_MAIN_PREINIT);
+  
   nprintf(nabla,NULL,"\n\
 \t// ****************************************************************\n\
 \t// Initialisation des variables\n\
@@ -281,7 +293,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
 // ****************************************************************************
 // * Backend POSTINIT - Génération du 'main'
 // ****************************************************************************
-#define BACKEND_MAIN_POSTINIT "\n\t//BACKEND_MAIN_POSTINIT"
+#define BACKEND_MAIN_POSTINIT "\n\t\t//BACKEND_MAIN_POSTINIT"
 NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
   dbg("\n[hookMainPostInit]");
   fprintf(nabla->entity->src, BACKEND_MAIN_POSTINIT);
@@ -306,6 +318,7 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 // ****************************************************************************
 NABLA_STATUS xHookMainPostfix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_POSTFIX);
+  xHookMeshFreeConnectivity(nabla);
   return NABLA_OK;
 }
 

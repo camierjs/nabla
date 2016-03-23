@@ -43,24 +43,26 @@
 #include "nabla.h"
 
 
-
 // ****************************************************************************
 // * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
-static void xHookMesh1DConnectivity(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * MESH CONNECTIVITY (1D)\n\
-// ********************************************************\
-\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
-\nint node_cell[NABLA_NODE_PER_CELL*NABLA_NB_NODES];\
-\nint node_cell_corner[NABLA_NODE_PER_CELL*NABLA_NB_NODES];\
-\nint cell_next[1*NABLA_NB_CELLS];\
-\nint cell_prev[1*NABLA_NB_CELLS];\
-\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint *face_cell=NULL;\
-\nint *face_node=NULL;\
-\n\n\n");
+void xHookMesh1DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * MESH CONNECTIVITY (1D)\n\
+\t// ********************************************************\n\
+\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*1);\n\
+\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*1);\n\
+\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);// is NULL\n\
+\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
+\tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
+\tassert(xs_face_cell && xs_face_node);\n");
 }
 
 
@@ -77,6 +79,7 @@ const int NABLA_NODE_PER_CELL = 2;\n\
 const int NABLA_CELL_PER_NODE = 2;\n\
 const int NABLA_CELL_PER_FACE = 0;\n\
 const int NABLA_NODE_PER_FACE = 0;\n\
+const int NABLA_FACE_PER_CELL = 0;\n\
 \n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = 1;\n\
@@ -105,29 +108,32 @@ int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
 
 // ****************************************************************************
 // * xHookMesh2DConnectivity
+// * Ces connectivités sont maintenant dans le main
 // ****************************************************************************
-static void xHookMesh2DConnectivity(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * MESH CONNECTIVITY (2D)\n\
-// ********************************************************\
-\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
-\nint cell_next[2*NABLA_NB_CELLS];\
-\nint cell_prev[2*NABLA_NB_CELLS];\
-\nint cell_face[NABLA_FACE_PER_CELL*NABLA_NB_CELLS];\
-\nint node_cell[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint node_cell_corner[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint face_cell[NABLA_CELL_PER_FACE*NABLA_NB_FACES];\
-\nint face_node[NABLA_NODE_PER_FACE*NABLA_NB_FACES];\
-\n\n\n");
+void xHookMesh2DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\n\
+\t// ********************************************************\n\
+\t// * MESH CONNECTIVITY (2D)\n\
+\t// ********************************************************\n\
+\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*2);\n\
+\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*2);\n\
+\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
+\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
+\tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
+\tassert(xs_face_cell && xs_face_node);\n");
 }
 
 // ****************************************************************************
 // * xHookMesh2D
 // ****************************************************************************
 static void xHookMesh2D(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
+  fprintf(nabla->entity->hdr,"\n\
 // ********************************************************\n\
 // * MESH GENERATION (2D)\n\
 // ********************************************************\n\
@@ -180,22 +186,44 @@ int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 // ****************************************************************************
 // * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
-static void xHookMesh3DConnectivity(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * MESH CONNECTIVITY (3D)\n\
-// ********************************************************\
-\nint cell_node[NABLA_NODE_PER_CELL*NABLA_NB_CELLS];\
-\nint node_cell[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint node_cell_corner[NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint cell_next[3*NABLA_NB_CELLS];\
-\nint cell_prev[3*NABLA_NB_CELLS];\
-\nint node_cell_and_corner[2*NABLA_CELL_PER_NODE*NABLA_NB_NODES];\
-\nint face_cell[NABLA_CELL_PER_FACE*NABLA_NB_FACES];\
-\nint face_node[NABLA_NODE_PER_FACE*NABLA_NB_FACES];\
-\nint cell_face[NABLA_FACE_PER_CELL*NABLA_NB_CELLS];\
-\n\n\n");
+void xHookMesh3DConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * MESH CONNECTIVITY (3D)\n\
+\t// ********************************************************\n\
+\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
+\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
+\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
+\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
+\tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
+\tassert(xs_face_cell && xs_face_node);\n");
 }
+
+
+// ****************************************************************************
+// ****************************************************************************
+void xHookMeshFreeConnectivity(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * FREE MESH CONNECTIVITY \n\
+\t// ********************************************************\n\
+\tfree(xs_cell_node);\n\
+\tfree(xs_node_cell);\n\
+\tfree(xs_node_cell_corner);\n\
+\tfree(xs_cell_next);\n\
+\tfree(xs_cell_prev);\n\
+\tfree(xs_node_cell_and_corner);\n\
+\tfree(xs_face_cell);\n\
+\tfree(xs_face_node);\n\
+\tfree(xs_cell_face);\n");
+}
+
 
 // ****************************************************************************
 // * okinaMesh
@@ -268,13 +296,13 @@ void xHookMeshCore(nablaMain *nabla){
 // ********************************************************\n");
   if (isWithLibrary(nabla,with_real)){
     xHookMesh1D(nabla);
-    xHookMesh1DConnectivity(nabla);
+    //xHookMesh1DConnectivity(nabla);
   }else if (isWithLibrary(nabla,with_real2)){
     xHookMesh2D(nabla);
-    xHookMesh2DConnectivity(nabla);
+    //xHookMesh2DConnectivity(nabla);
   }else{
     xHookMesh3D(nabla);
-    xHookMesh3DConnectivity(nabla);
+    //xHookMesh3DConnectivity(nabla);
   }
   xDumpMesh(nabla);
 }

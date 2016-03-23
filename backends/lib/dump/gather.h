@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _LIB_STD_GATHER_H_
-#define _LIB_STD_GATHER_H_
+#ifndef _NABLA_LIB_GATHER_H_
+#define _NABLA_LIB_GATHER_H_
 
 
 // ****************************************************************************
@@ -49,7 +49,7 @@
 // ****************************************************************************
 inline real rgatherk(const int a, const real *data){
   //assert(a>=0);
-  return *(data+a);
+  return data[a];
 }
 inline real3 rgather3k(const int a, const real3 *data){
   //const double *p=(double*)data;
@@ -61,20 +61,20 @@ inline real3x3 rgather3x3k(const int a, const real3x3 *data){
   //const real3 *p=(real3*)data;
   //return real3x3(p[3*a+0],p[3*a+1],p[3*a+2]);
   //assert(a>=0);
-  return *(data+a);
+  return data[a];
 }
 
 inline real rGatherAndZeroNegOnes(const int a, const real *data){
   //assert(a>=0);
-  return *(data+a);
+  return data[a];
 }
 inline real3 rGatherAndZeroNegOnes(const int a, const real3 *data){
-  printf("gth(%%d,real3)",a);
-  if (a>=0) return *(data+a);
+  //printf("gth(%%d,real3)",a);
+  if (a>=0) return data[a];
   return 0.0;
 }
 inline real3x3 rGatherAndZeroNegOnes(const int a,const  real3x3 *data){
-  if (a>=0) return *(data+a);
+  if (a>=0) return data[a];
   return real3x3(0.0);
 }
 inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const real3 *data){
@@ -188,5 +188,5 @@ inline void gatherFromNode_3kArray8(const int a, const int corner,
   //debug()<<"gather3k done";
 }
 
-#endif //  _LIB_STD_GATHER_H_
+#endif //  _NABLA_LIB_GATHER_H_
 

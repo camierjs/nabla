@@ -80,8 +80,8 @@ const nWhatWith cuHeaderDefines[]={
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
-  {"xs_cell_node(n)", "cell_node[c*NABLA_NODE_PER_CELL+n]"},
-  {"xs_face_cell(c)", "face_cell[f+NABLA_NB_FACES*c]"},
+  {"xs_cell_node(n)", "xs_cell_node[c*NABLA_NODE_PER_CELL+n]"},
+  {"xs_face_cell(c)", "xs_face_cell[f+NABLA_NB_FACES*c]"},
   {NULL,NULL}
 };
 

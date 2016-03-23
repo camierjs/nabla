@@ -74,7 +74,7 @@ nodes{ℝ³ 𝜕x;};
          X[0].x, X[0].y,
          X[1].x, X[1].y);
   ∀ node{
-    const int iNode=face_node[NABLA_NB_FACES*#+f];
+    const int iNode=xs_face_node[NABLA_NB_FACES*#+f];
     printf(", %d",iNode);
     printf(", coord[%d]=(%f,%f)",iNode,coord.x,coord.y);
     coord += 0.;
@@ -95,7 +95,7 @@ nodes{ℝ³ 𝜕x;};
          X[3].x, X[3].y
          );
   ∀ node {
-    printf("\n\t#%d",cell_node[n*NABLA_NB_CELLS+(c<<WARP_BIT)]);
+    printf("\n\t#%d",xs_cell_node[n*NABLA_NB_CELLS+(c<<WARP_BIT)]);
     printf(",coord[%d]=(%f,%f,%f)",#,coord.x,coord.y,coord.z);
     coord += 0.0;
     const ℝ³ crd=X[#];

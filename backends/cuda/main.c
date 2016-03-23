@@ -95,12 +95,12 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 // * CUDA_MAIN_PREINIT pour la génération du 'main'
 // ****************************************************************************
 #define CUDA_MAIN_PREINIT "\n\
-\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(node_cell,node_cell_corner,node_cell_corner_idx,node_coord);\n\
-\tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(cell_node);\n\
-\tnabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(cell_node,cell_prev,cell_next,node_cell,node_cell_corner,node_cell_corner_idx);\n\
+\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx,node_coord);\n\
+\tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(xs_cell_node);\n\
+\tnabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(xs_cell_node,xs_cell_prev,xs_cell_next,xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx);\n\
 \thost_set_corners();\n\
-\tCUDA_HANDLE_ERROR(cudaMemcpy(node_cell, &host_node_cell, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
-\tCUDA_HANDLE_ERROR(cudaMemcpy(node_cell_corner, &host_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell, &host_node_cell, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell_corner, &host_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
 \t//dbgCoords();\n\
 \t//Initialisation du temps et du deltaT\n\
 \tprintf(\"\\nInitialisation du temps et du deltaT\");\n\
@@ -284,15 +284,15 @@ void gpuEnum(void){\n\
 NABLA_STATUS cuHookMainPostfix(nablaMain *nabla){
   dbg("\n[nccCudaMainMeshPostfix]");
   fprintf(nabla->entity->src,"\n\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_node));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(node_cell_corner_idx));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_next));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(cell_prev));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(face_cell));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(face_node));\n\
-\t//CUDA_HANDLE_ERROR(cudaFree(node_cell_and_corner));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_cell_node));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell_corner));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell_corner_idx));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_cell_next));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_cell_prev));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_face_cell));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_face_node));\n\
+\t//CUDA_HANDLE_ERROR(cudaFree(xs_node_cell_and_corner));\n\
 ");
   fprintf(nabla->entity->src, CUDA_MAIN_POSTFIX);
   fprintf(nabla->entity->src, CUDA_MAIN_GPUENUM);

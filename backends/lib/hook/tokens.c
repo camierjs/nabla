@@ -50,8 +50,9 @@ static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   assert(token2function);
   if (isNode->next->tokenid==OWN)
     nprintf(nabla, "/*IS_OP_INI*/", "_isOwn_(");
-  else
-    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(", token2function);
+  else{
+    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(xs_face_cell,", token2function);
+  }
   // Et on purge le token pour pas qu'il soit parsé
   isNode->next->token[0]=0;
 }
@@ -435,9 +436,9 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='c') nprintf(nabla, NULL, "face->backCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' &&
-        job->parse.alephKeepExpression==true) nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");     
+        job->parse.alephKeepExpression==true) nprintf(nabla, NULL, "xs_face_cell[f+NABLA_NB_FACES*0]");     
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*0]");
+      nprintf(nabla, NULL, "xs_face_cell[f+NABLA_NB_FACES*0]");
   break;
   }
   case (BACKCELLUID):{
@@ -448,9 +449,9 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case (FRONTCELL):{
     if (job->parse.enum_enum=='f' && cnfgem=='c') nprintf(nabla, NULL, "f->frontCell()");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==false)
-      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
+      nprintf(nabla, NULL, "xs_face_cell[f+NABLA_NB_FACES*1]");
     if (job->parse.enum_enum=='\0' && cnfgem=='f' && job->parse.alephKeepExpression==true)
-      nprintf(nabla, NULL, "face_cell[f+NABLA_NB_FACES*1]");
+      nprintf(nabla, NULL, "xs_face_cell[f+NABLA_NB_FACES*1]");
     break;
   }
   case (FRONTCELLUID):{
@@ -499,7 +500,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   }
   case (UID):{
     if (job->parse.enum_enum=='n'  && cnfgem=='f'){
-      nprintf(nabla, NULL, "face_node[n*NABLA_NB_FACES+f]");
+      nprintf(nabla, NULL, "xs_face_node[n*NABLA_NB_FACES+f]");
       break;
     }
     nprintf(nabla, "/*uniqueId c*/", "%c",cnfgem);

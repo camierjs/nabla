@@ -93,10 +93,10 @@ void xHookSystem(astNode *n,
   if (n->tokenid == BOUNDARY_CELL) nprintf(nabla, "/*chs BOUNDARY_CELL*/", NULL);
   if (n->tokenid == FATAL)         nprintf(nabla, "/*chs*/", "throw FatalErrorException");
 
-  if (n->tokenid == BACKCELL)      nprintf(nabla, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]");
-  if (n->tokenid == BACKCELLUID)   nprintf(nabla, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*0]]");
-  if (n->tokenid == FRONTCELL)     nprintf(nabla, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
-  if (n->tokenid == FRONTCELLUID)  nprintf(nabla, "/*chs*/", "[face_cell[f+NABLA_NB_FACES*1]]");
+  if (n->tokenid == BACKCELL)      nprintf(nabla, "/*chs*/", "[xs_face_cell[f+NABLA_NB_FACES*0]]");
+  if (n->tokenid == BACKCELLUID)   nprintf(nabla, "/*chs*/", "[xs_face_cell[f+NABLA_NB_FACES*0]]");
+  if (n->tokenid == FRONTCELL)     nprintf(nabla, "/*chs*/", "[xs_face_cell[f+NABLA_NB_FACES*1]]");
+  if (n->tokenid == FRONTCELLUID)  nprintf(nabla, "/*chs*/", "[xs_face_cell[f+NABLA_NB_FACES*1]]");
     
   if (n->tokenid == NEXTNODE)      nprintf(nabla, NULL, "[n])+nextNode))");
   if (n->tokenid == PREVNODE)      nprintf(nabla, NULL, "[n])-prevNode))");
@@ -153,17 +153,17 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
   case ('n'):{
     nvar(nabla,var,job);
     if (enum_enum=='f') nprintf(nabla, "/*f*/", "[");
-    if (enum_enum=='n') nprintf(nabla, "/*n*/", "[cell_node[n*NABLA_NB_CELLS+c]]");
+    if (enum_enum=='n') nprintf(nabla, "/*n*/", "[xs_cell_node[n*NABLA_NB_CELLS+c]]");
     if (isPostfixed!=2 && enum_enum=='\0'){
       if (job->parse.postfix_constant==true)
         nprintf(nabla, NULL, "/*NodeVar + postfix_constant*/[");
-      else nprintf(nabla, "/*NodeVar 0*/", "[cell_node_");
+      else nprintf(nabla, "/*NodeVar 0*/", "[xs_cell_node_");
     }
     if (isPostfixed==2 && enum_enum=='\0') {
       if (job->parse.postfix_constant==true){
         nprintf(nabla, NULL, "/*NodeVar + postfix_constant*/[");
       }else
-        nprintf(nabla, "/*NodeVar 2&0*/", "/*p2&0*/[cell_node[c+NABLA_NB_CELLS*");
+        nprintf(nabla, "/*NodeVar 2&0*/", "/*p2&0*/[xs_cell_node[c+NABLA_NB_CELLS*");
     }
     break;
   }
@@ -208,9 +208,9 @@ static void xHookTurnTokenToVariableForNodeJob(nablaMain *nabla,
                            !isWithLibrary(nabla,with_real2)))
       nprintf(nabla, "/*CellVar c*/", "/*3D*/[c]");
     if (enum_enum=='c' && isWithLibrary(nabla,with_real))
-      nprintf(nabla, "/*CellVar c*/", "/*1D*/[node_cell[2*n+c]]");
+      nprintf(nabla, "/*CellVar c*/", "/*1D*/[xs_node_cell[2*n+c]]");
     if (enum_enum=='c' && isWithLibrary(nabla,with_real2))
-      nprintf(nabla, "/*CellVar c*/", "/*2D*/[node_cell[2*n+c]]");
+      nprintf(nabla, "/*CellVar c*/", "/*2D*/[xs_node_cell[2*n+c]]");
     //if (enum_enum=='c')  nprintf(nabla, "/*CellVar c*/", "[c]");
     if (enum_enum=='\0') nprintf(nabla, "/*CellVar 0*/", "[cell->node");
     break;
@@ -263,14 +263,14 @@ static void xHookTurnTokenToVariableForFaceJob(nablaMain *nabla,
             "%s",
             ((var->dim==0)?
              ((enum_enum=='\0')?
-              (isPostfixed==2)?"[face_cell[f+NABLA_NB_FACES*":"[face->cell"
+              (isPostfixed==2)?"[xs_face_cell[f+NABLA_NB_FACES*":"[face->cell"
               :"[c")
              :"[cell][node->cell")); 
     break;
   }
   case ('n'):{
-    if (isPostfixed!=2) nprintf(nabla, "/*NodeVar*/", "[face_node(n)]");
-    else nprintf(nabla, "/*NodeVar*/", "[face_node[f+NABLA_NB_FACES*");
+    if (isPostfixed!=2) nprintf(nabla, "/*NodeVar*/", "[xs_face_node(n)]");
+    else nprintf(nabla, "/*NodeVar*/", "[xs_face_node[f+NABLA_NB_FACES*");
     break;
   }
   case ('f'):{

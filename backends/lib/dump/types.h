@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KOKKOS_REAL3_H_
-#define _KOKKOS_REAL3_H_
+#ifndef _NABLA_LIB_TYPES_H_
+#define _NABLA_LIB_TYPES_H_
 
 // ****************************************************************************
 // * real3
@@ -156,4 +156,4 @@ inline real3x3 opMatrixProduct(const real3x3 &t1,
   return temp ;
 }
 
-#endif //  _KOKKOS_REAL3_H_
+#endif //  _NABLA_LIB_TYPES_H_

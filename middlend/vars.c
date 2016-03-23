@@ -377,40 +377,76 @@ static void dfsAddToUsedVariables(nablaJob *job,
                                   const bool left_of_assignment_expression){
   nablaVariable *new=nMiddleVariableFind(job->used_variables, token);
   //nablaVariable *new=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, token);
+  
   // Est-ce une variable connue ?
-  if (new==NULL){ // Si c'est une variable qu'on a pas déjà placée dans la liste connue
-    dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
-    // Création d'une nouvelle used_variable
-    new = nMiddleVariableNew(NULL);
-    new->name=strdup(var->name);
-    new->item=var->item;//strdup((job->nb_in_item_set==0)?var->item:job->item);
-    new->type=strdup(var->type);
-    new->dim=var->dim;
-    new->size=var->size;
-    // Et on mémorise ce que l'on a fait en in/out
-    if (left_of_assignment_expression) new->out|=true;
-    if (!left_of_assignment_expression) new->in|=true;
-    // Si elles n'ont pas le même support,
-    // c'est qu'il va falloir insérer un gather/scatter
-    dbg("\n\t[dfsVariables] new->item='%s' vs job->item='%s'",
-        new->item, job->item);
-    if (!job->is_a_function  && var->item[0]!='g' &&
-        (new->item[0]!=job->item[0])){
-      dbg("\n\t[dfsVariables] This variable will be gathered in this job!");
-      new->is_gathered=true;
-    }
-    // Rajout à notre liste
-    if (job->used_variables==NULL)
-      job->used_variables=new;
-    else
-      nMiddleVariableLast(job->used_variables)->next=new;
+  if (new!=NULL) return;
+  
+  // Si c'est une variable qu'on a pas déjà placée dans la liste connue
+  dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
+  // Création d'une nouvelle used_variable
+  new = nMiddleVariableNew(NULL);
+  new->name=strdup(var->name);
+  new->item=var->item;//strdup((job->nb_in_item_set==0)?var->item:job->item);
+  new->type=strdup(var->type);
+  new->dim=var->dim;
+  new->size=var->size;
+  // Et on mémorise ce que l'on a fait en in/out
+  if (left_of_assignment_expression) new->out|=true;
+  if (!left_of_assignment_expression) new->in|=true;
+  // Si elles n'ont pas le même support,
+  // c'est qu'il va falloir insérer un gather/scatter
+  dbg("\n\t[dfsVariables] new->name=%s new->item='%s' vs job->item='%s'",
+      new->name, new->item, job->item);
+  if (!job->is_a_function && // que pour les jobs
+      var->item[0]!='g' && // pas de gather des globales
+      var->item[0]!='x' && // pas de gather des xs
+      new->item[0]!=job->item[0]){
+    dbg("\n\t[dfsVariables] This variable will be gathered in this job!");
+    new->is_gathered=true;
   }
+  // Rajout à notre liste
+  if (job->used_variables==NULL)
+    job->used_variables=new;
+  else
+    nMiddleVariableLast(job->used_variables)->next=new;
   // Et on mémorise ce que l'on a fait en in/out
   if (left_of_assignment_expression)
     new->out|=true;
   else
     new->in|=true;
-  //if (!left_of_assignment_expression) new->in|=true;
+}
+
+// ****************************************************************************
+// ****************************************************************************
+nablaVariable* dfsVarThisOneSpecial(char* token, char* test, int d){
+  if (strcmp(token,test)!=0) return NULL;
+  nablaVariable *var=nMiddleVariableNew(NULL);
+  var->name=strdup(token);
+  var->item=strdup("xs");
+  var->type=strdup("int");
+  var->dim=d;
+  return var;
+}
+
+// ****************************************************************************
+// ****************************************************************************
+static void dfsVarThisOne(nablaMain *nabla,
+                          nablaJob *job,
+                          const astNode *n,
+                          const int tokenid,
+                          char* token,
+                          const bool left_of_assignment_expression){
+  if (n->children->tokenid != tokenid) return;
+  dbg("\n\t\t\t\t[dfsVarThisOne] nabla_system (%s, id #%d)!", token,tokenid);
+  const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
+  nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
+  if (var==NULL) var=dfsVarThisOneSpecial(token,"cell_prev",0);
+  if (var==NULL) var=dfsVarThisOneSpecial(token,"cell_next",1);
+  if (var==NULL){
+    dbg("\n\t\t\t\t[dfsVarThisOne] var==NULL, returning");
+    return;
+  }
+  dfsAddToUsedVariables(job,token,var,rw,left_of_assignment_expression);
 }
 
 // ****************************************************************************
@@ -436,6 +472,8 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   }
   
   if (n->ruleid==rulenameToId("nabla_system")){
+    // Si on tombe sur la variable systeme TIME,
+    // il faudra qu'on la rajoute au arguments
     if (n->children->tokenid == TIME){
       dbg("\n\t\t\t[dfsVariables] nabla_system (TIME)!");
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
@@ -444,6 +482,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
       if (var!=NULL)
         dfsAddToUsedVariables(job,token,var,rw,left_of_assignment_expression);
     }
+    // Idem pour ITERATION
     if (n->children->tokenid == ITERATION){
       dbg("\n\t\t\t[dfsVariables] nabla_system (TIME)!");
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
@@ -452,6 +491,15 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
       if (var!=NULL)
         dfsAddToUsedVariables(job,token,var,rw,left_of_assignment_expression);
     }
+    //dfsVarThisOne(nabla,job,n,PREVCELL,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,PREVCELL_X,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,PREVCELL_Y,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,PREVCELL_Z,"cell_prev",left_of_assignment_expression);
+
+    //dfsVarThisOne(nabla,job,n,NEXTCELL,"cell_next",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,NEXTCELL_X,"cell_next",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,NEXTCELL_Y,"cell_next",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,NEXTCELL_Z,"cell_next",left_of_assignment_expression);    
   }
       
   if (n->ruleid==rulenameToId("primary_expression")){

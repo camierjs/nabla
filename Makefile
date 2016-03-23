@@ -36,8 +36,8 @@ HYODA = /usr/local/arcane/testing/bin/hyoda
 # PATHS #
 #########
 NABLA_PATH = $(shell pwd)
-BUILD_PATH = ./build
-#/tmp/nabla
+#BUILD_PATH = ./build
+BUILD_PATH = /tmp/nabla
 
 ############
 # COMMANDS #
@@ -87,7 +87,7 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = xst glace2D lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
+tests = amber heat upwindAP aleph2D darcy xst glace2D lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
 #p1apwb1D_gosse heat aleph1D kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\

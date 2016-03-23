@@ -143,19 +143,19 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
 // * 
 // *****************************************************************************
 void nMiddleParamsAddExtra(nablaMain *nabla, int *numParams){
-  nprintf(nabla, NULL, ",\n\t\tint *cell_node");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_cell_node");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_node_cell");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *node_cell_corner");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_node_cell_corner");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_prev");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_cell_prev");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *cell_next");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_cell_next");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *face_cell");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_face_cell");
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n\t\tint *face_node");
+  nprintf(nabla, NULL, ",\n\t\tint *xs_face_node");
   *numParams+=1;
 }
 
@@ -166,19 +166,19 @@ void nMiddleParamsAddExtra(nablaMain *nabla, int *numParams){
 // ****************************************************************************
 void nMiddleArgsAddExtra(nablaMain *nabla, int *numParams){
   const char* tabs="\t\t\t\t\t\t\t";
-  nprintf(nabla, NULL, ",\n%scell_node",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_cell_node",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_node_cell",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%snode_cell_corner",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_node_cell_corner",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_prev",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_cell_prev",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%scell_next",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_cell_next",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%sface_cell",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_face_cell",tabs);
   *numParams+=1;
-  nprintf(nabla, NULL, ",\n%sface_node",tabs);
+  nprintf(nabla, NULL, ",\n%sxs_face_node",tabs);
   *numParams+=1;
 }
 
@@ -244,31 +244,40 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
 
 // ****************************************************************************
 // ****************************************************************************
-static char* xsArgs(const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return ", cell_node";
-  if (j=='c' and v=='f' and d=='0') return ", cell_face";
+static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
+  if (j=='c' and v=='n' and d=='0') return ", xs_cell_node";
+  if (j=='c' and v=='f' and d=='0') return ", xs_cell_face";
+  if (j=='c' and v=='x' and d=='0') return ", xs_cell_prev";
+  if (j=='c' and v=='x' and d=='1') return ", xs_cell_next";
+
+  if (j=='n' and v=='c' and d=='0') return ", xs_node_cell";
+  if (j=='n' and v=='f' and d=='0') return ", xs_node_face";
+  if (j=='n' and v=='c' and d=='1') return ", xs_node_cell, xs_node_cell_corner";
   
-  if (j=='n' and v=='c' and d=='0') return ", node_cell";
-  if (j=='n' and v=='f' and d=='0') return ", node_face";
-  if (j=='n' and v=='c' and d=='1') return ", node_cell, node_cell_corner";
+  if (j=='f' and v=='n' and d=='0') return ", xs_face_node";
+  if (j=='f' and v=='c' and d=='0') return ", xs_face_cell";
+
   
-  if (j=='f' and v=='n' and d=='0') return ", face_node";
-  if (j=='f' and v=='c' and d=='0') return ", face_cell";
+  nprintf(nabla, NULL,"/*xsArgs, error!*/");
   assert(NULL);
   return NULL;
 }
 // ****************************************************************************
 // ****************************************************************************
-static char* xsParam(const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return ", int *cell_node";
-  if (j=='c' and v=='f' and d=='0') return ", int *cell_face";
+static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
+  if (j=='c' and v=='n' and d=='0') return ", int *xs_cell_node";
+  if (j=='c' and v=='f' and d=='0') return ", int *xs_cell_face";
+  if (j=='c' and v=='x' and d=='0') return ", int *xs_cell_prev";
+  if (j=='c' and v=='x' and d=='1') return ", int *xs_cell_next";
 
-  if (j=='n' and v=='c' and d=='0') return ", int *node_cell";
-  if (j=='n' and v=='f' and d=='0') return ", int *node_face";
-  if (j=='n' and v=='c' and d=='1') return ", int *node_cell, int *node_cell_corner";
+  if (j=='n' and v=='c' and d=='0') return ", int *xs_node_cell";
+  if (j=='n' and v=='f' and d=='0') return ", int *xs_node_face";
+  if (j=='n' and v=='c' and d=='1') return ", int *xs_node_cell, int *xs_node_cell_corner";
   
-  if (j=='f' and v=='n' and d=='0') return ", int *face_node";
-  if (j=='f' and v=='c' and d=='0') return ", int *face_cell";
+  if (j=='f' and v=='n' and d=='0') return ", int *xs_face_node";
+  if (j=='f' and v=='c' and d=='0') return ", int *xs_face_cell";
+  
+  nprintf(nabla, NULL,"/*xsParam, error!*/");
   assert(NULL);
   return NULL;
 }
@@ -317,7 +326,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
       continue;
     }
     nprintf(nabla, NULL, "/*new XS:%c->%c%c*/",j,v,d);
-    nprintf(nabla, NULL, xsParam(j,v,d));
+    nprintf(nabla, NULL, xsParam(nabla,j,v,d));
     // Et on rajoute cette connectivité
     XS[3*nXS+0]=j;
     XS[3*nXS+1]=v;
@@ -356,7 +365,7 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
     const char v=var->item[0];
     const char d='0'+var->dim;
     if (isInXS(j,v,d,XS,nXS)) continue;
-    nprintf(nabla, NULL, xsArgs(j,v,d));
+    nprintf(nabla, NULL, xsArgs(nabla,j,v,d));
     XS[3*nXS+0]=j;
     XS[3*nXS+1]=v;
     XS[3*nXS+2]=d;

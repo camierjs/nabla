@@ -74,21 +74,21 @@ __attribute__((unused)) static void verifCorners(void){
 __attribute__((unused)) static void verifNextPrev(void){
  for (int i=0; i<NABLA_NB_CELLS; ++i) {
     printf("\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirX*NABLA_NB_CELLS+i],
+        xs_cell_prev[MD_DirX*NABLA_NB_CELLS+i],
         i,
-        cell_next[MD_DirX*NABLA_NB_CELLS+i]);
+        xs_cell_next[MD_DirX*NABLA_NB_CELLS+i]);
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
     printf("\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirY*NABLA_NB_CELLS+i],
+        xs_cell_prev[MD_DirY*NABLA_NB_CELLS+i],
         i,
-        cell_next[MD_DirY*NABLA_NB_CELLS+i]);
+        xs_cell_next[MD_DirY*NABLA_NB_CELLS+i]);
   }
   for (int i=0; i<NABLA_NB_CELLS; ++i) {
     printf("\nNext/Prev(Z) for cells %%d <- #%%d -> %%d: ",
-        cell_prev[MD_DirZ*NABLA_NB_CELLS+i],
+        xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+i],
         i,
-        cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
+        xs_cell_next[MD_DirZ*NABLA_NB_CELLS+i]);
   }
 }
 
