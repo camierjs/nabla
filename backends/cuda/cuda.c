@@ -55,18 +55,41 @@ const nWhatWith cuHeaderTypedef[]={
 };
 
 const nWhatWith cuHeaderDefines[]={
+  {"BLOCKSIZE", "128"},
+  {"CUDA_NB_THREADS_PER_BLOCK", "128"},
   {"WARP_BIT", "0"},
   {"WARP_SIZE", "1"},
   {"WARP_ALIGN", "8"}, 
   {"NABLA_NB_GLOBAL","1"},
   {"Real3","real3"},
   {"Real","real"},
-  {"ReduceMinToDouble(what)","reduce_min_kernel(global_device_shared_reduce_results,what)"},
-  {"ReduceMaxToDouble(what)","reduce_max_kernel(global_device_shared_reduce_results,what)"},
+  {"ReduceMinToDouble(what)","reduce_min_kernel(NABLA_NB_CELLS,global_device_shared_reduce_results,what)"},
+  {"ReduceMaxToDouble(what)","reduce_max_kernel(NABLA_NB_CELLS,global_device_shared_reduce_results,what)"},
   {"norm","fabs"},
   {"rabs","fabs"},
+  {"set(a)", "a"},
   {"square_root","sqrt"},
   {"cube_root","cbrt"},
+  {"DBG_MODE", "(false)"},
+  {"DBG_LVL", "(DBG_ALL)"},
+  {"DBG_OFF", "0x0000ul"},
+  {"DBG_CELL_VOLUME", "0x0001ul"},
+  {"DBG_CELL_CQS", "0x0002ul"},
+  {"DBG_GTH", "0x0004ul"},
+  {"DBG_NODE_FORCE", "0x0008ul"},
+  {"DBG_INI_EOS", "0x0010ul"},
+  {"DBG_EOS", "0x0020ul"},
+  {"DBG_DENSITY", "0x0040ul"},
+  {"DBG_MOVE_NODE", "0x0080ul"},
+  {"DBG_INI", "0x0100ul"},
+  {"DBG_INI_CELL", "0x0200ul"},
+  {"DBG_INI_NODE", "0x0400ul"},
+  {"DBG_LOOP", "0x0800ul"},
+  {"DBG_FUNC_IN", "0x1000ul"},
+  {"DBG_FUNC_OUT", "0x2000ul"},
+  {"DBG_VELOCITY", "0x4000ul"},
+  {"DBG_BOUNDARIES", "0x8000ul"},
+  {"DBG_ALL", "0xFFFFul"},
   {"opAdd(u,v)", "(u+v)"},
   {"opSub(u,v)", "(u-v)"},
   {"opDiv(u,v)", "(u/v)"},
@@ -79,9 +102,17 @@ const nWhatWith cuHeaderDefines[]={
   {"reduce(how,what)","what"},
   {"xyz","int"},
   {"GlobalIteration", "*global_iteration"},
+  {"MD_DirX","0"},
+  {"MD_DirY","1"},
+  {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
   {"PAD_DIV(nbytes, align)", "(((nbytes)+(align)-1)/(align))"},
   {"xs_cell_node(n)", "xs_cell_node[c*NABLA_NODE_PER_CELL+n]"},
   {"xs_face_cell(c)", "xs_face_cell[f+NABLA_NB_FACES*c]"},
+  {"xs_face_node(n)", "xs_face_node[f+NABLA_NB_FACES*n]"},
   {NULL,NULL}
 };
 
@@ -128,21 +159,21 @@ const static hookHeader cuHookHeader={
   xHookHeaderOpen,
   cuHookHeaderEnumerates,
   xHookHeaderPrefix,
-  cuHookHeaderIncludes,
-  xHookHeaderPostfix
+  cuHookHeaderIncludes, // cuda_runtime
+  cuHookHeaderPostfix
 };
 
 // Hooks pour le source
 const static hookSource cuHookSource={
-  cuHookSourceOpen,
+  cuHookSourceOpen, // .cu
   xHookSourceInclude,
   NULL
 };
   
 // Hooks pour le maillage
 const static hookMesh cuHookMesh={
-  cuHookMeshPrefix,
-  cuHookMeshCore,
+  xHookMeshPrefix, // cuHookMeshPrefix,
+  xHookMeshCore, // cuHookMeshCore
   NULL
 };
   
@@ -168,7 +199,7 @@ const static hookMain cuHookMain={
 
   
 const static hookForAll cuHookForAll={
-  cuHookForAllPrefix,
+  cuHookForAllPrefix, // tid continue
   NULL,
   NULL,
   NULL
@@ -181,8 +212,8 @@ const static hookToken cuHookToken={
   xHookTurnTokenToOption,
   xHookSystem,
   xHookIteration,
-  cuHookExit,
-  cuHookTime,
+  cuHookExit, // cudaExit(global_deltat)
+  xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,
   xHookIsTest,
@@ -190,22 +221,22 @@ const static hookToken cuHookToken={
 };
 
 const static hookGrammar cuHookGrammar={
-  NULL,//cuHookFunction,
-  NULL,//cuHookJob,
+  NULL,
+  NULL,
   cuHookReduction,
   NULL, // primary_expression_to_return
   NULL, // returnFromArgument
-  cudaHookDfsVariable //xHookDfsVariable
+  xHookDfsVariable
 };
   
   
 const static hookCall cuHookCall={
   xHookAddCallNames,
   xHookAddArguments,
-  cuHookEntryPointPrefix,
+  cuHookEntryPointPrefix, // __device__ vs __global__
   xHookDfsForCalls,
-  cuHookAddExtraParameters,
-  cuHookDumpNablaParameterList
+  NULL,
+  NULL
 };
 
 

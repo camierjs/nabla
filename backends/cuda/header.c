@@ -84,15 +84,6 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
           nabla->call->simd->includes?nabla->call->simd->includes():"",
           "");//nabla->call->parallel->includes());
   
-  fprintf(nabla->entity->hdr,"\n\n\
-// *****************************************************************************\n\
-// * Cartesian stuffs\n\
-// *****************************************************************************\n\
-#define MD_DirX 0\n#define MD_DirY 1\n#define MD_DirZ 2\n\
-//#warning empty libCartesianInitialize\n\
-//__device__ void libCartesianInitialize(void){}\n");
-  
-//  #warning MiddlEnd call from here
   nMiddleDefines(nabla,nabla->call->header->defines);
   nMiddleTypedefs(nabla,nabla->call->header->typedefs);
   nMiddleForwards(nabla,nabla->call->header->forwards);
@@ -108,9 +99,10 @@ void cuHookHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name);
   cuHeaderTypes(nabla);
   cuHeaderExtra(nabla);
-  cuHeaderMeshs(nabla);
+  //xDumpMesh(nabla);//cuHeaderMeshs(nabla);
   cuHeaderError(nabla);
-  cuHeaderItems(nabla);
+  //cuHeaderItems(nabla);
+  cuHeaderDebug(nabla);
 }
 
 
@@ -118,11 +110,13 @@ void cuHookHeaderDump(nablaMain *nabla){
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
-void cuHookHeaderEnumerates(nablaMain *nabla){
+void cuHookHeaderEnumerates(nablaMain *nabla){}
+
+void cuHeaderEnumerates(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
-/*********************************************************\n\
- * Forward enumerates\n\
- *********************************************************/\n\
+// *****************************************************************************\n\
+// * Forward enumerates\n\
+// *****************************************************************************\n\
 #define CUDA_INI_CELL_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
   if (tid>=NABLA_NB_CELLS) return;\n\
@@ -148,12 +142,14 @@ void cuHookHeaderEnumerates(nablaMain *nabla){
   if (tid<NABLA_NB_FACES_INNER) return;\\\n\
   if (tid>=(NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER)) return;\n\
 \n\
+#define FOR_EACH_NODE(n) for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<8;n+=1)\n\
-#define FOR_EACH_NODE_CELL(c) for(int c=0;c<8;c+=1)\n\
+#define FOR_EACH_NODE_CELL(c) for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
+//#define FOR_EACH_NODE_CELL(c) for(int c=0;c<8;c+=1)\n\
 \n\
-#define FOR_EACH_CELL_WARP(c) \n\
+//#define FOR_EACH_CELL_WARP(c) \n\
 \n\
-#define FOR_EACH_NODE_WARP(n) \n\
+//#define FOR_EACH_NODE_WARP(n) \n\
 \n\
 #define CUDA_INI_FUNCTION_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
@@ -162,5 +158,16 @@ void cuHookHeaderEnumerates(nablaMain *nabla){
 #define CUDA_LAUNCHER_FUNCTION_THREAD(tid)\\\n\
   const register int tid = blockDim.x*blockIdx.x + threadIdx.x;\\\n\
   if (tid>=NABLA_NB_CELLS) return;\n");
+}
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+void cuHookHeaderPostfix(nablaMain *nabla){
+  cuHeaderEnumerates(nabla);
+  fprintf(nabla->entity->hdr,
+          "\n\n#endif // __BACKEND_%s_H__\n",
+          nabla->entity->name);
 }
 

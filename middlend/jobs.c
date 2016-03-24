@@ -426,7 +426,9 @@ void nMiddleJobFill(nablaMain *nabla,
   // Et on dump dans le log les tokens de ce job
   dbg("\n\t[nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
+  dfsEnumMax(nabla,job,n);
   dfsVariablesDump(nabla,job,n);
+
   
   // On va chercher s'il y a des xyz dans les parameter_type_list
   // Ne devrait plus être utilisé

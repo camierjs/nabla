@@ -51,9 +51,9 @@
 /*****************************************************************************\n\
  * Backend CUDA - 'main'\n\
  *****************************************************************************/\n\
-int main(void){\n\
-\t__align__(8)int iteration=1;\n\
-\tfloat gputime=0.0;\n\
+int main(int argc, char *argv[]){\n\
+\t__builtin_align__(8) int iteration=1;\n\
+\tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
 //#warning Reduction for cells\n\
 \tconst int reduced_size=(NABLA_NB_CELLS%%CUDA_NB_THREADS_PER_BLOCK)==0?\
@@ -68,16 +68,20 @@ int main(void){\n\
 //#warning dimFuncBlock set for dimJobBlock\n\
 \tconst dim3 dimFuncBlock=dim3(BLOCKSIZE,1,1);\n\
 \tconst dim3 dimFuncGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
-\tgpuEnum();\n                                                          \
+\tgpuEnum();\n\
 \tassert((PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
 \tassert((PAD_DIV(NABLA_NB_NODES,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
 \tassert((dimJobBlock.x<=1024)); // Max threads per block:  1024 \n\
 \tprintf(\"NABLA_NB_NODES=%%d,NABLA_NB_CELLS=%%d\",\n\
 \t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\
-\t// Allocation coté CUDA des variables globales\n\
+\t// Allocation CUDA des variables globales\n\
+\t__builtin_align__(8) real* global_deltat;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
+\t__builtin_align__(8) int* global_iteration;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
+\t__builtin_align__(8) real* global_time;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
+\t__builtin_align__(8) real* global_device_shared_reduce_results;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*reduced_size));\n"
 // ****************************************************************************
 // * nccCudaMainPrefix
@@ -90,21 +94,20 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
   return NABLA_OK;
 }
 
-
 // ****************************************************************************
 // * CUDA_MAIN_PREINIT pour la génération du 'main'
 // ****************************************************************************
 #define CUDA_MAIN_PREINIT "\n\
-\tnabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx,node_coord);\n\
-\tnabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(xs_cell_node);\n\
-\tnabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(xs_cell_node,xs_cell_prev,xs_cell_next,xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx);\n\
-\thost_set_corners();\n\
+\t//nabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx,node_coord);\n\
+\t//nabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(xs_cell_node);\n\
+\t//nabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(xs_cell_node,xs_cell_prev,xs_cell_next,xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx);\n\
+\t//host_set_corners();\n\
 \tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell, &host_node_cell, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
 \tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell_corner, &host_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
 \t//dbgCoords();\n\
 \t//Initialisation du temps et du deltaT\n\
 \tprintf(\"\\nInitialisation du temps et du deltaT\");\n\
-\thost_time=0.0;\n\n\
+\tdouble host_time=0.0;\n\n\
 \tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\n\
 \t{// Initialisation et boucle de calcul"
 // ****************************************************************************
@@ -112,6 +115,7 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 // ****************************************************************************
 NABLA_STATUS cuHookMainPreInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPreInit]");
+  fprintf(nabla->entity->src, "\n\n\t//CUDA_MAIN_PREINIT");  
   fprintf(nabla->entity->src, CUDA_MAIN_PREINIT);
   return NABLA_OK;
 }
@@ -159,40 +163,27 @@ NABLA_STATUS cuHookMainCore(nablaMain *n){
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_iteration, &iteration, sizeof(int), cudaMemcpyHostToDevice));");
     }
     // Dump de la tabulation et du nom du point d'entrée
-    nprintf(n, NULL, "\n%s%s<<<dim%sGrid,dim%sBlock>>>( // @ %f",
-            is_into_compute_loop?"\t\t\t":"\t\t",
+    nprintf(n, NULL, "\n%s%s<<<dim%sGrid,dim%sBlock>>>(",
+            is_into_compute_loop?"\t\t":"\t",
             entry_points[i].name,
             entry_points[i].item[0]=='c'?"Cell":entry_points[i].item[0]=='n'?"Node":"Func",
-            entry_points[i].item[0]=='c'?"Job":entry_points[i].item[0]=='n'?"Job":"Func",
-            entry_points[i].whens[0]);
-   // Dump des arguments *ou pas*    
-    if (entry_points[i].stdParamsNode != NULL)
-      numParams=nMiddleDumpParameterTypeList(n,n->entity->src,
-                                             entry_points[i].stdParamsNode);
-    else nprintf(n,NULL,"/*NULL_stdParamsNode*/");
-    
-    nprintf(n,NULL,"/*numParams=%d*/",numParams);
+            entry_points[i].item[0]=='c'?"Job":entry_points[i].item[0]=='n'?"Job":"Func");
     
     // On s'autorise un endroit pour insérer des arguments
-    nMiddleArgsAddGlobal(n, &entry_points[i], &numParams);
-    
-    // Et on dump les in et les out
-    if (entry_points[i].nblParamsNode != NULL){
-      nMiddleArgsDump(n,entry_points[i].nblParamsNode,&numParams);
-    }else nprintf(n,NULL,"/*NULL_nblParamsNode*/");
+    nMiddleArgsDumpFromDFS(n,&entry_points[i]);
 
     // Si on doit appeler des jobs depuis cette fonction @ée
     if (entry_points[i].called_variables != NULL){
       if (!entry_points[i].reduction)
         nMiddleArgsAddExtra(n,&numParams);
+      else
+        nprintf(n, NULL, ",global_device_shared_reduce_results");
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[nccCudaMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
         nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
       }
-    }else nprintf(n,NULL,"/*NULL_called_variables*/");
-
-    
+    }//else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
 
     if (entry_points[i].reduction==true){
@@ -240,8 +231,8 @@ NABLA_STATUS cuHookMainCore(nablaMain *n){
 // ****************************************************************************
 #define CUDA_MAIN_POSTINIT "\n\t}\n\n\
 \tgettimeofday(&et, NULL);\n\
-\tgputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\ngpuTime=%%.2fs\\n\", gputime/1000.0);"
+\talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
+\tprintf(\"\\nalltime=%%.2fs\\n\", alltime/1000.0);"
 NABLA_STATUS cuHookMainPostInit(nablaMain *nabla){
   dbg("\n[nccCudaMainPostInit]");
   fprintf(nabla->entity->src, CUDA_MAIN_POSTINIT);

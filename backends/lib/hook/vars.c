@@ -98,16 +98,16 @@ static NABLA_STATUS generateSingleVariableMalloc(nablaMain *nabla,
   const char *type=dimType(nabla,var->type);
   nprintf(nabla,NULL,"\n\t// generateSingleVariableMalloc %s",var->name);
   if (var->dim==0)
-    fprintf(nabla->entity->src,"\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%s);",
-            type,
-            var->item,var->name,
+    fprintf(nabla->entity->src,
+            "\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%s);// WARP_ALIGN",
+            type, var->item,var->name,
             type,
             type,
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->src,"\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%ld*%s);// __attribute__ ((aligned(WARP_ALIGN)));",
-            type,
-            var->item,var->name,
+    fprintf(nabla->entity->src,
+            "\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%ld*%s);// WARP_ALIGN",
+            type, var->item,var->name,
             type,
             type,
             var->size,
@@ -258,10 +258,7 @@ void xHookVariablesInit(nablaMain *nabla){
  *****************************************************************************/
 static void options(nablaMain *nabla){
   nablaOption *opt;
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// ********************************************************\n\
-// * Options\n\
-// ********************************************************");
+  fprintf(nabla->entity->hdr,"\n// Options");
   for(opt=nabla->options;opt!=NULL;opt=opt->next)
     fprintf(nabla->entity->hdr,
             "\n#define %s %s",
@@ -276,12 +273,12 @@ static void options(nablaMain *nabla){
 void xHookVariablesPrefix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
-// * Variables\n\
+// * xHookVariablesPrefix\n\
 // ********************************************************");
-  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+/*  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
     if (genericVariable(nabla, var, witch2func(VARIABLES_DECLARATION))==NABLA_ERROR)
       exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
-  }
+      }*/
   options(nabla);
 }
 
@@ -290,6 +287,14 @@ void xHookVariablesPrefix(nablaMain *nabla){
 // * Malloc des variables
 // ****************************************************************************
 void xHookVariablesMalloc(nablaMain *nabla){
+
+  if (isWithLibrary(nabla,with_real))
+    xHookMesh1D(nabla);
+  else if (isWithLibrary(nabla,with_real2))
+    xHookMesh2D(nabla);
+  else
+    xHookMesh3D(nabla);
+  
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
 \t// * Déclaration & Malloc des Variables\n\

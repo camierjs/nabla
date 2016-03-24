@@ -72,27 +72,17 @@ void xHookHeaderPrefix(nablaMain *nabla){
 }
 
 
-/***************************************************************************** 
- * 
- *****************************************************************************/
-void xHookHeaderPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,
-          "\n\n#endif // __BACKEND_%s_H__\n",
-          nabla->entity->name);
-}
-
-
 // ****************************************************************************
-// * ENUMERATES Hooks
+// * ENUMERATES Work
 // ****************************************************************************
-void xHookHeaderDefineEnumerates(nablaMain *nabla){
+static void xHeaderDefineEnumerates(nablaMain *nabla){
   // S'il n'y a pas de call, c'est qu'on ne le gère pas
-  const char *parallel_prefix_for_loop=(nabla->call)?
-    nabla->call->parallel->loop(nabla):"";
+  const char *parallel_prefix_for_loop=
+    (nabla->call)?nabla->call->parallel?nabla->call->parallel->loop(nabla):"":"";
   fprintf(nabla->entity->hdr,"\n\n\
-/*********************************************************\n\
- * Forward enumerates\n\
- *********************************************************/\n\
+// *********************************************************\n\
+// * Forward enumerates\n\
+// *********************************************************\n\
 #define FOR_EACH_PARTICLE(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
 #define FOR_EACH_PARTICLE_WARP(p) %sfor(int p=0;p<NABLA_NB_PARTICLES;p+=1)\n\
 \n\
@@ -107,10 +97,13 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_CELL_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 \n\
+#define FOR_EACH_NODE_MSH(n) for(int n=0;n<msh.NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_NODE(n) /*%s*/for(int n=0;n<NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
 #define FOR_EACH_NODE_CELL(c)\
  for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
+#define FOR_EACH_NODE_CELL_MSH(c)\
+ for(int c=0,nc=msh.NABLA_NODE_PER_CELL*n;c<msh.NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
 #define FOR_EACH_NODE_WARP_CELL(c)\\\n\
     for(int c=0;c<NABLA_NODE_PER_CELL;c+=1)\n\
 \n\
@@ -131,8 +124,7 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
  %sfor(int f=NABLA_NB_FACES_INNER;f<NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;f+=1)\n\
 \n\
 #define FOR_EACH_FACE_CELL(c)\\\n\
-    for(int c=0;c<NABLA_NODE_PER_FACE;c+=1)\n\
-",
+    for(int c=0;c<NABLA_NODE_PER_FACE;c+=1)\n",
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL
@@ -154,4 +146,24 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
           parallel_prefix_for_loop, // FOR_EACH_OWN_OUTER_FACE
           parallel_prefix_for_loop  // FOR_EACH_OWN_OUTER_FACE_WARP
           );
+}
+
+
+// ****************************************************************************
+// * ENUMERATES Hooks
+// ****************************************************************************
+void xHookHeaderDefineEnumerates(nablaMain *nabla){
+  // xHeaderDefineEnumerates a été déplacé à la fin du header,
+  // dans le xHookHeaderPostfix
+}
+
+
+// ****************************************************************************
+// * 
+// ****************************************************************************
+void xHookHeaderPostfix(nablaMain *nabla){
+  xHeaderDefineEnumerates(nabla);
+  fprintf(nabla->entity->hdr,
+          "\n\n#endif // __BACKEND_%s_H__\n",
+          nabla->entity->name);
 }

@@ -86,6 +86,9 @@ void xDumpHeader(nablaMain *nabla){
 // * dumpMesh
 // ****************************************************************************
 void xDumpMesh(nablaMain *nabla){
+  // On rajoute les tests 'is something'
+  fprintf(nabla->entity->hdr,dumpExternalFile(items_c));
+  // Et les constantes des connectivités
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(msh1D_c));
   else
@@ -93,5 +96,4 @@ void xDumpMesh(nablaMain *nabla){
     fprintf(nabla->entity->src,dumpExternalFile(msh2D_c));
   else
     fprintf(nabla->entity->src,dumpExternalFile(msh3D_c));
-  fprintf(nabla->entity->hdr,dumpExternalFile(items_c));
 }

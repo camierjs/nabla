@@ -202,7 +202,7 @@ AlephRealMatrix mtx;
 // ****************************************************************************
 // * Globals for Simulation
 // ****************************************************************************
-IMesh *thisMesh=new IMesh(NABLA_NB_CELLS_X_AXIS,NABLA_NB_CELLS_Y_AXIS,NABLA_NB_CELLS_Z_AXIS);
+IMesh *thisMesh=new IMesh(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS);
 
 ITraceMng *thisTraceMng=new ITraceMng();
 

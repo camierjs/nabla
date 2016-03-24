@@ -71,7 +71,8 @@ __attribute__((unused)) static void verifCorners(void){
   }
 }
 
-__attribute__((unused)) static void verifNextPrev(void){
+__attribute__((unused)) static void verifNextPrev(int *xs_cell_prev,
+                                                  int *xs_cell_next){
  for (int i=0; i<NABLA_NB_CELLS; ++i) {
     printf("\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
         xs_cell_prev[MD_DirX*NABLA_NB_CELLS+i],

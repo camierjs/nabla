@@ -254,6 +254,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       entry_points[i].used_options=job->used_options;
       entry_points[i].reduction=job->reduction;
       entry_points[i].reduction_name=job->reduction_name;
+      entry_points[i].enum_enum=job->enum_enum;
       i+=1;
     }
   }

@@ -295,13 +295,51 @@ static bool isInXS(const char j,const char v,const char d,
 // * Dump dans le src des arguments depuis le scan DFS
 // ****************************************************************************
 void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
-  int i=numParams;
+  int i;
   nablaVariable *var;
   int nXS=0;
   char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
-  
+
+  //if (numParams==0){ // permet de ne pas rajouter pour les job à-là 'dumpSolution'
+  {
+    const char j=job->item[0];
+    const char e=job->enum_enum;
+    //printf("job %s, e=%c",job->name,e);
+    if (j=='c') {
+      nprintf(nabla, NULL,"%sconst int NABLA_NB_CELLS_WARP,const int NABLA_NB_CELLS",numParams==0?"":",");
+      numParams+=2;
+    }
+    if (j=='c' && e=='n'){
+      nprintf(nabla, NULL,",const int NABLA_NODE_PER_CELL");
+      numParams+=1;
+    }
+    if (j=='n'){
+      nprintf(nabla, NULL,"%sconst int NABLA_NB_NODES_WARP, const int NABLA_NB_NODES",numParams==0?"":",");
+      numParams+=2;
+    }
+    if (j=='n' && e=='c'){
+      nprintf(nabla, NULL,",const int NABLA_NODE_PER_CELL");
+      numParams+=1;
+    }
+    if (j=='f'){
+      nprintf(nabla, NULL,"%sconst int NABLA_NB_FACES,\
+ const int NABLA_NB_FACES_INNER,\
+ const int NABLA_NB_FACES_OUTER",numParams==0?"":",");
+      numParams+=3;
+    }
+    if (j=='f' && e=='n'){
+      nprintf(nabla, NULL,",const int NABLA_NODE_PER_FACE");
+      numParams+=1;
+    }
+    if (j=='p'){
+      nprintf(nabla, NULL,"%sconst int NABLA_NB_PARTICLES",numParams==0?"":",");
+      numParams+=1;
+    }
+  }
+  i=numParams;
+
   // Dump des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
     nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
@@ -343,9 +381,42 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
 void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   int i=0;
   nablaVariable *var;
-  
   int nXS=0;
   char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
+  
+  if (!job->is_a_function){
+    const char j=job->item[0];
+    const char e=job->enum_enum;
+    printf("[1;34m[nMiddleArgsDumpFromDFS] job %s, j=%c, enum_enum=%c[0m\n",job->name,j,e?e:'0');
+    if (j=='c'){
+      nprintf(nabla, NULL,"NABLA_NB_CELLS_WARP,NABLA_NB_CELLS");
+      i+=2;
+    }
+    if (j=='c' && e=='n'){
+      nprintf(nabla, NULL,",NABLA_NODE_PER_CELL");
+      i+=1;
+    }
+    if (j=='n'){
+      nprintf(nabla, NULL,"NABLA_NB_NODES_WARP,NABLA_NB_NODES");
+      i+=2;
+    }
+    if (j=='n' && e=='c'){
+      nprintf(nabla, NULL,",NABLA_NODE_PER_CELL");
+      i+=1;
+    }
+    if (j=='f'){
+      nprintf(nabla, NULL,"NABLA_NB_FACES,NABLA_NB_FACES_INNER,NABLA_NB_FACES_OUTER");
+      i+=3;
+    }
+    if (j=='f' && e=='n'){
+      nprintf(nabla, NULL,",NABLA_NODE_PER_FACE");
+      i+=1;
+    }
+    if (j=='p'){
+      nprintf(nabla, NULL,"NABLA_NB_PARTICLES");
+      i+=1;
+    }
+  }
 
 // Dump des options du job
   //nablaOption *opt=job->used_options;

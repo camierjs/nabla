@@ -70,7 +70,7 @@ void xHookMesh1DConnectivity(nablaMain *nabla){
 // * okinaMesh
 // * Adding padding for simd too 
 // ****************************************************************************
-static void xHookMesh1D(nablaMain *nabla){
+void xHookMesh1D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH GENERATION (1D)\n\
@@ -132,7 +132,7 @@ void xHookMesh2DConnectivity(nablaMain *nabla){
 // ****************************************************************************
 // * xHookMesh2D
 // ****************************************************************************
-static void xHookMesh2D(nablaMain *nabla){
+void xHookMesh2D(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\
 // ********************************************************\n\
 // * MESH GENERATION (2D)\n\
@@ -171,11 +171,11 @@ const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
 const int NABLA_NB_OUTER_CELLS_WARP   = ((2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4)/WARP_SIZE);\n\
 int nxtOuterCellOffset(const int c){\n\
   //printf(\"NABLA_NB_OUTER_CELLS_WARP=%%d, NABLA_NB_CELLS_X_AXIS=%%d\",NABLA_NB_OUTER_CELLS_WARP,NABLA_NB_CELLS_X_AXIS);\n\
-  if (c<NABLA_NB_CELLS_X_AXIS) {printf(\"1\"); return 1;}\n\
-  if (c>=(NABLA_NB_CELLS-NABLA_NB_CELLS_X_AXIS)) {printf(\"4\"); return 1;}\n \
-  if ((c%%(NABLA_NB_CELLS_X_AXIS))==0) {printf(\"2\"); return NABLA_NB_CELLS_X_AXIS-1;}\n\
-  if (((c+1)%%(NABLA_NB_CELLS_X_AXIS))==0) {printf(\"3\"); return 1;}\n\
-  printf(\"else\");\n\
+  if (c<NABLA_NB_CELLS_X_AXIS) {/*printf(\"1\");*/ return 1;}\n\
+  if (c>=(NABLA_NB_CELLS-NABLA_NB_CELLS_X_AXIS)) {/*printf(\"4\");*/ return 1;}\n\
+  if ((c%%(NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"2\");*/ return NABLA_NB_CELLS_X_AXIS-1;}\n\
+  if (((c+1)%%(NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"3\");*/ return 1;}\n \
+  /*printf(\"else\");*/\n\
   return NABLA_NB_CELLS_X_AXIS-1;\n\
 }\n\
 \n\
@@ -186,23 +186,25 @@ int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 // ****************************************************************************
 // * Backend OKINA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
-void xHookMesh3DConnectivity(nablaMain *nabla){
+void xHookMesh3DConnectivity(nablaMain *nabla,const char *pfx){
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
-\t// * MESH CONNECTIVITY (3D)\n\
+\t// * MESH CONNECTIVITY (3D) with prefix '%s'\n\
 \t// ********************************************************\n\
-\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
-\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
-\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
-\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
-\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
-\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
-\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
-\tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
-\tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
-\tassert(xs_face_cell && xs_face_node);\n");
+\tint* %s_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* %s_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
+\tint* %s_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
+\tint* %s_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
+\tint* %s_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* %s_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* %s_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* %s_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* %s_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tassert(%s_cell_node && %s_cell_next && %s_cell_prev && %s_cell_face);\n\
+\tassert(%s_node_cell && %s_node_cell_corner && %s_node_cell_and_corner);\n\
+\tassert(%s_face_cell && %s_face_node);\n",
+          pfx,pfx,pfx,pfx,pfx,pfx,pfx,pfx,pfx,
+          pfx,pfx,pfx,pfx,pfx,pfx,pfx,pfx,pfx,pfx);
 }
 
 
@@ -229,48 +231,79 @@ void xHookMeshFreeConnectivity(nablaMain *nabla){
 // * okinaMesh
 // * Adding padding for simd too 
 // ****************************************************************************
-static void xHookMesh3D(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * MESH GENERATION (3D)\n\
-// ********************************************************\n\
-const int NABLA_NODE_PER_CELL = 8;\n\
-const int NABLA_CELL_PER_NODE = 8;\n\
-const int NABLA_CELL_PER_FACE = 2;\n\
-const int NABLA_NODE_PER_FACE = 4;\n\
-const int NABLA_FACE_PER_CELL = 6;\n\
-\n\
-const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\
-\n\
-const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\
-\n\
-const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS*Z_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Z_INNER = (Z_EDGE_ELEMS-1)*X_EDGE_ELEMS*Y_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
-const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\
-const int NABLA_NB_FACES_Z_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;\n\
-const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_Z_INNER+NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\
-const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER+NABLA_NB_FACES_Z_OUTER;\n\
-const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\
-\n\
-const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
-const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
-const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\
-\n\
-const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\
-const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
-const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n \
-\n\
-int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
-\n\
-const int NABLA_NB_NODES_WARP   = (NABLA_NB_NODES/WARP_SIZE);\n\
+void xHookMesh3D(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\n\t\
+// ********************************************************\n\t\
+// * MESH GENERATION (3D)\n\t\
+// ********************************************************\n\t\
+const int NABLA_NODE_PER_CELL = 8;\n\t\
+const int NABLA_CELL_PER_NODE = 8;\n\t\
+const int NABLA_CELL_PER_FACE = 2;\n\t\
+const int NABLA_NODE_PER_FACE = 4;\n\t\
+const int NABLA_FACE_PER_CELL = 6;\n\t\
+\n\t\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\t\
+const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\t\
+const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\t\
+\n\t\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\t\
+const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\t\
+const int NABLA_NB_CELLS_Z_AXIS = Z_EDGE_ELEMS;\n\t\
+\n\t\
+const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS*Z_EDGE_ELEMS;\n\t\
+const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS*Z_EDGE_ELEMS;\n\t\
+const int NABLA_NB_FACES_Z_INNER = (Z_EDGE_ELEMS-1)*X_EDGE_ELEMS*Y_EDGE_ELEMS;\n\t\
+const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\t\
+const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Z_AXIS;\n\t\
+const int NABLA_NB_FACES_Z_OUTER = 2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;\n\t\
+const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_Z_INNER+NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\t\
+const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER+NABLA_NB_FACES_Z_OUTER;\n\t\
+const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\t\
+\n\t\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\t\
+const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\t\
+const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\t\
+\n\t\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\t\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\t\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n\t\
+const int NABLA_NB_NODES_WARP   = (NABLA_NB_NODES/WARP_SIZE);\n\t\
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
-");
+\n\
+\tconst nablaMesh msh={\n\
+\t\tNABLA_NODE_PER_CELL,\n\
+\t\tNABLA_CELL_PER_NODE,\n\
+\t\tNABLA_CELL_PER_FACE,\n\
+\t\tNABLA_NODE_PER_FACE,\n\
+\t\tNABLA_FACE_PER_CELL,\n\
+\n\
+\t\tNABLA_NB_NODES_X_AXIS,\n\
+\t\tNABLA_NB_NODES_Y_AXIS,\n\
+\t\tNABLA_NB_NODES_Z_AXIS,\n\
+\n\
+\t\tNABLA_NB_CELLS_X_AXIS,\n\
+\t\tNABLA_NB_CELLS_Y_AXIS,\n\
+\t\tNABLA_NB_CELLS_Z_AXIS,\n\
+\n\
+\t\tNABLA_NB_FACES_X_INNER,\n\
+\t\tNABLA_NB_FACES_Y_INNER,\n\
+\t\tNABLA_NB_FACES_Z_INNER,\n\
+\t\tNABLA_NB_FACES_X_OUTER,\n\
+\t\tNABLA_NB_FACES_Y_OUTER,\n\
+\t\tNABLA_NB_FACES_Z_OUTER,\n\
+\t\tNABLA_NB_FACES_INNER,\n\
+\t\tNABLA_NB_FACES_OUTER,\n\
+\t\tNABLA_NB_FACES,\n\
+\n\
+\t\tNABLA_NB_NODES_X_TICK,\n\
+\t\tNABLA_NB_NODES_Y_TICK,\n\
+\t\tNABLA_NB_NODES_Z_TICK,\n\
+\n\
+\t\tNABLA_NB_NODES,\n\
+\t\tNABLA_NODES_PADDING,\n\
+\t\tNABLA_NB_CELLS,\n\
+\t\tNABLA_NB_NODES_WARP,\n\
+\t\tNABLA_NB_CELLS_WARP};\n\n");
 }
 
 // ****************************************************************************
@@ -281,7 +314,6 @@ void xHookMeshPrefix(nablaMain *nabla){
   dbg("\n[lambdaMainMeshPrefix]");
   //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
   dbg("\n[xHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
-  // Mesh structures and functions depends on the ℝ library that can be used
 }
 
 // ****************************************************************************
@@ -290,20 +322,9 @@ void xHookMeshPrefix(nablaMain *nabla){
 // ****************************************************************************
 void xHookMeshCore(nablaMain *nabla){
   dbg("\n[xHookMeshCore]");
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * xHookMeshCore\n\
-// ********************************************************\n");
-  if (isWithLibrary(nabla,with_real)){
-    xHookMesh1D(nabla);
-    //xHookMesh1DConnectivity(nabla);
-  }else if (isWithLibrary(nabla,with_real2)){
-    xHookMesh2D(nabla);
-    //xHookMesh2DConnectivity(nabla);
-  }else{
-    xHookMesh3D(nabla);
-    //xHookMesh3DConnectivity(nabla);
-  }
+  
+
+  
   xDumpMesh(nabla);
 }
 

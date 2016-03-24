@@ -449,6 +449,7 @@ static void dfsVarThisOne(nablaMain *nabla,
   dfsAddToUsedVariables(job,token,var,rw,left_of_assignment_expression);
 }
 
+
 // ****************************************************************************
 // * dfsVariables
 // * On scan pour lister les variables en in/inout/out
@@ -544,6 +545,23 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   if (n->next != NULL)
     dfsVariables(nabla, job, n->next,
                  left_of_assignment_expression);
+}
+
+
+// ****************************************************************************
+// ****************************************************************************
+void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
+  if (n==NULL) return;
+  
+  if (n->tokenid==FORALL && n->next->ruleid==rulenameToId("nabla_item")){
+    if (n->next->children->tokenid==CELL) job->enum_enum='c';
+    if (n->next->children->tokenid==NODE) job->enum_enum='n';
+    if (n->next->children->tokenid==FACE) job->enum_enum='f';
+    if (n->next->children->tokenid==PARTICLE) job->enum_enum='p';
+    printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum);
+  }
+  if (n->children!=NULL) dfsEnumMax(nabla,job,n->children);
+  if (n->next!=NULL) dfsEnumMax(nabla,job,n->next);
 }
 
 

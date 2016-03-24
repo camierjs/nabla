@@ -53,7 +53,8 @@ __shared__ double shared_array[CUDA_NB_THREADS_PER_BLOCK];
 // *****************************************************************************
 // * Reduce MIN Kernel
 // *****************************************************************************
-__device__ void reduce_min_kernel(real  *results, const real what){
+__device__ void reduce_min_kernel(const int NABLA_NB_CELLS,
+                                  real  *results, const real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   const unsigned int i = bid*blockDim.x+tid;
@@ -100,7 +101,8 @@ __device__ void reduce_min_kernel(real  *results, const real what){
 // *****************************************************************************
 // * Reduce MAX Kernel
 // *****************************************************************************
-__device__ void reduce_max_kernel(real  *results, const real what){
+__device__ void reduce_max_kernel(const int NABLA_NB_CELLS,
+                                  real  *results, const real what){
   const unsigned int bid = blockIdx.x;
   const unsigned int tid = threadIdx.x;
   const unsigned int i = bid*blockDim.x+tid;

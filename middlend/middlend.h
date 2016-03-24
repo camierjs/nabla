@@ -136,6 +136,47 @@ typedef struct nablaOptionStruct{
   struct nablaOptionStruct *next;
 }nablaOption;
 
+
+// ****************************************************************************
+// * Nabla MESH struct
+// ****************************************************************************
+typedef struct nablaMshStruct{
+  int NABLA_NODE_PER_CELL;
+  int NABLA_CELL_PER_NODE;
+  int NABLA_CELL_PER_FACE;
+  int NABLA_NODE_PER_FACE;
+  int NABLA_FACE_PER_CELL;
+	
+  int NABLA_NB_NODES_X_AXIS;
+  int NABLA_NB_NODES_Y_AXIS;
+  int NABLA_NB_NODES_Z_AXIS;
+	
+  int NABLA_NB_CELLS_X_AXIS;
+  int NABLA_NB_CELLS_Y_AXIS;
+  int NABLA_NB_CELLS_Z_AXIS;
+	
+  int NABLA_NB_FACES_X_INNER;
+  int NABLA_NB_FACES_Y_INNER;
+  int NABLA_NB_FACES_Z_INNER;
+  int NABLA_NB_FACES_X_OUTER;
+  int NABLA_NB_FACES_Y_OUTER;
+  int NABLA_NB_FACES_Z_OUTER;
+  int NABLA_NB_FACES_INNER;
+  int NABLA_NB_FACES_OUTER;
+  int NABLA_NB_FACES;
+	
+  double NABLA_NB_NODES_X_TICK;
+  double NABLA_NB_NODES_Y_TICK;
+  double NABLA_NB_NODES_Z_TICK;
+	
+  int NABLA_NB_NODES;
+  int NABLA_NODES_PADDING;
+  int NABLA_NB_CELLS;
+  int NABLA_NB_NODES_WARP;
+  int NABLA_NB_CELLS_WARP;
+}nablaMesh;
+
+
 // ****************************************************************************
 // * Nabla JOB struct
 // ****************************************************************************
@@ -172,6 +213,7 @@ typedef struct nablaJobStruct{
   bool reduction;
   char *reduction_name;
   int swirl_index;
+  char enum_enum;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;
@@ -329,6 +371,7 @@ int nMiddleVariableGmpRank(nablaVariable*);
 char *nMiddleVariableGmpNameRank(nablaVariable*,int);
 bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
 int nMiddleVariableGmpDumpNumber(nablaVariable*);
+void dfsEnumMax(nablaMain*,nablaJob*,astNode*);
 void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
 void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
 bool dfsUsedInThisForall(nablaMain*,nablaJob*,astNode*,const char*);

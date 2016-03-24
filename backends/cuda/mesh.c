@@ -43,52 +43,13 @@
 #include "nabla.h"
 
 
-static void cuHookMesh3D(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
-// ********************************************************\n\
-// * MESH GENERATION (3D)\n\
-// ********************************************************\n\
-#define NABLA_NODE_PER_CELL 8\n\
-#define NABLA_CELL_PER_NODE 8\n\
-#define NABLA_CELL_PER_FACE 2\n\
-#define NABLA_NODE_PER_FACE 4\n\
-\n\
-#define NABLA_NB_NODES_X_AXIS   (X_EDGE_ELEMS+1)\n\
-#define NABLA_NB_NODES_Y_AXIS   (Y_EDGE_ELEMS+1)\n\
-#define NABLA_NB_NODES_Z_AXIS   (Z_EDGE_ELEMS+1)\n\
-\n\
-#define NABLA_NB_CELLS_X_AXIS    X_EDGE_ELEMS\n\
-#define NABLA_NB_CELLS_Y_AXIS    Y_EDGE_ELEMS\n\
-#define NABLA_NB_CELLS_Z_AXIS    Z_EDGE_ELEMS\n\
-\n\
-#define NABLA_NB_FACES_X_INNER ((X_EDGE_ELEMS-1)*Y_EDGE_ELEMS*Z_EDGE_ELEMS)\n\
-#define NABLA_NB_FACES_Y_INNER ((Y_EDGE_ELEMS-1)*X_EDGE_ELEMS*Z_EDGE_ELEMS)\n\
-#define NABLA_NB_FACES_Z_INNER ((Z_EDGE_ELEMS-1)*X_EDGE_ELEMS*Y_EDGE_ELEMS)\n\
-#define NABLA_NB_FACES_X_OUTER (2*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS)\n\
-#define NABLA_NB_FACES_Y_OUTER (2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Z_AXIS)\n\
-#define NABLA_NB_FACES_Z_OUTER (2*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS)\n\
-#define NABLA_NB_FACES_INNER (NABLA_NB_FACES_Z_INNER+NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER)\n\
-#define NABLA_NB_FACES_OUTER (NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER+NABLA_NB_FACES_Z_OUTER)\n\
-#define NABLA_NB_FACES (NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER)\n\
-\n\
-#define BLOCKSIZE                  128\n\
-#define CUDA_NB_THREADS_PER_BLOCK  128\n\
-\n\
-#define NABLA_NB_NODES_X_TICK LENGTH/(NABLA_NB_CELLS_X_AXIS)\n\
-#define NABLA_NB_NODES_Y_TICK LENGTH/(NABLA_NB_CELLS_Y_AXIS)\n\
-#define NABLA_NB_NODES_Z_TICK LENGTH/(NABLA_NB_CELLS_Z_AXIS)\n\
-\n\
-#define NABLA_NB_NODES (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS)\n\
-#define NABLA_NB_CELLS (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS)\n\
-\n\
-#define NABLA_NB_GLOBAL 1\n");
-}
+static void cuHookMesh3D(nablaMain *nabla){}
 
 // ****************************************************************************
 // * Backend CUDA - Génération de la connectivité du maillage coté header
 // ****************************************************************************
-static void nLambdaHookMesh3DDeviceVariables(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
+void nLambdaHookMesh3DDeviceVariables(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\n\
 // ********************************************************\n\
 // * MESH CONNECTIVITY\n\
 // ********************************************************\n\
@@ -116,7 +77,7 @@ void cuHookMeshPrefix(nablaMain *nabla){
     //cuHookMesh1D(nabla);
   }else{
     cuHookMesh3D(nabla);
-    nLambdaHookMesh3DDeviceVariables(nabla);
+    //nLambdaHookMesh3DDeviceVariables(nabla);
   }
 }
 
@@ -192,17 +153,29 @@ void cuHookMeshCore(nablaMain *nabla){
 // * Backend CUDA - Allocation de la connectivité du maillage
 // ****************************************************************************
 void cuHookMeshConnectivity(nablaMain *nabla){
+  xHookMesh3DConnectivity(nabla,"host");
+
+  fprintf(nabla->entity->src,"\treal3* host_node_coord=(real3*)calloc(NABLA_NB_NODES,sizeof(real3));// WARP_ALIGN\nnabla_ini_connectivity(host_node_coord,\n\t\t\t\t\t\t\t\t\thost_cell_node,host_cell_prev,host_cell_next,host_cell_face,\n\t\t\t\t\t\t\t\t\thost_node_cell,host_node_cell_corner,host_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\thost_face_cell,host_face_node);");
+  
   fprintf(nabla->entity->src,"\n\n\
-\t// Allocation coté CUDA des connectivités aux mailles\n\
+\t// cuHookMeshConnectivity\n\
+\t__builtin_align__(8) int* xs_cell_node;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_cell_node, 8*NABLA_NB_CELLS*sizeof(int)));\n\
-\t// Allocation coté CUDA des connectivités aux noeuds\n\
+\t__builtin_align__(8) int* xs_node_cell;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_node_cell, 8*NABLA_NB_NODES*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_node_cell_corner;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_node_cell_corner_idx;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_node_cell_corner_idx, NABLA_NB_NODES*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_cell_next;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_cell_next, 3*NABLA_NB_CELLS*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_cell_prev;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_cell_prev, 3*NABLA_NB_CELLS*sizeof(int)));\n\
+\t//__builtin_align__(8) int* xs_node_cell_and_corner;\n\
 \t//CUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_node_cell_and_corner, 2*8*NABLA_NB_NODES*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_face_cell;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_face_cell, NABLA_CELL_PER_FACE*NABLA_NB_FACES*sizeof(int)));\n\
+\t__builtin_align__(8) int* xs_face_node;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&xs_face_node, NABLA_NODE_PER_FACE*NABLA_NB_FACES*sizeof(int)));\n\
 \n\
 ");

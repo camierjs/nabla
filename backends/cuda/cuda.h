@@ -63,7 +63,6 @@ char* cuHookFilterGather(nablaJob*);
 char* cuHookFilterScatter(nablaJob*);
 
 void cuHookReduction(struct nablaMainStruct*,astNode*);
-bool cudaHookDfsVariable(void);
 
 char* cuHookPragmaGccIvdep(void);
 char* cuHookPragmaGccAlign(void);
@@ -71,6 +70,7 @@ char* cuHookPragmaGccAlign(void);
 void cuHookHeaderDump(nablaMain*);
 void cuHookHeaderEnumerates(nablaMain*);
 void cuHookHeaderIncludes(nablaMain*);
+void cuHookHeaderPostfix(nablaMain*);
 
 NABLA_STATUS cuHookMainPrefix(nablaMain*);
 NABLA_STATUS cuHookMainPreInit(nablaMain*);
@@ -93,16 +93,12 @@ void cuHookTime(struct nablaMainStruct*);
 char* cuHookEntryPointPrefix(struct nablaMainStruct*,nablaJob*);
 
 void cuHookFunctionName(nablaMain*);
-void cuHookFunction(nablaMain*,astNode*);
-void cuHookJob(nablaMain*,astNode*);
 void cuHookLibraries(astNode*,nablaEntity*);
 
 char* cuHookForAllPrefix(nablaJob*);
 
 void cuHookSwitchToken(astNode*,nablaJob*);
 nablaVariable *cuHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void cuHookAddExtraParameters(nablaMain*, nablaJob*, int*);
-void cuHookDumpNablaParameterList(nablaMain*,nablaJob*,astNode*,int *);
 
 void cuHookJobDiffractStatement(nablaMain*,nablaJob*,astNode**);
 

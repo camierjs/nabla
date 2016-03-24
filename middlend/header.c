@@ -94,6 +94,8 @@ NABLA_STATUS nMiddleForwards(nablaMain *nabla, const char **forwards){
 \n// *****************************************************************************\
 \n// * Forwards\
 \n// *****************************************************************************");
+  if (!forwards[0])
+    fprintf(nabla->entity->hdr, "\n// no Forwards here!\n");
   for(int i=0;forwards[i]!=NULL;i+=1)
     fprintf(nabla->entity->hdr, "\n%s",forwards[i]);
   fprintf(nabla->entity->hdr, "\n");

@@ -51,7 +51,7 @@ static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   if (isNode->next->tokenid==OWN)
     nprintf(nabla, "/*IS_OP_INI*/", "_isOwn_(");
   else{
-    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(xs_face_cell,", token2function);
+    nprintf(nabla, "/*IS_OP_INI*/", "_%s_(NABLA_NB_FACES,xs_face_cell,", token2function);
   }
   // Et on purge le token pour pas qu'il soit parsé
   isNode->next->token[0]=0;
@@ -90,14 +90,14 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
 // Preliminary pertinence test
   if (n->tokenid != FORALL) return false;
   
-  if (n->token) dbg("\n\t\t\t\t\t[hookSwitchForall]");
+  if (n->token) dbg("\n\t\t\t\t\t[hookSwitchForall] ");//token=%s",n->token);
   
   // Now we're allowed to work
   switch(n->next->children->tokenid){
-    
   case(CELL):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] CELL");
-    job->parse.enum_enum='c';
+    //assert(job->enum_enum==0||job->enum_enum=='c');
+    /*job->enum_enum='c';*/job->parse.enum_enum='c';
     if (job->item[0]=='f')
       nprintf(job->entity->main, "/*f_foreach_c*/", "FOR_EACH_FACE_CELL(c)");
     if (job->item[0]=='n')
@@ -106,7 +106,8 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
   }
   case(NODE):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] NODE");
-    job->parse.enum_enum='n';
+    //assert(job->enum_enum==0||job->enum_enum=='n');
+    /*job->enum_enum='n';*/job->parse.enum_enum='n';
     if ((job->entity->libraries&(1<<with_real))!=0) // Iteration 1D
       nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
     else{
@@ -122,7 +123,8 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
   }
   case(FACE):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] FACE");
-    job->parse.enum_enum='f';
+    //assert(job->enum_enum==0||job->enum_enum=='f');
+    /*job->enum_enum='f';*/job->parse.enum_enum='f';
     if (job->item[0]=='c')
       nprintf(job->entity->main, "/*chsf fc*/", "for(int f=0;f<4;++f)");
     if (job->item[0]=='n')
@@ -139,6 +141,7 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
   // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
 //#warning SKIP du nabla_item qui nous a renseigné sur le type de forall
   *n=*n->next->next;
+  //printf("[1;31mjob %s, enum_enum=%c[m\n",job->name,job->enum_enum);
   return true;
 }
 

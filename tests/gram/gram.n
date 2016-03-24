@@ -114,7 +114,7 @@ global{
   }*/
 
 ∀ cells void blabla(void) @ 8.0 { α=0.0; }
-∀ cells @ 8.0 { α=0.0; }
+∀ cells @ 8.0 { ∀ node α=0.0; }
 
 //∀ cells @ 8.0 {volo += (α=1.0)*α_global*β*(e=1.0)*v*α;}
 

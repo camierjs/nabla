@@ -53,9 +53,9 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Main\n\
 // ******************************************************************************\n\
 int main(int argc, char *argv[]){\n\
-\tfloat cputime=0.0;\n\
+\tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
-\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n\
+\t__attribute__((unused)) int NABLA_NB_PARTICLES;\n\
 \tif (argc==1)\n\
 \t\tNABLA_NB_PARTICLES=1000;\n\
 \telse\n\
@@ -82,24 +82,23 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   return NABLA_OK;
 }
 
-
 // ****************************************************************************
 // * Backend PREINIT - Génération du 'main'
 // ****************************************************************************
-#define BACKEND_MAIN_PREINIT "\tnabla_ini_connectivity(node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
+#define BACKEND_MAIN_PREINIT "\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n\
+\tnabla_ini_connectivity(msh,node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;
   dbg("\n[hookMainPreInit]");
   
   fprintf(nabla->entity->src, "\n\n\t//BACKEND_MAIN_PREINIT");
-  
-  // On pousse dans le main les connectivités
+
   if (isWithLibrary(nabla,with_real))
     xHookMesh1DConnectivity(nabla);
   else if (isWithLibrary(nabla,with_real2))
     xHookMesh2DConnectivity(nabla);
   else
-    xHookMesh3DConnectivity(nabla);
+    xHookMesh3DConnectivity(nabla,"xs");
 
   // Puis le BACKEND_MAIN_PREINIT
   // qui lance le nabla_ini_connectivity
@@ -279,6 +278,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     if (entry_points[i].called_variables != NULL){
       if (!entry_points[i].reduction)
          nMiddleArgsAddExtra(n,&numParams);
+      //else nprintf(n, NULL, "NABLA_NB_CELLS_WARP,");
       // Et on rajoute les called_variables en paramètre d'appel
       dbg("\n\t[hookMain] Et on rajoute les called_variables en paramètre d'appel");
       for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
@@ -309,8 +309,8 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 \n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
-\tcputime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
-\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, cputime/1000.0);\n"
+\talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
+\tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"
 
 
 // ****************************************************************************

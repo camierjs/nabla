@@ -49,7 +49,7 @@ bool _isOwn_(int c){
 }
 
 // aux faces
-bool _isSubDomainBoundaryOutside_(int f){
+bool _isSubDomainBoundaryOutside_(int *xs_face_cell, int f){
   assert(f>=0);
   assert(xs_face_cell[0*NABLA_NB_FACES+f]>=0);
   assert(xs_face_cell[1*NABLA_NB_FACES+f]<=0);

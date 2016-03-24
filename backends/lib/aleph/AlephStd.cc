@@ -42,7 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 static int rng(void){
-  return drand48()*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS;
+  return 0;//drand48()*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_X_AXIS;
 }
 
 // ****************************************************************************

@@ -11,7 +11,6 @@ set(BACKEND_CUDA_C cuda.c
     header.c
     source.c
     forall.c
-    params.c
     reduce.c)
 
 add_library(NablaCuda ${BACKEND_CUDA_C})

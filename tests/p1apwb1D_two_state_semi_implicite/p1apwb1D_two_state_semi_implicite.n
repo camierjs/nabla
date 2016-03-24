@@ -240,7 +240,7 @@ void iniGlobals(void) @ -5.0{
 
 void tstForQuit(void) @ 4.0 {
   if (option_dump_output){
-    dumpOutput(center,&n_time,cV,cW);
+    dumpOutput(NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,&n_time,cV,cW);
     output;
   }
   if ((time<(option_stoptime-δt))) return;
@@ -248,7 +248,7 @@ void tstForQuit(void) @ 4.0 {
     file(results,plot);
     // printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-    dumpSolution(results,center,cV,cW);
+    dumpSolution(results,NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,cV,cW);
   }else printf("\n");
   exit;
 }

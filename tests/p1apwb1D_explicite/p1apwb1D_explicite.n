@@ -197,8 +197,7 @@ void dbgLoop(void) @ 1.0{
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File results)
-  in (cell cU, cell cP, cell cT, cell cM){ 
+∀ cells void dumpSolution(File results){ 
   results << "\t" << center  
           << "\t" << cP
           << "\t" << P_condlimi(center,n_time)
@@ -215,7 +214,7 @@ void tstForQuit(void) @ 4.0 {
   if ((time<(option_stoptime-δt))) return;
   if (option_dump_output){
     file(results,plot);
-    dumpSolution(results,center,cP,&n_time);
+    dumpSolution(results,NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,cP,&n_time);
   }else printf("\n");
   exit;
 }

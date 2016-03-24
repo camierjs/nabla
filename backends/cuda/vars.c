@@ -86,7 +86,15 @@ static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla,
                                                      char *depth){
   if (var->dim==0){
     fprintf(nabla->entity->src,
-            "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
+            "\n\
+\t__builtin_align__(8) %s *%s_%s%s%s;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s%s%s, NABLA_NB_%s*sizeof(%s)));",
+            postfix?"real":var->type,
+            var->item,
+            var->name,
+            postfix?postfix:"",
+            depth?depth:"",
+            
             var->item,
             var->name,
             postfix?postfix:"",
@@ -95,9 +103,12 @@ static NABLA_STATUS cudaGenerateSingleVariableMalloc(nablaMain *nabla,
             postfix?"real":var->type);
   }else{
     fprintf(nabla->entity->src,
-            "\n\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s, NABLA_NB_%s*8*sizeof(%s)));",
-            var->item,
-            var->name, 
+            "\n\
+\t__builtin_align__(8) %s *%s_%s;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&%s_%s, NABLA_NB_%s*8*sizeof(%s)));",
+            postfix?"real":var->type,
+            var->item,var->name, 
+            var->item,var->name, 
             itemUPCASE(var->item),
             postfix?"real":var->type);
   }
@@ -137,8 +148,8 @@ static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla,
                                                char *postfix,
                                                char *depth){  
   if (var->dim==0)
-    fprintf(nabla->entity->hdr,
-            "\n__builtin_align__(8) %s *%s_%s%s%s; %s host_%s_%s%s%s[NABLA_NB_%s];",
+    fprintf(nabla->entity->src,
+            "\n//__builtin_align__(8) %s *%s_%s%s%s;// %s host_%s_%s%s%s[NABLA_NB_%s];",
             postfix?"real":var->type,
             var->item,
             var->name,
@@ -151,8 +162,8 @@ static NABLA_STATUS cudaGenerateSingleVariable(nablaMain *nabla,
             depth?depth:"",
             itemUPCASE(var->item));
   if (var->dim==1)
-    fprintf(nabla->entity->hdr,
-            "\n__builtin_align__(8) %s *%s_%s%s; %s host_%s_%s%s[NABLA_NB_%s][%ld];",
+    fprintf(nabla->entity->src,
+            "\n//__builtin_align__(8) %s *%s_%s%s;// %s host_%s_%s%s[NABLA_NB_%s][%ld];",
             postfix?"real":var->type,
             var->item,
             var->name,
@@ -248,7 +259,7 @@ void cuHookVariablesInit(nablaMain *nabla){
 void cuHookVariablesPrefix(nablaMain *nabla){
   nablaOption *opt;
   nablaVariable *var;
-  fprintf(nabla->entity->hdr,"\n\n\
+  fprintf(nabla->entity->src,"\n\n\
 // ********************************************************\n\
 // * cuHookVariablesPrefix\n\
 // ********************************************************");
@@ -268,20 +279,20 @@ void cuHookVariablesPrefix(nablaMain *nabla){
     fprintf(nabla->entity->hdr,
             "\n#define %s %s",
             opt->name, opt->dflt);
-  fprintf(nabla->entity->hdr,"\n\n\
+  fprintf(nabla->entity->src,"\n\n\
 // ********************************************************\n\
 // * Globals, coté DEVICE\n\
 // ********************************************************\n\
-__builtin_align__(8) real *global_time;\n\
-__builtin_align__(8) real *global_deltat;\n\
-__builtin_align__(8) int *global_iteration;\n\
-__builtin_align__(8) real *global_device_shared_reduce_results;\n\
+//__builtin_align__(8) real *global_time;\n\
+//__builtin_align__(8) real *global_deltat;\n\
+//__builtin_align__(8) int *global_iteration;\n\
+//__builtin_align__(8) real *global_device_shared_reduce_results;\n\
 \n\
 \n\
 // ********************************************************\n\
 // * Globals, coté HOST\n\
 // ********************************************************\n\
-double host_time;\n");
+//double host_time;\n");
 }
 
 
@@ -290,7 +301,7 @@ double host_time;\n");
 // ****************************************************************************
 void cuHookVariablesPostfix(nablaMain *nabla){
   nablaVariable *var;
-  fprintf(nabla->entity->hdr,"\n\n\
+  fprintf(nabla->entity->src,"\n\n\
 // ********************************************************\n\
 // * cuHookVariablesPostfix\n\
 // ********************************************************");

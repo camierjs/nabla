@@ -94,7 +94,7 @@ void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
-void %s(",item_var_name,global_var_name,job_name);
+void %s(const int NABLA_NB_CELLS_WARP, const int NABLA_NB_CELLS,",item_var_name,global_var_name,job_name);
 
   
   nablaVariable *global_var=nMiddleVariableFind(nabla->variables, global_var_name);
