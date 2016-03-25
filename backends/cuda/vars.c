@@ -198,13 +198,7 @@ static pFunDump witch2func(CUDA_VARIABLES_SWITCH witch){
 static NABLA_STATUS cudaGenericVariableDim1(nablaMain *nabla,
                                             nablaVariable *var,
                                             pFunDump fDump){
-  //int i;
-  //char depth[]="[0]";
-  dbg("\n[cudaGenerateVariableDim1] variable %s", var->name);
-  //for(i=0;i<NABLA_HARDCODED_VARIABLE_DIM_1_DEPTH;++i,depth[1]+=1)
-  //   fDump(nabla, var, NULL, depth);
-  fDump(nabla, var, NULL, "/*8*/");
-  return NABLA_OK;
+  return fDump(nabla, var, NULL, NULL);
 }
 
 /***************************************************************************** 

@@ -46,7 +46,6 @@
 
 
 void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  //int fakeNumParams=0;
   const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
   const astNode *global_var_node = n->children->next;
@@ -76,11 +75,12 @@ void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->called_variables=nMiddleVariableNew(nabla);
   redjob->called_variables->item=strdup("cell");
   redjob->called_variables->name=item_var_name;
-  // On annonce que c'est un job de reduction pour lancer le deuxieme etage de reduction dans la boucle
+  // On annonce que c'est un job de reduction pour
+  // lancer le deuxieme etage de reduction dans la boucle
   redjob->reduction = true;
   redjob->reduction_name = strdup(global_var_name);
 
-    // Init flush
+  // Init flush
   redjob->when_index = 0;
   redjob->whens[0] = 0.0;
   // On parse le at_single_cst_node pour le metre dans le redjob->whens[redjob->when_index-1]
@@ -97,7 +97,8 @@ void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
-__global__ void %s(const int NABLA_NB_CELLS_WARP,const int NABLA_NB_CELLS,real *global_device_shared_reduce_results,", item_var_name, global_var_name, job_name);
+__global__ void %s(const int NABLA_NB_CELLS_WARP,const int NABLA_NB_CELLS,\
+real *global_device_shared_reduce_results,", item_var_name, global_var_name, job_name);
   nprintf(nabla, NULL,"real *cell_%s){ // @ %s\n\
 \t//const double reduction_init=%e;\n\
 \tCUDA_INI_CELL_THREAD(c);\n\

@@ -45,7 +45,6 @@
    .globl ${ABI_UNDERSCORE}cuDebug_h
    .globl ${ABI_UNDERSCORE}cuError_h
    .globl ${ABI_UNDERSCORE}cuExtra_h
-   .globl ${ABI_UNDERSCORE}cuMeshs_h
    .globl ${ABI_UNDERSCORE}cuItems_h
 
 ${ABI_UNDERSCORE}cuTypes_h:
@@ -59,9 +58,6 @@ ${ABI_UNDERSCORE}cuError_h:
    .byte 0
 ${ABI_UNDERSCORE}cuExtra_h: 
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuExtra.h"
-   .byte 0   
-${ABI_UNDERSCORE}cuMeshs_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuMeshs.h"
    .byte 0   
 ${ABI_UNDERSCORE}cuItems_h: 
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/cuItems.h"

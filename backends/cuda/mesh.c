@@ -43,102 +43,10 @@
 #include "nabla.h"
 
 
-static void cuHookMesh3D(nablaMain *nabla){}
-
-// ****************************************************************************
-// * Backend CUDA - Génération de la connectivité du maillage coté header
-// ****************************************************************************
-void nLambdaHookMesh3DDeviceVariables(nablaMain *nabla){}
-
-
-// ****************************************************************************
-// * cuHookMeshPrefix
-// ****************************************************************************
-void cuHookMeshPrefix(nablaMain *nabla){
-  dbg("\n[cuHookMeshPrefix]");
-  dbg("\n[cuHookMeshPrefix] nabla->entity->libraries=0x%X",nabla->entity->libraries);
-  // Mesh structures and functions depends on the ℝ library that can be used
-  if (isWithLibrary(nabla,with_real)){
-    //cuHookMesh1D(nabla);
-  }else{
-    cuHookMesh3D(nabla);
-    //nLambdaHookMesh3DDeviceVariables(nabla);
-  }
-}
-
-
-
-
-
-/*****************************************************************************
- * Backend CUDA - Génération de la connectivité du maillage coté main
- *****************************************************************************/
-static void nLambdaHookMesh3DConnectivity(nablaMain *nabla){
-  fprintf(nabla->entity->src,"\n\n\
-/******************************************************************************\n\
- * Kernel d'initialisation du maillage à-la-SOD\n\
- ******************************************************************************/\n\
-__global__ void nabla_ini_node_coords(int *node_cell,\n\
-                                      int *node_cell_corner,\n\
-                                      int *node_cell_corner_idx,\n\
-                                      %s){\n\
-\tCUDA_INI_NODE_THREAD(n);\n\
-\tnode_cell[n+0*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+1*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+2*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+3*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+4*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+5*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+6*NABLA_NB_NODES]=-1;\n\
-\tnode_cell[n+7*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+0*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+1*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+2*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+3*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+4*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+5*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+6*NABLA_NB_NODES]=-1;\n\
-\tnode_cell_corner[n+7*NABLA_NB_NODES]=-1;\n\
-\tconst double dx=((double)(n%%NABLA_NB_NODES_X_AXIS))*NABLA_NB_NODES_X_TICK;\n\
-\tconst double dy=((double)((n/NABLA_NB_NODES_X_AXIS)%%NABLA_NB_NODES_Y_AXIS))*NABLA_NB_NODES_Y_TICK;\n\
-\tconst double dz=((double)((n/(NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS))%%NABLA_NB_NODES_Z_AXIS))*NABLA_NB_NODES_Z_TICK;\n%s\n\
-\t//printf(\"\\n\tNode #%%d @ (%%f,%%f,%%f)\",n,dx,dy,dz);\n\
-}\n\
-\n\
-__global__ void nabla_ini_cell_connectivity(int *xs_cell_node){\n\
-  CUDA_INI_CELL_THREAD(c);\n\
-  const int iX=c%%NABLA_NB_CELLS_X_AXIS;\n\
-  const int iY=((c/NABLA_NB_CELLS_X_AXIS)%%NABLA_NB_CELLS_Y_AXIS);\n\
-  const int iZ=((c/(NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS))%%NABLA_NB_CELLS_Z_AXIS);\n\
-  //const int cell_uid=iX+iY*NABLA_NB_CELLS_X_AXIS+iZ*NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS;\n \
-  const int node_bid=iX+iY*NABLA_NB_NODES_X_AXIS+iZ*NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;\n\
-  xs_cell_node[c+0*NABLA_NB_CELLS]=node_bid;\n\
-  xs_cell_node[c+1*NABLA_NB_CELLS]=node_bid +1;\n\
-  xs_cell_node[c+2*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS + 1;\n\
-  xs_cell_node[c+3*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS + 0;\n\
-  xs_cell_node[c+4*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS;\n\
-  xs_cell_node[c+5*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+1;\n\
-  xs_cell_node[c+6*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+1;\n\
-  xs_cell_node[c+7*NABLA_NB_CELLS]=node_bid + NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS+NABLA_NB_NODES_X_AXIS+0;\n}\n",
-          "real3 *node_coord",
-          "\tnode_coord[n]=real3(dx,dy,dz);");
-}
-
-
-
-// ****************************************************************************
-// * cuHookMeshCore
-// ****************************************************************************
-void cuHookMeshCore(nablaMain *nabla){
-  nLambdaHookMesh3DConnectivity(nabla);
-}
-
-
 // ****************************************************************************
 // * Backend CUDA - Allocation de la connectivité du maillage
 // ****************************************************************************
 void cuHookMeshConnectivity(nablaMain *nabla){
-  
   fprintf(nabla->entity->src,"\t// cuHookMeshConnectivity");
   
   if (isWithLibrary(nabla,with_real))

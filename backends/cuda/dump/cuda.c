@@ -56,7 +56,6 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 extern char cuTypes_h[];
 extern char cuExtra_h[];
-extern char cuMeshs_h[];
 extern char cuError_h[];
 extern char cuDebug_h[];
 extern char cuItems_h[];
@@ -78,11 +77,6 @@ void cuHeaderTypes(nablaMain *nabla){
 void cuHeaderExtra(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   fprintf(nabla->entity->hdr,dumpExternalFile(cuExtra_h));
-}
-
-void cuHeaderMeshs(nablaMain *nabla){
-  assert(nabla->entity->name!=NULL);
-  fprintf(nabla->entity->hdr,dumpExternalFile(cuMeshs_h));
 }
 
 void cuHeaderError(nablaMain *nabla){

@@ -42,12 +42,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "backends/cuda/cuda.h"
-
 extern char* cuSparseHeader(nablaMain *);
 
 
 // ****************************************************************************
-// *
+// * cuHookHeaderDump
+// ****************************************************************************
+void cuHookHeaderDump(nablaMain *nabla){
+  assert(nabla->entity->name);
+  cuHeaderTypes(nabla);
+  cuHeaderExtra(nabla);
+  cuHeaderError(nabla);
+  cuHeaderDebug(nabla);
+}
+
+
+// ****************************************************************************
+// * cuHookHeaderIncludes
 // ****************************************************************************
 void cuHookHeaderIncludes(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
@@ -92,27 +103,12 @@ cudaError_t cudaCalloc(void **devPtr, size_t size){\n\
     fprintf(nabla->entity->hdr, "%s", cuSparseHeader(nabla));
 }
 
-// ****************************************************************************
-// * cuHookHeaderDump
-// ****************************************************************************
-void cuHookHeaderDump(nablaMain *nabla){
-  assert(nabla->entity->name);
-  cuHeaderTypes(nabla);
-  cuHeaderExtra(nabla);
-  //xDumpMesh(nabla);//cuHeaderMeshs(nabla);
-  cuHeaderError(nabla);
-  //cuHeaderItems(nabla);
-  cuHeaderDebug(nabla);
-}
-
 
 
 // ****************************************************************************
-// * ENUMERATES Hooks
+// * cuHeaderEnumerates
 // ****************************************************************************
-void cuHookHeaderEnumerates(nablaMain *nabla){}
-
-void cuHeaderEnumerates(nablaMain *nabla){
+static void cuHeaderEnumerates(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 // *****************************************************************************\n\
 // * Forward enumerates\n\

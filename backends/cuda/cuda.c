@@ -157,7 +157,7 @@ const static hookPragma cuHookPragma={
 const static hookHeader cuHookHeader={
   cuHookHeaderDump,
   xHookHeaderOpen,
-  cuHookHeaderEnumerates,
+  NULL,
   xHookHeaderPrefix,
   cuHookHeaderIncludes, // cuda_runtime
   cuHookHeaderPostfix
@@ -172,8 +172,8 @@ const static hookSource cuHookSource={
   
 // Hooks pour le maillage
 const static hookMesh cuHookMesh={
-  xHookMeshPrefix, // cuHookMeshPrefix,
-  xHookMeshCore, // cuHookMeshCore
+  xHookMeshPrefix, 
+  xHookMeshCore,
   NULL
 };
   
