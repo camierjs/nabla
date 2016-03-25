@@ -146,6 +146,7 @@ const nWhatWith nOkinaStdTypedef[]={
 // * Std or Mic DEFINES
 // ****************************************************************************
 const nWhatWith nOkinaStdDefines[]={
+  {"__host__",""},
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -219,6 +220,5 @@ const char* nOkinaStdForwards[]={
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void verifCoords(void);",
   NULL
 };

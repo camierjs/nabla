@@ -558,7 +558,7 @@ void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
     if (n->next->children->tokenid==NODE) job->enum_enum='n';
     if (n->next->children->tokenid==FACE) job->enum_enum='f';
     if (n->next->children->tokenid==PARTICLE) job->enum_enum='p';
-    printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum);
+    //printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum);
   }
   if (n->children!=NULL) dfsEnumMax(nabla,job,n->children);
   if (n->next!=NULL) dfsEnumMax(nabla,job,n->next);

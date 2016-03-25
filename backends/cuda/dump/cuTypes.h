@@ -49,12 +49,12 @@ class __attribute__ ((aligned(8))) real {
   double d;
  public:
   // Constructors
-  __device__ inline real(): d(0.0){}
-  __device__ inline real(double f):d(f){}
-  __device__ inline real(double *_x):d(*_x){}
+  __device__ __host__ inline real(): d(0.0){}
+  __device__ __host__ inline real(double f):d(f){}
+  __device__ __host__ inline real(double *_x):d(*_x){}
   
   // Convertors
-  __device__ inline operator double() const { return d; }
+  __device__ __host__ inline operator double() const { return d; }
   
   // Arithmetic operators
   friend __device__ inline real operator+(const real &a, const real& b) { return __dadd_rn(a,b); }
@@ -98,11 +98,11 @@ class __attribute__ ((aligned(8))) real3 {
   real z;
  public:
   // Constructors
-  __device__ inline real3(): x(0.0), y(0.0), z(0.0){}
-  __device__ inline real3(double f):x(f), y(f), z(f){}
-  __device__ inline real3(real f):x(f), y(f), z(f){}
-  __device__ inline real3(real _x, real _y, real _z):x(_x), y(_y), z(_z){}
-  __device__ inline real3(real *_x, real *_y, real *_z):x(*_x), y(*_y), z(*_z){}
+  __device__ __host__ inline real3(): x(0.0), y(0.0), z(0.0){}
+  __device__ __host__ inline real3(double f):x(f), y(f), z(f){}
+  __device__ __host__ inline real3(real f):x(f), y(f), z(f){}
+  __device__ __host__ inline real3(real _x, real _y, real _z):x(_x), y(_y), z(_z){}
+  __device__ __host__ inline real3(real *_x, real *_y, real *_z):x(*_x), y(*_y), z(*_z){}
 
   // Arithmetic operators
   friend __device__ inline real3 operator+(const real3 &a, const real3& b) {
@@ -254,9 +254,9 @@ class __attribute__ ((aligned(8))) real3x3 {
   __attribute__ ((aligned(8))) struct real3 x;
   __attribute__ ((aligned(8))) struct real3 y;
   __attribute__ ((aligned(8))) struct real3 z;
-  __device__ inline real3x3(){ x=0.0; y=0.0; z=0.0;}
-  __device__ inline real3x3(real3 r){ x=r; y=r; z=r;}
-  __device__ inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
+  __device__ __host__ inline real3x3(){ x=0.0; y=0.0; z=0.0;}
+  __device__ __host__ inline real3x3(real3 r){ x=r; y=r; z=r;}
+  __device__ __host__ inline real3x3(real3 _x, real3 _y, real3 _z) {x=_x; y=_y; z=_z;}
   __device__ friend inline real3 opProdTensVec(real3x3 t,real3 v){
     return real3(dot3(t.x,v),dot3(t.y,v),dot3(t.z,v));
   }

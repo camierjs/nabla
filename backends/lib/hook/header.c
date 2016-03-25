@@ -162,7 +162,47 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
 // * 
 // ****************************************************************************
 void xHookHeaderPostfix(nablaMain *nabla){
-  xHeaderDefineEnumerates(nabla);
+  // Devrait être déplacé
+  fprintf(nabla->entity->hdr,"\n\n\
+// ****************************************************************************\n\
+// * nablaMshStruct\n\
+// ****************************************************************************\n\
+typedef struct nablaMshStruct{\n\
+\tint NABLA_NODE_PER_CELL;\n\
+\tint NABLA_CELL_PER_NODE;\n\
+\tint NABLA_CELL_PER_FACE;\n\
+\tint NABLA_NODE_PER_FACE;\n\
+\tint NABLA_FACE_PER_CELL;\n\
+\n\
+\tint NABLA_NB_NODES_X_AXIS;\n\
+\tint NABLA_NB_NODES_Y_AXIS;\n\
+\tint NABLA_NB_NODES_Z_AXIS;\n\
+\n\
+\tint NABLA_NB_CELLS_X_AXIS;\n\
+\tint NABLA_NB_CELLS_Y_AXIS;\n\
+\tint NABLA_NB_CELLS_Z_AXIS;\n\
+\n\
+\tint NABLA_NB_FACES_X_INNER;\n\
+\tint NABLA_NB_FACES_Y_INNER;\n\
+\tint NABLA_NB_FACES_Z_INNER;\n\
+\tint NABLA_NB_FACES_X_OUTER;\n\
+\tint NABLA_NB_FACES_Y_OUTER;\n\
+\tint NABLA_NB_FACES_Z_OUTER;\n\
+\tint NABLA_NB_FACES_INNER;\n\
+\tint NABLA_NB_FACES_OUTER;\n\
+\tint NABLA_NB_FACES;\n\
+\n\
+\tdouble NABLA_NB_NODES_X_TICK;\n\
+\tdouble NABLA_NB_NODES_Y_TICK;\n\
+\tdouble NABLA_NB_NODES_Z_TICK;\n\
+\n\
+\tint NABLA_NB_NODES;\n\
+\tint NABLA_NODES_PADDING;\n\
+\tint NABLA_NB_CELLS;\n\
+\tint NABLA_NB_NODES_WARP;\n\
+\tint NABLA_NB_CELLS_WARP;\n\
+}nablaMesh;\n");
+xHeaderDefineEnumerates(nabla);
   fprintf(nabla->entity->hdr,
           "\n\n#endif // __BACKEND_%s_H__\n",
           nabla->entity->name);

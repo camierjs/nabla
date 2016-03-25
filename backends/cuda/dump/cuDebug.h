@@ -45,7 +45,8 @@
 // * DEBUG functions
 // *****************************************************************************
 void dbg(const unsigned int flag, const char *format,...){
-  if ((flag&DBG_LVL)==0) return;
+  //if (!DBG_MODE) return;
+  if (((flag&DBG_LVL)==0)||(!DBG_MODE)) return;
   va_list args;
   va_start(args, format);
   vprintf(format, args);

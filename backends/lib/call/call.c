@@ -56,6 +56,8 @@ const nWhatWith xCallHeaderTypedef[]={
 };
 
 const nWhatWith xCallHeaderDefines[]={
+  {"__host__", ""},
+  {"__global__", ""},
   {"WARP_BIT", "0"},
   {"WARP_SIZE", "1"},
   {"WARP_ALIGN", "8"}, 

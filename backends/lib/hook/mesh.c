@@ -89,20 +89,27 @@ const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
 const int NABLA_NB_CELLS_Y_AXIS = 1;\n\
 const int NABLA_NB_CELLS_Z_AXIS = 1;\n\
 \n\
+const int NABLA_NB_FACES_X_INNER = 0;\n\
+const int NABLA_NB_FACES_Y_INNER = 0;\n\
+const int NABLA_NB_FACES_Z_INNER = 0;\n\
+const int NABLA_NB_FACES_X_OUTER = 0;\n\
+const int NABLA_NB_FACES_Y_OUTER = 0;\n\
+const int NABLA_NB_FACES_Z_OUTER = 0;\n\
+const int NABLA_NB_FACES_INNER = 0;\n\
+const int NABLA_NB_FACES_OUTER = 0;\n\
+const int NABLA_NB_FACES = 0;\n\
+\n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = 0.0;\n\
 const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
 \n\
-const int NABLA_NB_NODES      = (NABLA_NB_NODES_X_AXIS);\n\
-const int NABLA_NB_NODES_WARP = (NABLA_NB_NODES/WARP_SIZE);\n\
-const int NABLA_NODES_PADDING = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
 const int NABLA_NB_CELLS      = (NABLA_NB_CELLS_X_AXIS);\n\
+const int NABLA_NB_NODES      = (NABLA_NB_NODES_X_AXIS);\n\
+const int NABLA_NODES_PADDING = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
+\n\
+const int NABLA_NB_NODES_WARP = (NABLA_NB_NODES/WARP_SIZE);\n\
 const int NABLA_NB_CELLS_WARP = (NABLA_NB_CELLS/WARP_SIZE);\n\
-\n\
-const int NABLA_NB_FACES      = 0;\n\
-\n\
-int NABLA_NB_PARTICLES /* = NB_PARTICLES*/;\n\
-");
+const int NABLA_NB_OUTER_CELLS_WARP = 2;\n\n");
 }
 
 
@@ -153,14 +160,17 @@ const int NABLA_NB_CELLS_Z_AXIS = 1;\n\
 \n\
 const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS;\n\
 const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS;\n\
+const int NABLA_NB_FACES_Z_INNER = 0;\n\
 const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS;\n\
 const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS;\n\
+const int NABLA_NB_FACES_Z_OUTER = 0;\n\
 const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\
 const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER;\n\
 const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\
 \n\
 const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
 const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
+const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
 \n\
 const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS);\n\
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\
@@ -268,42 +278,9 @@ const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*N
 const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%1)==0)?0:1);\n\t\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n\t\
 const int NABLA_NB_NODES_WARP   = (NABLA_NB_NODES/WARP_SIZE);\n\t\
-const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
-\n\
-\tconst nablaMesh msh={\n\
-\t\tNABLA_NODE_PER_CELL,\n\
-\t\tNABLA_CELL_PER_NODE,\n\
-\t\tNABLA_CELL_PER_FACE,\n\
-\t\tNABLA_NODE_PER_FACE,\n\
-\t\tNABLA_FACE_PER_CELL,\n\
-\n\
-\t\tNABLA_NB_NODES_X_AXIS,\n\
-\t\tNABLA_NB_NODES_Y_AXIS,\n\
-\t\tNABLA_NB_NODES_Z_AXIS,\n\
-\n\
-\t\tNABLA_NB_CELLS_X_AXIS,\n\
-\t\tNABLA_NB_CELLS_Y_AXIS,\n\
-\t\tNABLA_NB_CELLS_Z_AXIS,\n\
-\n\
-\t\tNABLA_NB_FACES_X_INNER,\n\
-\t\tNABLA_NB_FACES_Y_INNER,\n\
-\t\tNABLA_NB_FACES_Z_INNER,\n\
-\t\tNABLA_NB_FACES_X_OUTER,\n\
-\t\tNABLA_NB_FACES_Y_OUTER,\n\
-\t\tNABLA_NB_FACES_Z_OUTER,\n\
-\t\tNABLA_NB_FACES_INNER,\n\
-\t\tNABLA_NB_FACES_OUTER,\n\
-\t\tNABLA_NB_FACES,\n\
-\n\
-\t\tNABLA_NB_NODES_X_TICK,\n\
-\t\tNABLA_NB_NODES_Y_TICK,\n\
-\t\tNABLA_NB_NODES_Z_TICK,\n\
-\n\
-\t\tNABLA_NB_NODES,\n\
-\t\tNABLA_NODES_PADDING,\n\
-\t\tNABLA_NB_CELLS,\n\
-\t\tNABLA_NB_NODES_WARP,\n\
-\t\tNABLA_NB_CELLS_WARP};\n\n");
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\t\
+// A verifier:\n\t\
+__attribute__((unused)) const int NABLA_NB_OUTER_CELLS_WARP = (((2*X_EDGE_ELEMS*Y_EDGE_ELEMS)+(Z_EDGE_ELEMS-2)*(2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4))/WARP_SIZE);\n");
 }
 
 // ****************************************************************************

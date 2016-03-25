@@ -48,8 +48,8 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Backend PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
-#define BACKEND_MAIN_PREFIX "\n\n\
-// ******************************************************************************\n \
+#define BACKEND_MAIN_PREFIX "\n\
+// ******************************************************************************\n\
 // * Main\n\
 // ******************************************************************************\n\
 int main(int argc, char *argv[]){\n\
@@ -85,7 +85,42 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
 // ****************************************************************************
 // * Backend PREINIT - Génération du 'main'
 // ****************************************************************************
-#define BACKEND_MAIN_PREINIT "\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n\
+#define BACKEND_MAIN_PREINIT "\
+\tconst nablaMesh msh={\n\
+\t\tNABLA_NODE_PER_CELL,\n\
+\t\tNABLA_CELL_PER_NODE,\n\
+\t\tNABLA_CELL_PER_FACE,\n\
+\t\tNABLA_NODE_PER_FACE,\n\
+\t\tNABLA_FACE_PER_CELL,\n\
+\n\
+\t\tNABLA_NB_NODES_X_AXIS,\n\
+\t\tNABLA_NB_NODES_Y_AXIS,\n\
+\t\tNABLA_NB_NODES_Z_AXIS,\n\
+\n\
+\t\tNABLA_NB_CELLS_X_AXIS,\n\
+\t\tNABLA_NB_CELLS_Y_AXIS,\n\
+\t\tNABLA_NB_CELLS_Z_AXIS,\n\
+\n\
+\t\tNABLA_NB_FACES_X_INNER,\n\
+\t\tNABLA_NB_FACES_Y_INNER,\n\
+\t\tNABLA_NB_FACES_Z_INNER,\n\
+\t\tNABLA_NB_FACES_X_OUTER,\n\
+\t\tNABLA_NB_FACES_Y_OUTER,\n\
+\t\tNABLA_NB_FACES_Z_OUTER,\n\
+\t\tNABLA_NB_FACES_INNER,\n\
+\t\tNABLA_NB_FACES_OUTER,\n\
+\t\tNABLA_NB_FACES,\n\
+\n\
+\t\tNABLA_NB_NODES_X_TICK,\n\
+\t\tNABLA_NB_NODES_Y_TICK,\n\
+\t\tNABLA_NB_NODES_Z_TICK,\n\
+\n\
+\t\tNABLA_NB_NODES,\n\
+\t\tNABLA_NODES_PADDING,\n\
+\t\tNABLA_NB_CELLS,\n\
+\t\tNABLA_NB_NODES_WARP,\n\
+\t\tNABLA_NB_CELLS_WARP};\n\
+\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n \
 \tnabla_ini_connectivity(msh,node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;

@@ -88,7 +88,6 @@ nodes{ℝ³ 𝜕x;};
   const ℝ³ X[4]={coord[0],coord[1],coord[2],coord[3]};
   printf("%c\ncell[%d]:",uid==0?'\n':' ',uid);
   printf("\n(%f,%f)->(%f,%f)->(%f,%f)->(%f,%f)",
-         uid,
          X[0].x, X[0].y,
          X[1].x, X[1].y,
          X[2].x, X[2].y,

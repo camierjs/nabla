@@ -52,37 +52,11 @@
  * Backend CUDA - 'main'\n\
  *****************************************************************************/\n\
 int main(int argc, char *argv[]){\n\
+\t// Reset device before everything\n\
+\tgpuEnum();\n\
 \t__builtin_align__(8) int iteration=1;\n\
 \tfloat alltime=0.0;\n\
-\tstruct timeval st, et;\n\
-//#warning Reduction for cells\n\
-\tconst int reduced_size=(NABLA_NB_CELLS%%CUDA_NB_THREADS_PER_BLOCK)==0?\
-(NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK):\
-(1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK);\n\
-\tdouble *host_reduce_results=(double*)malloc(reduced_size*sizeof(double));\n\
-\n\
-\tconst dim3 dimJobBlock=dim3(BLOCKSIZE,1,1);\n\
-\tconst dim3 dimNodeGrid=dim3(PAD_DIV(NABLA_NB_NODES,dimJobBlock.x),1,1);\n\
-\tconst dim3 dimCellGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
-\n\
-//#warning dimFuncBlock set for dimJobBlock\n\
-\tconst dim3 dimFuncBlock=dim3(BLOCKSIZE,1,1);\n\
-\tconst dim3 dimFuncGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
-\tgpuEnum();\n\
-\tassert((PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
-\tassert((PAD_DIV(NABLA_NB_NODES,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
-\tassert((dimJobBlock.x<=1024)); // Max threads per block:  1024 \n\
-\tprintf(\"NABLA_NB_NODES=%%d,NABLA_NB_CELLS=%%d\",\n\
-\t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\
-\t// Allocation CUDA des variables globales\n\
-\t__builtin_align__(8) real* global_deltat;\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
-\t__builtin_align__(8) int* global_iteration;\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
-\t__builtin_align__(8) real* global_time;\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
-\t__builtin_align__(8) real* global_device_shared_reduce_results;\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*reduced_size));\n"
+\tstruct timeval st, et;\n"
 // ****************************************************************************
 // * nccCudaMainPrefix
 // ****************************************************************************
@@ -98,12 +72,46 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 // * CUDA_MAIN_PREINIT pour la génération du 'main'
 // ****************************************************************************
 #define CUDA_MAIN_PREINIT "\n\
-\t//nabla_ini_node_coords<<<dimNodeGrid,dimJobBlock>>>(xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx,node_coord);\n\
-\t//nabla_ini_cell_connectivity<<<dimCellGrid,dimJobBlock>>>(xs_cell_node);\n\
-\t//nabla_set_next_prev<<<dimCellGrid,dimJobBlock>>>(xs_cell_node,xs_cell_prev,xs_cell_next,xs_node_cell,xs_node_cell_corner,xs_node_cell_corner_idx);\n\
-\t//host_set_corners();\n\
-\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell, &host_node_cell, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
-\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell_corner, &host_node_cell_corner, 8*NABLA_NB_NODES*sizeof(int), cudaMemcpyHostToDevice));\n\
+//#warning Reduction for cells\n\
+\tconst int reduced_size=(NABLA_NB_CELLS%%CUDA_NB_THREADS_PER_BLOCK)==0?\
+(NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK):\
+(1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK);\n\
+\tdouble *host_reduce_results=(double*)malloc(reduced_size*sizeof(double));\n\
+\n\
+\t// Allocation CUDA des variables globales\n\
+\t__builtin_align__(8) real* global_deltat;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
+\t__builtin_align__(8) int* global_iteration;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
+\t__builtin_align__(8) real* global_time;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
+\t__builtin_align__(8) real* global_device_shared_reduce_results;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*reduced_size));\n\
+\n\
+\tconst dim3 dimJobBlock=dim3(BLOCKSIZE,1,1);\n\
+\tconst dim3 dimNodeGrid=dim3(PAD_DIV(NABLA_NB_NODES,dimJobBlock.x),1,1);\n\
+\tconst dim3 dimCellGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
+\n\
+//#warning dimFuncBlock set for dimJobBlock\n\
+\tconst dim3 dimFuncBlock=dim3(BLOCKSIZE,1,1);\n\
+\tconst dim3 dimFuncGrid=dim3(PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x),1,1);\n\
+\tassert((PAD_DIV(NABLA_NB_CELLS,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
+\tassert((PAD_DIV(NABLA_NB_NODES,dimJobBlock.x)<65535));  // Max grid dimensions:  (65535, 65535, 65535) \n\
+\tassert((dimJobBlock.x<=1024)); // Max threads per block:  1024 \n\
+\tprintf(\"NABLA_NB_NODES=%%d,NABLA_NB_CELLS=%%d\",\n\
+\t\tNABLA_NB_NODES,NABLA_NB_CELLS);\n\
+\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(node_coord, host_node_coord, NABLA_NB_NODES*sizeof(real3), cudaMemcpyHostToDevice));\n \
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_cell_node, host_cell_node, NABLA_NB_CELLS*NABLA_NODE_PER_CELL*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_cell_next, host_cell_next, NABLA_NB_CELLS*3*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_cell_prev, host_cell_prev, NABLA_NB_CELLS*3*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_cell_face, host_cell_face, NABLA_NB_CELLS*NABLA_FACE_PER_CELL*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell, host_node_cell, NABLA_NB_NODES*NABLA_CELL_PER_NODE*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell_corner, host_node_cell_corner, NABLA_NB_NODES*NABLA_CELL_PER_NODE*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_node_cell_and_corner, host_node_cell_and_corner, NABLA_NB_NODES*2*NABLA_CELL_PER_NODE*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_face_cell, host_face_cell, NABLA_NB_FACES*NABLA_CELL_PER_FACE*sizeof(int), cudaMemcpyHostToDevice));\n\
+\tCUDA_HANDLE_ERROR(cudaMemcpy(xs_face_node, host_face_node, NABLA_NB_FACES*NABLA_NODE_PER_FACE*sizeof(int), cudaMemcpyHostToDevice));\n\
+\n\
 \t//dbgCoords();\n\
 \t//Initialisation du temps et du deltaT\n\
 \tprintf(\"\\nInitialisation du temps et du deltaT\");\n\
@@ -278,12 +286,12 @@ NABLA_STATUS cuHookMainPostfix(nablaMain *nabla){
 \tCUDA_HANDLE_ERROR(cudaFree(xs_cell_node));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell_corner));\n\
-\tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell_corner_idx));\n\
+\t//CUDA_HANDLE_ERROR(cudaFree(xs_node_cell_corner_idx));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_cell_next));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_cell_prev));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_face_cell));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(xs_face_node));\n\
-\t//CUDA_HANDLE_ERROR(cudaFree(xs_node_cell_and_corner));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(xs_node_cell_and_corner));\n\
 ");
   fprintf(nabla->entity->src, CUDA_MAIN_POSTFIX);
   fprintf(nabla->entity->src, CUDA_MAIN_GPUENUM);

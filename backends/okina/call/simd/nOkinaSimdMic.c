@@ -226,6 +226,7 @@ const nWhatWith nOkinaMicTypedef[]={
 // * MIC DEFINES
 // ****************************************************************************
 const nWhatWith nOkinaMicDefines[]={
+  {"__host__",""},
   {"integer", "Integer"},
   {"Real", "real"},
   {"Real3", "real3"},

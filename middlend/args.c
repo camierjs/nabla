@@ -387,7 +387,7 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   if (!job->is_a_function){
     const char j=job->item[0];
     const char e=job->enum_enum;
-    printf("[1;34m[nMiddleArgsDumpFromDFS] job %s, j=%c, enum_enum=%c[0m\n",job->name,j,e?e:'0');
+    dbg("[1;34m[nMiddleArgsDumpFromDFS] job %s, j=%c, enum_enum=%c[0m\n",job->name,j,e?e:'0');
     if (j=='c'){
       nprintf(nabla, NULL,"NABLA_NB_CELLS_WARP,NABLA_NB_CELLS");
       i+=2;

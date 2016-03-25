@@ -179,6 +179,7 @@ const nWhatWith nOkinaSseTypedef[]={
 // * Sse or Mic DEFINES
 // ****************************************************************************
 const nWhatWith nOkinaSseDefines[]={
+  {"__host__",""},
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
@@ -248,6 +249,5 @@ const char* nOkinaSseForwards[]={
   "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
   "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
   "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
-  "static void verifCoords(void);",
   NULL
 };

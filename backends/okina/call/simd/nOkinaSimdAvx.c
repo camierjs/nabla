@@ -195,6 +195,7 @@ const nWhatWith nOkinaAvxTypedef[]={
 // * Avx DEFINES
 // ****************************************************************************
 const nWhatWith nOkinaAvxDefines[]={
+  {"__host__",""},
   {"integer", "Integer"},
   {"real", "Real"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
