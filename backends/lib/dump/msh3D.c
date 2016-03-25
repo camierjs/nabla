@@ -55,8 +55,12 @@ __host__ static void nabla_ini_cell_node(const nablaMesh msh,
   for(int iZ=0;iZ<msh.NABLA_NB_CELLS_Z_AXIS;iZ++){
     for(int iY=0;iY<msh.NABLA_NB_CELLS_Y_AXIS;iY++){
       for(int iX=0;iX<msh.NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
-        const int cell_uid=iX + iY*msh.NABLA_NB_CELLS_X_AXIS + iZ*msh.NABLA_NB_CELLS_X_AXIS*msh.NABLA_NB_CELLS_Y_AXIS;
-        const int node_bid=iX + iY*msh.NABLA_NB_NODES_X_AXIS + iZ*msh.NABLA_NB_NODES_X_AXIS*msh.NABLA_NB_NODES_Y_AXIS;
+        const int cell_uid=iX +
+          iY*msh.NABLA_NB_CELLS_X_AXIS +
+          iZ*msh.NABLA_NB_CELLS_X_AXIS*msh.NABLA_NB_CELLS_Y_AXIS;
+        const int node_bid=iX +
+          iY*msh.NABLA_NB_NODES_X_AXIS +
+          iZ*msh.NABLA_NB_NODES_X_AXIS*msh.NABLA_NB_NODES_Y_AXIS;
         dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%dx%%d, cell_uid=%%d, node_bid=%%d",
             iCell,iX,iY,iZ,cell_uid,node_bid);
         cell_node[0*msh.NABLA_NB_CELLS+iCell] = node_bid;
@@ -112,8 +116,7 @@ void verifNextPrev(const nablaMesh msh,int *cell_prev, int *cell_next){
 __host__ static void nabla_ini_cell_next_prev(const nablaMesh msh,
                                      int *cell_prev, int *cell_next){
   dbg(DBG_INI,"\nOn associe a chaque maille ses next et prev");
-  // On met des valeurs négatives afin que le
-  // gatherk_and_zero_neg_ones puisse les reconaitre
+  // On met des valeurs négatives pour rGatherAndZeroNegOnes
   // Dans la direction X
   for (int i=0; i<msh.NABLA_NB_CELLS; ++i) {
     cell_prev[MD_DirX*msh.NABLA_NB_CELLS+i] = i-1 ;

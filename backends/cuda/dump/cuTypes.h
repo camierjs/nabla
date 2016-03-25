@@ -263,10 +263,8 @@ class __attribute__ ((aligned(8))) real3x3 {
 };
 
 
-
-
 // ****************************************************************************
-// * NEW Rgather*
+// * NEW Rgather
 // ****************************************************************************
 __device__ inline real3 rgather3k(const int a, const real3 *data){
   const double *p=(double*)data;
@@ -289,64 +287,6 @@ __device__ inline real3 rGatherAndZeroNegOnes(const int a, const int corner, con
   const double *p=(double*)data;
   if (a>=0) return real3(p[i+0],p[i+1],p[i+2]);
   return 0.0;
-}
-
-
-/******************************************************************************
- * Gather avec des real3
- ******************************************************************************/
-__device__ inline void gather3ki(const int a, real3 *data, real3 *gthr, int i){
-  const double *p=(double *)data;
-  const double value=p[3*a+i];
-  if (i==0) gthr->x=value;
-  if (i==1) gthr->y=value;
-  if (i==2) gthr->z=value;
-}
-
-__device__ inline void gather3k(const int a, real3 *data, real3 *gthr){
-  gather3ki(a, data, gthr, 0);
-  gather3ki(a, data, gthr, 1);
-  gather3ki(a, data, gthr, 2);
-}
-
-__device__ inline real gatherk_and_zero_neg_ones(const int a, real *data){
-  if (a>=0) return *(data+a);
-  return 0.0;
-}
-
-__device__ inline void gatherFromNode_k(const int a, real *data, real *gthr){
-  *gthr=gatherk_and_zero_neg_ones(a,data);
-}
-__device__ inline void gatherFromFace_k(const int a, real *data, real *gthr){
-  *gthr=gatherk_and_zero_neg_ones(a,data);
-}
-
-__device__ inline void gatherFromFace_3ki(const int a, real3 *data, real3 *gthr,int i){
-  const double *p=(double *)data;
-    const double value=(a<0)?0.0:p[3*8*a+i];
-  if (i==0) gthr->x=value;
-  if (i==1) gthr->y=value;
-  if (i==2) gthr->z=value;
-}
-__device__ inline void gatherFromFace_3k(const int a, real3 *data, real3 *gthr){
-  gatherFromFace_3ki(a,data,gthr,1);
-  gatherFromFace_3ki(a,data,gthr,2);
-  gatherFromFace_3ki(a,data,gthr,3);
-}
-__device__ inline void gatherFromNode_3kiArray8(const int a, const int corner,
-                                                real3 *data, real3 *gthr, int i){
-  const double *p=(double *)data;
-  const double value=(a<0)?0.0:p[3*8*a+3*corner+i];
-  if (i==0) gthr->x=value;
-  if (i==1) gthr->y=value;
-  if (i==2) gthr->z=value;
-}
-
-__device__ inline void gatherFromNode_3kArray8(const int a, const int corner,
-                                               real3 *data, real3 *gthr){
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 0);
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 1);
-  gatherFromNode_3kiArray8(a,corner, data, gthr, 2);
 }
 
 

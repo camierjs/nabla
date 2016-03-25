@@ -45,10 +45,9 @@
 
 #include <stdarg.h>
 
-/******************************************************************************
- * Outils de traces
- *****************************************************************************/
-
+// ****************************************************************************
+// * Outils de traces
+// ****************************************************************************
 void dbg(const unsigned int flag, const char *format, ...){
   if (!DBG_MODE) return;
   if ((flag&DBG_LVL)==0) return;
@@ -62,8 +61,6 @@ void dbg(const unsigned int flag, const char *format, ...){
 #define dbgFuncIn()  do{dbg(DBG_FUNC_IN,"\n\t > %%s",__FUNCTION__);}while(0)
 #define dbgFuncOut() do{dbg(DBG_FUNC_OUT,"\n\t\t < %%s",__FUNCTION__);}while(0)
 
-
-
 inline void dbgReal3(const unsigned int flag, real3& v){
   if (!DBG_MODE) return;
   if ((flag&DBG_LVL)==0) return;
@@ -76,7 +73,6 @@ inline void dbgReal3(const unsigned int flag, real3& v){
   printf("\n\t\t\t[%%.14f,%%.14f,%%.14f]", x[0], y[0], z[0]);
   fflush(stdout);
 }
-
 
 inline void dbgReal(const unsigned int flag, real v){
   if (!DBG_MODE) return;

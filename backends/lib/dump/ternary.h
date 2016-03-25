@@ -43,9 +43,6 @@
 #ifndef _NABLA_LIB_TERNARY_H_
 #define _NABLA_LIB_TERNARY_H_
 
-// ****************************************************************************
-// * opTernary
-// ****************************************************************************
 inline int opTernary(const bool cond,
                      const int ifStatement,
                      const int elseStatement){

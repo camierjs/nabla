@@ -43,9 +43,9 @@
 #include "nabla.h"
 
 
-/******************************************************************************
- * nprintf
- ******************************************************************************/
+// ****************************************************************************
+// * nprintf
+// ****************************************************************************
 int nprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
   int rtn;
   va_list args;
@@ -62,14 +62,14 @@ int nprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
 }
 
 
-/******************************************************************************
- * hprintf
- ******************************************************************************/
+// ****************************************************************************
+// * hprintf
+// ****************************************************************************
 int hprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
   int rtn;
   va_list args;
   if ((dbgGet()&DBG_CYC)!=0)
-    if (debug!=NULL) fprintf(nabla->entity->src, debug);
+    if (debug!=NULL) fprintf(nabla->entity->hdr, debug);
   if (format==NULL) return 0;
   va_start(args, format);
   if ((rtn=vfprintf(nabla->entity->hdr, format, args))<0)

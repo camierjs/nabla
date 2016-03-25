@@ -51,26 +51,20 @@
 // ******************************************************************************
 inline void scatterk(const int a, real *gathered, real *data){
   if (a<0) return; // Skipping to fake write
-  *(data+a)=*gathered;
+  data[a]=*gathered;
 }
 
-// *****************************************************************************
-// * Scatter for real3
-// *****************************************************************************
 inline void scatter3k(const int a, real3 *gathered, real3 *data){
   if (a<0) return; // Skipping to fake write
   double *p=(double *)data;
-  p[3*a+0]=(*gathered).x;
-  p[3*a+1]=(*gathered).y;
-  p[3*a+2]=(*gathered).z;
+  p[3*a+0]=gathered->x;
+  p[3*a+1]=gathered->y;
+  p[3*a+2]=gathered->z;
 }
 
-// *****************************************************************************
-// * Scatter for real3x3
-// *****************************************************************************
 inline void scatter3x3k(const int a, real3x3 *gathered, real3x3 *data){
   if (a<0) return; // Skipping to fake write
-  *(data+a)=*gathered;
+  data[a]=*gathered;
 }
 
 #endif //  _NABLA_LIB_SCATTER_H_

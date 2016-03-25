@@ -51,7 +51,6 @@ void xHookHeaderOpen(nablaMain *nabla){
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
-
 // ****************************************************************************
 // * xHookHeaderDump
 // ****************************************************************************
@@ -70,7 +69,6 @@ void xHookHeaderPrefix(nablaMain *nabla){
           nabla->entity->name,
           nabla->entity->name);
 }
-
 
 // ****************************************************************************
 // * ENUMERATES Work
@@ -148,7 +146,6 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
           );
 }
 
-
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
@@ -156,7 +153,6 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
   // xHeaderDefineEnumerates a été déplacé à la fin du header,
   // dans le xHookHeaderPostfix
 }
-
 
 // ****************************************************************************
 // * 

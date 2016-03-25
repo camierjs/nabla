@@ -250,6 +250,7 @@ typedef struct nablaJobStruct{
 // ****************************************************************************
 // * HOOKs DEFINEs
 // ****************************************************************************
+#define HOOK(h,f) if (nabla->hook->h->f) nabla->hook->h->f(nabla)
 #define cCALL(nabla,stuct,fct)\
   (nabla->call->stuct!=NULL)?\
   (nabla->call->stuct->fct!=NULL)?\

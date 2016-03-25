@@ -42,7 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-
 hooks* arcane(nablaMain*);
 hooks* cuda(nablaMain*);
 hooks* lambda(nablaMain*);

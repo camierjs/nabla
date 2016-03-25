@@ -97,8 +97,7 @@ void verifNextPrev(const nablaMesh msh,
 static void nabla_ini_cell_next_prev(const nablaMesh msh,
                                      int *cell_prev, int *cell_next){
   dbg(DBG_INI,"\nOn associe a chaque maille ses next et prev");
-  // On met des valeurs négatives afin que le
-  // gatherk_and_zero_neg_ones puisse les reconaitre
+  // On met des valeurs négatives pour rGatherAndZeroNegOnes
   // Dans la direction X
   for (int i=0; i<msh.NABLA_NB_CELLS; ++i) {
     cell_prev[MD_DirX*msh.NABLA_NB_CELLS+i] = i-1 ;

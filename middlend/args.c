@@ -42,10 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-
-/*****************************************************************************
- * Dump pour le header
- *****************************************************************************/
+// ****************************************************************************
+// * Dump pour le header
+// ****************************************************************************
 int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
   int number_of_parameters_here=0;
   
@@ -82,7 +81,6 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
     number_of_parameters_here+=nMiddleDumpParameterTypeList(nabla,file, n->next);
   return number_of_parameters_here;
 }
-
 
 
 // ****************************************************************************
@@ -243,6 +241,7 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
 
 
 // ****************************************************************************
+// * xsArgs
 // ****************************************************************************
 static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
   if (j=='c' and v=='n' and d=='0') return ", xs_cell_node";
@@ -262,7 +261,10 @@ static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
   assert(NULL);
   return NULL;
 }
+
+
 // ****************************************************************************
+// * xsParam
 // ****************************************************************************
 static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
   if (j=='c' and v=='n' and d=='0') return ", int *xs_cell_node";
@@ -283,6 +285,7 @@ static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
 }
 
 // ****************************************************************************
+// * isInXS
 // ****************************************************************************
 static bool isInXS(const char j,const char v,const char d,
                    const char *XS, const int m){

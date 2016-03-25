@@ -43,9 +43,8 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
 // ****************************************************************************
-// *
+// * dumpAtEndofAt
 // ****************************************************************************
 static void dumpAtEndofAt(nablaJob *job, char *token){
   const double h=atof(token);
@@ -56,7 +55,6 @@ static void dumpAtEndofAt(nablaJob *job, char *token){
       job->when_depth,
       job->whens[job->when_index]);
 }
-
 
 // ****************************************************************************
 // * nablaAtConstantParse
@@ -95,10 +93,9 @@ void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla){
   if (n->next != NULL) nMiddleAtConstantParse(job,n->next, nabla);
 }
 
-
-/*****************************************************************************
- * nablaStoreWhen
- *****************************************************************************/
+// ****************************************************************************
+// * nablaStoreWhen
+// ****************************************************************************
 void nMiddleStoreWhen(nablaJob *job,nablaMain *nabla){
   nablaJob *entry_point=job;
   dbg("\n\t\t[nablaStoreWhen] Storing when @=%.12e ",
@@ -108,9 +105,9 @@ void nMiddleStoreWhen(nablaJob *job,nablaMain *nabla){
 }
 
 
-/*****************************************************************************
- * nablaComparEntryPoints
- *****************************************************************************/
+// ****************************************************************************
+// * nablaComparEntryPoints
+// ****************************************************************************
 int nMiddleComparEntryPoints(const void *one, const void *two){
   nablaJob *first=(nablaJob*)one;
   nablaJob *second=(nablaJob*)two;
@@ -120,9 +117,9 @@ int nMiddleComparEntryPoints(const void *one, const void *two){
 }
 
 
-/*****************************************************************************
- * nablaNumberOfEntryPoints
- *****************************************************************************/
+// ****************************************************************************
+// * nablaNumberOfEntryPoints
+// ****************************************************************************
 int nMiddleNumberOfEntryPoints(nablaMain *nabla){
   nablaJob *job;;
   int i,number_of_entry_points=0;

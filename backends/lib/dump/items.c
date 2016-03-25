@@ -40,7 +40,6 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-
 #ifndef _LAMBDA_ITEMS_H_
 #define _LAMBDA_ITEMS_H_
 
@@ -52,7 +51,9 @@ bool _isOwn_(int c){
 }
 
 // aux faces
-bool _isSubDomainBoundaryOutside_(const int NABLA_NB_FACES, const int *xs_face_cell, int f){
+bool _isSubDomainBoundaryOutside_(const int NABLA_NB_FACES,
+                                  const int *xs_face_cell,
+                                  int f){
   assert(f>=0);
   assert(xs_face_cell[0*NABLA_NB_FACES+f]>=0);
   assert(xs_face_cell[1*NABLA_NB_FACES+f]<=0);

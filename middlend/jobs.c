@@ -44,10 +44,9 @@
 #include "nabla.tab.h"
 #include "backends/arcane/arcane.h"
 
-
-/***************************************************************************** 
- * Backend Generic for JOBS - New, Add, Last functions
- *****************************************************************************/
+// ****************************************************************************
+// * Backend Generic for JOBS - New, Add, Last functions
+// ****************************************************************************
 nablaJob *nMiddleJobNew(nablaEntity *entity){
   int i;
   nablaJob *job;
@@ -128,10 +127,9 @@ nablaJob *nMiddleJobFind(nablaJob *jobs,char *name){
 }
 
 
-
-/***************************************************************************** 
- * Backend Generic for JOBS - New, Add, Last functions
- *****************************************************************************/
+// ****************************************************************************
+// * Backend Generic for JOBS - New, Add, Last functions
+// ****************************************************************************
 static void actNablaJobParameterItem(astNode * n, void *current_item){
   current_item=n->children->token;
   dbg("\n\titem set to '%s' ", n->children->token);
@@ -370,7 +368,6 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if (n->children != NULL) nMiddleJobParse(n->children, job);
   if (n->next != NULL) nMiddleJobParse(n->next, job);
 }
-
 
 
 // ****************************************************************************

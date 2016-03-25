@@ -42,7 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"   
 
-
 // ****************************************************************************
 // * dumpExternalFile
 // * NABLA_LICENSE_HEADER is tied and defined in nabla.h
@@ -50,7 +49,6 @@
 static char *dumpExternalFile(char *file){
   return file+NABLA_LICENSE_HEADER;
 }
-
 
 // ****************************************************************************
 // * extern definitions from dDump.S
@@ -86,6 +84,7 @@ void xDumpHeader(nablaMain *nabla){
 // * dumpMesh
 // ****************************************************************************
 void xDumpMesh(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n");
   // On rajoute les tests 'is something'
   fprintf(nabla->entity->hdr,dumpExternalFile(items_c));
   // Et les constantes des connectivités

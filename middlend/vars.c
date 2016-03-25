@@ -43,10 +43,9 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-/*****************************************************************************
- * Gestion des variables (items)
- *****************************************************************************/
+// ****************************************************************************
+// * nMiddleVariableNew: New, Last, Add & Find
+// ****************************************************************************
 nablaVariable *nMiddleVariableNew(nablaMain *arc){
 	nablaVariable *variable;
 	variable = (nablaVariable *)malloc(sizeof(nablaVariable));
@@ -63,7 +62,6 @@ nablaVariable *nMiddleVariableNew(nablaMain *arc){
   	return variable; 
 }
 
-
 nablaVariable *nMiddleVariableAdd(nablaMain *arc, nablaVariable *variable) {
   assert(variable != NULL);
   if (arc->variables == NULL)
@@ -73,7 +71,6 @@ nablaVariable *nMiddleVariableAdd(nablaMain *arc, nablaVariable *variable) {
   return NABLA_OK;
 }
 
-
 nablaVariable *nMiddleVariableLast(nablaVariable *variables) {
    while(variables->next != NULL){
      variables = variables->next;
@@ -81,6 +78,27 @@ nablaVariable *nMiddleVariableLast(nablaVariable *variables) {
    return variables;
 }
 
+nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
+  nablaVariable *variable=variables;
+  assert(name!=NULL);
+  //dbg("\n\t[nablaVariableFind] looking for '%s'", name);
+  // Some backends use the fact it will return NULL
+  //assert(variable != NULL);  assert(name != NULL);
+  while(variable != NULL) {
+    //dbg(" ?%s", variable->name);
+    if(strcmp(variable->name, name) == 0){
+      //dbg(" Yes!");
+      return variable;
+    }
+    variable = variable->next;
+  }
+  //dbg(" Nope!");
+  return NULL;
+}
+
+// ****************************************************************************
+// * nMiddleVariableGmp: Rank, DumpNumber, NameRank, DumpRank
+// ****************************************************************************
 int nMiddleVariableGmpRank(nablaVariable *variables) {
   int rank=0;
   while(variables->next != NULL){
@@ -120,27 +138,6 @@ bool nMiddleVariableGmpDumpRank(nablaVariable *variables, int k) {
   return true;
 }
 
-
-// *************************************************************
-// * nMiddleVariableFind
-// *************************************************************
-nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
-  nablaVariable *variable=variables;
-  assert(name!=NULL);
-  //dbg("\n\t[nablaVariableFind] looking for '%s'", name);
-  // Some backends use the fact it will return NULL
-  //assert(variable != NULL);  assert(name != NULL);
-  while(variable != NULL) {
-    //dbg(" ?%s", variable->name);
-    if(strcmp(variable->name, name) == 0){
-      //dbg(" Yes!");
-      return variable;
-    }
-    variable = variable->next;
-  }
-  //dbg(" Nope!");
-  return NULL;
-}
 
 
 // *************************************************************
@@ -417,6 +414,7 @@ static void dfsAddToUsedVariables(nablaJob *job,
 }
 
 // ****************************************************************************
+// * dfsVarThisOneSpecial
 // ****************************************************************************
 nablaVariable* dfsVarThisOneSpecial(char* token, char* test, int d){
   if (strcmp(token,test)!=0) return NULL;
@@ -429,6 +427,7 @@ nablaVariable* dfsVarThisOneSpecial(char* token, char* test, int d){
 }
 
 // ****************************************************************************
+// * dfsVarThisOne
 // ****************************************************************************
 static void dfsVarThisOne(nablaMain *nabla,
                           nablaJob *job,
@@ -549,6 +548,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
 
 
 // ****************************************************************************
+// * dfsEnumMax
 // ****************************************************************************
 void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
   if (n==NULL) return;

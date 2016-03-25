@@ -164,9 +164,9 @@ static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
 }
 
 
-/*****************************************************************************
- * DFS scan for libraries
- *****************************************************************************/
+// ****************************************************************************
+// * DFS scan for libraries
+// ****************************************************************************
 void nMiddleLibraries(astNode * n, nablaEntity *entity){
   if (n->ruleid == rulenameToId("single_library"))
     nMiddleLibrariesSwitch(n,entity);
