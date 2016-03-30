@@ -87,29 +87,39 @@ void kHookReduction(struct nablaMainStruct *nabla, astNode *n){
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
   const double reduction_init = min_reduction?1.0e20:-1.0e20;
-  const char* mix = min_reduction?"in":"ax";
-  const char* min_or_max_operation = min_reduction?"<":">";
+  //const char* mix = min_reduction?"in":"ax";
+ 
   // Génération de code associé à ce job de réduction
   nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
-void %s(const int NABLA_NB_CELLS_WARP, const int NABLA_NB_CELLS,",
+#ifndef STRUCT_MIN_FUNCTOR\n\
+#define STRUCT_MIN_FUNCTOR\n\
+struct minFunctor {\n\
+\tdouble value;\n\
+\tKOKKOS_INLINE_FUNCTION minFunctor():value(1.0e20){}\n\
+\t//KOKKOS_INLINE_FUNCTION minFunctor(const minFunctor& f):value(f.value){}\n\
+\tKOKKOS_INLINE_FUNCTION minFunctor(double v):value(v){}\n\
+\tKOKKOS_INLINE_FUNCTION void operator+=(const volatile minFunctor& f) volatile {\n\
+\t\tvalue = fmin(value,f.value);\n\
+\t}\n};\n\
+#endif // STRUCT_MIN_FUNCTOR\n\
+void %s(const int NABLA_NB_CELLS_WARP,\n\t\t\t\t\t\tconst int NABLA_NB_CELLS,",
           item_var_name,
           global_var_name,job_name);
-
   
   nablaVariable *global_var=nMiddleVariableFind(nabla->variables, global_var_name);
   assert(global_var);
 
-  nprintf(nabla, NULL, "Kokkos::View<%s*>& __restrict__ %s_%s",
+  nprintf(nabla, NULL, "\n\t\t\t\t\t\tKokkos::View<%s*>& %s_%s",
           global_var->type,
           global_var->item,
           global_var->name);
   
   nablaVariable *local_var=nMiddleVariableFind(nabla->variables, item_var_name);
   assert(local_var);
-  nprintf(nabla, NULL, ",const Kokkos::View<%s*>& __restrict__ %s_%s",
+  nprintf(nabla, NULL, ",\n\t\t\t\t\t\tconst Kokkos::View<%s*>& %s_%s",
           local_var->type,
           local_var->item,
           local_var->name);
@@ -129,45 +139,21 @@ void %s(const int NABLA_NB_CELLS_WARP, const int NABLA_NB_CELLS,",
   new_local_var->item=strdup(local_var->item);
   redjob->used_variables->next=new_local_var;
 
-  //hookAddExtraParameters(nabla,redjob,&fakeNumParams);
-
-  nprintf(nabla, NULL,"){ // @ %s\n\
-\tconst double reduction_init=%e;\n\
-\tconst int threads = 1;\n\
-#if not defined(__APPLE__) and defined(__STDC_NO_THREADS__)\n\
-\treal *%s_per_thread=(real*)aligned_alloc(WARP_ALIGN,sizeof(real)*threads);\n\
-#else\n\
-\treal %s_per_thread[threads];\n\
-#endif\n\
-\t// GCC OK, not CLANG real %%s_per_thread[threads];\n\
-\tfor (int i=0; i<threads;i+=1) %s_per_thread[i] = reduction_init;\n\
-\tFOR_EACH_%s_WARP_SHARED(%s,reduction_init){\n\
-\t\tconst int tid = 0;\n\
-\t\t%s_per_thread[tid] = m%s(%s_%s[%s],%s_per_thread[tid]);\n\
-\t});\n\
-\tglobal_%s[0]=reduction_init;\n\
-\tfor (int i=0; i<threads; i+=1){\n\
-\t\tconst Real real_global_%s=global_%s[0];\n\
-\t\tglobal_%s[0]=(ReduceM%sToDouble(%s_per_thread[i])%sReduceM%sToDouble(real_global_%s))?\n\
-\t\t\t\t\t\t\t\t\tReduceM%sToDouble(%s_per_thread[i]):ReduceM%sToDouble(real_global_%s);\n\
-\t}\n\
-#if not defined(__APPLE__) and defined(__STDC_NO_THREADS__)\n\
-\tdelete [] %s_per_thread;\n\
-#endif\n}\n\n",
-          at_single_cst_node->token, // @ %s
-          reduction_init,            // reduction_init=%e
-          global_var_name, // %s_per_thread
-          global_var_name, // %s_per_thread
-          global_var_name, // %s_per_thread
+  nprintf(nabla, NULL,"){\n\
+\tminFunctor mix=%e;\n\
+\tKokkos::parallel_reduce(NABLA_NB_%sS, KOKKOS_LAMBDA (const int i, minFunctor& lmix) {\n\
+\t//const double val=%s_%s[i];\n\
+\t//printf(\"\\n\\tbefore lmix=%%f, val=%%f\",lmix.value,val);\n\
+\tminFunctor tmp(%s_%s[i]);\n\
+\tlmix+=tmp;\n\
+\t//printf(\"\\n\\tafter lmix=%%f\",lmix.value);\n\
+\t}, mix);\n\
+\t%s_%s[0]=mix.value;\n}\n",
+          reduction_init,
           (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,mix, // %s_per_thread[tid] & m%s
-          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
-          item_var_name,
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
-          global_var_name,
-          global_var_name,global_var_name,global_var_name, // global_%s & real_global_%s & global_%s
-          global_var_name,mix,global_var_name,min_or_max_operation,mix,global_var_name,
-          mix,global_var_name,mix,global_var_name,
-          global_var_name);  
+          local_var->item, local_var->name,
+          //mix,
+          local_var->item, local_var->name,
+          global_var->item, global_var->name
+          );
 }

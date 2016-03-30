@@ -151,6 +151,6 @@ NABLA_STATUS kHookMainPreInit(nablaMain *nabla){
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"
 NABLA_STATUS kHookMainPostfix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_POSTFIX);
-  fprintf(nabla->entity->src, "\n\t//Kokkos::finalize();");
+  fprintf(nabla->entity->src, "\n\t#warning no Kokkos::finalize();");
   return NABLA_OK;
 }
