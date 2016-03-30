@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Dump pour le header
 // ****************************************************************************
-int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode * n){
+int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode *n){
   int number_of_parameters_here=0;
   
   // Si on  a pas eu de parameter_type_list, on a rien à faire
@@ -110,29 +110,41 @@ void nMiddleDfsForCalls(nablaMain *nabla,
 
 // *****************************************************************************
 // * nMiddleFunctionDumpFwdDeclaration
+// * On revient des hooks pour faire ceci
 // *****************************************************************************
 void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
                                        nablaJob *fct,
-                                       astNode *nParams,
+                                       astNode *n,
                                        const char *namespace){
-  // Sinon, on remplit la ligne du hdr
+  int i=0;
+  
+  // On remplit la ligne du hdr
   hprintf(nabla, NULL, "\n%s %s %s%s(",
           nabla->hook->call->entryPointPrefix(nabla,fct),
           fct->return_type,
           namespace?"Entity::":"",
           fct->name);
+   
   // On va chercher les paramètres standards pour le hdr
-  nMiddleDumpParameterTypeList(nabla,nabla->entity->hdr, nParams);
-  
+  i=nMiddleDumpParameterTypeList(nabla,nabla->entity->hdr,n);
+
   // Dunp des variables du job dans le header
   nablaVariable *var=fct->used_variables;
-  for(int i=0;var!=NULL;var=var->next,i+=1)
-    hprintf(nabla, NULL, "%s%s %s* %s_%s",
+  for(;var!=NULL;var=var->next,i+=1)
+    hprintf(nabla, NULL, "%s%s%s*%s %s_%s",
             (i==0)?"":",",
-            (var->in&&!var->out)?"/*const*/":"",
+            cHOOKn(nabla,vars,idecl),
+            //(var->in&&!var->out)?"/*in*/":"",
             var->type,
+            cHOOKn(nabla,vars,odecl),
             var->item, var->name);
   
+  //printf("[1;34m[dfsExit] job %s exits? %s[m\n",fct->name, fct->exists?"yes":"no");
+
+  if (fct->exists)
+    hprintf(nabla, NULL,"%sconst int hlt_level, bool* hlt_exit",
+            i>0?",":"");
+   
   hprintf(nabla, NULL, ");");
 }
 
@@ -264,20 +276,51 @@ static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
 
 
 // ****************************************************************************
+// * iRTNo
+// ****************************************************************************
+static char* iRTNo(nablaMain *nabla,
+                   const char *type, const char *var){
+  char* dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
+  sprintf(dest,", %s%s%s %s",
+          cHOOKn(nabla,vars,idecl),
+          type,
+          cHOOKn(nabla,vars,odecl),
+          var);
+  return strdup(dest);
+}
+// ****************************************************************************
+// * iRTN2o
+// ****************************************************************************
+static char* iRTN2o(nablaMain *nabla,
+                    const char *type, const char *var,
+                    const char *type2, const char *var2){
+  char* dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
+  sprintf(dest,", %s%s%s %s, %s%s%s %s",
+          cHOOKn(nabla,vars,idecl),type,
+          cHOOKn(nabla,vars,odecl),var,
+          cHOOKn(nabla,vars,idecl),type2,
+          cHOOKn(nabla,vars,odecl),var2);
+  return strdup(dest);
+}
+
+
+// ****************************************************************************
 // * xsParam
 // ****************************************************************************
 static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return ", int *xs_cell_node";
-  if (j=='c' and v=='f' and d=='0') return ", int *xs_cell_face";
-  if (j=='c' and v=='x' and d=='0') return ", int *xs_cell_prev";
-  if (j=='c' and v=='x' and d=='1') return ", int *xs_cell_next";
+  if (j=='c' and v=='n' and d=='0') return iRTNo(nabla,"int*","xs_cell_node");
+  if (j=='c' and v=='f' and d=='0') return iRTNo(nabla,"int*","xs_cell_face");
+  if (j=='c' and v=='x' and d=='0') return iRTNo(nabla,"int*","xs_cell_prev");
+  if (j=='c' and v=='x' and d=='1') return iRTNo(nabla,"int*","xs_cell_next");
 
-  if (j=='n' and v=='c' and d=='0') return ", int *xs_node_cell";
-  if (j=='n' and v=='f' and d=='0') return ", int *xs_node_face";
-  if (j=='n' and v=='c' and d=='1') return ", int *xs_node_cell, int *xs_node_cell_corner";
+  if (j=='n' and v=='c' and d=='0') return iRTNo(nabla,"int*","xs_node_cell");
+  if (j=='n' and v=='f' and d=='0') return iRTNo(nabla,"int*","xs_node_face");
+  if (j=='n' and v=='c' and d=='1') return iRTN2o(nabla,
+                                                  "int*","xs_node_cell",
+                                                  "int*","xs_node_cell_corner");
   
-  if (j=='f' and v=='n' and d=='0') return ", int *xs_face_node";
-  if (j=='f' and v=='c' and d=='0') return ", int *xs_face_cell";
+  if (j=='f' and v=='n' and d=='0') return iRTNo(nabla,"int*","xs_face_node");
+  if (j=='f' and v=='c' and d=='0') return iRTNo(nabla,"int*","xs_face_cell");
   
   nprintf(nabla, NULL,"/*xsParam, error!*/");
   assert(NULL);
@@ -304,6 +347,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  
 
   //if (numParams==0){ // permet de ne pas rajouter pour les job à-là 'dumpSolution'
   {
@@ -345,14 +389,16 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
 
   // Dump des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
-    nprintf(nabla, NULL, "%s%s %s* %s_%s",//__restrict__
+    nprintf(nabla, NULL, "%s%s%s*%s %s_%s",//__restrict__
             (i==0)?"":",",
-            (var->in&&!var->out)?"":"",//const
+            //(var->in&&!var->out)?"":"",//const
+            cHOOKn(nabla,vars,idecl),
             // Si on est en 1D ou 2D et qu'on a un real3,
             // c'est qu'on joue peut-être avec les coords? => on force à real
             (strncmp(var->type,"real3",5)==0&&dim1D)?"real":
             (strncmp(var->type,"real3x3",7)==0&&dim2D)?"real3x3":
             (strncmp(var->type,"real3",5)==0&&dim2D)?"real3":var->type,
+            cHOOKn(nabla,vars,odecl),
             var->item,var->name);
 
   // Dump des XS des variables du job
@@ -375,6 +421,12 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     nXS+=1;
   }
   free(XS);
+
+  if (job->is_a_function && job->exists){
+    nprintf(nabla, NULL,"%sconst int hlt_level, bool* hlt_exit",i==0?"":",");
+    numParams+=2;
+  }
+
 }
 
 
@@ -386,7 +438,7 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   nablaVariable *var;
   int nXS=0;
   char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
-  
+
   if (!job->is_a_function){
     const char j=job->item[0];
     const char e=job->enum_enum;
@@ -446,4 +498,7 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
     nXS+=1;
   }
   free(XS);
+
+  if (job->exists)
+    nprintf(nabla, NULL,"%shlt_level,hlt_exit",i==0?"":",");
 }

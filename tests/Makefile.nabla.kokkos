@@ -5,24 +5,17 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 SIMD = std
 PARALLEL = seq
 
-BYFL_FLAGS  = #-bf-verbose -bf-vectors #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
+KOKKOS_DEVICES = "OpenMP"
+KOKKOS_ARCH = "HSL"
+include /usr/local/kokkos/Makefile.kokkos
 
-SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall -DNO_SSE2 -mno-avx 
+SIMD_std_FLAGS = -std=c++11 -O2 -Wall -DNO_SSE2
 
 LOG = -t #-v $(TGT).log
 
-PARALLEL_omp_FLAGS = -fopenmp
-PARALLEL_cilk_FLAGS = -fcilkplus
-
 CXX = ${CMAKE_CXX_COMPILER}
-#CXX=/usr/local/bin/bf-clang++
-#CXX = mpc_g++
-CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
-LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
-LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
-# A mettre lors du configure
-LIB_HYPRE = ${HYPRE_LIB}
-LIB_MPI = 
+
+CFLAGS = $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -37,25 +30,21 @@ export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS
 all:$(TGT) $(NABLA) 
 
 $(TGT).cc: $(TGT_FILE) $(NABLA)
-	$(NABLA) $(LOG) --kokkos $(TGT) --std --$(PARALLEL) -i $(TGT_FILE) #--$(COLORS)
+	$(NABLA) $(LOG) --kokkos $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
 
-$(TGT).o:$(TGT).cc $(TGT_FILE)
+$(TGT).o: $(KOKKOS_LINK_DEPENDS) $(KOKKOS_CPP_DEPENDS) $(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-#@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI)
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
-#	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
 	./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
 	./$(TGT)_$(MESH)_$(PARALLEL)
 
 #############

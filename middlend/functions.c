@@ -302,7 +302,9 @@ void nMiddleFunctionFill(nablaMain *nabla,
   dbg("\n\t[nablaJobFill] Now dfsVariables...");
   dfsVariables(nabla,fct,n,false);
   dfsVariablesDump(nabla,fct,n);
-  
+  // Scan DFS pour récupérer les exit
+  dfsExit(nabla,fct,n);
+
   // Récupération de la liste des paramètres
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
   nParams=dfsFetch(n->children,rulenameToId("parameter_type_list"));

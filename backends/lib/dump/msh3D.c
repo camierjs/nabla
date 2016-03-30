@@ -549,7 +549,7 @@ __host__ static void nabla_ini_node_coord(const nablaMesh msh,
     x=set(xOf7(msh,n+7), xOf7(msh,n+6), xOf7(msh,n+5), xOf7(msh,n+4), xOf7(msh,n+3), xOf7(msh,n+2), xOf7(msh,n+1), xOf7(msh,n));
     y=set(yOf7(msh,n+7), yOf7(msh,n+6), yOf7(msh,n+5), yOf7(msh,n+4), yOf7(msh,n+3), yOf7(msh,n+2), yOf7(msh,n+1), yOf7(msh,n));
     z=set(zOf7(msh,n+7), zOf7(msh,n+6), zOf7(msh,n+5), zOf7(msh,n+4), zOf7(msh,n+3), zOf7(msh,n+2), zOf7(msh,n+1), zOf7(msh,n));
-#elif __AVX__ || __AVX2__
+#elif (__AVX__ || __AVX2__) && !defined(NO_SSE2)
     x=set(xOf7(msh,n+3), xOf7(msh,n+2), xOf7(msh,n+1), xOf7(msh,n));
     y=set(yOf7(msh,n+3), yOf7(msh,n+2), yOf7(msh,n+1), yOf7(msh,n));
     z=set(zOf7(msh,n+3), zOf7(msh,n+2), zOf7(msh,n+1), zOf7(msh,n));

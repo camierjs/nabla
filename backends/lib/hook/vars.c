@@ -275,10 +275,6 @@ void xHookVariablesPrefix(nablaMain *nabla){
 // ********************************************************\n\
 // * xHookVariablesPrefix\n\
 // ********************************************************");
-/*  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
-    if (genericVariable(nabla, var, witch2func(VARIABLES_DECLARATION))==NABLA_ERROR)
-      exit(NABLA_ERROR|fprintf(stderr, "\n[variables] Error with variable %s\n", var->name));
-      }*/
   options(nabla);
 }
 

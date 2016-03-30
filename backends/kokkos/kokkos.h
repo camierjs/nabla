@@ -43,6 +43,28 @@
 #ifndef _NABLA_KOKKOS_HOOK_H_
 #define _NABLA_KOKKOS_HOOK_H_
 
+void kHookHeaderDump(nablaMain*);
+
+char *kParallelIncludes(void);
+
+void kHookHeaderIncludes(nablaMain*);
+void kHookHeaderPostfix(nablaMain*);
+
+char* kHookVarDeclPrefix(nablaMain*);
+char* kHookVarDeclPostfix(nablaMain*);
+
+NABLA_STATUS kHookMainPrefix(nablaMain*);
+NABLA_STATUS kHookMainPreInit(nablaMain*);
+NABLA_STATUS kHookMainPostfix(nablaMain*);
+
+void kHookVariablesPrefix(nablaMain*);
+void kHookVariablesMalloc(nablaMain*);
+void kHookVariablesFree(nablaMain*);
+
+void kHookReduction(nablaMain*,astNode*);
+
+char* kHookEoe(nablaMain*); 
+
 const hooks* kokkos(nablaMain*);
 
 #endif // _NABLA_KOKKOS_HOOK_H_

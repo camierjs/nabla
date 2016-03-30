@@ -167,7 +167,8 @@ const hookGrammar gram={
   xHookReduction,
   NULL,
   NULL,
-  xHookDfsVariable
+  xHookDfsVariable,
+  NULL
 };
 
 const hookCall call={
@@ -236,7 +237,9 @@ const static hookVars vars={
   xHookVariablesInit,
   xHookVariablesPrefix,
   xHookVariablesMalloc,
-  xHookVariablesFree
+  xHookVariablesFree,
+  NULL,
+  NULL
 };
 
 const static hookMain mains={

@@ -281,7 +281,10 @@ static void xHookTurnTokenToVariableForFaceJob(nablaMain *nabla,
     nprintf(nabla, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] FACES job xHookTurnTokenToVariableForFaceJob\n"));
+  default:
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\n[ncc] FACES job xHookTurnTokenToVariableForFaceJob\n"));
   }
 }
 
@@ -322,7 +325,10 @@ static void xHookTurnTokenToVariableForParticleJob(nablaMain *nabla,
     nprintf(nabla, "/*GlobalVar*/", "%s_%s[0]", var->item, var->name);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\nPARTICLE job xHookTurnTokenToVariableForParticleJob\n"));
+  default:
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\nPARTICLE job xHookTurnTokenToVariableForParticleJob\n"));
   }
 }
 
@@ -360,7 +366,10 @@ static void xHookTurnTokenToVariableForStdFunction(nablaMain *nabla,
     nprintf(nabla, "/*ParticleVar*/", NULL);
     break;
   }
-  default:exit(NABLA_ERROR|fprintf(stderr, "\n[ncc] StdJob xHookTurnTokenToVariableForStdFunction\n"));
+  default:
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\n[ncc] StdJob xHookTurnTokenToVariableForStdFunction\n"));
   }
 }
 

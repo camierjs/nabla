@@ -566,6 +566,21 @@ void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
 
 
 // ****************************************************************************
+// * dfsExit
+// ****************************************************************************
+void dfsExit(nablaMain *nabla, nablaJob *job, astNode *n){
+  if (n==NULL) return;  
+  if (n->ruleid==rulenameToId("nabla_system")
+      && (n->children->tokenid==EXIT)){
+    job->exists=true;
+    //printf("[1;33m[dfsExit] job %s exits[m\n",job->name);
+  }
+  if (n->children!=NULL) dfsExit(nabla,job,n->children);
+  if (n->next!=NULL) dfsExit(nabla,job,n->next);
+}
+
+
+// ****************************************************************************
 // * inout
 // ****************************************************************************
 static char* inout(const nablaVariable *var){

@@ -87,6 +87,7 @@ typedef struct hookGrammarStruct{
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*); // jobs
   bool (*dfsVariable)(void); // jobs, functions
+  char* (*eoe)(struct nablaMainStruct*); // jobs
 } hookGrammar;
 
 
@@ -151,6 +152,8 @@ typedef struct hookVarsStruct{
   void (*prefix)(struct nablaMainStruct *); // animate
   void (*malloc)(struct nablaMainStruct *); // animate
   void (*free)(struct nablaMainStruct *); // animate
+  char* (*idecl)(struct nablaMainStruct *); // args
+  char* (*odecl)(struct nablaMainStruct *); // args
 } hookVars;
 
 

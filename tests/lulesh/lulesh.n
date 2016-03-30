@@ -178,7 +178,7 @@ void ini(void) @ -10.0{
   coord *= (option_chaos)?option_chaos_seed:1.0;
   //const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   //coord = (option_chaos)?chaos:1.0;
-  //debug()<<"coord="<<coord;
+  //info()<<"coord="<<coord;
   //printf("\ncoord[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
 }
 /*nodes void dumpCorners(void)@-12.0{
@@ -187,8 +187,10 @@ void ini(void) @ -10.0{
     if (corner==-1) continue;
     if (uid==31) printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,node_cell_corner[8*n+i],node_cell[8*n+i]);
   }
-}*/
+  }*/
 
+
+  
 // ****************************************************************************
 // * Set up boundary condition information
 // * Set up elemement connectivity information
@@ -230,6 +232,7 @@ void ini(void) @ -10.0{
 }
 
 
+
 // ****************************************************************************
 // * Cells initialization
 // ****************************************************************************
@@ -266,6 +269,7 @@ void ini(void) @ -10.0{
 // ****************************************************************************
 // * Compute part @ ]+0,+∞[
 // ****************************************************************************
+
 
 
 // ****************************************************************************
@@ -332,7 +336,7 @@ void timeIncrement(void) @ 0.1 {
   Σ_FaceNormal(B,4,7,6,5,x);
   ∀ node cForce = -sig*B[n];
   //printf("\n@0.3 cForce[%d]=(%.21e,%.21e,%.21e)",uid,cForce.x,cForce.y,cForce.z);
-}
+  }
 
 ∀ nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   ℝ³ Σ=0.0;
@@ -625,14 +629,6 @@ void timeIncrement(void) @ 0.1 {
   phizeta = (phizeta > monoq_max_slope )?monoq_max_slope;
 }
 
-/*void calcMonotonicQForElems(void)@ 4.7{
-  //in (cell elemBC, cell delv_xi, cell delv_eta, cell delv_zeta)
-  //out (cell phixi, cell phieta, cell phizeta)@ 4.7{
-  calcMonotonicQForElemsByDirectionX(MD_DirX);
-  calcMonotonicQForElemsByDirectionY(MD_DirY);
-  calcMonotonicQForElemsByDirectionZ(MD_DirZ);
-  }*/
-
 ∀ cells void calcMonotonicQForElemsQQQL(void)
   in (cell vdov, cell elemMass, cell volo, cell vnew,
       cell delx_xi, cell delv_eta, cell delx_eta,
@@ -664,19 +660,6 @@ void timeIncrement(void) @ 0.1 {
   //ok printf("\n[#%02d] ql=%.21e, qq=%.21e",uid, ql,qq);
 }
 
-
-// ****************************************************************************
-// * The routine CalcQForElems() calculates the artificial viscosity term q
-// * for each element. The calculation is partitioned into two parts.
-// * CalcQForElems
-// ****************************************************************************
-/*∀ cells void calcQForElemsExcessiveArtificialViscosityTest(void) in (cell q) {//@ 4.8{
-  // Don't allow excessive artificial viscosity
-  //if (q>=option_qstop){
-    //debug()<<"calcQForElemsExcessiveArtificialViscosityTest!";
-    //fatal("calcQForElemsExcessiveArtificialViscosityTest", "q > option_qstop");
-  //}
-  }*/
 
 
 // ****************************************************************************
@@ -1005,19 +988,10 @@ inline ℝ computeSoundSpeed(const ℝ c,//pbvc
 // * is the minimum over all element values.
 // * The constraints are applied during the computation of δt for the next time step.
 // ****************************************************************************
-//void calcCourantConstraints(void) @ 12.1{
-//  const ℝ crnt=calcCourantConstraintForElems(1.0e+20);
-//  δt_courant <?= (crnt);  // MIN_ASSIGN
-//  }
-
 // Cells min reduction
 ∀ cells δt_courant <?= δt_cell_courant @ 12.11;
 ∀ cells δt_hydro   <?= δt_cell_hydro   @ 12.22;
 
-//void calcHydroTimeConstraints(void) @ 12.2{
-//  const ℝ hdr=calcHydroConstraintForElems(1.0e+20);
-//  δt_hydro <?= (hdr); // MIN_ASSIGN
-//  }
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
   //debug()<<"\tdomain.dtcourant()="<<δt_courant;
@@ -1025,6 +999,7 @@ void dumpTimeConstraintsForElems(void) @ 12.3{
   //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
   //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }
+
 
 
 // ****************************************************************************

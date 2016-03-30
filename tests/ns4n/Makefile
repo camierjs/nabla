@@ -1,10 +1,12 @@
-TGT = ahosla
+TGT = glcNxtStp2en
+#ahosla
 #glcNxtStp2
+#glcNxtStp2en (43,-35) (78,-0)
 
 ZOOM = 16 # 5 is good
 #QUALITY = 100
 
-TAIL = 43 # 43 pour enlever header CeCILL
+TAIL = 78 # 43 pour enlever header CeCILL
 HEAD = -0 # -0 pour tout
 
 EMACS_FLAGS = --no-site-lisp --no-init-file --no-site-file
@@ -18,11 +20,12 @@ all:
 # Now wkhtmltoimage html to /tmp/png file
 	wkhtmltoimage $(HTM2IMG_FLAGS) /tmp/$(TGT).html /tmp/$(TGT).png
 # convert trim & repage
-	convert -verbose -trim +repage /tmp/$(TGT).png /tmp/$(TGT)_trimed.pdf
+	convert -verbose -trim +repage /tmp/$(TGT).png /tmp/$(TGT)_trimed.png
+#	convert -verbose -trim +repage /tmp/$(TGT).png /tmp/$(TGT)_trimed.pdf
 # convert strip & synchronize /tmp/pdf to here
-	convert -verbose -strip -synchronize /tmp/$(TGT)_trimed.pdf $(TGT).pdf
+#	convert -verbose -strip -synchronize /tmp/$(TGT)_trimed.pdf $(TGT).pdf
 # Cleanup
-	\rm -rf /tmp/$(TGT).png /tmp/$(TGT)*.pdf
+# 	\rm -rf /tmp/$(TGT).png /tmp/$(TGT)*.pdf
 cln:
 	\rm -rf *.html
 

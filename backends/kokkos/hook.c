@@ -40,83 +40,85 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LIB_HOOK_H_
-#define _NABLA_LIB_HOOK_H_
-bool xHookSwitchForall(astNode *n, nablaJob *job);
-bool xHookSwitchAleph(astNode *n, nablaJob *job);
+#include "nabla.h"
 
-// forall
-char* xHookForAllDump(nablaJob*);
-char* xHookForAllItem(nablaJob*,const char,const char,char);
-char* xHookForAllPostfix(nablaJob*);
+extern char kokkos_dump_h[];
 
-// token
-void xHookSwitchToken(astNode*, nablaJob*);
-nablaVariable* xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void xHookTurnTokenToOption(nablaMain*,nablaOption*);
-void xHookSystem(astNode*,nablaMain*,const char,char);
-void xHookIteration(nablaMain*);
-void xHookExit(nablaMain*,nablaJob*);
-void xHookTime(nablaMain*);
-void xHookFatal(nablaMain*);
-void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
+// ****************************************************************************
+// * kHookHeaderDump
+// ****************************************************************************
+void kHookHeaderDump(nablaMain *nabla){
+  xHookHeaderDump(nabla);
+  fprintf(nabla->entity->hdr,kokkos_dump_h+NABLA_LICENSE_HEADER);
+ }
 
-// gram
-void xHookReduction(nablaMain*,astNode*);
-bool xHookDfsVariable(void);
+// ****************************************************************************
+// * kHookHeaderIncludes
+// ****************************************************************************
+void kHookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+#include <cstdio>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+#include <iostream>\n\
+#include <assert.h>\n\
+#include <sys/time.h>\n\
+#include <Kokkos_Core.hpp>\n\
+using namespace std;\n\
+");
+  nMiddleDefines(nabla,nabla->call->header->defines);
+  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
+  nMiddleForwards(nabla,nabla->call->header->forwards);
+}
+// ****************************************************************************
+// * 
+// ****************************************************************************
+void kHookHeaderPostfix(nablaMain *nabla){
+  xHookMeshStruct(nabla);
 
-// call
-void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
-void xHookAddArguments(nablaMain*,nablaJob*);
-char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
-void xHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
 
-// xyz
-char* xHookPrevCell(int);
-char* xHookNextCell(int);
-char* xHookSysPostfix(void);
+  fprintf(nabla->entity->hdr,"\n\n\
+// *********************************************************\n\
+// * Forward enumerates\n\
+// *********************************************************\n\
+#define FOR_EACH_PARTICLE(p)\\\n\
+\tKokkos::parallel_for(NABLA_NB_PARTICLES, KOKKOS_LAMBDA (const int p)\n \
+#define FOR_EACH_PARTICLE_WARP FOR_EACH_PARTICLE\n\
+\n\
+#define FOR_EACH_CELL(c) Kokkos::parallel_for(NABLA_NB_CELLS, KOKKOS_LAMBDA (const int c)\n\
+#define FOR_EACH_CELL_WARP FOR_EACH_CELL\n\
+#define FOR_EACH_CELL_SHARED(c,local) FOR_EACH_CELL(c)\n\
+#define FOR_EACH_CELL_WARP_SHARED(c,local) FOR_EACH_CELL(c)\n\
+\n\
+#define FOR_EACH_NODE_MSH(n) for(int n=0;n<msh.NABLA_NB_NODES;n+=1)\n\
+#define FOR_EACH_NODE(n)\\\n\
+\tKokkos::parallel_for(NABLA_NB_NODES, KOKKOS_LAMBDA (const int n)\n\
+#define FOR_EACH_NODE_WARP FOR_EACH_NODE\n\
+#define FOR_EACH_NODE_CELL(c)\
+ for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
+#define FOR_EACH_NODE_CELL_MSH(c)\
+ for(int c=0,nc=msh.NABLA_NODE_PER_CELL*n;c<msh.NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
+\n\
+#define FOR_EACH_FACE(f) Kokkos::parallel_for(NABLA_NB_FACES, KOKKOS_LAMBDA (const int f)\n\
+#define FOR_EACH_FACE_WARP FOR_EACH_FACE\n\
+\n");  
+  fprintf(nabla->entity->hdr,
+          "\n\n#endif // __BACKEND_%sH__\n",
+          nabla->entity->name);
+}
 
-// header
-void xHookHeaderDump(nablaMain*);
-void xHookHeaderOpen(nablaMain*);
-void xHookHeaderDefineEnumerates(nablaMain*);
-void xHookHeaderPrefix(nablaMain*);
-void xHookHeaderIncludes(nablaMain*);
-void xHookHeaderPostfix(nablaMain*);
 
-// source
-void xHookSourceOpen(nablaMain*);
-void xHookSourceInclude(nablaMain*);
-char* xHookSourceNamespace(nablaMain*);
+// ****************************************************************************
+// * kParallelIncludes
+// ****************************************************************************
+char *kParallelIncludes(void){
+  return "\n//kParallelIncludes\n";
+}
 
-// mesh
-void xHookMeshPrefix(nablaMain*);
-void xHookMesh1DConnectivity(nablaMain*);
-void xHookMesh2DConnectivity(nablaMain*);
-void xHookMesh3DConnectivity(nablaMain*,const char*);
-void xHookMesh1D(nablaMain*);
-void xHookMesh2D(nablaMain*);
-void xHookMesh3D(nablaMain*);
-void xHookMeshFreeConnectivity(nablaMain*);
-void xHookMeshCore(nablaMain*);
-void xHookMeshPostfix(nablaMain*);
-void xHookMeshStruct(nablaMain*);
 
-// vars
-void xHookVariablesInit(nablaMain*);
-void xHookVariablesPrefix(nablaMain*);
-void xHookVariablesMalloc(nablaMain*);
-void xHookVariablesFree(nablaMain*);
-
-// main
-NABLA_STATUS xHookMainPrefix(nablaMain*);
-NABLA_STATUS xHookMainPreInit(nablaMain*);
-NABLA_STATUS xHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS xHookMainVarInitCall(nablaMain*);
-NABLA_STATUS xHookMainHLT(nablaMain*);
-NABLA_STATUS xHookMainPostInit(nablaMain*);
-NABLA_STATUS xHookMainPostfix(nablaMain*);
-
-#endif // _NABLA_LIB_HOOK_H_
- 
+// ****************************************************************************
+// * kHookEoe - End Of Enumerate
+// ****************************************************************************
+char* kHookEoe(nablaMain* nabla){
+  return ");";
+}

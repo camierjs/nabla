@@ -61,8 +61,8 @@ int main(int argc, char *argv[]){\n\
 \telse\n\
 \t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
 \t// Initialisation des swirls\n\
-\thlt_level=0;\n\
-\thlt_exit=(bool*)calloc(64,sizeof(bool));\n\
+\tint hlt_level=0;\n\
+\tbool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
@@ -126,7 +126,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;
   dbg("\n[hookMainPreInit]");
   
-  fprintf(nabla->entity->src, "\n\n\t//BACKEND_MAIN_PREINIT");
+  fprintf(nabla->entity->src, "\n\n\t// BACKEND_MAIN_PREINIT");
 
   if (isWithLibrary(nabla,with_real))
     xHookMesh1DConnectivity(nabla);

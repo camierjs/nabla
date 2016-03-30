@@ -72,6 +72,7 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->forall_item='\0';
   job->reduction=false;
   job->swirl_index=0;
+  job->exists=false;
    {// Outils de parsing
     job->parse.left_of_assignment_operator=false;
     job->parse.turnBracketsToParentheses=false;
@@ -419,8 +420,8 @@ void nMiddleJobFill(nablaMain *nabla,
       set);
   //dbg("\n\t// **********************************************************************");
   
-  // Scan DFS pour récuérer les in/inout/out
-  // Et on dump dans le log les tokens de ce job
+  // Scan DFS pour récuérer les in/inout/out,
+  //      on dump dans le log les tokens de ce job
   dbg("\n\t[nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
   dfsEnumMax(nabla,job,n);
@@ -540,7 +541,7 @@ void nMiddleJobFill(nablaMain *nabla,
   nMiddleJobParse(n,job);
 
   if (!job->parse.got_a_return)
-    nprintf(nabla, NULL, "}");// de l'ENUMERATE
+    nprintf(nabla, NULL, "}%s",cHOOKn(nabla,grammar,eoe));// de l'ENUMERATE
   
   nprintf(nabla, NULL, "\n}\n");// du job, on rajoute un \n pour les preproc possibles
   dbg("\n\t[nablaJobFill] done");

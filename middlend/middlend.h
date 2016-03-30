@@ -214,6 +214,7 @@ typedef struct nablaJobStruct{
   char *reduction_name;
   int swirl_index;
   char enum_enum;
+  bool exists;
   struct{
     bool left_of_assignment_operator;
     bool turnBracketsToParentheses;
@@ -251,30 +252,30 @@ typedef struct nablaJobStruct{
 // * HOOKs DEFINEs
 // ****************************************************************************
 #define HOOK(h,f) if (nabla->hook->h->f) nabla->hook->h->f(nabla)
-#define cCALL(nabla,stuct,fct)\
-  (nabla->call->stuct!=NULL)?\
-  (nabla->call->stuct->fct!=NULL)?\
-   nabla->call->stuct->fct():"":""
+#define cCALL(nabla,struct,fct)\
+  (nabla->call->struct!=NULL)?\
+  (nabla->call->struct->fct!=NULL)?\
+   nabla->call->struct->fct():"":""
 
-#define cHOOK(nabla,stuct,fct)\
-  (nabla->hook->stuct!=NULL)?\
-  (nabla->hook->stuct->fct!=NULL)?\
-   nabla->hook->stuct->fct():"":""
+#define cHOOK(nabla,struct,fct)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+   nabla->hook->struct->fct():"":""
 
-#define cHOOKn(nabla,stuct,fct)\
-  (nabla->hook->stuct!=NULL)?\
-  (nabla->hook->stuct->fct!=NULL)?\
-  nabla->hook->stuct->fct(nabla):"":""
+#define cHOOKn(nabla,struct,fct)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+  nabla->hook->struct->fct(nabla):"":""
 
-#define cHOOKi(nabla,stuct,fct,i)\
-  (nabla->hook->stuct!=NULL)?\
-  (nabla->hook->stuct->fct!=NULL)?\
-  nabla->hook->stuct->fct(i):"":""
+#define cHOOKi(nabla,struct,fct,i)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+  nabla->hook->struct->fct(i):"":""
 
-#define cHOOKj(nabla,stuct,fct,job)\
-  (nabla->hook->stuct!=NULL)?\
-  (nabla->hook->stuct->fct!=NULL)?\
-   nabla->hook->stuct->fct(job):"":""
+#define cHOOKj(nabla,struct,fct,job)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+   nabla->hook->struct->fct(job):"":""
 
 
 // ****************************************************************************
@@ -373,6 +374,7 @@ char *nMiddleVariableGmpNameRank(nablaVariable*,int);
 bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
 int nMiddleVariableGmpDumpNumber(nablaVariable*);
 void dfsEnumMax(nablaMain*,nablaJob*,astNode*);
+void dfsExit(nablaMain*,nablaJob*,astNode*);
 void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
 void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
 bool dfsUsedInThisForall(nablaMain*,nablaJob*,astNode*,const char*);

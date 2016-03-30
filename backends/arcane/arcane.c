@@ -96,7 +96,8 @@ static const hookGrammar grammar={
   arcaneHookReduction,
   NULL,//aHookPrimaryExpressionToReturn,
   NULL,//returnFromArgument,
-  arcaneHookDfsVariable
+  arcaneHookDfsVariable,
+  NULL
 };
 
 const static hookSource source={
@@ -115,7 +116,9 @@ const static hookVars vars={
   aHookVariablesInit,
   aHookVariablesPrefix,
   aHookVariablesMalloc,
-  aHookVariablesFree
+  aHookVariablesFree,
+  NULL,
+  NULL
 };
 
 const static hookMain mains={

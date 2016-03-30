@@ -54,6 +54,8 @@
   extern bool direct_declarator_hit;
   extern nablaType *typedef_names;
   char *last_identifier=NULL;
+#undef YY_BUF_SIZE
+#define YY_BUF_SIZE 131072
 #undef YY_NEED_STRLEN
 #define YYSTYPE  astNode*   
 #include "nabla.tab.h"
@@ -330,7 +332,8 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 {includes}		   { return tok(&yylval, INCLUDES); }
 .						{ /* ignore bad characters */
   printf("\nREJECTing '%s' in ",yytext);
-  REJECT;}
+  REJECT;
+}
 \n                { yylineno+=1;}
 %% 
 

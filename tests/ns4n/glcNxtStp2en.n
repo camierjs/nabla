@@ -40,83 +40,73 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LIB_HOOK_H_
-#define _NABLA_LIB_HOOK_H_
-bool xHookSwitchForall(astNode *n, nablaJob *job);
-bool xHookSwitchAleph(astNode *n, nablaJob *job);
+// Options
+ℝ γ = 1.4;
+ℝ δt_ini = 1e-5;
+ℝ x_min = 0.0;
+ℝ x_max = 1.0;
+ℝ x_interface = 0.5;
 
-// forall
-char* xHookForAllDump(nablaJob*);
-char* xHookForAllItem(nablaJob*,const char,const char,char);
-char* xHookForAllPostfix(nablaJob*);
+// Variables Declarations
+ℝ t,δt;    // Time
+ℝᵈ u;      // Velocity
+ℝᵈ Χ⁰,Χ;   // Vertices coords (t=0 & tⁿ)
+ℝ c,m,e,E; // eos, mass & energy
+ℝ p,ρ,V;   // (t=0 & variable)
+ℝ p⁰,ρ⁰,V⁰ // Pressure, density & volume
+ℝᵈ b,*C,*F;// Geometrical, Fluxes vectors
+ℝᵈ⨯ℝᵈ *A;  // Nodal Matrices
 
-// token
-void xHookSwitchToken(astNode*, nablaJob*);
-nablaVariable* xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void xHookTurnTokenToOption(nablaMain*,nablaOption*);
-void xHookSystem(astNode*,nablaMain*,const char,char);
-void xHookIteration(nablaMain*);
-void xHookExit(nablaMain*,nablaJob*);
-void xHookTime(nablaMain*);
-void xHookFatal(nablaMain*);
-void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
+// Initial Conditions: Χ⁰(from the mesh), ρ⁰, p⁰, V⁰ & m
+∀ j∈cells Χⱼ = ¼*∑ᵣΧ⁰ᵣ;
+∀ cells {
+  if (Χ.x < x_interface)){
+    ρ⁰=1.0; p⁰=1.0;
+  }else{
+    ρ⁰=0.125; p⁰=0.1;
+  }
+}
+∀ j∈cells V⁰ⱼ = ½*∑ᵣCⱼᵣ⋅Χ⁰ᵣ;
+∀ cells m = ρ⁰*V⁰;
 
-// gram
-void xHookReduction(nablaMain*,astNode*);
-bool xHookDfsVariable(void);
+// Cⱼᵣ kernel
+ℝᵈ perp(ℝᵈ s0, ℝᵈ s1){return ℝᵈ(s1.y-s0.y,-s1.x+s0.x);}
+∀ j∈cells, ∀ r∈nodes(j) Cⱼᵣ=½*perp(Χ_{(r-1)%4},Χ_{(r+1)%4});
+∀ j∈cells Vⱼ = ½*∑ᵣCⱼᵣ⋅Χᵣ;
+∀ j∈cells glace_δtⱼ = 2.0*Vⱼ/(cⱼ*Σᵣ‖Cⱼᵣ‖);
 
-// call
-void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
-void xHookAddArguments(nablaMain*,nablaJob*);
-char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
-void xHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+// EOS
+∀ cells c = √(γ*p/ρ);
+∀ cells p = (γ-1.0)*ρ*e;
+∀ cells ρ = m/V;
+∀ cells e = E-½*(u⋅u);
 
-// xyz
-char* xHookPrevCell(int);
-char* xHookNextCell(int);
-char* xHookSysPostfix(void);
+// Initialization of the 'n' compute for-loop
+tⁿ⁼⁰ = 0;
+δtⁿ⁼⁰ = δt_ini;
+∀ nodes Χⁿ⁼⁰ = Χ⁰;
+∀ cells uⁿ⁼⁰ = 0;
+∀ cells Eⁿ⁼⁰ = p⁰/((γ-1.0)*ρ⁰);
 
-// header
-void xHookHeaderDump(nablaMain*);
-void xHookHeaderOpen(nablaMain*);
-void xHookHeaderDefineEnumerates(nablaMain*);
-void xHookHeaderPrefix(nablaMain*);
-void xHookHeaderIncludes(nablaMain*);
-void xHookHeaderPostfix(nablaMain*);
+// Cell-centered Godunov Scheme
+∀ j∈cells, ∀ r∈nodes(j) Aⱼᵣ = ρⱼ*cⱼ*Cⱼᵣ⊗Cⱼᵣ/‖Cⱼᵣ‖;
+∀ r∈nodes Aᵣ = ∑ⱼAⱼᵣ;
+∀ r∈nodes bᵣ = ∑ⱼ(Aⱼᵣuⱼ+Cⱼᵣpⱼ);
+∀ r∈nodes uᵣ = b̌ᵣ/Ǎᵣ;
+∀ j∈cells, ∀ r∈nodes(j) Fⱼᵣ = pⱼ*Cⱼᵣ+Aⱼᵣ*(uᵣ-uⱼ);
 
-// source
-void xHookSourceOpen(nablaMain*);
-void xHookSourceInclude(nablaMain*);
-char* xHookSourceNamespace(nablaMain*);
+// 'n' compute for-loop
+∀ n∈ℕ, ∀ j∈cells Eⱼⁿ⁺¹ = Eⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ;
+∀ n∈ℕ, ∀ j∈cells uⱼⁿ⁺¹ = uⱼⁿ + δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ⋅uᵣⁿ;
+∀ n∈ℕ, ∀ r∈nodes Χᵣⁿ⁺¹ = Χᵣⁿ + δtⁿ*uᵣⁿ;
+∀ n∈ℕ, δtⁿ⁺¹ = minⱼ(glace_δtⱼ);
+∀ n∈ℕ, tⁿ⁺¹ = tⁿ + δtⁿ⁺¹;
 
-// mesh
-void xHookMeshPrefix(nablaMain*);
-void xHookMesh1DConnectivity(nablaMain*);
-void xHookMesh2DConnectivity(nablaMain*);
-void xHookMesh3DConnectivity(nablaMain*,const char*);
-void xHookMesh1D(nablaMain*);
-void xHookMesh2D(nablaMain*);
-void xHookMesh3D(nablaMain*);
-void xHookMeshFreeConnectivity(nablaMain*);
-void xHookMeshCore(nablaMain*);
-void xHookMeshPostfix(nablaMain*);
-void xHookMeshStruct(nablaMain*);
-
-// vars
-void xHookVariablesInit(nablaMain*);
-void xHookVariablesPrefix(nablaMain*);
-void xHookVariablesMalloc(nablaMain*);
-void xHookVariablesFree(nablaMain*);
-
-// main
-NABLA_STATUS xHookMainPrefix(nablaMain*);
-NABLA_STATUS xHookMainPreInit(nablaMain*);
-NABLA_STATUS xHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS xHookMainVarInitCall(nablaMain*);
-NABLA_STATUS xHookMainHLT(nablaMain*);
-NABLA_STATUS xHookMainPostInit(nablaMain*);
-NABLA_STATUS xHookMainPostfix(nablaMain*);
-
-#endif // _NABLA_LIB_HOOK_H_
- 
+// Boundary Conditions
+∀ k∈outer faces, ∀ r∈nodes(k) {
+  b̃ᵣ = (I-nₖ⊗nₖ)*bᵣ;
+  Ãᵣ = (I-nₖ⊗nₖ)*Aᵣ*(I-nₖ⊗nₖ)+trace(Aᵣ)*(I-nₖ⊗nₖ);
+  if (!((Χᵣ.x==x_min)||(Χᵣ.x==x_max))) continue;
+  Ǎᵣ=I;
+  b̌ᵣ=option_u_ini;
+}

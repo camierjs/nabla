@@ -40,83 +40,56 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LIB_HOOK_H_
-#define _NABLA_LIB_HOOK_H_
-bool xHookSwitchForall(astNode *n, nablaJob *job);
-bool xHookSwitchAleph(astNode *n, nablaJob *job);
+#ifndef _NABLA_KOKKOS_GATHER_H_
+#define _NABLA_KOKKOS_GATHER_H_
 
-// forall
-char* xHookForAllDump(nablaJob*);
-char* xHookForAllItem(nablaJob*,const char,const char,char);
-char* xHookForAllPostfix(nablaJob*);
+inline real rgatherk(const int a, const Kokkos::View<real*>& data){
+  return data[a];
+}
+inline real3 rgather3k(const int a, const Kokkos::View<real3*>& data){
+  return data[a];
+}
+inline real3x3 rgather3x3k(const int a, const Kokkos::View<real3x3*>& data){
+  return data[a];
+}
 
-// token
-void xHookSwitchToken(astNode*, nablaJob*);
-nablaVariable* xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
-void xHookTurnTokenToOption(nablaMain*,nablaOption*);
-void xHookSystem(astNode*,nablaMain*,const char,char);
-void xHookIteration(nablaMain*);
-void xHookExit(nablaMain*,nablaJob*);
-void xHookTime(nablaMain*);
-void xHookFatal(nablaMain*);
-void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
+inline real rGatherAndZeroNegOnes(const int a, const Kokkos::View<real*>& data){
+  if (a>=0) return data[a];
+  return 0.0;
+}
+inline real3 rGatherAndZeroNegOnes(const int a, const Kokkos::View<real3*>& data){
+  if (a>=0) return data[a];
+  return 0.0;
+}
+inline real3x3 rGatherAndZeroNegOnes(const int a, const Kokkos::View<real3x3*>& data){
+  if (a>=0) return data[a];
+  return 0.0;
+}
+inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const Kokkos::View<real3*>& data){
+  const int i=3*8*a+3*corner;
+  const double *p=(double*) data.ptr_on_device();
+  if (a>=0) return real3(p[i+0],p[i+1],p[i+2]);
+  return 0.0;
+}
 
-// gram
-void xHookReduction(nablaMain*,astNode*);
-bool xHookDfsVariable(void);
 
-// call
-void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
-void xHookAddArguments(nablaMain*,nablaJob*);
-char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
-void xHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+inline void scatterk(const int a, Kokkos::View<real*>& gathered, Kokkos::View<real*>& data){
+  if (a<0) return; // Skipping to fake write
+  data[a]=gathered[0];
+}
 
-// xyz
-char* xHookPrevCell(int);
-char* xHookNextCell(int);
-char* xHookSysPostfix(void);
+inline void scatter3k(const int a, Kokkos::View<real3*>& gathered, Kokkos::View<real3*>& data){
+  if (a<0) return; // Skipping to fake write
+  double *p=(double *)data.ptr_on_device();
+  p[3*a+0]=gathered[0].x;
+  p[3*a+1]=gathered[0].y;
+  p[3*a+2]=gathered[0].z;
+}
 
-// header
-void xHookHeaderDump(nablaMain*);
-void xHookHeaderOpen(nablaMain*);
-void xHookHeaderDefineEnumerates(nablaMain*);
-void xHookHeaderPrefix(nablaMain*);
-void xHookHeaderIncludes(nablaMain*);
-void xHookHeaderPostfix(nablaMain*);
+inline void scatter3x3k(const int a, Kokkos::View<real3x3*>& gathered, Kokkos::View<real3x3*>& data){
+  if (a<0) return; // Skipping to fake write
+  data[a]=gathered[0];
+}
 
-// source
-void xHookSourceOpen(nablaMain*);
-void xHookSourceInclude(nablaMain*);
-char* xHookSourceNamespace(nablaMain*);
+#endif //  _NABLA_KOKKOS_GATHER_H_
 
-// mesh
-void xHookMeshPrefix(nablaMain*);
-void xHookMesh1DConnectivity(nablaMain*);
-void xHookMesh2DConnectivity(nablaMain*);
-void xHookMesh3DConnectivity(nablaMain*,const char*);
-void xHookMesh1D(nablaMain*);
-void xHookMesh2D(nablaMain*);
-void xHookMesh3D(nablaMain*);
-void xHookMeshFreeConnectivity(nablaMain*);
-void xHookMeshCore(nablaMain*);
-void xHookMeshPostfix(nablaMain*);
-void xHookMeshStruct(nablaMain*);
-
-// vars
-void xHookVariablesInit(nablaMain*);
-void xHookVariablesPrefix(nablaMain*);
-void xHookVariablesMalloc(nablaMain*);
-void xHookVariablesFree(nablaMain*);
-
-// main
-NABLA_STATUS xHookMainPrefix(nablaMain*);
-NABLA_STATUS xHookMainPreInit(nablaMain*);
-NABLA_STATUS xHookMainVarInitKernel(nablaMain*);
-NABLA_STATUS xHookMainVarInitCall(nablaMain*);
-NABLA_STATUS xHookMainHLT(nablaMain*);
-NABLA_STATUS xHookMainPostInit(nablaMain*);
-NABLA_STATUS xHookMainPostfix(nablaMain*);
-
-#endif // _NABLA_LIB_HOOK_H_
- 

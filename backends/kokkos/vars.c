@@ -44,147 +44,119 @@
 
 
 // ****************************************************************************
-// * hookAddArguments
+// * kHookVarDeclPrefix & kHookVarDeclPostfix
 // ****************************************************************************
-void xHookAddArguments(nablaMain *nabla,
-                       nablaJob *job){
-  // Si notre job a appelé des fonctions
-  if (job->parse.function_call_name!=NULL){
-    nMiddleArgsDumpFromDFS(nabla, job);
-  }
+char* kHookVarDeclPrefix(nablaMain *nabla){
+  //printf("\n\t[1;34m[kHookVarDeclPrefix][m");
+  return "Kokkos::View<";
+}
+char* kHookVarDeclPostfix(nablaMain *nabla){
+  return ">&";
 }
 
-// ****************************************************************************
-// * hookDfsVariable
-// * 'true' means that this backend supports
-// * in/out scan for variable from middlend
-// ****************************************************************************
-bool xHookDfsVariable(void){ return true; }
-
-
 
 // ****************************************************************************
-// * System Prev Cell
+// * Upcase de la chaîne donnée en argument
+// * Utilisé lors des déclarations des Variables
 // ****************************************************************************
-char* xHookPrevCell(int direction){
-  if (direction==DIR_X)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Y)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Z)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+c],";
-  assert(NULL);
+static inline char *itemUPCASE(const char *itm){
+  if (itm[0]=='c') return "NABLA_NB_CELLS";
+  if (itm[0]=='n') return "NABLA_NB_NODES";
+  if (itm[0]=='f') return "NABLA_NB_FACES";
+  if (itm[0]=='g') return "NABLA_NB_GLOBAL";
+  if (itm[0]=='p') return "NABLA_NB_PARTICLES";
+  dbg("\n\t[itemUPCASE] itm=%s", itm);
+  exit(NABLA_ERROR|fprintf(stderr, "\n[itemUPCASE] Error with given item\n"));
   return NULL;
 }
 
+// ****************************************************************************
+// * 
+// ****************************************************************************
+static char *dimType(nablaMain *nabla,
+                     char *type){
+  const bool dim1D = (nabla->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (nabla->entity->libraries&(1<<with_real2))!=0;
+  if (strncmp(type,"real3x3",7)==0) return type;
+  if (strncmp(type,"real3",5)==0 and dim1D) return "real";
+  if (strncmp(type,"real3",5)==0 and dim2D) return "real2";
+  if (strncmp(type,"real2",5)==0 and dim1D) return "real";
+  return type;
+}
 
 // ****************************************************************************
-// * System Next Cell
+// * Dump d'un MALLOC d'une variables dans le fichier source
 // ****************************************************************************
-char* xHookNextCell(int direction){
-  if (direction==DIR_X)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirX*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Y)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Z)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirZ*NABLA_NB_CELLS+c],";
-  assert(NULL);
-  return NULL;
+static NABLA_STATUS generateSingleVariableMalloc(nablaMain *nabla,
+                                                 nablaVariable *var){
+  const char *type=dimType(nabla,var->type);
+  if (var->dim==0)
+    fprintf(nabla->entity->src,
+            "\n\tKokkos::View<%s*> %s_%s(\"%s_%s_label\",%s);",
+            type,
+            var->item,var->name,
+            var->item,var->name,            
+            itemUPCASE(var->item));
+  if (var->dim==1)
+    fprintf(nabla->entity->src,
+            "\n\tKokkos::View<%s*> %s_%s(\"%s_%s_label\",%ld*%s);",
+            type,
+            var->item,var->name,
+            var->item,var->name,
+            var->size,
+            itemUPCASE(var->item));
+  return NABLA_OK;
 }
 
 
 // ****************************************************************************
-// * System Postfix
+// * Dump des options dans le header
 // ****************************************************************************
-char* xHookSysPostfix(void){ return "/*xHookSysPostfix*/)"; }
+void kHookVariablesPrefix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * xHookVariablesPrefix\n\
+// ********************************************************");
+  nablaOption *opt;
+  fprintf(nabla->entity->hdr,"\n// Options");
+  for(opt=nabla->options;opt!=NULL;opt=opt->next)
+    fprintf(nabla->entity->hdr,
+            "\n#define %s %s",
+            opt->name, opt->dflt);
+ }
 
 
 // ****************************************************************************
-// * Function Hooks
+// * Malloc des variables
 // ****************************************************************************
-void xHookFunctionName(nablaMain *nabla){
-  nprintf(nabla, NULL, "%s", nabla->name);
-}
-
-// ****************************************************************************
-// * Dump des variables appelées
-// ****************************************************************************
-void xHookDfsForCalls(nablaMain *nabla,
-                      nablaJob *fct,
-                      astNode *n,
-                      const char *namespace,
-                      astNode *nParams){
-  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
-}
-
-// ****************************************************************************
-// * Dump du préfix des points d'entrées: inline ou pas
-// ****************************************************************************
-char* xHookEntryPointPrefix(nablaMain *nabla,
-                            nablaJob *entry_point){
-  return "static inline";
-}
-
-void xHookExit(struct nablaMainStruct *nabla, nablaJob *job){
-  if (job->when_depth==0)
-    nprintf(nabla, "/*EXIT*/", "exit(0.0)");
+void kHookVariablesMalloc(nablaMain *nabla){
+  if (isWithLibrary(nabla,with_real))
+    xHookMesh1D(nabla);
+  else if (isWithLibrary(nabla,with_real2))
+    xHookMesh2D(nabla);
   else
-    nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
-}
-void xHookTime(struct nablaMainStruct *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time[0]");
-}
-void xHookFatal(struct nablaMainStruct *nabla){
-  nprintf(nabla, NULL, "fatal");
-}
-void xHookIteration(nablaMain *nabla){
-  nprintf(nabla, "/*ITERATION*/", "global_iteration[0]");
-}
-
-void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
-  nablaJob *foundJob;
-  char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", NULL);//"/*xHookAddCallNames*/");
-  fct->parse.function_call_name=NULL;
-  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
-    if (foundJob->is_a_function!=true){
-      nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=strdup(callName);
-    }else{
-      nprintf(nabla, "/*isNablaFunction*/", NULL);
-    }
-  }else{
-    nprintf(nabla, "/*has not been found*/", NULL);
+    xHookMesh3D(nabla);
+  
+  fprintf(nabla->entity->src,"\n\
+\t// ********************************************************\n\
+\t// * Déclaration & Malloc des Variables\n\
+\t// ********************************************************");
+  for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
+    if (generateSingleVariableMalloc(nabla, var)==NABLA_ERROR)
+      exit(NABLA_ERROR|
+           fprintf(stderr,
+                   "\n[variables] Error with variable %s\n",
+                   var->name));
   }
 }
 
+
 // ****************************************************************************
-// * xHookHeaderIncludes
+// * Variables Postfix
 // ****************************************************************************
-void xHookHeaderIncludes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// *****************************************************************************\n\
-// * Includes\n\
-// *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
-#include <sys/time.h>\n\
-#include <stdlib.h>\n\
-#include <stdio.h>\n\
-#include <string.h>\n\
-#include <vector>\n\
-#include <math.h>\n\
-#include <assert.h>\n\
-#include <stdarg.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-using namespace std;\n\
-//int hlt_level;\n\
-//bool *hlt_exit;\n\
-%s // from nabla->parallel->includes()\n",
-          cCALL(nabla,simd,includes),
-          cCALL(nabla,parallel,includes));
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+void kHookVariablesFree(nablaMain *nabla){
+  fprintf(nabla->entity->src, "\n\n\treturn 0;\n}");
 }
+
+
+
