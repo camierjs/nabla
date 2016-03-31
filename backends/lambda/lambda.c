@@ -54,7 +54,8 @@ static const callSimd simd={
   NULL,
   xCallGather,
   xCallScatter,
-  NULL
+  NULL,
+  xCallUid
 };
 static const callParallel parallel={
   NULL,

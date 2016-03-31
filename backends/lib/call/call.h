@@ -57,5 +57,7 @@ char* xCallScatter(nablaJob*,nablaVariable*);
 char* xCallFilterGather(astNode*,nablaJob*);
 char* xCallFilterScatter(astNode*,nablaJob*);
 
+char* xCallUid(nablaMain*,nablaJob*);
+
 #endif // _NABLA_LIB_CALL_H_
  

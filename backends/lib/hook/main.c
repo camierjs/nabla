@@ -70,9 +70,9 @@ int main(int argc, char *argv[]){\n\
 \t// ********************************************************\n\
 \t// Initialisation du temps et du deltaT\n\
 \t// ********************************************************\n\
-\tReal global_time[1]={option_dtt_initial};// Arcane fait comme cela!;\n\
+\tdouble global_time[1]={option_dtt_initial};// Arcane fait comme cela!;\n\
 \tint global_iteration[1]={1};\n\
-\tReal global_deltat[1] = {set1(option_dtt_initial)};// @ 0;\n\
+\treal global_deltat[1] = {set1(option_dtt_initial)};// @ 0;\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
 NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");

@@ -59,6 +59,11 @@ extern const nWhatWith nOkinaSseTypedef[];
 extern const nWhatWith nOkinaAvxTypedef[];
 extern const nWhatWith nOkinaMicTypedef[];
 
+char* nOkinaStdUid(nablaMain*,nablaJob*);
+char* nOkinaSseUid(nablaMain*,nablaJob*);
+char* nOkinaAvxUid(nablaMain*,nablaJob*);
+char* nOkinaMicUid(nablaMain*,nablaJob*);
+
 char* nOkinaStdIncludes(void);
 char* nOkinaSseIncludes(void);
 char* nOkinaAvxIncludes(void);

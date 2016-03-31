@@ -131,7 +131,8 @@ const static callSimd cudaSimdCalls={
   NULL,
   xCallGather,
   xCallScatter,
-  NULL
+  NULL,
+  xCallUid
 };
 
 backendCalls cudaCalls={

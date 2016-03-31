@@ -55,6 +55,7 @@ typedef struct callSimdStruct{
   char* (*gather)(nablaJob*,nablaVariable*);
   char* (*scatter)(nablaJob*,nablaVariable*);
   char* (*includes)(void);
+  char* (*uid)(nablaMain*,nablaJob*);
 } callSimd;
 
 

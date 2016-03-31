@@ -56,7 +56,7 @@ static char* nOkinaStdGatherCells(nablaJob *job,
   snprintf(gather, 1024, "\
 \n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 const int cw=(c<<WARP_BIT);\n\t\t\t\
-gather%sk(cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
+gather%sk(xs_cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
@@ -84,8 +84,8 @@ static char* nOkinaStdGatherNodes(nablaJob *job,
   snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s=%s(0.0);\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
 //#warning continue node_cell_corner\n\
-//if (node_cell_corner[8*nw+c]==-1) continue;\n\
-gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
+//if (xs_node_cell_corner[8*nw+c]==-1) continue;\n\
+gatherFromNode_%sk%s(xs_node_cell[8*nw+c],\n\
 %s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
@@ -95,7 +95,7 @@ gatherFromNode_%sk%s(node_cell[8*nw+c],\n\
            strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
            strcmp(var->type,"real")==0?"":dim1D?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\t\t\t\tnode_cell_corner[8*nw+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\t\t\t\txs_node_cell_corner[8*nw+c],\n\t\t\t",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"":"",
@@ -130,6 +130,16 @@ char* nOkinaStdScatter(nablaJob *job,nablaVariable* var){
 }
 
 
+// ****************************************************************************
+// * nOkinaStdUid
+// ****************************************************************************
+char* nOkinaStdUid(nablaMain *nabla, nablaJob *job){
+  const char cnfgem=job->item[0];
+  if (cnfgem=='c') return "(WARP_SIZE*c)";
+  if (cnfgem=='n') return "(n)";
+  assert(false);
+  return NULL;
+}
 
 
 // ****************************************************************************
@@ -139,7 +149,6 @@ const nWhatWith nOkinaStdTypedef[]={
   {"struct real3","Real3"},
   {NULL,NULL}
 };
-
 
 
 // ****************************************************************************

@@ -69,7 +69,8 @@ const callSimd okinaSimdStd={
   nOkinaStdBits,
   xCallGather,
   xCallScatter,
-  nOkinaStdIncludes
+  nOkinaStdIncludes,
+  nOkinaStdUid
 };
 
 const callHeader okinaHeaderSse={
@@ -81,7 +82,8 @@ const callSimd okinaSimdSse={
   nOkinaSseBits,
   nOkinaSseGather,
   nOkinaSseScatter,
-  nOkinaSseIncludes
+  nOkinaSseIncludes,
+  nOkinaSseUid
 };
 
 const callHeader okinaHeaderAvx={
@@ -93,7 +95,8 @@ const callSimd okinaSimdAvx={
   nOkinaAvxBits,
   nOkinaAvxGather,
   nOkinaAvxScatter,
-  nOkinaAvxIncludes
+  nOkinaAvxIncludes,
+  nOkinaAvxUid
 };
 
 const callHeader okinaHeaderMic={
@@ -105,7 +108,8 @@ const callSimd okinaSimdMic={
   nOkinaMicBits,
   nOkinaMicGather,
   nOkinaMicScatter,
-  nOkinaMicIncludes
+  nOkinaMicIncludes,
+  nOkinaMicUid
 };
 
 const callParallel okinaCilk={
@@ -273,7 +277,8 @@ static hooks okinaHooks={
 // ****************************************************************************
 hooks* okina(nablaMain *nabla){
   nabla->call=&okinaCalls;
-
+  nabla->hook=&okinaHooks;
+  
   // Call switch between STD, SSE, AVX, MIC
   if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
     nabla->call->simd=&okinaSimdSse;

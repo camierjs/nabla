@@ -92,9 +92,9 @@ tests = hlt aleph1D aleph2D glace2D xst upwindAP lulesh #upwind deflex upwindAP 
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
-procs = 1 #1 4
+procs = 1 2 #1 4
 types = gen run
-simds = std #sse avx # avx2 mic warp
+simds = std sse avx avx2 #mic warp
 backends = lambda okina cuda kokkos arcane #kokkos lambda arcane okina cuda 
 parallels = seq smp mpi #omp mpi smp #cilk
 define CTEST_template =

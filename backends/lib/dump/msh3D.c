@@ -245,7 +245,7 @@ __host__ static void nabla_ini_node_cell(const nablaMesh msh,
     for(int c=0;c<8;++c)
       node_cell_corner[8*n+c]=node_cell_and_corner[2*(8*n+c)+1];
   //verifConnectivity();
-  //verifCorners();
+  verifCorners(msh,node_cell,node_cell_corner);
 }
 
 // ****************************************************************************
@@ -541,9 +541,8 @@ __host__ static void nabla_ini_node_coord(const nablaMesh msh,
 
   dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
   assert((msh.NABLA_NB_CELLS %% 1)==0);
-    
-  for(int iNode=0; iNode<msh.NABLA_NB_NODES; iNode+=1){
-    const int n=iNode;
+  for(int iNode=0; iNode<msh.NABLA_NB_NODES_WARP; iNode+=1){
+    const int n=WARP_SIZE*iNode;
     Real x,y,z;
 #if defined(__MIC__)||defined(__AVX512F__)
     x=set(xOf7(msh,n+7), xOf7(msh,n+6), xOf7(msh,n+5), xOf7(msh,n+4), xOf7(msh,n+3), xOf7(msh,n+2), xOf7(msh,n+1), xOf7(msh,n));

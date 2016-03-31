@@ -299,10 +299,8 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*Real3*/", "real3 ");
     break;
   }
-  case(INTEGER):{
-    nprintf(nabla, "/*INTEGER*/", "int ");
-    break;
-  }
+    
+    //case(INTEGER):{ nprintf(nabla, "/*INTEGER*/", "int/**/ "); break;}
     //case(RESTRICT):{nprintf(nabla, "/*RESTRICT*/", "__restrict__ ");break;}
     
   case(POSTFIX_CONSTANT):{
@@ -501,14 +499,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     if (cnfgem=='n') nprintf(nabla, "/*localId n*/", "n->localId()");
     break;
   }
-  case (UID):{
-    if (job->parse.enum_enum=='n'  && cnfgem=='f'){
-      nprintf(nabla, NULL, "xs_face_node[n*NABLA_NB_FACES+f]");
-      break;
-    }
-    nprintf(nabla, "/*uniqueId c*/", "%c",cnfgem);
-    break;
-  }
+  case (UID):{ nprintf(nabla, NULL, nabla->call->simd->uid(nabla,job)); break; }
   case (AT):{ nprintf(nabla, "/*knAt*/", "; knAt"); break; }
   case ('='):{
     nprintf(nabla, "/*'='->!isLeft*/", "=");

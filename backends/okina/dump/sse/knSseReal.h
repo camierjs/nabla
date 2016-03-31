@@ -64,11 +64,6 @@ struct __attribute__ ((aligned(16))) real {
   // Convertors
   inline operator __m128d() const { return vec; }
   
-  // Logicals
-  //friend inline real operator &(const real &a, const real &b) { return _mm_and_pd(a,b); }
-  //friend inline real operator |(const real &a, const real &b) { return _mm_or_pd(a,b); }
-  //friend inline real operator ^(const real &a, const real &b) { return _mm_xor_pd(a,b); }
-
   // Arithmetics
   friend inline real operator +(const real &a, const real &b) { return _mm_add_pd(a,b); }
   friend inline real operator -(const real &a, const real &b) { return _mm_sub_pd(a,b); }
@@ -77,15 +72,11 @@ struct __attribute__ ((aligned(16))) real {
 #ifndef __clang_major__
   friend inline real operator /(const real &a, const real &b) { return _mm_div_pd(a,b); }
 #endif
-
   
   inline real& operator +=(const real &a) { return *this = _mm_add_pd(vec,a); }
   inline real& operator -=(const real &a) { return *this = _mm_sub_pd(vec,a); }
   inline real& operator *=(const real &a) { return *this = _mm_mul_pd(vec,a); }
   inline real& operator /=(const real &a) { return *this = _mm_div_pd(vec,a); }
-  //inline real& operator &=(const real &a) { return *this = _mm_and_pd(vec,a); }
-  //inline real& operator |=(const real &a) { return *this = _mm_or_pd(vec,a); }
-  //inline real& operator ^=(const real &a) { return *this = _mm_xor_pd(vec,a); }
   
   inline real operator -() const { return _mm_xor_pd (_mm_set1_pd(-0.0), *this); }
 
@@ -107,22 +98,12 @@ struct __attribute__ ((aligned(16))) real {
   friend inline real operator /(const double &f, const real &a) { return _mm_div_pd(_mm_set1_pd(f),a); }
 
   friend inline real sqrt(const real &a) { return _mm_sqrt_pd(a); }
-  //friend inline real ceil(const real &a)   { return _mm_round_pd((a), _MM_FROUND_CEIL); }
-  //friend inline real floor(const real &a)  { return _mm_round_pd((a), _MM_FROUND_FLOOR); }
-  //friend inline real trunc(const real &a)  { return _mm_round_pd((a), _MM_FROUND_TO_ZERO); }
-    //friend real round(const real &a)  { return _mm_svml_round_pd(a); }
 
   friend inline real min(const real &r, const real &s){ return _mm_min_pd(r,s);}
   friend inline real max(const real &r, const real &s){ return _mm_max_pd(r,s);}
-
   
-  friend inline real cube_root(const real &a){
-    return real(::cbrt(a[0]),::cbrt(a[1]));
-  }
-  
-  friend inline real norm(const real &u){
-    return real(::fabs(u[0]),::fabs(u[1]));
-  }
+  friend inline real cube_root(const real &a){return real(::cbrt(a[0]),::cbrt(a[1]));}
+  friend inline real norm(const real &u){ return real(::fabs(u[0]),::fabs(u[1]));}
 
   /* Compares: Mask is returned  */
   friend inline real cmp_eq(const real &a, const real &b)  { return _mm_cmpeq_pd(a, b); }
@@ -138,7 +119,6 @@ struct __attribute__ ((aligned(16))) real {
 
   friend inline real operator<(const real &a, const real& b) { return _mm_cmplt_pd(a, b); }
   friend inline real operator<(const real &a, double d) { return _mm_cmplt_pd(a, _mm_set1_pd(d)); }
-
 
   friend inline real operator>(const real &a, real& r) { return _mm_cmpgt_pd(a, r); }
   friend inline real operator>(const real &a, const real& r) { return _mm_cmpgt_pd(a, r); }
@@ -174,7 +154,6 @@ struct __attribute__ ((aligned(16))) real {
     double *d = (double*)&vec;
     return d[i];
   }
-
 };
 
 inline double ReduceMinToDouble(real r){

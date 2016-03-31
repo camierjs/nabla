@@ -53,22 +53,22 @@ char *nOkinaAvxBits(void){return "256";}
 char* nOkinaAvxPrevCell(int direction){
  if (direction==DIR_X)
    return "gatherk_and_zero_neg_ones(\n\
-			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
  if (direction==DIR_Y)
    return "gatherk_and_zero_neg_ones(\n\
-			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
  if (direction==DIR_Z)
    return "gatherk_and_zero_neg_ones(\n\
-			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
   assert(NULL);
   return NULL;
 }
@@ -79,22 +79,22 @@ char* nOkinaAvxPrevCell(int direction){
 char* nOkinaAvxNextCell(int direction){
   if (direction==DIR_X)
     return "gatherk_and_zero_neg_ones(\n\
-			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
   if (direction==DIR_Y)
     return "gatherk_and_zero_neg_ones(\n\
-			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
   if (direction==DIR_Z)
     return "gatherk_and_zero_neg_ones(\n\
-			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],";
   assert(NULL);
   return NULL;
 }
@@ -109,10 +109,10 @@ char* nOkinaAvxGatherCells(nablaJob *job,nablaVariable* var){
 \nint __attribute__((unused)) cw,ia,ib,ic,id;\
 \n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 cw=(c<<WARP_BIT);\n\t\t\t\
-gather%sk(ia=cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
-         ib=cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
-         ic=cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
-         id=cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
+gather%sk(ia=xs_cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
+         ib=xs_cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
+         ic=xs_cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
+         id=xs_cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
              strcmp(var->type,"real")==0?"real":"real3",
@@ -132,10 +132,10 @@ static char* nOkinaAvxGatherNodes(nablaJob *job,nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
-gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
-			node_cell[8*(nw+1)+c],\n\t\t\t\%s\
-			node_cell[8*(nw+2)+c],\n\t\t\t\%s\
-			node_cell[8*(nw+3)+c],\n\t\t\t\%s\
+gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+1)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+2)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+3)+c],\n\t\t\t\%s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
@@ -143,10 +143,10 @@ gatherFromNode_%sk%s(node_cell[8*(nw+0)+c],\n\t\t\t\%s\
            var->name,
            strcmp(var->type,"real")==0?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+0)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+1)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+2)+c],\n\t\t\t",
-           var->dim==0?"":"\t\t\tnode_cell_corner[8*(nw+3)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+0)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+1)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+2)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+3)+c],\n\t\t\t",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"":"",
@@ -178,6 +178,18 @@ char* nOkinaAvxScatter(nablaJob *job,nablaVariable* var){
            var->item, var->name,
            var->item, var->name);
   return strdup(scatter);
+}
+
+
+// ****************************************************************************
+// * nOkinaAvxUid
+// ****************************************************************************
+char* nOkinaAvxUid(nablaMain *nabla, nablaJob *job){
+  const char cnfgem=job->item[0];
+  if (cnfgem=='c') return "integer(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3)";
+  if (cnfgem=='n') return "integer(WARP_SIZE*n+0,WARP_SIZE*n+1,WARP_SIZE*n+2,WARP_SIZE*n+3)";
+  assert(false);
+  return NULL;
 }
 
 

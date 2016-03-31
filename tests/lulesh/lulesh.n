@@ -178,7 +178,7 @@ void ini(void) @ -10.0{
   coord *= (option_chaos)?option_chaos_seed:1.0;
   //const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   //coord = (option_chaos)?chaos:1.0;
-  //info()<<"coord="<<coord;
+  info()<<"coord="<<coord;
   //printf("\ncoord[%d]=(%.21e,%.21e,%.21e)",uid,coord.x,coord.y,coord.z);
 }
 /*nodes void dumpCorners(void)@-12.0{
@@ -227,7 +227,7 @@ void ini(void) @ -10.0{
     elemBC |= (coord.y==maxBoundaryY)?ETA_P_FREE;
     elemBC |= (coord.z==maxBoundaryZ)?ZETA_P_FREE;
   }
-  //debug()<<"#"<<uid<<" elemBC="<<elemBC;
+  debug()<<"#"<<uid<<" elemBC="<<elemBC;
   //printf("\n#%d elemBC=%d",uid,elemBC);
 }
 
@@ -246,7 +246,7 @@ void ini(void) @ -10.0{
   e=(option_chaos)?chaos:(uid==0)?option_initial_energy:0.0;
   sound_speed=p=q=(option_chaos)?chaos;
   volo=elemMass=calc_volume=computeElemVolume(X);
-  //debug()<<": e["<<uid<<"]="<<e<<", volume="<<calc_volume;
+  debug()<<": e["<<uid<<"]="<<e<<", volume="<<calc_volume;
   //printf("\ne[%02d]=%.21e, volume=%.21e",uid,e,calc_volume);
 }
 
@@ -255,13 +255,21 @@ void ini(void) @ -10.0{
   nodalMass=0.0;
   //if (nid==0) printf("\n[iniNodalMass] n=%d, Node #%d, nodalMass=%.21e",n,nid,nodalMass);
   ∀ cell{
+    /*
+      const int a=xs_node_cell[8*nw+c];
+    const int b=xs_node_cell[8*(nw+1)+c];
+    const int xsa=2*WARP_BASE(a)+WARP_OFFSET(a);
+    const int xsb=2*WARP_BASE(b)+WARP_OFFSET(b);
+    debug()<<"a="<<a<<", xsa="<<xsa<<", b="<<b<<", xsb="<<xsb;
+    */
+
     //int cid=node_cell[8*n+i];
     //if (cid<0) continue;
     //if (nid==0) printf("\n\tprefix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
     nodalMass+=calc_volume/8.0;
     //if (nid==0) printf("\n\tpostfix: %d+=#%d nodalMass=%.21e (+=%.21e)",nid,cid,nodalMass,calc_volume/8.0);
   }
-  //debug()<<uid<<": nodalMass="<<nodalMass;
+  debug()<<uid<<": nodalMass="<<nodalMass;
   //printf("\n#%d nodalMass=%.21e",uid,nodalMass);
 }
 
@@ -299,8 +307,8 @@ void timeIncrement(void) @ 0.1 {
   //δt = (iteration==2)?1.199999999999999892758e-07;
   //δt = (iteration==3)?1.439999999999999924249e-07;
   //δt <?= (scaled_δt);
-  //info()<<"ITERATION "<<iteration;
-  //printf("\nITERATION %d, δt=%.21e",iteration,δt[0]);
+  info()<<"ITERATION "<<iteration;
+  printf("\nITERATION %d, δt=%.21e",iteration,δt[0]);
   if (iteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//0]
   //printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);
@@ -341,6 +349,13 @@ void timeIncrement(void) @ 0.1 {
 ∀ nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
   ℝ³ Σ=0.0;
   ∀ cell{
+    /*
+      const int a=xs_node_cell[8*nw+c];
+    const int b=xs_node_cell[8*(nw+1)+c];
+    const int xsa=2*WARP_BASE(a)+WARP_OFFSET(a);
+    const int xsb=2*WARP_BASE(b)+WARP_OFFSET(b);
+    debug()<<"a="<<a<<", xsa="<<xsa<<", b="<<b<<", xsb="<<xsb;
+    */
     //const int corner = node_cell_corner[8*n+i];
     //if (corner==-1) continue;
     //printf("\n[#%d] node_#%d is corner %d of cell %d",i,uid,corner,node_cell[8*n+i]);
@@ -994,8 +1009,8 @@ inline ℝ computeSoundSpeed(const ℝ c,//pbvc
 
 
 void dumpTimeConstraintsForElems(void) @ 12.3{
-  //debug()<<"\tdomain.dtcourant()="<<δt_courant;
-  //debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
+  debug()<<"\tdomain.dtcourant()="<<δt_courant;
+  debug()<<"\tdomain.dthydro()  ="<<δt_hydro;
   //printf("\n\tdomain.dtcourant()=%.21e",δt_courant);
   //printf("\n\tdomain.dthydro()  =%.21e",δt_hydro);
 }

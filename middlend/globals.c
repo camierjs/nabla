@@ -59,7 +59,7 @@ void middleGlobals(nablaMain *nabla){
   nMiddleVariableAdd(nabla, time);
   time->axl_it=false;
   time->item=strdup("global");
-  time->type=strdup("real");
+  time->type=strdup("double");
   time->name=strdup("time");
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
   nablaVariable *coord = nMiddleVariableNew(nabla);

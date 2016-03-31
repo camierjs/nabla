@@ -64,12 +64,19 @@ inline void gatherk(const int a, const int b,
   gatherk_load(a,b,data,gthr);
 }
 
+//#warning HW_NB_NODE
+//#define HW_NB_NODE (64)
 
-inline __m128d gatherk_and_zero_neg_ones(const int a, const int b,
+inline __m128d gatherk_and_zero_neg_ones(const int a,
+                                         const int b,
                                          real *data){
   double *p=(double*)data;
   double dbl_a=a<0?0.0:p[2*WARP_BASE(a)+WARP_OFFSET(a)];
   double dbl_b=b<0?0.0:p[2*WARP_BASE(b)+WARP_OFFSET(b)];
+  //const unsigned int aa=2*WARP_BASE(a)+WARP_OFFSET(a);
+  //const unsigned int bb=2*WARP_BASE(b)+WARP_OFFSET(b);
+  //double dbl_a=a<0?0.0:aa<HW_NB_NODE?p[aa]:0.0;
+  //double dbl_b=b<0?0.0:bb<HW_NB_NODE?p[bb]:0.0;
   return real(dbl_a, dbl_b);
 }
 
@@ -111,6 +118,7 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
   const int aa = 2*(3*8*WARP_BASE(a)+3*a_corner+i)+WARP_OFFSET(a);
   const int bb = 2*(3*8*WARP_BASE(b)+3*b_corner+i)+WARP_OFFSET(b);
   const real ba=real((a<0||aa<0)?0:p[aa],(b<0||bb<0)?0:p[bb]);
+  //const real ba=real(a<0?0.0:aa<HW_NB_NODE?p[aa]:0.0,b<0?0.0:bb<HW_NB_NODE?p[bb]:0.0);
   if (i==0) gthr->x=ba;
   if (i==1) gthr->y=ba;
   if (i==2) gthr->z=ba;
