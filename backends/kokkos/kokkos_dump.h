@@ -43,6 +43,17 @@
 #ifndef _NABLA_KOKKOS_GATHER_H_
 #define _NABLA_KOKKOS_GATHER_H_
 
+
+struct minFunctor {
+  double value;
+  KOKKOS_INLINE_FUNCTION minFunctor():value(1.0e20){}
+  KOKKOS_INLINE_FUNCTION minFunctor(double v):value(v){}
+  KOKKOS_INLINE_FUNCTION void operator+=(const volatile minFunctor& f) volatile {
+    value = fmin(value,f.value);
+  }
+};
+
+
 inline real rgatherk(const int a, const Kokkos::View<real*>& data){
   return data[a];
 }
@@ -78,6 +89,14 @@ inline void scatterk(const int a, Kokkos::View<real*>& gathered, Kokkos::View<re
   data[a]=gathered[0];
 }
 
+
+inline void scatter3k(const int a, real3* gathered, Kokkos::View<real3*> data){
+  if (a<0) return; // Skipping to fake write
+  double *p=(double *)data.ptr_on_device();
+  p[3*a+0]=gathered[0].x;
+  p[3*a+1]=gathered[0].y;
+  p[3*a+2]=gathered[0].z;
+}
 inline void scatter3k(const int a, Kokkos::View<real3*>& gathered, Kokkos::View<real3*>& data){
   if (a<0) return; // Skipping to fake write
   double *p=(double *)data.ptr_on_device();
@@ -86,7 +105,12 @@ inline void scatter3k(const int a, Kokkos::View<real3*>& gathered, Kokkos::View<
   p[3*a+2]=gathered[0].z;
 }
 
-inline void scatter3x3k(const int a, Kokkos::View<real3x3*>& gathered, Kokkos::View<real3x3*>& data){
+
+inline void scatter3x3k(const int a, real3x3* gathered, Kokkos::View<real3x3*> data){
+  if (a<0) return; // Skipping to fake write
+  data[a]=gathered[0];
+}
+inline void scatter3x3k(const int a, Kokkos::View<real3x3*> gathered, Kokkos::View<real3x3*> data){
   if (a<0) return; // Skipping to fake write
   data[a]=gathered[0];
 }

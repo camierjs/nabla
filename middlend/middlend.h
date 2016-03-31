@@ -103,6 +103,19 @@ typedef struct nablaTypeStruct{
 
 
 // ****************************************************************************
+// * Nabla OPTION struct
+// ****************************************************************************
+typedef struct nablaOptionStruct{
+  bool axl_it;
+  const char *type; // int, Real, Real3, etc.
+  const char *name; // son nom
+  char *dflt; // sa valeur par défault
+  struct nablaMainStruct *main;
+  struct nablaOptionStruct *next;
+}nablaOption;
+
+
+// ****************************************************************************
 // * Nabla VARIABLE struct
 // ****************************************************************************
 typedef struct nablaVariableStruct{
@@ -122,59 +135,6 @@ typedef struct nablaVariableStruct{
   struct nablaMainStruct *main;
   struct nablaVariableStruct *next;
 }nablaVariable;
-
-
-// ****************************************************************************
-// * Nabla OPTION struct
-// ****************************************************************************
-typedef struct nablaOptionStruct{
-  bool axl_it;
-  const char *type; // int, Real, Real3, etc.
-  const char *name; // son nom
-  char *dflt; // sa valeur par défault
-  struct nablaMainStruct *main;
-  struct nablaOptionStruct *next;
-}nablaOption;
-
-
-// ****************************************************************************
-// * Nabla MESH struct
-// ****************************************************************************
-typedef struct nablaMshStruct{
-  int NABLA_NODE_PER_CELL;
-  int NABLA_CELL_PER_NODE;
-  int NABLA_CELL_PER_FACE;
-  int NABLA_NODE_PER_FACE;
-  int NABLA_FACE_PER_CELL;
-	
-  int NABLA_NB_NODES_X_AXIS;
-  int NABLA_NB_NODES_Y_AXIS;
-  int NABLA_NB_NODES_Z_AXIS;
-	
-  int NABLA_NB_CELLS_X_AXIS;
-  int NABLA_NB_CELLS_Y_AXIS;
-  int NABLA_NB_CELLS_Z_AXIS;
-	
-  int NABLA_NB_FACES_X_INNER;
-  int NABLA_NB_FACES_Y_INNER;
-  int NABLA_NB_FACES_Z_INNER;
-  int NABLA_NB_FACES_X_OUTER;
-  int NABLA_NB_FACES_Y_OUTER;
-  int NABLA_NB_FACES_Z_OUTER;
-  int NABLA_NB_FACES_INNER;
-  int NABLA_NB_FACES_OUTER;
-  int NABLA_NB_FACES;
-	
-  double NABLA_NB_NODES_X_TICK;
-  double NABLA_NB_NODES_Y_TICK;
-  double NABLA_NB_NODES_Z_TICK;
-	
-  int NABLA_NB_NODES;
-  int NABLA_NODES_PADDING;
-  int NABLA_NB_CELLS;
-  int NABLA_NB_NODES_WARP;
-  int NABLA_NB_CELLS_WARP;
-}nablaMesh;
 
 
 // ****************************************************************************
@@ -249,36 +209,6 @@ typedef struct nablaJobStruct{
 
 
 // ****************************************************************************
-// * HOOKs DEFINEs
-// ****************************************************************************
-#define HOOK(h,f) if (nabla->hook->h->f) nabla->hook->h->f(nabla)
-#define cCALL(nabla,struct,fct)\
-  (nabla->call->struct!=NULL)?\
-  (nabla->call->struct->fct!=NULL)?\
-   nabla->call->struct->fct():"":""
-
-#define cHOOK(nabla,struct,fct)\
-  (nabla->hook->struct!=NULL)?\
-  (nabla->hook->struct->fct!=NULL)?\
-   nabla->hook->struct->fct():"":""
-
-#define cHOOKn(nabla,struct,fct)\
-  (nabla->hook->struct!=NULL)?\
-  (nabla->hook->struct->fct!=NULL)?\
-  nabla->hook->struct->fct(nabla):"":""
-
-#define cHOOKi(nabla,struct,fct,i)\
-  (nabla->hook->struct!=NULL)?\
-  (nabla->hook->struct->fct!=NULL)?\
-  nabla->hook->struct->fct(i):"":""
-
-#define cHOOKj(nabla,struct,fct,job)\
-  (nabla->hook->struct!=NULL)?\
-  (nabla->hook->struct->fct!=NULL)?\
-   nabla->hook->struct->fct(job):"":""
-
-
-// ****************************************************************************
 // * Nabla SWIRL & HLT struct
 // ****************************************************************************
 typedef struct nablaHLTStruct{
@@ -330,6 +260,77 @@ typedef struct nablaMainStruct{
   struct hookStruct *hook;
   struct callStruct *call;
 } nablaMain;
+
+
+// ****************************************************************************
+// * HOOKs DEFINEs
+// ****************************************************************************
+#define HOOK(h,f) if (nabla->hook->h->f) nabla->hook->h->f(nabla)
+#define cCALL(nabla,struct,fct)\
+  (nabla->call->struct!=NULL)?\
+  (nabla->call->struct->fct!=NULL)?\
+   nabla->call->struct->fct():"":""
+
+#define cHOOK(nabla,struct,fct)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+   nabla->hook->struct->fct():"":""
+
+#define cHOOKn(nabla,struct,fct)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+  nabla->hook->struct->fct(nabla):"":""
+
+#define cHOOKi(nabla,struct,fct,i)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+  nabla->hook->struct->fct(i):"":""
+
+#define cHOOKj(nabla,struct,fct,job)\
+  (nabla->hook->struct!=NULL)?\
+  (nabla->hook->struct->fct!=NULL)?\
+   nabla->hook->struct->fct(job):"":""
+
+
+// ****************************************************************************
+// * Nabla MESH struct
+// ****************************************************************************
+typedef struct nablaMshStruct{
+  int NABLA_NODE_PER_CELL;
+  int NABLA_CELL_PER_NODE;
+  int NABLA_CELL_PER_FACE;
+  int NABLA_NODE_PER_FACE;
+  int NABLA_FACE_PER_CELL;
+
+  int NABLA_NB_NODES_X_AXIS;
+  int NABLA_NB_NODES_Y_AXIS;
+  int NABLA_NB_NODES_Z_AXIS;
+
+  int NABLA_NB_CELLS_X_AXIS;
+  int NABLA_NB_CELLS_Y_AXIS;
+  int NABLA_NB_CELLS_Z_AXIS;
+
+  int NABLA_NB_FACES_X_INNER;
+  int NABLA_NB_FACES_Y_INNER;
+  int NABLA_NB_FACES_Z_INNER;
+  int NABLA_NB_FACES_X_OUTER;
+  int NABLA_NB_FACES_Y_OUTER;
+  int NABLA_NB_FACES_Z_OUTER;
+  int NABLA_NB_FACES_INNER;
+  int NABLA_NB_FACES_OUTER;
+  int NABLA_NB_FACES;
+
+  double NABLA_NB_NODES_X_TICK;
+  double NABLA_NB_NODES_Y_TICK;
+  double NABLA_NB_NODES_Z_TICK;
+
+  int NABLA_NB_NODES;
+  int NABLA_NODES_PADDING;
+  int NABLA_NB_CELLS;
+  int NABLA_NB_NODES_WARP;
+  int NABLA_NB_CELLS_WARP;
+}nablaMesh;
+
 
 // ****************************************************************************
 // * Forward declaration

@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+//extern char* nablaAlephHeader(nablaMain*);
+
 // ****************************************************************************
 // * kHookMainPrefix
 // ****************************************************************************
@@ -68,6 +70,8 @@ int main(int argc, char *argv[]){\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
 \tstd::cout.setf(std::ios::scientific, std::ios::floatfield);"
 NABLA_STATUS kHookMainPrefix(nablaMain *nabla){
+  //if ((nabla->entity->libraries&(1<<with_aleph))!=0)
+  //fprintf(nabla->entity->hdr, "%s", nablaAlephHeader(nabla));
   fprintf(nabla->entity->src, BACKEND_MAIN_PREFIX);
   return NABLA_OK;
 }
@@ -144,7 +148,7 @@ NABLA_STATUS kHookMainPreInit(nablaMain *nabla){
 #define BACKEND_MAIN_POSTFIX "\n\t\t//BACKEND_MAIN_POSTFIX\
 \n\t\tglobal_time[0]+=global_deltat[0];\
 \n\t\tglobal_iteration[0]+=1;\
-\n\t\tprintf(\"\\ttime=%%e, dt=%%e\\n\", global_time[0], global_deltat[0]);\
+\n\t\t//printf(\"\\ttime=%%e, dt=%%e\\n\", global_time[0], global_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\

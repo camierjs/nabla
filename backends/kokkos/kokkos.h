@@ -65,6 +65,10 @@ void kHookReduction(nablaMain*,astNode*);
 
 char* kHookEoe(nablaMain*); 
 
+char* kHookForAllDump(nablaJob*);
+//char* kHookForAllItem(nablaJob*,const char,const char,char);
+char* kHookForAllPostfix(nablaJob*);
+
 const hooks* kokkos(nablaMain*);
 
 #endif // _NABLA_KOKKOS_HOOK_H_

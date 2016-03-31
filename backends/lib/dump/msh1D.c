@@ -258,7 +258,7 @@ static void nabla_ini_connectivity(const nablaMesh msh,
                       node_cell_corner,
                       node_cell_and_corner);
   // face_cell and face_node are malloc'ed but with size 0
-  assert(face_cell && face_node);
+  //assert(face_cell && face_node);
   dbg(DBG_OFF,"\nIni done");
 }
 

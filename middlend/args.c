@@ -281,7 +281,7 @@ static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
 static char* iRTNo(nablaMain *nabla,
                    const char *type, const char *var){
   char* dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
-  sprintf(dest,", %s%s%s %s",
+  sprintf(dest,", const %s%s%s %s",
           cHOOKn(nabla,vars,idecl),
           type,
           cHOOKn(nabla,vars,odecl),
@@ -295,7 +295,7 @@ static char* iRTN2o(nablaMain *nabla,
                     const char *type, const char *var,
                     const char *type2, const char *var2){
   char* dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
-  sprintf(dest,", %s%s%s %s, %s%s%s %s",
+  sprintf(dest,", const %s%s%s %s, %s%s%s %s",
           cHOOKn(nabla,vars,idecl),type,
           cHOOKn(nabla,vars,odecl),var,
           cHOOKn(nabla,vars,idecl),type2,

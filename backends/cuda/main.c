@@ -54,6 +54,9 @@
 int main(int argc, char *argv[]){\n\
 \t// Reset device before everything\n\
 \tgpuEnum();\n\
+\t// Initialisation des swirls\n\
+\tint hlt_level=0;\n\
+\tbool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t__builtin_align__(8) int iteration=1;\n\
 \tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n"

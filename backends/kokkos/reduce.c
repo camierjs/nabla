@@ -94,17 +94,6 @@ void kHookReduction(struct nablaMainStruct *nabla, astNode *n){
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
-#ifndef STRUCT_MIN_FUNCTOR\n\
-#define STRUCT_MIN_FUNCTOR\n\
-struct minFunctor {\n\
-\tdouble value;\n\
-\tKOKKOS_INLINE_FUNCTION minFunctor():value(1.0e20){}\n\
-\t//KOKKOS_INLINE_FUNCTION minFunctor(const minFunctor& f):value(f.value){}\n\
-\tKOKKOS_INLINE_FUNCTION minFunctor(double v):value(v){}\n\
-\tKOKKOS_INLINE_FUNCTION void operator+=(const volatile minFunctor& f) volatile {\n\
-\t\tvalue = fmin(value,f.value);\n\
-\t}\n};\n\
-#endif // STRUCT_MIN_FUNCTOR\n\
 void %s(const int NABLA_NB_CELLS_WARP,\n\t\t\t\t\t\tconst int NABLA_NB_CELLS,",
           item_var_name,
           global_var_name,job_name);

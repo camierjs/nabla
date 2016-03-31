@@ -6,7 +6,7 @@ SIMD = std
 PARALLEL = seq
 
 KOKKOS_DEVICES = "OpenMP"
-KOKKOS_ARCH = "HSL"
+KOKKOS_ARCH = "HSW"
 include /usr/local/kokkos/Makefile.kokkos
 
 SIMD_std_FLAGS = -std=c++11 -O2 -Wall -DNO_SSE2
@@ -16,6 +16,9 @@ LOG = -t #-v $(TGT).log
 CXX = ${CMAKE_CXX_COMPILER}
 
 CFLAGS = $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
+
+LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
+LIB_HYPRE = ${HYPRE_LIB}
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -32,20 +35,20 @@ all:$(TGT) $(NABLA)
 $(TGT).cc: $(TGT_FILE) $(NABLA)
 	$(NABLA) $(LOG) --kokkos $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
 
-$(TGT).o: $(KOKKOS_LINK_DEPENDS) $(KOKKOS_CPP_DEPENDS) $(TGT).cc $(TGT_FILE)
+$(TGT).o: $(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(LIB_ALEPH) $(LIB_HYPRE)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
 run1:$(TGT) $(NABLA) 
-	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
-	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
 
 #############
 # DOT 2 PNG #
