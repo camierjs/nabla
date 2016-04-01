@@ -212,7 +212,8 @@ __host__ static void nabla_ini_node_cell(const nablaMesh msh,
                                            int* node_cell_and_corner){
   dbg(DBG_INI,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
   dbg(DBG_INI,"\nOn flush le nombre de mailles attachées à ce noeud");
-  for(int n=0;n<msh.NABLA_NB_NODES;n+=1){
+  // Padding is used to be sure we'll init all connectivities
+  for(int n=0;n<msh.NABLA_NB_NODES+msh.NABLA_NODES_PADDING;n+=1){
     for(int c=0;c<8;++c){
       node_cell[8*n+c]=-1;
       node_cell_corner[8*n+c]=-1;
@@ -537,10 +538,11 @@ void verifCoords(const nablaMesh msh,Real3 *node_coord){
 __host__ static void nabla_ini_node_coord(const nablaMesh msh,
                                           Real3 *node_coord){
   dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= 1...");
-  assert((msh.NABLA_NB_NODES_Y_AXIS >= 1));
+  assert((msh.NABLA_NB_NODES_Y_AXIS >= WARP_SIZE));
 
   dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
-  assert((msh.NABLA_NB_CELLS %% 1)==0);
+  assert((msh.NABLA_NB_CELLS %% WARP_SIZE)==0);
+  
   for(int iNode=0; iNode<msh.NABLA_NB_NODES_WARP; iNode+=1){
     const int n=WARP_SIZE*iNode;
     Real x,y,z;

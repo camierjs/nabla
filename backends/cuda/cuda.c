@@ -55,6 +55,7 @@ const nWhatWith cuHeaderTypedef[]={
 };
 
 const nWhatWith cuHeaderDefines[]={
+  {"Integer", "integer"},
   {"BLOCKSIZE", "128"},
   {"CUDA_NB_THREADS_PER_BLOCK", "128"},
   {"WARP_BIT", "0"},

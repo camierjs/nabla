@@ -142,6 +142,8 @@ char* xCallUid(nablaMain *nabla, nablaJob *job){
   const char cnfgem=job->item[0];
   const char forall=job->parse.enum_enum;
   if (cnfgem=='f' && forall=='n') return "xs_face_node[n*NABLA_NB_FACES+f]";
+  if (cnfgem=='p') return "p";
+  if (cnfgem=='f') return "f";
   if (cnfgem=='c') return "c";
   if (cnfgem=='n') return "n";
   assert(false);

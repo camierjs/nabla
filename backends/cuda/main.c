@@ -86,7 +86,7 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
 \t__builtin_align__(8) int* global_iteration;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
-\t__builtin_align__(8) real* global_time;\n\
+\t__builtin_align__(8) double* global_time;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_time, sizeof(double)));\n\
 \t__builtin_align__(8) real* global_device_shared_reduce_results;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_device_shared_reduce_results, sizeof(double)*reduced_size));\n\

@@ -87,16 +87,16 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = hlt aleph1D aleph2D glace2D xst upwindAP lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
+tests = deflex hlt aleph1D aleph2D glace2D xst upwindAP lulesh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
 #p1apwb1D_gosse heat aleph1D kripke darcy deflex llsh lulesh shydro sethi anyItem gad comd pDDFV
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
-procs = 1 2 #1 4
+procs = 1 2 4
 types = gen run
 simds = std sse avx avx2 #mic warp
-backends = lambda okina cuda kokkos arcane #kokkos lambda arcane okina cuda 
-parallels = seq smp mpi #omp mpi smp #cilk
+backends = lambda okina cuda kokkos arcane 
+parallels = seq omp smp mpi #cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
 	(tput reset && cd $(BUILD_PATH)/tests && \

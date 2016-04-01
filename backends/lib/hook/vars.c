@@ -99,14 +99,15 @@ static NABLA_STATUS generateSingleVariableMalloc(nablaMain *nabla,
   nprintf(nabla,NULL,"\n\t// generateSingleVariableMalloc %s",var->name);
   if (var->dim==0)
     fprintf(nabla->entity->src,
-            "\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%s);// WARP_ALIGN",
+            //"\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%s);// WARP_ALIGN",
+            "\n\t%s* %s_%s=(%s*)aligned_alloc(WARP_ALIGN,sizeof(%s)*(NABLA_NODES_PADDING+%s));",
             type, var->item,var->name,
             type,
             type,
             itemUPCASE(var->item));
   if (var->dim==1)
     fprintf(nabla->entity->src,
-            "\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%ld*%s);// WARP_ALIGN",
+            "\n\t%s* %s_%s=(%s*)aligned_alloc(WARP_ALIGN,sizeof(%s)*(NABLA_NODES_PADDING+%ld*%s));",
             type, var->item,var->name,
             type,
             type,
@@ -126,7 +127,7 @@ static NABLA_STATUS generateSingleVariableFree(nablaMain *nabla,
   //if (var->item[0]!='p') return NABLA_OK;
   //nprintf(nabla,NULL,"\n\t// generateSingleVariableFree %s",var->name);
   if (var->dim==0)
-    fprintf(nabla->entity->src,"\n\tfree(%s_%s);",
+    fprintf(nabla->entity->src,"\n\tdelete [] %s_%s;",//"\n\tfree(%s_%s);",
             var->item, var->name);
   return NABLA_OK;
 }

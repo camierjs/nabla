@@ -97,15 +97,15 @@ void xHookMesh1DConnectivity(nablaMain *nabla){
 \t// ********************************************************\n\
 \t// * MESH CONNECTIVITY (1D)\n\
 \t// ********************************************************\n\
-\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
-\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*1);\n\
-\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*1);\n\
-\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);// is NULL\n\
-\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
-\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
-\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tint* xs_cell_node=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*NABLA_NB_CELLS*NABLA_NODE_PER_CELL);\n\
+\tint* xs_cell_next=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*1*NABLA_NB_CELLS);\n\
+\tint* xs_cell_prev=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*1*NABLA_NB_CELLS);\n\
+\tint* xs_cell_face=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*NABLA_FACE_PER_CELL*NABLA_NB_CELLS);// is NULL\n\
+\tint* xs_node_cell=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*NABLA_CELL_PER_NODE*NABLA_NB_NODES);\n\
+\tint* xs_node_cell_corner=(int*)aligned_alloc(WARP_ALIGN,sizeof(int)*NABLA_CELL_PER_NODE*NABLA_NB_NODES);\n\
+\tint* xs_node_cell_and_corner=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_NODES*sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* xs_face_cell=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* xs_face_node=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_NODE_PER_FACE);\n\
 \tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
 \tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
 \tassert(xs_face_cell && xs_face_node);\n");
@@ -168,15 +168,15 @@ void xHookMesh2DConnectivity(nablaMain *nabla){
 \t// ********************************************************\n\
 \t// * MESH CONNECTIVITY (2D)\n\
 \t// ********************************************************\n\
-\tint* xs_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
-\tint* xs_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*2);\n\
-\tint* xs_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*2);\n\
-\tint* xs_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
-\tint* xs_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* xs_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
-\tint* xs_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
-\tint* xs_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tint* xs_cell_node=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* xs_cell_next=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*2);\n\
+\tint* xs_cell_prev=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*2);\n\
+\tint* xs_cell_face=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*NABLA_FACE_PER_CELL);\n\
+\tint* xs_node_cell=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_NODES*sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_corner=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_NODES*sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* xs_node_cell_and_corner=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_NODES*sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* xs_face_cell=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* xs_face_node=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_NODE_PER_FACE);\n\
 \tassert(xs_cell_node && xs_cell_next && xs_cell_prev && xs_cell_face);\n\
 \tassert(xs_node_cell && xs_node_cell_corner && xs_node_cell_and_corner);\n\
 \tassert(xs_face_cell && xs_face_node);\n");
@@ -247,15 +247,15 @@ void xHookMesh3DConnectivity(nablaMain *nabla,const char *pfx){
 \t// ********************************************************\n\
 \t// * MESH CONNECTIVITY (3D) with prefix '%s'\n\
 \t// ********************************************************\n\
-\tint* %s_cell_node=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_NODE_PER_CELL);\n\
-\tint* %s_cell_next=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
-\tint* %s_cell_prev=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*3);\n\
-\tint* %s_cell_face=(int*)calloc(NABLA_NB_CELLS,sizeof(int)*NABLA_FACE_PER_CELL);\n\
-\tint* %s_node_cell=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* %s_node_cell_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*NABLA_CELL_PER_NODE);\n\
-\tint* %s_node_cell_and_corner=(int*)calloc(NABLA_NB_NODES,sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
-\tint* %s_face_cell=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_CELL_PER_FACE);\n\
-\tint* %s_face_node=(int*)calloc(NABLA_NB_FACES,sizeof(int)*NABLA_NODE_PER_FACE);\n\
+\tint* %s_cell_node=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*NABLA_NODE_PER_CELL);\n\
+\tint* %s_cell_next=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*3);\n\
+\tint* %s_cell_prev=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*3);\n\
+\tint* %s_cell_face=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_CELLS*sizeof(int)*NABLA_FACE_PER_CELL);\n\
+\tint* %s_node_cell=(int*)aligned_alloc(WARP_ALIGN,(NABLA_NB_NODES+NABLA_NODES_PADDING)*sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* %s_node_cell_corner=(int*)aligned_alloc(WARP_ALIGN,(NABLA_NB_NODES+NABLA_NODES_PADDING)*sizeof(int)*NABLA_CELL_PER_NODE);\n\
+\tint* %s_node_cell_and_corner=(int*)aligned_alloc(WARP_ALIGN,(NABLA_NB_NODES+NABLA_NODES_PADDING)*sizeof(int)*2*NABLA_CELL_PER_NODE);\n\
+\tint* %s_face_cell=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_CELL_PER_FACE);\n\
+\tint* %s_face_node=(int*)aligned_alloc(WARP_ALIGN,NABLA_NB_FACES*sizeof(int)*NABLA_NODE_PER_FACE);\n\
 \tassert(%s_cell_node && %s_cell_next && %s_cell_prev && %s_cell_face);\n\
 \tassert(%s_node_cell && %s_node_cell_corner && %s_node_cell_and_corner);\n\
 \tassert(%s_face_cell && %s_face_node);\n",
@@ -322,10 +322,12 @@ const double NABLA_NB_NODES_Z_TICK = LENGTH/(NABLA_NB_CELLS_Z_AXIS);\n\t\
 \n\t\
 const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS*NABLA_NB_NODES_Z_AXIS);\n\t\
 const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS*NABLA_NB_CELLS_Z_AXIS);\n\t\
-const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\t\
+const int NABLA_NODES_PADDING   = ((NABLA_NB_NODES%%WARP_SIZE)==0?0:WARP_SIZE-NABLA_NB_NODES%%WARP_SIZE);\n\t\
+const int NABLA_NODES_PADDING_WARP = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\t\
 //const int NABLA_CELLS_PADDING   = (((NABLA_NB_CELLS%%WARP_SIZE)==0)?0:1);\n\t\
-const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\t\
+const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING_WARP+NABLA_NB_NODES/WARP_SIZE);\n\t\
 const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\t\
+//printf(\"NABLA_NODES_PADDING=%%d\\n\",NABLA_NODES_PADDING);\n\
 // A verifier:\n\t\
 __attribute__((unused)) const int NABLA_NB_OUTER_CELLS_WARP = (((2*X_EDGE_ELEMS*Y_EDGE_ELEMS)+(Z_EDGE_ELEMS-2)*(2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4))/WARP_SIZE);\n");
 }

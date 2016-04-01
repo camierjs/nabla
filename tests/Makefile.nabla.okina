@@ -4,7 +4,7 @@ TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
 SIMD ?= std
 COLORS = 
-PARALLEL = seq
+PARALLEL ?= seq
 LOG = -t #-v $(TGT).log
 
 AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
