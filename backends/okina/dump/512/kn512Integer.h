@@ -55,8 +55,7 @@ public:
                  int i4, int i5, int i6, int i7){vec=_mm512_set_epi64(i7,i6,i5,i4,i3,i2,i1,i0);}
   // Convertors
   inline operator __m512i() const { return vec; }
-      
-  /* Logical Operations */
+  // Logical Operations
   inline integer& operator&=(const integer &a) { return *this = (integer) _mm512_and_epi64(vec,a); }
   inline integer& operator|=(const integer &a) { return *this = (integer) _mm512_or_epi64(vec,a); }
   inline integer& operator^=(const integer &a) { return *this = (integer) _mm512_xor_epi64(vec,a); }
@@ -65,12 +64,22 @@ public:
   inline integer& operator -=(const integer &a) { return *this = (integer)_mm512_sub_epi64(vec,a); }   
   
   friend inline __mmask8 operator==(const integer &a, const int i);
+  
+  inline const int& operator[](const int i) const  {
+    assert((0 <= i) && (i <= 7));
+    int *dp = (int*)&vec;
+    return *(dp+i);
+  }
+  inline int& operator[](const int i) {
+    assert((0 <= i) && (i <= 7));
+    int *dp = (int*)&vec;
+    return *(dp+i);
+  }
 };
 // Logicals
 inline integer operator&(const integer &a, const integer &b) { return _mm512_and_epi64(a,b); }
 inline integer operator|(const integer &a, const integer &b) { return _mm512_or_epi64(a,b); }
 inline integer operator^(const integer &a, const integer &b) { return _mm512_xor_epi64(a,b); }
-
 
 inline __mmask8 operator==(const integer &a, const int i){
   return _mm512_cmp_epi64_mask(a.vec,_mm512_set_epi64(i,i,i,i,i,i,i,i),_MM_CMPINT_EQ);

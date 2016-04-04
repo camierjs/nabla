@@ -42,21 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _KN_AVX_REAL_H_
 #define _KN_AVX_REAL_H_
-
-struct __attribute__ ((aligned(32))) reall {
- protected:
-  __attribute__ ((aligned(32))) __m256d d256;
-  //__attribute__ ((aligned(16))) __m128d d128;
- public:
-  inline __attribute__ ((aligned(32))) reall():
-    d256(_mm256_setzero_pd())//,
-    //d128(_mm_setzero_pd())
-    {
-      //printf("real!");
-    }
-  inline  __attribute__ ((aligned(32))) reall(double d):d256(_mm256_set1_pd(d)){}
-};
-
   
 // ****************************************************************************
 // * real
@@ -78,11 +63,6 @@ struct __attribute__ ((aligned(32))) real {
   // Convertors
   inline operator __m256d() const { return vec; }
   
-  // Logicals
-  //friend inline real operator &(const real &a, const real &b) { return _mm256_and_pd(a,b); }
-  //friend inline real operator |(const real &a, const real &b) { return _mm256_or_pd(a,b); }
-  //friend inline real operator ^(const real &a, const real &b) { return _mm256_xor_pd(a,b); }
-
   // Arithmetics
   friend inline real operator +(const real &a, const real &b) { return _mm256_add_pd(a,b); }
   friend inline real operator -(const real &a, const real &b) { return _mm256_sub_pd(a,b); }
@@ -99,9 +79,6 @@ struct __attribute__ ((aligned(32))) real {
   inline real& operator -=(const real &a) { return *this = _mm256_sub_pd(vec,a); }
   inline real& operator *=(const real &a) { return *this = _mm256_mul_pd(vec,a); }
   inline real& operator /=(const real &a) { return *this = _mm256_div_pd(vec,a); }
-  //inline real& operator &=(const real &a) { return *this = _mm256_and_pd(vec,a); }
-  //inline real& operator |=(const real &a) { return *this = _mm256_or_pd(vec,a); }
-  //inline real& operator ^=(const real &a) { return *this = _mm256_xor_pd(vec,a); }
   
   inline real operator -() const { return _mm256_xor_pd (_mm256_set1_pd(-0.0), *this); }
 
@@ -174,44 +151,6 @@ struct __attribute__ ((aligned(32))) real {
   friend inline real operator!=(const real &a, const real& r) { return _mm256_cmp_pd(a, r, _CMP_NEQ_UQ); }
   friend inline real operator!=(const real &a, double d) { return _mm256_cmp_pd(a, _mm256_set1_pd(d), _CMP_NEQ_UQ); }
 
-
-  // SVML functions
-  /*friend real acos(const real &a)    { return _mm256_acos_pd(a);    }
-  friend real acosh(const real &a)   { return _mm256_acosh_pd(a);   }
-  friend real asin(const real &a)    { return _mm256_asin_pd(a);    }
-  friend real asinh(const real &a)   { return _mm256_asinh_pd(a);   }
-  friend real atan(const real &a)    { return _mm256_atan_pd(a);    }
-  friend real atan2(const real &a, const real &b) { return _mm256_atan2_pd(a, b); }
-  friend real atanh(const real &a)   { return _mm256_atanh_pd(a);   }
-  friend real cos(const real &a)     { return _mm256_cos_pd(a);     }
-  friend real cosh(const real &a)    { return _mm256_cosh_pd(a);    }
-  friend real exp(const real &a)     { return _mm256_exp_pd(a);     }
-  friend real exp2(const real &a)    { return _mm256_exp2_pd(a);    }
-  friend real invcbrt(const real &a) { return _mm256_invcbrt_pd(a); }
-  friend real invsqrt(const real &a) { return _mm256_invsqrt_pd(a); }
-  friend real log(const real &a)     { return _mm256_log_pd(a);     }
-  friend real log10(const real &a)   { return _mm256_log10_pd(a);   }
-  friend real log2(const real &a)    { return _mm256_log2_pd(a);    }
-  friend real pow(const real &a, const real &b) { return _mm256_pow_pd(a, b); }
-  friend real sin(const real &a)     { return _mm256_sin_pd(a);     }
-  friend real sinh(const real &a)    { return _mm256_sinh_pd(a);    }
-  friend real tan(const real &a)     { return _mm256_tan_pd(a);     }
-  friend real tanh(const real &a)    { return _mm256_tanh_pd(a);    }
-  friend real erf(const real &a)     { return _mm256_erf_pd(a);     }
-  friend real erfc(const real &a)    { return _mm256_erfc_pd(a);    }
-  friend real erfinv(const real &a)  { return _mm256_erfinv_pd(a);  }*/
-
-  /* Absolute value */
-  /*friend real abs(const real &a)  {
-    static const union
-    {
-      int i[8];
-      __m256d m;
-    } __f64vec4_abs_mask = { 0xffffffff, 0x7fffffff, 0xffffffff, 0x7fffffff,
-                             0xffffffff, 0x7fffffff, 0xffffffff, 0x7fffffff};
-    return _mm256_and_pd(a, __f64vec4_abs_mask.m);
-    }*/
-
   /*friend real unglitch(const real &a)  {
     const union{
       unsigned long long i[4];
@@ -222,8 +161,6 @@ struct __attribute__ ((aligned(32))) real {
                              0xffffffffffff0000ull};
     return _mm256_and_pd(a, __f64vec4_abs_mask.m);
     }*/
-
-   
   inline const double& operator[](int i) const  {
     double *d = (double*)&vec;
     return *(d+i);
@@ -232,7 +169,6 @@ struct __attribute__ ((aligned(32))) real {
     double *d = (double*)&vec;
     return *(d+i);
   }
-
 };
 
 inline double ReduceMinToDouble(real r){

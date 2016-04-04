@@ -52,16 +52,16 @@ std::ostream& operator<<(std::ostream &os, const __m512d v);
  ******************************************************************************/
 inline void gatherk(const int a, const int b, const int c, const int d,
                     const int e, const int f, const int g, const int h,
-                    const real* addr, real *gather){
-  const __m512i index= _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
-  *gather = _mm512_i32logather_pd(index, addr, _MM_SCALE_8);
+                    const double* addr, real *gather){
+  const __m256i index= _mm256_set_epi32(h,g,f,e,d,c,b,a);
+  *gather = _mm512_i32gather_pd(index,addr,8);
 }
 
 inline real inlined_gatherk(const int a, const int b, const int c, const int d,
                             const int e, const int f, const int g, const int h,
                             const double* addr){
-  const __m512i index= _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
-  return _mm512_i32logather_pd(index, addr, _MM_SCALE_8);
+  const __m256i index= _mm256_set_epi32(h,g,f,e,d,c,b,a);
+  return _mm512_i32gather_pd(index,addr,8);
 }
 
 
@@ -77,15 +77,17 @@ inline __m512d masked_gather_pd(const int a, const int b,
   // when the corresponding element of the double-precision FP mask is '0'
   const __m512d def_vals =_mm512_setzero_pd();
   // the vector of dword indices used to reference the loaded FP elements.
-  const __m512i vindex = _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
+  const __m256i vindex = _mm256_set_epi32(h,g,f,e,d,c,b,a);
   // the vector of FP elements used as a vector mask;
   // only the most significant bit of each data element is used as a mask.
-  const __mmask8 vmask = _mm512_cmp_pd_mask(_mm512_set_pd(h,g,f,e,d,c,b,a), _mm512_setzero_pd(), _MM_CMPINT_GE);
+  const __mmask8 vmask = _mm512_cmp_pd_mask(_mm512_set_pd(h,g,f,e,d,c,b,a),
+                                            _mm512_setzero_pd(),
+                                            _MM_CMPINT_GE);
   // 32-bit scale used to address the loaded FP elements.
   const int scale = s;
   // Gathers 4 packed double-precision floating point values from memory referenced by the given base address,
   // dword indices and scale, and using the given double-precision FP mask values. 
-  const __m512d mdcbat = _mm512_mask_i32logather_pd(def_vals, vmask, vindex, base, scale);
+  const __m512d mdcbat = _mm512_mask_i32gather_pd(def_vals, vmask, vindex, base, scale);
   return mdcbat;
 }
 
@@ -96,7 +98,7 @@ inline __m512d gatherk_and_zero_neg_ones(const int a, const int b,
                                          const int e, const int f,
                                          const int g, const int h,
                                          real *data){
-  return masked_gather_pd(a,b,c,d,e,f,g,h,(double*)data,_MM_SCALE_8);
+  return masked_gather_pd(a,b,c,d,e,f,g,h,(double*)data,8);
 }
 
 inline void gatherFromNode_k(const int a, const int b,
@@ -146,19 +148,6 @@ inline void gather3k(const int a,
   gather3ki(a,b,c,d,e,f,g,h,addr,gthr,2);  
   }
 
-/*inline real3 inlined_gather3k(const int a,
-                              const int b,
-                              const int c,
-                              const int d,
-                              const int e,
-                              const int f,
-                              const int g,
-                              const int h,
-                              const real3* addr){
-  return real3(inlined_gatherk(a,b,c,d,e,f,g,h,&addr->x),
-               inlined_gatherk(a,b,c,d,e,f,g,h,&addr->y),
-               inlined_gatherk(a,b,c,d,e,f,g,h,&addr->z));
-               }*/
 // ******************************************************************************
 // *
 // ******************************************************************************
@@ -180,7 +169,7 @@ inline void gatherFromNode_3kiArray8(const int a, const int a_corner,
   const int jf=f<0?f:8*(3*8*WARP_BASE(f)+3*f_corner+i)+WARP_OFFSET(f);
   const int ig=g<0?g:8*(3*8*WARP_BASE(g)+3*g_corner+i)+WARP_OFFSET(g);
   const int ih=h<0?h:8*(3*8*WARP_BASE(h)+3*h_corner+i)+WARP_OFFSET(h);
-  const __m512d hgfedcba=masked_gather_pd(ia,ib,ic,id,ie,jf,ig,ih,base,_MM_SCALE_8);
+  const __m512d hgfedcba=masked_gather_pd(ia,ib,ic,id,ie,jf,ig,ih,base,8);
   if (i==0) gthr->x=hgfedcba;
   if (i==1) gthr->y=hgfedcba;
   if (i==2) gthr->z=hgfedcba;

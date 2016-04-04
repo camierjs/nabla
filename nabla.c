@@ -287,7 +287,6 @@ int main(int argc, char * argv[]){
        {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
     {"cuda",required_argument,NULL,BACKEND_CUDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
-    //{"tiling",no_argument,NULL,BACKEND_COLOR_OKINA_TILING},
        {"stc",no_argument,NULL,BACKEND_COLOR_OKINA_STC},
        {"dyn",no_argument,NULL,BACKEND_COLOR_OKINA_DYN},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
@@ -365,7 +364,7 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_ARCANE_ALONE:
       backend_color=BACKEND_COLOR_ARCANE_ALONE;
       dbg("\n[nabla] Command line specifies ARCANE's STAND-ALONE option");
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
@@ -374,7 +373,7 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_ARCANE_MODULE:
       backend_color=BACKEND_COLOR_ARCANE_MODULE;
       dbg("\n[nabla] Command line specifies ARCANE's MODULE option");
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
@@ -383,24 +382,24 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_ARCANE_SERVICE:
       backend_color=BACKEND_COLOR_ARCANE_SERVICE;
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE option");
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case 'p': // specific path to source directory for a module or a service
-      specific_path=strdup(optarg);
+      specific_path=optarg;
       dbg("\n[nabla] Command line specifies ARCANE's path: %s",
           specific_path);
       break;
     case 'I': // Interface name
-      interface_name=strdup(optarg);
+      interface_name=optarg;
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE interface name: %s",
           interface_name);
       break;
     case 'n': // Service name
-      service_name=strdup(optarg);
+      service_name=optarg;
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE service name: %s",
           service_name);
       break;
@@ -415,7 +414,7 @@ int main(int argc, char * argv[]){
       backend_color=BACKEND_COLOR_VOID;
       dbg("\n[nabla] Command line hits long option %s",
           longopts[longindex].name);
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s",
@@ -484,7 +483,7 @@ int main(int argc, char * argv[]){
       backend=BACKEND_CUDA;
       dbg("\n[nabla] Command line hits long option %s",
           longopts[longindex].name);
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new CUDA nabla_entity_name: %s",
@@ -497,7 +496,7 @@ int main(int argc, char * argv[]){
       backend=BACKEND_LAMBDA;
       dbg("\n[nabla] Command line hits long option %s",
           longopts[longindex].name);
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s",
@@ -510,7 +509,7 @@ int main(int argc, char * argv[]){
       backend=BACKEND_KOKKOS;
       dbg("\n[nabla] Command line hits long option %s",
           longopts[longindex].name);
-      nabla_entity_name=strdup(optarg);
+      nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n[nabla] Command line specifies new KOKKOS nabla_entity_name: %s",

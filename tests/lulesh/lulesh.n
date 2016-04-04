@@ -174,7 +174,7 @@ void ini(void) @ -10.0{
   //atexit(dumpFinalEnergy);
 }
 
-∀ nodes void choasNodes(void) out (node coord) @ -12.0{
+∀ nodes void chaosNodes(void) out (node coord) @ -12.0{
   coord *= (option_chaos)?option_chaos_seed:1.0;
   //const Real chaos = (((Real)uid)+1.0)*option_chaos_seed;
   //coord = (option_chaos)?chaos:1.0;

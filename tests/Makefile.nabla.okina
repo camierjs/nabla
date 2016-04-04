@@ -12,26 +12,36 @@ AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
 SIMD_ori_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_std_FLAGS  = -DWARP_BIT=0 -mno-avx -DNO_SSE2 #-mno-sse2 -malign-double
 SIMD_sse_FLAGS  = -DWARP_BIT=1 -msse4.2 -mno-avx
-SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx #-march=native 
+SIMD_avx_FLAGS  = -DWARP_BIT=2 -mavx
 SIMD_avx2_FLAGS = -DWARP_BIT=2 -march=core-avx2
-SIMD_avx512_FLAGS = -DWARP_BIT=3 -xCOMMON-AVX512 -D__AVX512__ #march=knl #avx512f
+SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic
 SIMD_avx512_SDE = /opt/intel/sde-external-7.41.0-2016-03-03-lin/sde64 -knl --
-SIMD_mic_FLAGS  = -DWARP_BIT=3 -mmic #mic mavx512f
 
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus
 
-CLANG_FLAGS = #-bf-by-func -bf-call-stack #-nobuiltininc -fno-builtin -fno-math-builtin
-CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -finline $(MESH_FLAGS)
+CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) $(MESH_FLAGS) -finline
 
+#######
+# GCC #
+#######
+SIMD_avx512_FLAGS = -DWARP_BIT=3 -mavx512f -D__AVX512__
+CXX = ${CMAKE_CXX_COMPILER}
+LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 
-#CXX = ${CMAKE_CXX_COMPILER}
-#LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
+#######
+# ICC #
+#######
+#SIMD_avx512_FLAGS = -DWARP_BIT=3 -xCOMMON-AVX512 -D__AVX512__
+#CFLAGS += -inline-forceinline -finline-functions #-inline-level=2 -no-inline-max-per-compile -no-inline-max-size -no-inline-max-total-size
+#CXX = /opt/intel/bin/icc
+#LIB_omp_GOMP = -Wl,-rpath,/opt/intel/lib/intel64_lin -L/opt/intel/lib/intel64_lin/ -liomp5
 
-CXX = /opt/intel/bin/icc
-LIB_omp_GOMP = -Wl,-rpath,/opt/intel/lib/intel64_lin -L/opt/intel/lib/intel64_lin/ -liomp5
-
+#########
+# CLANG #
+#########
 #CXX=/usr/local/bin/bf-clang++
+#CLANG_FLAGS = -bf-by-func -bf-call-stack #-nobuiltininc -fno-builtin -fno-math-builtin
 
 export X_EDGE_ELEMS = $(MESH)
 export Y_EDGE_ELEMS = $(MESH)
@@ -62,6 +72,6 @@ gen1:$(TGT).cc
 run1:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 $(SIMD_$(SIMD)_SDE) ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
 run2:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=2 CILK_NWORKERS=2 ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
+	OMP_NUM_THREADS=2 CILK_NWORKERS=2 $(SIMD_$(SIMD)_SDE) ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
 run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
+	OMP_NUM_THREADS=4 CILK_NWORKERS=4 $(SIMD_$(SIMD)_SDE) ./$(TGT)_$(MESH)_$(PARALLEL)_$(SIMD)
