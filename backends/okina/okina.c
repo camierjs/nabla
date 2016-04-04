@@ -112,6 +112,19 @@ const callSimd okinaSimdMic={
   nOkinaMicUid
 };
 
+const callHeader okinaHeader512={
+  nOkina512Forwards,
+  nOkina512Defines,
+  nOkina512Typedef
+};
+const callSimd okinaSimd512={ 
+  nOkina512Bits,
+  nOkina512Gather,
+  nOkina512Scatter,
+  nOkina512Includes,
+  nOkina512Uid
+};
+
 const callParallel okinaCilk={
   nOkinaParallelCilkSync,
   nOkinaParallelCilkSpawn,
@@ -208,6 +221,12 @@ const hookXyz xyzMic={
   nOkinaMicNextCell,
   xHookSysPostfix
 };
+const hookXyz xyz512={ 
+  NULL,
+  nOkina512PrevCell,
+  nOkina512NextCell,
+  xHookSysPostfix
+};
 
 const hookPragma pragmaICC ={
   nOkinaPragmaIccAlign
@@ -296,6 +315,10 @@ hooks* okina(nablaMain *nabla){
     nabla->call->simd=&okinaSimdMic;
     nabla->call->header=&okinaHeaderMic;
   }
+  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512){
+    nabla->call->simd=&okinaSimd512;
+    nabla->call->header=&okinaHeader512;
+  }
   
   // Call between parallel modes
   if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
@@ -312,6 +335,8 @@ hooks* okina(nablaMain *nabla){
     nabla->hook->xyz=&xyzAvx;  
   if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
     nabla->hook->xyz=&xyzMic;
+  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512)
+    nabla->hook->xyz=&xyz512;
 
   // Hook between ICC or GCC pragmas
   if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)

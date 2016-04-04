@@ -94,7 +94,7 @@ tests = deflex hlt aleph1D aleph2D glace2D xst upwindAP lulesh #upwind deflex up
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 2 4
 types = gen run
-simds = std sse avx avx2 #mic warp
+simds = std sse avx avx2 avx512 #mic warp
 backends = lambda okina cuda kokkos arcane 
 parallels = seq omp smp mpi #cilk
 define CTEST_template =

@@ -81,8 +81,8 @@ typedef enum {
   BACKEND_LIBRARY= 1<<(9),
   BACKEND_VHDL   = 1<<(10)
 } BACKEND_SWITCH;
-
 #define BACKEND_LAST 10
+
 
 // ****************************************************************************
 // * Possible Variations:
@@ -102,26 +102,22 @@ typedef enum {
   BACKEND_COLOR_OKINA_SSE      = 1<<(BACKEND_LAST+8),
   BACKEND_COLOR_OKINA_AVX      = 1<<(BACKEND_LAST+9),
   BACKEND_COLOR_OKINA_AVX2     = 1<<(BACKEND_LAST+10),
-  BACKEND_COLOR_OKINA_MIC      = 1<<(BACKEND_LAST+11),
-  BACKEND_COLOR_OKINA_SEQ      = 1<<(BACKEND_LAST+12),
-  BACKEND_COLOR_OpenMP         = 1<<(BACKEND_LAST+13),
-  BACKEND_COLOR_CILK           = 1<<(BACKEND_LAST+14),
-  BACKEND_COLOR_GCC            = 1<<(BACKEND_LAST+15),
-  BACKEND_COLOR_ICC            = 1<<(BACKEND_LAST+16),
-  OPTION_TIME_DOT_STD          = 1<<(BACKEND_LAST+17),
-  OPTION_TIME_DOT_MMA          = 1<<(BACKEND_LAST+18)
+  BACKEND_COLOR_OKINA_AVX512   = 1<<(BACKEND_LAST+11),
+  BACKEND_COLOR_OKINA_MIC      = 1<<(BACKEND_LAST+12),
+  BACKEND_COLOR_OKINA_SEQ      = 1<<(BACKEND_LAST+13),
+  BACKEND_COLOR_OpenMP         = 1<<(BACKEND_LAST+14),
+  BACKEND_COLOR_CILK           = 1<<(BACKEND_LAST+15),
+  BACKEND_COLOR_GCC            = 1<<(BACKEND_LAST+16),
+  BACKEND_COLOR_ICC            = 1<<(BACKEND_LAST+17),
+  OPTION_TIME_DOT_STD          = 1<<(BACKEND_LAST+18),
+  OPTION_TIME_DOT_MMA          = 1<<(BACKEND_LAST+19)
 } BACKEND_COLORS;
-
-#define BACKEND_COLOR_LAST BACKEND_LAST+18
-
-// Enumération des phases possibles lors des génération des gather/scatter
-typedef enum{
-  GATHER_SCATTER_DECL=0,
-  GATHER_SCATTER_CALL
-} GATHER_SCATTER_PHASE;
+#define BACKEND_COLOR_LAST BACKEND_LAST+19
 
 
-// Enumération des actions à faire selon les cas de postfixs
+// ****************************************************************************
+// * Enumération des actions à faire selon les cas de postfixs
+// ****************************************************************************
 typedef enum{
   postfixed_not_a_nabla_variable=0,
   postfixed_nabla_system_keyword=1,
@@ -168,7 +164,6 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 // * Std ∇ includes
 // ****************************************************************************
 #include "frontend/frontend.h"
-
 #include "middlend/middlend.h"
 
 #include "backends/hooks.h"

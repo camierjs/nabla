@@ -40,98 +40,50 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OKINA_CALL_H_
-#define _NABLA_OKINA_CALL_H_
+#ifndef _KN_OSTREAM_H_
+#define _KN_OSTREAM_H_
 
-// simd/[std|sse|avx|mic]
-extern const char* nOkinaStdForwards[];
-extern const char* nOkinaSseForwards[];
-extern const char* nOkinaAvxForwards[];
-extern const char* nOkina512Forwards[];
-extern const char* nOkinaMicForwards[];
 
-extern const nWhatWith nOkinaStdDefines[];
-extern const nWhatWith nOkinaSseDefines[];
-extern const nWhatWith nOkinaAvxDefines[];
-extern const nWhatWith nOkina512Defines[];
-extern const nWhatWith nOkinaMicDefines[];
+// ****************************************************************************
+// * INTEGERS
+// ****************************************************************************
+std::ostream& operator<<(std::ostream &os, const integer &a){
+  int *ip = (int*)&(a);
+  return os << "["<<*(ip+0)<<","<<*(ip+1)<<","<<*(ip+2)<<","<<*(ip+3)<<","<<*(ip+4)<<","<<*(ip+5)<<","<<*(ip+6)<<","<<*(ip+7)<<"]";
+}
 
-extern const nWhatWith nOkinaStdTypedef[];
-extern const nWhatWith nOkinaSseTypedef[];
-extern const nWhatWith nOkinaAvxTypedef[];
-extern const nWhatWith nOkina512Typedef[];
-extern const nWhatWith nOkinaMicTypedef[];
 
-char* nOkinaStdUid(nablaMain*,nablaJob*);
-char* nOkinaSseUid(nablaMain*,nablaJob*);
-char* nOkinaAvxUid(nablaMain*,nablaJob*);
-char* nOkina512Uid(nablaMain*,nablaJob*);
-char* nOkinaMicUid(nablaMain*,nablaJob*);
+// ****************************************************************************
+// * REALS
+// ****************************************************************************
+std::ostream& operator<<(std::ostream &os, const __m512d v){
+  const double *fp = (double*)&v;
+  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)
+            <<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
+}
 
-char* nOkinaStdIncludes(void);
-char* nOkinaSseIncludes(void);
-char* nOkinaAvxIncludes(void);
-char* nOkina512Includes(void);
-char* nOkinaMicIncludes(void);
+std::ostream& operator<<(std::ostream &os, const real &a){
+  const double *fp = (double*)&a;
+  return os << "["<<*(fp+0)<<","<<*(fp+1)<<","<<*(fp+2)<<","<<*(fp+3)
+            <<","<<*(fp+4)<<","<<*(fp+5)<<","<<*(fp+6)<<","<<*(fp+7)<<"]";
+}
 
-char* nOkinaStdBits(void);
-char* nOkinaSseBits(void);
-char* nOkinaAvxBits(void);
-char* nOkina512Bits(void);
-char* nOkinaMicBits(void);
 
-char* nOkinaStdGather(nablaJob*,nablaVariable*);
-char* nOkinaSseGather(nablaJob*,nablaVariable*);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*);
-char* nOkina512Gather(nablaJob*,nablaVariable*);
-char* nOkinaMicGather(nablaJob*,nablaVariable*);
+// ****************************************************************************
+// * REALS_3
+// ****************************************************************************
+std::ostream& operator<<(std::ostream &os, const real3 &a){
+  double *x = (double*)&(a.x);
+  double *y = (double*)&(a.y);
+  double *z = (double*)&(a.z);
+  return os << "[("<<*(x+0)<<","<<*(y+0)<<","<<*(z+0)<< "), "
+            <<  "("<<*(x+1)<<","<<*(y+1)<<","<<*(z+1)<< "), "
+            <<  "("<<*(x+2)<<","<<*(y+2)<<","<<*(z+2)<< "), "
+            <<  "("<<*(x+3)<<","<<*(y+3)<<","<<*(z+3)<< "), "
+            <<  "("<<*(x+4)<<","<<*(y+4)<<","<<*(z+4)<< "), "
+            <<  "("<<*(x+5)<<","<<*(y+5)<<","<<*(z+5)<< "), "
+            <<  "("<<*(x+6)<<","<<*(y+6)<<","<<*(z+6)<< "), "
+            <<  "("<<*(x+7)<<","<<*(y+7)<<","<<*(z+7)<< ")]";
+}
 
-char* nOkinaStdScatter(nablaJob*,nablaVariable*);
-char* nOkinaSseScatter(nablaJob*,nablaVariable*);
-char* nOkinaAvxScatter(nablaJob*,nablaVariable*);
-char* nOkina512Scatter(nablaJob*,nablaVariable*);
-char* nOkinaMicScatter(nablaJob*,nablaVariable*);
-
-char* nOkinaStdPrevCell(int);
-char* nOkinaSsePrevCell(int);
-char* nOkinaAvxPrevCell(int);
-char* nOkina512PrevCell(int);
-char* nOkinaMicPrevCell(int);
-
-char* nOkinaStdNextCell(int);
-char* nOkinaSseNextCell(int);
-char* nOkinaAvxNextCell(int);
-char* nOkina512NextCell(int);
-char* nOkinaMicNextCell(int);
-
-// Cilk+ parallel color
-char *nOkinaParallelCilkSync(void);
-char *nOkinaParallelCilkSpawn(void);
-char *nOkinaParallelCilkLoop(nablaMain *);
-char *nOkinaParallelCilkIncludes(void);
-
-// OpenMP parallel color
-char *nOkinaParallelOpenMPSync(void);
-char *nOkinaParallelOpenMPSpawn(void);
-char *nOkinaParallelOpenMPLoop(nablaMain *);
-char *nOkinaParallelOpenMPIncludes(void);
-
-// Void parallel color
-char *nOkinaParallelVoidSync(void);
-char *nOkinaParallelVoidSpawn(void);
-char *nOkinaParallelVoidLoop(nablaMain *);
-char *nOkinaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *nOkinaPragmaIccIvdep(void);
-char *nOkinaPragmaGccIvdep(void);
-char *nOkinaPragmaIccAlign(void);
-char *nOkinaPragmaGccAlign(void);
-
-// hooks/nOkinaHookGather
-char* gather(astNode*,nablaJob*);
-
-// hooks/nOkinaHookScatter
-char* scatter(nablaJob*);
-
-#endif // _NABLA_OKINA_CALL_H_
+#endif // _KN_OSTREAM_H_

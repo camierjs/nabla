@@ -73,6 +73,14 @@ extern char knAvxScatter_h[];
 extern char knAvxOStream_h[];
 extern char knAvxTernary_h[];
 
+extern char kn512Real_h[];
+extern char kn512Real3_h[];
+extern char kn512Integer_h[];
+extern char kn512Gather_h[];
+extern char kn512Scatter_h[];
+extern char kn512OStream_h[];
+extern char kn512Ternary_h[];
+
 extern char knMicReal_h[];
 extern char knMicReal3_h[];
 extern char knMicInteger_h[];
@@ -91,7 +99,16 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 void nOkinaHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
+  
+  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512){
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Integer_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real3_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Ternary_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Gather_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512Scatter_h));
+    fprintf(nabla->entity->hdr,dumpExternalFile(kn512OStream_h));
+  }else if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal3_h));

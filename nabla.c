@@ -78,6 +78,7 @@ static char *unique_temporary_file_name=NULL;
 \t\t[36m--sse[0m\tExplicit code generation with SSE intrinsics\n\
 \t\t[36m--avx[0m\tExplicit code generation with AVX intrinsics\n\
 \t\t[36m--avx2[0m\tExplicit code generation with AVX2 intrinsics\n\
+\t\t[36m--avx512[0m\tExplicit code generation with AVX152 intrinsics\n\
 \t\t[36m--mic[0m\tExplicit code generation with MIC intrinsics\n\
 \t\t[36m--seq[0m\tSequential code generation (default)\n\
 \t\t[36m--omp[0m\tOpenMP parallel implementation\n\
@@ -86,7 +87,7 @@ static char *unique_temporary_file_name=NULL;
 \t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\tIntel ICC pragma generation\n\
 \t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
-\t[1;35m--kokkos [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for KOKKOS\n\
+\t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
 \t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
 \t\t[36m--alone[0m\tGenerate a [4mstand-alone[0m application\n\
 \t\t[36m--module[0m  Generate a [4mmodule[0m\n\
@@ -293,6 +294,7 @@ int main(int argc, char * argv[]){
        {"sse",no_argument,NULL,BACKEND_COLOR_OKINA_SSE},
        {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
        {"avx2",no_argument,NULL,BACKEND_COLOR_OKINA_AVX2},
+       {"avx512",no_argument,NULL,BACKEND_COLOR_OKINA_AVX512},
        {"mic",no_argument,NULL,BACKEND_COLOR_OKINA_MIC},
        {"cilk",no_argument,NULL,BACKEND_COLOR_CILK},
        {"omp",no_argument,NULL,BACKEND_COLOR_OpenMP},
@@ -404,7 +406,7 @@ int main(int argc, char * argv[]){
       break;
       // ************************************************************
       // * BACKEND OKINA avec ses variantes:
-      // *    - STD, SSE, AVX, AVX2, MIC
+      // *    - STD, SSE, AVX, AVX2, AVX512 & MIC
       // *    - CILK, OpenMP, SEQ
       // *    - ICC, GCC
       // ************************************************************
@@ -446,6 +448,10 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_OKINA_AVX2:
       backend_color|=BACKEND_COLOR_OKINA_AVX2;
       dbg("\n[nabla] Command line specifies OKINA's AVX2 option");
+      break;
+    case BACKEND_COLOR_OKINA_AVX512:
+      backend_color|=BACKEND_COLOR_OKINA_AVX512;
+      dbg("\n[nabla] Command line specifies OKINA's AVX512 option");
       break;
     case BACKEND_COLOR_OKINA_MIC:
       backend_color|=BACKEND_COLOR_OKINA_MIC;

@@ -65,6 +65,14 @@
    .globl ${ABI_UNDERSCORE}knAvx2Gather_h
    .globl ${ABI_UNDERSCORE}knAvxScatter_h
    .globl ${ABI_UNDERSCORE}knAvxOStream_h
+
+	.globl ${ABI_UNDERSCORE}kn512Real_h
+	.globl ${ABI_UNDERSCORE}kn512Real3_h
+	.globl ${ABI_UNDERSCORE}kn512Integer_h
+	.globl ${ABI_UNDERSCORE}kn512Ternary_h
+	.globl ${ABI_UNDERSCORE}kn512Gather_h
+	.globl ${ABI_UNDERSCORE}kn512Scatter_h
+	.globl ${ABI_UNDERSCORE}kn512OStream_h
         
    .globl ${ABI_UNDERSCORE}knMicReal_h
    .globl ${ABI_UNDERSCORE}knMicReal3_h
@@ -146,6 +154,29 @@ ${ABI_UNDERSCORE}knAvxScatter_h:
         .byte 0
 ${ABI_UNDERSCORE}knAvxOStream_h: 
 	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/avx/knAvxOStream.h"
+   .byte 0
+
+   
+${ABI_UNDERSCORE}kn512Real_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Real.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512Real3_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Real3.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512Integer_h:
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Integer.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512Ternary_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Ternary.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512Gather_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Gather.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512Scatter_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512Scatter.h"
+        .byte 0
+${ABI_UNDERSCORE}kn512OStream_h: 
+	     .incbin "${CMAKE_CURRENT_SOURCE_DIR}/512/kn512OStream.h"
         .byte 0
 
 

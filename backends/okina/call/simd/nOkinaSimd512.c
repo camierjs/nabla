@@ -42,44 +42,45 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-char* nOkinaMicIncludes(void){return "#include <immintrin.h>\n";}
-char *nOkinaMicBits(void){return "512";}
+char* nOkina512Includes(void){return "#include <immintrin.h>\n";}
+
+char *nOkina512Bits(void){return "512";}
 
 
 // ****************************************************************************
 // * Prev Cell
 // ****************************************************************************
-char* nOkinaMicPrevCell(int direction){
-  if (direction==DIR_X)
-    return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_prev[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
-  if (direction==DIR_Y)
-    return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_prev[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
-  if (direction==DIR_Z)
-    return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_prev[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+char* nOkina512PrevCell(int direction){
+ if (direction==DIR_X)
+   return "gatherk_and_zero_neg_ones(\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_prev[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+ if (direction==DIR_Y)
+   return "gatherk_and_zero_neg_ones(\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_prev[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+ if (direction==DIR_Z)
+   return "gatherk_and_zero_neg_ones(\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
   assert(NULL);
   return NULL;
 }
@@ -87,84 +88,86 @@ char* nOkinaMicPrevCell(int direction){
 // ****************************************************************************
 // * Next Cell
 // ****************************************************************************
-char* nOkinaMicNextCell(int direction){
+char* nOkina512NextCell(int direction){
   if (direction==DIR_X)
     return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			cxs_ell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_next[DIR_X*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_next[MD_DirX*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
   if (direction==DIR_Y)
     return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_next[DIR_Y*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_next[MD_DirY*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
   if (direction==DIR_Z)
     return "gatherk_and_zero_neg_ones(\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
-			xs_cell_next[DIR_Z*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+0],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+1],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+2],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+3],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+4],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+5],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+6],\n\
+			xs_cell_next[MD_DirZ*NABLA_NB_CELLS+(c<<WARP_BIT)+7],";
   assert(NULL);
   return NULL;
 }
 
+
 // ****************************************************************************
 // * Gather
 // ****************************************************************************
-char* nOkinaMicGatherCells(nablaJob *job,nablaVariable* var){
+char* nOkina512GatherCells(nablaJob *job,nablaVariable* var){
   char gather[1024];
   snprintf(gather, 1024, "\
-int __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;\n\
+\nint __attribute__((unused)) cw,ia,ib,ic,id,ie,iff,ig,ih;\n\
 \n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 cw=(c<<WARP_BIT);\n\t\t\t\
 gather%sk(ia=xs_cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
-          ib=xs_cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
-          ic=xs_cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
-          id=xs_cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
-          ie=xs_cell_node[n*NABLA_NB_CELLS+cw+4],\n\t\t\t\
-         iff=xs_cell_node[n*NABLA_NB_CELLS+cw+5],\n\t\t\t\
-          ig=xs_cell_node[n*NABLA_NB_CELLS+cw+6],\n\t\t\t\
-          ih=xs_cell_node[n*NABLA_NB_CELLS+cw+7],\n\t\t\t\
-          %s_%s%s,\n\t\t\t\
-          &gathered_%s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":"real3",
-           var->item, var->name,
-           strcmp(var->type,"real")==0?"":"3",
-           var->item, var->name,
-           strcmp(var->type,"real")==0?"":"",
-           var->item, var->name);
+         ib=xs_cell_node[n*NABLA_NB_CELLS+cw+1],\n\t\t\t\
+         ic=xs_cell_node[n*NABLA_NB_CELLS+cw+2],\n\t\t\t\
+         id=xs_cell_node[n*NABLA_NB_CELLS+cw+3],\n\t\t\t\
+         ie=xs_cell_node[n*NABLA_NB_CELLS+cw+4],\n\t\t\t\
+        iff=xs_cell_node[n*NABLA_NB_CELLS+cw+5],\n\t\t\t\
+         ig=xs_cell_node[n*NABLA_NB_CELLS+cw+6],\n\t\t\t\
+         ih=xs_cell_node[n*NABLA_NB_CELLS+cw+7],\n\t\t\t\
+         %s_%s%s,\n\t\t\t\
+         &gathered_%s_%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"real":"real3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"":"3",
+             var->item, var->name,
+             strcmp(var->type,"real")==0?"":"",
+             var->item, var->name);
   return strdup(gather);
 }
+
 
 // ****************************************************************************
 // * Gather pour un job sur les nodes
 // ****************************************************************************
-static char* nOkinaMicGatherNodes(nablaJob *job,nablaVariable* var){ 
+static char* nOkina512GatherNodes(nablaJob *job,nablaVariable* var){ 
   char gather[1024];
   snprintf(gather, 1024, "int nw;\n\t\t\t%s gathered_%s_%s;\n\t\t\t\
 nw=(n<<WARP_BIT);\n\t\t\t\
-gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+1)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+2)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+3)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+4)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+5)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+6)+c],%s\n\
-\t\t\t\t\t\txs_node_cell[8*(nw+7)+c],%s\n\
+gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+1)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+2)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+3)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+4)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+5)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+6)+c],\n\t\t\t\%s\
+			xs_node_cell[8*(nw+7)+c],\n\t\t\t\%s\
          %s_%s%s,\n\t\t\t\
          &gathered_%s_%s);\n\t\t\t",
            strcmp(var->type,"real")==0?"real":"real3",
@@ -172,14 +175,14 @@ gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],%s\n\
            var->name,
            strcmp(var->type,"real")==0?"":"3",
            var->dim==0?"":"Array8",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+0)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+1)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+2)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+3)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+4)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+5)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+6)+c],",
-           var->dim==0?"":"xs_node_cell_corner[8*(nw+7)+c],",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+0)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+1)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+2)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+3)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+4)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+5)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+6)+c],\n\t\t\t",
+           var->dim==0?"":"\t\t\txs_node_cell_corner[8*(nw+7)+c],\n\t\t\t",
            var->item,
            var->name,
            strcmp(var->type,"real")==0?"":"",
@@ -192,21 +195,21 @@ gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],%s\n\
 // ****************************************************************************
 // * Gather switch
 // ****************************************************************************
-char* nOkinaMicGather(nablaJob *job,nablaVariable* var){
+char* nOkina512Gather(nablaJob *job,nablaVariable* var){
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  if (itm=='c') return nOkinaMicGatherCells(job,var);
-  if (itm=='n') return nOkinaMicGatherNodes(job,var);
-  nablaError("Could not distinguish job item in nOkinaMicGather!");
+  if (itm=='c') return nOkina512GatherCells(job,var);
+  if (itm=='n') return nOkina512GatherNodes(job,var);
+  nablaError("Could not distinguish job item in nOkina512Gather!");
   return NULL;
 }
 
 
 // ****************************************************************************
-// * MIC Scatter
+// * Scatter
 // ****************************************************************************
-char* nOkinaMicScatter(nablaJob *job,nablaVariable* var){
+char* nOkina512Scatter(nablaJob *job,nablaVariable* var){
   char scatter[1024];
-  snprintf(scatter, 1024, "\tscatter%s(ia,ib,ic,id,ie,iff,ig,ih, %s_%s, gathered_%s_%s);",
+  snprintf(scatter, 1024, "\tscatter%sk(ia,ib,ic,id,ie,iff,ig,ih, &gathered_%s_%s, %s_%s);",
            strcmp(var->type,"real")==0?"":"3",
            var->item, var->name,
            var->item, var->name);
@@ -215,9 +218,9 @@ char* nOkinaMicScatter(nablaJob *job,nablaVariable* var){
 
 
 // ****************************************************************************
-// * nOkinaAvxUid
+// * nOkina512Uid
 // ****************************************************************************
-char* nOkinaMicUid(nablaMain *nabla, nablaJob *job){
+char* nOkina512Uid(nablaMain *nabla, nablaJob *job){
   const char cnfgem=job->item[0];
   if (cnfgem=='c') return "integer(WARP_SIZE*c+0,WARP_SIZE*c+1,WARP_SIZE*c+2,WARP_SIZE*c+3,WARP_SIZE*c+4,WARP_SIZE*c+5,WARP_SIZE*c+6,WARP_SIZE*c+7)";
   if (cnfgem=='n') return "integer(WARP_SIZE*n+0,WARP_SIZE*n+1,WARP_SIZE*n+2,WARP_SIZE*n+3,WARP_SIZE*n+4,WARP_SIZE*n+5,WARP_SIZE*n+6,WARP_SIZE*n+7)";
@@ -227,23 +230,22 @@ char* nOkinaMicUid(nablaMain *nabla, nablaJob *job){
 
 
 // ****************************************************************************
-// * MIC TYPEDEFS
+// * 512 TYPEDEFS
 // ****************************************************************************
-const nWhatWith nOkinaMicTypedef[]={
-  //{"struct real3","Real3"},
+const nWhatWith nOkina512Typedef[]={
+  {"struct real3","Real3"},
   {NULL,NULL}
 };
 
 
+
 // ****************************************************************************
-// * MIC DEFINES
+// * 512 DEFINES
 // ****************************************************************************
-const nWhatWith nOkinaMicDefines[]={
+const nWhatWith nOkina512Defines[]={
   {"__host__",""},
-  {"integer", "Integer"},
+  {"Integer", "integer"},
   {"Real", "real"},
-  {"Real3", "real3"},
-  //{"norm","rabs"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
   {"NABLA_NB_GLOBAL","WARP_SIZE"},
@@ -257,12 +259,12 @@ const nWhatWith nOkinaMicDefines[]={
   {"set1(cst)", "_mm512_set1_pd(cst)"},
   {"square_root(u)", "_mm512_sqrt_pd(u)"},
   {"cube_root(u)", "_mm512_cbrt_pd(u)"},
+  {"shuffle(u,v,k)", "_mm512_shuffle_pd(u,v,k)"},
   {"store(addr,data)", "_mm512_store_pd(addr,data)"},
   {"load(u)", "_mm512_load_pd(u)"},
   {"zero", "_mm512_setzero_pd"},
-  // DEBUG STUFFS
   {"DBG_MODE", "(false)"},
-  {"DBG_LVL", "(DBG_FUNC_IN)"},
+  {"DBG_LVL", "(DBG_ALL)"},
   {"DBG_OFF", "0x0000ul"},
   {"DBG_CELL_VOLUME", "0x0001ul"},
   {"DBG_CELL_CQS", "0x0002ul"},
@@ -307,14 +309,14 @@ const nWhatWith nOkinaMicDefines[]={
 
 
 // ****************************************************************************
-// * MIC FORWARDS
+// * 512 FORWARDS
 // ****************************************************************************
-const char* nOkinaMicForwards[]={
+const char* nOkina512Forwards[]={
   "inline std::ostream& info(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
   "inline std::ostream& debug(){std::cout.flush();std::cout<<\"\\n\";return std::cout;}",
-  "inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
-  "inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
-  "inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
+  "static inline int WARP_BASE(int a){ return (a>>WARP_BIT);}",
+  "static inline int WARP_OFFSET(int a){ return (a&(WARP_SIZE-1));}",
+  "static inline int WARP_NFFSET(int a){ return ((WARP_SIZE-1)-WARP_OFFSET(a));}",
   NULL
 };
-  
+

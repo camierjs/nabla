@@ -40,98 +40,42 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OKINA_CALL_H_
-#define _NABLA_OKINA_CALL_H_
+#ifndef _KN_SCATTER_H_
+#define _KN_SCATTER_H_
 
-// simd/[std|sse|avx|mic]
-extern const char* nOkinaStdForwards[];
-extern const char* nOkinaSseForwards[];
-extern const char* nOkinaAvxForwards[];
-extern const char* nOkina512Forwards[];
-extern const char* nOkinaMicForwards[];
+/******************************************************************************
+ * Scatter: (X is the data @ offset x)
+ * scatter: |ABCD| and offsets:    a                 b       c   d
+ * data:    |....|....|....|....|..A.|....|....|....|B...|...C|..D.|....|....|
+ * ! à la séquence car quand c et d sont sur le même warp, ça percute
+ ******************************************************************************/
+inline void scatter(const int a,
+                     const int b,
+                     const int c,
+                     const int d,
+                     const int e,
+                     const int f,
+                     const int g,
+                     const int h,
+                     real* base,
+                     real scatter){
+  __m512i index= _mm512_set_epi32(0,0,0,0,0,0,0,0,h,g,f,e,d,c,b,a);
+  _mm512_i32loscatter_pd(base,index,scatter,_MM_SCALE_8);
+}
 
-extern const nWhatWith nOkinaStdDefines[];
-extern const nWhatWith nOkinaSseDefines[];
-extern const nWhatWith nOkinaAvxDefines[];
-extern const nWhatWith nOkina512Defines[];
-extern const nWhatWith nOkinaMicDefines[];
+inline void scatter3(const int a,
+                      const int b,
+                      const int c,
+                      const int d,
+                      const int e,
+                      const int f,
+                      const int g,
+                      const int h,
+                      real3* base,
+                      real3 sctr){
+  scatter(a,b,c,d,e,f,g,h,&base->x,sctr.x);
+  scatter(a,b,c,d,e,f,g,h,&base->y,sctr.y);
+  scatter(a,b,c,d,e,f,g,h,&base->z,sctr.z);
+}
 
-extern const nWhatWith nOkinaStdTypedef[];
-extern const nWhatWith nOkinaSseTypedef[];
-extern const nWhatWith nOkinaAvxTypedef[];
-extern const nWhatWith nOkina512Typedef[];
-extern const nWhatWith nOkinaMicTypedef[];
-
-char* nOkinaStdUid(nablaMain*,nablaJob*);
-char* nOkinaSseUid(nablaMain*,nablaJob*);
-char* nOkinaAvxUid(nablaMain*,nablaJob*);
-char* nOkina512Uid(nablaMain*,nablaJob*);
-char* nOkinaMicUid(nablaMain*,nablaJob*);
-
-char* nOkinaStdIncludes(void);
-char* nOkinaSseIncludes(void);
-char* nOkinaAvxIncludes(void);
-char* nOkina512Includes(void);
-char* nOkinaMicIncludes(void);
-
-char* nOkinaStdBits(void);
-char* nOkinaSseBits(void);
-char* nOkinaAvxBits(void);
-char* nOkina512Bits(void);
-char* nOkinaMicBits(void);
-
-char* nOkinaStdGather(nablaJob*,nablaVariable*);
-char* nOkinaSseGather(nablaJob*,nablaVariable*);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*);
-char* nOkina512Gather(nablaJob*,nablaVariable*);
-char* nOkinaMicGather(nablaJob*,nablaVariable*);
-
-char* nOkinaStdScatter(nablaJob*,nablaVariable*);
-char* nOkinaSseScatter(nablaJob*,nablaVariable*);
-char* nOkinaAvxScatter(nablaJob*,nablaVariable*);
-char* nOkina512Scatter(nablaJob*,nablaVariable*);
-char* nOkinaMicScatter(nablaJob*,nablaVariable*);
-
-char* nOkinaStdPrevCell(int);
-char* nOkinaSsePrevCell(int);
-char* nOkinaAvxPrevCell(int);
-char* nOkina512PrevCell(int);
-char* nOkinaMicPrevCell(int);
-
-char* nOkinaStdNextCell(int);
-char* nOkinaSseNextCell(int);
-char* nOkinaAvxNextCell(int);
-char* nOkina512NextCell(int);
-char* nOkinaMicNextCell(int);
-
-// Cilk+ parallel color
-char *nOkinaParallelCilkSync(void);
-char *nOkinaParallelCilkSpawn(void);
-char *nOkinaParallelCilkLoop(nablaMain *);
-char *nOkinaParallelCilkIncludes(void);
-
-// OpenMP parallel color
-char *nOkinaParallelOpenMPSync(void);
-char *nOkinaParallelOpenMPSpawn(void);
-char *nOkinaParallelOpenMPLoop(nablaMain *);
-char *nOkinaParallelOpenMPIncludes(void);
-
-// Void parallel color
-char *nOkinaParallelVoidSync(void);
-char *nOkinaParallelVoidSpawn(void);
-char *nOkinaParallelVoidLoop(nablaMain *);
-char *nOkinaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *nOkinaPragmaIccIvdep(void);
-char *nOkinaPragmaGccIvdep(void);
-char *nOkinaPragmaIccAlign(void);
-char *nOkinaPragmaGccAlign(void);
-
-// hooks/nOkinaHookGather
-char* gather(astNode*,nablaJob*);
-
-// hooks/nOkinaHookScatter
-char* scatter(nablaJob*);
-
-#endif // _NABLA_OKINA_CALL_H_
+#endif //  _KN_SCATTER_H_

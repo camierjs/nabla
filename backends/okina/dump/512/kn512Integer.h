@@ -40,98 +40,40 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OKINA_CALL_H_
-#define _NABLA_OKINA_CALL_H_
+#ifndef _KN_512_INTEGER_H_
+#define _KN_512_INTEGER_H_
 
-// simd/[std|sse|avx|mic]
-extern const char* nOkinaStdForwards[];
-extern const char* nOkinaSseForwards[];
-extern const char* nOkinaAvxForwards[];
-extern const char* nOkina512Forwards[];
-extern const char* nOkinaMicForwards[];
+struct __attribute__ ((aligned(64))) integer {
+protected:
+  __m512i vec;
+public:
+  // Constructors
+  inline integer():vec(_mm512_set_epi64(0,0,0,0,0,0,0,0)){}
+  inline	integer(__m512i mm):vec(mm){}
+  inline integer(int i):vec(_mm512_set_epi64(i,i,i,i,i,i,i,i)){}
+  inline integer(int i0, int i1, int i2, int i3,
+                 int i4, int i5, int i6, int i7){vec=_mm512_set_epi64(i7,i6,i5,i4,i3,i2,i1,i0);}
+  // Convertors
+  inline operator __m512i() const { return vec; }
+      
+  /* Logical Operations */
+  inline integer& operator&=(const integer &a) { return *this = (integer) _mm512_and_epi64(vec,a); }
+  inline integer& operator|=(const integer &a) { return *this = (integer) _mm512_or_epi64(vec,a); }
+  inline integer& operator^=(const integer &a) { return *this = (integer) _mm512_xor_epi64(vec,a); }
 
-extern const nWhatWith nOkinaStdDefines[];
-extern const nWhatWith nOkinaSseDefines[];
-extern const nWhatWith nOkinaAvxDefines[];
-extern const nWhatWith nOkina512Defines[];
-extern const nWhatWith nOkinaMicDefines[];
+  inline integer& operator +=(const integer &a) { return *this = (integer)_mm512_add_epi64(vec,a); }
+  inline integer& operator -=(const integer &a) { return *this = (integer)_mm512_sub_epi64(vec,a); }   
+  
+  friend inline __mmask8 operator==(const integer &a, const int i);
+};
+// Logicals
+inline integer operator&(const integer &a, const integer &b) { return _mm512_and_epi64(a,b); }
+inline integer operator|(const integer &a, const integer &b) { return _mm512_or_epi64(a,b); }
+inline integer operator^(const integer &a, const integer &b) { return _mm512_xor_epi64(a,b); }
 
-extern const nWhatWith nOkinaStdTypedef[];
-extern const nWhatWith nOkinaSseTypedef[];
-extern const nWhatWith nOkinaAvxTypedef[];
-extern const nWhatWith nOkina512Typedef[];
-extern const nWhatWith nOkinaMicTypedef[];
 
-char* nOkinaStdUid(nablaMain*,nablaJob*);
-char* nOkinaSseUid(nablaMain*,nablaJob*);
-char* nOkinaAvxUid(nablaMain*,nablaJob*);
-char* nOkina512Uid(nablaMain*,nablaJob*);
-char* nOkinaMicUid(nablaMain*,nablaJob*);
+inline __mmask8 operator==(const integer &a, const int i){
+  return _mm512_cmp_epi64_mask(a.vec,_mm512_set_epi64(i,i,i,i,i,i,i,i),_MM_CMPINT_EQ);
+}
 
-char* nOkinaStdIncludes(void);
-char* nOkinaSseIncludes(void);
-char* nOkinaAvxIncludes(void);
-char* nOkina512Includes(void);
-char* nOkinaMicIncludes(void);
-
-char* nOkinaStdBits(void);
-char* nOkinaSseBits(void);
-char* nOkinaAvxBits(void);
-char* nOkina512Bits(void);
-char* nOkinaMicBits(void);
-
-char* nOkinaStdGather(nablaJob*,nablaVariable*);
-char* nOkinaSseGather(nablaJob*,nablaVariable*);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*);
-char* nOkina512Gather(nablaJob*,nablaVariable*);
-char* nOkinaMicGather(nablaJob*,nablaVariable*);
-
-char* nOkinaStdScatter(nablaJob*,nablaVariable*);
-char* nOkinaSseScatter(nablaJob*,nablaVariable*);
-char* nOkinaAvxScatter(nablaJob*,nablaVariable*);
-char* nOkina512Scatter(nablaJob*,nablaVariable*);
-char* nOkinaMicScatter(nablaJob*,nablaVariable*);
-
-char* nOkinaStdPrevCell(int);
-char* nOkinaSsePrevCell(int);
-char* nOkinaAvxPrevCell(int);
-char* nOkina512PrevCell(int);
-char* nOkinaMicPrevCell(int);
-
-char* nOkinaStdNextCell(int);
-char* nOkinaSseNextCell(int);
-char* nOkinaAvxNextCell(int);
-char* nOkina512NextCell(int);
-char* nOkinaMicNextCell(int);
-
-// Cilk+ parallel color
-char *nOkinaParallelCilkSync(void);
-char *nOkinaParallelCilkSpawn(void);
-char *nOkinaParallelCilkLoop(nablaMain *);
-char *nOkinaParallelCilkIncludes(void);
-
-// OpenMP parallel color
-char *nOkinaParallelOpenMPSync(void);
-char *nOkinaParallelOpenMPSpawn(void);
-char *nOkinaParallelOpenMPLoop(nablaMain *);
-char *nOkinaParallelOpenMPIncludes(void);
-
-// Void parallel color
-char *nOkinaParallelVoidSync(void);
-char *nOkinaParallelVoidSpawn(void);
-char *nOkinaParallelVoidLoop(nablaMain *);
-char *nOkinaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *nOkinaPragmaIccIvdep(void);
-char *nOkinaPragmaGccIvdep(void);
-char *nOkinaPragmaIccAlign(void);
-char *nOkinaPragmaGccAlign(void);
-
-// hooks/nOkinaHookGather
-char* gather(astNode*,nablaJob*);
-
-// hooks/nOkinaHookScatter
-char* scatter(nablaJob*);
-
-#endif // _NABLA_OKINA_CALL_H_
+#endif //  _KN_512_INTEGER_H_

@@ -40,98 +40,85 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OKINA_CALL_H_
-#define _NABLA_OKINA_CALL_H_
+#ifndef _KN_TERNARY_H_
+#define _KN_TERNARY_H_
 
-// simd/[std|sse|avx|mic]
-extern const char* nOkinaStdForwards[];
-extern const char* nOkinaSseForwards[];
-extern const char* nOkinaAvxForwards[];
-extern const char* nOkina512Forwards[];
-extern const char* nOkinaMicForwards[];
+inline integer opTernary(const __mmask8 cond,
+                         const int ifStatement,
+                         const integer elseStatement){
+  return _mm512_mask_blend_epi64(cond, elseStatement, integer(ifStatement));
+}
+inline integer opTernary(const __mmask8 cond,
+                         const int ifStatement,
+                         const int elseStatement){
+  return _mm512_mask_blend_epi64(cond, integer(elseStatement), integer(ifStatement));
+}
 
-extern const nWhatWith nOkinaStdDefines[];
-extern const nWhatWith nOkinaSseDefines[];
-extern const nWhatWith nOkinaAvxDefines[];
-extern const nWhatWith nOkina512Defines[];
-extern const nWhatWith nOkinaMicDefines[];
+inline real opTernary(const __mmask8 cond,
+                      const __m512d ifStatement,
+                      const __m512d elseStatement){
+  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
+}
 
-extern const nWhatWith nOkinaStdTypedef[];
-extern const nWhatWith nOkinaSseTypedef[];
-extern const nWhatWith nOkinaAvxTypedef[];
-extern const nWhatWith nOkina512Typedef[];
-extern const nWhatWith nOkinaMicTypedef[];
+inline real opTernary(const __mmask8 cond,
+                      const double ifStatement,
+                      const double elseStatement){
+  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), _mm512_set1_pd(ifStatement));
+}
 
-char* nOkinaStdUid(nablaMain*,nablaJob*);
-char* nOkinaSseUid(nablaMain*,nablaJob*);
-char* nOkinaAvxUid(nablaMain*,nablaJob*);
-char* nOkina512Uid(nablaMain*,nablaJob*);
-char* nOkinaMicUid(nablaMain*,nablaJob*);
+inline real opTernary(const bool cond,
+                      const double ifStatement,
+                      const double elseStatement){
+  if (cond) return _mm512_set1_pd(ifStatement);
+  return _mm512_set1_pd(elseStatement);
+}
 
-char* nOkinaStdIncludes(void);
-char* nOkinaSseIncludes(void);
-char* nOkinaAvxIncludes(void);
-char* nOkina512Includes(void);
-char* nOkinaMicIncludes(void);
+inline real opTernary(const __mmask8 cond,
+                      const double ifStatement,
+                      const real&  elseStatement){
+  return _mm512_mask_blend_pd(cond, elseStatement, _mm512_set1_pd(ifStatement));
+}
 
-char* nOkinaStdBits(void);
-char* nOkinaSseBits(void);
-char* nOkinaAvxBits(void);
-char* nOkina512Bits(void);
-char* nOkinaMicBits(void);
+inline real opTernary(const __mmask8 cond,
+                      const real& ifStatement,
+                      const double elseStatement){
+  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), ifStatement);
+}
 
-char* nOkinaStdGather(nablaJob*,nablaVariable*);
-char* nOkinaSseGather(nablaJob*,nablaVariable*);
-char* nOkinaAvxGather(nablaJob*,nablaVariable*);
-char* nOkina512Gather(nablaJob*,nablaVariable*);
-char* nOkinaMicGather(nablaJob*,nablaVariable*);
+inline real opTernary(const __mmask8 cond,
+                      const real& ifStatement,
+                      const real& elseStatement){
+  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
+}
 
-char* nOkinaStdScatter(nablaJob*,nablaVariable*);
-char* nOkinaSseScatter(nablaJob*,nablaVariable*);
-char* nOkinaAvxScatter(nablaJob*,nablaVariable*);
-char* nOkina512Scatter(nablaJob*,nablaVariable*);
-char* nOkinaMicScatter(nablaJob*,nablaVariable*);
+inline real opTernary(const __mmask8 cond,
+                      const __m512d ifStatement,
+                      const real& elseStatement){
+  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
+}
 
-char* nOkinaStdPrevCell(int);
-char* nOkinaSsePrevCell(int);
-char* nOkinaAvxPrevCell(int);
-char* nOkina512PrevCell(int);
-char* nOkinaMicPrevCell(int);
+inline real opTernary(const bool cond,
+                      const double ifStatement,
+                      const real& elseStatement){
+  if (cond) return _mm512_set1_pd(ifStatement);
+  return elseStatement;
+}
 
-char* nOkinaStdNextCell(int);
-char* nOkinaSseNextCell(int);
-char* nOkinaAvxNextCell(int);
-char* nOkina512NextCell(int);
-char* nOkinaMicNextCell(int);
+inline real opTernary(const bool cond,
+                      const real& ifStatement,
+                      const real& elseStatement){
+  if (cond) return ifStatement;
+  return elseStatement;
+}
 
-// Cilk+ parallel color
-char *nOkinaParallelCilkSync(void);
-char *nOkinaParallelCilkSpawn(void);
-char *nOkinaParallelCilkLoop(nablaMain *);
-char *nOkinaParallelCilkIncludes(void);
 
-// OpenMP parallel color
-char *nOkinaParallelOpenMPSync(void);
-char *nOkinaParallelOpenMPSpawn(void);
-char *nOkinaParallelOpenMPLoop(nablaMain *);
-char *nOkinaParallelOpenMPIncludes(void);
+inline real3 opTernary(const __mmask8 cond,
+                       const double ifStatement,
+                       const real3&  elseStatement){
+  //debug()<<"opTernary4";
+  return real3(_mm512_mask_blend_pd(cond, elseStatement.x, _mm512_set1_pd(ifStatement)),
+               _mm512_mask_blend_pd(cond, elseStatement.y, _mm512_set1_pd(ifStatement)),
+               _mm512_mask_blend_pd(cond, elseStatement.z, _mm512_set1_pd(ifStatement)));
+}
 
-// Void parallel color
-char *nOkinaParallelVoidSync(void);
-char *nOkinaParallelVoidSpawn(void);
-char *nOkinaParallelVoidLoop(nablaMain *);
-char *nOkinaParallelVoidIncludes(void);
-
-// Pragmas: Ivdep, Align
-char *nOkinaPragmaIccIvdep(void);
-char *nOkinaPragmaGccIvdep(void);
-char *nOkinaPragmaIccAlign(void);
-char *nOkinaPragmaGccAlign(void);
-
-// hooks/nOkinaHookGather
-char* gather(astNode*,nablaJob*);
-
-// hooks/nOkinaHookScatter
-char* scatter(nablaJob*);
-
-#endif // _NABLA_OKINA_CALL_H_
+#endif //  _KN_TERNARY_H_
