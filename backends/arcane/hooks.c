@@ -71,19 +71,50 @@ bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n)
 // ****************************************************************************
 // *
 // ****************************************************************************
-bool arcaneHookDfsVariable(void){ return false; }
+bool arcaneHookDfsVariable(nablaMain *nabla){
+  if (isAnArcaneFamily(nabla)) return true;
+  return false;
+}
+bool arcaneHookDfsExtra(nablaMain *nabla){
+  if (isAnArcaneFamily(nabla)) return true;
+  return false;
+}
+char* arcaneHookDfsArgType(nablaMain *nabla, nablaVariable *var){
+  if (isAnArcaneFamily(nabla)){
+    const int offset=var->in?6:0;
+    char *str=(char*)calloc(1024,sizeof(char));
+    snprintf(str,1024,"%sVariable%s%s",
+             var->in?"const ":"",
+             var->item,
+             var->type);
+    str[8+offset]-=32;
+    str[12+offset]-=32;
+    return str;
+  }
+  return var->type;
+}
+
 
 
 
 // ****************************************************************************
 // * Dump des variables appelées
 // ****************************************************************************
-void aHookDfsForCalls(struct nablaMainStruct *nabla,
+void aHookDfsForCalls(nablaMain *nabla,
                       nablaJob *fct,
                       astNode *n,
                       const char *namespace,
                       astNode *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
+}
+
+
+// ****************************************************************************
+// * aHookJobHit
+// ****************************************************************************
+bool aHookJobHit(nablaMain *nabla,bool is_an_entry_point){
+  if (isAnArcaneFamily(nabla) && is_an_entry_point) return false;
+  return true;
 }
 
 
@@ -93,6 +124,8 @@ void aHookDfsForCalls(struct nablaMainStruct *nabla,
 char *nablaArcaneColor(nablaMain *middlend){
   if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
     return "Module";
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_FAMILY)==BACKEND_COLOR_ARCANE_FAMILY)
+    return "";
   if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE)
     return "Module";
   if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
@@ -114,6 +147,11 @@ bool isAnArcaneModule(nablaMain *middlend){
 }
 bool isAnArcaneService(nablaMain *middlend){
   if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
+    return true;
+  return false;
+}
+bool isAnArcaneFamily(nablaMain *middlend){
+  if ((middlend->colors&BACKEND_COLOR_ARCANE_FAMILY)==BACKEND_COLOR_ARCANE_FAMILY)
     return true;
   return false;
 }

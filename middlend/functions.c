@@ -325,7 +325,8 @@ void nMiddleFunctionFill(nablaMain *nabla,
           nabla->hook->call->entryPointPrefix(nabla,fct),
           fct->return_type,
           namespace?namespace:"",
-          namespace?(isAnArcaneModule(nabla)==true)?"Module::":"Service::":"",
+          namespace?(isAnArcaneModule(nabla))?"Module::":
+          isAnArcaneService(nabla)?"Service::":"::":"",
           fct->name);
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
 
@@ -333,7 +334,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   // Si used_options et used_variables ont été utilisées
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
   //nprintf(nabla, NULL,"/*fct numParams=%d*/",numParams);
-  if (nabla->hook->grammar->dfsVariable())
+  if (nabla->hook->grammar->dfsVariable(nabla))
     nMiddleParamsDumpFromDFS(nabla,fct,numParams);
       
   // On s'autorise un endroit pour insérer des paramètres

@@ -1,0 +1,225 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DUCLOUS Roland - Roland.Duclous@cea.fr                    //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+//∀ x,vx,vy,vz,c;
+
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℕ steps_p_period = 200;   // NumberOfIterationsPerPeriod
+  ℝ nb_period      = 5.0;   // NumberOfPeriod
+  ℝ frequence      = 0.01;  // TimeFrequencyOfDiagnostics
+  
+  ℕ nx             = 128;   // NumberOfPointsInX
+  ℝ xmin           = -60.0; // MinimumValueOfX
+  ℝ xmax           = +60.0; // MaximumValueOfX
+  
+  ℕ nvx            = 128;   // NumberOfPointsInVX
+  ℝ vxmin          = -8.0;  // MinimumValueOfVX
+  ℝ vxmax          = +8.0;  // MaximumValueOfVX
+  
+  ℕ nvy            = 1;     // NumberOfPointsInVY
+  ℝ vymin          = -0.5;  // MinimumValueOfVY
+  ℝ vymax          = +0.5;  // MaximumValueOfVY
+  
+  ℕ nvz            = 1;     // NumberOPointsInVZ
+  ℝ vzmin          = -0.5;  // MinimumValueOfVZ
+  ℝ vzmax          = +0.5;  // MaximumValueOfVZ
+  
+  ℕ nc             = 1;     // NumberOfPointsInConc
+  ℝ cmin           = -0.5;  // MinimumValueOfConc
+  ℝ cmax           = +0.5;  // MaximumValueOfConc
+  //
+  ℕ my_proc        = 0;     // rank of process
+  ℕ nb_proc        = 1;     // number of processes
+  //
+  ℝ C1                = 2.73;
+  ℝ Cc                = 3.;
+  ℝ C0                = 1.73;
+  ℝ Cc0               = 0.;
+  ℝ Cepsilon          = 1.;
+  ℝ Comega            = 0.9;
+  ℝ reynolds_xx       = 1.;
+  ℝ reynolds_yy       = 1.;
+  ℝ mean_vx           = 0.;
+  ℝ mean_vy           = 0.;
+  ℝ c_variance        = 0.5;
+  ℝ mean_c            = 0.;
+  ℝ zmt_lowbound      = -10.;
+  ℝ zmt_highbound     =  10.;
+  ℝ reynolds_xx_dirac = 0.001;
+  ℝ reynolds_yy_dirac = 0.01;
+  ℝ c_variance_dirac  = 0.01;
+  //
+  ℝ pi                = 3.14159265359;
+  ℝ Ck                = 6./(3.*C1+2.*Comega-4.);
+  ℝ beta              = (2.*(1.+Comega)-3.)/(3.*Comega);
+  ℝ dissipation_rate  = sqrt(2.*Ck/(beta*Comega))*sqrt(reynolds_xx)*reynolds_xx/zmt_highbound;
+  ℝ tau0              = reynolds_xx/(Comega*dissipation_rate);
+  //frequence turbulente initiale, independante de l'espace
+  ℝ omega0            = 1./(tau0*Comega); 
+};
+
+
+// ****************************************************************************
+// * Element Variables
+// ****************************************************************************
+cells/*x*/{
+  ℝ³⨯ℝ³ fe0,fe1;
+  
+  ℝ initial_kinetic_energy0;
+  ℝ initial_variance;
+  ℝ kinetic_energy0;
+  ℝ vx_skewness;
+  ℝ dissipation_rate0;
+  ℝ turbulent_frequency0;
+  ℝ c_variance0;
+  
+  ℝ kinetic_energy1;
+  ℝ dissipation_rate1;
+  ℝ turbulent_frequency1;
+  ℝ c_variance1;
+  
+  ℝ³⨯ℝ³ phi;
+  ℝ vx_correlation_gradient;
+  ℝ uc_correlation_gradient;
+  
+  // vxdiffusion_H
+  ℝ matAvx[2];
+  ℝ matAvy[2];
+  ℝ matAc[2];
+
+  ℝ reynolds_xx_profile;
+};
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℕ piece_x;
+  ℕ ix_start;
+  ℕ ix_end;
+  ℕ nx_max;
+  ℝ xb[2];
+  ℝ dx;
+  ℕ nvtot;
+  ℝ vb[6];
+  ℝ dvx,dvy,dvz;
+  ℝ cb[2];
+  ℝ dc;
+  ℝ vbcol[6];
+
+  ℕ bsize;
+  ℕ l,l1,l2;
+  
+  ℝ velocity_diffusion_coeff;
+  ℝ c_diffusion_coeff;
+  
+  // diffusion_H
+  ℕ sizeAvx,sizeAvy,sizeAc;
+
+  // Initialize
+  ℝ kx,Lx;
+  ℝ zmt_halfsize2;
+};
+
+// ****************************************************************************
+// * Initialization Part @ ]-∞,-0.0[
+// ****************************************************************************
+void ini(void) @ -10.0{
+  piece_x  = (nx-1 + nb_proc)/nb_proc;
+  ix_start = my_proc*piece_x;
+  ix_end   = min(nx-1,ix_start+piece_x-1);
+  nx_max = piece_x*nb_proc;
+  
+  assert((nb_proc-1)*piece_x<=nx-1);
+  // Minimum number of points per processor
+  assert(ix_end-ix_start+1>=2);
+
+  xb[0]=xmin; xb[1] = xmax;
+  dx = (xmax-xmin)/(nx);
+  nvtot = nvx*nvy*nvz;
+  
+  // Grid intended for finite volume treatement of advection
+  // vxmin is located at the interface
+  vb[0] = vxmin; vb[1] = vxmax;
+  vb[2] = vymin; vb[3] = vymax;
+  vb[4] = vzmin; vb[5] = vzmax;
+  
+  dvx = (vxmax-vxmin)/(nvx);
+  dvy = (vymax-vymin)/(nvy);
+  dvz = (vzmax-vzmin)/(nvz);
+
+  cb[0] = cmin;  cb[1] = cmax;
+  dc = (cmax-cmin)/(nc);
+  
+  // Grid intended for finite difference treatement of collisions
+  // vxmin is now a grid point
+  vbcol[0] = vxmin+0.5*dvx; vbcol[1] = vxmax-0.5*dvx;
+  vbcol[2] = vymin+0.5*dvy; vbcol[3] = vymax-0.5*dvy;
+  vbcol[4] = vzmin+0.5*dvz; vbcol[5] = vzmax-0.5*dvz;
+
+  bsize = 2;//vlasov.buffer_size();
+  l1 = ix_start - bsize;
+  l2 = ix_start + piece_x - 1 + bsize;
+  
+  sizeAvx = nvx*2;
+  sizeAvy = nvy*2;
+  sizeAc = nc*2; 
+}
+
+
+// Start of the Simulation
+
+// mise a zero de matAvx
+// mise à zéro de matAvy
+// mise a zero de matAc
+
+
+// ****************************************************************************
+// * Partie boucle de calcul ]+0.0,+∞[ 
+// ****************************************************************************
+∀ cells @ 1.0 { }

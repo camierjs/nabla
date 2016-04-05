@@ -60,6 +60,7 @@ int main(int argc,char* argv[]){\n\
   return r;\n\
 }\n"
 NABLA_STATUS nccArcMain(nablaMain *arc){
+  dbg("\n[nccArcMain]");
   if ((arc->main=fopen("main.cc", "w")) == NULL) exit(NABLA_ERROR); 
   fprintf(arc->main, ARC_MAIN, arc->name);
   fclose(arc->main);
@@ -67,7 +68,11 @@ NABLA_STATUS nccArcMain(nablaMain *arc){
 }
 
 
+// ****************************************************************************
+// * aHookMainPrefix
+// ****************************************************************************
 NABLA_STATUS aHookMainPrefix(nablaMain *nabla){
+  dbg("\n[aHookMainPrefix]");
   // MATHEMATICA fonctions d'initialisation
   if ((nabla->entity->libraries&(1<<with_mathematica))!=0){
     dbg("\n[nccArcane] MATHEMATICA initialization");
@@ -116,17 +121,28 @@ NABLA_STATUS aHookMainPrefix(nablaMain *nabla){
   }
   return NABLA_OK;
 }
+
+// ****************************************************************************
+// * aHookMainPreInit
+// ****************************************************************************
 NABLA_STATUS aHookMainPreInit(nablaMain *nabla){
+  dbg("\n[aHookMainPreInit]");
+  if (isAnArcaneFamily(nabla)) return NABLA_OK;
   nArcaneHLTInit(nabla);
-  dbg("\n[nccArcane] AXL generation");
+  dbg("\n[aHookMainPreInit] AXL generation");
   if (nccAxlGenerator(nabla)!=NABLA_OK)
     printf("error: in AXL generation!\n");
-  dbg("\n[nccArcane] HDR generation");
+  dbg("\n[aHookMainPreInit] HDR generation");
   if (nccArcaneEntityGeneratorPrivates(nabla->entity)!=NABLA_OK)
     printf("error: in HDR generation!\n");
   return NABLA_OK;
 }
+
+// ****************************************************************************
+// * aHookMainVarInitKernel
+// ****************************************************************************
 NABLA_STATUS aHookMainVarInitKernel(nablaMain *nabla){
+  dbg("\n[aHookMainVarInitKernel]");
   return NABLA_OK;
 }
 
@@ -134,6 +150,7 @@ NABLA_STATUS aHookMainVarInitKernel(nablaMain *nabla){
 // * hookMainVarInitKernel
 // ****************************************************************************
 NABLA_STATUS aHookMainVarInitCall(nablaMain *nabla){
+  dbg("\n[aHookMainVarInitCall]");
   return NABLA_OK;
 }
 
@@ -141,7 +158,9 @@ NABLA_STATUS aHookMainVarInitCall(nablaMain *nabla){
 // ****************************************************************************
 // * hookMain
 // ****************************************************************************
-NABLA_STATUS aHookMainHLT(nablaMain *n){
+NABLA_STATUS aHookMainHLT(nablaMain *nabla){
+  dbg("\n[aHookMainHLT]");
+  nprintf(nabla, NULL,"/*aHookMainHLT*/");
   return NABLA_OK;
 }
 
@@ -150,7 +169,7 @@ NABLA_STATUS aHookMainHLT(nablaMain *n){
 // * Backend POSTINIT - Génération du 'main'
 // ****************************************************************************
 NABLA_STATUS aHookMainPostInit(nablaMain *nabla){
-  dbg("\n[hookMainPostInit]");
+  dbg("\n[aHookMainPostInit]");
   return NABLA_OK;
 }
 
@@ -159,21 +178,23 @@ NABLA_STATUS aHookMainPostInit(nablaMain *nabla){
 // * hookMainPostfix
 // ****************************************************************************
 NABLA_STATUS aHookMainPostfix(nablaMain *nabla){
-
+  dbg("\n[aHookMainPostfix]");
   // Fermeture du source du entity
-  fprintf(nabla->entity->src,"\n\
+  if (!isAnArcaneFamily(nabla))
+    fprintf(nabla->entity->src,"\n\
 \n/*---------------------------------------------------------------------------*/\
 \n/*---------------------------------------------------------------------------*/\
 \nARCANE_REGISTER_%s_%s%s(%s%s%s%s%s);\n%s\n",
-          isAnArcaneModule(nabla)?"MODULE":"SERVICE",
-          toolStrUpCase(nabla->name),
-          isAnArcaneService(nabla)?"SERVICE":"",
-          isAnArcaneService(nabla)?nabla->service_name:"",
-          isAnArcaneService(nabla)?",":"",
-          nabla->name,
-          isAnArcaneModule(nabla)?"Module":"Service",
-          isAnArcaneService(nabla)?",SFP_None":"",
-          isAnArcaneService(nabla)?"ARCANE_END_NAMESPACE\n":"");
+            isAnArcaneModule(nabla)?"MODULE":"SERVICE",
+            toolStrUpCase(nabla->name),
+            isAnArcaneService(nabla)?"SERVICE":"",
+            isAnArcaneService(nabla)?nabla->service_name:"",
+            isAnArcaneService(nabla)?",":"",
+            nabla->name,
+            isAnArcaneModule(nabla)?"Module":"Service",
+            isAnArcaneService(nabla)?",SFP_None":"",
+            isAnArcaneService(nabla)?"ARCANE_END_NAMESPACE\n":"");
+  else dbg("\n[aHookMainPostfix] isAnArcaneFamily");
   fclose(nabla->entity->src);
   return NABLA_OK;
 }

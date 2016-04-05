@@ -46,6 +46,14 @@
 
 
 // ****************************************************************************
+// * aHookVariablesODecl
+// ****************************************************************************
+char* aHookVariablesODecl(nablaMain *nabla){
+  return "&";
+}
+
+
+// ****************************************************************************
 // * Initialisation des besoins vis-à-vis des variables (globales)
 // ****************************************************************************
 void aHookVariablesInit(nablaMain *nabla){}
@@ -54,6 +62,7 @@ void aHookVariablesInit(nablaMain *nabla){}
 /***************************************************************************** 
  * DEFINES LIST ==> ARCANE
  *****************************************************************************/
+//static nWhatWith noDefines[] ={ {NULL,NULL}};
 static nWhatWith arcaneDefines[] ={
   {"reducemin(a)","0.0"},
   {"dot(a,b)","math::scaMul(a,b)"},
@@ -89,13 +98,13 @@ static nWhatWith arcaneDefines[] ={
   {"restrict",""},
   {NULL,NULL}
 };
-static nWhatWith arcaneOpCodesDefines[] ={
+nWhatWith arcaneOpCodesDefines[] ={
   {"opMul(a,b)","(a*b)"},
   {"opDiv(a,b)","(a/b)"},
   {"opMod(a,b)","(a%b)"},
   {"opAdd(a,b)","(a+b)"},
   {"opSub(a,b)","(a-b)"},
-  {"opTernary(cond,ifStatement,elseStatement)","(cond)?ifStatement:elseStatement"},
+  {"opTernary(c,i,e)","(c)?i:e"},
   {"log(a)","::log(a)"},
   {"exp(a)","::exp(a)"},
   {"min(a,b)","math::min(a,b)"},
@@ -214,7 +223,7 @@ inline double unglitch(double a){\n\
             ((entity->libraries&(1<<with_slurm))!=0)?nccArcLibSlurmHeader():"",
             ((entity->libraries&(1<<with_particles))!=0)?nccArcLibParticlesHeader():"",
             (isAnArcaneModule(entity->main)
-             &&(entity->main->interface_path!=NULL))?entity->main->interface_path:"",
+             &&(entity->main->specific_path!=NULL))?entity->main->specific_path:"",
             entity->name,isAnArcaneModule(entity->main)?"":"Service");
   // Dans le cas d'un service, on ne souhaite que les opCodes en DEFINES
   if (isAnArcaneService(entity->main))
@@ -276,26 +285,33 @@ static NABLA_STATUS nccArcaneEntityConstructor(const nablaEntity *entity){
 // ****************************************************************************
 NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity *entity){
   nablaJob *job=entity->jobs;
-
+  nablaMain *nabla=entity->main;
   // Dans le cas d'un service, pour l'instant on ne fait rien dans le header
-  if (isAnArcaneService(entity->main)) return NABLA_OK;
+  if (isAnArcaneService(nabla)) return NABLA_OK;
   
   for(;job!=NULL;job=job->next){
     if (job->is_a_function){
-      fprintf(entity->hdr, "\n\t virtual ");
+      // Si on est une Family et que la fonction a un '@', on ne fait rien!
+      if (isAnArcaneFamily(nabla) && job->is_an_entry_point) continue;
+      fprintf(entity->hdr, "\n\tvirtual ");
       nMiddleFunctionDumpHeader(entity->hdr, job->jobNode);
       fprintf(entity->hdr, ";");
       continue;
     }
+      // Si on est une Family et que le job a un '@', on ne fait rien!
+    if (isAnArcaneFamily(nabla) && job->is_an_entry_point) continue;
     // Cela se fait aussi lors de la génération de l'axl afin de pouvoir traiter les @ -4,4
     dbg("\n\t[nccArcaneEntityVirtuals] virtuals for job %s", job->name);
     // On remplit la ligne du fichier HDR
-    // Si c'est une réduction, on fait moins
-    if (strstr(job->name, "arcaneReduction_")!=NULL)
-      fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
-    else
-      fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
-    nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);
+    fprintf(entity->hdr, "\n\tvirtual void %s(", job->name);
+    if (isAnArcaneFamily(nabla)){
+      int i=0;
+      for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next,i+=1)
+        fprintf(entity->hdr, "%s%s%s",i==0?"":",",
+                arcaneHookDfsArgType(nabla,var),
+                aHookVariablesODecl(nabla));
+    }else
+      nMiddleDumpParameterTypeList(entity->main,entity->hdr, job->stdParamsNode);
     fprintf(entity->hdr, ");");
   }
   return NABLA_OK;
@@ -307,6 +323,11 @@ NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity *entity){
 // * Utile pour les variables static, par exemple
 // ****************************************************************************
 void aHookVariablesPrefix(nablaMain *nabla){
+  if (isAnArcaneFamily(nabla)){
+    aHookFamilyVariablesPrefix(nabla);
+    nccArcaneEntityVirtuals(nabla->entity);
+    return;
+  }
 
   // Dans le cas d'un module, on le fait maintenant
   if (isAnArcaneModule(nabla)){

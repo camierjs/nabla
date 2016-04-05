@@ -45,7 +45,11 @@
 
 char *toolStrDownCase(const char*);
 char *toolStrUpCase(const char*);
+char *toolStrUpCaseAndSwap(const char*,
+                           const char,
+                           const char);
 char *toolStrQuote(const char*);
+char *pth2nmspc(const char*);
 
 char *toolOpName(char*);
 

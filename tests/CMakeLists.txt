@@ -42,7 +42,6 @@ function(get_additional_nabla_files_and_set_Makefile name backend path)
   endforeach()
 endfunction()
 
-#################################################
 # nabla_add_arcane_test_with_additional_defines #
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
   info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_CYAN}arcane${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_mpi")
@@ -54,10 +53,21 @@ function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd addition
 				COMMAND /bin/sh -c "export ADDITIONAL_DEFINES=-D${additional_defines} && ${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile ${cmd}${nb_proc}")
 endfunction()
 
-#########################
-# nabla_add_arcane_test #
+# nabla_add_arcane_test
 function(nabla_add_arcane_test name nb_proc cmd)
    nabla_add_arcane_test_with_additional_defines(${name} ${nb_proc} ${cmd} NO_ADDITIONAL_DEFINES)
+endfunction()
+
+# nabla_add_arcane_test_family
+function(nabla_add_arcane_test_family name)
+  set(cmd gen)
+  set(backend arcane)
+  set(subpath family)
+  info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_CYAN}arcane${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_1_std_family")
+  get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
+  add_test(NAME nabla_${cmd}_arcane_${name}_1_std_family
+				WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}
+				COMMAND /bin/sh -c "${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile family")
 endfunction()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane)
@@ -172,6 +182,7 @@ endforeach(tst)
 # NABLA TESTS FOR ARCANE #
 ##########################
 if (ARCANE_FOUND)
+  nabla_add_arcane_test_family(fmly)
   nabla_add_arcane_test(ndspmhd 1 run)
   nabla_add_arcane_test(hlt 1 run)
   # No ICartesianMesh out of CEA # nabla_add_arcane_test(gad 1 run)

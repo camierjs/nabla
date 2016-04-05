@@ -64,7 +64,7 @@ void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
 
 // gram
 void xHookReduction(nablaMain*,astNode*);
-bool xHookDfsVariable(void);
+bool xHookDfsVariable(nablaMain*);
 
 // call
 void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
@@ -108,6 +108,7 @@ void xHookVariablesInit(nablaMain*);
 void xHookVariablesPrefix(nablaMain*);
 void xHookVariablesMalloc(nablaMain*);
 void xHookVariablesFree(nablaMain*);
+char* xHookVariablesODecl(nablaMain*);
 
 // main
 NABLA_STATUS xHookMainPrefix(nablaMain*);

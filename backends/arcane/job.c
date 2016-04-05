@@ -42,6 +42,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
+#include "backends/arcane/arcane.h"
+
 extern bool adrs_it;
 
 
@@ -58,6 +60,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
     if (itm=='c' && j->forall_item=='c'){
       return "CellCellGroup cells_pairgroup(allCells(),allCells(),IK_Node);";
     }else{
+      if (isAnArcaneFamily(j->entity->main)) return "";
       char prefix[2048];
       snprintf(prefix,2048,"debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
       return strdup(prefix);
@@ -76,7 +79,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
     return strdup(str);
   }
   // Pour une fonction, on ne fait que le debug
-  if (itm=='\0'){
+  if (itm=='\0'){// && !isAnArcaneFamily(j->entity->main)){
     char prefix[2048];
     snprintf(prefix,2048,"\n\tdebug()<<\"\33[2;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
     return strdup(prefix);

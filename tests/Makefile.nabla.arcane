@@ -6,7 +6,8 @@ TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 
-LOG = -t #-v $(TGT).log
+LOG =
+#-v $(TGT).log
 
 
 ########################## 
@@ -76,6 +77,9 @@ $(TGT)Module.o:$(TGT)Module.cc
 	@echo ADDITIONAL_DEFINES=$(ADDITIONAL_DEFINES)
 	$(CXX) -c $(CFLAGS) $(ADDITIONAL_DEFINES) $(TGT)Module.cc -o $(TGT)Module.o
 
+family:$(TGT_FILE) $(NABLA)
+	$(NABLA) $(LOG) --arcane --family $(TGT) -I IFamily -p $(TGT)/arcane/family -i $(TGT_FILE)
+	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 ########
 # MAIN #
@@ -119,8 +123,7 @@ h1:$(TGT)
 # CLEAN #
 #########
 cln:
-	@-rm -f *.o *.a *.so *.co $(TGT) $(TGT).axl $(TGT)_axl.h $(TGT)Module.* $(TGT).E.* *.log *.dot *.svg main.cc mcuda.config
-	@-rm -rf output* signal* fatal* logs *.o *.a *.so *.co $(TGT) $(TGT)Module* $(TGT).E.* *.log *.dot *.svg main.cc *.config errors
+	-rm -f *.o *.a *.so *.co $(TGT) $(TGT)*.cc $(TGT)*.h $(TGT)*.axl $(TGT)_axl.h $(TGT)Module.* $(TGT).E.* *.log *.dot *.svg main.cc mcuda.config output* signal* fatal* logs *.o *.a *.so *.co $(TGT) $(TGT)Module* $(TGT).E.* *.log *.dot *.svg main.cc *.config errors
 
 
 #############

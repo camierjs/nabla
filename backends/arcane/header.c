@@ -76,7 +76,7 @@ static NABLA_STATUS nccArcaneEntityHeader(nablaMain *arc){
 \n#include <arcane/ItemPairGroup.h>\
 \n#include <arcane/ItemPairEnumerator.h>\n\n",
           (isAnArcaneService(arc)||
-           (isAnArcaneModule(arc)&&(arc->interface_path!=NULL)))?arc->interface_path:"",
+           (isAnArcaneModule(arc)&&(arc->specific_path!=NULL)))?arc->specific_path:"",
           arc->entity->name,
           nablaArcaneColor(arc));
   return NABLA_OK;
@@ -107,7 +107,14 @@ static NABLA_STATUS nccArcConfigFooter(nablaMain *arc){
 // * hookHeaderDump
 // ****************************************************************************
 void aHookHeaderDump(nablaMain *nabla){
+  if (isAnArcaneFamily(nabla)){
+    dbg("\n[aHookHeaderDump] isAnArcaneFamily");
+    aHookFamilyHeader(nabla);
+    return;
+  }
+  dbg("\n[aHookHeaderDump] nccAxlGenerateHeader");
   nccAxlGenerateHeader(nabla);
+  dbg("\n[aHookHeaderDump] nccArcaneEntityHeader");
   nccArcaneEntityHeader(nabla);
   // Dans le cas d'un service, on le fait maintenant
   if (isAnArcaneService(nabla)){
@@ -126,18 +133,22 @@ void aHookHeaderDump(nablaMain *nabla){
 // ****************************************************************************
 void aHookHeaderOpen(nablaMain *nabla){
   char hdrFileName[NABLA_MAX_FILE_NAME];
-  dbg("\n[nccArcane] Ouverture du fichier HEADER du nabla dans le cas d'un module");
-  if (isAnArcaneModule(nabla)==true){
+  dbg("\n[nccArcane] Ouverture du fichier HEADER");
+  if (isAnArcaneModule(nabla) || isAnArcaneFamily(nabla)){
     sprintf(hdrFileName, "%s%s.h", nabla->name, nablaArcaneColor(nabla));
+    dbg("\n[nccArcane] File %s%s.h",nabla->name, nablaArcaneColor(nabla));
     if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
   }
+  dbg("\n[nccArcane] done!");
 }
 
 
 // ****************************************************************************
 // * ENUMERATES Hooks
 // ****************************************************************************
-void aHookHeaderEnums(nablaMain *nabla){}
+void aHookHeaderEnums(nablaMain *nabla){
+  dbg("\n[aHookHeaderEnums]");
+}
 
 
 // ****************************************************************************
@@ -145,31 +156,37 @@ void aHookHeaderEnums(nablaMain *nabla){}
 // ****************************************************************************
 void aHookHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name);
+  dbg("\n[aHookHeaderPrefix]");
 }
 
 
 // ****************************************************************************
 // * hookHeaderIncludes
 // ****************************************************************************
-void aHookHeaderIncludes(nablaMain *nabla){}
+void aHookHeaderIncludes(nablaMain *nabla){
+  dbg("\n[aHookHeaderIncludes]");
+}
 
 
 // ****************************************************************************
 // * 
 // ****************************************************************************
 void aHookHeaderPostfix(nablaMain *nabla){
-  if (isAnArcaneModule(nabla)==true){ // Fermeture du CONFIG dans le cas d'un module
+  if (isAnArcaneModule(nabla)){ // Fermeture du CONFIG dans le cas d'un module
     nccArcConfigFooter(nabla); 
     fclose(nabla->cfg);
   }
-
-  // Fermeture de l'AXL
-  fprintf(nabla->axl,"\n</%s>\n",
-          (isAnArcaneModule(nabla)==true)?"module":"service");
-  fclose(nabla->axl);
   
-  // Fermeture du header du entity
-  if (isAnArcaneModule(nabla)==true){ // Fermeture du HEADER dans le cas d'un module
-    fclose(nabla->entity->hdr);
+  if (!isAnArcaneFamily(nabla)){
+    // Fermeture de l'AXL
+    fprintf(nabla->axl,"\n</%s>\n",
+            (isAnArcaneModule(nabla))?"module":"service");
+    fclose(nabla->axl);
   }
+  
+  if (isAnArcaneFamily(nabla)) aHookFamilyFooter(nabla);
+    
+  // Fermeture du header
+  //if (isAnArcaneModule(nabla)||isAnArcaneFamily(nabla))
+  fclose(nabla->entity->hdr);
 }

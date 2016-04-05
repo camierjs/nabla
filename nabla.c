@@ -70,10 +70,20 @@ static char *unique_temporary_file_name=NULL;
 \t[1;36m-tnl[0m\t\tGenerate the same AST dot files withou labels\n\
 \t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
 [1;4;35mTARGET[0m can be:\n\
-\t[1;35m--cuda  [36;4mname[0m\tCode generation for the target CUDA\n\
+\t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
+\t\t[36m--alone[0m\tGenerates a [4mstand-alone[0m application\n\
+\t\t[36m--library[0m Generates a [4mlibrary[0m\n\
+\t\t[36m--module[0m  Generates a [4mmodule[0m\n\
+\t\t[36m--service[0m Generates a [4mservice[0m\n\
+\t\t\t[36m-I [4mname[0m Interface name to use\n\
+\t\t\t[36m-p [4mpath[0m Path of the interface file\n\
+\t\t\t[36m-n [4mname[0m Service name that will be generate\n\
+\t[1;35m--cuda [36;4mname[0m\tCode generation for the target CUDA\n\
+\t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
+\t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
+\t[1;35m--lib [36;4mname[0m\tCode generation for C/C++ library [1;5;31m(WiP)[0m\n\
+\t[1;35m--loci [36;4mname[0m\tCode generation for LOCI [1;5;31m(WiP)[0m\n\
 \t[1;35m--okina [36;4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
-\t\t[36m--stc Generate static structures\n\
-\t\t[36m--dyn Generate dynamic structues\n\
 \t\t[36m--std[0m\tStandard code generation with no explicit vectorization\n\
 \t\t[36m--sse[0m\tExplicit code generation with SSE intrinsics\n\
 \t\t[36m--avx[0m\tExplicit code generation with AVX intrinsics\n\
@@ -86,21 +96,10 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\tIntel ICC pragma generation\n\
-\t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
-\t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
-\t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
-\t\t[36m--alone[0m\tGenerate a [4mstand-alone[0m application\n\
-\t\t[36m--module[0m  Generate a [4mmodule[0m\n\
-\t\t[36m--service[0m Generate a [4mservice[0m\n\
-\t\t\t[36m-I [4mname[0m Interface name to use\n\
-\t\t\t[36m-p [4mpath[0m Path of the interface file\n\
-\t\t\t[36m-n [4mname[0m Service name that will be generate\n\
-\t[1;35m--raja   [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for RAJA\n \
-\t[1;35m--loci   [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for LOCI\n\
-\t[1;35m--uintah [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for UINTAH\n\
-\t[1;35m--mma    [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for Mathematica\n\
-\t[1;35m--vhdl   [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for VHDL\n\
-\t[1;35m--lib    [36;4mname[0m\t[1;5;31mWork in progress[0m, Code generation for LIBRARY\n\
+\t[1;35m--mma [36;4mname[0m\tCode generation for Mathematica [1;5;31m(WiP)[0m\n\
+\t[1;35m--raja [36;4mname[0m\tCode generation for RAJA [1;5;31m(WiP)[0m\n\
+\t[1;35m--uintah [36;4mname[0m\tCode generation for UINTAH [1;5;31m(WiP)[0m\n\
+\t[1;35m--vhdl [36;4mname[0m\tCode generation for VHDL [1;5;31m(WiP)[0m\n\
 [1;36mEMACS MODE[0m\n\
 \tYou can find a nabla-mode.el file within the distribution.\n\
 \tLoading emacs utf-8 locale coding system could be a good idea:\n\
@@ -283,23 +282,22 @@ int main(int argc, char * argv[]){
   const struct option longopts[]={
     {"arcane",no_argument,NULL,BACKEND_ARCANE},
        {"alone",required_argument,NULL,BACKEND_COLOR_ARCANE_ALONE},
+       {"family",required_argument,NULL,BACKEND_COLOR_ARCANE_FAMILY},
        {"module",required_argument,NULL,BACKEND_COLOR_ARCANE_MODULE},
        {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
     {"cuda",required_argument,NULL,BACKEND_CUDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
-       {"stc",no_argument,NULL,BACKEND_COLOR_OKINA_STC},
-       {"dyn",no_argument,NULL,BACKEND_COLOR_OKINA_DYN},
        {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
        {"sse",no_argument,NULL,BACKEND_COLOR_OKINA_SSE},
        {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
        {"avx2",no_argument,NULL,BACKEND_COLOR_OKINA_AVX2},
        {"avx512",no_argument,NULL,BACKEND_COLOR_OKINA_AVX512},
        {"mic",no_argument,NULL,BACKEND_COLOR_OKINA_MIC},
-       {"cilk",no_argument,NULL,BACKEND_COLOR_CILK},
-       {"omp",no_argument,NULL,BACKEND_COLOR_OpenMP},
+       {"cilk",no_argument,NULL,BACKEND_COLOR_OKINA_CILK},
+       {"omp",no_argument,NULL,BACKEND_COLOR_OKINA_OMP},
        {"seq",no_argument,NULL,BACKEND_COLOR_OKINA_SEQ},
-       {"gcc",no_argument,NULL,BACKEND_COLOR_GCC},
-       {"icc",no_argument,NULL,BACKEND_COLOR_ICC},
+       {"gcc",no_argument,NULL,BACKEND_COLOR_OKINA_GCC},
+       {"icc",no_argument,NULL,BACKEND_COLOR_OKINA_ICC},
     {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
     {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"raja",required_argument,NULL,BACKEND_RAJA},
@@ -353,7 +351,7 @@ int main(int argc, char * argv[]){
       break;
       // ************************************************************
       // * BACKEND ARCANE avec ses variantes:
-      // *    - ALONE, MODULE ou SERVICE
+      // *    - ALONE, FAMILY, MODULE ou SERVICE
       // *    - p(ath), I(nterface), n(name)
       // ************************************************************      
     case BACKEND_ARCANE:
@@ -364,6 +362,15 @@ int main(int argc, char * argv[]){
     case BACKEND_COLOR_ARCANE_ALONE:
       backend_color=BACKEND_COLOR_ARCANE_ALONE;
       dbg("\n[nabla] Command line specifies ARCANE's STAND-ALONE option");
+      nabla_entity_name=optarg;
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+          nabla_entity_name);
+      break;
+    case BACKEND_COLOR_ARCANE_FAMILY:
+      backend_color=BACKEND_COLOR_ARCANE_FAMILY;
+      dbg("\n[nabla] Command line specifies ARCANE's FAMILY option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
@@ -420,18 +427,6 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s",
           nabla_entity_name);
       break;
-      //case BACKEND_COLOR_OKINA_TILING:
-      //backend_color=BACKEND_COLOR_OKINA_TILING;
-      //dbg("\n[nabla] Command line specifies OKINA's tiling option");
-      //break;
-    case BACKEND_COLOR_OKINA_STC:
-      backend_color|=BACKEND_COLOR_OKINA_STC;
-      dbg("\n[nabla] Command line specifies OKINA's STC option");
-      break;
-    case BACKEND_COLOR_OKINA_DYN:
-      backend_color|=BACKEND_COLOR_OKINA_DYN;
-      dbg("\n[nabla] Command line specifies OKINA's DYN option");
-      break;
     case BACKEND_COLOR_OKINA_STD:
       backend_color|=BACKEND_COLOR_OKINA_STD;
       dbg("\n[nabla] Command line specifies OKINA's STD option");
@@ -456,24 +451,24 @@ int main(int argc, char * argv[]){
       backend_color|=BACKEND_COLOR_OKINA_MIC;
       dbg("\n[nabla] Command line specifies OKINA's MIC option");
       break;
-    case BACKEND_COLOR_CILK:
-      backend_color|=BACKEND_COLOR_CILK;
+    case BACKEND_COLOR_OKINA_CILK:
+      backend_color|=BACKEND_COLOR_OKINA_CILK;
       dbg("\n[nabla] Command line specifies OKINA's CILK option");
       break;
-    case BACKEND_COLOR_OpenMP:
-      backend_color|=BACKEND_COLOR_OpenMP;
+    case BACKEND_COLOR_OKINA_OMP:
+      backend_color|=BACKEND_COLOR_OKINA_OMP;
       dbg("\n[nabla] Command line specifies OKINA's OpenMP option");
       break;
     case BACKEND_COLOR_OKINA_SEQ:
       backend_color|=BACKEND_COLOR_OKINA_SEQ;
       dbg("\n[nabla] Command line specifies OKINA's SEQ option");
       break;
-    case BACKEND_COLOR_GCC:
-      backend_color|=BACKEND_COLOR_GCC;
+    case BACKEND_COLOR_OKINA_GCC:
+      backend_color|=BACKEND_COLOR_OKINA_GCC;
       dbg("\n[nabla] Command line specifies OKINA's GCC option");
       break;
-    case BACKEND_COLOR_ICC:
-      backend_color|=BACKEND_COLOR_ICC;
+    case BACKEND_COLOR_OKINA_ICC:
+      backend_color|=BACKEND_COLOR_OKINA_ICC;
       dbg("\n[nabla] Command line specifies OKINA's ICC option");
       break;
       // ************************************************************

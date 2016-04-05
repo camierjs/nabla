@@ -82,7 +82,7 @@ int nMiddleSwitch(astNode *root,
                   const BACKEND_SWITCH backend,
                   const BACKEND_COLORS colors,
                   char *interface_name,
-                  char *interface_path,
+                  char *specific_path,
                   char *service_name){
   nablaMain *nabla=nMiddleInit(nabla_entity_name);
   dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
@@ -90,7 +90,7 @@ int nMiddleSwitch(astNode *root,
   nabla->backend=backend;
   nabla->colors=colors;
   nabla->interface_name=interface_name;
-  nabla->interface_path=interface_path;
+  nabla->specific_path=specific_path;
   nabla->service_name=service_name;
   nabla->optionDumpTree=optionDumpTree;
   nabla->options=NULL;  

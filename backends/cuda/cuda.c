@@ -187,7 +187,7 @@ const static hookVars cuHookVars={
   cuHookVariablesMalloc,
   cuHookVariablesFree,
   NULL,
-  NULL
+  xHookVariablesODecl
 };  
 
 // Hooks pour le main
@@ -231,6 +231,9 @@ const static hookGrammar cuHookGrammar={
   NULL, // primary_expression_to_return
   NULL, // returnFromArgument
   xHookDfsVariable,
+  NULL,
+  NULL,
+  NULL,
   NULL
 };
   

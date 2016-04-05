@@ -51,7 +51,7 @@ char* kHookVarDeclPrefix(nablaMain *nabla){
   return "Kokkos::View<";
 }
 char* kHookVarDeclPostfix(nablaMain *nabla){
-  return ">&";
+  return "*>&";
 }
 
 

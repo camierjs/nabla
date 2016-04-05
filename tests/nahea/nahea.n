@@ -119,7 +119,8 @@ void reduceMeshSize(void) @ -0.9{
 // ********************************************************
 // * iniPrime via GMP
 // ********************************************************
-∀ own cells void iniPrimeGmp(void) in (cell inc, cell nth) out (cell i, cell prime, cell cpuTime) @ -0.8,2.0{
+∀ own cells void iniPrimeGmp(void) in (cell inc, cell nth)
+  out (cell i, cell prime, cell cpuTime) @ -0.8,2.0{
   int tmp,percent=0;
   if (i!=prime) continue;
   // On flush le rang de l'itérateur

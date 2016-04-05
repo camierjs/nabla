@@ -131,7 +131,7 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   // Dunp des variables du job dans le header
   nablaVariable *var=fct->used_variables;
   for(;var!=NULL;var=var->next,i+=1)
-    hprintf(nabla, NULL, "%s%s%s*%s %s_%s",
+    hprintf(nabla, NULL, "%s%s%s%s %s_%s",
             (i==0)?"":",",
             cHOOKn(nabla,vars,idecl),
             //(var->in&&!var->out)?"/*in*/":"",
@@ -308,19 +308,19 @@ static char* iRTN2o(nablaMain *nabla,
 // * xsParam
 // ****************************************************************************
 static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return iRTNo(nabla,"int*","xs_cell_node");
-  if (j=='c' and v=='f' and d=='0') return iRTNo(nabla,"int*","xs_cell_face");
-  if (j=='c' and v=='x' and d=='0') return iRTNo(nabla,"int*","xs_cell_prev");
-  if (j=='c' and v=='x' and d=='1') return iRTNo(nabla,"int*","xs_cell_next");
+  if (j=='c' and v=='n' and d=='0') return iRTNo(nabla,"int","xs_cell_node");
+  if (j=='c' and v=='f' and d=='0') return iRTNo(nabla,"int","xs_cell_face");
+  if (j=='c' and v=='x' and d=='0') return iRTNo(nabla,"int","xs_cell_prev");
+  if (j=='c' and v=='x' and d=='1') return iRTNo(nabla,"int","xs_cell_next");
 
-  if (j=='n' and v=='c' and d=='0') return iRTNo(nabla,"int*","xs_node_cell");
-  if (j=='n' and v=='f' and d=='0') return iRTNo(nabla,"int*","xs_node_face");
+  if (j=='n' and v=='c' and d=='0') return iRTNo(nabla,"int","xs_node_cell");
+  if (j=='n' and v=='f' and d=='0') return iRTNo(nabla,"int","xs_node_face");
   if (j=='n' and v=='c' and d=='1') return iRTN2o(nabla,
-                                                  "int*","xs_node_cell",
-                                                  "int*","xs_node_cell_corner");
+                                                  "int","xs_node_cell",
+                                                  "int","xs_node_cell_corner");
   
-  if (j=='f' and v=='n' and d=='0') return iRTNo(nabla,"int*","xs_face_node");
-  if (j=='f' and v=='c' and d=='0') return iRTNo(nabla,"int*","xs_face_cell");
+  if (j=='f' and v=='n' and d=='0') return iRTNo(nabla,"int","xs_face_node");
+  if (j=='f' and v=='c' and d=='0') return iRTNo(nabla,"int","xs_face_cell");
   
   nprintf(nabla, NULL,"/*xsParam, error!*/");
   assert(NULL);
@@ -348,9 +348,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
   
-
-  //if (numParams==0){ // permet de ne pas rajouter pour les job à-là 'dumpSolution'
-  {
+  if (!nabla->hook->grammar->dfsExtra){
     const char j=job->item[0];
     const char e=job->enum_enum;
     //printf("job %s, e=%c",job->name,e);
@@ -387,9 +385,13 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   }
   i=numParams;
 
+  // On va chercher le prefix des variables de notre backend
+  const char *prefix=
+    nabla->hook->token->prefix?
+    nabla->hook->token->prefix(nabla):"";
   // Dump des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
-    nprintf(nabla, NULL, "%s%s%s*%s %s_%s",//__restrict__
+    nprintf(nabla, NULL, "%s%s%s%s %s%s_%s",//__restrict__
             (i==0)?"":",",
             //(var->in&&!var->out)?"":"",//const
             cHOOKn(nabla,vars,idecl),
@@ -397,9 +399,11 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
             // c'est qu'on joue peut-être avec les coords? => on force à real
             (strncmp(var->type,"real3",5)==0&&dim1D)?"real":
             (strncmp(var->type,"real3x3",7)==0&&dim2D)?"real3x3":
-            (strncmp(var->type,"real3",5)==0&&dim2D)?"real3":var->type,
+            (strncmp(var->type,"real3",5)==0&&dim2D)?"real3":
+            (nabla->hook->grammar->dfsArgType)?
+            nabla->hook->grammar->dfsArgType(nabla,var):var->type,
             cHOOKn(nabla,vars,odecl),
-            var->item,var->name);
+            prefix,var->item,var->name);
 
   // Dump des XS des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1){

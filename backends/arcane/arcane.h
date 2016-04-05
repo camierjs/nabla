@@ -43,6 +43,8 @@
 #ifndef _NABLA_ARCANE_H_
 #define _NABLA_ARCANE_H_
 
+bool aHookJobHit(nablaMain*,bool);
+
 NABLA_STATUS aHookMainPrefix(nablaMain*);
 NABLA_STATUS aHookMainPreInit(nablaMain*);
 NABLA_STATUS aHookMainVarInitKernel(nablaMain*);
@@ -55,6 +57,7 @@ void aHookVariablesInit(nablaMain*);
 void aHookVariablesPrefix(nablaMain*);
 void aHookVariablesMalloc(nablaMain*);
 void aHookVariablesFree(nablaMain*);
+char* aHookVariablesODecl(nablaMain*);
 
 void aHookMeshPrefix(nablaMain*);
 void aHookMeshCore(nablaMain*);
@@ -89,7 +92,9 @@ void arcaneIteration(nablaMain*);
 void arcaneTurnTokenToOption(nablaMain*,nablaOption*);
 void arcaneHookReduction(nablaMain*,astNode*);
 
-bool arcaneHookDfsVariable(void);
+bool arcaneHookDfsVariable(nablaMain*);
+bool arcaneHookDfsExtra(nablaMain*);
+char* arcaneHookDfsArgType(nablaMain*,nablaVariable*);
 
 //char *nccArcBits(void);
 //char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
@@ -105,6 +110,7 @@ char *nablaArcaneColor(nablaMain*);
 bool isAnArcaneAlone(nablaMain*);
 bool isAnArcaneModule(nablaMain*);
 bool isAnArcaneService(nablaMain*);
+bool isAnArcaneFamily(nablaMain*);
 
 void actFunctionDumpHdr(FILE*, astNode*);
 
@@ -177,10 +183,13 @@ char* nccArcLibAlephHeader(void);
 void nccArcLibAlephIni(nablaMain*);
 
 // Main Entry Backend
-NABLA_STATUS arcaneOld(nablaMain*,astNode*, const char*);
 hooks* arcane(nablaMain*);
 
 // Hooks 
+void aHookFamilyHeader(nablaMain*);
+void aHookFamilyFooter(nablaMain*);
+void aHookFamilyVariablesPrefix(nablaMain*);
+
 void arcaneJob(nablaMain*, astNode*);
 void arcaneHookFunctionName(nablaMain*);
 void arcaneHookFunction(nablaMain*, astNode*);

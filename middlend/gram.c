@@ -181,15 +181,28 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   /////////////////////////////////////////////////
   if (n->ruleid == rulenameToId("function_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    //nabla->hook->grammar->function(nabla,n);
+    bool is_an_entry_point=false;
+    // On scan pour trouver un '@'
+    for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
+      if (nAt->token!=NULL) dbg("%s ",nAt->token);
+      if (nAt->tokenid!=AT) continue;
+      is_an_entry_point=true;
+      break;
+    }
+    if (nabla->hook->grammar->hit &&
+        !nabla->hook->grammar->hit(nabla,is_an_entry_point))
+      goto step_next;
+    
     nablaJob *fct = nMiddleJobNew(nabla->entity);
     nMiddleJobAdd(nabla->entity, fct);
-    nMiddleFunctionFill(nabla,fct,n,nabla->hook->source->name?nabla->hook->source->name(nabla):NULL);
+    nMiddleFunctionFill(nabla,fct,n,
+                        nabla->hook->source->name?
+                        nabla->hook->source->name(nabla):NULL);
     dbg("\n\t[nablaMiddlendParseAndHook] function done");
     goto step_next;
     // On continue sans s'engouffrer dans la fonction
-    if(n->next != NULL) nMiddleGrammar(n->next, nabla);
-    return;
+    //if(n->next != NULL) nMiddleGrammar(n->next, nabla);
+    //return;
   }
   
   ////////////////////////////////////////
@@ -197,13 +210,35 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   ////////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_job_definition")){
     dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-
-    //nabla->hook->grammar->job(nabla,n);
-    nablaJob *job = nMiddleJobNew(nabla->entity);
-    nMiddleJobAdd(nabla->entity, job);
-    nMiddleJobFill(nabla,job,n,nabla->hook->source->name?nabla->hook->source->name(nabla):NULL);
-
-    dbg("\n\t[nablaMiddlendParseAndHook] job done");
+    bool job_to_add=true;
+    bool is_an_entry_point=false;
+    
+    // On scan pour trouver un '@'
+    for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
+      if (nAt->token!=NULL) dbg("%s ",nAt->token);
+      if (nAt->tokenid!=AT) continue;
+      is_an_entry_point=true;
+      break;
+    }
+    dbg("\n\t\t[nablaMiddlendParseAndHook] is_an_entry_point=%s",
+        is_an_entry_point?"true":"false");
+    if (nabla->hook->grammar->hit &&
+        !nabla->hook->grammar->hit(nabla,is_an_entry_point))
+      job_to_add=false;
+      
+    if (!job_to_add){
+      dbg("\n\t[nablaMiddlendParseAndHook] Skipping job!");
+      goto step_next;
+    }else{
+      dbg("\n\t[nablaMiddlendParseAndHook] Adding job!");
+    
+      nablaJob *job = nMiddleJobNew(nabla->entity);
+      nMiddleJobAdd(nabla->entity, job);
+      nMiddleJobFill(nabla,job,n,
+                     nabla->hook->source->name?
+                     nabla->hook->source->name(nabla):NULL);
+      dbg("\n\t[nablaMiddlendParseAndHook] job done");
+    }
     goto step_next;
   }
 

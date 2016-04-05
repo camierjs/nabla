@@ -47,17 +47,24 @@
 // * Backend - Allocation de la connectivité du maillage
 // * On a pas encore parsé!, on ne peut pas jouer avec les isWithLibrary
 // ****************************************************************************
-void aHookMeshPrefix(nablaMain *nabla){}
+void aHookMeshPrefix(nablaMain *nabla){
+  dbg("\n[aHookMeshPrefix]");
+}
 
 
 // ****************************************************************************
 // * hookMeshCore
 // * Ici, on revient une fois parsé!
 // ****************************************************************************
-void aHookMeshCore(nablaMain *nabla){}
+void aHookMeshCore(nablaMain *nabla){
+  dbg("\n[aHookMeshCore]");
+  nprintf(nabla, NULL,"/*aHookMeshCore*/");
+}
 
 
 // ****************************************************************************
 // * hookMeshPostfix
 // ****************************************************************************
-void aHookMeshPostfix(nablaMain *nabla){}
+void aHookMeshPostfix(nablaMain *nabla){
+  dbg("\n[aHookMeshPostfix]");
+}

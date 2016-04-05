@@ -185,6 +185,9 @@ const hookGrammar gram={
   NULL,
   NULL,
   xHookDfsVariable,
+  NULL,
+  NULL,
+  NULL,
   NULL
 };
 
@@ -262,7 +265,7 @@ const static hookVars vars={
   xHookVariablesMalloc,
   xHookVariablesFree,
   NULL,
-  NULL
+  xHookVariablesODecl
 };
 
 const static hookMain mains={
@@ -321,9 +324,9 @@ hooks* okina(nablaMain *nabla){
   }
   
   // Call between parallel modes
-  if ((nabla->colors&BACKEND_COLOR_CILK)==BACKEND_COLOR_CILK)
+  if ((nabla->colors&BACKEND_COLOR_OKINA_CILK)==BACKEND_COLOR_OKINA_CILK)
     nabla->call->parallel=&okinaCilk;
-  if ((nabla->colors&BACKEND_COLOR_OpenMP)==BACKEND_COLOR_OpenMP)
+  if ((nabla->colors&BACKEND_COLOR_OKINA_OMP)==BACKEND_COLOR_OKINA_OMP)
     nabla->call->parallel=&okinaOpenMP;
 
   // Hook des directions
@@ -339,7 +342,7 @@ hooks* okina(nablaMain *nabla){
     nabla->hook->xyz=&xyz512;
 
   // Hook between ICC or GCC pragmas
-  if ((nabla->colors&BACKEND_COLOR_ICC)==BACKEND_COLOR_ICC)
+  if ((nabla->colors&BACKEND_COLOR_OKINA_ICC)==BACKEND_COLOR_OKINA_ICC)
     nabla->hook->pragma=&pragmaICC;
 
   return &okinaHooks;

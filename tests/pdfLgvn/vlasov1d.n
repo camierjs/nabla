@@ -5,6 +5,7 @@
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 DUCLOUS Roland - Roland.Duclous@cea.fr                    //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,116 +41,4 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
-#include "backends/arcane/arcane.h"
-
-static const hookHeader header={
-  aHookHeaderDump,
-  aHookHeaderOpen,
-  aHookHeaderEnums,
-  aHookHeaderPrefix,
-  aHookHeaderIncludes,
-  aHookHeaderPostfix
-};
-
-static const hookXyz xyz={
-  nccArcSystemPrefix,
-  NULL, NULL, NULL
-};
-
-static const hookForAll forall={
-  arcaneHookPrefixEnumerate,
-  arcaneHookDumpEnumerate,
-  arcaneHookItem,
-  arcaneHookPostfixEnumerate
-};
-
-static const hookToken token={
-  arcaneHookTokenPrefix,
-  arcaneHookSwitchToken,
-  arcaneHookTurnTokenToVariable,
-  arcaneTurnTokenToOption,
-  arcaneHookSystem,
-  arcaneIteration,
-  arcaneExit,
-  arcaneTime,
-  arcaneFatal,
-  arcaneHookTurnBracketsToParentheses,
-  arcaneHookIsTest,
-  arcaneHookTokenPostfix
-};
-
-static const hookCall call={
-  arcaneAddCallNames,
-  arcaneAddArguments,
-  arcaneEntryPointPrefix,
-  NULL,//aHookDfsForCalls,
-  NULL,//aHookAddExtraParametersDFS,
-  NULL//aHookDumpNablaParameterListDFS
-};
-
-static const hookGrammar grammar={
-  NULL,//arcaneHookFunction,
-  NULL,//arcaneJob,
-  arcaneHookReduction,
-  NULL,//aHookPrimaryExpressionToReturn,
-  NULL,//returnFromArgument,
-  arcaneHookDfsVariable,
-  arcaneHookDfsExtra,
-  arcaneHookDfsArgType,
-  NULL,
-  aHookJobHit
-};
-
-const static hookSource source={
-  aHookSourceOpen,
-  aHookSourceInclude,
-  aHookSourceNamespace
-};
-
-const static hookMesh mesh={
-  aHookMeshPrefix,
-  aHookMeshCore,
-  aHookMeshPostfix
-};
-
-const static hookVars vars={
-  aHookVariablesInit,
-  aHookVariablesPrefix,
-  aHookVariablesMalloc,
-  aHookVariablesFree,
-  NULL,
-  aHookVariablesODecl
-};
-
-const static hookMain mains={
-  aHookMainPrefix,
-  aHookMainPreInit,
-  aHookMainVarInitKernel,
-  aHookMainVarInitCall,
-  aHookMainHLT,
-  aHookMainPostInit,
-  aHookMainPostfix
-};
-
-static hooks arcaneBackendHooks={
-  &forall,
-  &token,
-  &grammar,
-  &call,
-  &xyz,
-  NULL, // pragma
-  &header,
-  &source,
-  &mesh,
-  &vars,
-  &mains
-};
-
-// ****************************************************************************
-// * arcane with middlend/animate
-// ****************************************************************************
-hooks* arcane(nablaMain *nabla){
-  dbg("\n* Backend ARCANE"); // org mode item
-  return &arcaneBackendHooks;
-}
+//my_proc,nb_proc,nx,nvx,nvy,nvz,nc,xb,vb,cb

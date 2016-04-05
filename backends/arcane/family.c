@@ -41,115 +41,86 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/arcane/arcane.h"
 
-static const hookHeader header={
-  aHookHeaderDump,
-  aHookHeaderOpen,
-  aHookHeaderEnums,
-  aHookHeaderPrefix,
-  aHookHeaderIncludes,
-  aHookHeaderPostfix
-};
-
-static const hookXyz xyz={
-  nccArcSystemPrefix,
-  NULL, NULL, NULL
-};
-
-static const hookForAll forall={
-  arcaneHookPrefixEnumerate,
-  arcaneHookDumpEnumerate,
-  arcaneHookItem,
-  arcaneHookPostfixEnumerate
-};
-
-static const hookToken token={
-  arcaneHookTokenPrefix,
-  arcaneHookSwitchToken,
-  arcaneHookTurnTokenToVariable,
-  arcaneTurnTokenToOption,
-  arcaneHookSystem,
-  arcaneIteration,
-  arcaneExit,
-  arcaneTime,
-  arcaneFatal,
-  arcaneHookTurnBracketsToParentheses,
-  arcaneHookIsTest,
-  arcaneHookTokenPostfix
-};
-
-static const hookCall call={
-  arcaneAddCallNames,
-  arcaneAddArguments,
-  arcaneEntryPointPrefix,
-  NULL,//aHookDfsForCalls,
-  NULL,//aHookAddExtraParametersDFS,
-  NULL//aHookDumpNablaParameterListDFS
-};
-
-static const hookGrammar grammar={
-  NULL,//arcaneHookFunction,
-  NULL,//arcaneJob,
-  arcaneHookReduction,
-  NULL,//aHookPrimaryExpressionToReturn,
-  NULL,//returnFromArgument,
-  arcaneHookDfsVariable,
-  arcaneHookDfsExtra,
-  arcaneHookDfsArgType,
-  NULL,
-  aHookJobHit
-};
-
-const static hookSource source={
-  aHookSourceOpen,
-  aHookSourceInclude,
-  aHookSourceNamespace
-};
-
-const static hookMesh mesh={
-  aHookMeshPrefix,
-  aHookMeshCore,
-  aHookMeshPostfix
-};
-
-const static hookVars vars={
-  aHookVariablesInit,
-  aHookVariablesPrefix,
-  aHookVariablesMalloc,
-  aHookVariablesFree,
-  NULL,
-  aHookVariablesODecl
-};
-
-const static hookMain mains={
-  aHookMainPrefix,
-  aHookMainPreInit,
-  aHookMainVarInitKernel,
-  aHookMainVarInitCall,
-  aHookMainHLT,
-  aHookMainPostInit,
-  aHookMainPostfix
-};
-
-static hooks arcaneBackendHooks={
-  &forall,
-  &token,
-  &grammar,
-  &call,
-  &xyz,
-  NULL, // pragma
-  &header,
-  &source,
-  &mesh,
-  &vars,
-  &mains
-};
+extern nWhatWith arcaneOpCodesDefines[];
 
 // ****************************************************************************
-// * arcane with middlend/animate
+// * ifndef
 // ****************************************************************************
-hooks* arcane(nablaMain *nabla){
-  dbg("\n* Backend ARCANE"); // org mode item
-  return &arcaneBackendHooks;
+static char* ifndef(char* path,const char* name){
+  char* str=(char*)calloc(1024,sizeof(char));
+  snprintf(str,1024,"_%s_%s_",
+           toolStrUpCaseAndSwap(path,'/','_'),
+           toolStrUpCaseAndSwap(name,'/','_'));
+  return str;
+}
+
+
+// ****************************************************************************
+// * aHookFamilyHeader
+// ****************************************************************************
+void aHookFamilyHeader(nablaMain *arc){
+  const char *ifndef_token = ifndef(arc->specific_path,arc->name);
+  const char *namespace_token = pth2nmspc(arc->specific_path);
+  fprintf(arc->entity->hdr,"//aHookFamilyHeader\n\
+#ifndef %s\n#define %s\n\n\
+#include <arcane/IMesh.h>\n\
+#include <arcane/VariableTypes.h>\n\
+#include <arcane/IVariableAccessor.h>\n\
+#include <arcane/VariableTypedef.h>\n\
+#include <arcane/IParallelMng.h>\n\
+#include <arcane/ISubDomain.h>\n\
+#include <arcane/MeshAccessor.h>\n\
+#include <arcane/utils/TraceAccessor.h>",
+          ifndef_token,ifndef_token);
+  
+  nMiddleDefines(arc, arcaneOpCodesDefines);
+  
+  fprintf(arc->entity->hdr,"//#include <arcane/%s.h>\n\
+\n\
+using namespace Arcane;\n\
+namespace %s{\n\
+\tclass %s:\n\
+\t\t//public %s,\n\
+\t\tpublic TraceAccessor,\n\
+\t\tpublic MeshAccessor{\n\
+\tpublic:\n\
+\t\t\t%s(IMesh *msh):TraceAccessor(msh->traceMng()),\n\
+\t\t\t\t\t\t\t\t\tMeshAccessor(msh),\n\
+\t\t\t\t\t\t\t\t\tm_sub_domain(msh->subDomain()){}\n\
+\t\t\t~%s(){}\n\
+\t\t\tISubDomain* m_sub_domain;\n\
+\t\t\tISubDomain* subDomain() { return m_sub_domain; }\n\
+\tpublic:\n",
+          arc->interface_name,
+          namespace_token,
+          arc->name,
+          arc->interface_name,
+          arc->name,
+          arc->name);
+  fprintf(arc->entity->src,"//aHookFamilyHeader\n\
+#include \"%s.h\"\nnamespace %s{\n",arc->name,namespace_token);
+}
+
+
+// ****************************************************************************
+// * aHookFamilyVariablesPrefix
+// ****************************************************************************
+void aHookFamilyVariablesPrefix(nablaMain *arc){
+  fprintf(arc->entity->hdr,"//aHookFamilyVariablesPrefix");
+}
+
+
+// ****************************************************************************
+// * aHookFamilyFooter
+// ****************************************************************************
+void aHookFamilyFooter(nablaMain *arc){
+  const char *ifndef_token = ifndef(arc->specific_path,arc->name);
+  const char *namespace_token = pth2nmspc(arc->specific_path);
+  fprintf(arc->entity->hdr,"\n//aHookFamilyFooter\n\t};\n\
+} // namespace %s\n\
+#endif // %s",
+          namespace_token,
+          ifndef_token);
+  fprintf(arc->entity->src,"\n}//aHookFamilyFooter");
 }

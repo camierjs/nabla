@@ -52,25 +52,31 @@ void aHookSourceOpen(nablaMain *nabla){
   char cfgFileName[NABLA_MAX_FILE_NAME];
   char axlFileName[NABLA_MAX_FILE_NAME];
  
-  dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
-  if (isAnArcaneModule(nabla)==true)
+  if (isAnArcaneModule(nabla)==true){
+    dbg("\n[nccArcane] Création du fichier ARCANE main.c dans le cas d'un module");
     nccArcMain(nabla);
+  }
 
-  dbg("\n[nccArcane] Ouverture du fichier SOURCE du nabla");
+  dbg("\n[nccArcane] Ouverture du fichier SOURCE");
   sprintf(srcFileName, "%s%s.cc", nabla->entity->name, nablaArcaneColor(nabla));
   if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
 
-  dbg("\n[nccArcane] Ouverture du fichier CONFIG pour ARCANE dans le cas d'un module");
   if (isAnArcaneModule(nabla)==true){
+    dbg("\n[nccArcane] Ouverture du fichier CONFIG pour ARCANE dans le cas d'un module");
     sprintf(cfgFileName, "%s.config", nabla->name);
     if ((nabla->cfg=fopen(cfgFileName, "w")) == NULL) exit(NABLA_ERROR);
   }
   
-  dbg("\n[nccArcane] Et du fichier AXL pour ARCANE");
+  // Pas d'AXL si on génère pour une Family
+  if (isAnArcaneFamily(nabla)) return;  
+
+  dbg("\n[nccArcane] Ouverture du fichier AXL pour ARCANE");
   if (isAnArcaneModule(nabla))
     sprintf(axlFileName, "%s.axl", nabla->name);
-  else
+  
+  if (isAnArcaneService(nabla))
     sprintf(axlFileName, "%sService.axl", nabla->name);
+  
   if ((nabla->axl=fopen(axlFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 

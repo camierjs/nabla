@@ -253,7 +253,7 @@ typedef struct nablaMainStruct{
   BACKEND_SWITCH backend;
   BACKEND_COLORS colors;
   char *interface_name; // Arcane specific
-  char *interface_path; // Arcane specific
+  char *specific_path; // Arcane specific
   char *service_name;   // Arcane specific
   int optionDumpTree;
   int HLT_depth;

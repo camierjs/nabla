@@ -59,7 +59,7 @@ void xHookAddArguments(nablaMain *nabla,
 // * 'true' means that this backend supports
 // * in/out scan for variable from middlend
 // ****************************************************************************
-bool xHookDfsVariable(void){ return true; }
+bool xHookDfsVariable(nablaMain *nabla){ return true; }
 
 
 

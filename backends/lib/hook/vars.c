@@ -323,4 +323,9 @@ void xHookVariablesFree(nablaMain *nabla){
 }
 
 
-
+// ****************************************************************************
+// * xHookVariablesODecl
+// ****************************************************************************
+char* xHookVariablesODecl(nablaMain *nabla){
+  return "*";
+}

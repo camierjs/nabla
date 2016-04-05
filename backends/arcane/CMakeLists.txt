@@ -8,7 +8,7 @@ include_directories(${NABLA_BINARY_DIR})
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}BACKEND${VT100_RESET}: ${VT100_BOLD}${VT100_FG_YELLOW}ARCANE${VT100_RESET}")
 set(BACKEND_ARCANE_C arcane.c
   axl.c hlt.c job.c main.c source.c mesh.c vars.c
-  hooks.c module.c 
+  hooks.c module.c family.c
   jCells.c jNodes.c jFaces.c jParticles.c
   tokens.c data.c reduce.c header.c params.c)
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}ARCANE${VT100_RESET} libraries:${VT100_RESET}")

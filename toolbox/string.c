@@ -56,6 +56,29 @@ char *toolStrDownCase(const char * str){
 }
 
 
+// ****************************************************************************
+// * path2namespace
+// ****************************************************************************
+char *pth2nmspc(const char *str){
+  char *p=strdup(str);
+  char *f=p;//forecast
+  char *bkp=p;
+  for(int i=0;*f!=0;p++,f++,i++){
+    if (*f=='/'){
+      char nxt_char=*++f;
+      if (nxt_char>=97 && nxt_char<=122) nxt_char-=32; // to upper
+      *p=nxt_char;
+      continue;
+    }
+    if (i==0 && *f>=97 && *f<=122) *p-=32; // to upper
+    if ( i>0 && *f>64  && *f<91) *p+=32; // to lower
+    else *p=*f;
+  }
+  *p=0;
+  return bkp;
+}
+
+
 /******************************************************************************
  * strUpCase
  ******************************************************************************/
@@ -64,6 +87,20 @@ char *toolStrUpCase(const char * str){
   char *bkp=p;
   for(;*p!=0;p++)
     if ((*p>=97)&&(*p<=122)) *p-=32;
+  return bkp;
+}
+
+
+// ****************************************************************************
+// * toolStrUpCaseAndSwap
+// ****************************************************************************
+char *toolStrUpCaseAndSwap(const char * str, const char cHit, const char cNew){
+  char *p=strdup(str);
+  char *bkp=p;
+  for(;*p!=0;p++){
+    if (*p==cHit) *p=cNew;
+    if ((*p>=97)&&(*p<=122)) *p-=32;
+  }
   return bkp;
 }
 

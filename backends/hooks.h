@@ -86,8 +86,11 @@ typedef struct hookGrammarStruct{
   bool (*primary_expression_to_return)(struct nablaMainStruct*, nablaJob*, astNode*); // jobs
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(struct nablaMainStruct*, nablaJob*); // jobs
-  bool (*dfsVariable)(void); // jobs, functions
+  bool (*dfsVariable)(struct nablaMainStruct*); // jobs, functions
+  bool (*dfsExtra)(struct nablaMainStruct*); // args
+  char* (*dfsArgType)(struct nablaMainStruct*,nablaVariable*); // args
   char* (*eoe)(struct nablaMainStruct*); // jobs
+  bool (*hit)(struct nablaMainStruct*,bool); // jobs
 } hookGrammar;
 
 
