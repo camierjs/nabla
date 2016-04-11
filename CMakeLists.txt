@@ -54,13 +54,14 @@ if (CUDA_FOUND)
   info("\t${VT100_FG_MAGENTA}CUDA${VT100_RESET} version is ${VT100_BOLD}${CUDA_VERSION_STRING}${VT100_RESET}")
 endif()
 
-##########
-# ARCANE #
-##########
+############
+# PACKAGES #
+############
 find_package(MPI)
 include(CMake/FindARCANE.cmake)
 include(CMake/FindHYPRE.cmake)
 include(CMake/FindIceT.cmake)
+include(CMake/FindKokkos.cmake)
 if(ARCANE_FOUND)
   info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
 endif()

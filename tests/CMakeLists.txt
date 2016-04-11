@@ -163,7 +163,7 @@ execute_process(COMMAND find . -maxdepth 1 -type d -name [^.]*[^\(ns4n||mesh\)]*
 if (${RESULT_NABLA_TESTS})
   message(SEND_ERROR "Error: Could not load tests directories!")
 endif (${RESULT_NABLA_TESTS})
-info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
+#info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
 separate_arguments(NABLA_TESTS)
 #info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
 
@@ -222,7 +222,7 @@ set(SIMD_MODES "std sse avx avx2") #mic
 set(PARALLEL_MODES "seq omp") #cilk
 if(APPLE)
   set(SIMD_MODES "std sse")
-  set(PARALLEL_MODES "seq")
+  #set(PARALLEL_MODES "seq")
 endif(APPLE)
   
 separate_arguments(SIMD_MODES)
@@ -268,6 +268,7 @@ nabla_add_okina_test(p1apwb1D_gosse 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_irregular_mesh 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_semi_implicite 1 run std seq)
 
+
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
@@ -295,34 +296,36 @@ if (HYPRE_FOUND)
    nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
 endif (HYPRE_FOUND)
 
+
 ##########################
 # NABLA TESTS FOR KOKKOS #
 ##########################
-set(TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS "shydro sethi anyItem gad comd pDDFV")
-foreach(TST ${NABLA_TESTS})
-  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS} ${TST} TEST_SHOULD_PASS)
-  if(${TEST_SHOULD_PASS} EQUAL -1)
-    nabla_add_test(kokkos ${TST} 1 gen seq)
-  endif()
-endforeach(TST)
-nabla_add_test(kokkos xst 1 run seq)
-nabla_add_test(kokkos glace2D 1 run seq)
-nabla_add_test(kokkos lulesh 1 run seq)
-nabla_add_test(kokkos lulesh 1 run omp)
-nabla_add_test(kokkos llsh 1 run seq)
-nabla_add_test(kokkos upwindAP 1 run seq)
-nabla_add_test(kokkos hlt 1 run seq)
-nabla_add_test_with_defines(kokkos deflex 1 run seq -DNO_DEFINES 100000)
-# No Aleph yet with KOKKOS
-#if (HYPRE_FOUND)
-#   nabla_add_test(kokkos aleph1D 1 run seq)
-#   nabla_add_test(kokkos aleph2D 1 run seq)
-#   nabla_add_test(kokkos heat 1 run seq)
-#   nabla_add_test(kokkos amber 1 run seq)
-#   nabla_add_test_with_defines(kokkos darcy 1 run seq -DALEPH_INDEX 100000)
-#   nabla_add_test(kokkos p1apwb1D_implicite 1 run std seq)
-#endif (HYPRE_FOUND)
-
+if(KOKKOS_FOUND)
+  set(TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS "shydro sethi anyItem gad comd pDDFV")
+  foreach(TST ${NABLA_TESTS})
+     string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS} ${TST} TEST_SHOULD_PASS)
+     if(${TEST_SHOULD_PASS} EQUAL -1)
+       nabla_add_test(kokkos ${TST} 1 gen seq)
+     endif()
+  endforeach(TST)
+  nabla_add_test(kokkos xst 1 run seq)
+  nabla_add_test(kokkos glace2D 1 run seq)
+  nabla_add_test(kokkos lulesh 1 run seq)
+  nabla_add_test(kokkos lulesh 1 run omp)
+  nabla_add_test(kokkos llsh 1 run seq)
+  nabla_add_test(kokkos upwindAP 1 run seq)
+  nabla_add_test(kokkos hlt 1 run seq)
+  nabla_add_test_with_defines(kokkos deflex 1 run seq -DNO_DEFINES 100000)
+  # No Aleph yet with KOKKOS
+  #if (HYPRE_FOUND)
+  #   nabla_add_test(kokkos aleph1D 1 run seq)
+  #   nabla_add_test(kokkos aleph2D 1 run seq)
+  #   nabla_add_test(kokkos heat 1 run seq)
+  #   nabla_add_test(kokkos amber 1 run seq)
+  #   nabla_add_test_with_defines(kokkos darcy 1 run seq -DALEPH_INDEX 100000)
+  #   nabla_add_test(kokkos p1apwb1D_implicite 1 run std seq)
+  #endif (HYPRE_FOUND)
+endif(KOKKOS_FOUND)
 
 ########################
 # NABLA TESTS FOR CUDA #
@@ -344,4 +347,4 @@ if(CUDA_FOUND)
   nabla_add_cuda_test(lulesh 1 run)
   nabla_add_cuda_test(nvknl 1 run)
   #nabla_add_cuda_test(darcy 1 run)
-endif()
+endif(CUDA_FOUND)

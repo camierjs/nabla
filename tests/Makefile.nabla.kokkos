@@ -7,7 +7,7 @@ PARALLEL ?= seq
 
 KOKKOS_DEVICES = "OpenMP"
 KOKKOS_ARCH = "HSW"
-include /usr/local/kokkos/Makefile.kokkos
+include ${KOKKOS_ROOT_PATH}/Makefile.kokkos
 
 SIMD_std_FLAGS = -std=c++11 -O2 -Wall -DNO_SSE2
 

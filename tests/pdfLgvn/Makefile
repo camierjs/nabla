@@ -5,4 +5,4 @@ export LOG= -t #-v $(TGT).log
 export ADDITIONAL_NABLA_FILES = #spectrum.n
 export ADDITIONAL_DEFINES = #-DNB_PARTICLES=200000
 
-include /tmp/nabla/tests/Makefile.nabla.lambda
+include ~/nabla/build/tests/Makefile.nabla.lambda
