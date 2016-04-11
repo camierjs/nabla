@@ -10,6 +10,8 @@ endif
 ifeq ($(shell uname),Linux)
   CMAKE_ROOT_PATH = /usr/bin
   COMPILER_ROOT_PATH = /usr/bin
+#  COMPILER_ROOT_PATH = /usr/local/gcc/4.9.3/bin
+#  COMPILER_ROOT_PATH = /usr/local/gcc/5.3.0/bin: undefined reference to symbol 'dlclose@@GLIBC_2.2.5'
 endif
 ifeq ($(shell [ -f /etc/redhat-release ] && cat /etc/redhat-release|cut -b 1-6),CentOS)
   CMAKE_ROOT_PATH = /usr/bin

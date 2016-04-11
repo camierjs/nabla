@@ -83,6 +83,7 @@ const nWhatWith kCallHeaderDefines[]={
   {"DBG_VELOCITY", "0x4000ul"},
   {"DBG_BOUNDARIES", "0x8000ul"},
   {"DBG_ALL", "0xFFFFul"},
+  {"DBG_DUMP", "false"},
   {"opAdd(u,v)", "(u+v)"},
   {"opSub(u,v)", "(u-v)"},
   {"opDiv(u,v)", "(u/v)"},
