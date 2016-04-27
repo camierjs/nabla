@@ -68,7 +68,7 @@
   ∀ node{
     if ((coord.y==Y_MIN)||(coord.y==Y_MAX)){
       if (DEBUG)
-        printf("\n\t[36m[std] sym node[%d] (%f,%f,%f)",#,coord.x,coord.y,coord.z);
+        printf("\n\t\t[36m[std] sym node[%d] (%f,%f,%f)",#,coord.x,coord.y,coord.z);
       const Real orientation = (coord.y==Y_MIN)?-1.0:1.0;
       const Real3 normal = orientation*normaleY;
       const Real3x3 nxn = normal⊗normal;
@@ -94,7 +94,7 @@
     if (!((fabs(coord.x-X_MIN)<1.e-10) ||
           ((fabs(coord.x-X_MAX)<1.e-10)))) continue;
     if (DEBUG)
-      printf("\n\t[36m[std] BC node[%d] (coord.x=%f)",#,coord.x);
+      printf("\n\t\t[36m[std] BC node[%d] (coord.x=%f)",#,coord.x);
     node_u_matrix = I;
     node_u_second_member = value;
   }

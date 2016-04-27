@@ -25,16 +25,23 @@ CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(
 #######
 # GCC #
 #######
-SIMD_avx512_FLAGS = -DWARP_BIT=3 -mavx512f -D__AVX512__
 CXX = ${CMAKE_CXX_COMPILER}
+SIMD_avx512_FLAGS = -DWARP_BIT=3 -mavx512f -D__AVX512__
 LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
+
+#######
+# MPC #
+#######
+#CXX = mpc_g++
+#SIMD_avx512_FLAGS = -DWARP_BIT=3 -mavx512f -D__AVX512__
+#LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 
 #######
 # ICC #
 #######
+#CXX = /opt/intel/bin/icc
 #SIMD_avx512_FLAGS = -DWARP_BIT=3 -xCOMMON-AVX512 -D__AVX512__
 #CFLAGS += -inline-forceinline -finline-functions #-inline-level=2 -no-inline-max-per-compile -no-inline-max-size -no-inline-max-total-size
-#CXX = /opt/intel/bin/icc
 #LIB_omp_GOMP = -Wl,-rpath,/opt/intel/lib/intel64_lin -L/opt/intel/lib/intel64_lin/ -liomp5
 
 #########

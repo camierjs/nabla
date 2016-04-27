@@ -50,6 +50,7 @@ with ℝ²;
 // ****************************************************************************
 options{
   Bool DEBUG = false;
+  Bool TRACE = false;
   Bool option_test_sod = true;
       
   Real γ = 1.4;
@@ -125,12 +126,13 @@ global{
 ∀ cells @ 9.0 {
   const Real ρc = ρ*css;
   ∀ node{
+    //const int k = xs_cell_node[c+NABLA_NB_CELLS*n];
+    //if (TRACE) printf("\n[32m[std] k: %d %d %d %d[0m",k0,k1,k2,k3);
     AQs = CQs⊗CQs;
     AQs *= ρc/absCQs;
-    if (DEBUG)
-      printf("\n\t[32m[std] AQs=");
-    if (DEBUG)
-      cout<<AQs<<"[0m";
+    //AQs = 10*c+n+Real3x3(Real3(0.11,0.22,0.33),Real3(0.44,0.55,0.66),Real3(0.77,0.88,0.99));
+    if (DEBUG) printf("\n\t[32m[std] AQs=");
+    if (DEBUG) cout<<AQs<<"[0m";
   }
 }
 
@@ -171,9 +173,23 @@ global{
 // * temporalSchemeAssembleMatricesAndSecondMember
 // ****************************************************************************
 ∀ cells @ 12.0{
+  //if (TRACE) printf("\n\n[37m[temporalSchemeAssembleMatricesAndSecondMember] Cell #%d[0m",uid);
+  //const int kCell=uid;
   ∀ node{
+    //const int k = xs_cell_node[n*NABLA_NB_CELLS+kCell];
+    //if (TRACE) printf("\n[37m[temporalSchemeAssembleMatricesAndSecondMember] k=%d[0m",n);
     const Real3x3 local_matrix = AQs;
+    //if (DEBUG) printf("\n\t[32m[std] AQs=");
+    //if (DEBUG) cout<<AQs<<"[0m";
     node_u_matrix += local_matrix;
+    /*if (DEBUG)
+    printf("\n\t[31m[temporalSchemeAssembleMatricesAndSecondMember] node_u_matrix=\n\t\t[\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]][0m",
+           node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
+           node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
+           node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);*/
     node_u_second_member += local_matrix ⨂ reconstructed_u;
     node_u_second_member += CQs*reconstructed_p;
   }

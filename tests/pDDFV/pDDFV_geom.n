@@ -101,19 +101,19 @@ inline Real3 n(Real3 a, Real3 b){
 cells void computeMaxNbNode(void){
   maxNbNode = max(maxNbNode,nbNode);
   }*/
-#warning reductionn system nbNode
+#warning reduction system nbNode
 //∀ cells minNbNode <?= nbNode @ -31.0;
 //∀ cells maxNbNode >?= nbNode @ -31.0;
 
-∀ cells void computeCellMassCenterDelta(void)@-31.0{
+∀ cells void computeCellMassCenterDelta(void)@-31.3{
   minCellDelta=+∞;
   ∀ cell
     minCellDelta=min(minCellDelta,
                      norm(cell_mass_center[cc]-cell_mass_center));
 }
-∀ cells minΔ <?= minCellDelta @ -31.1;
+∀ cells minΔ <?= minCellDelta @ -31.2;
 
-void testForQuadsOrTriangles(void) @ -31.2{
+void testForQuadsOrTriangles(void) @ -31.1{
   //Real minNbNode=computeMinNbNode(1024);
   //Real maxNbNode=computeMaxNbNode(0);
   Integer rMinNbNode = minNbNode;//mpi_reduce(ReduceMin,minNbNode);

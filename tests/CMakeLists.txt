@@ -194,7 +194,7 @@ if (ARCANE_FOUND)
   nabla_add_arcane_test(glace 1 run)
   nabla_add_arcane_test(glace2D 1 run)
   nabla_add_arcane_test(glc 1 run)
-  # No ICartesianMesh out of CEA # nabla_add_arcane_test(lulesh 1 run)
+  # No ICartesianMesh out of CEA
   #nabla_add_arcane_test(lulesh 1 run)
   #nabla_add_arcane_test(lulesh 8 run)
 if (HYPRE_FOUND)
@@ -293,7 +293,8 @@ if (HYPRE_FOUND)
    nabla_add_test(lambda heat 1 run seq)
    nabla_add_test(lambda amber 1 run seq)
    nabla_add_test_with_defines(lambda darcy 1 run seq -DALEPH_INDEX 100000)
-   nabla_add_test(lambda p1apwb1D_implicite 1 run std seq)
+   nabla_add_test(lambda p1apwb1D_implicite 1 run seq)
+   nabla_add_test(lambda xgnplt 1 run seq)
 endif (HYPRE_FOUND)
 
 

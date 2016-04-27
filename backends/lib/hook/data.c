@@ -140,8 +140,8 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
     nprintf(nabla, "/*CellVar*/",
             "%s",
             ((var->dim==0)? (isPostfixed==2)?"":"[c":
-             (enum_enum!='\0')?"[n+8*c":
-             (var->dim==1)?"[8*c":"[c"));
+             (enum_enum!='\0')?"[n+NABLA_NODE_PER_CELL*c":
+             (var->dim==1)?"[NABLA_NODE_PER_CELL*c":"[c"));
     job->parse.variableIsArray=(var->dim==1)?true:false;
     if (job->parse.postfix_constant==true
         && job->parse.variableIsArray==true)

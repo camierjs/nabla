@@ -40,57 +40,127 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+with ℵ,ℝ²;
+
+ofstream output("output.plot");
 
 // ****************************************************************************
-// * updatePhysicalDensity
+// * Déclaration des options
 // ****************************************************************************
-∀ cells @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
+options{
+  ℾ option_quads           = true;
+  ℾ option_rdq             = true;
+  ℝ option_rdq_α           = 0.3;
+  ℝ option_deltat          = 0.1;
+  ℝ option_δt_initial      = 0.0;
+  ℝ option_stoptime        = 1.0;
+  ℝ option_ini_temperature = 300.0;
+  ℝ option_hot_temperature = 700.0;
+  ℕ option_max_iterations  = 4;
+  
+  ℾ option_dump_at_end     = true;
+  ℾ option_dump_iteration  = false;
+  
+  // Options d'Aleph
+  ℝ alephEpsilon           = 1.e-10;
+  ℕ alephUnderlyingSolver  = 2;
+  ℕ alephMaxIterations     = 16384;
+  ℕ alephPreconditionerMethod = 2; // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+                                   // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephSolverMethod = 0; //PCG=0, BiCGStab=1, BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephNumberOfCores = 0;
+  ℾ option_aleph_dump_matrix = false;
+};
+
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles/aux faces
+// ****************************************************************************
+cells{ ℝ θ; };
+faces{ ℝ bcθ,iΔ; };
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0[
+// ****************************************************************************
+∀ nodes @ -48.0 if (option_rdq){
+  const ℝ Δl=LENGTH/X_EDGE_ELEMS;
+  //info()<<"LENGTH="<<LENGTH<<", X_EDGE_ELEMS="<<X_EDGE_ELEMS;
+  const ℝ α=option_rdq_α;
+  const ℝ ρ1=drand48()+drand48()-1.0;
+  const ℝ ρ2=drand48()+drand48()-1.0;
+  if (coord.x == 0.0 || coord.x == LENGTH) continue;
+  if (coord.y == 0.0 || coord.y == LENGTH) continue;
+  //info()<<"\33[33m[rdq] node[#"<<uid<<"] @ "<<coord.x<<"x"<<coord.y<<"\33[m";
+  coord.x+=α*ρ1*Δl;
+  coord.y+=α*ρ2*Δl;
+  //info()<<"\t\33[33m[rdq] => "<<coord<<"\33[m";
+}
+
+void iniδt(void) @ -10.0 { δt=option_deltat; }
+∀ cells @ -10.0{ θ=option_ini_temperature; }
+∀ faces @ -10.0{
+  iΔ=1.0/norm(coord[0]-coord[1]);
+  bcθ=option_ini_temperature;
+}
+
+∀ own outer faces @ -9.9{
+  if (not (((coord[0].x==0.0)and(coord[1].x==0.0))
+           or
+           ((coord[0].y==0.0)and(coord[1].y==0.0)))) continue;
+  bcθ=option_hot_temperature;
 }
 
 // ****************************************************************************
-// * 
+// * Partie de calcul ]+0,+∞[ 
 // ****************************************************************************
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
+void rhsInit(void) @ 1.0 {  ℵ rhs reset; ℵ lhs reset; }
+∀ own cells @ 1.1 {
+  const ℝ value=θ;
+  ℵ rhs addValue(θ,this,value);
+}
+∀ own outer faces @ 1.2 {
+  const ℝ value = δt*iΔ*bcθ;
+  ℵ rhs addValue(θ, cell(0), value);
+}
+void iniAleph(void) @ 2.0 { alephInitialize(); }
+∀ inner faces @ 2.1 {
+  const ℝ δtDivSurface = -δt*iΔ;
+  ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
+  ℵ matrix setValue(θ,frontCell, θ,backCell, δtDivSurface);
+}
+∀ own cells @ 2.2{
+  ℝ d=0.0;
+  ∀ face d += iΔ;
+  d*=δt;
+  d+=1.0;
+  ℵ matrix setValue(θ,this, θ,this, d);
+}
+void assembleAndSolve(void) @ 4.0 { ℵ solve; }
+∀ own cells @ 4.1 { θ=ℵ lhs getValue(θ, this); }
+
+
 
 // ****************************************************************************
-// * computeTotalInternalEnergyFromTotalEnergy
+// * dumpGnuplot
 // ****************************************************************************
-∀ cells @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
+∀ cells void dumpGnuplot(void) @ 5.0 if (option_dump_iteration or
+                                         (option_dump_at_end and (iteration+1==option_max_iterations))){
+  if (uid==0) info()<<"\33[1;31m[dumpGnuplot] Now dumping to output.plot file!\33[0m";
+  output << θ << " ";
+  ∀ node
+    output << coord.x << " " << coord.y << " ";
+  output << coord[0].x << " " << coord[0].y << " ";
+  output << "\n";
+  if (uid==NABLA_NB_CELLS-1) output << "\n\n";
 }
 
 // ****************************************************************************
-// * updateTotalPressure
+// * tstForQuit
 // ****************************************************************************
-∀ cells @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
-}
-
-// ****************************************************************************
-// * computeTotalSoundSpeed
-// ****************************************************************************
-∀ cells @ -18.0,28.0{
-  css=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
-  //if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
-}
-
-// ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
-// ****************************************************************************
-∀ cells @ 30.0{
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(css*Σljr);
-  if (DEBUG)
-    printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
+void tstForQuit(void) @ 5.0 {
+  printf("\n[testForQuit] Iteration #%d - time=%f & delta_t=%f", iteration, time,δt);
+  if ((iteration+1<option_max_iterations) and (time<(option_stoptime-δt))) return;
+  info()<<"\33[1;31m[tstForQuit] Exiting!\33[0m";
+  exit;
 }

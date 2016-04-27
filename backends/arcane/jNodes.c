@@ -97,7 +97,7 @@ char *nodeJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
  forall_node=%d, forall_face=%d, forall_cell=%d",
       scalar,resolve,forall_none,forall_node,forall_face,forall_cell);
   
-  if (!scalar) return "[cell][node->cell";
+  if (!scalar) return "[c]";//cell][node->cell";
   
   if (forall_face) return "[";
   if (forall_node) return "[n]";

@@ -1,10 +1,11 @@
 TGT=${name}
 
-MESH = 8
+MESH ?= 8
 #SIMD = std
 #PARALLEL = seq
 #LOG = -t #-v $(TGT).log 
 
 ADDITIONAL_NABLA_FILES=${ADDITIONAL_NABLA_FILES}
+ADDITIONAL_DEFINES ?= -DALEPH_INDEX -DNB_PARTICLES=0
 
 include ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.${backend}

@@ -62,7 +62,7 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
     }else{
       if (isAnArcaneFamily(j->entity->main)) return "";
       char prefix[2048];
-      snprintf(prefix,2048,"debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
+      snprintf(prefix,2048,"debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());\n\t",j->entity->name,j->name);
       return strdup(prefix);
     }
   }
@@ -240,7 +240,8 @@ char* arcaneHookPostfixEnumerate(nablaJob *job){
 \t\t//                        DirCell ccp(cdm.cell(prevCell));\n\
 \t\t//__attribute__((unused)) Cell prevPrevCell=ccp.previous();\n\
 \t\t__attribute__((unused)) DirCellNode cn(cdm.cellNode(*cell));\n";  
-  if (itm[0]=='n') return "\tDirNode cc(ndm.node(*node));\n\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
+  if (itm[0]=='n') return "\tDirNode cc(ndm.node(*node));\n\
+\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
   dbg("\n\t[postfixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm[0]);
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;

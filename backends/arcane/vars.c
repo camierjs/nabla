@@ -152,6 +152,7 @@ NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity *entity){
 #include <arcane/utils/TraceAccessor.h>\n\
 #include <arcane/utils/TraceClassConfig.h>\n\
 #include <arcane/IMesh.h>\n\
+#include <arcane/cea/ICartesianMesh.h>\n\
 #include <arcane/ArcaneTypes.h>\n\
 #include <arcane/IEntryPoint.h>\n\
 #include <arcane/IEntryPointMng.h>\n\

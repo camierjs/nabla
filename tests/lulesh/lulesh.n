@@ -219,7 +219,7 @@ void ini(void) @ -10.0{
   const ℝ maxBoundaryY = Y_EDGE_TICK*Y_EDGE_ELEMS;
   const ℝ maxBoundaryZ = Z_EDGE_TICK*Z_EDGE_ELEMS;
   elemBC=0; // clear BCs by default
-  foreach node{
+  ∀ node{
     elemBC |= (coord.x==zero)?XI_M_SYMM;
     elemBC |= (coord.y==zero)?ETA_M_SYMM;
     elemBC |= (coord.z==zero)?ZETA_M_SYMM;
@@ -347,7 +347,7 @@ void timeIncrement(void) @ 0.1 {
   }
 
 ∀ nodes void fetchCellNodeForce0(void) in (cell cForce) out (node nForce)@0.301 {
-  ℝ³ Σ=0.0;
+  ℝ³ Σ=ℝ³(0.0,0.0,0.0);
   ∀ cell{
     /*
       const int a=xs_node_cell[8*nw+c];

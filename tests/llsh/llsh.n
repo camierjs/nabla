@@ -47,6 +47,28 @@
 
 with cartesian;
 
+// ****************************************************************************
+// * Defines
+// ****************************************************************************
+#define XI_M        0x003
+#define XI_M_SYMM   0x001
+#define XI_M_FREE   0x002
+#define XI_P        0x00C
+#define XI_P_SYMM   0x004
+#define XI_P_FREE   0x008
+#define ETA_M       0x030
+#define ETA_M_SYMM  0x010
+#define ETA_M_FREE  0x020
+#define ETA_P       0x0C0
+#define ETA_P_SYMM  0x040
+#define ETA_P_FREE  0x080
+#define ZETA_M      0x300
+#define ZETA_M_SYMM 0x100
+#define ZETA_M_FREE 0x200
+#define ZETA_P      0xC00
+#define ZETA_P_SYMM 0x400
+#define ZETA_P_FREE 0x800
+
 
 // ****************************************************************************
 // * Options
@@ -157,24 +179,6 @@ void ini(void) @ -10.0{
 // * Set up boundary condition information
 // * Set up elemement connectivity information
 // ****************************************************************************
-#define XI_M        0x003
-#define XI_M_SYMM   0x001
-#define XI_M_FREE   0x002
-#define XI_P        0x00C
-#define XI_P_SYMM   0x004
-#define XI_P_FREE   0x008
-#define ETA_M       0x030
-#define ETA_M_SYMM  0x010
-#define ETA_M_FREE  0x020
-#define ETA_P       0x0C0
-#define ETA_P_SYMM  0x040
-#define ETA_P_FREE  0x080
-#define ZETA_M      0x300
-#define ZETA_M_SYMM 0x100
-#define ZETA_M_FREE 0x200
-#define ZETA_P      0xC00
-#define ZETA_P_SYMM 0x400
-#define ZETA_P_FREE 0x800
 ∀ cells @ -9.5{
   const ℝ zero = 0.0;
   const ℝ maxBoundaryX = X_EDGE_TICK*X_EDGE_ELEMS;
@@ -269,8 +273,7 @@ void timeIncrement(void) @ 0.1 {
 
 ∀ nodes @ 0.301 {
   ℝ³ Σ=0.0;
-  ∀ cell
-    Σ+=cForce;
+  ∀ cell Σ+=cForce;
   nForce=Σ;
 }
 
@@ -365,9 +368,7 @@ void timeIncrement(void) @ 0.1 {
 // * advance portion of the algorithm by integrating the velocity at each node
 // * to advance the position of the node to tn+1.
 // ****************************************************************************
-∀ nodes @ 3.1{
-  coord += 𝜕x*δt;
-}
+∀ nodes @ 3.1 { coord += 𝜕x*δt; }
 
 // ****************************************************************************
 // * calcElemVolume

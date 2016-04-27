@@ -10,6 +10,16 @@ LOG =
 #-v $(TGT).log
 
 
+export X_EDGE_ELEMS = $(MESH)
+export Y_EDGE_ELEMS = $(MESH)
+export Z_EDGE_ELEMS = $(MESH)
+export X_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export Y_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export Z_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
+export LENGTH = $(shell echo 1.125)
+export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
+
+
 ########################## 
 # ARCANE_LIBS and CFLAGS #
 ##########################
@@ -27,11 +37,10 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_utils\
  -larcane_driverlib\
  -larcane_aleph\
- -larcane_ios\
- -larcane_hyoda\
  -larcane_aleph_hypre\
  $(ARCANE_PKG_LIBS)\
  -Wl,-rpath,${ARCANE_ROOT}/lib
+# -larcane_ios\
 # -larcane_hyoda\
 # -larcane_cea\
 # -larcane_aleph_sloop\
@@ -47,7 +56,8 @@ CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
 			-I${ARCANE_ROOT}/include\
 			-I${HYPRE_INCLUDE_DIR}\
 			-I${ICET_INCLUDE_DIRS}\
-			$(ARCANE_CFLAGS)
+			$(ARCANE_CFLAGS)\
+			$(MESH_FLAGS)
 
 #			-I${GMP_DIR}/include\
 #			-I${SLOOP_INC}

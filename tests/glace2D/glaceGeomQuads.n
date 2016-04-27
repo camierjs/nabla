@@ -63,6 +63,11 @@ inline Real3 geomNormal(Real3 a, Real3 b){
 // * geomComputeSurfaceAndVolume @ -20.0 & 23.0
 // ****************************************************************************
 ∀ cells @ -20.0,23.0 {
+  /*const int k0 = xs_cell_node[c+NABLA_NB_CELLS*0];
+  const int k1 = xs_cell_node[c+NABLA_NB_CELLS*1];
+  const int k2 = xs_cell_node[c+NABLA_NB_CELLS*2];
+  const int k3 = xs_cell_node[c+NABLA_NB_CELLS*3];
+  if (TRACE) printf("\n[37m[geo,std] k: %d %d %d %d[0m",k0,k1,k2,k3);*/
   const Real3 fst_edge = coord[2]-coord[0];
   const Real3 snd_edge = coord[0]-coord[1];
   V=geomCross2D(fst_edge,snd_edge);
@@ -80,7 +85,7 @@ inline Real3 geomNormal(Real3 a, Real3 b){
     const int i=(#+nbNode-1)%nbNode;
     const int j=(#+nbNode+1)%nbNode;
     CQs = 0.5*geomNormal(X[i],X[j]);
-    absCQs=norm(CQs);
     if (DEBUG) cout << "\n[37m[geo,std] CQs["<<#<<"]: "<<CQs<<"[0m";
+    absCQs=norm(CQs);
   }
 }
