@@ -111,8 +111,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.lambda ${CMAKE_CURRENT
 ########################################
 # NABLA TEST MACRO FOR GENERIC BACKEND #
 ########################################
-function(nabla_add_test_with_defines backend name nb_proc cmd parallel defines nb_particles)
-info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_MAGENTA}${backend}${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_${parallel}")
+function(nabla_add_test_with_defines backend color name nb_proc cmd parallel defines nb_particles)
+info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${color}${backend}${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_${parallel}")
   set(backend ${backend})
   set(subpath ${nb_proc}/${cmd}/${parallel})
   get_additional_nabla_files_and_set_Makefile(${name} ${backend} ${subpath})
@@ -122,7 +122,11 @@ info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_MAGENTA}
 endfunction(nabla_add_test_with_defines)
 
 function(nabla_add_test backend name nb_proc cmd parallel)
-   nabla_add_test_with_defines(${backend} ${name} ${nb_proc} ${cmd} ${parallel} -DALEPH_INDEX 0)
+   nabla_add_test_with_defines(${backend} VT100_FG_MAGENTA ${name} ${nb_proc} ${cmd} ${parallel} -DALEPH_INDEX 0)
+endfunction(nabla_add_test)
+
+function(nabla_add_test backend color name nb_proc cmd parallel)
+   nabla_add_test_with_defines(${backend} ${color} ${name} ${nb_proc} ${cmd} ${parallel} -DALEPH_INDEX 0)
 endfunction(nabla_add_test)
 
 
@@ -130,6 +134,11 @@ endfunction(nabla_add_test)
 # NABLA TESTS FOR KOKKOS BACKEND #
 ##################################
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.kokkos ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.kokkos)
+
+################################
+# NABLA TESTS FOR RAJA BACKEND #
+################################
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.raja ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.raja)
 
 
 #####################################
@@ -276,25 +285,25 @@ set(TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA "shydro sethi anyItem gad comd pDDFV")
 foreach(TST ${NABLA_TESTS})
   string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA} ${TST} TEST_SHOULD_PASS)
   if(${TEST_SHOULD_PASS} EQUAL -1)
-    nabla_add_test(lambda ${TST} 1 gen seq)
+    nabla_add_test(lambda ${VT100_FG_MAGENTA} ${TST} 1 gen seq)
   endif()
 endforeach(TST)
-nabla_add_test(lambda xst 1 run seq)
-nabla_add_test(lambda glace2D 1 run seq)
-nabla_add_test(lambda lulesh 1 run seq)
-nabla_add_test(lambda lulesh 1 run omp)
-nabla_add_test(lambda llsh 1 run seq)
-nabla_add_test(lambda upwindAP 1 run seq)
-nabla_add_test(lambda hlt 1 run seq)
-nabla_add_test_with_defines(lambda deflex 1 run seq -DNO_DEFINES 100000)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} xst 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} glace2D 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} lulesh 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} lulesh 1 run omp)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} llsh 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} upwindAP 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} hlt 1 run seq)
+nabla_add_test_with_defines(lambda ${VT100_FG_MAGENTA} deflex 1 run seq -DNO_DEFINES 100000)
 if (HYPRE_FOUND)
-   nabla_add_test(lambda aleph1D 1 run seq)
-   nabla_add_test(lambda aleph2D 1 run seq)
-   nabla_add_test(lambda heat 1 run seq)
-   nabla_add_test(lambda amber 1 run seq)
-   nabla_add_test_with_defines(lambda darcy 1 run seq -DALEPH_INDEX 100000)
-   nabla_add_test(lambda p1apwb1D_implicite 1 run seq)
-   nabla_add_test(lambda xgnplt 1 run seq)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} aleph1D 1 run seq)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} aleph2D 1 run seq)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} heat 1 run seq)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} amber 1 run seq)
+   nabla_add_test_with_defines(lambda ${VT100_FG_MAGENTA} darcy 1 run seq -DALEPH_INDEX 100000)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} p1apwb1D_implicite 1 run seq)
+   nabla_add_test(lambda ${VT100_FG_MAGENTA} xgnplt 1 run seq)
 endif (HYPRE_FOUND)
 
 
@@ -306,27 +315,58 @@ if(KOKKOS_FOUND)
   foreach(TST ${NABLA_TESTS})
      string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS} ${TST} TEST_SHOULD_PASS)
      if(${TEST_SHOULD_PASS} EQUAL -1)
-       nabla_add_test(kokkos ${TST} 1 gen seq)
+       nabla_add_test(kokkos ${VT100_FG_GREEN} ${TST} 1 gen seq)
      endif()
   endforeach(TST)
-  nabla_add_test(kokkos xst 1 run seq)
-  nabla_add_test(kokkos glace2D 1 run seq)
-  nabla_add_test(kokkos lulesh 1 run seq)
-  nabla_add_test(kokkos lulesh 1 run omp)
-  nabla_add_test(kokkos llsh 1 run seq)
-  nabla_add_test(kokkos upwindAP 1 run seq)
-  nabla_add_test(kokkos hlt 1 run seq)
-  nabla_add_test_with_defines(kokkos deflex 1 run seq -DNO_DEFINES 100000)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} xst 1 run seq)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} glace2D 1 run seq)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} lulesh 1 run seq)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} lulesh 1 run omp)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} llsh 1 run seq)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} upwindAP 1 run seq)
+  nabla_add_test(kokkos ${VT100_FG_GREEN} hlt 1 run seq)
+  nabla_add_test_with_defines(kokkos ${VT100_FG_GREEN} deflex 1 run seq -DNO_DEFINES 100000)
   # No Aleph yet with KOKKOS
   #if (HYPRE_FOUND)
-  #   nabla_add_test(kokkos aleph1D 1 run seq)
-  #   nabla_add_test(kokkos aleph2D 1 run seq)
-  #   nabla_add_test(kokkos heat 1 run seq)
-  #   nabla_add_test(kokkos amber 1 run seq)
-  #   nabla_add_test_with_defines(kokkos darcy 1 run seq -DALEPH_INDEX 100000)
-  #   nabla_add_test(kokkos p1apwb1D_implicite 1 run std seq)
+  #   nabla_add_test(kokkos ${VT100_FG_GREEN} aleph1D 1 run seq)
+  #   nabla_add_test(kokkos ${VT100_FG_GREEN} aleph2D 1 run seq)
+  #   nabla_add_test(kokkos ${VT100_FG_GREEN} heat 1 run seq)
+  #   nabla_add_test(kokkos ${VT100_FG_GREEN} amber 1 run seq)
+  #   nabla_add_test_with_defines(kokkos ${VT100_FG_GREEN} darcy 1 run seq -DALEPH_INDEX 100000)
+  #   nabla_add_test(kokkos ${VT100_FG_GREEN} p1apwb1D_implicite 1 run std seq)
   #endif (HYPRE_FOUND)
-endif(KOKKOS_FOUND)
+  endif(KOKKOS_FOUND)
+
+  
+##########################
+# NABLA TESTS FOR RAJA #
+##########################
+if(RAJA_FOUND)
+  set(TESTS_NOT_YET_SUPPORTED_WITH_RAJA "shydro sethi anyItem gad comd pDDFV")
+  foreach(TST ${NABLA_TESTS})
+     string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_RAJA} ${TST} TEST_SHOULD_PASS)
+     if(${TEST_SHOULD_PASS} EQUAL -1)
+       nabla_add_test(raja ${VT100_FG_BLUE} ${TST} 1 gen seq)
+     endif()
+  endforeach(TST)
+  #nabla_add_test(raja ${VT100_FG_BLUE} xst 1 run seq)
+  #nabla_add_test(raja ${VT100_FG_BLUE} glace2D 1 run seq)
+  nabla_add_test(raja ${VT100_FG_BLUE} lulesh 1 run seq)
+  #nabla_add_test(raja ${VT100_FG_BLUE} lulesh 1 run omp)
+  #nabla_add_test(raja ${VT100_FG_BLUE} llsh 1 run seq)
+  #nabla_add_test(raja ${VT100_FG_BLUE} upwindAP 1 run seq)
+  #nabla_add_test(raja ${VT100_FG_BLUE} hlt 1 run seq)
+  #nabla_add_test_with_defines(raja ${VT100_FG_BLUE} deflex 1 run seq -DNO_DEFINES 100000)
+  # No Aleph yet with RAJA
+  #if (HYPRE_FOUND)
+  #   nabla_add_test(raja ${VT100_FG_BLUE} aleph1D 1 run seq)
+  #   nabla_add_test(raja ${VT100_FG_BLUE} aleph2D 1 run seq)
+  #   nabla_add_test(raja ${VT100_FG_BLUE} heat 1 run seq)
+  #   nabla_add_test(raja ${VT100_FG_BLUE} amber 1 run seq)
+  #   nabla_add_test_with_defines(raja ${VT100_FG_BLUE} darcy 1 run seq -DALEPH_INDEX 100000)
+  #   nabla_add_test(raja ${VT100_FG_BLUE} p1apwb1D_implicite 1 run std seq)
+  #endif (HYPRE_FOUND)
+endif(RAJA_FOUND)
 
 ########################
 # NABLA TESTS FOR CUDA #

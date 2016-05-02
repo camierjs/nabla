@@ -1,0 +1,8 @@
+include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
+
+find_path(RAJA_ROOT_PATH include/RAJA/RAJA.hxx ${RAJA_ROOT})
+info("${VT100_FG_MAGENTA}RAJA${VT100_RESET} set to ${VT100_BOLD}${RAJA_ROOT_PATH}${VT100_RESET}")
+
+if(RAJA_ROOT_PATH)
+  set(RAJA_FOUND "YES")
+endif(RAJA_ROOT_PATH)

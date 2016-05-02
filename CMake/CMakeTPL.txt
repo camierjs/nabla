@@ -1,4 +1,5 @@
 set(ICET_ROOT /usr/local/iceT)
+set(RAJA_ROOT /usr/local/raja)
 set(HYPRE_ROOT /usr/local/hypre)
 set(KOKKOS_ROOT /usr/local/kokkos)
 set(ARCANE_ROOT /usr/local/arcane/testing)

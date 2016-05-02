@@ -58,19 +58,31 @@ endif()
 # PACKAGES #
 ############
 find_package(MPI)
+
 include(CMake/FindARCANE.cmake)
-include(CMake/FindHYPRE.cmake)
-include(CMake/FindIceT.cmake)
-include(CMake/FindKokkos.cmake)
 if(ARCANE_FOUND)
   info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
 endif()
+
+include(CMake/FindHYPRE.cmake)
 if(HYPRE_FOUND)
   info("\t${VT100_FG_MAGENTA}HYPRE${VT100_RESET} has been found in ${VT100_BOLD}${HYPRE_ROOT}${VT100_RESET}")
 endif()
+
+include(CMake/FindIceT.cmake)
 if(ICET_FOUND)
   info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} has been found in ${VT100_BOLD}${ICET_ROOT}${VT100_RESET}")
   info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} libraries are ${VT100_BOLD}${ICET_LIBRARIES}${VT100_RESET}")
+endif()
+  
+include(CMake/FindKokkos.cmake)
+if(KOKKOS_FOUND)
+  info("\t${VT100_FG_MAGENTA}KOKKOS${VT100_RESET} has been found in ${VT100_BOLD}${KOKKOS_ROOT}${VT100_RESET}")
+  endif()
+  
+include(CMake/FindRAJA.cmake)
+if(RAJA_FOUND)
+  info("\t${VT100_FG_MAGENTA}RAJA${VT100_RESET} has been found in ${VT100_BOLD}${RAJA_ROOT}${VT100_RESET}")
 endif()
 
 ################################
@@ -99,6 +111,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/kokkos)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/raja)
 
 #######################
 # Backends common lib #
@@ -115,7 +128,7 @@ endif()
 target_link_libraries(nabla libNabla
                       NablaFrontend NablaToolbox
                       NablaMiddlend
-                      NablaArcane NablaCuda NablaKokkos NablaLambda NablaOkina
+                      NablaArcane NablaCuda NablaKokkos NablaRaja NablaLambda NablaOkina
                       NablaLibCall NablaLibHook NablaLibDump NablaLibAleph
                       NablaMiddlend)
 
