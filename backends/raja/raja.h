@@ -49,7 +49,7 @@ void rajaHookHeaderDump(nablaMain*);
 void rajaHookHeaderIncludes(nablaMain*);
 void rajaHookHeaderPostfix(nablaMain*);
 
-bool rajaHookDfsExtra(nablaMain*,nablaJob*);
+bool rajaHookDfsExtra(nablaMain*,nablaJob*,bool);
 char* rajaHookEoe(nablaMain*); 
 
 NABLA_STATUS rajaHookMainPreInit(nablaMain*);
