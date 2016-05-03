@@ -44,9 +44,10 @@
 #include "nabla.tab.h"
 hooks* arcane(nablaMain*);
 hooks* cuda(nablaMain*);
-hooks* lambda(nablaMain*);
-hooks* kokkos(nablaMain*);
 hooks* okina(nablaMain*);
+hooks* lambda(nablaMain*);
+hooks* raja(nablaMain*);
+hooks* kokkos(nablaMain*);
 
 
 // ****************************************************************************
@@ -103,6 +104,7 @@ int nMiddleSwitch(astNode *root,
   case BACKEND_CUDA:   return animate(nabla,root,cuda(nabla));
   case BACKEND_OKINA:  return animate(nabla,root,okina(nabla));
   case BACKEND_LAMBDA: return animate(nabla,root,lambda(nabla));
+  case BACKEND_RAJA:   return animate(nabla,root,raja(nabla));
   case BACKEND_KOKKOS: return animate(nabla,root,kokkos(nabla));
   default:
     exit(NABLA_ERROR|

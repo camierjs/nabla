@@ -115,5 +115,5 @@ inline void scatter3x3k(const int a, Kokkos::View<real3x3*> gathered, Kokkos::Vi
   data[a]=gathered[0];
 }
 
-#endif //  _NABLA_KOKKOS_GATHER_H_
+#endif // _NABLA_KOKKOS_GATHER_H_
 

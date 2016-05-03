@@ -43,7 +43,22 @@
 #ifndef _NABLA_LAMBDA_HOOK_H_
 #define _NABLA_LAMBDA_HOOK_H_
 
-const hooks* lambda(nablaMain*);
+char *rajaParallelIncludes(void);
+void rajaHookHeaderDump(nablaMain*);
+
+void rajaHookHeaderIncludes(nablaMain*);
+void rajaHookHeaderPostfix(nablaMain*);
+
+bool rajaHookDfsExtra(nablaMain*,nablaJob*);
+char* rajaHookEoe(nablaMain*); 
+
+NABLA_STATUS rajaHookMainPreInit(nablaMain*);
+
+char* rajaHookForAllDump(nablaJob*);
+
+void rajaHookReduction(nablaMain*,astNode*);
+
+const hooks* raja(nablaMain*);
 
 #endif // _NABLA_LAMBDA_HOOK_H_
  

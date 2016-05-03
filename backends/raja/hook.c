@@ -40,36 +40,84 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_KOKKOS_HOOK_H_
-#define _NABLA_KOKKOS_HOOK_H_
+#include "nabla.h"
 
-void kHookHeaderDump(nablaMain*);
+extern char raja_dump_h[];
 
-char *kParallelIncludes(void);
+// ****************************************************************************
+// * kHookHeaderDump
+// ****************************************************************************
+void rajaHookHeaderDump(nablaMain *nabla){
+  xHookHeaderDump(nabla);
+  fprintf(nabla->entity->hdr,raja_dump_h+NABLA_LICENSE_HEADER);
+}
 
-void kHookHeaderIncludes(nablaMain*);
-void kHookHeaderPostfix(nablaMain*);
 
-char* kHookVarDeclPrefix(nablaMain*);
-char* kHookVarDeclPostfix(nablaMain*);
+// ****************************************************************************
+// * rajaParallelIncludes
+// ****************************************************************************
+char *rajaParallelIncludes(void){
+  return "\n//kParallelIncludes\n";
+}
 
-NABLA_STATUS kHookMainPrefix(nablaMain*);
-NABLA_STATUS kHookMainPreInit(nablaMain*);
-NABLA_STATUS kHookMainPostfix(nablaMain*);
 
-void kHookVariablesPrefix(nablaMain*);
-void kHookVariablesMalloc(nablaMain*);
-void kHookVariablesFree(nablaMain*);
+// ****************************************************************************
+// * rajaHookHeaderIncludes
+// ****************************************************************************
+void rajaHookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+#include <cmath>\n\
+#include <cstdio>\n\
+#include <cstdlib>\n\
+#include <sstream>\n\
+#include <fstream>\n\
+#include <iostream>\n\
+#include <cstring>\n\
+#include <cctype>\n\
+#include <assert.h>\n\
+#include <sys/time.h>\n\
+#include <RAJA/RAJA.hxx>\n\
+#include <RAJA/IndexSetBuilders.hxx>\n\
+using namespace std;\n\
+");
+  nMiddleDefines(nabla,nabla->call->header->defines);
+  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
+  nMiddleForwards(nabla,nabla->call->header->forwards);
+}
 
-void kHookReduction(nablaMain*,astNode*);
 
-char* kHookEoe(nablaMain*); 
-bool kHookDfsExtra(nablaMain*,nablaJob*,bool);
+// ****************************************************************************
+// * rajaHookHeaderPostfix
+// ****************************************************************************
+void rajaHookHeaderPostfix(nablaMain *nabla){
+  xHookMeshStruct(nabla);
+  fprintf(nabla->entity->hdr,"\n\n\
+// *********************************************************\n\
+// * Forward deep enumerates\n\
+// *********************************************************\n\
+#define FOR_EACH_NODE_MSH(n) for(int n=0;n<msh.NABLA_NB_NODES;n+=1)\n\
+#define FOR_EACH_NODE_CELL_MSH(c)\\\n\
+\tfor(int c=0,nc=msh.NABLA_NODE_PER_CELL*n;c<msh.NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\
+#define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
+#define FOR_EACH_NODE_CELL(c)\\\n\
+\tfor(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)");
+  fprintf(nabla->entity->hdr,"\n\n#endif");
+}
 
-char* kHookForAllDump(nablaJob*);
-char* kHookForAllPostfix(nablaJob*);
 
-const hooks* kokkos(nablaMain*);
+// ****************************************************************************
+// * kHookEoe - End Of Enumerate
+// ****************************************************************************
+char* rajaHookEoe(nablaMain* nabla){
+  return ");";
+}
 
-#endif // _NABLA_KOKKOS_HOOK_H_
- 
+
+bool rajaHookDfsExtra(nablaMain* nabla,nablaJob* job,bool type){
+  const char j=job->item[0];
+
+  if (j=='c') nprintf(nabla, NULL,"%scellIdxSet,",type?"RAJA::IndexSet *":"");
+  if (j=='n') nprintf(nabla, NULL,"%snodeIdxSet,",type?"RAJA::IndexSet *":"");
+  
+  return false;
+}

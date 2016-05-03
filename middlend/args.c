@@ -348,7 +348,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
   
-  if (!nabla->hook->grammar->dfsExtra){
+  if (!nabla->hook->grammar->dfsExtra(nabla,job,true)){
     const char j=job->item[0];
     const char e=job->enum_enum;
     //printf("job %s, e=%c",job->name,e);
@@ -443,7 +443,8 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   int nXS=0;
   char *XS=(char*)calloc(3*NABLA_JOB_WHEN_MAX,sizeof(char));
 
-  if (!job->is_a_function){
+  if ((!job->is_a_function) &&
+      (!nabla->hook->grammar->dfsExtra(nabla,job,false))){
     const char j=job->item[0];
     const char e=job->enum_enum;
     dbg("[1;34m[nMiddleArgsDumpFromDFS] job %s, j=%c, enum_enum=%c[0m\n",job->name,j,e?e:'0');

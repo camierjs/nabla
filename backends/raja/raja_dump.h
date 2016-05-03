@@ -40,36 +40,16 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_KOKKOS_HOOK_H_
-#define _NABLA_KOKKOS_HOOK_H_
+#ifndef _NABLA_RAJA_DUMP_H_
+#define _NABLA_RAJA_DUMP_H_
 
-void kHookHeaderDump(nablaMain*);
+typedef RAJA::seq_segit Hybrid_Seg_Iter;
+typedef RAJA::simd_exec Segment_Exec;
 
-char *kParallelIncludes(void);
+typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> node_exec_policy;
+typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> cell_exec_policy;
 
-void kHookHeaderIncludes(nablaMain*);
-void kHookHeaderPostfix(nablaMain*);
+typedef RAJA::omp_reduce reduce_policy;
 
-char* kHookVarDeclPrefix(nablaMain*);
-char* kHookVarDeclPostfix(nablaMain*);
+#endif // _NABLA_RAJA_GATHER_H_
 
-NABLA_STATUS kHookMainPrefix(nablaMain*);
-NABLA_STATUS kHookMainPreInit(nablaMain*);
-NABLA_STATUS kHookMainPostfix(nablaMain*);
-
-void kHookVariablesPrefix(nablaMain*);
-void kHookVariablesMalloc(nablaMain*);
-void kHookVariablesFree(nablaMain*);
-
-void kHookReduction(nablaMain*,astNode*);
-
-char* kHookEoe(nablaMain*); 
-bool kHookDfsExtra(nablaMain*,nablaJob*,bool);
-
-char* kHookForAllDump(nablaJob*);
-char* kHookForAllPostfix(nablaJob*);
-
-const hooks* kokkos(nablaMain*);
-
-#endif // _NABLA_KOKKOS_HOOK_H_
- 

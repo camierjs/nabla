@@ -41,14 +41,99 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "raja.h"
+
+const nWhatWith rajaCallHeaderTypedef[]={
+  {"int","integer"},
+  //{"double","real"},
+  {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
+  {"RAJA::Real_type","Real_t"},
+  {"RAJA::Real_ptr","Real_p"},
+  {"RAJA::const_Real_ptr","const_Real_p"},
+  {NULL,NULL}
+};
+
+const nWhatWith rajaCallHeaderDefines[]={
+  {"__host__", ""},
+  {"__global__", ""},
+  {"WARP_BIT", "0"},
+  {"WARP_SIZE", "1"},
+  {"WARP_ALIGN", "8"}, 
+  {"NABLA_NB_GLOBAL","1"},
+  {"Bool", "bool"},
+  {"Integer", "int"},
+  {"Real", "RAJA::Real_type"},
+  {"real", "RAJA::Real_type"},
+  {"Real2", "real3"},
+  {"real2", "real3"},
+  {"rabs(a)","fabs(a)"},
+  {"set(a)", "a"},
+  {"set1(cst)", "cst"},
+  {"square_root(u)", "sqrt(u)"},
+  {"cube_root(u)", "cbrt(u)"},
+  {"store(u,_u)", "(*u=_u)"},
+  {"load(u)", "(*u)"},
+  {"zero()", "0.0"},
+  {"DBG_MODE", "(false)"},
+  {"DBG_LVL", "(DBG_ALL)"},
+  {"DBG_OFF", "0x0000ul"},
+  {"DBG_CELL_VOLUME", "0x0001ul"},
+  {"DBG_CELL_CQS", "0x0002ul"},
+  {"DBG_GTH", "0x0004ul"},
+  {"DBG_NODE_FORCE", "0x0008ul"},
+  {"DBG_INI_EOS", "0x0010ul"},
+  {"DBG_EOS", "0x0020ul"},
+  {"DBG_DENSITY", "0x0040ul"},
+  {"DBG_MOVE_NODE", "0x0080ul"},
+  {"DBG_INI", "0x0100ul"},
+  {"DBG_INI_CELL", "0x0200ul"},
+  {"DBG_INI_NODE", "0x0400ul"},
+  {"DBG_LOOP", "0x0800ul"},
+  {"DBG_FUNC_IN", "0x1000ul"},
+  {"DBG_FUNC_OUT", "0x2000ul"},
+  {"DBG_VELOCITY", "0x4000ul"},
+  {"DBG_BOUNDARIES", "0x8000ul"},
+  {"DBG_ALL", "0xFFFFul"},
+  {"DBG_DUMP", "false"},
+  {"opAdd(u,v)", "(u+v)"},
+  {"opSub(u,v)", "(u-v)"},
+  {"opDiv(u,v)", "(u/v)"},
+  {"opMul(u,v)", "(u*v)"},
+  {"opMod(u,v)", "(u%v)"},
+  {"opScaMul(u,v)","dot3(u,v)"},
+  {"opVecMul(u,v)","cross(u,v)"},    
+  {"dot", "dot3"},
+  {"ReduceMinToDouble(a)","a"},
+  {"ReduceMaxToDouble(a)","a"},
+  {"knAt(a)",""},
+  {"fatal(a,b)","exit(-1)"},
+  {"mpi_reduce(how,what)","how##ToDouble(what)"},
+  {"xyz","int"},
+  {"GlobalIteration", "global_iteration"},
+  {"MD_DirX","0"},
+  {"MD_DirY","1"},
+  {"MD_DirZ","2"},
+  {"MD_Plus","0"},
+  {"MD_Negt","4"},
+  {"MD_Shift","3"},
+  {"MD_Mask","7"}, // [sign,..]
+  {"File", "std::ofstream&"},
+  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
+  //{"xs_node_cell(c)", "xs_node_cell[n*NABLA_NODE_PER_CELL+c]"},
+  //{"xs_face_cell(c)", "xs_face_cell[f+NABLA_NB_FACES*c]"},
+  //{"xs_face_node(n)", "xs_face_node[f+NABLA_NB_FACES*n]"},
+  {"synchronize(v)",""},
+  {NULL,NULL}
+};
 
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
 static const callHeader xHeader={
   xCallHeaderForwards,
-  xCallHeaderDefines,
-  xCallHeaderTypedef
+  rajaCallHeaderDefines,
+  rajaCallHeaderTypedef
 };
 static const callSimd simd={
   NULL,
@@ -61,7 +146,7 @@ static const callParallel parallel={
   NULL,
   NULL,
   xParallelLoop,
-  xParallelIncludes
+  rajaParallelIncludes
 };
 static backendCalls calls={
   &xHeader,
@@ -75,7 +160,7 @@ static backendCalls calls={
 // ****************************************************************************
 const static hookForAll forall={
   NULL,
-  xHookForAllDump,
+  rajaHookForAllDump,
   xHookForAllItem,
   xHookForAllPostfix
 };
@@ -98,13 +183,13 @@ const static hookToken token={
 const static hookGrammar gram={
   NULL,
   NULL,
-  xHookReduction,
+  rajaHookReduction,
   NULL,
   NULL,
   xHookDfsVariable,
+  rajaHookDfsExtra,
   NULL,
-  NULL,
-  NULL,
+  rajaHookEoe,
   NULL
 };
 
@@ -125,12 +210,12 @@ const static hookXyz xyz={
 };
 
 const static hookHeader header={
-  xHookHeaderDump,
+  rajaHookHeaderDump,
   xHookHeaderOpen,
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
-  xHookHeaderIncludes,
-  xHookHeaderPostfix
+  rajaHookHeaderIncludes,
+  rajaHookHeaderPostfix
 };
 
 const static hookSource source={
@@ -156,7 +241,7 @@ const static hookVars vars={
 
 const static hookMain mains={
   xHookMainPrefix,
-  xHookMainPreInit,
+  rajaHookMainPreInit,
   xHookMainVarInitKernel,
   xHookMainVarInitCall,
   xHookMainHLT,
@@ -164,7 +249,7 @@ const static hookMain mains={
   xHookMainPostfix
 };  
 
-static hooks lambdaHooks={
+static hooks rajaHooks={
   &forall,
   &token,
   &gram,
@@ -180,9 +265,9 @@ static hooks lambdaHooks={
 
 
 // ****************************************************************************
-// * lambda
+// * raja
 // ****************************************************************************
-const hooks* lambda(nablaMain *nabla){
+const hooks* raja(nablaMain *nabla){
   nabla->call=&calls;
-  return &lambdaHooks;
+  return &rajaHooks;
 }

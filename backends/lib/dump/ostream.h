@@ -49,10 +49,11 @@ std::ostream& info(){
   return std::cout;
 }
 
-std::ofstream devNull("/dev/null");
+// Get rid of this last global variable
+//std::ofstream devNull("/dev/null");
 
 std::ostream& debug(){
-  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return devNull;
+  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return std::clog;//devNull;
   std::cout.flush();
   std::cout<<"\n";
   return std::cout;

@@ -2,40 +2,17 @@ NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
-SIMD = std
-PARALLEL = seq
-
-BYFL_FLAGS  = #-bf-verbose #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
-
-AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
-SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall -DNO_SSE2 -mno-avx  #-fPIC
-
+SIMD ?= std
+PARALLEL ?= omp
 LOG = -tnl #-v $(TGT).log
 
+SIMD_std_FLAGS  = -DRAJA_USE_GETTIME -DNO_SSE2 -Ofast -mavx -finline-functions -finline-limit=20000 -std=c++0x -fopenmp -O3 -DNDEBUG   -std=gnu++11
 PARALLEL_omp_FLAGS = -fopenmp
-PARALLEL_cilk_FLAGS = #-fcilkplus
 
 CXX = ${CMAKE_CXX_COMPILER}
-#CXX=/usr/local/bin/bf-clang++
-#CXX = mpc_g++
-CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) # -save-temps
+CFLAGS = -I${RAJA_ROOT_PATH}/include $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline $(MESH_FLAGS)
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
-LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
-# A mettre lors du configure
-LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
-LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
-
-
-#XYZ_GEOMETRY_64 = -DX_EDGE_ELEMS=64 -DY_EDGE_ELEMS=63 -DZ_EDGE_ELEMS=63 -DX_EDGE_TICK=.017307 -DY_EDGE_TICK=.017578 -DZ_EDGE_TICK=.017578 -DLENGTH=1.125
-#XYZ_GEOMETRY = $(XYZ_GEOMETRY_40)
-#export X_EDGE_ELEMS = 64
-#export Y_EDGE_ELEMS = 63
-#export Z_EDGE_ELEMS = 63
-#export X_EDGE_TICK = 0.017307
-#export Y_EDGE_TICK = 0.017578
-#export Z_EDGE_TICK = 0.017578
-#export LENGTH = 1.125
-#export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
+LIB_RAJA = ${RAJA_ROOT_PATH}/lib/libRAJA.a
 
 export LENGTH = $(shell echo 1.125)
 export X_EDGE_ELEMS = $(MESH)
@@ -46,34 +23,24 @@ export Y_EDGE_TICK = $(shell echo "scale=6;$(LENGTH)/$(MESH)"|bc -l)
 export Z_EDGE_TICK = $(shell echo "scale=6;$(LENGTH)/$(MESH)"|bc -l)
 export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
 
-
 all:$(TGT) $(NABLA) 
 
 $(TGT).cc: $(TGT_FILE) $(NABLA)
-	$(NABLA) $(LOG) --lambda $(TGT) --std --$(PARALLEL) -i $(TGT_FILE) #--$(COLORS)
+	$(NABLA) $(LOG) --raja $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
 
 $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI)
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_RAJA)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
-#	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
 run1:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
-
-#############
-# DOT 2 PNG #
-#############
 png:
-#	dot -Tpng $(TGT).dot -o $(TGT).png
 	dot -O -Tpng $(TGT).time.dot

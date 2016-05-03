@@ -523,7 +523,10 @@ int main(int argc, char * argv[]){
     case BACKEND_RAJA:
       backend=BACKEND_RAJA;
       dbg("\n[nabla] RAJA BACKEND WIP!");
-      exit(NABLA_ERROR);      
+      nabla_entity_name=optarg;
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      break;      
       // ************************************************************
       // * BACKEND LOCI en cours de construction
       // ************************************************************

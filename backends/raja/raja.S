@@ -40,36 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_KOKKOS_HOOK_H_
-#define _NABLA_KOKKOS_HOOK_H_
+   .globl ${ABI_UNDERSCORE}raja_dump_h
 
-void kHookHeaderDump(nablaMain*);
-
-char *kParallelIncludes(void);
-
-void kHookHeaderIncludes(nablaMain*);
-void kHookHeaderPostfix(nablaMain*);
-
-char* kHookVarDeclPrefix(nablaMain*);
-char* kHookVarDeclPostfix(nablaMain*);
-
-NABLA_STATUS kHookMainPrefix(nablaMain*);
-NABLA_STATUS kHookMainPreInit(nablaMain*);
-NABLA_STATUS kHookMainPostfix(nablaMain*);
-
-void kHookVariablesPrefix(nablaMain*);
-void kHookVariablesMalloc(nablaMain*);
-void kHookVariablesFree(nablaMain*);
-
-void kHookReduction(nablaMain*,astNode*);
-
-char* kHookEoe(nablaMain*); 
-bool kHookDfsExtra(nablaMain*,nablaJob*,bool);
-
-char* kHookForAllDump(nablaJob*);
-char* kHookForAllPostfix(nablaJob*);
-
-const hooks* kokkos(nablaMain*);
-
-#endif // _NABLA_KOKKOS_HOOK_H_
- 
+${ABI_UNDERSCORE}raja_dump_h: 
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/raja_dump.h"
+   .byte 0

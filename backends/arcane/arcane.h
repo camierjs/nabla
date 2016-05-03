@@ -93,7 +93,7 @@ void arcaneTurnTokenToOption(nablaMain*,nablaOption*);
 void arcaneHookReduction(nablaMain*,astNode*);
 
 bool arcaneHookDfsVariable(nablaMain*);
-bool arcaneHookDfsExtra(nablaMain*);
+bool arcaneHookDfsExtra(nablaMain*,nablaJob*,bool);
 char* arcaneHookDfsArgType(nablaMain*,nablaVariable*);
 
 //char *nccArcBits(void);

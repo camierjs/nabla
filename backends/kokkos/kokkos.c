@@ -175,7 +175,7 @@ const static hookGrammar gram={
   NULL,
   NULL,
   xHookDfsVariable,
-  NULL,
+  kHookDfsExtra,
   NULL,
   kHookEoe,
   NULL

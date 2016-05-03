@@ -42,88 +42,79 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
-extern char kokkos_dump_h[];
+static char* forAllParticle(void){
+  return "RAJA::forall<particle_exec_policy>(*particleList,[=] RAJA_DEVICE (int p)";
+}
 
-// ****************************************************************************
-// * kHookHeaderDump
-// ****************************************************************************
-void kHookHeaderDump(nablaMain *nabla){
-  xHookHeaderDump(nabla);
-  fprintf(nabla->entity->hdr,kokkos_dump_h+NABLA_LICENSE_HEADER);
- }
+static char* forAllCell(void){
+  return "RAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
+static char* forAllInnerCell(void){
+  return "#warning Should be INNER cells\n\
+\tRAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
+static char* forAllOuterCell(void){
+  return "RAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
 
-// ****************************************************************************
-// * kHookHeaderIncludes
-// ****************************************************************************
-void kHookHeaderIncludes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\
-#include <cstdio>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-#include <iostream>\n\
-#include <assert.h>\n\
-#include <sys/time.h>\n\
-#include <Kokkos_Core.hpp>\n\
-using namespace std;\n\
-");
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+static char* forAllNode(void){
+  return "RAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
+static char* forAllInnerNode(void){
+  return "#warning Should be INNER nodes\n\
+\tRAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
+static char* forAllOuterNode(void){
+  return "#warning Should be OUTER nodes\n\
+\tRAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
+
+
+static char* forAllFace(void){
+  return "RAJA::forall<face_exec_policy>(*faceIdxSet,[=] RAJA_DEVICE (int f)";
+}
+static char* forAllInnerFace(void){
+  return "RAJA::forall<face_exec_policy>(*faceIdxSet,[=] RAJA_DEVICE (int f)";
+}
+static char* forAllOuterFace(void){
+  return "RAJA::forall<face_exec_policy>(*faceIdxSet,[=] RAJA_DEVICE (int f)";
 }
 
 
 // ****************************************************************************
-// * kHookHeaderPostfix
+// * Fonction produisant l'ENUMERATE_*
 // ****************************************************************************
-void kHookHeaderPostfix(nablaMain *nabla){
-  xHookMeshStruct(nabla);
-  fprintf(nabla->entity->hdr,"\n\n\
-// *********************************************************\n\
-// * Forward enumerates\n\
-// *********************************************************\n\
-#define FOR_EACH_PARTICLE(p)\\\n\
-\tKokkos::parallel_for(NABLA_NB_PARTICLES, KOKKOS_LAMBDA (const int p)\n \
-\n\
-#define FOR_EACH_CELL(c) Kokkos::parallel_for(NABLA_NB_CELLS, KOKKOS_LAMBDA (const int c)\n\
-#define FOR_EACH_CELL_SHARED(c,local) FOR_EACH_CELL(c)\n\
-\n\
-#define FOR_EACH_NODE_MSH(n) for(int n=0;n<msh.NABLA_NB_NODES;n+=1)\n\
-#define FOR_EACH_NODE(n)\\\n\
-\tKokkos::parallel_for(NABLA_NB_NODES, KOKKOS_LAMBDA (const int n)\n\
-#define FOR_EACH_NODE_CELL(c)\
- for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
-#define FOR_EACH_NODE_CELL_MSH(c)\
- for(int c=0,nc=msh.NABLA_NODE_PER_CELL*n;c<msh.NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
-\n\
-#define FOR_EACH_FACE(f) Kokkos::parallel_for(NABLA_NB_FACES, KOKKOS_LAMBDA (const int f)\n\
-#define FOR_EACH_OUTER_FACE(f)\
- Kokkos::parallel_for(NABLA_NB_FACES_OUTER, KOKKOS_LAMBDA (const int f)\n\
-#define FOR_EACH_OWN_OUTER_FACE FOR_EACH_OUTER_FACE\n\
-\n");  
-  fprintf(nabla->entity->hdr,
-          "\n\n#endif // __BACKEND_%sH__\n",
-          nabla->entity->name);
+char* rajaHookForAllDump(nablaJob *job){
+  const char *grp=job->scope;   // OWN||ALL
+  const char *rgn=job->region;  // INNER, OUTER
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] function?");
+  if (itm=='\0') return "\n";
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] particle?");
+  if (itm=='p' && grp==NULL && rgn==NULL) return forAllParticle();
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
+  if (itm=='c' && grp==NULL && rgn==NULL) return forAllCell();
+  if (itm=='c' && grp==NULL && rgn[0]=='i') return forAllInnerCell();
+  if (itm=='c' && grp==NULL && rgn[0]=='o') return forAllOuterCell();
+  if (itm=='c' && grp[0]=='o' && rgn==NULL) return forAllCell();
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
+  if (itm=='n' && grp==NULL && rgn==NULL)     return forAllNode();
+  if (itm=='n' && grp==NULL && rgn[0]=='i')   return forAllInnerNode();
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return forAllOuterNode();
+  if (itm=='n' && grp[0]=='o' && rgn==NULL)   return forAllNode();
+  if (itm=='n' && grp[0]=='a' && rgn==NULL)   return forAllNode();
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return forAllInnerNode();
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return forAllOuterNode();
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
+  if (itm=='f' && grp==NULL && rgn==NULL)     return forAllFace();
+  if (itm=='f' && grp==NULL && rgn[0]=='i')   return forAllInnerFace();
+  if (itm=='f' && grp==NULL && rgn[0]=='o')   return forAllOuterFace();
+  // ! Tester grp==NULL avant ces prochains:
+  if (itm=='f' && grp[0]=='o' && rgn==NULL)   return forAllFace();
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return forAllInnerFace();
+  if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return forAllOuterFace();
+  
+  dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
+  nablaError("Could not distinguish ENUMERATE!");
+  return NULL;
 }
 
-
-// ****************************************************************************
-// * kParallelIncludes
-// ****************************************************************************
-char *kParallelIncludes(void){
-  return "\n//kParallelIncludes\n";
-}
-
-
-// ****************************************************************************
-// * kHookEoe - End Of Enumerate
-// ****************************************************************************
-char* kHookEoe(nablaMain* nabla){
-  return ");";
-}
-
-
-
-
-bool kHookDfsExtra(nablaMain* nabla,nablaJob* job){
-  return false;
-}

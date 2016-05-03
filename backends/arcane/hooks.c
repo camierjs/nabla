@@ -75,7 +75,7 @@ bool arcaneHookDfsVariable(nablaMain *nabla){
   if (isAnArcaneFamily(nabla)) return true;
   return false;
 }
-bool arcaneHookDfsExtra(nablaMain *nabla){
+bool arcaneHookDfsExtra(nablaMain *nabla, nablaJob *job,bool type){
   if (isAnArcaneFamily(nabla)) return true;
   return false;
 }
