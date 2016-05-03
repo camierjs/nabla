@@ -43,9 +43,21 @@
 #ifndef _NABLA_RAJA_DUMP_H_
 #define _NABLA_RAJA_DUMP_H_
 
-typedef RAJA::seq_segit Hybrid_Seg_Iter;
-typedef RAJA::simd_exec Segment_Exec;
+// ****************************************************************************
+// * LULESH_SEQUENTIAL
+// ****************************************************************************
+//typedef RAJA::seq_segit Hybrid_Seg_Iter;
+//typedef RAJA::simd_exec Segment_Exec;
+//typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> node_exec_policy;
+//typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> cell_exec_policy;
+//typedef RAJA::omp_reduce reduce_policy;
 
+
+// ****************************************************************************
+// * LULESH_CANONICAL
+// ****************************************************************************
+typedef RAJA::seq_segit Hybrid_Seg_Iter;
+typedef RAJA::omp_parallel_for_exec  Segment_Exec;
 typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> node_exec_policy;
 typedef RAJA::IndexSet::ExecPolicy<Hybrid_Seg_Iter, Segment_Exec> cell_exec_policy;
 
