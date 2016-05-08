@@ -47,6 +47,12 @@
 // * 
 // ****************************************************************************
 void xHookMeshStruct(nablaMain *nabla){
+#warning xHookMeshStruct __APPLE__ switches aligned_alloc
+  fprintf(nabla->entity->hdr,"\n\n\
+#if defined(__APPLE__)\n\
+\t#define aligned_alloc(align,size) malloc(size)\n\
+#endif\n");
+  
   fprintf(nabla->entity->hdr,"\n\n\
 // ****************************************************************************\n\
 // * nablaMshStruct\n\

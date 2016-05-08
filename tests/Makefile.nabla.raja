@@ -6,7 +6,7 @@ SIMD ?= std
 PARALLEL ?= omp
 LOG = -tnl #-v $(TGT).log
 
-SIMD_std_FLAGS  = -DRAJA_USE_GETTIME -DNO_SSE2 -Ofast -mavx -finline-functions -finline-limit=20000 -std=c++0x -fopenmp -O3 -DNDEBUG   -std=gnu++11
+SIMD_std_FLAGS  = -DRAJA_USE_GETTIME -DNO_SSE2 -Ofast -finline-functions -finline-limit=20000 -std=c++0x -fopenmp -O3 -DNDEBUG   -std=gnu++11
 PARALLEL_omp_FLAGS = -fopenmp
 
 CXX = ${CMAKE_CXX_COMPILER}
