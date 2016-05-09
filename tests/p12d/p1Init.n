@@ -1,0 +1,190 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0.0]
+// ****************************************************************************
+
+// ****************************************************************************
+// * hydroInit
+// ****************************************************************************
+void hydroInit(void) @ -25.0{
+  δt=option_δt_initial;
+}
+
+// ****************************************************************************
+// * iniCellZone
+// ****************************************************************************
+∀ cells void iniCellZone0(void)@ -25.0 if (option_case==0){
+  Real3 centre; 
+  ∀ node centre+=coord;
+  centre/=nbNode;
+  // On regarde si le centre de la maille est à G ou D de la frontière
+  if ((option_test_sod && (centre.x < option_x_interface))
+      // Ou suivant une autre règle géométrique arbitraire
+      ||(!option_test_sod && (√(centre⋅centre) < option_x_interface))){
+    u.x=0.0;//option_ini_zg_u;
+    u.y=0.0;
+    p=option_ini_zg_p;
+    temperature=option_ini_zg_p;
+  }else{
+    u.x=0.0;//option_ini_zd_u;
+    u.y=0.0;
+    p=option_ini_zd_p;
+    temperature=option_ini_zd_p;
+  }
+  sigma_a=0.;
+  sigma_s=1.;
+  sigma=sigma_a+sigma_s;
+  epsilon = 1.;
+
+  if (DEBUG)
+    printf("\n[35m[eos,ini] temperature=%f, p_ic=%f, ux_ic=%f, uy_ic=%f[0m",temperature,p,u.x,u.y);
+}
+
+∀ cells void initExact0(void) @ -19.0 {
+  if (option_ini_exact){
+    p=_exact_p_sol(time,center);
+    u=_exact_u_sol(time,center);
+    temperature=_exact_t_sol(time,center);
+    //    if (DEBUG) 
+    printf("\n %d : Impose la solution exacte à l'init (%f)=%f",uid,time,u.x);
+  }
+}
+
+
+// ****************************************************************************
+// * iniCellZone
+// ****************************************************************************
+∀ cells void iniCellZone1(void) @ -25.0 if (option_case==1){
+    Real3 centre; 
+    ∀ node centre+=coord;
+    centre/=nbNode;
+    u.x=0.0;//centre.x+option_ini_zd_u;//option_ini_zg_u;
+    u.y=0.0;
+    p=0.;//option_ini_zg_p;
+    temperature=0.;//option_ini_zg_p;
+    sigma_a=0.;
+    sigma_s=1.;
+    sigma=sigma_a+sigma_s;
+    epsilon = 1.;
+    if (DEBUG)
+      printf("\n[35m[eos,ini] temperature=%f, p_ic=%f, ux_ic=%f, uy_ic=%f[0m",temperature,p,u.x,u.y);
+}
+
+// ****************************************************************************
+// * iniCellZone
+// ****************************************************************************
+∀ cells void iniCellZone2(void) @ -25.0 if (option_case==2){
+    Real3 centre; 
+    ∀ node centre+=coord;
+    centre/=nbNode;
+    u.x=0.0;//centre.x+option_ini_zd_u;//option_ini_zg_u;
+    u.y=0.0;
+    p=0.;//option_ini_zg_p;
+    temperature=1.;//option_ini_zg_p;
+    if (DEBUG)
+      printf("\n[35m[eos,ini] temperature=%f, p_ic=%f, ux_ic=%f, uy_ic=%f[0m",temperature,p,u.x,u.y);
+    sigma_a=1.;
+    sigma_s=1.;
+    sigma=sigma_a+sigma_s;
+    epsilon = 1.;
+}
+
+// ****************************************************************************
+// * iniCellZone
+// ****************************************************************************
+∀ cells void iniCellZone3(void) @ -25.0 if (option_case==3){
+    Real3 centre; 
+    ∀ node centre+=coord;
+    centre/=nbNode;
+    u.x=0.0;//centre.x+option_ini_zd_u;//option_ini_zg_u;
+    u.y=0.0;
+    p=0.;//option_ini_zg_p;
+    temperature=1.;//option_ini_zg_p;
+    if (DEBUG)
+      printf("\n[35m[eos,ini] temperature=%f, p_ic=%f, ux_ic=%f, uy_ic=%f[0m",temperature,p,u.x,u.y);
+    sigma_a=0.5;
+    sigma_s=19./12.;
+    sigma=sigma_a+sigma_s;
+    epsilon = 1.;
+}
+
+∀ outer cells void initExact(void)@ -19.0 {
+  p=_exact_p_sol(time,center);
+  u=_exact_u_sol(time,center);
+  temperature=_exact_t_sol(time,center);
+  //  if (DEBUG) printf("\n %d: Impose les conditions aux bords",uid);
+}
+
+// ****************************************************************************
+// * iniCellZone
+// ****************************************************************************
+∀ cells void viewMesh(void) @ -25.0 {
+  ∀ node   output2  << "\t" << coord.x << "\t" << coord.y << "\n";
+  output2 << "\n";
+}
+// ****************************************************************************
+// * geomComputeCQsQuad @ -20.0
+// * geomComputeSurfaceAndVolume @ -20.0 
+// ****************************************************************************
+
+// ****************************************************************************
+// * iniCellMass
+// ****************************************************************************
+//∀ cells @ -19.0 {
+//  u=0.0;
+//  m=ρ*V;
+//  if (DEBUG)
+//    printf("\n[35m[eos,ini] m=%f[m",m);
+//}
+
+// ****************************************************************************
+// * iniEOS
+// ****************************************************************************
+//∀ cells @ -18.0{
+//  ρΕ = p/((γ-1.0)*ρ);
+//  if (DEBUG)
+//    printf("\n[35m[eos,ini] rhoE=%f[0m",ρΕ);
+//}
+

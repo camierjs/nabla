@@ -1,0 +1,184 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+Real _exact_p_sol_0(Real t, Real3 position){
+  return 1.0-position.x;
+}
+
+Real3 _exact_u_sol_0(Real t, Real3 position){
+  return Real3(1.0,0.0,0.0);
+}
+
+Real _exact_t_sol_0(Real t, Real3 position){
+  return 1.0-position.x;
+}
+
+Real _exact_p_sol_1(Real t, Real3 position){
+  return exp(-t);
+}
+
+Real3 _exact_u_sol_1(Real t, Real3 position){
+  return Real3(position.x*exp(-t),0.0,0.0);
+}
+
+Real _exact_t_sol_1(Real t, Real3 position){
+  return exp(-t);
+}
+
+Real _exact_p_sol_2(Real t, Real3 position){
+  return (0.5*(1.-exp(-2.*t)));
+}
+
+Real3 _exact_u_sol_2(Real t, Real3 position){
+  return Real3(0.0,0.0,0.0);
+}
+
+Real _exact_t_sol_2(Real t, Real3 position){
+  return (0.5*(1.+exp(-2.*t)));
+}
+
+Real _exact_p_sol_3(Real t, Real3 position){
+  return (exp(-0.25*t)*cos(position.x));
+}
+
+Real3 _exact_u_sol_3(Real t, Real3 position){
+  return Real3(0.75*exp(-0.25*t)*sin(position.x),0.0,0.0);
+}
+
+Real _exact_t_sol_3(Real t, Real3 position){
+  return (2.*exp(-0.25*t)*cos(position.x));
+}
+
+// on reimpose la solution exacte sur les ghost cells
+/*Real _exact_p_sol(Real t, Real3 position){
+  switch (option_case){
+  case 0 :
+    return _exact_p_sol_0(t, position);
+  case 1 : 
+    return _exact_p_sol_1(t, position);
+  case 2 :
+    return _exact_p_sol_2(t, position);
+  default:
+    printf("\n The test problem (%d) does not exist",option_case);
+    exit(-1);
+  }
+  }*/
+
+Real _exact_p_sol(Real t, Real3 position){
+  if (option_case==0)
+    return _exact_p_sol_0(t, position);
+  if (option_case==1)
+    return _exact_p_sol_1(t, position);
+  if (option_case==2)
+    return _exact_p_sol_2(t, position);
+  if (option_case==3)
+    return _exact_p_sol_3(t, position);
+  else {
+    printf("\n The test problem (%d) does not exist",option_case);
+    exit;
+  }
+}
+
+/*Real3 _exact_u_sol(Real t, Real3 position){
+  switch (option_case){
+  case 0 :
+    return _exact_u_sol_0(t, position);
+  case 1 : 
+    return _exact_u_sol_1(t, position);
+  case 2 :
+    return _exact_u_sol_2(t, position);
+  default:
+    printf("\n Cas test non géré");
+    exit(-1);
+  }
+}*/
+
+Real3 _exact_u_sol(Real t, Real3 position){
+  if (option_case==0)
+    return _exact_u_sol_0(t, position);
+  if (option_case==1)
+    return _exact_u_sol_1(t, position);
+  if (option_case==2)
+    return _exact_u_sol_2(t, position);
+  if (option_case==3)
+    return _exact_u_sol_3(t, position);
+  else{
+     printf("\n Cas test non géré");
+     exit;
+  }
+}
+
+/*Real _exact_t_sol(Real t, Real3 position){
+  switch (option_case){
+  case 0 :
+    return _exact_t_sol_0(t, position);
+  case 1 : 
+    return _exact_t_sol_1(t, position);
+  case 2 :
+    return _exact_t_sol_2(t, position);
+  default:
+    printf("\n Cas test non géré");
+    exit(-1);
+  }
+  }*/
+Real _exact_t_sol(Real t, Real3 position){
+  if (option_case==0)
+    return _exact_t_sol_0(t, position);
+  if (option_case==1)
+    return _exact_t_sol_1(t, position);
+  if (option_case==2)  
+    return _exact_t_sol_2(t, position);
+  if (option_case==3)
+    return _exact_t_sol_3(t, position);
+  else{ 
+     printf("\n Cas test non géré");
+     exit;
+  }
+}
+
+
+∀ cells void analyticSol(void)@ 30.1 {
+  pana=_exact_p_sol(time,center);
+  uana=_exact_u_sol(time,center);
+  tana=_exact_t_sol(time,center);
+}
