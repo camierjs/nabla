@@ -38,8 +38,8 @@ HYODA = /usr/local/arcane/testing/bin/hyoda
 # PATHS #
 #########
 NABLA_PATH = $(shell pwd)
-#BUILD_PATH = build
-BUILD_PATH = /tmp/nabla
+BUILD_PATH = build
+#BUILD_PATH = /tmp/nabla
 
 ############
 # COMMANDS #
