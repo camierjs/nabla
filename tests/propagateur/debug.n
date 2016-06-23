@@ -4,7 +4,9 @@
 // Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
-// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+// Contributor(s): TRAN Guillaume - Guillaume.Tran@polytechnique.edu         //
+//                 LOISEAU Pascal - Pascal.Loiseau@cea.fr                    //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,34 +42,15 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OSTREAM_H_
-#define _NABLA_OSTREAM_H_
+∀ cells @ -4.9 if (DEBUG) { info()<<E;}
 
-std::ostream& info(){
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
+∀ cells @ -2.0 if (false) { info()<<sousdiag;}
+∀ cells @ -2.0 if (false) { info()<<surdiag;}
+
+
+void dbgLoop(void) @ 1.0 {
+  printf("\n\33[7m[Loop] #%d, time=%f\33[m", iteration,time);
 }
 
-// Get rid of this last global variable
-std::ofstream devNull("/dev/null");
-
-std::ostream& debug(){
-  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return devNull;//std::clog;
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
-}
-
-std::ostream& operator<<(std::ostream &os, const Real3 &a){
-  double *x = (double*)&(a.x);
-  double *y = (double*)&(a.y);
-  double *z = (double*)&(a.z);
-  return os << "("<<*x<<","<<*y<<","<<*z<< ")";
-}
-
-std::ostream& operator<<(std::ostream &os, const Real3x3 &a){
-  return os << "(" << a.x <<","<< a.y <<","<< a.z <<")";
-}
-
-#endif // _NABLA_OSTREAM_H_
+∀ cells @ 2.0 if (false) { info()<<temp;}
+∀ cells @ 2.3 if (DEBUG) { info()<<E;}

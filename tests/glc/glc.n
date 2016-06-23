@@ -112,7 +112,7 @@ cells{
   ℝ glace_δt;
   ℝ absCQs[nodes];
   ℝ³ CQs[nodes];                        // Résultantes aux sommets
-  ℝ³⨯ℝ³ AQs[nodes];                      // Matrices de contributions aux sommets
+  ℝ³⨯ℝ³ AQs[nodes];                     // Matrices de contributions aux sommets
   ℝ ρΕ;                                 // Énergie massique
   ℝ ιΕ;                                 // Énergie interne
   ℝ³ reconstructed_u[nodes];            // Tableau des vitesses reconstruites

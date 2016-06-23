@@ -4,7 +4,9 @@
 // Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
-// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+// Contributor(s): TRAN Guillaume - Guillaume.Tran@polytechnique.edu         //
+//                 LOISEAU Pascal - Pascal.Loiseau@cea.fr                    //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,34 +42,26 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OSTREAM_H_
-#define _NABLA_OSTREAM_H_
 
-std::ostream& info(){
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
+ℝ sigmoide(const ℝ I, const ℝ temps_montee, const ℝ temps){
+  const ℝ ε1 = ε;
+  const ℝ ε2 = ε;
+  const ℝ a =1.0/temps_montee*log(ε1*ε2/(1.0-ε1)/(1.0-ε2));
+  const ℝ b =log((1.0-ε1)/ε1);
+  return I/(1.0+exp(a*temps+b)) ;
 }
 
-// Get rid of this last global variable
-std::ofstream devNull("/dev/null");
-
-std::ostream& debug(){
-  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return devNull;//std::clog;
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
+ℝ Heaviside(const ℝ x){
+  if(x >= 0.0) return 1.0;
+  return 0.0;
 }
 
-std::ostream& operator<<(std::ostream &os, const Real3 &a){
-  double *x = (double*)&(a.x);
-  double *y = (double*)&(a.y);
-  double *z = (double*)&(a.z);
-  return os << "("<<*x<<","<<*y<<","<<*z<< ")";
+ℝ Heaviside_strict(const ℝ x){
+  if(x > 0.0) return 1.0;
+  return 0.0;
 }
 
-std::ostream& operator<<(std::ostream &os, const Real3x3 &a){
-  return os << "(" << a.x <<","<< a.y <<","<< a.z <<")";
+ℝ Heaviside_lisse(const ℝ x, const ℝ largeur){
+  if(largeur == 0) return 1.0;
+  return 1.0/(1.0+exp(2.0*x/largeur));
 }
-
-#endif // _NABLA_OSTREAM_H_

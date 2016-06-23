@@ -43,7 +43,7 @@ file = "/tmp/nabla/tests/xgnplt/lambda/1/run/seq/output.plot"
 ############
 nbEmptyLines = system(sprintf("grep -e ^$ %s | wc --lines",file))
 print nbEmptyLines." empty lines have been found"
-nbBlocs = system(gprintf('echo %s/2|bc',nbEmptyLines))
+nbBlocs = system(sprintf('echo %s/2|bc',nbEmptyLines))
 print nbBlocs." blocs have been found"
 allLines = system(sprintf('wc --lines %s | sed "s/ .*//" ',file))
 print allLines." lines have been found"

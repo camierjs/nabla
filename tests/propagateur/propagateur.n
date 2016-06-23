@@ -4,7 +4,9 @@
 // Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
-// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+// Contributor(s): TRAN Guillaume - Guillaume.Tran@polytechnique.edu         //
+//                 LOISEAU Pascal - Pascal.Loiseau@cea.fr                    //
+//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,34 +42,81 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_OSTREAM_H_
-#define _NABLA_OSTREAM_H_
+with ℝ, ℵ;
 
-std::ostream& info(){
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
+
+// ****************************************************************************
+// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ∀ ℂℕℝℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂ * ⋅⨯⤫⊗⨂⊛ ∞ ⁰¹²³ⁱⁿ⁺⁼
+// ****************************************************************************
+//ofstream output("onde.plot");
+
+options{
+  ℾ DEBUG = false;
+  ℕ nbmailles=NABLA_NB_CELLS;
+  ℝ CFL = 2.0;
+  ℝ option_CL = 7.0;
+
+  ℾ hypre = true;
+  ℾ tridiag = false;
+    
+  ℝ ε = 1.0e-6;  
+  ℝ option_xmin = 0.0;
+  ℝ option_xmax = 1.0;
+  ℝ pi =atan(1.0)*4.0;
+  
+  // Yet required options for Okina 
+  ℝ option_δt_initial = 0.001;
+  ℝ option_stoptime=0.2;
+  ℕ option_max_iterations = 100;   // ! utilisé en dur dans les backends
+
+  // Options d'Aleph
+  ℝ alephEpsilon             = 1.e-16;
+  ℕ alephUnderlyingSolver    = 2;
+  ℕ alephMaxIterations       = 2048;
+  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
+  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
+  ℕ alephPreconditionerMethod = 0;
+  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
+  ℕ alephSolverMethod     = 3; 
+  ℕ alephNumberOfCores    = 0;
+  ℾ option_aleph_dump_matrix = false;
+};
+
+
+// ****************************************************************************
+// * Cell Variables
+// ****************************************************************************
+cells{
+  ℝ E;
+  ℝ sousdiag,diag,surdiag;
+  ℝ solution,temp;
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℝ last;
+};
+
+
+// ****************************************************************************
+// * if (tridiag) → ResolutionSystemeTridiag
+// ****************************************************************************
+void solveTriDiag(void) @ 2.1{
+  if (tridiag)
+    ResolutionSystemeTridiag(sousdiag,diag,surdiag,
+                             solution,temp,nbmailles);
 }
+∀ cells @ 2.2 if (tridiag) {E=solution;}
 
-// Get rid of this last global variable
-std::ofstream devNull("/dev/null");
 
-std::ostream& debug(){
-  if (getenv("NABLA_LAMBDA_ALEPH_DEBUG")==NULL) return devNull;//std::clog;
-  std::cout.flush();
-  std::cout<<"\n";
-  return std::cout;
+// ****************************************************************************
+// * 
+// ****************************************************************************
+void tstForQuit(void) @ 4.0 {
+  if ((time<(option_stoptime-δt))) return;
+  exit;
 }
-
-std::ostream& operator<<(std::ostream &os, const Real3 &a){
-  double *x = (double*)&(a.x);
-  double *y = (double*)&(a.y);
-  double *z = (double*)&(a.z);
-  return os << "("<<*x<<","<<*y<<","<<*z<< ")";
-}
-
-std::ostream& operator<<(std::ostream &os, const Real3x3 &a){
-  return os << "(" << a.x <<","<< a.y <<","<< a.z <<")";
-}
-
-#endif // _NABLA_OSTREAM_H_
