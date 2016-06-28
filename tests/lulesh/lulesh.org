@@ -1,0 +1,28 @@
+
+* time
+** δt
+   - option_δt_courant         = 1.0e+20
+   - option_dtfixed            = 1.0e-7
+   - option_δt_mult_lower_b    = 1.1
+   - option_δt_initial         = 1.0e-7
+   - option_δt_hydro           = 1.0e+20
+   - option_δt_mult_upper_b    = 1.2
+** stop
+   - option_stoptime           = 1.0e-2
+* mesh
+** cartesian 
+  - LENGTH = -1.125
+  - X_EDGE_ELEMS = 8
+  - Y_EDGE_ELEMS = 8
+  - Z_EDGE_ELEMS = 8
+
+* cuts
+  - option_e_cut = 1.0e-7
+  - option_p_cut = 1.0e-7
+  - option_q_cut = 1.0e-7
+  - option_u_cut = 1.0e-7
+  - option_v_cut = 1.0e-10
+
+* chaos
+ - option_chaos = false
+ - option_chaos_seed = 1.1234567890123

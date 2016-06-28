@@ -41,6 +41,11 @@ if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
 	return()
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
+   
+bison_target(oParser orgopt.y ${CMAKE_CURRENT_BINARY_DIR}/orgopt.tab.c COMPILE_FLAGS "--report=all")
+flex_target(oScanner orgopt.l ${CMAKE_CURRENT_BINARY_DIR}/orgopt.lex.c COMPILE_FLAGS "")
+add_flex_bison_dependency(oScanner oParser)
+
 bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c 
   COMPILE_FLAGS "--report=all")#--warnings=all,error --graph 
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
@@ -98,11 +103,13 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/toolbox)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBRARIES OFF)
 if (NOT APPLE AND NOT OLD_LINUX_KERNEL)
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
+   set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 configure_file(nabla.S ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_executable(nabla nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
+add_executable(orgopt ${BISON_oParser_OUTPUTS} ${FLEX_oScanner_OUTPUTS})
+target_link_libraries(orgopt NablaFrontend NablaToolbox)
 
 ############
 # Backends #

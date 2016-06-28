@@ -1,12 +1,12 @@
+%{
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
 // Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
-// Contributor(s): TRAN Guillaume - Guillaume.Tran@polytechnique.edu         //
-//                 LOISEAU Pascal - Pascal.Loiseau@cea.fr                    //
-//                 CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                  http://www.quut.com/c/ANSI-C-grammar-l-2011.html         //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -42,87 +42,93 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-with ℝ, ℵ;
-
-
-// ****************************************************************************
-// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
-// * ∀ ℂℕℝℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂ * ⋅⨯⤫⊗⨂⊛ ∞ ⁰¹²³ⁱⁿ⁺⁼
-// ****************************************************************************
-//ofstream output("onde.plot");
-
-options{
-  ℕ nbmailles = 1024;
-  // Mesh options
-  ℝ LENGTH                    = 1.0;
-  ℕ X_EDGE_ELEMS              = nbmailles;
-  ℕ Y_EDGE_ELEMS              = 1;
-  ℕ Z_EDGE_ELEMS              = 1;
-
-  ℾ DEBUG = false;
-  ℝ CFL = 2.0;
-  ℝ option_CL = 7.0;
-
-  ℾ hypre = true;
-  ℾ tridiag = false;
-    
-  ℝ ε = 1.0e-6;  
-  ℝ option_xmin = 0.0;
-  ℝ option_xmax = 1.0;
-  ℝ pi =atan(1.0)*4.0;
-  
-  // Yet required options for Okina 
-  ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime=0.2;
-  ℕ option_max_iterations = 100;   // ! utilisé en dur dans les backends
-
-  // Options d'Aleph
-  ℝ alephEpsilon             = 1.e-16;
-  ℕ alephUnderlyingSolver    = 2;
-  ℕ alephMaxIterations       = 2048;
-  // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
-  // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
-  ℕ alephPreconditionerMethod = 0;
-  // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
-  ℕ alephSolverMethod     = 3; 
-  ℕ alephNumberOfCores    = 0;
-  ℾ option_aleph_dump_matrix = false;
-};
-
-
-// ****************************************************************************
-// * Cell Variables
-// ****************************************************************************
-cells{
-  ℝ E;
-  ℝ sousdiag,diag,surdiag;
-  ℝ solution,temp;
-};
-
-
-// ****************************************************************************
-// * Global Variables
-// ****************************************************************************
-global{
-  ℝ last;
-};
-
-
-// ****************************************************************************
-// * if (tridiag) → ResolutionSystemeTridiag
-// ****************************************************************************
-void solveTriDiag(void) @ 2.1{
-  if (tridiag)
-    ResolutionSystemeTridiag(sousdiag,diag,surdiag,
-                             solution,temp,nbmailles);
+#include "nabla.h"
+#include <stdio.h>
+#define YY_SKIP_YYWRAP
+int yywrap(void){
+  // return 0; if we switch nabla input file
+  return 1;
 }
-∀ cells @ 2.2 if (tridiag) {E=solution;}
+extern int yylineno;
+#undef YY_BUF_SIZE
+#define YY_BUF_SIZE 131072
+//#undef YY_NEED_STRLEN
+#define YYSTYPE  astNode*   
+#include "orgopt.tab.h"
+static int tok(YYSTYPE *yylval, int tokenid);
+static void ignoreBlocComments(void); 
+static void ignoreLineComments(void);
+%}
 
+D					[0-9]
+L					[a-zA-Z_αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ𝜕]
+H					[a-fA-F0-9]
+E					[Ee][+-]?{D}+
+FS					(f|F|l|L)
+IS					(u|U|l|L)*
 
-// ****************************************************************************
-// * 
-// ****************************************************************************
-void tstForQuit(void) @ 4.0 {
-  if ((time<(option_stoptime-δt))) return;
-  exit;
+%%
+
+"/*"					{ ignoreBlocComments();}
+"//"              { ignoreLineComments();}
+
+"true"				{ return tok(&yylval, TRUE);}
+"false"				{ return tok(&yylval, FALSE);}
+
+{L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER); }
+
+"*"			      { return tok(&yylval, '*');}
+"-"			      { return tok(&yylval, '-');}
+"+"			      { return tok(&yylval, '+');}
+
+0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
+{D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
+L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CONSTANT);}
+{D}+{E}{FS}?		     { return tok(&yylval, R_CONSTANT);}
+{D}*"."{D}+({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
+{D}+"."{D}*({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
+
+"="					{ return tok(&yylval, '=');}
+
+[ \t\v\f]		   { /*ignore*/ }
+
+.						{ /* ignore bad characters */
+  printf("\nREJECTing '%s' in ",yytext);
+  REJECT;
 }
+\n                { yylineno+=1;}
+%%
+
+// ****************************************************************************
+// * Get rid of line comments
+// ****************************************************************************
+static void ignoreLineComments(void){
+  while(input()!='\n');
+  yylineno+=1;
+}
+
+// ****************************************************************************
+// * Get rid of bloc comments
+// ****************************************************************************
+static void ignoreBlocComments(void){
+	char c, c1;
+loop:
+	do {c = input(); if (c=='\n') yylineno+=1; } while (c != '*' && c != 0);
+	c1 = input();
+	if (c1 != '/' && c != 0){
+		unput(c1);
+		goto loop;
+	}
+}
+
+// ****************************************************************************
+// * Tokenizer
+// ****************************************************************************
+static int tok(YYSTYPE *yylval, int tokenid){
+  //dbg("\n[astNewNode] line %d: '%s' (%d)", yylineno, yytext, tokenid); 
+  (*yylval) = astNewNode();
+  (*yylval)->token=strdup(yytext);
+  (*yylval)->tokenid=tokenid;
+  return tokenid;
+}
+
