@@ -250,6 +250,8 @@ foreach(parallel ${PARALLEL_MODES})
   endforeach()
   endforeach()
   
+nabla_add_okina_test(llsh 1 run avx2 seq)
+
 nabla_add_okina_test(lulesh 1 run avx512 seq)
 nabla_add_okina_test(lulesh 4 run avx512 omp)
 

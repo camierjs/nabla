@@ -48,13 +48,20 @@ extern int yylineno;
 int yyparse (astNode **);
 extern char nabla_input_file[]; 
 static char *unique_temporary_file_name=NULL;
+extern char nabla_version[]; 
+extern char nabla_license[]; 
 
 
 // *****************************************************************************
 // * NABLA_MAN
+// \t[1;35m--lib [36;4mname[0m\tCode generation for C/C++ library [1;5;31m(WiP)[0m\n
+// \t[1;35m--loci [36;4mname[0m\tCode generation for LOCI [1;5;31m(WiP)[0m\n
+// \t[1;35m--mma [36;4mname[0m\tCode generation for Mathematica [1;5;31m(WiP)[0m\n
+// \t[1;35m--uintah [36;4mname[0m\tCode generation for UINTAH [1;5;31m(WiP)[0m\n
+// \t[1;35m--vhdl [36;4mname[0m\tCode generation for VHDL [1;5;31m(WiP)[0m\n
 // *****************************************************************************
 #define NABLA_MAN "[1;36mNAME[0m\n\
-\t[1;36mnabla[0m - Numerical Analysis Based LAnguage\n\
+\t[1;36mnabla[0m - Numerical Analysis Based LAnguage - [36mVersion[36m: %s\n\
 \t        Optimized Code Generator for Specific Compilers/Architectures\n\
 [1;36mSYNOPSIS[0m\n\
 \t[1;36mnabla[0m [-t[nl]] [-v [4mlogfile[0m] [1;4;35mTARGET[0m -i [4minput file list[0m\n\
@@ -69,6 +76,8 @@ static char *unique_temporary_file_name=NULL;
 \t[1;36m-t[0m\t\tGenerate the intermediate AST dot files\n\
 \t[1;36m-tnl[0m\t\tGenerate the same AST dot files withou labels\n\
 \t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
+\t[1;36m--version[0m\tOutput version information and exit\n\
+\t[1;36m--license[0m\tOutput license information and exit\n\
 [1;4;35mTARGET[0m can be:\n\
 \t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
 \t\t[36m--alone[0m\tGenerates a [4mstand-alone[0m application\n\
@@ -80,9 +89,8 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t[36m-n [4mname[0m Service name that will be generate\n\
 \t[1;35m--cuda [36;4mname[0m\tCode generation for the target CUDA\n\
 \t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
+\t[1;35m--raja [36;4mname[0m\tCode generation for RAJA\n\
 \t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
-\t[1;35m--lib [36;4mname[0m\tCode generation for C/C++ library [1;5;31m(WiP)[0m\n\
-\t[1;35m--loci [36;4mname[0m\tCode generation for LOCI [1;5;31m(WiP)[0m\n\
 \t[1;35m--okina [36;4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
 \t\t[36m--std[0m\tStandard code generation with no explicit vectorization\n\
 \t\t[36m--sse[0m\tExplicit code generation with SSE intrinsics\n\
@@ -96,10 +104,6 @@ static char *unique_temporary_file_name=NULL;
 \t\t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\tIntel ICC pragma generation\n\
-\t[1;35m--mma [36;4mname[0m\tCode generation for Mathematica [1;5;31m(WiP)[0m\n\
-\t[1;35m--raja [36;4mname[0m\tCode generation for RAJA [1;5;31m(WiP)[0m\n\
-\t[1;35m--uintah [36;4mname[0m\tCode generation for UINTAH [1;5;31m(WiP)[0m\n\
-\t[1;35m--vhdl [36;4mname[0m\tCode generation for VHDL [1;5;31m(WiP)[0m\n\
 [1;36mEMACS MODE[0m\n\
 \tYou can find a nabla-mode.el file within the distribution.\n\
 \tLoading emacs utf-8 locale coding system could be a good idea:\n\
@@ -280,6 +284,8 @@ int main(int argc, char * argv[]){
   BACKEND_SWITCH backend=BACKEND_VOID;
   BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
   const struct option longopts[]={
+    {"version",no_argument,NULL,OPTION_VERSION},
+    {"license",no_argument,NULL,OPTION_LICENSE},
     {"arcane",no_argument,NULL,BACKEND_ARCANE},
        {"alone",required_argument,NULL,BACKEND_COLOR_ARCANE_ALONE},
        {"family",required_argument,NULL,BACKEND_COLOR_ARCANE_FAMILY},
@@ -316,10 +322,19 @@ int main(int argc, char * argv[]){
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   // Check for at least several arguments
   if (argc<=1)
-    exit(0&fprintf(stderr, NABLA_MAN));
+    exit(0&fprintf(stderr, NABLA_MAN,nabla_version));
   // Now switch the arguments
   while ((c=getopt_long(argc, argv, "tv:I:p:n:i:",longopts,&longindex))!=-1){
     switch (c){
+      // ************************************************************
+      // * Version & License options
+      // ************************************************************      
+    case OPTION_VERSION:
+      printf("Nabla version is %s\n",nabla_version);
+      return NABLA_OK;
+    case OPTION_LICENSE:
+      printf(nabla_license);
+      return NABLA_OK;
       // ************************************************************
       // * Standard OPTIONS: t, tnl, v
       // ************************************************************      

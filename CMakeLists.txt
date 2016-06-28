@@ -100,7 +100,8 @@ set(BUILD_SHARED_LIBRARIES OFF)
 if (NOT APPLE AND NOT OLD_LINUX_KERNEL)
     set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
-add_executable(nabla nabla.c)
+configure_file(nabla.S ${CMAKE_CURRENT_BINARY_DIR}/nabla.S)
+add_executable(nabla nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.S)
 add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
 ############
