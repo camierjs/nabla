@@ -45,11 +45,18 @@ with ℝ²;
 ofstream output("evol.plot");
 ofstream output2("mesh.plot");
 ofstream output3("output.plot");
+ofstream results("result.plot");
 
 // ****************************************************************************
 // * Options du schéma
 // ****************************************************************************
 options{
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 1;
+
   Bool DEBUG = false;
   Bool option_test_sod = true;
   Bool option_semi_implicit = false;
@@ -65,8 +72,8 @@ options{
   Real option_x_min = 0.0;
   Real option_y_min = 0.0;
   Real option_x_interface = 0.5;
-  Real option_x_max = 1.0;
-  Real option_y_max = 1.0;
+  Real option_x_max = LENGTH;
+  Real option_y_max = LENGTH;
   
   Real option_δt_initial = 1e-7;         // ! utilisé en dur dans le backend lambda !
   Real option_δt_min = 1e-15;
@@ -150,7 +157,7 @@ global{
       printf("\n[31m[std] AQs[%d;node #%d]=\n\t\t[\
 [%.15e %.15e %.15e]\n\t\t\
 [%.15e %.15e %.15e]\n\t\t\
-[%.15e %.15e %.15e]][0m",uid,cell_node[n*NABLA_NB_CELLS+c],
+[%.15e %.15e %.15e]][0m",uid,n,
            AQs.x.x,AQs.x.y,AQs.x.z,
            AQs.y.x,AQs.y.y,AQs.y.z,
            AQs.z.x,AQs.z.y,AQs.z.z);
@@ -368,27 +375,13 @@ void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
 }
 
 
-
 // ****************************************************************************
-// * Dump Solution
+// * Dump Output
 // ****************************************************************************
-∀ cells void dumpSolution(File results){ 
-  results << "\t" << center.x 
-	  << "\t" << center.y
-          << "\t" << p
-          << "\t" << u.x
-          << "\t" << u.y
-          << "\t" << temperature
-          << "\t" << pana
-          << "\t" << uana.x
-          << "\t" << uana.y
-          << "\t" << tana
-          << "\n";
-	  }  
-
-∀ cells void dumpOutput(void) {
+∀ cells void dumpOutput(void) @ 35.0 if (((iteration-1)%dump_iterations)==0) {
+  if (uid==0) info()<<"\33[1;31m[dumpOutput] Now dumping to evol.plot file!\33[0m";
   output  << "\t" << center.x 
-	  << "\t" << center.y
+          << "\t" << center.y
           << "\t" << p
           << "\t" << u.x
           << "\t" << u.y
@@ -398,8 +391,8 @@ void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
           << "\t" << uana.y
           << "\t" << tana
           << "\n";
+  if (c==(NABLA_NB_CELLS-1)) output << "\n";
 } 
-
 
 
 // ****************************************************************************
@@ -409,10 +402,6 @@ void hydroTimeStepCtrl(void) @ 35.0{
   Real new_δt=option_δt_control*global_δt;
   if (true)
     printf("\n\t[1m iteration=%d, time=%f, global_δt=%.15e[0m",iteration,time,global_δt);
-  if (((iteration-1)%dump_iterations)==0){ 
-    dumpOutput(center,p,u,temperature,pana,uana,tana);
-    output << "\n";
-  }
   // on calcule les variations min et max autorisées
   const Real max_time_step = (1.0+option_δt_max_variation)*δt;
   const Real min_time_step = (1.0-option_δt_min_variation)*δt;
@@ -424,12 +413,34 @@ void hydroTimeStepCtrl(void) @ 35.0{
   if (option_δt_last_exact && ((time + new_δt) > option_stoptime)) 
       new_δt = option_stoptime - time;
   δt=new_δt;
+}
+
+
+// ****************************************************************************
+// * Dump Solution
+// ****************************************************************************
+∀ cells void dumpSolution(void) @ 36.0 if (option_dump_output and (time>=(option_stoptime-δt))){ 
+  if (uid==0) info()<<"\33[1;31m[dumpSolution] Now dumping to result.plot file!\33[0m";
+  results << "\t" << center.x 
+          << "\t" << center.y
+          << "\t" << p
+          << "\t" << u.x
+          << "\t" << u.y
+          << "\t" << temperature
+          << "\t" << pana
+          << "\t" << uana.x
+          << "\t" << uana.y
+          << "\t" << tana
+          << "\n";
+}
+
+
+// ****************************************************************************
+// * Test for QUIT
+// ****************************************************************************
+void testForQuit(void) @ 40.0{
   if (option_max_iterations!=0 && iteration >= option_max_iterations) exit;
   if ((time<(option_stoptime-δt))) return;
   printf("\n[1;33m final δt=%.15e[0m\n",δt);
-  if (option_dump_output){
-    file(results,plot);
-    dumpSolution(results,center,p,u,temperature,pana,uana,tana);
-  }
   exit;
 }

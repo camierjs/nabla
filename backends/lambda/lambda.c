@@ -88,6 +88,7 @@ const static hookToken token={
   xHookSystem,
   xHookIteration,
   xHookExit,
+  xHookError,
   xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,

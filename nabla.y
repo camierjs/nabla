@@ -136,7 +136,7 @@ extern char *last_identifier;
 %token BACKCELL BACKCELLUID FRONTCELL FRONTCELLUID
 %token BOUNDARY_CELL
 %token WITH
-%token TIME EXIT ITERATION
+%token TIME EXIT ERROR ITERATION
 
  ///////////////////////
  // If-Else Ambiguity //
@@ -343,6 +343,7 @@ nabla_system
 | TIME REMAIN {remainY1();}
 | TIME LIMIT {limitY1($$);}
 | EXIT {rhs;}
+| ERROR {rhs;}
 | ITERATION {rhs;}
 | MAIL {rhs;}
 ;

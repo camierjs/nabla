@@ -89,8 +89,7 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
-tests = p1apwb1D_implicite propagateur drc mhydro ddfv xgnplt pdfLgvn fmly deflex hlt aleph1D aleph2D glc glace2D xst upwindAP lulesh llsh #upwind deflex upwindAP lulesh darcy ndspmhd mhydro glace2D
-#p1apwb1D_gosse heat aleph1D kripke darcy deflex shydro sethi anyItem gad comd pDDFV
+tests = nvknl darcy amber heat p1apwb1D_version_2 p12d upwind p1apwb1D_implicite propagateur drc mhydro ddfv xgnplt pdfLgvn fmly deflex hlt aleph1D aleph2D glc glace2D xst upwindAP lulesh llsh
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")

@@ -1,15 +1,3 @@
-###################
-# MESH MANAGEMENT #
-###################
-export X_EDGE_ELEMS = $(MESH)
-export Y_EDGE_ELEMS = $(MESH)
-export Z_EDGE_ELEMS = $(MESH)
-export X_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export Y_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export Z_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export LENGTH = $(shell echo 1.125)
-export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
-
 #LOG = -t -v $(TGT).log
 
 ###################
@@ -30,8 +18,8 @@ NV_ARCH = -arch=sm_30 #  -gencode arch=compute_30,code=sm_30
 #NV_ARCH = -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_37,code=sm_37 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_50,code=compute_50
 NV = $(NV_PATH)/bin/nvcc
 #-ccbin g++
-NVFLAGS = -O3 $(MESH_FLAGS) $(NV_ARCH) -DNO_SSE2
-#-m64 -shared $(NV_ARCH) --compiler-options -fPIC $(MESH_FLAGS)
+NVFLAGS = -O3 $(NV_ARCH) -DNO_SSE2
+#-m64 -shared $(NV_ARCH) --compiler-options -fPIC 
 NV_LIBRARY = -L$(NV_PATH)/lib64 -lcudart -Wl,-rpath=$(NV_PATH)/lib64
 NV_INCLUDE = -I. -I$(NV_PATH)/include
 

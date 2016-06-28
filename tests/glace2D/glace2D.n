@@ -49,6 +49,11 @@ with ℝ²;
 // * Options du schéma Glace Euler/Sans reconstruction
 // ****************************************************************************
 options{
+  // Mesh options
+  ℝ LENGTH                    = 1.125;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 1;
   Bool DEBUG = false;
   Bool TRACE = false;
   Bool option_test_sod = true;

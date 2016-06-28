@@ -52,8 +52,14 @@ with ℝ, ℵ;
 //ofstream output("onde.plot");
 
 options{
+  ℕ nbmailles=128;
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = nbmailles;
+  ℕ Y_EDGE_ELEMS              = 1;
+  ℕ Z_EDGE_ELEMS              = 1;
+
   ℾ DEBUG = false;
-  ℕ nbmailles=NABLA_NB_CELLS;
   ℝ CFL = 2.0;
   ℝ option_CL = 7.0;
 

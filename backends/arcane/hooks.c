@@ -167,6 +167,7 @@ void arcaneIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "subDomain()->commonVariables().globalIteration()");
 }
 
+void arcaneError(nablaMain *nabla,nablaJob *job){nprintf(nabla,"/*ERROR*/","\nexit(-1);\n");}
 
 void arcaneExit(nablaMain *nabla,nablaJob *job){
   // le token 'exit' doit être appelé depuis une fonction

@@ -137,6 +137,7 @@ char* nOkinaStdUid(nablaMain *nabla, nablaJob *job){
   const char cnfgem=job->item[0];
   if (cnfgem=='c') return "(WARP_SIZE*c)";
   if (cnfgem=='n') return "(n)";
+  if (cnfgem=='f') return "(f)";
   assert(false);
   return NULL;
 }
@@ -147,6 +148,7 @@ char* nOkinaStdUid(nablaMain *nabla, nablaJob *job){
 // ****************************************************************************
 const nWhatWith nOkinaStdTypedef[]={
   {"struct real3","Real3"},
+  {"struct real3x3","Real3x3"},
   {NULL,NULL}
 };
 
@@ -156,8 +158,11 @@ const nWhatWith nOkinaStdTypedef[]={
 // ****************************************************************************
 const nWhatWith nOkinaStdDefines[]={
   {"__host__",""},
+  {"__global__", ""},
   {"integer", "Integer"},
   {"real", "Real"},
+  {"Real2", "real3"},
+  {"real2", "real3"},
   {"WARP_SIZE", "(1<<WARP_BIT)"},
   {"WARP_ALIGN", "(8<<WARP_BIT)"},    
   {"NABLA_NB_GLOBAL","WARP_SIZE"},
@@ -200,7 +205,8 @@ const nWhatWith nOkinaStdDefines[]={
   {"dot", "dot3"},
   {"knAt(a)",""},
   {"fatal(a,b)","exit(-1)"},
-  {"synchronize(a)","_Pragma(\"omp barrier\")"},
+  //{"synchronize(a)","_Pragma(\"omp barrier\")"},
+  {"synchronize(v)",""},
   {"mpi_reduce(how,what)","how##ToDouble(what)"},
   {"reduce(how,what)","how##ToDouble(what)"},
   {"xyz","int"},

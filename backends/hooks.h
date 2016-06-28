@@ -67,6 +67,7 @@ typedef struct hookTokenStruct{
   void (*system)(astNode*, struct nablaMainStruct*, const char, char); // variables
   void (*iteration)(struct nablaMainStruct*); // functions
   void (*exit)(struct nablaMainStruct*,nablaJob*);
+  void (*error)(struct nablaMainStruct*,nablaJob*);
   void (*time)(struct nablaMainStruct*); // functions
   void (*fatal)(struct nablaMainStruct*); // functions
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char); // jobs

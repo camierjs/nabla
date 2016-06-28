@@ -67,6 +67,7 @@ char *rajaParallelIncludes(void){
 void rajaHookHeaderIncludes(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n\
 #include <cmath>\n\
+#include <getopt.h>\n\
 #include <cstdio>\n\
 #include <cstdlib>\n\
 #include <sstream>\n\

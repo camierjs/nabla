@@ -88,6 +88,7 @@ void arcaneAddCallNames(nablaMain*,nablaJob*,astNode*);
 void arcaneFatal(nablaMain*);
 void arcaneTime(nablaMain*);
 void arcaneExit(nablaMain*,nablaJob*);
+void arcaneError(nablaMain*,nablaJob*);
 void arcaneIteration(nablaMain*);
 void arcaneTurnTokenToOption(nablaMain*,nablaOption*);
 void arcaneHookReduction(nablaMain*,astNode*);

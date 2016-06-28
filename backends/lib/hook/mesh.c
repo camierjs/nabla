@@ -294,16 +294,20 @@ void xHookMeshFreeConnectivity(nablaMain *nabla){
 // * Adding padding for simd too 
 // ****************************************************************************
 void xHookMesh3D(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// ********************************************************\n\
+// * MESH GENERATION (3D)\n\
+// ********************************************************\n\
+static const int NABLA_NODE_PER_CELL = 8;\n\
+static const int NABLA_CELL_PER_NODE = 8;\n\
+static const int NABLA_CELL_PER_FACE = 2;\n\
+static const int NABLA_NODE_PER_FACE = 4;\n\
+static const int NABLA_FACE_PER_CELL = 6;\n");
+  
   fprintf(nabla->entity->src,"\n\n\t\
 // ********************************************************\n\t\
 // * MESH GENERATION (3D)\n\t\
 // ********************************************************\n\t\
-const int NABLA_NODE_PER_CELL = 8;\n\t\
-const int NABLA_CELL_PER_NODE = 8;\n\t\
-const int NABLA_CELL_PER_FACE = 2;\n\t\
-const int NABLA_NODE_PER_FACE = 4;\n\t\
-const int NABLA_FACE_PER_CELL = 6;\n\t\
-\n\t\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\t\
 const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\t\
 const int NABLA_NB_NODES_Z_AXIS = Z_EDGE_ELEMS+1;\n\t\

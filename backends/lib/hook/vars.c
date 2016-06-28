@@ -262,7 +262,11 @@ static void options(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n// Options");
   for(opt=nabla->options;opt!=NULL;opt=opt->next)
     fprintf(nabla->entity->hdr,
-            "\n#define %s %s",
+            "\n__attribute__((unused)) static %s %s = %s;",
+            opt->type[0]=='r'?"double":
+            opt->type[0]=='i'?"int":
+            opt->type[0]=='b'?"bool":
+            "\n#error Unknown Type for option",
             opt->name, opt->dflt);
 }
 

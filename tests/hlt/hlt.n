@@ -41,6 +41,11 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 options{
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 8;
   ℝ option_δt_initial = 0.001;
   ℝ option_stoptime = 0.01;
   ℕ option_max_iterations = -1;

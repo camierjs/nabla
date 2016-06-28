@@ -193,6 +193,11 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       nabla->hook->token->exit(nabla,fct);
       break;
     }
+    
+    if (n->tokenid == ERROR){
+      nabla->hook->token->error(nabla,fct);
+      break;
+    }
 
     if (n->tokenid == ITERATION){
       nabla->hook->token->iteration(nabla);

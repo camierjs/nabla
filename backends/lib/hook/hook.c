@@ -125,9 +125,12 @@ char* xHookEntryPointPrefix(nablaMain *nabla,
   return "static inline";
 }
 
+void xHookError(struct nablaMainStruct *nabla, nablaJob *job){
+  nprintf(nabla, "/*ERROR*/", "exit(-1)");
+}
 void xHookExit(struct nablaMainStruct *nabla, nablaJob *job){
   if (job->when_depth==0)
-    nprintf(nabla, "/*EXIT*/", "exit(0.0)");
+    nprintf(nabla, "/*EXIT*/", "exit(0)");
   else
     nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
 }
@@ -168,6 +171,7 @@ void xHookHeaderIncludes(nablaMain *nabla){
 // *****************************************************************************\n\
 %s // from nabla->simd->includes\n\
 #include <sys/time.h>\n\
+#include <getopt.h>\n\
 #include <stdlib.h>\n\
 #include <stdio.h>\n\
 #include <string.h>\n\
@@ -179,8 +183,6 @@ void xHookHeaderIncludes(nablaMain *nabla){
 #include <sstream>\n\
 #include <fstream>\n\
 using namespace std;\n\
-//int hlt_level;\n\
-//bool *hlt_exit;\n\
 %s // from nabla->parallel->includes()\n",
           cCALL(nabla,simd,includes),
           cCALL(nabla,parallel,includes));

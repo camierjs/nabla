@@ -48,6 +48,10 @@
 // * Options
 // ****************************************************************************
 options{
+  ℝ LENGTH                    = 1.125;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 8;
   ℝ option_δt_initial         = 1.0e-7;   // variable time increment
   ℝ option_stoptime           = 1.0e-2;   // end time for simulation
   ℕ option_max_iterations     = 1024;

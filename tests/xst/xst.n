@@ -43,6 +43,11 @@
 with ℝ²;
 
 options{  
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 1;
   ℝ option_δt_initial = 0.0001;
   ℝ option_stoptime=0.2;
   ℕ option_max_iterations = 2;

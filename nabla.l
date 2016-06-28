@@ -219,6 +219,7 @@ __asm__           { return tok(&yylval, ASM);}
 "time"            { return tok(&yylval, TIME);}
 "limit"           { return tok(&yylval, LIMIT);}
 "remain"          { return tok(&yylval, REMAIN);}
+"error"           { return tok(&yylval, ERROR);}
 "exit"            { return tok(&yylval, EXIT);}
 "iteration"       { return tok(&yylval, ITERATION);}
 "fatal"           { return tok(&yylval, FATAL);}

@@ -20,7 +20,7 @@ SIMD_avx512_SDE = /opt/intel/sde-external-7.41.0-2016-03-03-lin/sde64 -knl --
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = -fcilkplus
 
-CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) $(MESH_FLAGS) -finline
+CFLAGS = -std=c++11 $(CLANG_FLAGS) -g -O2 -Wall $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -finline
 
 #######
 # GCC #
@@ -49,16 +49,6 @@ LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 #########
 #CXX=/usr/local/bin/bf-clang++
 #CLANG_FLAGS = -bf-by-func -bf-call-stack #-nobuiltininc -fno-builtin -fno-math-builtin
-
-export X_EDGE_ELEMS = $(MESH)
-export Y_EDGE_ELEMS = $(MESH)
-export Z_EDGE_ELEMS = $(MESH)
-export X_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export Y_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export Z_EDGE_TICK = $(shell echo "scale=6;1.125/$(MESH)"|bc -l)
-export LENGTH = $(shell echo 1.125)
-export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
-
 
 all:$(TGT) $(NABLA) 
 

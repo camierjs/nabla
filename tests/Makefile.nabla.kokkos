@@ -15,20 +15,10 @@ LOG = -t #-v $(TGT).log
 
 CXX = ${CMAKE_CXX_COMPILER}
 
-CFLAGS = $(SIMD_std_FLAGS) -finline $(MESH_FLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
+CFLAGS = $(SIMD_std_FLAGS) -finline $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
 
 LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
 LIB_HYPRE = ${HYPRE_LIB}
-
-export X_EDGE_ELEMS = $(MESH)
-export Y_EDGE_ELEMS = $(MESH)
-export Z_EDGE_ELEMS = $(MESH)
-export X_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export Y_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export Z_EDGE_TICK = $(shell echo "scale=6;1.0/$(MESH)"|bc -l)
-export LENGTH = $(shell echo 1.125)
-export MESH_FLAGS = -DX_EDGE_ELEMS=$(X_EDGE_ELEMS) -DY_EDGE_ELEMS=$(Y_EDGE_ELEMS) -DZ_EDGE_ELEMS=$(Z_EDGE_ELEMS) -DX_EDGE_TICK=$(X_EDGE_TICK) -DY_EDGE_TICK=$(Y_EDGE_TICK) -DZ_EDGE_TICK=$(Z_EDGE_TICK) -DLENGTH=$(LENGTH)
-
 
 all:$(TGT) $(NABLA) 
 

@@ -61,7 +61,7 @@ extern char nabla_license[];
 // \t[1;35m--vhdl [36;4mname[0m\tCode generation for VHDL [1;5;31m(WiP)[0m\n
 // *****************************************************************************
 #define NABLA_MAN "[1;36mNAME[0m\n\
-\t[1;36mnabla[0m - Numerical Analysis Based LAnguage - [36mVersion[36m: %s\n\
+\t[1;36mnabla[0m - [1;35mN[0mumerical [1;35mA[0mnalysis [1;35mB[0mased [1;35mLA[0mnguage - Version: [1;35m%s[0m\n\
 \t        Optimized Code Generator for Specific Compilers/Architectures\n\
 [1;36mSYNOPSIS[0m\n\
 \t[1;36mnabla[0m [-t[nl]] [-v [4mlogfile[0m] [1;4;35mTARGET[0m -i [4minput file list[0m\n\
@@ -74,12 +74,12 @@ extern char nabla_license[];
 \tthe required files for each specified target.\n\
 [1;36mOPTIONS[0m\n\
 \t[1;36m-t[0m\t\tGenerate the intermediate AST dot files\n\
-\t[1;36m-tnl[0m\t\tGenerate the same AST dot files withou labels\n\
-\t[1;36m-v [4mlogfile[0m\tGenerate intermediate debug info to [4mlogfile[0m\n\
+\t[1;36m-tnl[0m\t\tGenerate the intermediate AST dot files without labels\n\
+\t[1;36m-v [4mlogfile[0m\tGenerate debug info to [4mlogfile[0m\n\
 \t[1;36m--version[0m\tOutput version information and exit\n\
 \t[1;36m--license[0m\tOutput license information and exit\n\
 [1;4;35mTARGET[0m can be:\n\
-\t[1;35m--arcane [36;4mname[0m\tCode generation for ARCANE middleware\n\
+\t[1;35m--arcane [36;4mname[0m\tCode generation for the ARCANE middleware\n\
 \t\t[36m--alone[0m\tGenerates a [4mstand-alone[0m application\n\
 \t\t[36m--library[0m Generates a [4mlibrary[0m\n\
 \t\t[36m--module[0m  Generates a [4mmodule[0m\n\
@@ -87,21 +87,21 @@ extern char nabla_license[];
 \t\t\t[36m-I [4mname[0m Interface name to use\n\
 \t\t\t[36m-p [4mpath[0m Path of the interface file\n\
 \t\t\t[36m-n [4mname[0m Service name that will be generate\n\
-\t[1;35m--cuda [36;4mname[0m\tCode generation for the target CUDA\n\
-\t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
+\t[1;35m--cuda [36;4mname[0m\tCode generation for CUDA\n\
 \t[1;35m--raja [36;4mname[0m\tCode generation for RAJA\n\
-\t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA generic C/C++ code\n\
-\t[1;35m--okina [36;4mname[0m\tCode generation for experimental native C/C++ stand-alone target\n\
-\t\t[36m--std[0m\tStandard code generation with no explicit vectorization\n\
-\t\t[36m--sse[0m\tExplicit code generation with SSE intrinsics\n\
-\t\t[36m--avx[0m\tExplicit code generation with AVX intrinsics\n\
-\t\t[36m--avx2[0m\tExplicit code generation with AVX2 intrinsics\n\
+\t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
+\t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA (C/C++11) stand-alone target\n\
+\t[1;35m--okina [36;4mname[0m\tCode generation for OKINA  (C/C++11) stand-alone target\n\
+\t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
+\t\t[36m--sse[0m\t\tExplicit code generation with SSE intrinsics\n\
+\t\t[36m--avx[0m\t\tExplicit code generation with AVX intrinsics\n\
+\t\t[36m--avx2[0m\t\tExplicit code generation with AVX2 intrinsics\n\
 \t\t[36m--avx512[0m\tExplicit code generation with AVX152 intrinsics\n\
-\t\t[36m--mic[0m\tExplicit code generation with MIC intrinsics\n\
+\t\t[36m--mic[0m\t\tExplicit code generation with MIC intrinsics\n\
 \t\t[36m--seq[0m\tSequential code generation (default)\n\
 \t\t[36m--omp[0m\tOpenMP parallel implementation\n\
 \t\t[36m--cilk[0m\tCilk+ parallel implementation\n\
-\t\t\t\t(still experimental with latest GNU GCC)\n\
+\t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\tIntel ICC pragma generation\n\
 [1;36mEMACS MODE[0m\n\
@@ -284,6 +284,7 @@ int main(int argc, char * argv[]){
   BACKEND_SWITCH backend=BACKEND_VOID;
   BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
   const struct option longopts[]={
+    {"help",no_argument,NULL,OPTION_HELP},
     {"version",no_argument,NULL,OPTION_VERSION},
     {"license",no_argument,NULL,OPTION_LICENSE},
     {"arcane",no_argument,NULL,BACKEND_ARCANE},
@@ -327,8 +328,11 @@ int main(int argc, char * argv[]){
   while ((c=getopt_long(argc, argv, "tv:I:p:n:i:",longopts,&longindex))!=-1){
     switch (c){
       // ************************************************************
-      // * Version & License options
+      // * Help, Version & License options
       // ************************************************************      
+    case OPTION_HELP:
+      printf(NABLA_MAN,nabla_version);
+      return NABLA_OK;
     case OPTION_VERSION:
       printf("Nabla version is %s\n",nabla_version);
       return NABLA_OK;

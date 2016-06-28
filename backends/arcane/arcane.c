@@ -72,6 +72,7 @@ static const hookToken token={
   arcaneHookSystem,
   arcaneIteration,
   arcaneExit,
+  arcaneError,
   arcaneTime,
   arcaneFatal,
   arcaneHookTurnBracketsToParentheses,

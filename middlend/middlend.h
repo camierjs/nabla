@@ -291,47 +291,6 @@ typedef struct nablaMainStruct{
   (nabla->hook->struct->fct!=NULL)?\
    nabla->hook->struct->fct(job):"":""
 
-
-// ****************************************************************************
-// * Nabla MESH struct
-// ****************************************************************************
-typedef struct nablaMshStruct{
-  int NABLA_NODE_PER_CELL;
-  int NABLA_CELL_PER_NODE;
-  int NABLA_CELL_PER_FACE;
-  int NABLA_NODE_PER_FACE;
-  int NABLA_FACE_PER_CELL;
-
-  int NABLA_NB_NODES_X_AXIS;
-  int NABLA_NB_NODES_Y_AXIS;
-  int NABLA_NB_NODES_Z_AXIS;
-
-  int NABLA_NB_CELLS_X_AXIS;
-  int NABLA_NB_CELLS_Y_AXIS;
-  int NABLA_NB_CELLS_Z_AXIS;
-
-  int NABLA_NB_FACES_X_INNER;
-  int NABLA_NB_FACES_Y_INNER;
-  int NABLA_NB_FACES_Z_INNER;
-  int NABLA_NB_FACES_X_OUTER;
-  int NABLA_NB_FACES_Y_OUTER;
-  int NABLA_NB_FACES_Z_OUTER;
-  int NABLA_NB_FACES_INNER;
-  int NABLA_NB_FACES_OUTER;
-  int NABLA_NB_FACES;
-
-  double NABLA_NB_NODES_X_TICK;
-  double NABLA_NB_NODES_Y_TICK;
-  double NABLA_NB_NODES_Z_TICK;
-
-  int NABLA_NB_NODES;
-  int NABLA_NODES_PADDING;
-  int NABLA_NB_CELLS;
-  int NABLA_NB_NODES_WARP;
-  int NABLA_NB_CELLS_WARP;
-}nablaMesh;
-
-
 // ****************************************************************************
 // * Forward declaration
 // ****************************************************************************

@@ -48,19 +48,17 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Backend PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
-#define BACKEND_MAIN_PREFIX "\n\
+#define BACKEND_MAIN_FUNCTION "\n\
 // ******************************************************************************\n\
 // * Main\n\
 // ******************************************************************************\n\
-int main(int argc, char *argv[]){\n\
+int main(int argc, char *argv[]){\n"
+
+#define BACKEND_MAIN_VARIABLES "\
 \tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
-\t__attribute__((unused)) int NABLA_NB_PARTICLES;\n\
-\tif (argc==1)\n\
-\t\tNABLA_NB_PARTICLES=1000;\n\
-\telse\n\
-\t\tNABLA_NB_PARTICLES=atoi(argv[1]);\n\
-\t// Initialisation des swirls\n\
+\t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
+\t// Initialisation des Swirls\n\
 \tint hlt_level=0;\n\
 \tbool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
@@ -74,11 +72,50 @@ int main(int argc, char *argv[]){\n\
 \tint global_iteration[1]={1};\n\
 \treal global_deltat[1] = {set1(option_dtt_initial)};// @ 0;\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
+
+#define BACKEND_MAIN_OPTIONS_PREFIX "\n\
+\t// ********************************************************\n\
+\t// Parse command-line options\n\
+\t// ********************************************************\n\
+\tint o,longindex=0;\n\
+\tconst struct option longopts[]={\n"
+#define BACKEND_MAIN_OPTIONS_POSTFIX "\
+\t\t{NULL,0,NULL,0}\n\
+\t};\n"
+#define BACKEND_MAIN_OPTIONS_WHILE_PREFIX "\
+\twhile ((o=getopt_long_only(argc, argv, \"\",longopts,&longindex))!=-1){\n\
+\t\tswitch (o){\n"
+
+#define BACKEND_MAIN_OPTIONS_WHILE_POSTFIX "\
+\t\tcase '?':\n\
+\t\t\tif ((optopt>(int)'A')&&(optopt<(int)'z'))\n\
+\t\t\t\texit(fprintf (stderr, \"\\n[nabla] Unknown option `-%%c'.\\n\", optopt));\n\
+\t\t\telse exit(fprintf (stderr, \"\\n[nabla] Unknown option character `\\%%d'.\\n\", optopt));\n\
+\t\tdefault: exit(fprintf(stderr, \"\\n[nabla] Error in command line\\n\"));\n\
+\t\t}\n\
+\t}"
+
 NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
   if ((nabla->entity->libraries&(1<<with_aleph))!=0)
     fprintf(nabla->entity->hdr, "%s", nablaAlephHeader(nabla));
-  fprintf(nabla->entity->src, BACKEND_MAIN_PREFIX);
+  fprintf(nabla->entity->src, BACKEND_MAIN_FUNCTION);
+  fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
+  fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
+  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
+    fprintf(nabla->entity->src, "\t\t{\"%s\",optional_argument,NULL,0x%X},\n",opt->name,*(unsigned int*)&opt);
+  fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
+  fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
+  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
+    fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, opt->name);
+    fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
+    fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);\n", opt->type, opt->name);
+    if (opt->type[0]=='r') fprintf(nabla->entity->src, "\t\t\t%s=atof(optarg);\n",opt->name);
+    if (opt->type[0]=='i') fprintf(nabla->entity->src, "\t\t\t%s=atol(optarg);\n",opt->name);
+    if (opt->type[0]=='b') fprintf(nabla->entity->src, "\t\t\t%s=(0==strcmp(optarg,\"true\"));\n",opt->name);
+    fprintf(nabla->entity->src, "\t\t\tbreak;\n");
+  }
+  fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_POSTFIX);
   return NABLA_OK;
 }
 

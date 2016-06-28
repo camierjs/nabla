@@ -57,6 +57,11 @@ with ℵ;
 // * Options
 // ****************************************************************************
 options{
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 8;
   ℝ ε = 1.e-16;
   ℾ option_debug = false;
   ℝ option_bc_Xmin = 0.0;

@@ -217,6 +217,7 @@ const static hookToken cuHookToken={
   xHookSystem,
   xHookIteration,
   cuHookExit, // cudaExit(global_deltat)
+  xHookError,
   xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,

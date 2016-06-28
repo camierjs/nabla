@@ -74,6 +74,11 @@ with cartesian;
 // * Options
 // ****************************************************************************
 options{
+  ℝ LENGTH                    = 1.125;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 8;
+
   ℝ option_dtfixed            = -1.0e-7;  // fixed time increment
   ℝ option_δt_initial         = 1.0e-7;   // variable time increment
   ℝ option_δt_courant         = 1.0e+20;
@@ -181,9 +186,9 @@ void ini(void) @ -10.0{
 // ****************************************************************************
 ∀ cells @ -9.5{
   const ℝ zero = 0.0;
-  const ℝ maxBoundaryX = X_EDGE_TICK*X_EDGE_ELEMS;
-  const ℝ maxBoundaryY = Y_EDGE_TICK*Y_EDGE_ELEMS;
-  const ℝ maxBoundaryZ = Z_EDGE_TICK*Z_EDGE_ELEMS;
+  const ℝ maxBoundaryX = LENGTH;//X_EDGE_TICK*X_EDGE_ELEMS;
+  const ℝ maxBoundaryY = LENGTH;//Y_EDGE_TICK*Y_EDGE_ELEMS;
+  const ℝ maxBoundaryZ = LENGTH;//Z_EDGE_TICK*Z_EDGE_ELEMS;
   elemBC=0;
   ∀ node{
     elemBC |= (coord.x==zero)?XI_M_SYMM;

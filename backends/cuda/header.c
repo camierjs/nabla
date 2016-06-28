@@ -71,6 +71,7 @@ void cuHookHeaderIncludes(nablaMain *nabla){
 // * Standard CUDA Includes\n\
 // *****************************************************************************\n\
 #include <iostream>\n\
+#include <getopt.h>\n\
 #include <cstdio>\n\
 #include <cstdlib>\n\
 #include <sys/time.h>\n\

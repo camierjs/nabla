@@ -171,6 +171,7 @@ const hookToken token={
   xHookSystem,
   xHookIteration,
   xHookExit,
+  xHookError,
   xHookTime,
   xHookFatal,
   xHookTurnBracketsToParentheses,

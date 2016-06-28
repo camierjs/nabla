@@ -57,6 +57,7 @@ void xHookTurnTokenToOption(nablaMain*,nablaOption*);
 void xHookSystem(astNode*,nablaMain*,const char,char);
 void xHookIteration(nablaMain*);
 void xHookExit(nablaMain*,nablaJob*);
+void xHookError(nablaMain*,nablaJob*);
 void xHookTime(nablaMain*);
 void xHookFatal(nablaMain*);
 void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);

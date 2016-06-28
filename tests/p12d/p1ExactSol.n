@@ -115,7 +115,7 @@ Real _exact_p_sol(Real t, Real3 position){
     return _exact_p_sol_3(t, position);
   else {
     printf("\n The test problem (%d) does not exist",option_case);
-    exit;
+    error;
   }
 }
 
@@ -144,7 +144,7 @@ Real3 _exact_u_sol(Real t, Real3 position){
     return _exact_u_sol_3(t, position);
   else{
      printf("\n Cas test non géré");
-     exit;
+     error;
   }
 }
 
@@ -172,7 +172,7 @@ Real _exact_t_sol(Real t, Real3 position){
     return _exact_t_sol_3(t, position);
   else{ 
      printf("\n Cas test non géré");
-     exit;
+     error;
   }
 }
 
