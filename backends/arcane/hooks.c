@@ -122,37 +122,29 @@ bool aHookJobHit(nablaMain *nabla,bool is_an_entry_point){
  * nablaArcaneColor
  */
 char *nablaArcaneColor(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
-    return "Module";
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_FAMILY)==BACKEND_COLOR_ARCANE_FAMILY)
-    return "";
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE)
-    return "Module";
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
-    return "Service";
+  if (middlend->option==BACKEND_OPTION_ARCANE_ALONE) return "Module";
+  if (middlend->option==BACKEND_OPTION_ARCANE_FAMILY) return "";
+  if (middlend->option==BACKEND_OPTION_ARCANE_MODULE) return "Module";
+  if (middlend->option==BACKEND_OPTION_ARCANE_SERVICE) return "Service";
   exit(NABLA_ERROR|fprintf(stderr,"[nablaArcaneColor] Unable to switch!"));
   return NULL;
 }
 bool isAnArcaneAlone(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
+  if (middlend->option==BACKEND_OPTION_ARCANE_ALONE)
     return true;
   return false;
 }
 bool isAnArcaneModule(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_ALONE)==BACKEND_COLOR_ARCANE_ALONE)
-    return true;
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_MODULE)==BACKEND_COLOR_ARCANE_MODULE)
-    return true;
+  if (middlend->option==BACKEND_OPTION_ARCANE_ALONE) return true;
+  if (middlend->option==BACKEND_OPTION_ARCANE_MODULE) return true;
   return false;
 }
 bool isAnArcaneService(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_SERVICE)==BACKEND_COLOR_ARCANE_SERVICE)
-    return true;
+  if (middlend->option==BACKEND_OPTION_ARCANE_SERVICE) return true;
   return false;
 }
 bool isAnArcaneFamily(nablaMain *middlend){
-  if ((middlend->colors&BACKEND_COLOR_ARCANE_FAMILY)==BACKEND_COLOR_ARCANE_FAMILY)
-    return true;
+  if (middlend->option==BACKEND_OPTION_ARCANE_FAMILY) return true;
   return false;
 }
 

@@ -303,47 +303,43 @@ hooks* okina(nablaMain *nabla){
   nabla->hook=&okinaHooks;
   
   // Call switch between STD, SSE, AVX, MIC
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
+  if (nabla->option==BACKEND_OPTION_OKINA_SSE){
     nabla->call->simd=&okinaSimdSse;
     nabla->call->header=&okinaHeaderSse;
   }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX){
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX){
     nabla->call->simd=&okinaSimdAvx;
     nabla->call->header=&okinaHeaderAvx;
   }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2){
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX2){
     nabla->call->simd=&okinaSimdAvx;
     nabla->call->header=&okinaHeaderAvx;
   }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
+  if (nabla->option==BACKEND_OPTION_OKINA_MIC){
     nabla->call->simd=&okinaSimdMic;
     nabla->call->header=&okinaHeaderMic;
   }
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512){
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX512){
     nabla->call->simd=&okinaSimd512;
     nabla->call->header=&okinaHeader512;
   }
   
   // Call between parallel modes
-  if ((nabla->colors&BACKEND_COLOR_OKINA_CILK)==BACKEND_COLOR_OKINA_CILK)
+  if (nabla->parallelism==BACKEND_PARALLELISM_CILK)
     nabla->call->parallel=&okinaCilk;
-  if ((nabla->colors&BACKEND_COLOR_OKINA_OMP)==BACKEND_COLOR_OKINA_OMP)
+      
+  if (nabla->parallelism==BACKEND_PARALLELISM_OMP)
     nabla->call->parallel=&okinaOpenMP;
 
   // Hook des directions
-  if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE)
-    nabla->hook->xyz=&xyzSse;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
-    nabla->hook->xyz=&xyzAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)
-    nabla->hook->xyz=&xyzAvx;  
-  if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC)
-    nabla->hook->xyz=&xyzMic;
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512)
-    nabla->hook->xyz=&xyz512;
+  if (nabla->option==BACKEND_OPTION_OKINA_SSE) nabla->hook->xyz=&xyzSse;  
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX) nabla->hook->xyz=&xyzAvx;  
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX2) nabla->hook->xyz=&xyzAvx;  
+  if (nabla->option==BACKEND_OPTION_OKINA_MIC) nabla->hook->xyz=&xyzMic;
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX512) nabla->hook->xyz=&xyz512;
 
   // Hook between ICC or GCC pragmas
-  if ((nabla->colors&BACKEND_COLOR_OKINA_ICC)==BACKEND_COLOR_OKINA_ICC)
+      if (nabla->compiler==BACKEND_COMPILER_ICC)
     nabla->hook->pragma=&pragmaICC;
 
   return &okinaHooks;

@@ -78,13 +78,17 @@ int main(int argc, char *argv[]){\n"
 \t// Parse command-line options\n\
 \t// ********************************************************\n\
 \tint o,longindex=0;\n\
-\tconst struct option longopts[]={\n"
+\tconst struct option longopts[]={\n\
+\t\t{\"org\",required_argument,NULL,0x3c0f6f4c},\n"
 #define BACKEND_MAIN_OPTIONS_POSTFIX "\
 \t\t{NULL,0,NULL,0}\n\
 \t};\n"
 #define BACKEND_MAIN_OPTIONS_WHILE_PREFIX "\
 \twhile ((o=getopt_long_only(argc, argv, \"\",longopts,&longindex))!=-1){\n\
-\t\tswitch (o){\n"
+\t\tswitch (o){\n\
+\t\tcase 0x3c0f6f4c:\n\
+\t\t\tprintf(\"org iput file '%%s'\\n\",optarg);\n\
+\t\t\tbreak;\n"
 
 #define BACKEND_MAIN_OPTIONS_WHILE_POSTFIX "\
 \t\tcase '?':\n\

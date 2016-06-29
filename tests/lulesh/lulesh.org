@@ -1,17 +1,31 @@
+* Org                                                                :ignore:
+#+title: SC16 Reviews
+#+author: CAMIER Jean-Sylvain
+#+email: Jean-Sylvain.Camier@cea.fr
+#+date: 01.06.2016
+
+#+LANGUAGE: en
+#+OPTIONS: H:2 num:t toc:nil todo:nil pri:nil tags:nil date:t
+#+OPTIONS: author:t timestamp:t
+#+OPTIONS: \n:nil ^:nil <:t *:t |:t
+#+TODO: IGNORE | USED
+
+#+creator: CEA, DAM, DIF, F-91297 Arpajon, France
+
 
 * time
 ** δt
-   - option_δt_courant         = 1.0e+20
-   - option_dtfixed            = 1.0e-7
+   - option_δt_initial         = -1.0e-7
+   - option_δt_fixed           = 1.0e-7
    - option_δt_mult_lower_b    = 1.1
-   - option_δt_initial         = 1.0e-7
+   - option_δt_courant         = 1.0e+20
    - option_δt_hydro           = 1.0e+20
    - option_δt_mult_upper_b    = 1.2
 ** stop
    - option_stoptime           = 1.0e-2
 * mesh
-** cartesian 
-  - LENGTH = -1.125
+** xyz 
+  - LENGTH = +1.125
   - X_EDGE_ELEMS = 8
   - Y_EDGE_ELEMS = 8
   - Z_EDGE_ELEMS = 8
@@ -24,5 +38,5 @@
   - option_v_cut = 1.0e-10
 
 * chaos
- - option_chaos = false
+ - option_chaos = true
  - option_chaos_seed = 1.1234567890123

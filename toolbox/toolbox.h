@@ -54,6 +54,7 @@ char *pth2nmspc(const char*);
 char *toolOpName(char*);
 
 void toolUtf8(char**);
+char *utf2ascii(char *utf);
 void toolUtf8SupThree(char **);
 
 void toolUnlink(char *);

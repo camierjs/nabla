@@ -289,3 +289,93 @@ void toolUtf8(char **bkp){
     //p2c(p,0x2297,"ct"); // CIRCLE_TIMES_OP → 'ct'
  }
 }
+
+
+// ****************************************************************************
+// * uCa
+// ****************************************************************************
+static bool uCa(char **a,char **p,const char *utf,const char *ascii){
+  if (strncmp(*p,utf,2)) return false;
+  strcat(*a,ascii);
+  *a+=strlen(ascii);
+  *p+=1;
+  return true;
+}
+
+// ****************************************************************************
+// * u2a - αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// ****************************************************************************
+static void u2a(char **a, char **p){
+  if (uCa(a,p,"α","greek_alpha")) return;
+  if (uCa(a,p,"β","greek_beta")) return;
+  if (uCa(a,p,"γ","greek_gamma")) return;
+  if (uCa(a,p,"δ","greek_delta")) return;
+  if (uCa(a,p,"ε","greek_epsilon")) return;
+  if (uCa(a,p,"ζ","greek_zeta")) return;
+  if (uCa(a,p,"η","greek_eta")) return;
+  if (uCa(a,p,"θ","greek_theta")) return;
+  if (uCa(a,p,"ι","greek_iota")) return;
+  if (uCa(a,p,"κ","greek_kappa")) return;
+  if (uCa(a,p,"λ","greek_lambda")) return;
+  if (uCa(a,p,"μ","greek_mu")) return;
+  if (uCa(a,p,"ν","greek_nu")) return;
+  if (uCa(a,p,"ξ","greek_xi")) return;
+  if (uCa(a,p,"ο","greek_omicron")) return;
+  if (uCa(a,p,"π","greek_pi")) return;
+  if (uCa(a,p,"ρ","greek_rho")) return;
+  //if (uCa(a,p,"ς","GREEK_SMALL_LETTER_FINAL_SIGMA")) return;
+  if (uCa(a,p,"σ","greek_sigma")) return;
+  if (uCa(a,p,"τ","greek_tau")) return;
+  if (uCa(a,p,"υ","greek_upsilon")) return;
+  if (uCa(a,p,"φ","greek_phi")) return;
+  if (uCa(a,p,"χ","greek_chi")) return;
+  if (uCa(a,p,"ψ","greek_psi")) return;
+  if (uCa(a,p,"ω","greek_omega")) return;
+  
+  if (uCa(a,p,"Α","greek_capital_alpha")) return;
+  if (uCa(a,p,"Β","greek_capital_beta")) return;
+  if (uCa(a,p,"Γ","greek_capital_gamma")) return;
+  if (uCa(a,p,"Δ","greek_capital_delta")) return;
+  if (uCa(a,p,"Ε","greek_capital_epsilon")) return;
+  if (uCa(a,p,"Ζ","greek_capital_zeta")) return;
+  if (uCa(a,p,"Η","greek_capital_eta")) return;
+  if (uCa(a,p,"Θ","greek_capital_theta")) return;
+  if (uCa(a,p,"Ι","greek_capital_iota")) return;
+  if (uCa(a,p,"Κ","greek_capital_kappa")) return;
+  if (uCa(a,p,"Λ","greek_capital_lambda")) return;
+  if (uCa(a,p,"Μ","greek_capital_mu")) return;
+  if (uCa(a,p,"Ν","greek_capital_nu")) return;
+  if (uCa(a,p,"Ξ","greek_capital_xi")) return;
+  if (uCa(a,p,"Ο","greek_capital_omicron")) return;
+  if (uCa(a,p,"Π","greek_capital_pi")) return;
+  if (uCa(a,p,"Ρ","greek_capital_rho")) return;
+  if (uCa(a,p,"Σ","greek_capital_sigma")) return;
+  if (uCa(a,p,"Τ","greek_capital_tau")) return;
+  if (uCa(a,p,"Υ","greek_capital_upsilon")) return;
+  if (uCa(a,p,"Φ","greek_capital_phi")) return;
+  if (uCa(a,p,"Χ","greek_capital_chi")) return;
+  if (uCa(a,p,"Ψ","greek_capital_psi")) return;
+  if (uCa(a,p,"Ω","greek_capital_omega")) return;
+  assert(NULL);
+}
+
+// ****************************************************************************
+// * utf2ascii
+// ****************************************************************************
+char *utf2ascii(char *utf){
+  assert(utf);
+  int nb_utf=0;
+  char *p=utf;
+  //printf("\n[1;35m%s[0m:",utf);
+  for(;*p!=0;p++)
+    if (*p<0) nb_utf+=1;
+  nb_utf>>=1;
+  //printf("nb_utf=%d\n",nb_utf);
+  const int utf_size_max = 16;
+  char *ascii=(char*)calloc(strlen(utf)+utf_size_max*nb_utf,sizeof(char));
+  char *rtn=ascii;
+  for(p=utf;*p!=0;p++)
+    if (*p<0) u2a(&ascii,&p);
+    else *ascii++=*p;
+  return rtn;
+}

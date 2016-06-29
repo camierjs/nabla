@@ -100,7 +100,7 @@ static char *dumpExternalFile(char *file){
 void nOkinaHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
   
-  if ((nabla->colors&BACKEND_COLOR_OKINA_AVX512)==BACKEND_COLOR_OKINA_AVX512){
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX512){
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Integer_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real3_h));
@@ -108,7 +108,7 @@ void nOkinaHeaderDump(nablaMain *nabla){
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Gather_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Scatter_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512OStream_h));
-  }else if ((nabla->colors&BACKEND_COLOR_OKINA_MIC)==BACKEND_COLOR_OKINA_MIC){
+  }else if (nabla->option==BACKEND_OPTION_OKINA_MIC){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicReal3_h));
@@ -116,19 +116,19 @@ void nOkinaHeaderDump(nablaMain *nabla){
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicGather_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicScatter_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knMicOStream_h));
-  }else if (((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)||
-            ((nabla->colors&BACKEND_COLOR_OKINA_AVX2)==BACKEND_COLOR_OKINA_AVX2)){
+  }else if ((nabla->option==BACKEND_OPTION_OKINA_AVX)||
+            (nabla->option==BACKEND_OPTION_OKINA_AVX2)){
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxReal_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxReal3_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxTernary_h));
-    if ((nabla->colors&BACKEND_COLOR_OKINA_AVX)==BACKEND_COLOR_OKINA_AVX)
+    if (nabla->option==BACKEND_OPTION_OKINA_AVX)
       fprintf(nabla->entity->hdr,dumpExternalFile(knAvxGather_h));
     else
       fprintf(nabla->entity->hdr,dumpExternalFile(knAvx2Gather_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxScatter_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knAvxOStream_h));
-  }else if ((nabla->colors&BACKEND_COLOR_OKINA_SSE)==BACKEND_COLOR_OKINA_SSE){
+  }else if (nabla->option==BACKEND_OPTION_OKINA_SSE){
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseInteger_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(knSseReal3_h));

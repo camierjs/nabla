@@ -383,7 +383,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
 
   case(COMPOUND_JOB_INI):{
     if (job->parse.returnFromArgument &&
-        ((nabla->colors&BACKEND_COLOR_OKINA_OMP)==BACKEND_COLOR_OKINA_OMP))
+        (nabla->parallelism==BACKEND_PARALLELISM_OMP))
       nprintf(nabla, NULL, "int tid = omp_get_thread_num();");
     //nprintf(nabla, NULL, "/*COMPOUND_JOB_INI:*/");
     break;
@@ -522,7 +522,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     
   case (LSH_OP):{ job->parse.left_of_assignment_operator=true; nprintf(nabla, NULL, "<<"); break; }
   case (RETURN):{
-    if ((nabla->colors&BACKEND_COLOR_OKINA_OMP)==BACKEND_COLOR_OKINA_OMP){
+    if (nabla->parallelism==BACKEND_PARALLELISM_OMP){
       char mnx[4]={'M','x','x','\0'};
       const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
       astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));

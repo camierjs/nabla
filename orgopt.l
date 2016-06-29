@@ -71,6 +71,7 @@ IS					(u|U|l|L)*
 
 "/*"					{ ignoreBlocComments();}
 "//"              { ignoreLineComments();}
+"#+"              { ignoreLineComments();}
 
 "true"				{ return tok(&yylval, TRUE);}
 "false"				{ return tok(&yylval, FALSE);}
@@ -80,7 +81,12 @@ IS					(u|U|l|L)*
 "*"			      { return tok(&yylval, '*');}
 "-"			      { return tok(&yylval, '-');}
 "+"			      { return tok(&yylval, '+');}
+":noexport:"      { /*ignore*/ }
+":ignore:"        { /*ignore*/ }
 
+"α" {return tok(&yylval, ALPHA);}
+"δ" {return tok(&yylval, DELTA);}
+υ
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 {D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
 L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CONSTANT);}

@@ -153,8 +153,10 @@ void yyerror(astNode **root, char *error){
 static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
                                  const int optionDumpTree,
                                  char *npFileName,
-                                 const BACKEND_SWITCH backend,
-                                 const BACKEND_COLORS colors,
+                                 const NABLA_BACKEND backend,
+                                 const BACKEND_OPTION option,
+                                 const BACKEND_PARALLELISM parallelism,
+                                 const BACKEND_COMPILER compiler,
                                  char *interface_name,
                                  char *specific_path,
                                  char *service_name){
@@ -185,8 +187,8 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   return nMiddleSwitch(root,
                        optionDumpTree,
                        nabla_entity_name,
-                       backend,
-                       colors,
+                       backend, option,
+                       parallelism, compiler,
                        interface_name,
                        specific_path,
                        service_name);
@@ -281,43 +283,45 @@ int main(int argc, char * argv[]){
   char *service_name=NULL;
   int unique_temporary_file_fd=0;
   char *input_file_list=NULL;
-  BACKEND_SWITCH backend=BACKEND_VOID;
-  BACKEND_COLORS backend_color=BACKEND_COLOR_VOID;
+  NABLA_BACKEND backend=0;
+  BACKEND_OPTION option=0;
+  BACKEND_PARALLELISM parallelism=0;
+  BACKEND_COMPILER compiler =0;
   const struct option longopts[]={
+    // Standard options:
     {"help",no_argument,NULL,OPTION_HELP},
     {"version",no_argument,NULL,OPTION_VERSION},
     {"license",no_argument,NULL,OPTION_LICENSE},
+    {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
+    // Backend options:
     {"arcane",no_argument,NULL,BACKEND_ARCANE},
-       {"alone",required_argument,NULL,BACKEND_COLOR_ARCANE_ALONE},
-       {"family",required_argument,NULL,BACKEND_COLOR_ARCANE_FAMILY},
-       {"module",required_argument,NULL,BACKEND_COLOR_ARCANE_MODULE},
-       {"service",required_argument,NULL,BACKEND_COLOR_ARCANE_SERVICE},
+       {"alone",required_argument,NULL,BACKEND_OPTION_ARCANE_ALONE},
+       {"family",required_argument,NULL,BACKEND_OPTION_ARCANE_FAMILY},
+       {"module",required_argument,NULL,BACKEND_OPTION_ARCANE_MODULE},
+       {"service",required_argument,NULL,BACKEND_OPTION_ARCANE_SERVICE},
     {"cuda",required_argument,NULL,BACKEND_CUDA},
     {"okina",required_argument,NULL,BACKEND_OKINA},
-       {"std",no_argument,NULL,BACKEND_COLOR_OKINA_STD},
-       {"sse",no_argument,NULL,BACKEND_COLOR_OKINA_SSE},
-       {"avx",no_argument,NULL,BACKEND_COLOR_OKINA_AVX},
-       {"avx2",no_argument,NULL,BACKEND_COLOR_OKINA_AVX2},
-       {"avx512",no_argument,NULL,BACKEND_COLOR_OKINA_AVX512},
-       {"mic",no_argument,NULL,BACKEND_COLOR_OKINA_MIC},
-       {"cilk",no_argument,NULL,BACKEND_COLOR_OKINA_CILK},
-       {"omp",no_argument,NULL,BACKEND_COLOR_OKINA_OMP},
-       {"seq",no_argument,NULL,BACKEND_COLOR_OKINA_SEQ},
-       {"gcc",no_argument,NULL,BACKEND_COLOR_OKINA_GCC},
-       {"icc",no_argument,NULL,BACKEND_COLOR_OKINA_ICC},
-    {"tnl",no_argument,NULL,OPTION_TIME_DOT_MMA},
+       {"std",no_argument,NULL,BACKEND_OPTION_OKINA_STD},
+       {"sse",no_argument,NULL,BACKEND_OPTION_OKINA_SSE},
+       {"avx",no_argument,NULL,BACKEND_OPTION_OKINA_AVX},
+       {"avx2",no_argument,NULL,BACKEND_OPTION_OKINA_AVX2},
+       {"avx512",no_argument,NULL,BACKEND_OPTION_OKINA_AVX512},
+       {"mic",no_argument,NULL,BACKEND_OPTION_OKINA_MIC},
+       {"cilk",no_argument,NULL,BACKEND_PARALLELISM_CILK},
+       {"omp",no_argument,NULL,BACKEND_PARALLELISM_OMP},
+       {"seq",no_argument,NULL,BACKEND_PARALLELISM_SEQ},
+       {"gcc",no_argument,NULL,BACKEND_COMPILER_GCC},
+       {"icc",no_argument,NULL,BACKEND_COMPILER_ICC},
     {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"raja",required_argument,NULL,BACKEND_RAJA},
     {"kokkos",required_argument,NULL,BACKEND_KOKKOS},
-    {"loci",required_argument,NULL,BACKEND_LOCI},
-    {"uintah",required_argument,NULL,BACKEND_UINTAH},
-    {"mma",no_argument,NULL,BACKEND_MMA},
-    {"library",required_argument,NULL,BACKEND_LIBRARY},
-    {"vhdl",required_argument,NULL,BACKEND_VHDL},
+    //{"loci",required_argument,NULL,BACKEND_LOCI},
+    //{"uintah",required_argument,NULL,BACKEND_UINTAH},
+    //{"mma",no_argument,NULL,BACKEND_MMA},
+    //{"library",required_argument,NULL,BACKEND_LIBRARY},
+    //{"vhdl",required_argument,NULL,BACKEND_VHDL},
     {NULL,0,NULL,0}
   };
-  // Check BACKEND's options are still in a 32 bit register
-  assert(BACKEND_COLOR_LAST<32);
 
   // Setting null bytes ('\0') at the beginning of dest, before concatenation
   input_file_list=calloc(NABLA_MAX_FILE_NAME,sizeof(char));
@@ -378,8 +382,8 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line hits target ARCANE (%s)",
           longopts[longindex].name);
       break;
-    case BACKEND_COLOR_ARCANE_ALONE:
-      backend_color=BACKEND_COLOR_ARCANE_ALONE;
+    case BACKEND_OPTION_ARCANE_ALONE:
+      option=BACKEND_OPTION_ARCANE_ALONE;
       dbg("\n[nabla] Command line specifies ARCANE's STAND-ALONE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
@@ -387,8 +391,8 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
-    case BACKEND_COLOR_ARCANE_FAMILY:
-      backend_color=BACKEND_COLOR_ARCANE_FAMILY;
+    case BACKEND_OPTION_ARCANE_FAMILY:
+      option=BACKEND_OPTION_ARCANE_FAMILY;
       dbg("\n[nabla] Command line specifies ARCANE's FAMILY option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
@@ -396,8 +400,8 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
-    case BACKEND_COLOR_ARCANE_MODULE:
-      backend_color=BACKEND_COLOR_ARCANE_MODULE;
+    case BACKEND_OPTION_ARCANE_MODULE:
+      option=BACKEND_OPTION_ARCANE_MODULE;
       dbg("\n[nabla] Command line specifies ARCANE's MODULE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
@@ -405,8 +409,8 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
-    case BACKEND_COLOR_ARCANE_SERVICE:
-      backend_color=BACKEND_COLOR_ARCANE_SERVICE;
+    case BACKEND_OPTION_ARCANE_SERVICE:
+      option=BACKEND_OPTION_ARCANE_SERVICE;
       dbg("\n[nabla] Command line specifies ARCANE's SERVICE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
@@ -437,7 +441,6 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_OKINA:
       backend=BACKEND_OKINA;
-      backend_color=BACKEND_COLOR_VOID;
       dbg("\n[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
@@ -446,48 +449,59 @@ int main(int argc, char * argv[]){
       dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s",
           nabla_entity_name);
       break;
-    case BACKEND_COLOR_OKINA_STD:
-      backend_color|=BACKEND_COLOR_OKINA_STD;
+    case BACKEND_OPTION_OKINA_STD:
+      assert(option==0);
+      option=BACKEND_OPTION_OKINA_STD;
       dbg("\n[nabla] Command line specifies OKINA's STD option");
       break;
-    case BACKEND_COLOR_OKINA_SSE:
-      backend_color|=BACKEND_COLOR_OKINA_SSE;
+    case BACKEND_OPTION_OKINA_SSE:
+       assert(option==0);
+     option=BACKEND_OPTION_OKINA_SSE;
       dbg("\n[nabla] Command line specifies OKINA's SSE option");
       break;
-    case BACKEND_COLOR_OKINA_AVX:
-      backend_color|=BACKEND_COLOR_OKINA_AVX;
+    case BACKEND_OPTION_OKINA_AVX:
+      assert(option==0);
+      option|=BACKEND_OPTION_OKINA_AVX;
       dbg("\n[nabla] Command line specifies OKINA's AVX option");
       break;
-    case BACKEND_COLOR_OKINA_AVX2:
-      backend_color|=BACKEND_COLOR_OKINA_AVX2;
+    case BACKEND_OPTION_OKINA_AVX2:
+      assert(option==0);
+      option=BACKEND_OPTION_OKINA_AVX2;
       dbg("\n[nabla] Command line specifies OKINA's AVX2 option");
       break;
-    case BACKEND_COLOR_OKINA_AVX512:
-      backend_color|=BACKEND_COLOR_OKINA_AVX512;
+    case BACKEND_OPTION_OKINA_AVX512:
+      assert(option==0);
+      option=BACKEND_OPTION_OKINA_AVX512;
       dbg("\n[nabla] Command line specifies OKINA's AVX512 option");
       break;
-    case BACKEND_COLOR_OKINA_MIC:
-      backend_color|=BACKEND_COLOR_OKINA_MIC;
+    case BACKEND_OPTION_OKINA_MIC:
+      assert(option==0);
+      option=BACKEND_OPTION_OKINA_MIC;
       dbg("\n[nabla] Command line specifies OKINA's MIC option");
       break;
-    case BACKEND_COLOR_OKINA_CILK:
-      backend_color|=BACKEND_COLOR_OKINA_CILK;
+    case BACKEND_PARALLELISM_CILK:
+      assert(parallelism==0);
+      parallelism=BACKEND_PARALLELISM_CILK;
       dbg("\n[nabla] Command line specifies OKINA's CILK option");
       break;
-    case BACKEND_COLOR_OKINA_OMP:
-      backend_color|=BACKEND_COLOR_OKINA_OMP;
+    case BACKEND_PARALLELISM_OMP:
+      assert(parallelism==0);
+      parallelism=BACKEND_PARALLELISM_OMP;
       dbg("\n[nabla] Command line specifies OKINA's OpenMP option");
       break;
-    case BACKEND_COLOR_OKINA_SEQ:
-      backend_color|=BACKEND_COLOR_OKINA_SEQ;
+    case BACKEND_PARALLELISM_SEQ:
+      assert(parallelism==0);
+      parallelism=BACKEND_PARALLELISM_SEQ;
       dbg("\n[nabla] Command line specifies OKINA's SEQ option");
       break;
-    case BACKEND_COLOR_OKINA_GCC:
-      backend_color|=BACKEND_COLOR_OKINA_GCC;
+    case BACKEND_COMPILER_GCC:
+      assert(compiler==0);
+      compiler=BACKEND_COMPILER_GCC;
       dbg("\n[nabla] Command line specifies OKINA's GCC option");
       break;
-    case BACKEND_COLOR_OKINA_ICC:
-      backend_color|=BACKEND_COLOR_OKINA_ICC;
+    case BACKEND_COMPILER_ICC:
+      assert(compiler==0);
+      compiler=BACKEND_COMPILER_ICC;
       dbg("\n[nabla] Command line specifies OKINA's ICC option");
       break;
       // ************************************************************
@@ -532,10 +546,10 @@ int main(int argc, char * argv[]){
       // ************************************************************
       // * BACKEND LIBRARY en cours de construction
       // ************************************************************
-    case BACKEND_LIBRARY:
+      /*case BACKEND_LIBRARY:
       backend=BACKEND_LIBRARY;
       dbg("\n[nabla] LIBRARY BACKEND WIP!");
-      exit(NABLA_ERROR);      
+      exit(NABLA_ERROR);*/ 
       // ************************************************************
       // * BACKEND RAJA en cours de construction
       // ************************************************************
@@ -549,31 +563,31 @@ int main(int argc, char * argv[]){
       // ************************************************************
       // * BACKEND LOCI en cours de construction
       // ************************************************************
-    case BACKEND_LOCI:
+      /*case BACKEND_LOCI:
       backend=BACKEND_LOCI;
       dbg("\n[nabla] LOCI BACKEND WIP!");
-      exit(NABLA_ERROR);      
+      exit(NABLA_ERROR);*/
        // ************************************************************
       // * BACKEND UINTAH en cours de construction
       // ************************************************************
-   case BACKEND_UINTAH:
+      /*case BACKEND_UINTAH:
       backend=BACKEND_UINTAH;
       dbg("\n[nabla] UINTAH BACKEND WIP!");
-      exit(NABLA_ERROR);
+      exit(NABLA_ERROR);*/
       // ************************************************************
       // * BACKEND MMA en cours de construction
       // ************************************************************
-    case BACKEND_MMA:
+      /*case BACKEND_MMA:
       backend=BACKEND_MMA;
       dbg("\n[nabla] MMA BACKEND WIP!");
-      exit(NABLA_ERROR);      
+      exit(NABLA_ERROR);*/
       // ************************************************************
       // * BACKEND VHDL en cours de construction
       // ************************************************************
-    case BACKEND_VHDL:
+      /*case BACKEND_VHDL:
       backend=BACKEND_VHDL;
       dbg("\n[nabla] VHDLBACKEND WIP!");
-      exit(NABLA_ERROR);      
+      exit(NABLA_ERROR);*/
       // ************************************************************
       // * UNKNOWN OPTIONS
       // ************************************************************      
@@ -592,7 +606,7 @@ int main(int argc, char * argv[]){
          fprintf(stderr,
                  "\n[nabla] Error with entity name!\n"));
 
-  if (backend==BACKEND_VOID)
+  if (backend==0)
     exit(NABLA_ERROR|
          fprintf(stderr,
                  "\n[nabla] Error with target switch!\n"));
@@ -617,7 +631,7 @@ int main(int argc, char * argv[]){
   if (nablaParsing(nabla_entity_name?nabla_entity_name:argv[argc-1],
                    optionDumpTree,
                    unique_temporary_file_name,
-                   backend,backend_color,
+                   backend,option,parallelism,compiler,
                    interface_name,specific_path,
                    service_name)!=NABLA_OK)
     exit(NABLA_ERROR);

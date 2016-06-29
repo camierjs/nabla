@@ -56,6 +56,7 @@ extern FILE *yyin;
 // Terminals used in grammar //
 ///////////////////////////////
 %token IDENTIFIER
+%token ALPHA DELTA
 %token TRUE FALSE
 %token HEX_CONSTANT Z_CONSTANT R_CONSTANT
 
@@ -87,8 +88,7 @@ boolean
 ;
 
 value
-: boolean 
-| HEX_CONSTANT
+: HEX_CONSTANT
 | Z_CONSTANT
 | R_CONSTANT 
 ;
@@ -96,61 +96,54 @@ value
 //id:IDENTIFIER {rhs;}
 
 option
-: '-' IDENTIFIER '=' value {rhs;}
+: '-' IDENTIFIER '=' boolean {rhs;}
+| '-' IDENTIFIER '=' value {rhs;}
 | '-' IDENTIFIER '=' plus_moins value {rhs;}
 ;
 
-stars
-: '*'
-| stars '*'
-;
+stars: '*'| stars '*';
 
-header
-: stars IDENTIFIER
-;
-
+header: stars IDENTIFIER;
 
 ///////////////
 // ∇ grammar //
 ///////////////
-orgopt_grammar
-: header 
-| option
-;
+orgopt_grammar: header | option;
 
 %%
 
-void nablaErrorVariadic(const char *file,
-                        const int line,
-                        const char *format,...){
-  va_list args;
-  va_start(args, format);
-  fflush(stdout);
-  fflush(stderr);
-  fprintf(stderr,"\r%s:%d:%d: error: ",file,line,yylineno-1);
-  vfprintf(stderr,format,args);
-  fprintf(stderr,"\n");
-  va_end(args);
-  exit(-1);
-}
-
-
+// ****************************************************************************
+// * yyerror
+// ****************************************************************************
 void yyerror(astNode **root, const char *error){
   fflush(stdout);
   printf("\r%s:%d: %s\n",nabla_input_file,yylineno-1, error);
 }
 
 
+// ****************************************************************************
+// * orgGrammar
+// ****************************************************************************
 static void orgGrammar(astNode * n){
-  if (n->ruleid == rulenameToId("option"))
-    printf(" --%s=%s",
-           n->children->next->token,
-           n->children->next->next->next->token);
+  if (n->ruleid == rulenameToId("option")){
+    const astNode *nnn=n->children->next->next->next;
+    const char *ascii_id=utf2ascii(n->children->next->token);
+    if (nnn->tokenid=='-' or nnn->tokenid=='+')
+      printf(" --%s=%s%s",ascii_id,nnn->token,nnn->next->token);
+    else
+      if (nnn->ruleid == rulenameToId("boolean"))
+        printf(" --%s=%s",ascii_id,nnn->children->token);
+      else
+        printf(" --%s=%s",ascii_id,nnn->token);
+  }
   if(n->children != NULL) orgGrammar(n->children);
   if(n->next != NULL) orgGrammar(n->next);
 }
 
 
+// ****************************************************************************
+// * main
+// ****************************************************************************
 int main(int argc, char * argv[]){
   astNode *root=NULL;
   if (argc<2) return printf("No input file!\n");

@@ -250,8 +250,10 @@ typedef struct nablaMainStruct{
   nablaOption *options;
   nablaEntity *entity;
   nablaSwirl *swirls;
-  BACKEND_SWITCH backend;
-  BACKEND_COLORS colors;
+  NABLA_BACKEND backend;
+  BACKEND_OPTION option;
+  BACKEND_PARALLELISM parallelism;
+  BACKEND_COMPILER compiler;
   char *interface_name; // Arcane specific
   char *specific_path; // Arcane specific
   char *service_name;   // Arcane specific
@@ -365,8 +367,10 @@ void nMiddleInsertSpace(nablaMain*,astNode*);
 
 // nMiddle
 int nMiddleSwitch(astNode*,const int,const char*,
-                  const BACKEND_SWITCH,
-                  const BACKEND_COLORS,
+                  const NABLA_BACKEND,
+                  const BACKEND_OPTION,
+                  const BACKEND_PARALLELISM,
+                  const BACKEND_COMPILER,
                   char*,char*,char*);
 
 // nMiddlePrintf

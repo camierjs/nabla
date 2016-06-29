@@ -80,16 +80,20 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 int nMiddleSwitch(astNode *root,
                   const int optionDumpTree,
                   const char *nabla_entity_name,
-                  const BACKEND_SWITCH backend,
-                  const BACKEND_COLORS colors,
+                  const NABLA_BACKEND backend,
+                  const BACKEND_OPTION option,
+                  const BACKEND_PARALLELISM parallelism,
+                  const BACKEND_COMPILER compiler,
                   char *interface_name,
                   char *specific_path,
                   char *service_name){
   nablaMain *nabla=nMiddleInit(nabla_entity_name);
   dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
- (= 0x%x) et de ses variantes (= 0x%x)",backend,colors);
+ (= 0x%x) et de ses options (= 0x%x)",backend,option);
   nabla->backend=backend;
-  nabla->colors=colors;
+  nabla->option=option;
+  nabla->parallelism=parallelism;
+  nabla->compiler=compiler;
   nabla->interface_name=interface_name;
   nabla->specific_path=specific_path;
   nabla->service_name=service_name;
