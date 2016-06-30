@@ -107,7 +107,7 @@ static void nArcaneHLTIni(nablaMain *arc,
 // *************************************************************
 // *************************************************************
 static char* tab(int k){
-  char *rtrn,*tabs=(char *)malloc(k+1);
+  char *rtrn,*tabs=(char *)calloc(k+1,sizeof(char));
   for(int i=0;i<k;i+=1) tabs[i]='\t';
   tabs[k]=0;
   rtrn=strdup(tabs);

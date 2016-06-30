@@ -46,16 +46,15 @@
 // ****************************************************************************
 // * nablaInsertSpace
 // ****************************************************************************
-void nMiddleInsertSpace( nablaMain *nabla, astNode * n){
+void nMiddleInsertSpace(nablaMain *nabla, astNode * n){
   if (n->token!=NULL) {
     if (n->parent!=NULL){
       if (n->parent->rule!=NULL){
-        if ( (n->parent->ruleid==rulenameToId("type_qualifier")) ||
-             (n->parent->ruleid==rulenameToId("type_specifier")) ||
-             (n->parent->ruleid==rulenameToId("jump_statement")) ||
-             (n->parent->ruleid==rulenameToId("selection_statement")) ||
-             (n->parent->ruleid==rulenameToId("storage_class_specifier"))
-             ){
+        if ((n->parent->ruleid==rulenameToId("type_qualifier")) ||
+            (n->parent->ruleid==rulenameToId("type_specifier")) ||
+            (n->parent->ruleid==rulenameToId("jump_statement")) ||
+            (n->parent->ruleid==rulenameToId("selection_statement")) ||
+            (n->parent->ruleid==rulenameToId("storage_class_specifier"))){
           nprintf(nabla, NULL, " ");
           //nprintf(nabla, NULL, "/*%s*/ ",n->parent->rule);
         }
@@ -116,7 +115,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   /////////////////////////////////////
   if (n->tokenid == INCLUDES){
     nMiddleInclude(nabla, n->token);
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit INCLUDES %s", n->token);
+    dbg("\n\t[nMiddleGrammar] rule hit INCLUDES %s", n->token);
   }
 
   /////////////////////////////////////
@@ -125,17 +124,17 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   if (n->ruleid == rulenameToId("preproc")){
     // We do not want preprocs declarations down to the source file
     //nprintf(nabla, NULL, "%s\n", n->children->token);
-    dbg("\n\t[nablaMiddlendParseAndHook] preproc '%s'", n->children->token);
+    dbg("\n\t[nMiddleGrammar] preproc '%s'", n->children->token);
   }
   
   ///////////////////////////////
   // Déclaration des libraries //
   ///////////////////////////////
   if (n->ruleid == rulenameToId("with_library")){
-    dbg("\n\t[nablaMiddlendParseAndHook] with_library hit!");
+    dbg("\n\t[nMiddleGrammar] with_library hit!");
     nMiddleLibraries(n,nabla->entity);
-    dbg("\n\t[nablaMiddlendParseAndHook] library done");
-    dbg("\n\t[nablaMiddlendParseAndHook] nabla->entity->libraries=0x%X",
+    dbg("\n\t[nMiddleGrammar] library done");
+    dbg("\n\t[nMiddleGrammar] nabla->entity->libraries=0x%X",
         nabla->entity->libraries);
   }
 
@@ -143,7 +142,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // Règle ∇ de 'declaration' //
   //////////////////////////////
   if (n->ruleid == rulenameToId("declaration")){
-    dbg("\n\t[nablaMiddlendParseAndHook] declaration hit:");
+    dbg("\n\t[nMiddleGrammar] declaration hit:");
     nMiddleDeclarationDump(nabla,n);
     nprintf(nabla, NULL, "\n");
     dbg(", done");
@@ -153,38 +152,38 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // Règle de définitions des items sur leurs supports //
   ///////////////////////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_item_definition")){
-    char *item_support=n->children->children->token;
+    const char *item_support=n->children->children->token;
     // Nodes|Cells|Global|Faces|Particles
     int item_support_tokenid=n->children->children->tokenid;
-    dbg("\n\t[nablaMiddlendParseAndHook] rule %s,  support %s",
+    dbg("\n\t[nMiddleGrammar] rule %s,  support %s",
         n->rule, item_support);
     // On backup temporairement le support (kind) de l'item
     nabla->tmpVarKinds=strdup(switchItemSupportTokenid(item_support_tokenid));
     nMiddleItems(n->children->next,
                rulenameToId("nabla_item_declaration"),
                nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] item done");
+    dbg("\n\t[nMiddleGrammar] item done");
   }
 
   //////////////////////////////////////
   // Règle de définitions des options //
   //////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_options_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
+    dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     nMiddleOptions(n->children,
                    rulenameToId("nabla_option_declaration"), nabla);
-    dbg("\n\t[nablaMiddlendParseAndHook] option done");
+    dbg("\n\t[nMiddleGrammar] option done");
   }
 
   /////////////////////////////////////////////////
   // On a une définition d'une fonction standard //
   /////////////////////////////////////////////////
   if (n->ruleid == rulenameToId("function_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
+    dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     bool is_an_entry_point=false;
     // On scan pour trouver un '@'
     for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
-      if (nAt->token!=NULL) dbg("%s ",nAt->token);
+      //if (nAt->token!=NULL) dbg("%s ",nAt->token);
       if (nAt->tokenid!=AT) continue;
       is_an_entry_point=true;
       break;
@@ -198,46 +197,44 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     nMiddleFunctionFill(nabla,fct,n,
                         nabla->hook->source->name?
                         nabla->hook->source->name(nabla):NULL);
-    dbg("\n\t[nablaMiddlendParseAndHook] function done");
+    dbg("\n\t[nMiddleGrammar] function done");
     goto step_next;
-    // On continue sans s'engouffrer dans la fonction
-    //if(n->next != NULL) nMiddleGrammar(n->next, nabla);
-    //return;
   }
   
   ////////////////////////////////////////
   // On a une définition d'un job Nabla //
   ////////////////////////////////////////
   if (n->ruleid == rulenameToId("nabla_job_definition")){
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
+    dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     bool job_to_add=true;
     bool is_an_entry_point=false;
     
     // On scan pour trouver un '@'
     for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
-      if (nAt->token!=NULL) dbg("%s ",nAt->token);
+      //if (nAt->token!=NULL) dbg("%s ",nAt->token);
       if (nAt->tokenid!=AT) continue;
       is_an_entry_point=true;
       break;
     }
-    dbg("\n\t\t[nablaMiddlendParseAndHook] is_an_entry_point=%s",
+    dbg("\n\t\t[nMiddleGrammar] is_an_entry_point=%s",
         is_an_entry_point?"true":"false");
     if (nabla->hook->grammar->hit &&
         !nabla->hook->grammar->hit(nabla,is_an_entry_point))
       job_to_add=false;
       
     if (!job_to_add){
-      dbg("\n\t[nablaMiddlendParseAndHook] Skipping job!");
+      dbg("\n\t[nMiddleGrammar] Skipping job!");
       goto step_next;
     }else{
-      dbg("\n\t[nablaMiddlendParseAndHook] Adding job!");
-    
+      dbg("\n\t[nMiddleGrammar] nMiddleJobNew!");
       nablaJob *job = nMiddleJobNew(nabla->entity);
+      dbg("\n\t[nMiddleGrammar] nMiddleJobAdd!");
       nMiddleJobAdd(nabla->entity, job);
+      dbg("\n\t[nMiddleGrammar] nMiddleJobFill!");
       nMiddleJobFill(nabla,job,n,
                      nabla->hook->source->name?
                      nabla->hook->source->name(nabla):NULL);
-      dbg("\n\t[nablaMiddlendParseAndHook] job done");
+      dbg("\n\t[nMiddleGrammar] job done");
     }
     goto step_next;
   }
@@ -246,19 +243,19 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   // On a une reduction Nabla //
   //////////////////////////////
   if (n->ruleid == rulenameToId("nabla_reduction")){
-    const astNode *global_node = n->children->next;
-    const astNode *item_node =n->children->next->next->next;
-    char *global_var_name = global_node->token;
-    char *item_var_name = item_node->token;
+    astNode *global_node = n->children->next;
+    astNode *item_node =n->children->next->next->next;
+    const char *global_var_name = global_node->token;
+    const char *item_var_name = item_node->token;
     dbg("\n\n////////////////////////////////////");
-    dbg("\n\t[nablaMiddlendParseAndHook] rule hit %s", n->rule);
-    dbg("\n\t[nablaMiddlendParseAndHook] Checking for global variable '%s'",
+    dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
+    dbg("\n\t[nMiddleGrammar] Checking for global variable '%s'",
         global_var_name);
     const nablaVariable *global_var =
       nMiddleVariableFind(nabla->variables, global_var_name);
     const nablaVariable *item_var =
       nMiddleVariableFind(nabla->variables, item_var_name);
-    dbg("\n\t[nablaMiddlendParseAndHook] global_var->item '%s'",
+    dbg("\n\t[nMiddleGrammar] global_var->item '%s'",
         global_var->item);
     // global_var must be 'global'
     assert(global_var->item[0]=='g');
@@ -266,9 +263,9 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     assert(item_var->item[0]!='g');
     // Having done these sanity checks,
     // let's pass the rest of the generation to the backends
-    dbg("\n\t[nablaMiddlendParseAndHook] Hooking reduction:");
+    dbg("\n\t[nMiddleGrammar] Hooking reduction:");
     nabla->hook->grammar->reduction(nabla,n);
-    dbg("\n\t[nablaMiddlendParseAndHook] reduction done");
+    dbg("\n\t[nMiddleGrammar] reduction done");
   }
   
   //////////////////

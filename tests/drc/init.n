@@ -144,7 +144,7 @@ void init(void) @ -20.0{
   const ℝ d0F1 = s0F⋅s0F;
   //info()<<"[initOuterCellTransmissivity] d0F1["<<uid<<"]="<<d0F1;
   const ℝ d0F2 = fabs(s0F⋅nF);
-  const ℝ³⨯ℝ³ k0 = permeability[0];
+  const ℝ³ˣ³ k0 = permeability[0];
   const ℝ nFnF =  nF⋅nF;
   const ℝ cos2 =  (d0F2*d0F2)/(d0F1*nFnF);
   const ℝ tau = (nF⋅(k0⨂nF))/d0F2;
@@ -163,8 +163,8 @@ void init(void) @ -20.0{
   const ℝ d0F = fabs(s0F⋅nF);
   const ℝ d1F = fabs(s1F⋅nF);
   const ℝ d01 = s01⋅s01;
-  const ℝ³⨯ℝ³ k0 = permeability[backCell];
-  const ℝ³⨯ℝ³ k1 = permeability[frontCell];
+  const ℝ³ˣ³ k0 = permeability[backCell];
+  const ℝ³ˣ³ k1 = permeability[frontCell];
   const ℝ t0 = (nF⋅(k0⨂nF))/d0F;
   const ℝ t1 = (nF⋅(k1⨂nF))/d1F;
   const ℝ nFnF = nF⋅nF;

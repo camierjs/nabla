@@ -68,9 +68,9 @@ int main(int argc, char *argv[]){\n"
 \t// ********************************************************\n\
 \t// Initialisation du temps et du deltaT\n\
 \t// ********************************************************\n\
-\tdouble global_time[1]={option_dtt_initial};// Arcane fait comme cela!;\n\
+\tdouble global_time[1]={0.0};//{option_dtt_initial};// Arcane fait comme cela!;\n\
 \tint global_iteration[1]={1};\n\
-\treal global_deltat[1] = {set1(option_dtt_initial)};// @ 0;\n\
+\treal global_greek_deltat[1] = {set1(0.0)};// @ 0;\n\
 \t//printf(\"\\n\\33[7;32m[main] time=%%e, iteration is #%%d\\33[m\",global_time[0],global_iteration[0]);\n"
 
 #define BACKEND_MAIN_OPTIONS_PREFIX "\n\
@@ -111,7 +111,9 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
-    fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, opt->name);
+    //const char *ascii_name=utf2ascii(opt->name);
+    const char *ascii_name=opt->name;
+    fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, ascii_name);
     fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
     fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);\n", opt->type, opt->name);
     if (opt->type[0]=='r') fprintf(nabla->entity->src, "\t\t\t%s=atof(optarg);\n",opt->name);
@@ -380,9 +382,9 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 // * Backend POSTFIX - Génération du 'main'
 // ****************************************************************************
 #define BACKEND_MAIN_POSTFIX "\n\t\t//BACKEND_MAIN_POSTFIX\
-\n\t\tglobal_time[0]+=*(double*)&global_deltat[0];\
+\n\t\tglobal_time[0]+=*(double*)&global_greek_deltat[0];\
 \n\t\tglobal_iteration[0]+=1;\
-\n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_deltat[0]);\
+\n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\

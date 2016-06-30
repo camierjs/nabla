@@ -45,7 +45,7 @@
 
 
 void cuHookExit(struct nablaMainStruct *nabla,nablaJob *job){
-  nprintf(nabla, "/*EXIT*/", "cudaExit(global_deltat)");
+  nprintf(nabla, "/*EXIT*/", "cudaExit(global_greek_deltat)");
 }
 
 

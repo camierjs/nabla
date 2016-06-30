@@ -58,7 +58,7 @@ void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
     nprintf(nabla, NULL, "/*IS*/.isOwn()");
   else
     nprintf(nabla, NULL, "/*IS*/.%s()", token2function);
-  // Et on purge le token pour pas qu'il soit parsé
+//#warning On purge le token pour pas quil soit parsé
   n->children->next->token[0]=0;
 }
 
@@ -66,12 +66,12 @@ void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
 // ****************************************************************************
 // * nArcaneHookTokenPrefix
 // ****************************************************************************
-char* arcaneHookTokenPrefix(struct nablaMainStruct *nabla){return strdup("m_");}
+char* arcaneHookTokenPrefix(nablaMain *nabla){return strdup("m_");}
 
 // ****************************************************************************
 // * nArcaneHookTokenPostfix
 // ****************************************************************************
-char* arcaneHookTokenPostfix(struct nablaMainStruct *nabla){return strdup("");}
+char* arcaneHookTokenPostfix(nablaMain *nabla){return strdup("");}
 
 
 

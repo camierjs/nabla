@@ -118,7 +118,7 @@ global{
 // * Partie d'initialisation ]-∞,-0[
 // ****************************************************************************
 
-//void ini(void) @ -10.0{  δt=option_deltat;}
+//void ini(void) @ -10.0{  deltat=option_deltat;}
 
 ∀ cells void iniCells(void) out (cell cell_nb_nodes,
                                cell cell_density,
@@ -200,16 +200,16 @@ global{
 }
 
 // ****************************************************************************
-// * Initialisation du δt en fonction des options
+// * Initialisation du deltat en fonction des options
 // ****************************************************************************
 #warning face reduction
 //∀ faces min_σ <?= σ @ -8.6;
 
 void ini_δt(void) @ -8.5{
   if (option_deltat==0.0){
-    δt=1.0/*min_σ*//option_deltat_factor;
-  }else δt=option_deltat;
-  info()<< "\33[7m[ini_δt] δt="<<δt<<"\33[m";
+    deltat=1.0/*min_σ*//option_deltat_factor;
+  }else deltat=option_deltat;
+  info()<< "\33[7m[ini_δt] δt="<<deltat<<"\33[m";
 }
 
 // ****************************************************************************
@@ -261,9 +261,9 @@ void ini_δt(void) @ -8.5{
 ∀ faces void updateAlphaBetaGammaDelta(void)
   in (face sdivs, face Cosθ, face Sinθ)
   out (face α, face β, face δ) @ -7.0{
-  α = δt*sdivs/Cosθ;
-  β = γ = δt*(-Sinθ/Cosθ);
-  δ = δt*(1./(sdivs*Cosθ));
+  α = deltat*sdivs/Cosθ;
+  β = γ = deltat*(-Sinθ/Cosθ);
+  δ = deltat*(1./(sdivs*Cosθ));
 }
 
 // ****************************************************************************
@@ -368,7 +368,7 @@ void getMatrixAndVectors(void) @ 2.0 { alephInitialize(); }
       ℵ matrix addValue(cell_density_im,this, edge_density_re,f, αc);
     }
   }
-  Σα*=(δt/cell_area);
+  Σα*=(deltat/cell_area);
   ℵ matrix addValue(cell_density_re,this, cell_density_re,this, +1.0);
   ℵ matrix addValue(cell_density_re,this, cell_density_im,this, -Σα);
   ℵ matrix addValue(cell_density_im,this, cell_density_re,this, -Σα);
@@ -440,7 +440,7 @@ void getMatrixAndVectors(void) @ 2.0 { alephInitialize(); }
                       node_density_re,(node(0)==*this)?node(1):node(0),
                       +δn);
   }
-  Σδ*=δt/node_area;
+  Σδ*=deltat/node_area;
   ℵ matrix addValue(node_density_re,this, node_density_re,this, +1.0);
   ℵ matrix addValue(node_density_re,this, node_density_im,this, -Σδ);
   ℵ matrix addValue(node_density_im,this, node_density_re,this, -Σδ);

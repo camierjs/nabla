@@ -95,7 +95,7 @@ nodes{
   ℾ node_got_tgt;
   ℝ³ node_tangent;
   ℝ³ node_u;                          // Vitesse nodale du maillage
-  ℝ³⨯ℝ³ node_u_matrix;                // Matrice aux sommets pour le calcul de la vitesse
+  ℝ³ˣ³ node_u_matrix;                // Matrice aux sommets pour le calcul de la vitesse
   ℝ³ node_u_second_member;            // Second membre aux sommets pour le calcul de la vitesse
 };
 
@@ -112,7 +112,7 @@ cells{
   ℝ glace_δt;
   ℝ absCQs[nodes];
   ℝ³ CQs[nodes];                        // Résultantes aux sommets
-  ℝ³⨯ℝ³ AQs[nodes];                     // Matrices de contributions aux sommets
+  ℝ³ˣ³ AQs[nodes];                     // Matrices de contributions aux sommets
   ℝ ρΕ;                                 // Énergie massique
   ℝ ιΕ;                                 // Énergie interne
   ℝ³ reconstructed_u[nodes];            // Tableau des vitesses reconstruites
@@ -136,7 +136,7 @@ global{
 // ****************************************************************************
 
 void hydroInit(void) @ -25.0{
-  δt=option_δt_ini;
+  deltat=option_δt_ini;
   assert(option_triangles^option_quads^option_hexa^option_cylinder);
 }
 
@@ -194,7 +194,7 @@ void hydroInit(void) @ -25.0{
 ∀ cells @ 10.0 { ∀ node reconstructed_u=u; }
 
 ∀ nodes @ 11.0{
-  node_u_matrix=ℝ³⨯ℝ³();
+  node_u_matrix=ℝ³ˣ³();
 //#warning 3D ℝ³(0,0,1));
   //ℝ³(0,0,1));
   node_u_second_member=0.0;//ℝ³(0,0,0);
@@ -202,7 +202,7 @@ void hydroInit(void) @ -25.0{
 
 ∀ cells @ 12.0{ // 16%
   ∀ node{
-    const ℝ³⨯ℝ³ local_matrix = AQs;
+    const ℝ³ˣ³ local_matrix = AQs;
     node_u_matrix += local_matrix;
     node_u_second_member += local_matrix ⨂ reconstructed_u;
     node_u_second_member += CQs*reconstructed_p;
@@ -236,11 +236,11 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 }
 
 ∀ cells @ 19.0{
-  u += δt*momentum_fluxes_Σ/m;
-  ρΕ += δt*total_energy_fluxes_Σ/m;
+  u += deltat*momentum_fluxes_Σ/m;
+  ρΕ += deltat*total_energy_fluxes_Σ/m;
 }
 
-∀ nodes @ 22.0 { coord += δt*node_u; }
+∀ nodes @ 22.0 { coord += deltat*node_u; }
 
 ∀ cells @ 26.0 { ρ = m/V; }
 
@@ -276,8 +276,8 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 void hydroTimeStepCtrl(void) @ 35.0{
   ℝ new_δt=option_δt_control*global_δt;
   // on calcule les variations min et max autorisées
-  const ℝ max_time_step = (1.0+option_δt_max_variation)*δt;
-  const ℝ min_time_step = (1.0-option_δt_min_variation)*δt;
+  const ℝ max_time_step = (1.0+option_δt_max_variation)*deltat;
+  const ℝ min_time_step = (1.0-option_δt_min_variation)*deltat;
   if (new_δt > max_time_step) new_δt=max_time_step;
   if (new_δt < min_time_step) new_δt=min_time_step;
   new_δt = min(new_δt, option_δt_max);
@@ -286,7 +286,7 @@ void hydroTimeStepCtrl(void) @ 35.0{
   if (option_δt_last_exact && ((time + new_δt) > option_δt_end)) 
       new_δt = option_δt_end - time;
   if ((time>=option_δt_end) || (new_δt==0.0)) exit;
-  δt=new_δt;
-  info()<<"[1;32m final δt="<<δt<<"[0m";
+  deltat=new_δt;
+  info()<<"[1;32m final δt="<<deltat<<"[0m";
   if (option_max_iterations!=0 && GlobalIteration >= option_max_iterations) exit;
 }

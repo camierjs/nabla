@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * dumpAtEndofAt
 // ****************************************************************************
-static void dumpAtEndofAt(nablaJob *job, char *token){
+static void dumpAtEndofAt(nablaJob *job, const char *token){
   const double h=atof(token);
   assert(h>=0.0);
   job->whens[job->when_index]+=

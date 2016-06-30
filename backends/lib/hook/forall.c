@@ -111,15 +111,15 @@ char* xHookForAllItem(nablaJob *j,
   if (job=='c' && enum_enum=='f'  && itm=='c') return "/*chi-cfc*/f->";
   if (job=='n' && enum_enum=='f'  && itm=='n') return "/*chi-nfn*/f->";
   if (job=='n' && enum_enum=='f'  && itm=='c') return "/*chi-nfc*/f->";
-  if (job=='n' && enum_enum=='c'  && itm=='c') return "/*chi-ncc*/xs_node_";
-  if (job=='n' && enum_enum=='\0' && itm=='c') return "/*chi-n0c*/xs_node_";
+  if (job=='n' && enum_enum=='c'  && itm=='c') return "/*chi-ncc*/xs_node_cell";
+  if (job=='n' && enum_enum=='\0' && itm=='c') return "/*chi-n0c*/xs_node_cell";
   if (job=='n' && enum_enum=='\0' && itm=='n') return "/*chi-n0n*/n";
   if (job=='f' && enum_enum=='\0' && itm=='f') return "/*chi-f0f*/f";
-  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/xs_face_";
+  if (job=='f' && enum_enum=='\0' && itm=='n') return "/*chi-f0n*/xs_face_node";
   if (job=='f' && enum_enum=='\0' && itm=='c' &&
-      j->parse.alephKeepExpression==false) return "/*chi-f0c*/xs_face_";
+      j->parse.alephKeepExpression==false) return "/*chi-f0c*/xs_face_cell";
   if (job=='f' && enum_enum=='\0' && itm=='c' &&
-      j->parse.alephKeepExpression==true)  return "/*chi-f0c*/xs_face_";
+      j->parse.alephKeepExpression==true)  return "/*chi-f0c*/xs_face_cell";
   nablaError("Could not switch in hookItem!");
   return NULL;
 }

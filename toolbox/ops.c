@@ -46,9 +46,8 @@
 // *****************************************************************************
 // * op2name
 // *****************************************************************************
-char *toolOpName(char *op){
-  //printf("[%s] ",op);
-  if (strncmp(op,"√",3)==0) return "opSqrt";
+char *toolOpName(const char *op){
+  if (!strncmp(op,"√",3)) return "opSqrt";
   if (strncmp(op,"∛",3)==0) return "opCbrt";
   
   if (strncmp(op,"⋅",3)==0) return "opScaMul";
@@ -67,8 +66,9 @@ char *toolOpName(char *op){
   case ('+') : return "opAdd";
   case ('-') : return "opSub";
   case ('?') : return "opTernary";
-  default: return "opUnknown"; 
+  default: assert(NULL);
   }
-  return "opUnknown";
+  assert(NULL);
+  return NULL;
 }
 

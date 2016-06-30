@@ -42,7 +42,7 @@ options{
   // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   ℕ alephSolverMethod     = 3; 
   ℕ alephNumberOfCores    = 0;
-  Bool option_aleph_dump_matrix = true;     
+  Bool option_aleph_dump_matrix = false;     
 };
 
 // **************************************************************************

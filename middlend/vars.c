@@ -48,7 +48,7 @@
 // ****************************************************************************
 nablaVariable *nMiddleVariableNew(nablaMain *arc){
 	nablaVariable *variable;
-	variable = (nablaVariable *)malloc(sizeof(nablaVariable));
+	variable = (nablaVariable *)calloc(1,sizeof(nablaVariable));
  	assert(variable != NULL);
    variable->axl_it=true; // Par défaut, on dump la variable dans le fichier AXL
    variable->type=variable->name=variable->field_name=NULL;
@@ -78,7 +78,7 @@ nablaVariable *nMiddleVariableLast(nablaVariable *variables) {
    return variables;
 }
 
-nablaVariable *nMiddleVariableFind(nablaVariable *variables, char *name) {
+nablaVariable *nMiddleVariableFind(nablaVariable *variables, const char *name) {
   nablaVariable *variable=variables;
   assert(name!=NULL);
   //dbg("\n\t[nablaVariableFind] looking for '%s'", name);
@@ -368,7 +368,7 @@ bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char 
 // * dfsAddToUsedVariables
 // ****************************************************************************
 static void dfsAddToUsedVariables(nablaJob *job,
-                                  char *token,
+                                  const char *token,
                                   nablaVariable *var,
                                   const char *rw,
                                   const bool left_of_assignment_expression){
@@ -431,7 +431,7 @@ nablaVariable* dfsVarThisOneSpecial(char* token, char* test, int d){
 // ****************************************************************************
 static void dfsVarThisOne(nablaMain *nabla,
                           nablaJob *job,
-                          const astNode *n,
+                          astNode *n,
                           const int tokenid,
                           char* token,
                           const bool left_of_assignment_expression){
@@ -506,7 +506,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
     if (n->children->tokenid == IDENTIFIER){
       dbg("\n\t\t\t[dfsVariables] primary_expression (%s)!", n->children->token);
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
-      char* token = n->children->token;
+      const char* token = n->children->token;
       // Est-ce une variable connue?
       nablaVariable *var=nMiddleVariableFind(nabla->variables,token);
       //nablaVariable *var=nMiddleVariableFindWithSameJobItem(nabla,job,nabla->variables, token);

@@ -44,7 +44,7 @@
 #include "nabla.tab.h"
 
 // ****************************************************************************
-// * enums pour les différents dumps à faire: déclaration, malloc et free
+// * enums pour les différents dumps à faire: déclaration, alloc et free
 // ****************************************************************************
 typedef enum {
   CUDA_VARIABLES_DECLARATION=0,
@@ -278,7 +278,7 @@ void cuHookVariablesPrefix(nablaMain *nabla){
 // * Globals, coté DEVICE\n\
 // ********************************************************\n\
 //__builtin_align__(8) real *global_time;\n\
-//__builtin_align__(8) real *global_deltat;\n\
+//__builtin_align__(8) real *global_greek_deltat;\n\
 //__builtin_align__(8) int *global_iteration;\n\
 //__builtin_align__(8) real *global_device_shared_reduce_results;\n\
 \n\

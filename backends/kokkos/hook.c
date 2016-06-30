@@ -124,6 +124,6 @@ char* kHookEoe(nablaMain* nabla){
 
 
 
-bool kHookDfsExtra(nablaMain* nabla,nablaJob* job){
+bool kHookDfsExtra(nablaMain* nabla,nablaJob* job, bool arg_test){
   return false;
 }

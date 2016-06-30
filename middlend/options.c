@@ -47,7 +47,7 @@
 // ****************************************************************************
 nablaOption *nMiddleOptionNew(nablaMain *nabla){
 	nablaOption *option;
-	option = (nablaOption *)malloc(sizeof(nablaOption));
+	option = (nablaOption *)calloc(1,sizeof(nablaOption));
  	assert(option != NULL);
    option->axl_it=true; // Par défaut, on dump la option dans le fichier AXL
    option->type=option->name=option->dflt=NULL;
@@ -76,7 +76,7 @@ nablaOption *nMiddleOptionAdd(nablaMain *nabla, nablaOption *option) {
 // ****************************************************************************
 // * nMiddleOptionFindName
 // ****************************************************************************
-nablaOption *nMiddleOptionFindName(nablaOption *options, char *name) {
+nablaOption *nMiddleOptionFindName(nablaOption *options, const char *name) {
   nablaOption *option=options;
   //dbg("\n\t[findOptionName] %s", name);
   //assert(option != NULL && name != NULL);
@@ -97,12 +97,12 @@ nablaOption *nMiddleOptionFindName(nablaOption *options, char *name) {
 // ****************************************************************************
 // * nMiddleCatTillToken
 // ****************************************************************************
-void nMiddleCatTillToken(astNode * n, char **dflt){
+static void nMiddleCatTillToken(astNode * n, char **dflt){
   if (n==NULL) return;
   if (n->token != NULL){
     dbg("\n\t\t\t[catTillToken] %s", n->token);
     if (n->tokenid != ';'){
-      *dflt=realloc(*dflt, strlen(*dflt)+strlen(n->token));
+      //*dflt=realloc(*dflt, strlen(*dflt)+strlen(n->token));
       strcat(*dflt,n->token);
     }
   }
@@ -131,6 +131,8 @@ static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actGenericOptionsDirectDeclarator] %s", n->children->token);
   option->name=strdup(n->children->token);
+  //printf("\noption: %s",n->children->token);
+  //option->name=utf2ascii(n->children->token);
 }
 
 
@@ -141,7 +143,7 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsExpression] rule=%s", n->rule);
-  option->dflt=calloc(1024,1);
+  option->dflt=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   nMiddleCatTillToken(n->children, &option->dflt);
   dbg("\n\t\t[actOptionsExpression] final option->dflt is '%s'", option->dflt);
 }
@@ -168,10 +170,10 @@ void nMiddleOptions(astNode * n, int ruleid, nablaMain *nabla){
 // ****************************************************************************
 // * Transformation de tokens en options
 // ****************************************************************************
-nablaOption *nMiddleTurnTokenToOption(astNode * n, nablaMain *arc){
-  nablaOption *opt=nMiddleOptionFindName(arc->options, n->token);
+nablaOption *nMiddleTurnTokenToOption(astNode * n, nablaMain *nabla){
+  nablaOption *opt=nMiddleOptionFindName(nabla->options, n->token);
   // Si on ne trouve pas d'option, on a rien à faire
   if (opt == NULL) return NULL;
-  arc->hook->token->option(arc,opt);
+  nabla->hook->token->option(nabla,opt);
   return opt;
 }

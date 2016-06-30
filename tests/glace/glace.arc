@@ -62,11 +62,11 @@
      <option_quads>false</option_quads>
      <option_triangles>false</option_triangles>
 
-     <option_dtt_ini>0.001</option_dtt_ini>
-     <option_dtt_min>1e-12</option_dtt_min>
-     <option_dtt_max>0.01</option_dtt_max>
-     <option_dtt_control>0.9</option_dtt_control>
-     <option_dtt_end>1.0</option_dtt_end>
+     <option_greek_deltat_ini>0.001</option_greek_deltat_ini>
+     <option_greek_deltat_min>1e-12</option_greek_deltat_min>
+     <option_greek_deltat_max>0.01</option_greek_deltat_max>
+     <option_greek_deltat_control>0.9</option_greek_deltat_control>
+     <option_greek_deltat_end>1.0</option_greek_deltat_end>
 
      <option_x_min>0.0</option_x_min>
      <option_x_interface>0.5</option_x_interface>
@@ -78,10 +78,10 @@
      <option_z_min>-0.15</option_z_min>
      <option_z_max>+0.15</option_z_max>
 
-     <option_ini_zg_rh>2.0</option_ini_zg_rh>
+     <option_ini_zg_greek_rho>2.0</option_ini_zg_greek_rho>
      <option_ini_zg_p>2.0</option_ini_zg_p>
 
-     <option_ini_zd_rh>1.0</option_ini_zd_rh>
+     <option_ini_zd_greek_rho>1.0</option_ini_zd_greek_rho>
      <option_ini_zd_p>1.0</option_ini_zd_p>
 
      <option_max_iterations>8</option_max_iterations>

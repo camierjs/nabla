@@ -79,7 +79,7 @@ options{
   // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   ℕ alephSolverMethod     = 0; 
   ℕ alephNumberOfCores    = 0;
-  Bool option_aleph_dump_matrix = false;
+  ℾ option_aleph_dump_matrix = false;
 };
 
 
@@ -87,7 +87,7 @@ options{
 // * Cell Variables
 // ****************************************************************************
 cells{
-  ℝ Ω, Δ,λ;
+  ℝ Ω,Δ,λ;
 };
 
 
@@ -119,6 +119,7 @@ global{
 
 void iniGlobals(void) @ -5.0{
   δx=(Χmax-Χmin)/X_EDGE_ELEMS;
+  δt=option_δt_initial;
   printf("\n\t\t\33[7m[iniGlobals] δx=%f\33[m", (double)δx);
   printf("\n\t\t\33[7m[iniGlobals] δt=%f\33[m", (double)δt);
 }

@@ -100,7 +100,7 @@ faces{
 // ****************************************************************************
 
 void ini(void) @ -10.0{
-  δt=option_deltat;
+  deltat=option_deltat;
 }
 
 ∀ cells void iniCells(void) out (cell θ) @ -10.0{
@@ -138,7 +138,7 @@ void rhsInit(void) @ 1.0{
 }
 
 ∀ own outer faces void setRhsFaceValues(void) in (cell θ, face ih2, face bcθ) @ 1.2{
-  const ℝ value = δt*ih2*bcθ;
+  const ℝ value = deltat*ih2*bcθ;
   ℵ rhs addValue(θ, cell(0), value);
 }
 
@@ -153,7 +153,7 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 // ****************************************************************************
 
 ∀ inner faces void setInnerFacesValues(void) in (cell θ, face ih2) @ 2.1{
-  const ℝ δtDivSurface = -δt*ih2;
+  const ℝ δtDivSurface = -deltat*ih2;
   //info()<<"\n[setInnerFacesValues] backCell="<<backCell;
 //if (backCell.isOwn())
     ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
@@ -164,7 +164,7 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 ∀ own cells void setCellsValues(void) in (cell θ/*, face ih2*/) @ 2.2{
   ℝ diagonalTerme=0.0;
   ∀ face diagonalTerme += ih2;
-  diagonalTerme*=δt;
+  diagonalTerme*=deltat;
   diagonalTerme+=1.0;
   ℵ matrix setValue(θ,this, θ,this, diagonalTerme);
 }

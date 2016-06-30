@@ -133,12 +133,9 @@ endif()
 ##################
 # Link libraries #
 ##################
-target_link_libraries(nabla libNabla
-                      NablaFrontend NablaToolbox
-                      NablaMiddlend
+target_link_libraries(nabla libNabla NablaMiddlend NablaFrontend NablaToolbox
                       NablaArcane NablaCuda NablaKokkos NablaRaja NablaLambda NablaOkina
-                      NablaLibCall NablaLibHook NablaLibDump NablaLibAleph
-                      NablaMiddlend)
+                      NablaLibCall NablaLibHook NablaLibDump NablaLibAleph)
 
 ###########
 # INSTALL #

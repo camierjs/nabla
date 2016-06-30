@@ -122,9 +122,9 @@ NABLA_STATUS kHookMainPreInit(nablaMain *nabla){
 \t// ********************************************************\n\
 \t// Initialisation du temps et du deltaT\n\
 \t// ********************************************************\n\
-\tglobal_time[0]=option_dtt_initial;\n\
+\tglobal_time[0]=0.0;\n\
 \tglobal_iteration[0]=1;\n\
-\tglobal_deltat[0]=option_dtt_initial;\n\n\t// kHookMainPreInit\n\
+\tglobal_greek_deltat[0]=0.0;\n\n\t// kHookMainPreInit\n\
 \t// ********************************************************\n\
 \t// * MESH CONNECTIVITY (3D) with prefix 'xs'\n\
 \t// ********************************************************\n\
@@ -146,9 +146,9 @@ NABLA_STATUS kHookMainPreInit(nablaMain *nabla){
 // * kHookMainPostfix
 // ****************************************************************************
 #define BACKEND_MAIN_POSTFIX "\n\t\t//BACKEND_MAIN_POSTFIX\
-\n\t\tglobal_time[0]+=global_deltat[0];\
+\n\t\tglobal_time[0]+=global_greek_deltat[0];\
 \n\t\tglobal_iteration[0]+=1;\
-\n\t\t//printf(\"\\ttime=%%e, dt=%%e\\n\", global_time[0], global_deltat[0]);\
+\n\t\t//printf(\"\\ttime=%%e, dt=%%e\\n\", global_time[0], global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\

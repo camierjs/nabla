@@ -46,4 +46,28 @@
 #include "ast.h"
 #include "dbg.h"
 
+// ****************************************************************************
+// * Structure used to pass a batch of actions for each ruleid found while DFS
+// ****************************************************************************
+typedef struct RuleActionStruct{
+  int ruleid;
+  void (*action)(astNode*,void*);
+} RuleAction;
+
+
+// ****************************************************************************
+// * DFS functions
+// ****************************************************************************
+void dfsDumpToken(astNode*);
+
+void scanTokensForActions(astNode*, RuleAction*, void*);
+char *dfsFetchFirst(astNode*, int);
+char *dfsFetchAll(astNode*,const int,int*,char*);
+astNode *dfsFetch(astNode*,int);
+
+astNode *dfsFetchTokenId(astNode*,int);
+astNode *dfsFetchToken(astNode*, const char *);
+astNode *dfsFetchRule(astNode*,int);
+int dfsScanJobsCalls(void*,void*,astNode*);
+
 #endif // _NABLA_FRONTEND_H_

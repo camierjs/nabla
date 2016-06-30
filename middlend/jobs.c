@@ -50,7 +50,7 @@
 nablaJob *nMiddleJobNew(nablaEntity *entity){
   int i;
   nablaJob *job;
-  job = (nablaJob *)malloc(sizeof(nablaJob));
+  job = (nablaJob *)calloc(1,sizeof(nablaJob));
   assert(job != NULL);
   job->is_an_entry_point=false;
   job->is_a_function=false;
@@ -117,7 +117,7 @@ nablaJob *nMiddleJobLast(nablaJob *jobs) {
   return jobs;
 }
 
-nablaJob *nMiddleJobFind(nablaJob *jobs,char *name){
+nablaJob *nMiddleJobFind(nablaJob *jobs,const char *name){
   nablaJob *job=jobs;
   while(job != NULL) {
     if(strcmp(job->name, name) == 0)
@@ -132,7 +132,7 @@ nablaJob *nMiddleJobFind(nablaJob *jobs,char *name){
 // * Backend Generic for JOBS - New, Add, Last functions
 // ****************************************************************************
 static void actNablaJobParameterItem(astNode * n, void *current_item){
-  current_item=n->children->token;
+  current_item=(void*)n->children->token;
   dbg("\n\titem set to '%s' ", n->children->token);
 }
 static void actNablaJobParameterDirectDeclarator(astNode * n, void *current_item){
@@ -379,37 +379,51 @@ void nMiddleJobFill(nablaMain *nabla,
                     nablaJob *job,
                     astNode *n,
                     const char *namespace){
-  char *set=calloc(NABLA_MAX_FILE_NAME,1);
+  dbg("\n\t[nMiddleJobFill] calloc");
+  char *set=(char*)calloc(1024,sizeof(char));
+  dbg("\n\t[nMiddleJobFill] numParams");
   int numParams=0;
-  astNode *nd;
   job->is_a_function=false;
   assert(job != NULL);
+  dbg("\n\t[nMiddleJobFill] job != NULL");
   
-  // Récupération scope/region/items
+  dbg("\n\tRécupération scope");
   job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
+  dbg("\n\tRécupération region");
   job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
+  dbg("\n\tRécupération items");
   job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
+  
   // On va chercher tous les items de l'ensemble, on stop au token SET_END
-  job->item_set = dfsFetchAll(n->children->children,rulenameToId("nabla_items"),
-                              &job->nb_in_item_set,set);
+  dbg("\n\tdfsFetchAll item_set");
+  job->item_set = dfsFetchAll(n->children->children,
+                              rulenameToId("nabla_items"),
+                              &job->nb_in_item_set,
+                              set);
   assert(job->item);
+  
   // On test en DFS dans le nabla_job_decl pour voir s'il y a un type retour
+  dbg("\n\tdfsFetchFirst return_type");
   job->return_type = dfsFetchFirst(n->children->children,rulenameToId("type_specifier"));
   
   // Nom du job:
   // On va chercher le premier identifiant qui est le nom du job *ou pas*
+  dbg("\n\tOn va chercher le premier identifiant pour un nom");
   //dbg("\n\n\t// **********************************************************************");
   if (!job->return_type){ // Pas de 'void', pas de nom, on en créé un
+    dbg("\n\tPas de 'void', pas de nom, on en créé un");
     const char* kName=mkktemp("kernel");
+    dbg("\n\tkName=%s\n",kName);
     job->has_to_be_unlinked=true;
     job->name=strdup(kName);
     job->name_utf8=strdup(kName);
     job->return_type=strdup("void");
   }else{
-    nd=dfsFetchTokenId(n->children,IDENTIFIER);
-    assert(nd);
-    job->name=strdup(nd->token);
-    job->name_utf8 = strdup(nd->token_utf8);
+    dbg("\n\tdfsFetchTokenId IDENTIFIER");
+    astNode* id_node=dfsFetchTokenId(n->children,IDENTIFIER);
+    assert(id_node);
+    job->name=strdup(id_node->token);
+    job->name_utf8 = strdup(id_node->token_utf8);
   }
   dbg("\n\n* Nabla Job: %s", job->name); // org-mode job name
   dbg("\n\t[nablaJobFill] Kernel named '%s', on item '%s', item_set=%s",
@@ -445,7 +459,7 @@ void nMiddleJobFill(nablaMain *nabla,
   job->returnTypeNode=dfsFetch(n->children->children,rulenameToId("type_specifier"));
   
   // Récupération de la liste des paramètres
-  nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  astNode *nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
   if (nd) job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",

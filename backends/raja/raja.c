@@ -268,7 +268,7 @@ static hooks rajaHooks={
 // ****************************************************************************
 // * raja
 // ****************************************************************************
-const hooks* raja(nablaMain *nabla){
+hooks* raja(nablaMain *nabla){
   nabla->call=&calls;
   return &rajaHooks;
 }

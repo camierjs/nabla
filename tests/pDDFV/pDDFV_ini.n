@@ -45,7 +45,7 @@
 // * Partie d'initialisation ]-∞,-0[
 // ****************************************************************************
 void iniδt(void) @ -10.0{
-  δt=option_δt_ini;
+  deltat=option_δt_ini;
   area_sum=0.0;
   sumNbCell=0;
 }

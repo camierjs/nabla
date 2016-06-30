@@ -46,15 +46,15 @@
 
 
 void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
+  astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
-  const astNode *global_var_node = n->children->next;
-  const astNode *reduction_operation_node = global_var_node->next;
+  astNode *global_var_node = n->children->next;
+  astNode *reduction_operation_node = global_var_node->next;
   astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n->children->next, rulenameToId("at_constant"));
   assert(at_single_cst_node!=NULL);
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
+  const char *global_var_name = global_var_node->token;
+  const char *item_var_name = item_var_node->token;
   // Préparation du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   job_name[0]=0;
@@ -74,7 +74,7 @@ void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
   redjob->direction  = strdup("NoDirection");
   redjob->called_variables=nMiddleVariableNew(nabla);
   redjob->called_variables->item=strdup("cell");
-  redjob->called_variables->name=item_var_name;
+  redjob->called_variables->name=(char *)item_var_name;
   // On annonce que c'est un job de reduction pour
   // lancer le deuxieme etage de reduction dans la boucle
   redjob->reduction = true;

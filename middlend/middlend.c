@@ -42,13 +42,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-hooks* arcane(nablaMain*);
-hooks* cuda(nablaMain*);
-hooks* okina(nablaMain*);
-hooks* lambda(nablaMain*);
-hooks* raja(nablaMain*);
-hooks* kokkos(nablaMain*);
-
 
 // ****************************************************************************
 // * nMiddleInit
@@ -88,6 +81,7 @@ int nMiddleSwitch(astNode *root,
                   char *specific_path,
                   char *service_name){
   nablaMain *nabla=nMiddleInit(nabla_entity_name);
+  nabla->root=root;
   dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
  (= 0x%x) et de ses options (= 0x%x)",backend,option);
   nabla->backend=backend;
@@ -104,16 +98,16 @@ int nMiddleSwitch(astNode *root,
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   // Switching between our possible backends:
   switch (backend){
-  case BACKEND_ARCANE: return animate(nabla,root,arcane(nabla));
-  case BACKEND_CUDA:   return animate(nabla,root,cuda(nabla));
-  case BACKEND_OKINA:  return animate(nabla,root,okina(nabla));
-  case BACKEND_LAMBDA: return animate(nabla,root,lambda(nabla));
-  case BACKEND_RAJA:   return animate(nabla,root,raja(nabla));
-  case BACKEND_KOKKOS: return animate(nabla,root,kokkos(nabla));
+  case BACKEND_ARCANE: { nabla->hook=arcane(nabla); break;}
+  case BACKEND_CUDA:   { nabla->hook=cuda(nabla); break;}
+  case BACKEND_OKINA:  { nabla->hook=okina(nabla); break;}
+  case BACKEND_LAMBDA: { nabla->hook=lambda(nabla); break;}
+  case BACKEND_RAJA:   { nabla->hook=raja(nabla); break;}
+  case BACKEND_KOKKOS: { nabla->hook=kokkos(nabla); break;}
   default:
     exit(NABLA_ERROR|
          fprintf(stderr,
                  "\nError while switching backend!\n"));
   }
-  return NABLA_ERROR;
+  return animate(nabla);
 }

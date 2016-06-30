@@ -51,11 +51,10 @@ char *toolStrUpCaseAndSwap(const char*,
 char *toolStrQuote(const char*);
 char *pth2nmspc(const char*);
 
-char *toolOpName(char*);
+char *toolOpName(const char*);
 
-void toolUtf8(char**);
-char *utf2ascii(char *utf);
-void toolUtf8SupThree(char **);
+char *utf2ascii(const char*);
+void toolUtf8SupThree(char**);
 
 void toolUnlink(char *);
 int toolMkstemp(const char*,char**);

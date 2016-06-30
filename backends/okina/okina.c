@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/okina/okina.h"
+////#include "backends/okina/okina.h"
 #include "backends/okina/call/call.h"
 
 
@@ -300,7 +300,6 @@ static hooks okinaHooks={
 // ****************************************************************************
 hooks* okina(nablaMain *nabla){
   nabla->call=&okinaCalls;
-  nabla->hook=&okinaHooks;
   
   // Call switch between STD, SSE, AVX, MIC
   if (nabla->option==BACKEND_OPTION_OKINA_SSE){
@@ -332,15 +331,15 @@ hooks* okina(nablaMain *nabla){
     nabla->call->parallel=&okinaOpenMP;
 
   // Hook des directions
-  if (nabla->option==BACKEND_OPTION_OKINA_SSE) nabla->hook->xyz=&xyzSse;  
-  if (nabla->option==BACKEND_OPTION_OKINA_AVX) nabla->hook->xyz=&xyzAvx;  
-  if (nabla->option==BACKEND_OPTION_OKINA_AVX2) nabla->hook->xyz=&xyzAvx;  
-  if (nabla->option==BACKEND_OPTION_OKINA_MIC) nabla->hook->xyz=&xyzMic;
-  if (nabla->option==BACKEND_OPTION_OKINA_AVX512) nabla->hook->xyz=&xyz512;
+  if (nabla->option==BACKEND_OPTION_OKINA_SSE) okinaHooks.xyz=&xyzSse;  
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX) okinaHooks.xyz=&xyzAvx;  
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX2) okinaHooks.xyz=&xyzAvx;  
+  if (nabla->option==BACKEND_OPTION_OKINA_MIC) okinaHooks.xyz=&xyzMic;
+  if (nabla->option==BACKEND_OPTION_OKINA_AVX512) okinaHooks.xyz=&xyz512;
 
   // Hook between ICC or GCC pragmas
-      if (nabla->compiler==BACKEND_COMPILER_ICC)
-    nabla->hook->pragma=&pragmaICC;
+  if (nabla->compiler==BACKEND_COMPILER_ICC)
+    okinaHooks.pragma=&pragmaICC;
 
   return &okinaHooks;
 }

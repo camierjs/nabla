@@ -162,28 +162,27 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
                                  char *service_name){
   astNode *root=NULL;  
   if(!(yyin=fopen(npFileName,"r")))
-    return NABLA_ERROR | dbg("\n[nablaParsing] Could not open '%s' file",
+    return NABLA_ERROR | dbg("\n\t[nablaParsing] Could not open '%s' file",
                              npFileName);
   dbg("\n* nablaParsing");
-  dbg("\n[nablaParsing] Starting parsing");
+  dbg("\n\t[nablaParsing] Starting parsing");
   if (yyparse(&root)){
     fclose(yyin);
-    return NABLA_ERROR | dbg("\n[nablaParsing] Error while parsing!");
+    return NABLA_ERROR | dbg("\n\t[nablaParsing] Error while parsing!");
   }
-  dbg("\n[nablaParsing] Closing & Quit");
+  dbg("\n\t[nablaParsing] Closing & Quit");
   fclose (yyin);
-  dbg("\n[nablaParsing] On scan l'arbre pour transformer les tokens en UTF8");
-  dfsUtf8(root);
+  
   if (optionDumpTree!=0){
-    dbg("\n[nablaParsing] On dump l'arbre créé");
+    dbg("\n\t[nablaParsing] On dump l'arbre créé");
     astTreeSave(nabla_entity_name, root);
   }
   // Initial files setup and checkup
   if (nabla_entity_name==NULL)
     return NABLA_ERROR | dbg("\n[nccParseur] No entity name has been set!");
-  dbg("\n[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
-  dbg("\n[nablaParsing] nabla_input_file=%s", nabla_input_file);
-  dbg("\n[nablaParsing] Now launching nablaMiddlendSwitch");
+  dbg("\n\t[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
+  dbg("\n\t[nablaParsing] nabla_input_file=%s", nabla_input_file);
+  dbg("\n\t[nablaParsing] Now launching nablaMiddlendSwitch");
   return nMiddleSwitch(root,
                        optionDumpTree,
                        nabla_entity_name,
@@ -207,11 +206,11 @@ static int sysPreprocessor(const char *nabla_entity_name,
   char *gcc_command=NULL;
   int cat_sed_temporary_fd=0;
   
-  if ((cat_sed_temporary_file_name = malloc(size))==NULL)
-    nablaError("[sysPreprocessor] Could not malloc cat_sed_temporary_file_name!");
+  if ((cat_sed_temporary_file_name = (char*)calloc(size,sizeof(char)))==NULL)
+    nablaError("[sysPreprocessor] Could not calloc cat_sed_temporary_file_name!");
   
-  if ((gcc_command = malloc(size))==NULL)
-    nablaError("[sysPreprocessor] Could not malloc gcc_command!");
+  if ((gcc_command = (char*)calloc(size,sizeof(char)))==NULL)
+    nablaError("[sysPreprocessor] Could not calloc gcc_command!");
   
   // On crée un fichier temporaire où l'on va:
   //    - cat'er les différents fichiers .n et en initialisant le numéro de ligne
@@ -242,11 +241,11 @@ static int sysPreprocessor(const char *nabla_entity_name,
            cat_sed_temporary_file_name,
            unique_temporary_file_name
            );
-  dbg("\n[sysPreprocessor] gcc_command=%s", gcc_command);
+  dbg("\n\t[sysPreprocessor] gcc_command=%s", gcc_command);
   if (system(gcc_command)<0)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while preprocessing!\n"));
+    exit(NABLA_ERROR|fprintf(stderr, "\n\t[sysPreprocessor] Error while preprocessing!\n"));
   if (unlink(cat_sed_temporary_file_name)<0)
-    exit(NABLA_ERROR|fprintf(stderr, "\n[sysPreprocessor] Error while unlinking sed file!\n"));
+    exit(NABLA_ERROR|fprintf(stderr, "\n\t[sysPreprocessor] Error while unlinking sed file!\n"));
   return NABLA_OK;
 }
  
@@ -265,8 +264,8 @@ static void nablaPreprocessor(char *nabla_entity_name,
                       unique_temporary_file_fd)!=0)
     exit(NABLA_ERROR|
          fprintf(stderr,
-                 "\n[nablaPreprocessor] Error in preprocessor stage\n"));
-  dbg("\n[nablaPreprocessor] done!");
+                 "\n\t[nablaPreprocessor] Error in preprocessor stage\n"));
+  dbg("\n\t[nablaPreprocessor] done!");
 }
 
 
@@ -348,28 +347,28 @@ int main(int argc, char * argv[]){
       // ************************************************************      
     case 't': // DUMP tree option
       optionDumpTree=OPTION_TIME_DOT_STD;
-      dbg("\n[nabla] Command line specifies to dump the tree");
+      dbg("\n\t[nabla] Command line specifies to dump the tree");
       break;
     case OPTION_TIME_DOT_MMA:
       optionDumpTree=OPTION_TIME_DOT_MMA;
-      dbg("\n[nabla] Command line specifies to dump the MMA tree");
+      dbg("\n\t[nabla] Command line specifies to dump the MMA tree");
       break;
     case 'v': // DEBUG MANAGEMENT
       if (dbgSet(DBG_ALL) == DBG_OFF) return NABLA_ERROR;
       dbgOpenTraceFile(optarg);
-      dbg("* Command line\n"); // org mode first item
-      dbg("[nabla] Command line specifies debug file: %s", optarg);
+      dbg("* Command line"); // org mode first item
+      dbg("\n\t[nabla] Command line specifies debug file: %s", optarg);
       break;      
       // ************************************************************
       // * INPUT FILES
       // ************************************************************      
     case 'i':
       strcat(input_file_list,optarg);
-      dbg("\n[nabla] first input_file_list: %s ", input_file_list);
+      dbg("\n\t[nabla] first input_file_list: %s ", input_file_list);
       while (optind < argc){
         input_file_list=strcat(input_file_list," ");
         input_file_list=strcat(input_file_list,argv[optind++]);
-        dbg("\n[nabla] next input_file_list: %s ", input_file_list);
+        dbg("\n\t[nabla] next input_file_list: %s ", input_file_list);
       }
       break;
       // ************************************************************
@@ -379,58 +378,58 @@ int main(int argc, char * argv[]){
       // ************************************************************      
     case BACKEND_ARCANE:
       backend=BACKEND_ARCANE;
-      dbg("\n[nabla] Command line hits target ARCANE (%s)",
+      dbg("\n\t[nabla] Command line hits target ARCANE (%s)",
           longopts[longindex].name);
       break;
     case BACKEND_OPTION_ARCANE_ALONE:
       option=BACKEND_OPTION_ARCANE_ALONE;
-      dbg("\n[nabla] Command line specifies ARCANE's STAND-ALONE option");
+      dbg("\n\t[nabla] Command line specifies ARCANE's STAND-ALONE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case BACKEND_OPTION_ARCANE_FAMILY:
       option=BACKEND_OPTION_ARCANE_FAMILY;
-      dbg("\n[nabla] Command line specifies ARCANE's FAMILY option");
+      dbg("\n\t[nabla] Command line specifies ARCANE's FAMILY option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case BACKEND_OPTION_ARCANE_MODULE:
       option=BACKEND_OPTION_ARCANE_MODULE;
-      dbg("\n[nabla] Command line specifies ARCANE's MODULE option");
+      dbg("\n\t[nabla] Command line specifies ARCANE's MODULE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case BACKEND_OPTION_ARCANE_SERVICE:
       option=BACKEND_OPTION_ARCANE_SERVICE;
-      dbg("\n[nabla] Command line specifies ARCANE's SERVICE option");
+      dbg("\n\t[nabla] Command line specifies ARCANE's SERVICE option");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new ARCANE nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case 'p': // specific path to source directory for a module or a service
       specific_path=optarg;
-      dbg("\n[nabla] Command line specifies ARCANE's path: %s",
+      dbg("\n\t[nabla] Command line specifies ARCANE's path: %s",
           specific_path);
       break;
     case 'I': // Interface name
       interface_name=optarg;
-      dbg("\n[nabla] Command line specifies ARCANE's SERVICE interface name: %s",
+      dbg("\n\t[nabla] Command line specifies ARCANE's SERVICE interface name: %s",
           interface_name);
       break;
     case 'n': // Service name
       service_name=optarg;
-      dbg("\n[nabla] Command line specifies ARCANE's SERVICE service name: %s",
+      dbg("\n\t[nabla] Command line specifies ARCANE's SERVICE service name: %s",
           service_name);
       break;
       // ************************************************************
@@ -441,80 +440,80 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_OKINA:
       backend=BACKEND_OKINA;
-      dbg("\n[nabla] Command line hits long option %s",
+      dbg("\n\t[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new OKINA nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new OKINA nabla_entity_name: %s",
           nabla_entity_name);
       break;
     case BACKEND_OPTION_OKINA_STD:
       assert(option==0);
       option=BACKEND_OPTION_OKINA_STD;
-      dbg("\n[nabla] Command line specifies OKINA's STD option");
+      dbg("\n\t[nabla] Command line specifies OKINA's STD option");
       break;
     case BACKEND_OPTION_OKINA_SSE:
        assert(option==0);
      option=BACKEND_OPTION_OKINA_SSE;
-      dbg("\n[nabla] Command line specifies OKINA's SSE option");
+      dbg("\n\t[nabla] Command line specifies OKINA's SSE option");
       break;
     case BACKEND_OPTION_OKINA_AVX:
       assert(option==0);
       option|=BACKEND_OPTION_OKINA_AVX;
-      dbg("\n[nabla] Command line specifies OKINA's AVX option");
+      dbg("\n\t[nabla] Command line specifies OKINA's AVX option");
       break;
     case BACKEND_OPTION_OKINA_AVX2:
       assert(option==0);
       option=BACKEND_OPTION_OKINA_AVX2;
-      dbg("\n[nabla] Command line specifies OKINA's AVX2 option");
+      dbg("\n\t[nabla] Command line specifies OKINA's AVX2 option");
       break;
     case BACKEND_OPTION_OKINA_AVX512:
       assert(option==0);
       option=BACKEND_OPTION_OKINA_AVX512;
-      dbg("\n[nabla] Command line specifies OKINA's AVX512 option");
+      dbg("\n\t[nabla] Command line specifies OKINA's AVX512 option");
       break;
     case BACKEND_OPTION_OKINA_MIC:
       assert(option==0);
       option=BACKEND_OPTION_OKINA_MIC;
-      dbg("\n[nabla] Command line specifies OKINA's MIC option");
+      dbg("\n\t[nabla] Command line specifies OKINA's MIC option");
       break;
     case BACKEND_PARALLELISM_CILK:
       assert(parallelism==0);
       parallelism=BACKEND_PARALLELISM_CILK;
-      dbg("\n[nabla] Command line specifies OKINA's CILK option");
+      dbg("\n\t[nabla] Command line specifies OKINA's CILK option");
       break;
     case BACKEND_PARALLELISM_OMP:
       assert(parallelism==0);
       parallelism=BACKEND_PARALLELISM_OMP;
-      dbg("\n[nabla] Command line specifies OKINA's OpenMP option");
+      dbg("\n\t[nabla] Command line specifies OKINA's OpenMP option");
       break;
     case BACKEND_PARALLELISM_SEQ:
       assert(parallelism==0);
       parallelism=BACKEND_PARALLELISM_SEQ;
-      dbg("\n[nabla] Command line specifies OKINA's SEQ option");
+      dbg("\n\t[nabla] Command line specifies OKINA's SEQ option");
       break;
     case BACKEND_COMPILER_GCC:
       assert(compiler==0);
       compiler=BACKEND_COMPILER_GCC;
-      dbg("\n[nabla] Command line specifies OKINA's GCC option");
+      dbg("\n\t[nabla] Command line specifies OKINA's GCC option");
       break;
     case BACKEND_COMPILER_ICC:
       assert(compiler==0);
       compiler=BACKEND_COMPILER_ICC;
-      dbg("\n[nabla] Command line specifies OKINA's ICC option");
+      dbg("\n\t[nabla] Command line specifies OKINA's ICC option");
       break;
       // ************************************************************
       // * BACKEND CUDA avec aucune variantes pour l'instant
       // ************************************************************
     case BACKEND_CUDA:
       backend=BACKEND_CUDA;
-      dbg("\n[nabla] Command line hits long option %s",
+      dbg("\n\t[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new CUDA nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new CUDA nabla_entity_name: %s",
           nabla_entity_name);
       break;
       // ************************************************************
@@ -522,12 +521,12 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_LAMBDA:
       backend=BACKEND_LAMBDA;
-      dbg("\n[nabla] Command line hits long option %s",
+      dbg("\n\t[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new LAMBDA nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new LAMBDA nabla_entity_name: %s",
           nabla_entity_name);
       break;    
       // ************************************************************
@@ -535,12 +534,12 @@ int main(int argc, char * argv[]){
       // ************************************************************
     case BACKEND_KOKKOS:
       backend=BACKEND_KOKKOS;
-      dbg("\n[nabla] Command line hits long option %s",
+      dbg("\n\t[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
-      dbg("\n[nabla] Command line specifies new KOKKOS nabla_entity_name: %s",
+      dbg("\n\t[nabla] Command line specifies new KOKKOS nabla_entity_name: %s",
           nabla_entity_name);
       break;      
       // ************************************************************
@@ -548,14 +547,14 @@ int main(int argc, char * argv[]){
       // ************************************************************
       /*case BACKEND_LIBRARY:
       backend=BACKEND_LIBRARY;
-      dbg("\n[nabla] LIBRARY BACKEND WIP!");
+      dbg("\n\t[nabla] LIBRARY BACKEND WIP!");
       exit(NABLA_ERROR);*/ 
       // ************************************************************
       // * BACKEND RAJA en cours de construction
       // ************************************************************
     case BACKEND_RAJA:
       backend=BACKEND_RAJA;
-      dbg("\n[nabla] RAJA BACKEND WIP!");
+      dbg("\n\t[nabla] RAJA BACKEND WIP!");
       nabla_entity_name=optarg;
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
@@ -565,61 +564,61 @@ int main(int argc, char * argv[]){
       // ************************************************************
       /*case BACKEND_LOCI:
       backend=BACKEND_LOCI;
-      dbg("\n[nabla] LOCI BACKEND WIP!");
+      dbg("\n\t[nabla] LOCI BACKEND WIP!");
       exit(NABLA_ERROR);*/
        // ************************************************************
       // * BACKEND UINTAH en cours de construction
       // ************************************************************
       /*case BACKEND_UINTAH:
       backend=BACKEND_UINTAH;
-      dbg("\n[nabla] UINTAH BACKEND WIP!");
+      dbg("\n\t[nabla] UINTAH BACKEND WIP!");
       exit(NABLA_ERROR);*/
       // ************************************************************
       // * BACKEND MMA en cours de construction
       // ************************************************************
       /*case BACKEND_MMA:
       backend=BACKEND_MMA;
-      dbg("\n[nabla] MMA BACKEND WIP!");
+      dbg("\n\t[nabla] MMA BACKEND WIP!");
       exit(NABLA_ERROR);*/
       // ************************************************************
       // * BACKEND VHDL en cours de construction
       // ************************************************************
       /*case BACKEND_VHDL:
       backend=BACKEND_VHDL;
-      dbg("\n[nabla] VHDLBACKEND WIP!");
+      dbg("\n\t[nabla] VHDLBACKEND WIP!");
       exit(NABLA_ERROR);*/
       // ************************************************************
       // * UNKNOWN OPTIONS
       // ************************************************************      
     case '?':
-      dbg("\n[nabla] UNKNOWN OPTIONS");
+      dbg("\n\t[nabla] UNKNOWN OPTIONS");
       if ((optopt>(int)'A')&&(optopt<(int)'z'))
-        fprintf (stderr, "\n[nabla] Unknown option `-%c'.\n", optopt);
-      else fprintf (stderr, "\n[nabla] Unknown option character `\\%d'.\n", optopt);
+        fprintf (stderr, "\n\t[nabla] Unknown option `-%c'.\n", optopt);
+      else fprintf (stderr, "\n\t[nabla] Unknown option character `\\%d'.\n", optopt);
       exit(NABLA_ERROR);
-    default: exit(NABLA_ERROR|fprintf(stderr, "\n[nabla] Error in command line\n"));
+    default: exit(NABLA_ERROR|fprintf(stderr, "\n\t[nabla] Error in command line\n"));
     }
   }
   
   if (nabla_entity_name==NULL)
     exit(NABLA_ERROR|
          fprintf(stderr,
-                 "\n[nabla] Error with entity name!\n"));
+                 "\n\t[nabla] Error with entity name!\n"));
 
   if (backend==0)
     exit(NABLA_ERROR|
          fprintf(stderr,
-                 "\n[nabla] Error with target switch!\n"));
+                 "\n\t[nabla] Error with target switch!\n"));
  
   if (unique_temporary_file_fd==0)
     exit(NABLA_ERROR|
          fprintf(stderr,
-                 "\n[nabla] Error with unique temporary file\n"));
+                 "\n\t[nabla] Error with unique temporary file\n"));
   
   if (input_file_list==NULL)
     exit(NABLA_ERROR|
          fprintf(stderr,
-                 "\n[nabla] Error in input_file_list\n"));
+                 "\n\t[nabla] Error in input_file_list\n"));
 
   // On a notre fichier temporaire et la listes des fichiers ∇ à parser
   nablaPreprocessor(nabla_entity_name,
@@ -627,7 +626,7 @@ int main(int argc, char * argv[]){
                     unique_temporary_file_name,
                     unique_temporary_file_fd);
 
-  dbg("\n[nabla] Now triggering nablaParsing with these options");
+  dbg("\n\t[nabla] Now triggering nablaParsing with these options");
   if (nablaParsing(nabla_entity_name?nabla_entity_name:argv[argc-1],
                    optionDumpTree,
                    unique_temporary_file_name,

@@ -429,28 +429,28 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     switch(tokenid){
     case(CELL):{
       job->parse.enum_enum='c';
-      if (support=='c') nprintf(arc, NULL, "ENUMERATE_SUB_ITEM(Cell,cc,cell)");
-      if (support=='n') nprintf(arc, NULL, "for(CellEnumerator c(node->cells()); c.hasNext(); ++c)\n\t\t\t");
+      if (support=='c') nprintf(arc,NULL,"ENUMERATE_SUB_ITEM(Cell,cc,cell)");
+      if (support=='n') nprintf(arc,NULL,"for(CellEnumerator c(node->cells()); c.hasNext(); ++c)\n\t\t\t");
       break;
     }
     case(FACE):{
       job->parse.enum_enum='f';
-      if (support=='c') nprintf(arc, NULL, "for(FaceEnumerator f(cell->faces()); f.hasNext(); ++f)\n\t\t\t");
-      if (support=='n') nprintf(arc, NULL, "for(FaceEnumerator f(node->faces()); f.hasNext(); ++f)\n\t\t\t");
+      if (support=='c') nprintf(arc,NULL,"for(FaceEnumerator f(cell->faces()); f.hasNext(); ++f)\n\t\t\t");
+      if (support=='n') nprintf(arc,NULL,"for(FaceEnumerator f(node->faces()); f.hasNext(); ++f)\n\t\t\t");
       break;
     }
     case(NODE):{
       job->parse.enum_enum='n';
-      if (support=='c') nprintf(arc, NULL, "for(NodeEnumerator n(cell->nodes()); n.hasNext(); ++n)\n\t\t\t");
-      if (support=='f') nprintf(arc, NULL, "for(NodeEnumerator n(face->nodes()); n.hasNext(); ++n)\n\t\t\t");
+      if (support=='c') nprintf(arc,NULL,"for(NodeEnumerator n(cell->nodes()); n.hasNext(); ++n)\n\t\t\t");
+      if (support=='f') nprintf(arc,NULL,"for(NodeEnumerator n(face->nodes()); n.hasNext(); ++n)\n\t\t\t");
       break;
     }
     case(PARTICLE):{
       job->parse.enum_enum='p';
       if (iterator==NULL)
-        nprintf(arc, NULL, "for(ParticleEnumerator p(cellParticles(cell->localId())); p.hasNext(); ++p)");
+        nprintf(arc,NULL,"for(ParticleEnumerator p(cellParticles(cell->localId())); p.hasNext(); ++p)");
       else
-        nprintf(arc, NULL, "for(ParticleEnumerator p(cellParticles(%s->localId())); p.hasNext(); ++p)",iterator);
+        nprintf(arc,NULL,"for(ParticleEnumerator p(cellParticles(%s->localId())); p.hasNext(); ++p)",iterator);
       break;
     }
       //case (MATERIAL): break;
@@ -460,7 +460,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     // Attention au cas où on a un @ au lieu d'un statement
     if (n->next->next->tokenid == AT)
       nprintf(arc, "/* Found AT */", "knAt");
-    // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
+#warning Skip du 'nabla_item' qui renseigne sur le type de forall
     *n=*n->next->next;
     break;
   }

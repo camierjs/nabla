@@ -2,15 +2,15 @@ NABLA = ${NABLA_BINARY_DIR}/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
-SIMD = std
-PARALLEL = seq
+SIMD ?= std
+PARALLEL ?= seq
 
 BYFL_FLAGS  = #-bf-verbose #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
 
 AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
 SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall -DNO_SSE2 -mno-avx  #-fPIC
 
-LOG = -tnl #-v $(TGT).log
+LOG ?= -tnl #-v $(TGT).log
 
 PARALLEL_omp_FLAGS = -fopenmp
 PARALLEL_cilk_FLAGS = #-fcilkplus
@@ -28,7 +28,7 @@ LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmp
 all:$(TGT) $(NABLA) 
 
 $(TGT).cc: $(TGT_FILE) $(NABLA)
-	$(NABLA) $(LOG) --lambda $(TGT) --std --$(PARALLEL) -i $(TGT_FILE) #--$(COLORS)
+	$(NABLA) $(LOG) --lambda $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
 
 $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o

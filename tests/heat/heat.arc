@@ -10,7 +10,7 @@
      <end-execution-output>0</end-execution-output>
 	  <output-period>0</output-period>
 		<output>
-		  <variable>cell_th</variable>
+		  <variable>cell_greek_theta</variable>
         <group>AllCells</group>
  		</output>
 	</arcane-post-processing>

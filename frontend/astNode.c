@@ -45,9 +45,15 @@
 // ****************************************************************************
 // * astNewNode
 // ****************************************************************************
-astNode *astNewNode(void) {
+astNode *astNewNode(char *token, const unsigned int tokenid) {
   astNode *n = (astNode*)calloc(1,sizeof(astNode));
-  assert(n != NULL);
+  assert(n);
+  n->tokenid=tokenid;
+  if (token==NULL) return n;
+  //dbg("\n\t[astNewNode] Non-Empty UTF8 Token: ('%s',#%d)", token, tokenid);
+  n->token_utf8=strdup(token);
+  n->token=utf2ascii(n->token_utf8);
+  dbg("\n\t[astNewNode] Non-Empty ASCII Token: ('%s',#%d)", n->token, tokenid);
   return n; 
 }
 
@@ -55,11 +61,11 @@ astNode *astNewNode(void) {
 // ****************************************************************************
 // * astNewNodeRule
 // ****************************************************************************
-astNode *astNewNodeRule(const char *rule, unsigned int yyn) {
-  astNode *n=astNewNode();
+astNode *astNewNodeRule(const char *rule, unsigned int ruleid) {
+  astNode *n=astNewNode(NULL,0);
   assert(rule != NULL);
   n->rule = rule; 
-  n->ruleid = yyn;   
+  n->ruleid = ruleid;   
   return n;
 }
 

@@ -238,7 +238,7 @@ const static hookMain mains={
   kHookMainPostfix
 };  
 
-const static hooks kokkosHooks={
+static hooks kokkosHooks={
   &forall,
   &token,
   &gram,
@@ -256,7 +256,7 @@ const static hooks kokkosHooks={
 // ****************************************************************************
 // * kokkos
 // ****************************************************************************
-const hooks* kokkos(nablaMain *nabla){
+hooks* kokkos(nablaMain *nabla){
   nabla->call=&calls;
   return &kokkosHooks;
 }

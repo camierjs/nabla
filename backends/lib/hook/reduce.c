@@ -47,15 +47,15 @@
 // * hookReduction
 // ****************************************************************************
 void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  const astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
+  astNode *item_node = dfsFetch(n->children,rulenameToId("nabla_items"));
   assert(item_node);
-  const astNode *global_var_node = n->children->next;
-  const astNode *reduction_operation_node = global_var_node->next;
-  const astNode *item_var_node = reduction_operation_node->next;
+  astNode *global_var_node = n->children->next;
+  astNode *reduction_operation_node = global_var_node->next;
+  astNode *item_var_node = reduction_operation_node->next;
   astNode *at_single_cst_node = dfsFetch(n->children->next, rulenameToId("at_constant"));
   assert(at_single_cst_node!=NULL);
-  char *global_var_name = global_var_node->token;
-  char *item_var_name = item_var_node->token;
+  const char *global_var_name = global_var_node->token;
+  const char *item_var_name = item_var_node->token;
 
 
   // Rajout du job de reduction

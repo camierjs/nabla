@@ -11,13 +11,13 @@
      <!--format name="Ensight7PostProcessor"/-->
 	  <output-period>0</output-period>
 	  <output>
-		  <variable>cell_cell_th</variable>
-		  <variable>cell_cell_th_diff</variable>
+		  <variable>cell_cell_greek_theta</variable>
+		  <variable>cell_cell_greek_theta_diff</variable>
 		  <!--variable>cell_cell_exact_solution</variable-->
 		  <!--variable>cell_cell_sd_id</variable-->
 		  <!--variable>cell_cell_th_kp1mk</variable-->
-		  <variable>node_node_th</variable>
-		  <variable>node_node_th_diff</variable>
+		  <variable>node_node_greek_theta</variable>
+		  <variable>node_node_greek_theta_diff</variable>
 		  <!--variable>node_node_unique_id</variable-->
 		  <!--variable>node_node_exact_solution</variable-->
 		  <!--variable>node_node_sd_id</variable-->
@@ -52,7 +52,7 @@
 
    <p-d-d-f-v>
      <!--option_dtt_ini>0.01</option_dtt_ini--> <!-- 10: 9.285e-01 -->
-     <option_dtt_ini>1.0</option_dtt_ini> <!-- 20: -->
+     <option_greek_deltat_ini>1.0</option_greek_deltat_ini> <!-- 20: -->
      <!--option_dtt_ini>0.000625</option_dtt_ini--> <!-- 40: -->
      
       <!-- Maillage Triangles ou Quads -->
@@ -88,11 +88,11 @@
      <option_isotropic>true</option_isotropic>
 
      <option_k>1.0</option_k>
-     <option_th>0.0</option_th><!-- 0.52359877559829887308 -->
+     <option_greek_theta>0.0</option_greek_theta><!-- 0.52359877559829887308 -->
 
-     <option_spin_th>false</option_spin_th>
-     <option_spin_th_x>3.0</option_spin_th_x>
-     <option_spin_th_y>3.0</option_spin_th_y>
+     <option_spin_greek_theta>false</option_spin_greek_theta>
+     <option_spin_greek_theta_x>3.0</option_spin_greek_theta_x>
+     <option_spin_greek_theta_y>3.0</option_spin_greek_theta_y>
 
      <option_ini_temperature>0.0</option_ini_temperature>
      <option_PartMg_temperature>0.0</option_PartMg_temperature>

@@ -183,7 +183,7 @@ static hooks lambdaHooks={
 // ****************************************************************************
 // * lambda
 // ****************************************************************************
-const hooks* lambda(nablaMain *nabla){
+hooks* lambda(nablaMain *nabla){
   nabla->call=&calls;
   return &lambdaHooks;
 }

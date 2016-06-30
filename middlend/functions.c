@@ -152,13 +152,14 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
           nprintf(nabla, NULL,
-                  "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",support,support,support,support);
+                  "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",
+                  support,support,support,support);
         break;
       }
       default: nablaError("[nablaFunctionParse] Could not distinguish FORALL!");
       }
-      // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
-      *n=*n->next->next;
+//#warning On skip le nabla_item qui renseigne sur le type de forall
+      //n=n->next->next;
       break;
     }
 
@@ -272,11 +273,9 @@ void nMiddleFunctionFill(nablaMain *nabla,
                          astNode *n,
                          const char *namespace){
   int numParams;
-  astNode *nFctName;
-  astNode *nParams;
   fct->jobNode=n;
   fct->called_variables=NULL;
-  nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
+  astNode *nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
   assert(nFctName->children->tokenid==IDENTIFIER);
   dbg("\n* Fonction '%s'", nFctName->children->token); // org-mode function item
   dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
@@ -312,7 +311,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
 
   // Récupération de la liste des paramètres
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
-  nParams=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  astNode *nParams=dfsFetch(n->children,rulenameToId("parameter_type_list"));
   fct->stdParamsNode=nParams->children;
   
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",

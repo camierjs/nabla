@@ -144,7 +144,7 @@ __asm__           { return tok(&yylval, ASM);}
 "particles"			{ return tok(&yylval, PARTICLES);}
 "options"		   { return tok(&yylval, OPTIONS);}
 
-"ℝ³⨯ℝ³"	         { return tok(&yylval, REAL3x3);}
+"ℝ³ˣ³"	         { return tok(&yylval, REAL3x3);}
 "ℝ³"			      { return tok(&yylval, REAL3);}
 "ℝ²"			      { return tok(&yylval, REAL2);}
 "ℝ"			      { return tok(&yylval, REAL);}
@@ -364,16 +364,14 @@ loop:
 // * Tokenizer
 // ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
-  //dbg("\n[astNewNode] line %d: '%s' (%d)", yylineno, yytext, tokenid);
+  dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
   if (tokenid==PREPROCS){
     long line_jump=atol(yytext+1);
     assert(line_jump>0);
-    //dbg("\n[astNewNode] preprocs: line_jump=%d and yylineno=%d", line_jump, yylineno);
+    dbg("\n\t\t[tok] PREPROCS: line_jump=%d and yylineno=%d", line_jump, yylineno);
     yylineno=line_jump-1;
   }
-  (*yylval) = astNewNode();
-  (*yylval)->token=strdup(yytext);
-  (*yylval)->tokenid=tokenid;
+  (*yylval) = astNewNode(yytext,tokenid);
   return tokenid;
 }
 
@@ -382,21 +380,19 @@ static int tok(YYSTYPE *yylval, int tokenid){
 // *
 // ****************************************************************************
 static int tok_type(YYSTYPE *yylval){
-  (*yylval) = astNewNode();
-  (*yylval)->token=strdup(yytext);
-  last_identifier=strdup(yytext);
+  //last_identifier=strdup(yytext);
   //dbg("\n\t[tok_type] last_identifier is %s!",yytext);
   // On check s'il est déjà connu comme TYPEDEF_NAME
   if (nMiddleTypeFindName(typedef_names,yytext)!=NULL){
     dbg("\n\t[tok_type] TYPEDEF_NAME: %s <=> known type!",yytext);
-    (*yylval)->tokenid=TYPEDEF_NAME;
+    (*yylval) = astNewNode(yytext,TYPEDEF_NAME);
     return TYPEDEF_NAME;
   }
   if (strstr(yytext,"__builtin")!=NULL){
     dbg("\n\t[tok_type] BUILTIN TYPE: %s!",yytext);
-    (*yylval)->tokenid=TYPEDEF_NAME;
+    (*yylval) = astNewNode(yytext,TYPEDEF_NAME);
     return TYPEDEF_NAME;
   }
-  (*yylval)->tokenid=IDENTIFIER;
+  (*yylval) = astNewNode(yytext,IDENTIFIER);
   return IDENTIFIER;
 }

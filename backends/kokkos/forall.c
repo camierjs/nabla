@@ -50,15 +50,15 @@ char* kHookForAllDump(nablaJob *job){
   const char *grp=job->scope;   // OWN||ALL
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  dbg("\n\t\t[lambdaHookSelectEnumerate] function?");
+  dbg("\n\t\t[kokkosHookSelectEnumerate] function?");
   if (itm=='\0') return "\n";
-  dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
+  dbg("\n\t\t[kokkosHookSelectEnumerate] cell?");
   if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE(p)";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL(c)";
   if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL(c)";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_CELL(c)";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_CELL(c)";
-  dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
+  dbg("\n\t\t[kokkosHookSelectEnumerate] node?");
   if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE(n)";
   if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
   if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
@@ -66,7 +66,7 @@ char* kHookForAllDump(nablaJob *job){
   if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "FOR_EACH_NODE(n)";
   if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
   if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
-  dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
+  dbg("\n\t\t[kokkosHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
   if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE(f)";
   if (itm=='f' && grp==NULL && rgn[0]=='i')   return "FOR_EACH_INNER_FACE(of)";
   if (itm=='f' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_FACE(of)";
@@ -74,7 +74,7 @@ char* kHookForAllDump(nablaJob *job){
   if (itm=='f' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_FACE(f)";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return "FOR_EACH_OWN_OUTER_FACE(of)";
   if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return "FOR_EACH_OWN_INNER_FACE(of)";
-  dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
+  dbg("\n\t\t[kokkosHookSelectEnumerate] Could not distinguish ENUMERATE!");
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }

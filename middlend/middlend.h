@@ -107,8 +107,8 @@ typedef struct nablaTypeStruct{
 // ****************************************************************************
 typedef struct nablaOptionStruct{
   bool axl_it;
-  const char *type; // int, Real, Real3, etc.
-  const char *name; // son nom
+  char *type; // int, Real, Real3, etc.
+  char *name; // son nom
   char *dflt; // sa valeur par défault
   struct nablaMainStruct *main;
   struct nablaOptionStruct *next;
@@ -242,6 +242,7 @@ typedef struct nablaEntityStruct{
 // Nabla MAIN struct
 // ****************************************************************************
 typedef struct nablaMainStruct{
+  astNode *root;
   FILE *main, *cfg, *axl, *dot;
   const char *name;
   char *tmpVarKinds;
@@ -316,7 +317,7 @@ int nMiddleDumpParameterTypeList(nablaMain*,FILE*,astNode*);
 nablaJob *nMiddleJobNew(nablaEntity*);
 nablaJob *nMiddleJobAdd(nablaEntity*,nablaJob*);
 nablaJob *nMiddleJobLast(nablaJob*);
-nablaJob *nMiddleJobFind(nablaJob*,char*);
+nablaJob *nMiddleJobFind(nablaJob*,const char*);
 void nMiddleJobParse(astNode*,nablaJob*);
 void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
 
@@ -324,7 +325,7 @@ void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
 nablaVariable *nMiddleVariableNew(nablaMain*);
 nablaVariable *nMiddleVariableAdd(nablaMain*,nablaVariable*);
 nablaVariable *nMiddleVariableLast(nablaVariable*);
-nablaVariable *nMiddleVariableFind(nablaVariable*,char*);
+nablaVariable *nMiddleVariableFind(nablaVariable*,const char*);
 nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain*,nablaJob*,
                                                   nablaVariable*,const char*);
 what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
@@ -351,7 +352,7 @@ nablaType *nMiddleTypeFindName(nablaType*,char*);
 nablaOption *nMiddleOptionNew(nablaMain*);
 nablaOption *nMiddleOptionLast(nablaOption*);
 nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);
-nablaOption *nMiddleOptionFindName(nablaOption*,char*);
+nablaOption *nMiddleOptionFindName(nablaOption*,const char*);
 void nMiddleOptions(astNode*,int,nablaMain*);
 nablaOption *nMiddleTurnTokenToOption(astNode*,nablaMain*);
 
@@ -366,7 +367,9 @@ void nMiddleGrammar(astNode*,nablaMain*);
 void nMiddleInsertSpace(nablaMain*,astNode*);
 
 // nMiddle
-int nMiddleSwitch(astNode*,const int,const char*,
+int nMiddleSwitch(astNode*,
+                  const int,
+                  const char*,
                   const NABLA_BACKEND,
                   const BACKEND_OPTION,
                   const BACKEND_PARALLELISM,
@@ -394,7 +397,7 @@ NABLA_STATUS nMiddleTimeTreeSave(nablaMain*,nablaJob*,int);
 void nMiddleFunctionDumpHeader(FILE*,astNode*);
 void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
 
-NABLA_STATUS animate(nablaMain*,astNode*,struct hookStruct*);
+NABLA_STATUS animate(nablaMain*);
 
 void nMiddleArgsAddExtra(nablaMain*,int*);
 void nMiddleArgsAddGlobal(nablaMain*,nablaJob*,int*);

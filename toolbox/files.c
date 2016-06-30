@@ -46,10 +46,10 @@
 // * nablaMakeTempFile
 // *****************************************************************************
 int toolMkstemp(const char *entity_name, char **unique_temporary_file_name){
-  int n,size = NABLA_MAX_FILE_NAME;
-  if ((*unique_temporary_file_name=malloc(size))==NULL)
-    nablaError("[nablaMakeTempFile] Could not malloc our unique_temporary_file_name!");
-  n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
+  const int size = NABLA_MAX_FILE_NAME;
+  if ((*unique_temporary_file_name=calloc(size,sizeof(char)))==NULL)
+    nablaError("[nablaMakeTempFile] Could not calloc our unique_temporary_file_name!");
+  const int n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
   if (n > -1 && n < size)
     return mkstemp(*unique_temporary_file_name);
   nablaError("[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
@@ -75,13 +75,13 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
                                 const char *cat_sed_temporary_file_name){
   size_t size;
 //#warning BUFSIZ pour les anciens compilos/stations ?
-  char buf[BUFSIZ];
+  char *buf=(char*)calloc(BUFSIZ,sizeof(char));
   char *pointer_that_matches=NULL;
   char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
   FILE *cat_sed_temporary_file=NULL;
   
   printf("\r%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
-  dbg("\n[nToolFileCatAndHackIncludes] cat_sed_temporary_file_name is %s",
+  dbg("\n\t[nToolFileCatAndHackIncludes] cat_sed_temporary_file_name is %s",
       cat_sed_temporary_file_name);
   
   cat_sed_temporary_file=fopen(cat_sed_temporary_file_name,"w");
@@ -97,7 +97,7 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
       //printf("\n\tbuf: '%s'",buf);
       // On recherche les '#include' pour les transformer en ' include'
       while ((pointer_that_matches=strstr(buf,"#include"))!=NULL){
-        dbg("\n[nToolFileCatAndHackIncludes] '#include' FOUND! Hacking!");
+        dbg("\n\t[nToolFileCatAndHackIncludes] '#include' FOUND! Hacking!");
         *pointer_that_matches=' ';
       }
       fwrite(buf, 1, size, cat_sed_temporary_file);
@@ -105,6 +105,7 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
     assert(fclose(nabla_FILE)==0);
   }
   assert(fclose(cat_sed_temporary_file)==0);
+  free(buf);
   free(dup_list_of_nabla_files);
   return NABLA_OK;
 }

@@ -570,13 +570,8 @@ postfix_expression
 | FATAL '(' argument_expression_list ')' {rhs;}
 | postfix_expression '(' argument_expression_list ')'{
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
-  astNode *callNode=astNewNode();
-  // On DOIT laisser un token != NULL!
-  callNode->token=strdup("/*call*/");
-  callNode->tokenid=CALL;
-  astNode *argsNode=astNewNode();
-  argsNode->token=strdup("/*args*/");
-  argsNode->tokenid=END_OF_CALL;
+  astNode *callNode=astNewNode("/*call*/",CALL);
+  astNode *argsNode=astNewNode("/*args*/",END_OF_CALL);
   RHS($$,callNode,$1,$2,$3,argsNode,$4);
   }
 | postfix_expression '.' IDENTIFIER {rhs;}
@@ -890,7 +885,7 @@ with_library: WITH with_library_list ';'{rhs;};
 ///////////////
 nabla_grammar
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
-: INCLUDES {$1->token[0]='#';   {rhs;}}
+: INCLUDES {/*$1->token[0]='#';*/   {rhsPatch(0,'#');}}
 | preproc                       {rhs;}
 | with_library                  {rhs;}
 | declaration                   {rhs;}
@@ -1042,7 +1037,7 @@ int tokenToId(const char *token){
 // * Standard rhsTailSandwich
 // *****************************************************************************
 inline void rhsTailSandwich(astNode **lhs,int yyn,
-                            int left_token, int right_token, astNode* *yyvsp){
+                            int left_tokenid, int right_tokenid, astNode* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   // Le first est le nouveau noeud que l'on va insérer
@@ -1050,12 +1045,8 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare les 2 tokens à rajouter
-  astNode *left=astNewNode();
-  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
-  left->tokenid=left_token;
-  astNode *right=astNewNode();
-  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
-  right->tokenid=right_token;
+  astNode *left= astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  astNode *right=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1085,21 +1076,17 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,
 // * Variadic rhsTailSandwich
 // *****************************************************************************
 inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
-                                    int left_token, int right_token, ...){
+                                    int left_tokenid, int right_tokenid, ...){
   va_list args;
-  va_start(args, right_token);
+  va_start(args, right_tokenid);
   //("[1;33m[rhsTailSandwich] yynrhs=%d\n[m",yynrhs);
   // Le first est le nouveau noeud que l'on va insérer
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=va_arg(args,astNode*);
   // On prépare les 2 tokens à rajouter
-  astNode *left=astNewNode();
-  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
-  left->tokenid=left_token;
-  astNode *right=astNewNode();
-  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
-  right->tokenid=right_token;
+  astNode *left=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  astNode *right=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1148,6 +1135,17 @@ inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
     astAddNext(first,next);
   }
 }
+inline void rhsPatchAndAdd(const int offset, const char chr,astNode **lhs,int yyn, astNode* *yyvsp){
+  const int yynrhs = yyr2[yyn];
+  assert(yynrhs==1);
+  assert(yyvsp[0]->token);
+  // Sanity check & patch
+  // On échappe au const du token ici
+  char *token=(char*)yyvsp[0]->token;
+  token[offset]=chr;
+  dbg("[1;33m[rhsPatchAndAdd] yynrhs=%d, %s[m\n",yynrhs, yyvsp[0]->token);
+  rhsAdd(lhs,yyn, yyvsp);
+}
 
 
 // *****************************************************************************
@@ -1176,22 +1174,18 @@ inline void rhsAddVariadic(astNode **lhs,int yyn,int yynrhs,...){
 // * rhsYSandwich
 // *****************************************************************************
 inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
-                         int left_token,
-                         int right_token){
+                         int left_tokenid,
+                         int right_tokenid){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   // Le first est le nouveau noeud que l'on va insérer
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
-  astNode *left=astNewNode();
-  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
-  left->tokenid=left_token;
+  astNode *left=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare le token de droite à rajouter
-  astNode *right=astNewNode();
-  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
-  right->tokenid=right_token;
+  astNode *right=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1223,23 +1217,18 @@ inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
 // * Variadic rhsYSandwich
 // *****************************************************************************
 inline void rhsYSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
-                                 int left_token,
-                                 int right_token, ...){
+                                 int left_tokenid,int right_tokenid, ...){
   va_list args;
-  va_start(args, right_token);
+  va_start(args, right_tokenid);
   //printf("[1;33m[rhsYSandwich] yynrhs=%d\n[m",yynrhs);
   // Le first est le nouveau noeud que l'on va insérer
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
-  astNode *left=astNewNode();
-  left->token=toolStrQuote(strdup(yytname[YYTRANSLATE(left_token)]));
-  left->tokenid=left_token;
+  astNode *left=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
   // Le next pointe pour l'instant sur le premier noeud en argument
   astNode *next=va_arg(args,astNode*);
   // On prépare le token de droite à rajouter
-  astNode *right=astNewNode();
-  right->token=toolStrQuote(strdup(yytname[YYTRANSLATE(right_token)]));
-  right->tokenid=right_token;
+  astNode *right=astNewNode(toolStrQuote(strdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);

@@ -146,7 +146,7 @@ void xHookIteration(nablaMain *nabla){
 
 void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   nablaJob *foundJob;
-  char *callName=n->next->children->children->token;
+  const char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", NULL);//"/*xHookAddCallNames*/");
   fct->parse.function_call_name=NULL;
   if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){

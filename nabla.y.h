@@ -55,6 +55,7 @@
 // * Forward declarations
 // ****************************************************************************
 void rhsAdd(astNode**,int,astNode**);
+void rhsPatchAndAdd(const int, const char,astNode**,int,astNode**);
 void rhsYSandwich(astNode**,int,astNode**,int,int);
 void rhsTailSandwich(astNode**,int,int,int,astNode**);
 
@@ -67,6 +68,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Right Hand Side of the Grammar
 // ****************************************************************************
 #define rhs rhsAdd(&yyval,yyn,yyvsp)
+#define rhsPatch(i,chr) rhsPatchAndAdd(i,chr,&yyval,yyn,yyvsp)
 #define RHS(lhs, ...) rhsAddVariadic(&yyval,yyn,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
 
@@ -117,10 +119,8 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Yadrs and YadrsSandwich that uses tailSandwich
 // *****************************************************************************
 #define Yadrs(lhs,and,expr)                                           \
-  astNode *i=astNewNode();                                            \
-  i->tokenid=ADRS_IN;                                                 \
-  astNode *o=astNewNode();                                            \
-  o->tokenid=ADRS_OUT;                                                \
+  astNode *i=astNewNode(NULL,ADRS_IN);                                \
+  astNode *o=astNewNode(NULL,ADRS_OUT);                               \
   RHS(lhs,i,and,expr,o)
 #define YadrsSandwich(lhs,nd,expr)                                    \
   tailSandwich(ADRS_IN,ADRS_OUT,2,nd,expr)
@@ -130,57 +130,26 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Operations Sandwich
 // *****************************************************************************
 #define Yop3p(lhs, n1, op, n3)                                        \
-  astNode *nOp=astNewNode();                                          \
-  nOp->token=strdup(toolOpName(op->token));                           \
-  nOp->tokenid=op->tokenid;                                           \
-  astNode *pIn=astNewNode();                                          \
-  pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;              \
-  astNode *nComa=astNewNode();                                        \
-  nComa->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;          \
-  astNode *pOut=astNewNode();                                         \
-  pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');             \
+  astNode *nOp=astNewNode(toolOpName(op->token_utf8),op->tokenid);    \
+  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
+  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                    \
+  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
   RHS(lhs,nOp,pIn,n1,nComa,n3,pOut)
  
-#define Zop3p(lhs, n1, op, n3)                                        \
-  printf("\nyyn=%d, yyr1[yyn]=%d '%s' yytoken=%d %s\n",               \
-         yyn,yyr1[yyn],yytname[yyr1[yyn]],yytoken,yytname[yytoken]);  \
-  astNode *nOp=astNewNode();                                          \
-  nOp->token=strdup(toolOpName(op->token));                           \
-  nOp->tokenid=op->tokenid;                                           \
-  astNode *pIn=astNewNode();                                          \
-  pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;              \
-  astNode *nComa=astNewNode();                                        \
-  nComa->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;          \
-  astNode *pOut=astNewNode();                                         \
-  pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');             \
-  RHS(lhs,nOp,pIn,n1,nComa,n3,pOut)
-
-#define YopTernary5p(lhs, cond, question, ifState,doubleDot,elseState)  \
-  astNode *nOp=astNewNode();                                            \
-  nOp->token=strdup("opTernary");                                       \
-  nOp->tokenid=0;                                                       \
-  astNode *pIn=astNewNode();                                            \
-  pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;                \
-  astNode *nComa=astNewNode();                                          \
-  nComa->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;            \
-  astNode *nComa2=astNewNode();                                         \
-  nComa2->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;           \
-  astNode *pOut=astNewNode();                                           \
-  pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');               \
-  RHS(lhs,nOp,pIn,cond,nComa,ifState,nComa2,elseState,pOut)
+#define YopTernary5p(lhs,cond,qstn,if,doubleDot,else)                   \
+  astNode *nOp=astNewNode("opTernary",0);                               \
+  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                        \
+  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                      \
+  astNode *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
+  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
+  RHS(lhs,nOp,pIn,cond,nComa,if,nComa2,else,pOut)
 
 #define YopDuaryExpression(lhs,ident,op,cond,ifState)                   \
-  astNode *nOp=astNewNode();                                            \
-  nOp->token=strdup("opTernary");                                       \
-  nOp->tokenid=0;                                                       \
-  astNode *pIn=astNewNode();                                            \
-  pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(') ;                \
-  astNode *nComa=astNewNode();                                          \
-  nComa->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;            \
-  astNode *nComa2=astNewNode();                                         \
-  nComa2->token=strdup(",");nComa->tokenid=YYTRANSLATE(',') ;           \
-  astNode *pOut=astNewNode();                                           \
-  pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');               \
+  astNode *nOp=astNewNode("opTernary",0);                               \
+  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                        \
+  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                      \
+  astNode *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
+  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
   astNode *elseState=astNewNodeRule(ident->rule,ident->ruleid);         \
   elseState->children=ident->children;                                  \
   RHS(lhs,ident,op,nOp,pIn,cond,nComa,ifState,nComa2,elseState,pOut)
@@ -191,74 +160,54 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Other singular operations
 // *****************************************************************************
 #define superNP1(lhs,ident)                                           \
-  char *dest;                                                         \
-  dest=malloc(1024);                                                  \
+  char *dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));         \
   dest=strcat(dest,ident->token);                                     \
   dest=strcat(dest,"np1");                                            \
-  astNode *superNP1Node=astNewNode();                                 \
-  superNP1Node->token=strdup(dest);                                   \
-  superNP1Node->tokenid=IDENTIFIER;                                   \
+  astNode *superNP1Node=astNewNode(dest,IDENTIFIER);                  \
   RHS(lhs,superNP1Node)
 
 #define Ypow(lhs,n1,pow)                                              \
-  astNode *pPow=astNewNode();                                         \
-  pPow->token=strdup("pow");                                          \
-  pPow->tokenid=IDENTIFIER;                                           \
-  astNode *pIn=astNewNode();                                          \
-  pIn->token=strdup("(");pIn->tokenid=YYTRANSLATE('(');               \
-  astNode *pTwo=astNewNode();                                         \
-  pTwo->token=strdup("," #pow ".0");pTwo->tokenid=IDENTIFIER;         \
-  astNode *pOut=astNewNode();                                         \
-  pOut->token=strdup(")");pOut->tokenid=YYTRANSLATE(')');             \
+  astNode *pPow=astNewNode("pow",IDENTIFIER);                         \
+  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
+  astNode *pTwo=astNewNode("," #pow ".0",IDENTIFIER);                 \
+  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
   RHS(lhs,pPow,pIn,n1,pTwo,pOut)
 
-#define remainY1(lhs)                                                 \
-  astNode *timeRemainNode=astNewNode();                               \
-  timeRemainNode->token=strdup("slurmTremain()");                     \
-  timeRemainNode->tokenid=YYTRANSLATE(REMAIN);                        \
+#define remainY1(lhs)                                                   \
+  astNode *timeRemainNode=astNewNode("slurmTremain()",YYTRANSLATE(REMAIN)); \
   RHS(lhs,timeRemainNode)
 
 #define limitY1(lhs)                                                  \
-  astNode *timeLimitNode=astNewNode();                                \
-  timeLimitNode->token=strdup("slurmTlimit()");                       \
-  timeLimitNode->tokenid=YYTRANSLATE(LIMIT);                          \
+  astNode *timeLimitNode=astNewNode("slurmTlimit()",YYTRANSLATE(LIMIT)); \
   RHS(lhs,timeLimitNode)
 
 #define volatilePreciseY1(lhs, gmpType){                              \
-    astNode *mpTypeNode=astNewNode();                                 \
-    astNode *volatileNode=astNewNode();                               \
+    astNode *mpTypeNode;                                              \
     if (gmpType==GMP_INTEGER)                                         \
-      mpTypeNode->token=strdup("mpInteger");                          \
+      mpTypeNode=astNewNode("mpInteger",YYTRANSLATE(gmpType));        \
     else                                                              \
-      mpTypeNode->token=strdup("mpReal");                             \
-    volatileNode->tokenid=VOLATILE;                                   \
-    volatileNode->token=strdup("VOLATILE");                           \
-    mpTypeNode->tokenid=YYTRANSLATE(gmpType);                         \
+      mpTypeNode=astNewNode("mpReal",YYTRANSLATE(gmpType));           \
+    astNode *volatileNode=astNewNode("VOLATILE",VOLATILE);            \
     RHS(lhs,mpTypeNode,volatileNode);}
 
 #define preciseY1(lhs, gmpType){                                      \
-    astNode *mpTypeNode=astNewNode();                                 \
+    astNode *mpTypeNode;                                              \
     if (gmpType==GMP_INTEGER)                                         \
-      mpTypeNode->token=strdup("mpInteger");                          \
+      mpTypeNode=astNewNode("mpInteger",YYTRANSLATE(gmpType));        \
     else                                                              \
-      mpTypeNode->token=strdup("mpReal");                             \
-    mpTypeNode->tokenid=YYTRANSLATE(gmpType);                         \
+      mpTypeNode=astNewNode("mpReal",YYTRANSLATE(gmpType));           \
     RHS(lhs,mpTypeNode);}
 
 #define primeY1ident(lhs, ident)                                      \
   char token[1024];                                                   \
-  astNode *mathlinkPrimeNode=astNewNode();                            \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",ident->token);          \
-  mathlinkPrimeNode->token=strdup(token);                             \
-  mathlinkPrimeNode->tokenid=YYTRANSLATE(MATHLINK);                   \
+  astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK);  \
   RHS(lhs,mathlinkPrimeNode)
 
 #define primeY1(lhs, cst)                                             \
   char token[1024];                                                   \
-  astNode *mathlinkPrimeNode=astNewNode();                            \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",cst->token);            \
-  mathlinkPrimeNode->token=strdup(token);                             \
-  mathlinkPrimeNode->tokenid=YYTRANSLATE(MATHLINK);                   \
+  astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK)); \
   RHS(lhs,mathlinkPrimeNode)
 
 

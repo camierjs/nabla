@@ -69,7 +69,7 @@ bool kHookDfsExtra(nablaMain*,nablaJob*,bool);
 char* kHookForAllDump(nablaJob*);
 char* kHookForAllPostfix(nablaJob*);
 
-const hooks* kokkos(nablaMain*);
+hooks* kokkos(nablaMain*);
 
 #endif // _NABLA_KOKKOS_HOOK_H_
  

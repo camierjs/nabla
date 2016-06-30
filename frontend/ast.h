@@ -43,14 +43,13 @@
 #ifndef _NABLA_AST_H_
 #define _NABLA_AST_H_
 
-
 // ****************************************************************************
 // * Node structure used for the AST
 // ****************************************************************************
 typedef struct astNodeStruct{
-  unsigned int id; // Unique node ID
+  /*const*/ unsigned int id; // Unique node ID
   char *token;
-  char *token_utf8;
+  const char *token_utf8;
   int tokenid;
   const char * rule;
   int ruleid;
@@ -60,38 +59,20 @@ typedef struct astNodeStruct{
 
 
 // ****************************************************************************
-// * Structure used to pass a batch of actions for each ruleid found while DFS
+// * Forward declaration of AST NODE functions
 // ****************************************************************************
-typedef struct RuleActionStruct{
-  int ruleid;
-  void (*action)(astNode*,void*);
-} RuleAction;
-
-
-// ****************************************************************************
-// * Forward declaration of AST functions
-// ****************************************************************************
-astNode *astNewNode(void);
+astNode *astNewNode(char*, const unsigned int);
 astNode *astNewNodeRule(const char*,unsigned int);
 astNode *astAddChild(astNode*,astNode*);
 astNode *astAddNext(astNode*,astNode*);
 
+// ****************************************************************************
+// * Forward declaration of AST TREE functions
+// ****************************************************************************
 NABLA_STATUS astTreeSave(const char*, astNode*);
 void getInOutPutsNodes(FILE*,astNode*,char*);
 void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
 
-void dfsUtf8(astNode*);
-void dfsDumpToken(astNode*);
-
-void scanTokensForActions(astNode*, RuleAction*, void*);
-char *dfsFetchFirst(astNode*, int);
-char *dfsFetchAll(const astNode*,const int,int*,char*);
-astNode *dfsFetch(astNode*,int);
-
-astNode *dfsFetchTokenId(astNode*,int);
-astNode *dfsFetchToken(astNode*, const char *);
-astNode *dfsFetchRule(astNode*,int);
-int dfsScanJobsCalls(void*,void*,astNode*);
 
 int yyUndefTok(void);
 int yyTranslate(int);

@@ -43,23 +43,6 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-// ****************************************************************************
-// * UTF8 DFS
-// ****************************************************************************
-void dfsUtf8(astNode * n){
-  if (n==NULL) return;
-  if (n->token!=NULL){
-    //dbg("\n\t\t[dfsUtf8] n->token=%s",n->token);
-    n->token_utf8=strdup(n->token);
-    toolUtf8SupThree(&n->token_utf8);
-  }
-  toolUtf8(&n->token);
-  dfsUtf8(n->children);
-  dfsUtf8(n->next);
-}
-
-
 // ****************************************************************************
 // * Generic DFS scan for specifics actions
 // ****************************************************************************
@@ -107,7 +90,7 @@ char *dfsFetchFirst(astNode *n, int ruleid){
 // ****************************************************************************
 // * DFS scan until a all hit is found
 // ****************************************************************************
-char *dfsFetchAll(const astNode *n, const int ruleid,
+char *dfsFetchAll(astNode *n, const int ruleid,
                 int *idx,
                 char *rtn){
   //if (n->ruleid) dbg("\n\t[dfsFetchAll] n->rule=%s",n->rule);
@@ -131,12 +114,12 @@ char *dfsFetchAll(const astNode *n, const int ruleid,
 // On lance une recherche dfs jusqu'à un token en next 
 // ****************************************************************************
 astNode *dfsFetch(astNode *n, int ruleid){
-  astNode *rtn;
   //if (n==NULL) return;
   //if (n->ruleid!=0) dbg("\n\t\t[dfsFetch] n->rule=%s",n->rule?rtn->rule:"xNULL");
   if (n->ruleid==ruleid) return n->children;
   if (n->children != NULL){
-    if ((rtn=dfsFetch(n->children, ruleid))!=NULL){
+    astNode *rtn=dfsFetch(n->children, ruleid);
+    if (rtn!=NULL){
       //dbg("\n\t\t[dfsFetch] return %s",rtn->rule?rtn->rule:"yNULL");
       return rtn;
     }
@@ -144,7 +127,8 @@ astNode *dfsFetch(astNode *n, int ruleid){
   // Si on a un voisin token non null, on évite de parser tout la branche pour rien
   //if (n->next!=NULL)    if (n->next->token!=0)      return NULL;
   if (n->next != NULL){
-    if ((rtn=dfsFetch(n->next, ruleid))!=NULL){
+    astNode *rtn=dfsFetch(n->next, ruleid);
+    if (rtn!=NULL){
       //dbg("\n\t\t[dfsFetch] return %s", rtn->rule?rtn->rule:"zNULL");
       return rtn;
     }
@@ -168,7 +152,6 @@ void dfsDumpToken(astNode *n){
 // * DFS scan until tokenid is found
 // ****************************************************************************
 astNode *dfsFetchTokenId(astNode *n, int tokenid){
-  register astNode *rtn;
   if (n==NULL){
     //dbg("\n\t\t[dfsFetchToken] return first NULL");
     return NULL;
@@ -179,15 +162,17 @@ astNode *dfsFetchTokenId(astNode *n, int tokenid){
     return n;
   }
   if (n->children != NULL){
-    if ((rtn=dfsFetchTokenId(n->children, tokenid))!=NULL){
+    astNode* dfs_id=dfsFetchTokenId(n->children, tokenid);
+    if (dfs_id!=NULL){
       //dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
-      return rtn;
+      return dfs_id;
     }
   }
   if (n->next != NULL){
-    if ((rtn=dfsFetchTokenId(n->next, tokenid))!=NULL){
+    astNode* dfs_id=dfsFetchTokenId(n->next, tokenid);
+    if (dfs_id!=NULL){
       //dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
-      return rtn;
+      return dfs_id;
     }
   }
   //dbg("\n\t\t[dfsFetchToken] return last NULL");
@@ -199,7 +184,6 @@ astNode *dfsFetchTokenId(astNode *n, int tokenid){
 // * DFS scan until token is found
 // ****************************************************************************
 astNode *dfsFetchToken(astNode *n, const char *token){
-  astNode *rtn;
   dbg("\n\t\t[dfsFetchToken] looking for token '%s'", token);
   if (n==NULL){
     dbg("\n\t\t[dfsFetchToken] n==NULL, returning");
@@ -214,13 +198,15 @@ astNode *dfsFetchToken(astNode *n, const char *token){
     }
   }
   if (n->children != NULL){
-    if ((rtn=dfsFetchToken(n->children, token))!=NULL){
+    astNode* rtn=dfsFetchToken(n->children, token);
+    if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
       return rtn;
     }
   }
   if (n->next != NULL){
-    if ((rtn=dfsFetchToken(n->next, token))!=NULL){
+    astNode *rtn=dfsFetchToken(n->next, token);
+    if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
       return rtn;
     }
@@ -235,7 +221,6 @@ astNode *dfsFetchToken(astNode *n, const char *token){
 // * dfsFetchRule
 // ****************************************************************************
 astNode *dfsFetchRule(astNode *n, int ruleid){
-  register astNode *rtn;
   if (n==NULL){
     dbg("\n\t\t[dfsFetchRule] return first NULL");
     return NULL;
@@ -246,13 +231,15 @@ astNode *dfsFetchRule(astNode *n, int ruleid){
     return n;
   }
   if (n->children != NULL){
-    if ((rtn=dfsFetchRule(n->children, ruleid))!=NULL){
+    astNode *rtn=dfsFetchRule(n->children, ruleid);
+    if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchRule] cFound return %s", rtn->rule);
       return rtn;
     }
   }
   if (n->next != NULL){
-    if ((rtn=dfsFetchRule(n->next, ruleid))!=NULL){
+    astNode *rtn=dfsFetchRule(n->next, ruleid);
+    if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchRule] nFound return %s", rtn->rule);
       return rtn;
     }
@@ -279,8 +266,8 @@ static void addNablaVariableList(nablaMain *nabla,
   }
   
   if (n->tokenid=='@'){
-    return;
     dbg("\n\t\t\t[addNablaVariableList] '@', returning");
+    return;
   }
     
   if (n->ruleid==rulenameToId("direct_declarator")){
@@ -338,7 +325,7 @@ int dfsScanJobsCalls(void *vars, void *main, astNode * n){
   if (n->tokenid!=0) dbg("\n\t\t[dfsScanJobsCalls] token is '%s'",n->token);
   if (n->tokenid==CALL){
     nablaJob *foundJob;
-    char *callName=n->next->children->children->token;
+    const char *callName=n->next->children->children->token;
     dbg("\n\t\t[dfsScanJobsCalls] hit what we are looking for: token '%s', calling '%s'",
         n->token, callName);
     if ((foundJob=nMiddleJobFind(nabla->entity->jobs,callName))!=NULL){

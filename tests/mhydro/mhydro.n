@@ -100,7 +100,7 @@ global{
 // ****************************************************************************
 
 void ini(void) @ -6.0{
-  δt = option_δt_initial;
+  deltat = option_δt_initial;
 }
 
 // ****************************************************************************
@@ -183,7 +183,7 @@ void ini(void) @ -6.0{
 // ****************************************************************************
 ∀ nodes void computeVelocity(void)
   in (node nMass, node force) inout (node velocity) @ 1.0{
-  velocity+=(δt/nMass)*force;
+  velocity+=(deltat/nMass)*force;
 }
 
 
@@ -209,7 +209,7 @@ void ini(void) @ -6.0{
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
 ∀ nodes void moveNodes(void) in (node velocity) out (node coord)@ 3.0{
-  coord += δt * velocity;
+  coord += deltat * velocity;
 }
 
 // ****************************************************************************
@@ -313,7 +313,7 @@ void computeDeltaT(void) @ 10.0{
   // Respect des valeurs min et max imposées par les options
   new_δt = min(new_δt, option_δt_max);
   new_δt = max(new_δt, option_δt_min);
-  δt=new_δt;
+  deltat=new_δt;
   if (time >= option_time_end) exit;
 }
 

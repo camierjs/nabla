@@ -122,15 +122,21 @@ char *toolStrQuote(const char * str){
 // *****************************************************************************
 const char* mkktemp(const char *prefix){
   char *rtn,*unique_temporary_kernel_name=NULL;
-  int n,size = NABLA_MAX_FILE_NAME;
+  const int size = NABLA_MAX_FILE_NAME;
+
+  dbg("\n\t\t[mkktemp] with prefix: '%s'", prefix);
+
+  dbg("\n\t\t[mkktemp] calloc(%d,%d)",size,sizeof(char));
+  if ((unique_temporary_kernel_name=calloc(size,sizeof(char)))==NULL)
+    nablaError("[mkktemp] Could not calloc our unique_temporary_kernel_name!");
   
-  if ((unique_temporary_kernel_name=malloc(size))==NULL)
-    nablaError("[mkktemp] Could not malloc our unique_temporary_kernel_name!");
-  n=snprintf(unique_temporary_kernel_name, size, "/tmp/nabla_%sXXXXXX", prefix);
+  dbg("\n\t\t[mkktemp] snprintf");
+  const int n=snprintf(unique_temporary_kernel_name, size, "/tmp/nabla_%sXXXXXX", prefix);
   
   if (n > -1 && n < size)
     if (mkstemp(unique_temporary_kernel_name)==-1)
       nablaError("[mkktemp] Could not mkstemp our unique_temporary_kernel_name!");
+  
   assert(strrchr(prefix,'_')==NULL);
   rtn=strdup(strrchr(unique_temporary_kernel_name,'_')+1);
   free(unique_temporary_kernel_name);
@@ -143,10 +149,10 @@ const char* mkktemp(const char *prefix){
 // *****************************************************************************
 void toolUnlinkKtemp(nablaJob *job){
   char *kernel_name=NULL;
-  int size = NABLA_MAX_FILE_NAME;
+  const int size = NABLA_MAX_FILE_NAME;
   
-  if ((kernel_name=malloc(size))==NULL)
-    nablaError("[mkktemp] Could not malloc our unique_temporary_kernel_name!");
+  if ((kernel_name=calloc(size,sizeof(char)))==NULL)
+    nablaError("[mkktemp] Could not calloc our unique_temporary_kernel_name!");
 
   for(;job!=NULL;job=job->next){
     if (!job->has_to_be_unlinked) continue;

@@ -176,8 +176,15 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #include "frontend/frontend.h"
 #include "middlend/middlend.h"
 
-#include "backends/hooks.h"
 #include "backends/calls.h"
+#include "backends/hooks.h"
+
+#include "backends/arcane/arcane.h"
+#include "backends/cuda/cuda.h"
+#include "backends/kokkos/kokkos.h"
+#include "backends/lambda/lambda.h"
+#include "backends/okina/okina.h"
+#include "backends/raja/raja.h"
 
 #include "backends/lib/call/call.h"
 #include "backends/lib/hook/hook.h"

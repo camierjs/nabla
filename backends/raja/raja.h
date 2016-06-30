@@ -40,8 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LAMBDA_HOOK_H_
-#define _NABLA_LAMBDA_HOOK_H_
+#ifndef _NABLA_RAJA_HOOK_H_
+#define _NABLA_RAJA_HOOK_H_
 
 char *rajaParallelIncludes(void);
 void rajaHookHeaderDump(nablaMain*);
@@ -58,7 +58,7 @@ char* rajaHookForAllDump(nablaJob*);
 
 void rajaHookReduction(nablaMain*,astNode*);
 
-const hooks* raja(nablaMain*);
+hooks* raja(nablaMain*);
 
-#endif // _NABLA_LAMBDA_HOOK_H_
+#endif // _NABLA_RAJA_HOOK_H_
  

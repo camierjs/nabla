@@ -117,7 +117,7 @@ cells{
   ℝ oil_mobility;
   ℝ total_mobility;
   ℝ porosity;
-  ℝ³⨯ℝ³ permeability;
+  ℝ³ˣ³ permeability;
 };
 
 // ****************************************************************************

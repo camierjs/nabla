@@ -56,10 +56,10 @@ bool isWithLibrary(nablaMain *nabla, with_library lib){
 // ****************************************************************************
 // * nMiddleLibrariesSwitch
 // ****************************************************************************
-static void nMiddleLibrariesSwitch(astNode * n, nablaEntity *entity){
+static void nMiddleLibrariesSwitch(const astNode * n, nablaEntity *entity){
 
   //dbg("\n\t[nMiddleLibrariesSwitch] token= %s",n->children->token);
-  if (strncmp(n->children->token,"ℵ",3)==0){
+  if (strcmp(n->children->token,"Aleph")==0){
     dbg("\n\t[nMiddleLibrariesSwitch] ALEPH single_library hit!");
     entity->libraries|=(1<<with_aleph);
     dbg("\n\t[nMiddleLibrariesSwitch] Alephlibrary=0x%X",entity->libraries);

@@ -127,7 +127,8 @@ void yyerror(astNode **root, const char *error){
 static void orgGrammar(astNode * n){
   if (n->ruleid == rulenameToId("option")){
     const astNode *nnn=n->children->next->next->next;
-    const char *ascii_id=utf2ascii(n->children->next->token);
+    //const char *ascii_id=utf2ascii(n->children->next->token);
+    const char *ascii_id=n->children->next->token;
     if (nnn->tokenid=='-' or nnn->tokenid=='+')
       printf(" --%s=%s%s",ascii_id,nnn->token,nnn->next->token);
     else

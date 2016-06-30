@@ -43,7 +43,7 @@
 #include "nabla.h"
 
 nablaType *nMiddleTypeNew(void){
-  nablaType *type = (nablaType *)malloc(sizeof(nablaType));
+  nablaType *type = (nablaType *)calloc(1,sizeof(nablaType));
   assert(type != NULL);
   type->name=NULL;
   type->next=NULL;

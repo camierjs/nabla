@@ -46,11 +46,7 @@
 // * nMiddleBackendAnimate
 // ****************************************************************************
 //#warning nMiddleBackendAnimate a simplifier
-NABLA_STATUS animate(nablaMain *nabla,
-                     astNode *root,
-                     struct hookStruct *hooks){
-  // Initialisation des hooks avant tout
-  nabla->hook=hooks;
+NABLA_STATUS animate(nablaMain *nabla){
 
   // Partie des hooks à remonter à termes dans le middlend
   HOOK(vars,init);
@@ -67,7 +63,7 @@ NABLA_STATUS animate(nablaMain *nabla,
 
   // Parse du code préprocessé et lance les hooks associés
   // On en profite pour dumper dans le header les forwards des fonctions
-  nMiddleGrammar(root,nabla);
+  nMiddleGrammar(nabla->root,nabla);
 
   // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
   HOOK(mesh,core);

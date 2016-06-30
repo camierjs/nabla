@@ -108,7 +108,7 @@ char* xCallFilterScatter(astNode *n,nablaJob *job){
   char *scatters=NULL;
     
   if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[xCallFilterScatter] Could not malloc our scatters!");
+    nablaError("[xCallFilterScatter] Could not calloc our scatters!");
 
   // On récupère le nombre de variables potentielles à scatterer
    for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){

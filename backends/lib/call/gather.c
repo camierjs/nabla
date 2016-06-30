@@ -145,12 +145,14 @@ char* xCallGather(nablaJob *job,nablaVariable* var){
 // * Et non pas que sur leurs déclarations en in et out
 // ****************************************************************************
 char* xCallFilterGather(astNode *n,nablaJob *job){
+  dbg("\n\t\t\t\t[xFilterGather]");
   char *gather_src_buffer=NULL;  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
-    nablaError("[xFilterGather] Could not malloc our gather_src_buffer!");
+    nablaError("[xFilterGather] Could not calloc our gather_src_buffer!");
   
   //nprintf(job->entity->main, NULL,"/*filterGather*/");
 
+    dbg("\n\t\t\t\t[xFilterGather] for");
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     if (!var->is_gathered) continue;
     dbg("\n\t\t\t\t[xFilterGather] var '%s'", var->name);
@@ -169,6 +171,7 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
   }
   dbg("\n\t\t\t\t[xFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");
+  dbg("\n\t\t\t\t[xFilterGather] done");
   return gather_src_buffer;
 }
 

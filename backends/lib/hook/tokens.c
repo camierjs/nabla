@@ -43,9 +43,10 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
+static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, const astNode *n){
   const astNode* isNode = dfsFetchTokenId(n->next,IS);
   assert(isNode);
+  assert(isNode->next);
   const char *token2function = isNode->next->token;
   assert(token2function);
   if (isNode->next->tokenid==OWN)
@@ -53,10 +54,10 @@ static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, astNode *n){
   else{
     nprintf(nabla, "/*IS_OP_INI*/", "_%s_(NABLA_NB_FACES,xs_face_cell,", token2function);
   }
-  // Et on purge le token pour pas qu'il soit parsé
+//#warning Et on purge le token pour pas quil soit parsé
   isNode->next->token[0]=0;
 }
-static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, astNode *n){
+static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, const astNode *n){
   nprintf(nabla, "/*IS_OP_END*/", ")");
 }
 
@@ -84,7 +85,7 @@ void xHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-bool xHookSwitchForall(astNode *n, nablaJob *job){
+static bool xHookSwitchForall(astNode *n, nablaJob *job){
   const char cnfg=job->item[0];
 
 // Preliminary pertinence test
@@ -138,10 +139,6 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
     dbg("\n\t\t\t\t\t[hookSwitchForall] @ au lieu d'un statement!");
     nprintf(job->entity->main, "/* Found AT */", NULL);
   }
-  // On skip le 'nabla_item' qui nous a renseigné sur le type de forall
-//#warning SKIP du nabla_item qui nous a renseigné sur le type de forall
-  *n=*n->next->next;
-  //printf("[1;31mjob %s, enum_enum=%c[m\n",job->name,job->enum_enum);
   return true;
 }
 
@@ -149,7 +146,7 @@ bool xHookSwitchForall(astNode *n, nablaJob *job){
 // *****************************************************************************
 // * xHookSwitchAleph
 // *****************************************************************************
-bool xHookSwitchAleph(astNode *n, nablaJob *job){
+static bool xHookSwitchAleph(astNode *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
   //nprintf(nabla, "/*xHookSwitchAleph*/","/*xHookSwitchAleph*/");
@@ -236,10 +233,16 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   // Si c'est le cas, on a fini
   if (xHookSwitchAleph(n,job)) return;
   
-  //if (xHookSwitchForall(n,job)) return;
   xHookSwitchForall(n,job);
   
   switch(n->tokenid){
+
+    // Si il y a un forall, il y an un item à skiper après
+    case(FORALL):break;
+    case(NODE):break;
+    case(CELL):break;
+    case(FACE):break;
+    case(PARTICLE):break;
     
   case (TIME):{ nprintf(nabla, NULL, "global_time[0]"); break;}
     
@@ -332,7 +335,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
       dbg("\n\t[xHookSwitchToken] JOB_CALL next children children");
       if (n->next->children->children->token){
         dbg("\n\t[xHookSwitchToken] JOB_CALL next children children token");
-        char *callName=n->next->children->children->token;
+        const char *callName=n->next->children->children->token;
         nprintf(nabla, "/*got_call*/", NULL);
         if ((foundJob=nMiddleJobFind(job->entity->jobs,callName))!=NULL){
           if (foundJob->is_a_function!=true){
@@ -525,17 +528,17 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     if (nabla->parallelism==BACKEND_PARALLELISM_OMP){
       char mnx[4]={'M','x','x','\0'};
       const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
-      astNode *min,*max,*compound_statement=dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"));
-      compound_statement=compound_statement->parent;
+      astNode *compound_statement=
+        dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"))->parent;
+      //compound_statement=compound_statement->parent;
       assert(compound_statement!=NULL);
       //printf("compound_statement->rule=%s",compound_statement->rule);
       assert(compound_statement->ruleid==rulenameToId("compound_statement"));
       /////////////////////////////////////
       // A *little* bit too cavalier here!
       /////////////////////////////////////
-      min=max=NULL;
-      min=dfsFetchToken(compound_statement,"min");
-      max=dfsFetchToken(compound_statement,"max");
+      astNode *min=dfsFetchToken(compound_statement,"min");
+      astNode *max=dfsFetchToken(compound_statement,"max");
       assert(min!=NULL || max !=NULL);
       if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
       if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}

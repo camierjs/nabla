@@ -43,7 +43,7 @@
 #ifndef _NABLA_LAMBDA_HOOK_H_
 #define _NABLA_LAMBDA_HOOK_H_
 
-const hooks* lambda(nablaMain*);
+hooks* lambda(nablaMain*);
 
 #endif // _NABLA_LAMBDA_HOOK_H_
  

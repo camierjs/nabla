@@ -45,7 +45,7 @@
 // Allocation d'une nouvelle structure de entity
 nablaEntity *nMiddleEntityNew(nablaMain *nabla){
 	nablaEntity *entity;
-	entity = (nablaEntity *)malloc(sizeof(nablaEntity));
+	entity = (nablaEntity *)calloc(1,sizeof(nablaEntity));
  	assert(entity != NULL);
    entity->hdr=entity->src=NULL;
    entity->next=NULL;

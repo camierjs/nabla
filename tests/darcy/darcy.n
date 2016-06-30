@@ -119,7 +119,7 @@ cells{
   ℝ oil_mobility;
   ℝ total_mobility;
   ℝ porosity;
-  ℝ³⨯ℝ³ permeability;
+  ℝ³ˣ³ permeability;
 };
 
 // ****************************************************************************
@@ -156,8 +156,8 @@ global{
 // * Compute loop @ ]+0,+∞[
 // ****************************************************************************
 void infoLoop(void) @ 1.0 {
-  //info()<<"\n\33[7m*** ITERATION #"<<iteration<<", TIME "<<time<<", DELTAT "<<δt<<" ***\33[m";
-  printf("\n\33[7m*** ITERATION #%d, TIME %f, DELTAT=%f ***\33[m",iteration,time,δt);
+  //info()<<"\n\33[7m*** ITERATION #"<<iteration<<", TIME "<<time<<", DELTAT "<<deltat<<" ***\33[m";
+  printf("\n\33[7m*** ITERATION #%d, TIME %f, DELTAT=%f ***\33[m",iteration,time,deltat);
  
 }
 
@@ -236,8 +236,8 @@ void infoLoop(void) @ 1.0 {
 // * Test for Quit & adjust time step
 // ****************************************************************************
 void computeNextTimeStep(void) @ 10.0 {
-  //debug()<<"[computeNextTimeStep] iteration="<<iteration <<", time="<<time <<", delta_t="<<δt;
+  //debug()<<"[computeNextTimeStep] iteration="<<iteration <<", time="<<time <<", delta_t="<<deltat;
   const ℝ factor = 1.125;
-  δt = factor*δt;
+  deltat = factor*deltat;
   if (time >= option_stoptime) exit;
 }

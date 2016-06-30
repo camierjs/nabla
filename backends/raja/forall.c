@@ -83,19 +83,19 @@ char* rajaHookForAllDump(nablaJob *job){
   const char *rgn=job->region;  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] function?");
+  dbg("\n\t\t[rajaHookForAllDump] function?");
   if (itm=='\0') return "\n";
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] particle?");
+  dbg("\n\t\t[rajaHookForAllDump] particle?");
   if (itm=='p' && grp==NULL && rgn==NULL) return forAllParticle();
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
+  dbg("\n\t\t[rajaHookForAllDump] cell?");
   if (itm=='c' && grp==NULL && rgn==NULL) return forAllCell();
   if (itm=='c' && grp==NULL && rgn[0]=='i') return forAllInnerCell();
   if (itm=='c' && grp==NULL && rgn[0]=='o') return forAllOuterCell();
   if (itm=='c' && grp[0]=='o' && rgn==NULL) return forAllCell();
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
+  dbg("\n\t\t[rajaHookForAllDump] node?");
   if (itm=='n' && grp==NULL && rgn==NULL)     return forAllNode();
   if (itm=='n' && grp==NULL && rgn[0]=='i')   return forAllInnerNode();
   if (itm=='n' && grp==NULL && rgn[0]=='o')   return forAllOuterNode();
@@ -104,7 +104,7 @@ char* rajaHookForAllDump(nablaJob *job){
   if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return forAllInnerNode();
   if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return forAllOuterNode();
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
+  dbg("\n\t\t[rajaHookForAllDump] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
   if (itm=='f' && grp==NULL && rgn==NULL)     return forAllFace();
   if (itm=='f' && grp==NULL && rgn[0]=='i')   return forAllInnerFace();
   if (itm=='f' && grp==NULL && rgn[0]=='o')   return forAllOuterFace();
@@ -113,7 +113,7 @@ char* rajaHookForAllDump(nablaJob *job){
   if (itm=='f' && grp[0]=='o' && rgn[0]=='i') return forAllInnerFace();
   if (itm=='f' && grp[0]=='o' && rgn[0]=='o') return forAllOuterFace();
   
-  dbg("\n\t\t[lambdaHookSelectEnumerate] Could not distinguish ENUMERATE!");
+  dbg("\n\t\t[rajaHookForAllDump] Could not distinguish ENUMERATE!");
   nablaError("Could not distinguish ENUMERATE!");
   return NULL;
 }

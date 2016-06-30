@@ -113,7 +113,7 @@ bool isAnArcaneModule(nablaMain*);
 bool isAnArcaneService(nablaMain*);
 bool isAnArcaneFamily(nablaMain*);
 
-void actFunctionDumpHdr(FILE*, astNode*);
+void actFunctionDumpHdr(FILE*,astNode*);
 
 char* nccArcLibMailHeader(void);
 char* nccArcLibMailPrivates(void);
@@ -161,8 +161,6 @@ char* nccArcLibParticlesConstructor(const nablaEntity*);
 
 
 NABLA_STATUS nccArcMain(nablaMain*);
-//NABLA_STATUS nccArcConfigHeader(nablaMain*);
-//NABLA_STATUS nccArcConfigFooter(nablaMain*);
 
 void nArcaneHLTInit(nablaMain*);
 char* nccAxlGeneratorEntryPointWhenName(double when);
@@ -173,10 +171,7 @@ NABLA_STATUS nccHdrEntityGeneratorInclude(const nablaEntity*);
 NABLA_STATUS nccHdrEntityGeneratorConstructor(const nablaEntity*);
 NABLA_STATUS nccHdrEntityGeneratorPrivates(const nablaEntity*);
 
-//NABLA_STATUS nccArcaneEntityHeader(nablaMain*);
-//NABLA_STATUS nccArcaneBeginNamespace(nablaMain *);
 NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity*);
-//NABLA_STATUS nccArcaneEntityConstructor(const nablaEntity*);
 NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity*);
 NABLA_STATUS nccArcaneEntityGeneratorPrivates(const nablaEntity*);
 
@@ -193,7 +188,7 @@ void aHookFamilyVariablesPrefix(nablaMain*);
 
 void arcaneJob(nablaMain*, astNode*);
 void arcaneHookFunctionName(nablaMain*);
-void arcaneHookFunction(nablaMain*, astNode*);
+void arcaneHookFunction(nablaMain*,astNode*);
 void arcaneItemDeclaration(astNode*,int,nablaMain*);
 void arcaneOptionsDeclaration(astNode*, int, nablaMain*);
 char* arcaneHookPrefixEnumerate(nablaJob*);
@@ -210,29 +205,27 @@ char* arcaneHookTokenPostfix(nablaMain*);
 void arcaneHookIsTest(nablaMain*,nablaJob*,astNode*,int);
 
 // Transformations
-char *cellJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *cellJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *cellJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *cellJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *cellJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *cellJobCellVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *cellJobNodeVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *cellJobFaceVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *cellJobParticleVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *cellJobGlobalVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
 
-char *nodeJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *nodeJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *nodeJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *nodeJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *nodeJobCellVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *nodeJobNodeVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *nodeJobFaceVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *nodeJobGlobalVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
 
-char *faceJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *faceJobNodeVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *faceJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *faceJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *faceJobCellVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *faceJobNodeVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *faceJobFaceVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *faceJobGlobalVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
 
-char *particleJobParticleVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *particleJobCellVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
-char *particleJobGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *particleJobParticleVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *particleJobCellVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
+char *particleJobGlobalVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
 
-char *functionGlobalVar(const nablaMain *arc, const nablaJob *job,  const nablaVariable *var);
+char *functionGlobalVar(const nablaMain*, const nablaJob*,  const nablaVariable*);
 
-void nArcaneHLTEntryPoint(nablaMain *arc,
-                          nablaJob *entry_point,
-                          int number_of_entry_points,double*);
+void nArcaneHLTEntryPoint(nablaMain*,nablaJob*,int ,double*);
 #endif // _NABLA_ARCANE_H_

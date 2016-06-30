@@ -102,9 +102,8 @@ void dbgLoop(void) @ 1.0 {
 }
 
 // nP au centre
-∀ nodes void computeNodP(void)
-  /*in (cell center, cell cU)*/
-  out (node nP) @ 2.0 {
+∀ nodes void computeNodP(void)  /*in (cell center, cell cU)*/  out (node nP) @ 2.0 {
+//∀ nodes @ 2.0 {
   if (n==0) continue;
   if (n==(NABLA_NB_NODES-1)) continue;
   ∀ cell {

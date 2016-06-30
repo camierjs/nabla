@@ -15,7 +15,7 @@
     <output-history-period>0</output-history-period>
     <end-execution-output>0</end-execution-output>
     <output>
-      <variable>cell_rh</variable>
+      <variable>cell_greek_rho</variable>
       <variable>cell_pressure</variable>
     </output>
   </arcane-post-processing>
@@ -37,10 +37,10 @@
         <z set='true' delta='0.02' total='true'>3</z>
       </sod></meshgenerator-->
 	 <initialisation>
-		<variable nom="cell_rh" valeur="1." groupe="ZG" />
+		<variable nom="cell_greek_rho" valeur="1." groupe="ZG" />
 		<variable nom="cell_pressure" valeur="1." groupe="ZG" />
 		<variable nom="cell_adiabatic_cst" valeur="1.4" groupe="ZG" />
-		<variable nom="cell_rh" valeur="0.125" groupe="ZD" />
+		<variable nom="cell_greek_rho" valeur="0.125" groupe="ZD" />
 		<variable nom="cell_pressure" valeur="0.1" groupe="ZD" />
 		<variable nom="cell_adiabatic_cst" valeur="1.4" groupe="ZD" />
 	 </initialisation>

@@ -132,9 +132,7 @@ loop:
 // ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
   //dbg("\n[astNewNode] line %d: '%s' (%d)", yylineno, yytext, tokenid); 
-  (*yylval) = astNewNode();
-  (*yylval)->token=strdup(yytext);
-  (*yylval)->tokenid=tokenid;
+  (*yylval) = astNewNode(yytext,tokenid);
   return tokenid;
 }
 

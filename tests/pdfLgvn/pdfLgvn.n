@@ -49,6 +49,12 @@
 // * Options
 // ****************************************************************************
 options{
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 1;
+  ℕ Z_EDGE_ELEMS              = 1;
+
   ℕ steps_p_period = 200;   // NumberOfIterationsPerPeriod
   ℝ nb_period      = 5.0;   // NumberOfPeriod
   ℝ frequence      = 0.01;  // TimeFrequencyOfDiagnostics
@@ -108,7 +114,7 @@ options{
 // * Element Variables
 // ****************************************************************************
 cells/*x*/{
-  ℝ³⨯ℝ³ fe0,fe1;
+  ℝ³ˣ³ fe0,fe1;
   
   ℝ initial_kinetic_energy0;
   ℝ initial_variance;
@@ -123,7 +129,7 @@ cells/*x*/{
   ℝ turbulent_frequency1;
   ℝ c_variance1;
   
-  ℝ³⨯ℝ³ phi;
+  ℝ³ˣ³ phi;
   ℝ vx_correlation_gradient;
   ℝ uc_correlation_gradient;
   
@@ -222,4 +228,6 @@ void ini(void) @ -10.0{
 // ****************************************************************************
 // * Partie boucle de calcul ]+0.0,+∞[ 
 // ****************************************************************************
-∀ cells @ 1.0 { }
+∀ cells @ 1.0 { initial_kinetic_energy0=0.0; }
+
+void end(void) @ 2.0 {piece_x=0;}

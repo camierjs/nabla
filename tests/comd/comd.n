@@ -288,7 +288,7 @@ void initSim(void) @ -5.0{
          << " " << yBoxsize/cutoff << " " << zBoxsize/cutoff;
   nsteps=10;
   info() << "Starting simulation";
-  δt = 1.0e-15;
+  deltat = 1.0e-15;
   ts=timeNow();
   ns=(double)(1+nsteps);
 }
@@ -323,9 +323,9 @@ void iniComputeForce(void){
   energy=0.0;
 }
 void cellComputeForce(Cell i, Cell j){
-  register Real etotl=0.0;
-  register Real strss=0.0;
-  register Real r2,r6,rs,fr;
+  Real etotl=0.0;
+  Real strss=0.0;
+  Real r2,r6,rs,fr;
   Real3 dr;
   Real3 drbox=dcenter[i]-dcenter[j];
 
@@ -506,7 +506,7 @@ int getIBoxFromIxyz3(int x, int y, int z){
 // ****************************************************************************
 void nTimeSteps(void) @ 2.0{
   int i;
-  Real dt = δt * bohr_per_atu_to_A_per_s;
+  Real dt = deltat * bohr_per_atu_to_A_per_s;
   for(i=0;i<nsteps;i++){
     advancePositions(dt/2.);
     computeForce();

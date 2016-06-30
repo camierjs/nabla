@@ -79,11 +79,11 @@ NABLA_STATUS cuHookMainPrefix(nablaMain *nabla){
 \tconst int reduced_size=(NABLA_NB_CELLS%%CUDA_NB_THREADS_PER_BLOCK)==0?\
 (NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK):\
 (1+NABLA_NB_CELLS/CUDA_NB_THREADS_PER_BLOCK);\n\
-\tdouble *host_reduce_results=(double*)malloc(reduced_size*sizeof(double));\n\
+\tdouble *host_reduce_results=(double*)calloc(reduced_size,sizeof(double));\n\
 \n\
 \t// Allocation CUDA des variables globales\n\
-\t__builtin_align__(8) real* global_deltat;\n\
-\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_deltat, sizeof(double)));\n\
+\t__builtin_align__(8) real* global_greek_deltat;\n\
+\tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_greek_deltat, sizeof(double)));\n\
 \t__builtin_align__(8) int* global_iteration;\n\
 \tCUDA_HANDLE_ERROR(cudaCalloc((void**)&global_iteration, sizeof(int)));\n\
 \t__builtin_align__(8) double* global_time;\n\
@@ -219,7 +219,7 @@ NABLA_STATUS cuHookMainCore(nablaMain *n){
  }
   nprintf(n, NULL,"\
 \n\t\t\t//CUDA_CHECK_LAST_KERNEL(\"cudaDeviceSynchronize\");\
-\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
+\n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(&new_delta_t, global_greek_deltat, sizeof(double), cudaMemcpyDeviceToHost));\
 \n\t\t\t//printf(\"\\n\\t[#%%d] got new_delta_t=%%.21e, reduced blocs=%%d\", iteration, new_delta_t, reduced_size);\
 \n\t\t\thost_time+=new_delta_t;\
 \n\t\t\tCUDA_HANDLE_ERROR(cudaMemcpy(global_time, &host_time, sizeof(double), cudaMemcpyHostToDevice));\
@@ -255,7 +255,7 @@ NABLA_STATUS cuHookMainPostInit(nablaMain *nabla){
 // * Backend CUDA POSTFIX - Génération du 'main'
 // ****************************************************************************
 #define CUDA_MAIN_POSTFIX "\n\
-\tCUDA_HANDLE_ERROR(cudaFree(global_deltat));\n\
+\tCUDA_HANDLE_ERROR(cudaFree(global_greek_deltat));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(global_time));\n\
 \tCUDA_HANDLE_ERROR(cudaFree(global_iteration));\n\
 \treturn 0;\n\
