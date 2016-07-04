@@ -596,7 +596,9 @@ int main(int argc, char * argv[]){
         fprintf (stderr, "\n\t[nabla] Unknown option `-%c'.\n", optopt);
       else fprintf (stderr, "\n\t[nabla] Unknown option character `\\%d'.\n", optopt);
       exit(NABLA_ERROR);
-    default: exit(NABLA_ERROR|fprintf(stderr, "\n\t[nabla] Error in command line\n"));
+    default: exit(NABLA_ERROR|
+                  fprintf(stderr,
+                          "\n\t[nabla] Error in command line\n"));
     }
   }
   

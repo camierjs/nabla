@@ -121,49 +121,69 @@ void yyerror(astNode **root, const char *error){
 }
 
 
+
 // ****************************************************************************
-// * orgGrammar
+// * stradd
 // ****************************************************************************
-static void orgGrammar(astNode * n){
-  if (n->ruleid == rulenameToId("option")){
-    const astNode *nnn=n->children->next->next->next;
-    //const char *ascii_id=utf2ascii(n->children->next->token);
-    const char *ascii_id=n->children->next->token;
-    if (nnn->tokenid=='-' or nnn->tokenid=='+')
-      printf(" --%s=%s%s",ascii_id,nnn->token,nnn->next->token);
-    else
-      if (nnn->ruleid == rulenameToId("boolean"))
-        printf(" --%s=%s",ascii_id,nnn->children->token);
-      else
-        printf(" --%s=%s",ascii_id,nnn->token);
-  }
-  if(n->children != NULL) orgGrammar(n->children);
-  if(n->next != NULL) orgGrammar(n->next);
+static void stradd(char** str, const char *format, ...){
+  va_list args;
+  va_start(args, format);
+  const size_t size = 128;
+  *str=(char*)calloc(size,sizeof(char));
+  if (vsnprintf(*str,size,format,args)<0)
+    fprintf(stderr,"Nabla error in stradd");
+  va_end(args);
 }
 
 
 // ****************************************************************************
-// * main
+// * orgGrammar
 // ****************************************************************************
-int main(int argc, char * argv[]){
-  astNode *root=NULL;
-  if (argc<2) return printf("No input file!\n");
-  printf("Input file is '%s'\n",argv[1]);
-  
-  const char *nabla_entity_name = "orgopt";
-  if(!(yyin=fopen(argv[1],"r")))
-    return NABLA_ERROR |
-      dbg("\n[nablaParsing] Could not open '%s' file",
-          argv[1]);
-  dbg("\n[nablaParsing] Starting parsing");
-  if (yyparse(&root)){
-    fclose(yyin);
-    return NABLA_ERROR | dbg("\n[nablaParsing] Error while parsing!");
+static void orgGrammar(astNode *n, int *argc, char *argv[]){
+  if (n->ruleid == rulenameToId("option")){
+    const astNode *nnn=n->children->next->next->next;
+    const char *ascii_id=n->children->next->token;
+    if (nnn->tokenid=='-' or nnn->tokenid=='+')
+      stradd(&argv[*argc],"--%s=%s%s",ascii_id,nnn->token,nnn->next->token);
+    else
+      if (nnn->ruleid == rulenameToId("boolean"))
+        stradd(&argv[*argc],"--%s=%s",ascii_id,nnn->children->token);
+      else
+        stradd(&argv[*argc],"--%s=%s",ascii_id,nnn->token);
+    *argc+=1;
   }
+  if(n->children != NULL) orgGrammar(n->children,argc,argv);
+  if(n->next != NULL) orgGrammar(n->next,argc,argv);
+}
+
+
+// ****************************************************************************
+// * inOpt
+// ****************************************************************************
+int inOpt(char *file,int *argc, char **argv){
+  astNode *root=NULL;
+  
+  if(!(yyin=fopen(file,"r")))
+    return NABLA_ERROR |
+      fprintf(stderr,
+              "\n[nablaParsing] Could not open '%s' file",
+              file);
+  
+  dbg("\n[nablaParsing] Starting parsing");
+  if (yyparse(&root))
+    return NABLA_ERROR | fclose(yyin) |
+      fprintf(stderr,
+              "\n[nablaParsing] Error while parsing!");
+
   fclose (yyin);
-  astTreeSave(nabla_entity_name, root);
-  orgGrammar(root);
-  dbg("\n[nablaParsing] Closing & Quit");
+  
+  /*{
+    const char *nabla_entity_name = "orgopt";
+    astTreeSave(nabla_entity_name, root);
+    }*/
+  
+  orgGrammar(root,argc,argv);
+  
   return 0;
 }
 

@@ -15,11 +15,11 @@
 
 * time
 ** δt
-   - option_δt_initial         = -1.0e-7
-   - option_δt_fixed           = 1.0e-7
-   - option_δt_mult_lower_b    = 1.1
+   - option_δt_fixed           = -1.0e-7
+   - option_δt_initial         = 1.0e-7
    - option_δt_courant         = 1.0e+20
    - option_δt_hydro           = 1.0e+20
+   - option_δt_mult_lower_b    = 1.1
    - option_δt_mult_upper_b    = 1.2
 ** stop
    - option_stoptime           = 1.0e-2
@@ -38,5 +38,5 @@
   - option_v_cut = 1.0e-10
 
 * chaos
- - option_chaos = true
+ - option_chaos = false
  - option_chaos_seed = 1.1234567890123

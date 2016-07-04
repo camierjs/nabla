@@ -49,6 +49,7 @@ extern char* nablaAlephHeader(nablaMain*);
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
 #define BACKEND_MAIN_FUNCTION "\n\
+extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
 // ******************************************************************************\n\
 // * Main\n\
 // ******************************************************************************\n\
@@ -86,18 +87,53 @@ int main(int argc, char *argv[]){\n"
 #define BACKEND_MAIN_OPTIONS_WHILE_PREFIX "\
 \twhile ((o=getopt_long_only(argc, argv, \"\",longopts,&longindex))!=-1){\n\
 \t\tswitch (o){\n\
-\t\tcase 0x3c0f6f4c:\n\
-\t\t\tprintf(\"org iput file '%%s'\\n\",optarg);\n\
-\t\t\tbreak;\n"
+\t\tcase 0x3c0f6f4c:{//optorg\n\
+\t\t\tconst int org_optind=optind;\n\
+\t\t\toptind=0;\n\
+\t\t\tchar *org_optarg=strdup(optarg);\n\
+\t\t\tprintf(\"[1;33morg input file '%%s'[0m\\n\",optarg);\n\
+\t\t\t{\n\t\t\t\tint org_o,org_longindex=0;\n\
+\t\t\t\tint org_argc=0;\n\
+\t\t\t\tchar **org_argv=(char**)calloc(1024,sizeof(char*));\n\
+\t\t\t\tint status=inOpt(optarg,&org_argc,org_argv);\n\
+\t\t\t\tprintf(\"[1;33morg_argc=%%d[0m\\n\",org_argc);\n\
+\t\t\t\tassert(status==0);\n\
+\t\t\t\twhile ((org_o=getopt_long_only(org_argc,\n\
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\torg_argv,\"\",\n\
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tlongopts,&org_longindex))!=-1){\n\
+\t\t\t\t\tswitch (org_o){\n"
+
+#define BACKEND_MAIN_OPTIONS_WHILE_PREFIX_BIS "\
+\t\t\t\t\tdefault: exit(fprintf(stderr, \"[nabla] Error in orgopt option line\\n\"));\n\
+\t\t\t\t\t}\n\
+\t\t\t\t}\n\
+\t\t\t}\n\
+\t\t\toptind=org_optind;\n\
+\t\t\toptarg=org_optarg;\n\
+\t\t\tbreak;}\n"
 
 #define BACKEND_MAIN_OPTIONS_WHILE_POSTFIX "\
 \t\tcase '?':\n\
 \t\t\tif ((optopt>(int)'A')&&(optopt<(int)'z'))\n\
 \t\t\t\texit(fprintf (stderr, \"\\n[nabla] Unknown option `-%%c'.\\n\", optopt));\n\
-\t\t\telse exit(fprintf (stderr, \"\\n[nabla] Unknown option character `\\%%d'.\\n\", optopt));\n\
-\t\tdefault: exit(fprintf(stderr, \"\\n[nabla] Error in command line\\n\"));\n\
+\t\tdefault: exit(fprintf(stderr, \"[nabla] Error in command line\\n\"));\n\
 \t\t}\n\
 \t}"
+
+
+static void dumpOptions(nablaMain *nabla,const int tabs){
+  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
+    const char *ascii_name=opt->name;
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, ascii_name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
+    if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
+    if (opt->type[0]=='i') fprintf(nabla->entity->src, " %s=atol(optarg);\n",opt->name);
+    if (opt->type[0]=='b') fprintf(nabla->entity->src, " %s=(0==strcmp(optarg,\"true\"));\n",opt->name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tbreak;\n");
+  }
+}
+
 
 NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
@@ -107,20 +143,16 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
-    fprintf(nabla->entity->src, "\t\t{\"%s\",optional_argument,NULL,0x%X},\n",opt->name,*(unsigned int*)&opt);
+    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,0x%X},\n",opt->name,*(unsigned int*)&opt);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
-  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
-    //const char *ascii_name=utf2ascii(opt->name);
-    const char *ascii_name=opt->name;
-    fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, ascii_name);
-    fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
-    fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);\n", opt->type, opt->name);
-    if (opt->type[0]=='r') fprintf(nabla->entity->src, "\t\t\t%s=atof(optarg);\n",opt->name);
-    if (opt->type[0]=='i') fprintf(nabla->entity->src, "\t\t\t%s=atol(optarg);\n",opt->name);
-    if (opt->type[0]=='b') fprintf(nabla->entity->src, "\t\t\t%s=(0==strcmp(optarg,\"true\"));\n",opt->name);
-    fprintf(nabla->entity->src, "\t\t\tbreak;\n");
-  }
+
+  dumpOptions(nabla,3);
+  
+  fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX_BIS);
+  
+  dumpOptions(nabla,0);
+  
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_POSTFIX);
   return NABLA_OK;
 }

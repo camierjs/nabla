@@ -57,7 +57,7 @@ options{
   ℕ Y_EDGE_ELEMS              = 8;
   ℕ Z_EDGE_ELEMS              = 8;
   
-  ℝ option_dtfixed            = -1.0e-7;  // fixed time increment
+  ℝ option_δt_fixed           = -1.0e-7;  // fixed time increment
   ℝ option_δt_initial         = 1.0e-7;   // variable time increment
   ℝ option_δt_courant         = 1.0e+20;
   ℝ option_δt_hydro           = 1.0e+20;
@@ -304,7 +304,7 @@ void timeIncrement(void) @ 0.1 {
   const ℝ up_new_δt = (ratio >= 1.0)?(ratio < option_δt_mult_lower_b)?old_δt:now_δt:now_δt;//option_δt_mult_lower_b
   const ℝ dw_new_δt = (ratio >= 1.0)?(ratio > option_δt_mult_upper_b)?old_δt*option_δt_mult_upper_b:up_new_δt:up_new_δt;
   const ℝ new_δt = (dw_new_δt > option_dtmax)?option_dtmax:dw_new_δt;
-  const ℝ δτ = (option_dtfixed <= 0.0)?(iteration != 1)?new_δt:old_δt:old_δt;
+  const ℝ δτ = (option_δt_fixed <= 0.0)?(iteration != 1)?new_δt:old_δt:old_δt;
   const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = scaled_δt ;

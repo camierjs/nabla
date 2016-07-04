@@ -108,8 +108,11 @@ endif()
 configure_file(nabla.S ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_executable(nabla nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_library(libNabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
-add_executable(orgopt ${BISON_oParser_OUTPUTS} ${FLEX_oScanner_OUTPUTS})
-target_link_libraries(orgopt NablaFrontend NablaToolbox)
+
+add_library(libOrgOpt ${BISON_oParser_OUTPUTS} ${FLEX_oScanner_OUTPUTS} toolbox/utf8.c frontend/astNode.c frontend/dbg.c)
+add_executable(orgopt orgopt.c)
+target_link_libraries(orgopt libOrgOpt NablaFrontend NablaToolbox)
+
 
 ############
 # Backends #
