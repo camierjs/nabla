@@ -44,38 +44,37 @@
 #include "nabla.tab.h"
 
 
-
-/******************************************************************************
- * tr \" to spaces
- ******************************************************************************/
-static char *strKillQuote(const char * str){
-  char *p=strdup(str);
-  char *bkp=p;
+// ****************************************************************************
+// * tr \" to spaces
+// ****************************************************************************
+static const char *strKillQuote(const char *str,char* kQTok){
   //printf("\n[strKillQuote] str=%s", str);
-  for(;*p!=0;p++)
+  for(char *p=memcpy(kQTok,str,strlen(str));*p!=0;p++)
     if (*p==34) *p=32;
-  return bkp;
+  return str;
 } 
 
 
 /*****************************************************************************
  * astTreeSaveNodes
  *****************************************************************************/
-static unsigned int astTreeSaveNodes(FILE *fTreeOutput, const astNode *l, unsigned int id){
+static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
+                                     const astNode *l,
+                                     unsigned int id){
+  char *kQTok=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   for(;l not_eq NULL;l=l->next){
     if (l->rule not_eq NULL)
       fprintf(fTreeOutput,
               "\n\tnode_%d [label=\"%s\" color=\"#CCDDCC\"]",
-              /*l->id=*/id++,
-              strKillQuote(l->rule));
+              id++,strKillQuote(l->rule,kQTok));
     else if (l->token not_eq NULL)
       fprintf(fTreeOutput,
               "\n\tnode_%d [label=\"%s\" color=\"#CCCCDD\"]",
-              /*l->id=*/id++,
-              strKillQuote(l->token));
+              id++,strKillQuote(l->token,kQTok));
     else /* */ ;
     id=astTreeSaveNodes(fTreeOutput, l->children, id);
   }
+  free(kQTok);
   return id;
 }
 

@@ -237,12 +237,12 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   
   switch(n->tokenid){
 
-    // Si il y a un forall, il y an un item à skiper après
-    case(FORALL):break;
-    case(NODE):break;
-    case(CELL):break;
-    case(FACE):break;
-    case(PARTICLE):break;
+    // Si il y a un forall, il y a un item à skiper après
+  case(FORALL):break;
+  case(NODE):break;
+  case(CELL):break;
+  case(FACE):break;
+  case(PARTICLE):break;
     
   case (TIME):{ nprintf(nabla, NULL, "global_time[0]"); break;}
     

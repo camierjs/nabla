@@ -314,6 +314,7 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
     if (nccAxlGenerateOption(arc, opt)!=NABLA_OK) return NABLA_ERROR;
   fprintf(arc->axl,"\n\t\t</options>");
 
-  
+  free(entry_point);
+
   return NABLA_OK;
 }

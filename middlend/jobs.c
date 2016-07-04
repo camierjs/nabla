@@ -45,6 +45,14 @@
 #include "backends/arcane/arcane.h"
 
 // ****************************************************************************
+// * nMiddleJobFree
+// ****************************************************************************
+void nMiddleJobFree(nablaMain *nabla){
+  for(nablaJob *job=nabla->entity->jobs;job!=NULL;job=job->next)
+    free(job);
+}
+
+// ****************************************************************************
 // * Backend Generic for JOBS - New, Add, Last functions
 // ****************************************************************************
 nablaJob *nMiddleJobNew(nablaEntity *entity){

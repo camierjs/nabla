@@ -365,6 +365,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     }//else nprintf(n,NULL,"/*NULL_called_variables*/");
     nprintf(n, NULL, ");");
   }
+  free(entry_points);
   return NABLA_OK;
 }
 

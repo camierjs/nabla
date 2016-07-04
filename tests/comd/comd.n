@@ -288,7 +288,7 @@ void initSim(void) @ -5.0{
          << " " << yBoxsize/cutoff << " " << zBoxsize/cutoff;
   nsteps=10;
   info() << "Starting simulation";
-  deltat = 1.0e-15;
+  δt = 1.0e-15;
   ts=timeNow();
   ns=(double)(1+nsteps);
 }
@@ -506,7 +506,7 @@ int getIBoxFromIxyz3(int x, int y, int z){
 // ****************************************************************************
 void nTimeSteps(void) @ 2.0{
   int i;
-  Real dt = deltat * bohr_per_atu_to_A_per_s;
+  Real dt = δt * bohr_per_atu_to_A_per_s;
   for(i=0;i<nsteps;i++){
     advancePositions(dt/2.);
     computeForce();

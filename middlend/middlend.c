@@ -70,16 +70,16 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 // * nMiddleSwitch
 // * The CUDA, KOKKOS & LAMBDA backends uses middlend/animate.c
 // ****************************************************************************
-int nMiddleSwitch(astNode *root,
-                  const int optionDumpTree,
-                  const char *nabla_entity_name,
-                  const NABLA_BACKEND backend,
-                  const BACKEND_OPTION option,
-                  const BACKEND_PARALLELISM parallelism,
-                  const BACKEND_COMPILER compiler,
-                  char *interface_name,
-                  char *specific_path,
-                  char *service_name){
+NABLA_STATUS nMiddleSwitch(astNode *root,
+                           const int optionDumpTree,
+                           const char *nabla_entity_name,
+                           const NABLA_BACKEND backend,
+                           const BACKEND_OPTION option,
+                           const BACKEND_PARALLELISM parallelism,
+                           const BACKEND_COMPILER compiler,
+                           char *interface_name,
+                           char *specific_path,
+                           char *service_name){
   nablaMain *nabla=nMiddleInit(nabla_entity_name);
   nabla->root=root;
   dbg("\n\t[nablaMiddlendSwitch] On initialise le type de backend\
@@ -109,5 +109,12 @@ int nMiddleSwitch(astNode *root,
          fprintf(stderr,
                  "\nError while switching backend!\n"));
   }
-  return animate(nabla);
+  if (animate(nabla)!=NABLA_OK)
+    exit(NABLA_ERROR|
+         fprintf(stderr,
+                 "\nError while animating backend!\n"));
+  nMiddleOptionFree(nabla);
+  nMiddleJobFree(nabla);
+  free(nabla);
+  return NABLA_OK;   
 }

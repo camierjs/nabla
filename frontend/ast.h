@@ -51,7 +51,7 @@ typedef struct astNodeStruct{
   char *token;
   const char *token_utf8;
   int tokenid;
-  const char * rule;
+  const char *rule;
   int ruleid;
   bool type_name;
   struct astNodeStruct *next, *children, *parent;  

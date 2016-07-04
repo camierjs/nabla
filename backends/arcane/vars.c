@@ -64,6 +64,7 @@ void aHookVariablesInit(nablaMain *nabla){}
  *****************************************************************************/
 //static nWhatWith noDefines[] ={ {NULL,NULL}};
 static nWhatWith arcaneDefines[] ={
+  {"m_global_greek_deltat","m_global_deltat"},
   {"reducemin(a)","0.0"},
   {"dot(a,b)","math::scaMul(a,b)"},
   {"opScaMul(a,b)","math::scaMul(a,b)"},

@@ -68,10 +68,10 @@
 
      <!-- Options de deformations de maillages-->
      <option_rdq>false</option_rdq>
-     <option_rdq_al>0.3</option_rdq_al>
+     <option_rdq_greek_alpha>0.3</option_rdq_greek_alpha>
 
      <option_sncq>false</option_sncq>
-     <option_sncq_th>0.25</option_sncq_th>
+     <option_sncq_greek_theta>0.25</option_sncq_greek_theta>
      
      <option_kershaw>false</option_kershaw>
 
@@ -95,9 +95,9 @@
      <option_spin_greek_theta_y>3.0</option_spin_greek_theta_y>
 
      <option_ini_temperature>0.0</option_ini_temperature>
-     <option_PartMg_temperature>0.0</option_PartMg_temperature>
+     <option_partialgreek_capital_omega_temperature>0.0</option_partialgreek_capital_omega_temperature>
      <option_max_iterations>8192</option_max_iterations>
-     <option_picard_ep>1e-6</option_picard_ep>
+     <option_picard_greek_epsilon>1e-6</option_picard_greek_epsilon>
 
      <alephEpsilon>1e-10</alephEpsilon>
      <alephMaxIterations>8192</alephMaxIterations>

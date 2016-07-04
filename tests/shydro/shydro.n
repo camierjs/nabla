@@ -123,7 +123,7 @@ global{
 // ****************************************************************************
 void ini(void) @ -6{
   m_cell_cqs.resize(8);
-  deltat=OPTION_DELTAT_INI;
+  δt=OPTION_DELTAT_INI;
 }
 
 
@@ -244,7 +244,7 @@ void iniGeometry(void) @ -4{
 // ****************************************************************************
 ∀ nodes void computeVelocity(void)
   in (node nMass, node force) inout (node velocity) @ 1.0{
-  velocity+=(deltat/nMass)*force;
+  velocity+=(δt/nMass)*force;
 }
 
 // ****************************************************************************
@@ -282,7 +282,7 @@ void iniGeometry(void) @ -4{
 // * Calcul des nouvelles coordonnées des noeuds
 // ****************************************************************************
 ∀ nodes void moveNodes(void) in (node velocity) @ 3.0{
-  coord += deltat * velocity;
+  coord += δt * velocity;
   //info()<< "[moveNodes] coord="<<coord;
 }
 
@@ -364,7 +364,7 @@ void updateDensityRatioMaximum(void) @ 6.0{
   Real numer_accrois_nrj = 1.0 + x * (1.0 - γVolume);
   Real denom_accrois_nrj = 1.0 + x * (1.0 - 1.0 / γVolume);
   internal_energy *= numer_accrois_nrj / denom_accrois_nrj;
-  internal_energy -= deltat * viscosity_work / (cMass*denom_accrois_nrj);
+  internal_energy -= δt * viscosity_work / (cMass*denom_accrois_nrj);
 }
 
 // ****************************************************************************
@@ -404,8 +404,8 @@ void computeDeltaT(void) @ 10.2{
   new_dt = max(new_dt, OPTION_DELTAT_MIN);
   if (time+new_dt >= OPTION_TIME_END)
     subDomain()->timeLoopMng()->stopComputeLoop(true);
-  deltat=new_dt;
-  info()<<"[computeDeltaT] delta_t="<<deltat;
+  δt=new_dt;
+  info()<<"[computeDeltaT] delta_t="<<δt;
 }
 
 

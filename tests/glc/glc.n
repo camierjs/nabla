@@ -136,7 +136,7 @@ global{
 // ****************************************************************************
 
 void hydroInit(void) @ -25.0{
-  deltat=option_δt_ini;
+  δt=option_δt_ini;
   assert(option_triangles^option_quads^option_hexa^option_cylinder);
 }
 
@@ -236,11 +236,11 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 }
 
 ∀ cells @ 19.0{
-  u += deltat*momentum_fluxes_Σ/m;
-  ρΕ += deltat*total_energy_fluxes_Σ/m;
+  u += δt*momentum_fluxes_Σ/m;
+  ρΕ += δt*total_energy_fluxes_Σ/m;
 }
 
-∀ nodes @ 22.0 { coord += deltat*node_u; }
+∀ nodes @ 22.0 { coord += δt*node_u; }
 
 ∀ cells @ 26.0 { ρ = m/V; }
 
@@ -276,8 +276,8 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
 void hydroTimeStepCtrl(void) @ 35.0{
   ℝ new_δt=option_δt_control*global_δt;
   // on calcule les variations min et max autorisées
-  const ℝ max_time_step = (1.0+option_δt_max_variation)*deltat;
-  const ℝ min_time_step = (1.0-option_δt_min_variation)*deltat;
+  const ℝ max_time_step = (1.0+option_δt_max_variation)*δt;
+  const ℝ min_time_step = (1.0-option_δt_min_variation)*δt;
   if (new_δt > max_time_step) new_δt=max_time_step;
   if (new_δt < min_time_step) new_δt=min_time_step;
   new_δt = min(new_δt, option_δt_max);
@@ -286,7 +286,7 @@ void hydroTimeStepCtrl(void) @ 35.0{
   if (option_δt_last_exact && ((time + new_δt) > option_δt_end)) 
       new_δt = option_δt_end - time;
   if ((time>=option_δt_end) || (new_δt==0.0)) exit;
-  deltat=new_δt;
-  info()<<"[1;32m final δt="<<deltat<<"[0m";
+  δt=new_δt;
+  info()<<"[1;32m final δt="<<δt<<"[0m";
   if (option_max_iterations!=0 && GlobalIteration >= option_max_iterations) exit;
 }

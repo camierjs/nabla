@@ -48,14 +48,13 @@ with ℵ;
 // ****************************************************************************
 options{
   // Mesh options
-  ℝ LENGTH                    = 1.0;
-  ℕ X_EDGE_ELEMS              = 8;
-  ℕ Y_EDGE_ELEMS              = 8;
-  ℕ Z_EDGE_ELEMS              = 8;
+  ℝ LENGTH                   = 1.0;
+  ℕ X_EDGE_ELEMS             = 8;
+  ℕ Y_EDGE_ELEMS             = 8;
+  ℕ Z_EDGE_ELEMS             = 8;
   Bool option_quads          = true;
   Bool option_triangles      = false;  
-  ℝ option_deltat            = 0.0001;
-  ℝ option_δt_initial        = 0.0;
+  ℝ option_δt_ini            = 0.0001;
   ℝ option_stoptime          = 0.1;
   ℝ option_ini_temperature   = 300.0;
   ℝ option_hot_temperature   = 700.0;
@@ -100,7 +99,7 @@ faces{
 // ****************************************************************************
 
 void ini(void) @ -10.0{
-  deltat=option_deltat;
+  δt=option_δt_ini;
 }
 
 ∀ cells void iniCells(void) out (cell θ) @ -10.0{
@@ -138,7 +137,7 @@ void rhsInit(void) @ 1.0{
 }
 
 ∀ own outer faces void setRhsFaceValues(void) in (cell θ, face ih2, face bcθ) @ 1.2{
-  const ℝ value = deltat*ih2*bcθ;
+  const ℝ value = δt*ih2*bcθ;
   ℵ rhs addValue(θ, cell(0), value);
 }
 
@@ -153,7 +152,7 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 // ****************************************************************************
 
 ∀ inner faces void setInnerFacesValues(void) in (cell θ, face ih2) @ 2.1{
-  const ℝ δtDivSurface = -deltat*ih2;
+  const ℝ δtDivSurface = -δt*ih2;
   //info()<<"\n[setInnerFacesValues] backCell="<<backCell;
 //if (backCell.isOwn())
     ℵ matrix setValue(θ,backCell, θ,frontCell, δtDivSurface);
@@ -164,7 +163,7 @@ void iniAleph(void) @ 2.0 { alephInitialize(); }
 ∀ own cells void setCellsValues(void) in (cell θ/*, face ih2*/) @ 2.2{
   ℝ diagonalTerme=0.0;
   ∀ face diagonalTerme += ih2;
-  diagonalTerme*=deltat;
+  diagonalTerme*=δt;
   diagonalTerme+=1.0;
   ℵ matrix setValue(θ,this, θ,this, diagonalTerme);
 }

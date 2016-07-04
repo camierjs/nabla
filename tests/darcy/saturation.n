@@ -61,7 +61,7 @@
   const ℝ wfrac_flow = (velocity > 0.) ?
     water_mobility[frontCell]/total_mobility[frontCell]:
     water_mobility[backCell]/total_mobility[backCell];
-  const ℝ tmp = velocity*wfrac_flow*deltat;
+  const ℝ tmp = velocity*wfrac_flow*δt;
   const ℝ tmpf = tmp/(cell_measure[frontCell]*porosity[frontCell]);
   const ℝ tmpb = tmp/(cell_measure[backCell]*porosity[backCell]);
   water_saturation_local[frontCell] -= tmpf;
@@ -76,7 +76,7 @@
   if ((face_center.x!=option_bc_Xmin) &&
       (face_center.x!=option_bc_Xmax)) continue;
   const ℝ velocity = ((this) is isSubDomainBoundaryOutside)?-total_velocity:+total_velocity;
-  const ℝ tmp = velocity * deltat / (cell_measure[0] * porosity[0]);
+  const ℝ tmp = velocity * δt / (cell_measure[0] * porosity[0]);
   if (velocity < 0.0) { // Injection d'huile
     const ℝ local_water_mobility = krw(0.0) / water_viscosity[0];
     const ℝ local_oil_mobility = krw(1.0) / oil_viscosity[0];
@@ -118,8 +118,8 @@ void needSmallerTimeStep(void) @ WATER_SATURATION_HLT/6.0 {
     redo_with_a_smaller_time_step=0;
   else{
     /*info()<< "\33[31m[computeExplicitWaterSaturation] "
-      << "Redoing with a smaller time step: "<<deltat<<"\33[m";*/
-    deltat=½*deltat;
+      << "Redoing with a smaller time step: "<<δt<<"\33[m";*/
+    δt=½*δt;
   }
 }
 

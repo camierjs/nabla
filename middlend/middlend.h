@@ -320,6 +320,7 @@ nablaJob *nMiddleJobLast(nablaJob*);
 nablaJob *nMiddleJobFind(nablaJob*,const char*);
 void nMiddleJobParse(astNode*,nablaJob*);
 void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
+void nMiddleJobFree(nablaMain*);
 
 // nMiddleVariables.c
 nablaVariable *nMiddleVariableNew(nablaMain*);
@@ -349,6 +350,7 @@ nablaType *nMiddleTypeAdd(nablaType*,nablaType*);
 nablaType *nMiddleTypeFindName(nablaType*,char*);
 
 // nMiddleOptions.c
+void nMiddleOptionFree(nablaMain*);
 nablaOption *nMiddleOptionNew(nablaMain*);
 nablaOption *nMiddleOptionLast(nablaOption*);
 nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);
@@ -367,14 +369,14 @@ void nMiddleGrammar(astNode*,nablaMain*);
 void nMiddleInsertSpace(nablaMain*,astNode*);
 
 // nMiddle
-int nMiddleSwitch(astNode*,
-                  const int,
-                  const char*,
-                  const NABLA_BACKEND,
-                  const BACKEND_OPTION,
-                  const BACKEND_PARALLELISM,
-                  const BACKEND_COMPILER,
-                  char*,char*,char*);
+NABLA_STATUS nMiddleSwitch(astNode*,
+                           const int,
+                           const char*,
+                           const NABLA_BACKEND,
+                           const BACKEND_OPTION,
+                           const BACKEND_PARALLELISM,
+                           const BACKEND_COMPILER,
+                           char*,char*,char*);
 
 // nMiddlePrintf
 int nprintf(const struct nablaMainStruct*,const char*,const char*,...);

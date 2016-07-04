@@ -50,7 +50,7 @@
 // ****************************************************************************
 
 void init(void) @ -20.0{
-   deltat=option_δt_initial;
+   δt=option_δt_initial;
 }
 
 ∀ cells void initCellUid(void) out (cell cell_uid) @ -10.0 {

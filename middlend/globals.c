@@ -49,16 +49,14 @@
 // ****************************************************************************
 void middleGlobals(nablaMain *nabla){
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding global greek_deltat, time");
+  
   nablaVariable *greek_deltat = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, greek_deltat);
   greek_deltat->axl_it=false;
   greek_deltat->item=strdup("global");
   greek_deltat->type=strdup("real");
-//#warning BACKEND_ARCANE switch
-  if (nabla->backend==BACKEND_ARCANE)
-    greek_deltat->name=strdup("deltat");
-  else
-    greek_deltat->name=strdup("greek_deltat");
+  greek_deltat->name=strdup("greek_deltat");
+  
   nablaVariable *time = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, time);
   time->axl_it=false;
@@ -66,6 +64,7 @@ void middleGlobals(nablaMain *nabla){
   time->type=strdup("double");
   time->name=strdup("time");
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
+  
   nablaVariable *coord = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, coord);
   coord->axl_it=true;

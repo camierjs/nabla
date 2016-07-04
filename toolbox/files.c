@@ -72,12 +72,13 @@ void toolUnlink(char *pathname){
 // * nToolFileCatAndHackIncludes
 // ****************************************************************************
 int toolCatAndHackIncludes(const char *list_of_nabla_files,
-                                const char *cat_sed_temporary_file_name){
+                           const char *cat_sed_temporary_file_name){
   size_t size;
 //#warning BUFSIZ pour les anciens compilos/stations ?
-  char *buf=(char*)calloc(BUFSIZ,sizeof(char));
+  char *buf=(char*)calloc(BUFSIZ+1,sizeof(char));
   char *pointer_that_matches=NULL;
-  char *nabla_file_name, *dup_list_of_nabla_files=strdup(list_of_nabla_files);
+  char *nabla_file_name=NULL;
+  char *dup_list_of_nabla_files=strdup(list_of_nabla_files);
   FILE *cat_sed_temporary_file=NULL;
   
   printf("\r%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
