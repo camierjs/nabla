@@ -9,7 +9,7 @@ The standard steps for installation are:
     1. Make sure you have a C/C++ compiler
     2. Make sure you have cmake (at least 2.8) on your system
     3. Look at the top Makefile and patch the paths (compiler and cmake)
-    4. Look at the top CMake/CMakeTPL.txt and patch the paths ((Arcane) and Trilinos)
+    4. Look at the top cmake/CMakeTPL.txt and patch the paths ((Arcane) and Trilinos)
     5. Launch 'make' in here
     6. Test the distribution by typing 'make test'
     7. You can rerun make clean/config/install to clean/configure/install as you wish

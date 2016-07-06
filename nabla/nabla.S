@@ -44,9 +44,9 @@
    .globl ${ABI_UNDERSCORE}nabla_license
    
 ${ABI_UNDERSCORE}nabla_version: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/VERSION"
+	.incbin "${NABLA_SOURCE_DIR}/VERSION"
    .byte 0
    
 ${ABI_UNDERSCORE}nabla_license: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+	.incbin "${NABLA_SOURCE_DIR}/LICENSE"
    .byte 0

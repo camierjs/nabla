@@ -1,7 +1,7 @@
 ARCANE_PKG_PATH = ${ARCANE_ROOT}/lib/pkgconfig
 HYODA = ${ARCANE_ROOT}/bin/hyoda
 
-NABLA = ${NABLA_BINARY_DIR}/nabla
+NABLA = ${NABLA_BINARY_DIR}/nabla/nabla
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc

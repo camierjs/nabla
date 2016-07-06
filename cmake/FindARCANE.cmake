@@ -1,4 +1,4 @@
-include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 
 #info("ARCANE_ROOT set to ${ARCANE_ROOT}")
 

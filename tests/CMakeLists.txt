@@ -3,7 +3,7 @@
 ###############
 enable_testing()
 info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} gathering ${VT100_FG_YELLOW}TESTS${VT100_RESET}")
-include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 
 ##########
 # Meshes #

@@ -1,4 +1,4 @@
-include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 
 find_path(HYPRE_INCLUDE_DIR HYPRE.h ${HYPRE_ROOT}/include)
 

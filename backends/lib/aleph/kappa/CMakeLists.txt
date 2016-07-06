@@ -1,4 +1,4 @@
-include(${NABLA_SOURCE_DIR}/CMake/CMakeTPL.txt)
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 
 info("\t${VT100_FG_YELLOW}Aleph::Kappa${VT100_RESET}")
 
