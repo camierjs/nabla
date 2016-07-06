@@ -127,9 +127,10 @@ public:
                              size_z(z),
                              uid_idx(0)
   {
-    cells.resize(x*y*z);
-    faces.resize(x*y*z);
-    nodes.resize((x+1)*(y+1)*(z+1));
+    // Only used for ordering, we'll look at it later
+    //cells.resize(x*y*z);
+    //faces.resize(x*y*z);
+    //nodes.resize((x+1)*(y+1)*(z+1));
   }
 public:
   int size(){ return size_x*size_y*size_z; }
@@ -148,35 +149,6 @@ private:
   items nodes;
 };
 
-
-// ****************************************************************************
-// * Variables Stuff
-// ****************************************************************************
-/*class IVariable{
-public:
-  virtual int dimension() const =0;
-  virtual items itemGroup() const =0;
-  virtual const string& name() const =0;
-  virtual eItemKind itemKind() const =0;
-};
-
-class Variable{
-public:
-  virtual IVariable* variable() const =0;
-};
-
-template <typename T>
-class VariableItemT:public vector<T>{
-public:
-  VariableItemT(eItemKind ik){}
-  string name() { return "name";}
-  T& operator[](items::iterator itm) { return this->at(itm->uniqueId());}
-  T& operator[](const item itm) { return this->at(0);}
-  void synchronize(){}
-};
-
-typedef VariableItemT<int> VariableItemInt;
-*/
 
 // ****************************************************************************
 // * Parallel Stuff
