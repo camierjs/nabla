@@ -51,6 +51,7 @@
     "material" "materials" 
     "environment" "environments" 
     "options" "option" "enum"
+    "variables"
     ) "List of Nabla items")
 
 (defconst nabla-types
@@ -153,9 +154,9 @@
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
    ;; highlight special keywords
-   '("\\(∀\\|³\\)" . font-lock-keyword-face)
+   '("\\(∀\\|ℵ\\|³\\|ᵈ\\)" . font-lock-keyword-face)
    ;; highlight special characters
-   '("\\(ℝ\\|ℤ\\|ℕ\\|ℾ\\)" . font-lock-type-face)
+   '("\\(ℝ\\|ℤ\\|ℕ\\|ℾ\\|ℂ\\)" . font-lock-type-face)
    ;; highlight numbers[-+]?
    '("\\W\\([0-9._]+\\)\\>" 1 font-lock-constant-face)
    ;; highlight true, false

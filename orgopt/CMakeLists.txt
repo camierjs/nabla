@@ -5,7 +5,7 @@ add_flex_bison_dependency(oScanner oParser)
 
 add_library(OrgOpt ${BISON_oParser_OUTPUTS}
             ${FLEX_oScanner_OUTPUTS}
-            ${NABLA_SOURCE_DIR}/toolbox/utf8.c
+            ${NABLA_SOURCE_DIR}/tools/utf8.c
             ${NABLA_SOURCE_DIR}/frontend/astNode.c
             ${NABLA_SOURCE_DIR}/frontend/dbg.c)
 

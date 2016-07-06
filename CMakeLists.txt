@@ -8,7 +8,7 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RES
 info("${VT100_BOLD}${VT100_FG_GREEN}# Welcome to the NABLA Project! #${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RESET}")
 
-project(Nabla)
+project(Nabla C CXX ASM)
 
 string(FIND ${CMAKE_HOST_SYSTEM} "Linux-2.6" OLD_LINUX_KERNEL)
 if (OLD_LINUX_KERNEL EQUAL 0)
@@ -20,7 +20,6 @@ endif(OLD_LINUX_KERNEL EQUAL 0)
 ####################
 # FLAGS & INCLUDES #
 ####################
-enable_language(ASM) 
 set(CMAKE_C_FLAGS "-g -Wall -std=c99")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/nabla)
@@ -110,7 +109,7 @@ add_subdirectory(nabla)
 add_subdirectory(orgopt)
 add_subdirectory(frontend)
 add_subdirectory(middlend)
-add_subdirectory(toolbox)
+add_subdirectory(tools)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
