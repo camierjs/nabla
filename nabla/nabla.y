@@ -1005,11 +1005,15 @@ inline int yyNameTranslate(int tokenid){
 // * rulenameToId
 // ****************************************************************************
 int rulenameToId(const char *rulename){
-  const size_t rnLength=strlen(rulename);
-  for(int i=0; yytname[i]!=NULL;i+=1){
+  //printf("[1;33m[rulenameToId] looking for '%s':[0m",rulename);    
+  //const size_t rnLength=strlen(rulename);
+  for(int i=YYNTOKENS; yytname[i]!=NULL;i+=1){
     //if (strlen(yytname[i])!=rnLength) continue;
-    //if (strcmp(yytname[i], rulename)!=0) continue;
-    if (strncmp(yytname[i], rulename, 1+rnLength)!=0) continue;
+    if (strcmp(yytname[i], rulename)!=0) continue;
+    //if (strncmp(yytname[i], rulename, rnLength)!=0) continue;
+    //printf("[1;33m #%d, line %d[0m\n",i,yyrline[i]);    
+//#warning rulenameToId exit
+    //exit(0);
     return i;
   }
   dbg("[rulenameToId] error with '%s'",rulename);
