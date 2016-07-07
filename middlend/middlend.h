@@ -106,10 +106,10 @@ typedef struct nablaTypeStruct{
 // * Nabla OPTION struct
 // ****************************************************************************
 typedef struct nablaOptionStruct{
-  bool axl_it;
   char *type; // int, Real, Real3, etc.
   char *name; // son nom
   char *dflt; // sa valeur par défault
+  bool axl_it;
   struct nablaMainStruct *main;
   struct nablaOptionStruct *next;
 }nablaOption;
@@ -119,7 +119,6 @@ typedef struct nablaOptionStruct{
 // * Nabla VARIABLE struct
 // ****************************************************************************
 typedef struct nablaVariableStruct{
-  bool axl_it;
   char *item; // node, cell, etc.
   char *type; // int, Real, Real3, etc.
   char *name; // son nom
@@ -132,6 +131,7 @@ typedef struct nablaVariableStruct{
   bool out;
   bool is_gathered;
   inout_mode inout;
+  bool axl_it;
   struct nablaMainStruct *main;
   struct nablaVariableStruct *next;
 }nablaVariable;
@@ -141,6 +141,7 @@ typedef struct nablaVariableStruct{
 // * Nabla JOB struct
 // ****************************************************************************
 typedef struct nablaJobStruct{
+  double struct_start;
   bool is_an_entry_point;
   bool is_a_function;
   bool has_to_be_unlinked;
@@ -304,6 +305,7 @@ bool isWithLibrary(nablaMain*,with_library);
 void nMiddleLibraries(astNode*,nablaEntity*);
 
 // nMiddleEntities.c
+void nMiddleEntityFree(nablaEntity*);
 nablaEntity *nMiddleEntityNew(nablaMain*);
 nablaEntity *nMiddleEntityAddEntity(nablaMain*,nablaEntity*);
 
@@ -323,6 +325,7 @@ void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
 void nMiddleJobFree(nablaMain*);
 
 // nMiddleVariables.c
+void nMiddleVariableFree(nablaVariable*);
 nablaVariable *nMiddleVariableNew(nablaMain*);
 nablaVariable *nMiddleVariableAdd(nablaMain*,nablaVariable*);
 nablaVariable *nMiddleVariableLast(nablaVariable*);
@@ -350,7 +353,7 @@ nablaType *nMiddleTypeAdd(nablaType*,nablaType*);
 nablaType *nMiddleTypeFindName(nablaType*,char*);
 
 // nMiddleOptions.c
-void nMiddleOptionFree(nablaMain*);
+void nMiddleOptionFree(nablaOption*);
 nablaOption *nMiddleOptionNew(nablaMain*);
 nablaOption *nMiddleOptionLast(nablaOption*);
 nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);

@@ -43,11 +43,13 @@
 #ifndef _NABLA_TOOLS_H_
 #define _NABLA_TOOLS_H_
 
+
+char *sdup(const char*);
+void sfree(void);
+
 char *toolStrDownCase(const char*);
 char *toolStrUpCase(const char*);
-char *toolStrUpCaseAndSwap(const char*,
-                           const char,
-                           const char);
+char *toolStrUpCaseAndSwap(const char*,const char,const char);
 char *toolStrQuote(const char*);
 char *pth2nmspc(const char*);
 

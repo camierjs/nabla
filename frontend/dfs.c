@@ -47,9 +47,8 @@
 // * Generic DFS scan for specifics actions
 // ****************************************************************************
 void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc){
-  register unsigned int nId=tokenidToRuleid(n->tokenid);
-  register int i;
-  for(i=0;tokact[i].action!=NULL;++i)
+  unsigned int nId=tokenidToRuleid(n->tokenid);
+  for(int i=0;tokact[i].action!=NULL;++i)
     if ((nId==tokact[i].ruleid)||(n->ruleid==tokact[i].ruleid)) tokact[i].action(n,arc);
   if(n->children != NULL) scanTokensForActions(n->children, tokact, arc);
   if(n->next != NULL) scanTokensForActions(n->next, tokact, arc);
@@ -64,7 +63,7 @@ char *dfsFetchFirst(astNode *n, int ruleid){
   //if (n->ruleid!=0) dbg("\n\t[dfsFetchFirst] n->rule=%s",n->rule);
   if (n->ruleid==ruleid) {
     //dbg("\n\t\t[dfsFetchFirst] returning token '%s'",n->children->token);
-    return strdup(n->children->token);
+    return sdup(n->children->token);
   }
   if (n->children != NULL){
     if ((rtn=dfsFetchFirst(n->children, ruleid))!=NULL){
@@ -290,9 +289,9 @@ static void addNablaVariableList(nablaMain *nabla,
     }else{
       // Création d'une nouvelle called_variable
       nablaVariable *new = nMiddleVariableNew(NULL);
-      new->name=strdup(hit->name);
-      new->item=strdup(hit->item);
-      new->type=strdup(hit->type);
+      new->name=sdup(hit->name);
+      new->item=sdup(hit->item);
+      new->type=sdup(hit->type);
       new->dim=hit->dim;
       new->size=hit->size;
       // Rajout à notre liste

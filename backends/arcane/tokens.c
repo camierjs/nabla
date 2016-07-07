@@ -66,12 +66,12 @@ void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
 // ****************************************************************************
 // * nArcaneHookTokenPrefix
 // ****************************************************************************
-char* arcaneHookTokenPrefix(nablaMain *nabla){return strdup("m_");}
+char* arcaneHookTokenPrefix(nablaMain *nabla){return sdup("m_");}
 
 // ****************************************************************************
 // * nArcaneHookTokenPostfix
 // ****************************************************************************
-char* arcaneHookTokenPostfix(nablaMain *nabla){return strdup("");}
+char* arcaneHookTokenPostfix(nablaMain *nabla){return sdup("");}
 
 
 

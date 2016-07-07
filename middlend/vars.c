@@ -43,16 +43,21 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
+void nMiddleVariableFree(nablaVariable *variable){
+  for(nablaVariable *this,*var=this=variable;var!=NULL;free(this))
+    var=(this=var)->next;
+}
+
 // ****************************************************************************
 // * nMiddleVariableNew: New, Last, Add & Find
 // ****************************************************************************
-nablaVariable *nMiddleVariableNew(nablaMain *arc){
+nablaVariable *nMiddleVariableNew(nablaMain *nabla){
 	nablaVariable *variable;
 	variable = (nablaVariable *)calloc(1,sizeof(nablaVariable));
  	assert(variable != NULL);
    variable->axl_it=true; // Par défaut, on dump la variable dans le fichier AXL
    variable->type=variable->name=variable->field_name=NULL;
-   variable->main=arc;
+   variable->main=nabla;
    variable->next=NULL;
    variable->gmpRank=-1;
    variable->dump=true;
@@ -62,19 +67,18 @@ nablaVariable *nMiddleVariableNew(nablaMain *arc){
   	return variable; 
 }
 
-nablaVariable *nMiddleVariableAdd(nablaMain *arc, nablaVariable *variable) {
+nablaVariable *nMiddleVariableAdd(nablaMain *nabla, nablaVariable *variable) {
   assert(variable != NULL);
-  if (arc->variables == NULL)
-    arc->variables=variable;
+  if (nabla->variables == NULL)
+    nabla->variables=variable;
   else
-    nMiddleVariableLast(arc->variables)->next=variable;
+    nMiddleVariableLast(nabla->variables)->next=variable;
   return NABLA_OK;
 }
 
 nablaVariable *nMiddleVariableLast(nablaVariable *variables) {
-   while(variables->next != NULL){
+   while(variables->next != NULL)
      variables = variables->next;
-   }
    return variables;
 }
 
@@ -287,7 +291,7 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
   // SI on a bien une primary_expression
   if (primary_expression->token!=NULL && primary_expression!=NULL){
     // On récupère de nom de la variable potentielle de cette expression
-    nablaVariable *var=nMiddleVariableFind(nabla->variables, strdup(primary_expression->token));
+    nablaVariable *var=nMiddleVariableFind(nabla->variables, sdup(primary_expression->token));
     if (var!=NULL){ // On a bien trouvé une variable nabla
       if (nabla_item!=NULL && nabla_system!=NULL){
         // Mais elle est bien postfixée mais par qq chose d'inconnu: should be smarter here!
@@ -382,9 +386,9 @@ static void dfsAddToUsedVariables(nablaJob *job,
   dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
   // Création d'une nouvelle used_variable
   new = nMiddleVariableNew(NULL);
-  new->name=strdup(var->name);
-  new->item=var->item;//strdup((job->nb_in_item_set==0)?var->item:job->item);
-  new->type=strdup(var->type);
+  new->name=sdup(var->name);
+  new->item=var->item;//sdup((job->nb_in_item_set==0)?var->item:job->item);
+  new->type=sdup(var->type);
   new->dim=var->dim;
   new->size=var->size;
   // Et on mémorise ce que l'on a fait en in/out
@@ -419,9 +423,9 @@ static void dfsAddToUsedVariables(nablaJob *job,
 nablaVariable* dfsVarThisOneSpecial(char* token, char* test, int d){
   if (strcmp(token,test)!=0) return NULL;
   nablaVariable *var=nMiddleVariableNew(NULL);
-  var->name=strdup(token);
-  var->item=strdup("xs");
-  var->type=strdup("int");
+  var->name=sdup(token);
+  var->item=sdup("xs");
+  var->type=sdup("int");
   var->dim=d;
   return var;
 }
@@ -442,10 +446,12 @@ static void dfsVarThisOne(nablaMain *nabla,
   if (var==NULL) var=dfsVarThisOneSpecial(token,"cell_prev",0);
   if (var==NULL) var=dfsVarThisOneSpecial(token,"cell_next",1);
   if (var==NULL){
+    nMiddleVariableFree(var);
     dbg("\n\t\t\t\t[dfsVarThisOne] var==NULL, returning");
     return;
   }
   dfsAddToUsedVariables(job,token,var,rw,left_of_assignment_expression);
+  nMiddleVariableFree(var);
 }
 
 

@@ -45,15 +45,15 @@
 #include "nabla.h"
 #include <stdio.h>
 #define YY_SKIP_YYWRAP
-  int yywrap(void){
-    // return 0; if we switch nabla input file
-    return 1;
-  }
-  extern int yylineno;
-  extern bool typedef_hit;
-  extern bool direct_declarator_hit;
-  extern nablaType *typedef_names;
-  char *last_identifier=NULL;
+int yywrap(void){
+  // return 0; if we switch nabla input file
+  return 1;
+}
+extern int yylineno;
+extern bool typedef_hit;
+extern bool direct_declarator_hit;
+extern nablaType *typedef_names;
+char *last_identifier=NULL;
 #undef YY_BUF_SIZE
 #define YY_BUF_SIZE 131072
 #undef YY_NEED_STRLEN
@@ -380,7 +380,7 @@ static int tok(YYSTYPE *yylval, int tokenid){
 // *
 // ****************************************************************************
 static int tok_type(YYSTYPE *yylval){
-  //last_identifier=strdup(yytext);
+  //last_identifier=sdup(yytext);
   //dbg("\n\t[tok_type] last_identifier is %s!",yytext);
   // On check s'il est déjà connu comme TYPEDEF_NAME
   if (nMiddleTypeFindName(typedef_names,yytext)!=NULL){

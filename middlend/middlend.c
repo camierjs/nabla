@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
+int yylex_destroy (void );
 
 // ****************************************************************************
 // * nMiddleInit
@@ -49,14 +50,14 @@
 static nablaMain *nMiddleInit(const char *nabla_entity_name){
   nablaMain *nabla=(nablaMain*)calloc(1,sizeof(nablaMain));
   nablaEntity *entity; 
-  nabla->name=strdup(nabla_entity_name);
+  nabla->name=sdup(nabla_entity_name);
   dbg("\n\t[nablaMiddlendInit] setting nabla->name to '%s'", nabla->name);
   dbg("\n\t[nablaMiddlendInit] Création de notre premier entity");
   entity=nMiddleEntityNew(nabla);
   dbg("\n\t[nablaMiddlendInit] Rajout du 'main'");
   nMiddleEntityAddEntity(nabla, entity);
   dbg("\n\t[nablaMiddlendInit] Rajout du nom de l'entity '%s'", nabla_entity_name);  
-  entity->name=strdup(nabla_entity_name);
+  entity->name=sdup(nabla_entity_name);
   entity->name_upcase=toolStrUpCase(nabla_entity_name);  // On lui rajoute son nom
   dbg("\n\t[nablaMiddlendInit] Rajout du name_upcase de l'entity %s", entity->name_upcase);  
   entity->main=nabla;                        // On l'ancre à l'unique entity pour l'instant
@@ -113,8 +114,13 @@ NABLA_STATUS nMiddleSwitch(astNode *root,
     exit(NABLA_ERROR|
          fprintf(stderr,
                  "\nError while animating backend!\n"));
-  nMiddleOptionFree(nabla);
   nMiddleJobFree(nabla);
+  nMiddleEntityFree(nabla->entity);
+  nMiddleOptionFree(nabla->options);
+  nMiddleVariableFree(nabla->variables);
+  sfree();
+  nAstListFree();
   free(nabla);
+  yylex_destroy();
   return NABLA_OK;   
 }

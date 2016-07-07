@@ -94,7 +94,7 @@ char* xHookForAllDump(nablaJob *job){
   dbg("\n\t[lambdaHookDumpEnumerate] format='%s'",format);
   if (sprintf(str,format,warping)<=0)
     nablaError("Could not patch warping within ENUMERATE!");
-  return strdup(str);
+  return sdup(str);
 }
 
 // **************************************************************************** 

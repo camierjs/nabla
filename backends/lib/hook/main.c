@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){\n"
 \t// ********************************************************\n\
 \t// Parse command-line options\n\
 \t// ********************************************************\n\
-\tint o,longindex=0;\n\
+\tint o; int longindex=0;\n\
 \tconst struct option longopts[]={\n\
 \t\t{\"org\",required_argument,NULL,0x3c0f6f4c},\n"
 #define BACKEND_MAIN_OPTIONS_POSTFIX "\
@@ -143,7 +143,7 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
-    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,0x%X},\n",opt->name,*(unsigned int*)&opt);
+    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,(int)0x%X},\n",opt->name,*(unsigned int*)&opt);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
 

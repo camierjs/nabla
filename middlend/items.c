@@ -64,7 +64,7 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
   }
   dbg("\n\t\t[actItemTypeSpecifier] nMiddleVariableAdd:");
   nMiddleVariableAdd(arc, variable);
-  variable->item=strdup(arc->tmpVarKinds);
+  variable->item=sdup(arc->tmpVarKinds);
   dbg("\n\t\t[actItemTypeSpecifier] item=%s",variable->item);
   // Par défaut, on met à '0' la dimension de la variable
   variable->dim=0;
@@ -77,7 +77,7 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
   if (strcmp(variable->type, "mpinteger")==0){
     variable->gmpRank=nMiddleVariableGmpRank(arc->variables);
     dbg("\n\t\t[actItemTypeSpecifier] Found GMP rank=%d", variable->gmpRank);
-    variable->type=strdup("integer");
+    variable->type=sdup("integer");
     variable->dim=1;
   }
  }
@@ -91,7 +91,7 @@ static void actItemDirectDeclarator(astNode * n, void *generic_arg){
   nablaVariable *variable =nMiddleVariableLast(arc->variables);
   dbg("\n\t\t[actItemDirectDeclarator]");
   dbg("\n\t\t[actItemDirectDeclarator] %s", n->children->token);
-  variable->name=strdup(n->children->token);
+  variable->name=sdup(n->children->token);
   if (variable->gmpRank!=-1)
     dbg("\n\t\t[actItemDirectDeclarator] Found GMP variable %s", variable->name);
 }
@@ -154,7 +154,7 @@ static void actItemComa(astNode * n, void *generic_arg){
   nablaVariable *last_variable = nMiddleVariableLast(arc->variables);
   variable->dump=true;
   nMiddleVariableAdd(arc, variable);
-  variable->item=strdup(arc->tmpVarKinds);
+  variable->item=sdup(arc->tmpVarKinds);
   // On utilise le type de la dernière variable pour cette nouvelle
   variable->type=last_variable->type;
   variable->dim=0;

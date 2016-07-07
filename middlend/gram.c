@@ -158,7 +158,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     dbg("\n\t[nMiddleGrammar] rule %s,  support %s",
         n->rule, item_support);
     // On backup temporairement le support (kind) de l'item
-    nabla->tmpVarKinds=strdup(switchItemSupportTokenid(item_support_tokenid));
+    nabla->tmpVarKinds=sdup(switchItemSupportTokenid(item_support_tokenid));
     nMiddleItems(n->children->next,
                rulenameToId("nabla_item_declaration"),
                nabla);

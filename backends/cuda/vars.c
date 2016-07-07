@@ -240,9 +240,9 @@ void cuHookVariablesInit(nablaMain *nabla){
   nablaVariable *device_shared_reduce_results = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, device_shared_reduce_results);
   device_shared_reduce_results->axl_it=false;
-  device_shared_reduce_results->item=strdup("global");
-  device_shared_reduce_results->type=strdup("real");
-  device_shared_reduce_results->name=strdup("device_shared_reduce_results");
+  device_shared_reduce_results->item=sdup("global");
+  device_shared_reduce_results->type=sdup("real");
+  device_shared_reduce_results->name=sdup("device_shared_reduce_results");
 
 }
 

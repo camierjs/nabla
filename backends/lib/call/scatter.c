@@ -56,7 +56,7 @@ char* xCallScatterCells(nablaJob *job,
            strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
            var->item, var->name,
            var->item, var->name);
-  return strdup(scatter);
+  return sdup(scatter);
 }
 
 
@@ -82,7 +82,7 @@ static char* xCallScatterFaces(nablaJob *job,
              var->dim==0?"":"/*xCallScatterFaces var->dim==1*/,",
              var->item, var->name);
   
-  return strdup(scatter);
+  return sdup(scatter);
 }
 
 
@@ -111,7 +111,7 @@ char* xCallFilterScatter(astNode *n,nablaJob *job){
     nablaError("[xCallFilterScatter] Could not calloc our scatters!");
 
   // On récupère le nombre de variables potentielles à scatterer
-   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+  for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     dbg("\n\t\t\t\t[xCallFilterScatter] var '%s'", var->name);
     if (!var->is_gathered) continue;
     //nprintf(job->entity->main, NULL, "\n\t/*gathered %s?*/",var->name);
@@ -119,5 +119,7 @@ char* xCallFilterScatter(astNode *n,nablaJob *job){
     //nprintf(job->entity->main, NULL, "/*out: %s*/",var->name);
     strcat(scatters,xCallScatter(job,var));
   }
-  return strdup(scatters);
+  char *rtn=sdup(scatters);
+  free(scatters);
+  return rtn;
 }

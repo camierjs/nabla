@@ -154,7 +154,6 @@ typedef enum{
 // * Forwards
 // ****************************************************************************
 int fileno(FILE *stream);
-char *strdup(const char *s);
 int mkstemp(char *template);
 #define nablaError(...) nablaErrorVariadic(__FILE__,__LINE__,__VA_ARGS__)
 void nablaErrorVariadic(const char *,const int,const char *,...);

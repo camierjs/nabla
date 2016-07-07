@@ -63,26 +63,26 @@ char* arcaneHookPrefixEnumerate(nablaJob *j){
       if (isAnArcaneFamily(j->entity->main)) return "";
       char prefix[2048];
       snprintf(prefix,2048,"debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());\n\t",j->entity->name,j->name);
-      return strdup(prefix);
+      return sdup(prefix);
     }
   }
   if (itm=='c'){
     char str[1024];
     if (sprintf(str,"CellDirectionMng cdm(m_cartesian_mesh->cellDirection(%s));",direction)<0)
       return NULL;
-    return strdup(str);
+    return sdup(str);
   }
   if (itm=='n'){
     char str[1024];
     if (sprintf(str,"NodeDirectionMng ndm(m_cartesian_mesh->nodeDirection(%s));",direction)<0)
       return NULL;
-    return strdup(str);
+    return sdup(str);
   }
   // Pour une fonction, on ne fait que le debug
   if (itm=='\0'){// && !isAnArcaneFamily(j->entity->main)){
     char prefix[2048];
     snprintf(prefix,2048,"\n\tdebug()<<\"\33[2;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
-    return strdup(prefix);
+    return sdup(prefix);
   }
 
   dbg("\n\t[arcaneHookPrefixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm);
@@ -421,7 +421,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     if (n->next->tokenid==IDENTIFIER){
       dbg("\n\t[arcaneHookSwitchToken] n->next->token is IDENTIFIER %s", n->next->token);
       dbg("\n\t[arcaneHookSwitchToken] n->next->next->token=%s", n->next->next->token);
-      iterator=strdup(n->next->token);
+      iterator=sdup(n->next->token);
       tokenid=n->next->next->tokenid;
     }else{
       tokenid=n->next->children->tokenid;

@@ -248,9 +248,9 @@ void xHookVariablesInit(nablaMain *nabla){
   nablaVariable *iteration = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, iteration);
   iteration->axl_it=false;
-  iteration->item=strdup("global");
-  iteration->type=strdup("int");
-  iteration->name=strdup("iteration");
+  iteration->item=sdup("global");
+  iteration->type=sdup("int");
+  iteration->name=sdup("iteration");
 }
 
 

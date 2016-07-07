@@ -62,12 +62,12 @@ void rajaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   nablaJob *redjob = nMiddleJobNew(nabla->entity);
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->return_type  = strdup("void");
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->direction  = strdup("NoDirection");
+  redjob->scope  = sdup("NoGroup");
+  redjob->region = sdup("NoRegion");
+  redjob->item   = sdup(item_node->token);
+  redjob->return_type  = sdup("void");
+  redjob->xyz    = sdup("NoXYZ");
+  redjob->direction  = sdup("NoDirection");
   // Init flush
   redjob->when_index = 0;
   redjob->whens[0] = 0.0;
@@ -81,8 +81,8 @@ void rajaHookReduction(struct nablaMainStruct *nabla, astNode *n){
   char job_name[NABLA_MAX_FILE_NAME];
   const unsigned long *adrs = (unsigned long*)&redjob->whens[redjob->when_index-1];
   snprintf(job_name,NABLA_MAX_FILE_NAME,"reduction_%s_at_0x%lx",global_var_name,*adrs);
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
+  redjob->name   = sdup(job_name);
+  redjob->name_utf8 = sdup(job_name);
 
   nMiddleJobAdd(nabla->entity, redjob);
   const bool min_reduction = reduction_operation_node->tokenid==MIN_ASSIGN;
@@ -115,17 +115,17 @@ void %s(RAJA::IndexSet *cellIdxSet,const int NABLA_NB_CELLS_WARP,\n\t\t\t\t\t\tc
 
   // Et on les rajoute pour faire croire qu'on a fait le DFS
   nablaVariable* new_global_var=nMiddleVariableNew(nabla);
-  new_global_var->name=strdup(global_var->name);
-  new_global_var->type=strdup(global_var->type);
+  new_global_var->name=sdup(global_var->name);
+  new_global_var->type=sdup(global_var->type);
   new_global_var->out=true;
-  new_global_var->item=strdup("global");
+  new_global_var->item=sdup("global");
   redjob->used_variables=new_global_var;
 
   nablaVariable* new_local_var=nMiddleVariableNew(nabla);
-  new_local_var->name=strdup(local_var->name);
-  new_local_var->type=strdup(local_var->type);
+  new_local_var->name=sdup(local_var->name);
+  new_local_var->type=sdup(local_var->type);
   new_local_var->in=true;
-  new_local_var->item=strdup(local_var->item);
+  new_local_var->item=sdup(local_var->item);
   redjob->used_variables->next=new_local_var;
 
   nprintf(nabla, NULL,"){\n\

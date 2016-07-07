@@ -179,11 +179,11 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       snprintf(name,11+18,"hltDive%d",i);
       dbg("\n\t\t[nMiddleEntryPointsSort] Adding hltDive%d before %s @ %f, name=%s",
           i,job->name,when,name);
-      entry_points[i].item = strdup("\0");
+      entry_points[i].item = sdup("\0");
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=true;
-      entry_points[i].name = strdup(name);
-      entry_points[i].name_utf8 = strdup(name);
+      entry_points[i].name = sdup(name);
+      entry_points[i].name_utf8 = sdup(name);
       entry_points[i].whens[0] = when;
       entry_points[i].when_index = 1;
       entry_points[i].when_depth = hlt_current_depth;
@@ -193,21 +193,21 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
   }
   
   dbg("\n\t\t[nMiddleEntryPointsSort] Adding ComputeLoopBegin [%d]", i);
-  entry_points[i].item = strdup("\0");
+  entry_points[i].item = sdup("\0");
   entry_points[i].is_an_entry_point=true;
   entry_points[i].is_a_function=true;
-  entry_points[i].name = strdup("ComputeLoopBegin");
-  entry_points[i].name_utf8 = strdup("ComputeLoopBegin");
+  entry_points[i].name = sdup("ComputeLoopBegin");
+  entry_points[i].name_utf8 = sdup("ComputeLoopBegin");
   entry_points[i].whens[0] = ENTRY_POINT_compute_loop;
   entry_points[i].when_index = 1;
   i+=1;
   
   dbg("\n\t\t[nMiddleEntryPointsSort] Adding ComputeLoopEnd [%d]", i);
-  entry_points[i].item = strdup("\0");
+  entry_points[i].item = sdup("\0");
   entry_points[i].is_an_entry_point=true;
   entry_points[i].is_a_function=true;
-  entry_points[i].name = strdup("ComputeLoopEnd");
-  entry_points[i].name_utf8 = strdup("ComputeLoopEnd");
+  entry_points[i].name = sdup("ComputeLoopEnd");
+  entry_points[i].name_utf8 = sdup("ComputeLoopEnd");
   entry_points[i].whens[0] = ENTRY_POINT_exit;
   entry_points[i].when_index = 1; 
 
@@ -235,11 +235,11 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       entry_points[i].when_depth=job->when_depth;
       // Pas utilisé, on passe après par la fonction nccAxlGeneratorEntryPointWhere
       if (entry_points[i].whens[0]>ENTRY_POINT_compute_loop)
-        entry_points[i].where=strdup("compute-loop");
+        entry_points[i].where=sdup("compute-loop");
       if (entry_points[i].whens[0]==-0.0)
-        entry_points[i].where=strdup("build");
+        entry_points[i].where=sdup("build");
       if (entry_points[i].whens[0]<ENTRY_POINT_start_init)
-        entry_points[i].where=strdup("init");
+        entry_points[i].where=sdup("init");
       assert(job->entity!=NULL);
       // On recopie les infos utiles pour le dump d'après
       entry_points[i].ifAfterAt=job->ifAfterAt;

@@ -9,6 +9,5 @@ add_library(OrgOpt ${BISON_oParser_OUTPUTS}
             ${NABLA_SOURCE_DIR}/frontend/astNode.c
             ${NABLA_SOURCE_DIR}/frontend/dbg.c)
 
-add_executable(orgopt orgopt.c)
-
-target_link_libraries(orgopt OrgOpt NablaFrontend NablaToolbox)
+#add_executable(orgopt orgopt.c)
+#target_link_libraries(orgopt OrgOpt NablaFrontend NablaToolbox)

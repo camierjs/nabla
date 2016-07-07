@@ -50,14 +50,14 @@ void nArcaneHLTInit(nablaMain *arc){
   nablaJob *hltInitFunction=nMiddleJobNew(arc->entity);
   hltInitFunction->is_an_entry_point=true;
   hltInitFunction->is_a_function=true;
-  hltInitFunction->scope  = strdup("NoScope");
-  hltInitFunction->region = strdup("NoRegion");
-  hltInitFunction->item   = strdup("\0");
-  hltInitFunction->return_type  = strdup("void");
-  hltInitFunction->name   = strdup("hltIni");
-  hltInitFunction->name_utf8 = strdup("hltIni");
-  hltInitFunction->xyz    = strdup("NoXYZ");
-  hltInitFunction->direction  = strdup("NoDirection");
+  hltInitFunction->scope  = sdup("NoScope");
+  hltInitFunction->region = sdup("NoRegion");
+  hltInitFunction->item   = sdup("\0");
+  hltInitFunction->return_type  = sdup("void");
+  hltInitFunction->name   = sdup("hltIni");
+  hltInitFunction->name_utf8 = sdup("hltIni");
+  hltInitFunction->xyz    = sdup("NoXYZ");
+  hltInitFunction->direction  = sdup("NoDirection");
   sprintf(&hltInitFunction->at[0],"-huge_valf");
   hltInitFunction->when_index  = 1;
   hltInitFunction->whens[0] = ENTRY_POINT_init;
@@ -110,7 +110,7 @@ static char* tab(int k){
   char *rtrn,*tabs=(char *)calloc(k+1,sizeof(char));
   for(int i=0;i<k;i+=1) tabs[i]='\t';
   tabs[k]=0;
-  rtrn=strdup(tabs);
+  rtrn=sdup(tabs);
   free(tabs);
   return rtrn;
 }

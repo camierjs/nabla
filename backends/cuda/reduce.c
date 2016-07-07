@@ -64,21 +64,21 @@ void cuHookReduction(struct nablaMainStruct *nabla, astNode *n){
   nablaJob *redjob = nMiddleJobNew(nabla->entity);
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(item_node->token);
-  redjob->return_type  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->direction  = strdup("NoDirection");
+  redjob->scope  = sdup("NoGroup");
+  redjob->region = sdup("NoRegion");
+  redjob->item   = sdup(item_node->token);
+  redjob->return_type  = sdup("void");
+  redjob->name   = sdup(job_name);
+  redjob->name_utf8 = sdup(job_name);
+  redjob->xyz    = sdup("NoXYZ");
+  redjob->direction  = sdup("NoDirection");
   redjob->called_variables=nMiddleVariableNew(nabla);
-  redjob->called_variables->item=strdup("cell");
+  redjob->called_variables->item=sdup("cell");
   redjob->called_variables->name=(char *)item_var_name;
   // On annonce que c'est un job de reduction pour
   // lancer le deuxieme etage de reduction dans la boucle
   redjob->reduction = true;
-  redjob->reduction_name = strdup(global_var_name);
+  redjob->reduction_name = sdup(global_var_name);
 
   // Init flush
   redjob->when_index = 0;

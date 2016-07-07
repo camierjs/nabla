@@ -43,11 +43,55 @@
 #include "nabla.h"
 
 
-/******************************************************************************
- * strDownCase
- ******************************************************************************/
+// ****************************************************************************
+// * sdup
+// ****************************************************************************
+char *strdup(const char *s);
+
+typedef struct nStrDup{
+  char *str;
+  struct nStrDup *next; 
+} nStrDup;
+
+static nStrDup *duped=NULL;
+static nStrDup *dplst=NULL;
+
+static nStrDup* snew(const char* str){
+  nStrDup *new=(nStrDup *)calloc(1,sizeof(nStrDup));
+  assert(new);
+  new->str=strdup(str);
+  return new;
+}
+
+static nStrDup *sadd(const char* str){
+  nStrDup *dup=duped;
+  if (duped == NULL) return dplst=duped=snew(str);
+  //for(;dup->next!=NULL;dup=dup->next);
+  dup=dplst;
+  return dplst=dup->next=snew(str);
+}
+
+char *sdup(const char *s){
+  //printf("[1;33m[sdup] '%s'[0m\n",s);
+  return sadd(s)->str;
+}
+
+void sfree(void){
+  //printf("[1;31m[sfree][0m\n");    
+  for(nStrDup *this,*dup=this=duped;dup!=NULL;){
+    dup=(this=dup)->next;
+    //printf("\t[1;33m[sfree] '%s'[0m\n",this->str);    
+    free(this->str);//if (this->str!=NULL){ free(this->str); this->str=NULL;}
+    free(this);//if (this!=NULL){ free(this);this=NULL;}
+  }
+}
+
+
+// ****************************************************************************
+// * strDownCase
+// ****************************************************************************
 char *toolStrDownCase(const char * str){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *bkp=p;
   for(;*p!=0;p++){
     if (*p>64 && *p<91) *p+=32;
@@ -60,7 +104,7 @@ char *toolStrDownCase(const char * str){
 // * path2namespace
 // ****************************************************************************
 char *pth2nmspc(const char *str){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *f=p;//forecast
   char *bkp=p;
   for(int i=0;*f!=0;p++,f++,i++){
@@ -83,7 +127,7 @@ char *pth2nmspc(const char *str){
  * strUpCase
  ******************************************************************************/
 char *toolStrUpCase(const char * str){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *bkp=p;
   for(;*p!=0;p++)
     if ((*p>=97)&&(*p<=122)) *p-=32;
@@ -95,7 +139,7 @@ char *toolStrUpCase(const char * str){
 // * toolStrUpCaseAndSwap
 // ****************************************************************************
 char *toolStrUpCaseAndSwap(const char * str, const char cHit, const char cNew){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *bkp=p;
   for(;*p!=0;p++){
     if (*p==cHit) *p=cNew;
@@ -109,7 +153,7 @@ char *toolStrUpCaseAndSwap(const char * str, const char cHit, const char cNew){
  * ''' to ' '
  ******************************************************************************/
 char *toolStrQuote(const char * str){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *bkp=p;
   for(;*p!=0;p++)
     if (*p==0x27) *p=0x20;
@@ -138,7 +182,7 @@ const char* mkktemp(const char *prefix){
       nablaError("[mkktemp] Could not mkstemp our unique_temporary_kernel_name!");
   
   assert(strrchr(prefix,'_')==NULL);
-  rtn=strdup(strrchr(unique_temporary_kernel_name,'_')+1);
+  rtn=sdup(strrchr(unique_temporary_kernel_name,'_')+1);
   free(unique_temporary_kernel_name);
   return rtn;
 }
@@ -161,4 +205,5 @@ void toolUnlinkKtemp(nablaJob *job){
     if (unlink(kernel_name)!=0)
       nablaError("Error while removing '%s' file", kernel_name);
   }
+  free(kernel_name);
 }

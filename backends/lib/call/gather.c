@@ -73,7 +73,7 @@ static char* xCallGatherCells(nablaJob *job,
               var->name,
               strcmp(var->type,"real")==0?"":"");
   
-  return strdup(gather);
+  return sdup(gather);
 }
 
 
@@ -93,7 +93,7 @@ static char* xCallGatherNodes(nablaJob *job,
            var->dim==0?"":"xs_node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],",
            var->item,
            var->name);
-  return strdup(gather);
+  return sdup(gather);
 }
 
 
@@ -121,7 +121,7 @@ static char* xCallGatherFaces(nablaJob *job,
              var->name,
              var->dim==0?"":"/*xCallGatherFaces and var->dim==1*/",
              var->item, var->name);
-  return strdup(gather);
+  return sdup(gather);
 }
 
 
@@ -172,6 +172,8 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
   dbg("\n\t\t\t\t[xFilterGather] gather_src_buffer='%s'",
       gather_src_buffer?gather_src_buffer:"NULL");
   dbg("\n\t\t\t\t[xFilterGather] done");
-  return gather_src_buffer;
+  char *rtn=sdup(gather_src_buffer);
+  free(gather_src_buffer);
+  return rtn;
 }
 

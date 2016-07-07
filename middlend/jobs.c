@@ -42,14 +42,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/arcane/arcane.h"
+
 
 // ****************************************************************************
 // * nMiddleJobFree
 // ****************************************************************************
 void nMiddleJobFree(nablaMain *nabla){
-  for(nablaJob *job=nabla->entity->jobs;job!=NULL;job=job->next)
-    free(job);
+  for(nablaJob *this,*job=this=nabla->entity->jobs;job!=NULL;free(this)){
+    free(job->item_set);
+    nMiddleVariableFree(job->used_variables);
+    nMiddleVariableFree(job->called_variables);
+    nMiddleVariableFree(job->variables_to_gather_scatter);
+    nMiddleOptionFree(job->used_options);
+    job=(this=job)->next;
+  }
 }
 
 // ****************************************************************************
@@ -423,15 +429,15 @@ void nMiddleJobFill(nablaMain *nabla,
     const char* kName=mkktemp("kernel");
     dbg("\n\tkName=%s\n",kName);
     job->has_to_be_unlinked=true;
-    job->name=strdup(kName);
-    job->name_utf8=strdup(kName);
-    job->return_type=strdup("void");
+    job->name=sdup(kName);
+    job->name_utf8=sdup(kName);
+    job->return_type=sdup("void");
   }else{
     dbg("\n\tdfsFetchTokenId IDENTIFIER");
     astNode* id_node=dfsFetchTokenId(n->children,IDENTIFIER);
     assert(id_node);
-    job->name=strdup(id_node->token);
-    job->name_utf8 = strdup(id_node->token_utf8);
+    job->name=sdup(id_node->token);
+    job->name_utf8 = sdup(id_node->token_utf8);
   }
   dbg("\n\n* Nabla Job: %s", job->name); // org-mode job name
   dbg("\n\t[nablaJobFill] Kernel named '%s', on item '%s', item_set=%s",

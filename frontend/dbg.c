@@ -55,12 +55,13 @@ static char *fTraceFile=NULL;
  * toDbg																								*
 \*****************************************************************************/
 void dbgt(const bool flag, const int fd, const char *msg, ...){
+  int number_of_printed_characters=0;
   char bfrDbg[1024];
   if (flag != true) return;
   va_list args;
   va_start(args, msg);
-  if (vsprintf(bfrDbg, msg, args) < 0){ va_end(args); return;}
-  write(fd, bfrDbg, strlen(bfrDbg));/* fdDbg[1] */
+  if ((number_of_printed_characters=vsnprintf(bfrDbg,1024,msg,args))<0){ va_end(args); return;}
+  write(fd, bfrDbg, number_of_printed_characters);
   va_end(args);  
 }
 
@@ -86,7 +87,7 @@ NABLA_STATUS dbg(const char *str, ...){
  * Function to open specified dbg trace file												*
 \*****************************************************************************/
 void dbgOpenTraceFile(const char *file){
-  fTraceFile=strdup(file);
+  fTraceFile=sdup(file);
   if ((fTrace=fopen(fTraceFile, "w")) == NULL)
     exit(printf("[dbgOpenTraceFile] Cannot open trace file\n"));
 }

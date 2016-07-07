@@ -53,24 +53,24 @@ void middleGlobals(nablaMain *nabla){
   nablaVariable *greek_deltat = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, greek_deltat);
   greek_deltat->axl_it=false;
-  greek_deltat->item=strdup("global");
-  greek_deltat->type=strdup("real");
-  greek_deltat->name=strdup("greek_deltat");
+  greek_deltat->item=sdup("global");
+  greek_deltat->type=sdup("real");
+  greek_deltat->name=sdup("greek_deltat");
   
   nablaVariable *time = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, time);
   time->axl_it=false;
-  time->item=strdup("global");
-  time->type=strdup("double");
-  time->name=strdup("time");
+  time->item=sdup("global");
+  time->type=sdup("double");
+  time->name=sdup("time");
   dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
   
   nablaVariable *coord = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, coord);
   coord->axl_it=true;
-  coord->item=strdup("node");
-  coord->type=strdup("real3");
-  coord->name=strdup("coord");
-  coord->field_name=strdup("NodeCoord");
+  coord->item=sdup("node");
+  coord->type=sdup("real3");
+  coord->name=sdup("coord");
+  coord->field_name=sdup("NodeCoord");
 }
 

@@ -47,7 +47,7 @@
  * +->m, .->d
  ******************************************************************************/
 static char *strKillMinusDot(const char * str){
-  char *p=strdup(str);
+  char *p=sdup(str);
   char *bkp=p;
   for(;*p!=0;p++){
     if (*p==45) *p=109;
@@ -62,7 +62,7 @@ static char *strKillMinusDot(const char * str){
 static char *whenName(const char *prefix, double at){
   char bfr[1024];
   sprintf(bfr, "%s%0.02f", prefix, at);
-  return strdup(bfr);
+  return sdup(bfr);
 }
 
 // *****************************************************************************

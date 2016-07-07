@@ -61,6 +61,7 @@ typedef struct astNodeStruct{
 // ****************************************************************************
 // * Forward declaration of AST NODE functions
 // ****************************************************************************
+void nAstListFree(void);
 astNode *astNewNode(char*, const unsigned int);
 astNode *astNewNodeRule(const char*,unsigned int);
 astNode *astAddChild(astNode*,astNode*);

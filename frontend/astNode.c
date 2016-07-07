@@ -42,16 +42,41 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+
+// ****************************************************************************
+// * List des noeuds alloués
+// ****************************************************************************
+typedef struct nAstList{
+  astNode *node;
+  struct nAstList *next; 
+} nAstList;
+static nAstList *nast=NULL;
+static nAstList *nlst=NULL;
+void nAstListFree(void){
+  for(nAstList *this,*list=nast;list!=NULL;){
+    list=(this=list)->next;
+    free(this->node);
+    free(this);
+  }
+}
+
 // ****************************************************************************
 // * astNewNode
 // ****************************************************************************
 astNode *astNewNode(char *token, const unsigned int tokenid) {
   astNode *n = (astNode*)calloc(1,sizeof(astNode));
   assert(n);
+  
+  nAstList *nl=(nAstList*)calloc(1,sizeof(nAstList));
+  assert(nl);
+  nl->node=n;
+  if (nast==NULL) nast=nlst=nl;
+  else nlst=nlst->next=nl;
+  
   n->tokenid=tokenid;
   if (token==NULL) return n;
   //dbg("\n\t[astNewNode] Non-Empty UTF8 Token: ('%s',#%d)", token, tokenid);
-  n->token_utf8=strdup(token);
+  n->token_utf8=sdup(token);
   n->token=utf2ascii(n->token_utf8);
   dbg("\n\t[astNewNode] Non-Empty ASCII Token: ('%s',#%d)", n->token, tokenid);
   return n; 

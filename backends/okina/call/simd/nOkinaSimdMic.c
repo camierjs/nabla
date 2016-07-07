@@ -147,7 +147,7 @@ gather%sk(ia=xs_cell_node[n*NABLA_NB_CELLS+cw+0],\n\t\t\t\
            var->item, var->name,
            strcmp(var->type,"real")==0?"":"",
            var->item, var->name);
-  return strdup(gather);
+  return sdup(gather);
 }
 
 // ****************************************************************************
@@ -185,7 +185,7 @@ gatherFromNode_%sk%s(xs_node_cell[8*(nw+0)+c],%s\n\
            strcmp(var->type,"real")==0?"":"",
            var->item,
            var->name);
-  return strdup(gather);
+  return sdup(gather);
 }
 
 
@@ -210,7 +210,7 @@ char* nOkinaMicScatter(nablaJob *job,nablaVariable* var){
            strcmp(var->type,"real")==0?"":"3",
            var->item, var->name,
            var->item, var->name);
-  return strdup(scatter);
+  return sdup(scatter);
 }
 
 

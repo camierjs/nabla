@@ -286,7 +286,9 @@ static char* iRTNo(nablaMain *nabla,
           type,
           cHOOKn(nabla,vars,odecl),
           var);
-  return strdup(dest);
+  char* rtn=sdup(dest);
+  free(dest);
+  return rtn;
 }
 // ****************************************************************************
 // * iRTN2o
@@ -300,7 +302,9 @@ static char* iRTN2o(nablaMain *nabla,
           cHOOKn(nabla,vars,odecl),var,
           cHOOKn(nabla,vars,idecl),type2,
           cHOOKn(nabla,vars,odecl),var2);
-  return strdup(dest);
+  char* rtn=sdup(dest);
+  free(dest);
+  return rtn;
 }
 
 

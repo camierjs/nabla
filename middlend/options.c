@@ -46,9 +46,9 @@
 // ****************************************************************************
 // * nMiddleOptionFree
 // ****************************************************************************
-void nMiddleOptionFree(nablaMain *nabla){
-  for(nablaOption *option=nabla->options;option!=NULL;option=option->next)
-    free(option);
+void nMiddleOptionFree(nablaOption *options){
+  for(nablaOption *this,*option=this=options;option!=NULL;free(this))
+    option=(this=option)->next;
 }
 
 // ****************************************************************************
@@ -108,13 +108,9 @@ nablaOption *nMiddleOptionFindName(nablaOption *options, const char *name) {
 // ****************************************************************************
 static void nMiddleCatTillToken(astNode * n, char **dflt){
   if (n==NULL) return;
-  if (n->token != NULL){
-    dbg("\n\t\t\t[catTillToken] %s", n->token);
-    if (n->tokenid != ';'){
-      //*dflt=realloc(*dflt, strlen(*dflt)+strlen(n->token));
+  if (n->token != NULL)
+    if (n->tokenid != ';')
       strcat(*dflt,n->token);
-    }
-  }
   if (n->children != NULL) nMiddleCatTillToken(n->children, dflt);
   if (n->next != NULL) nMiddleCatTillToken(n->next, dflt);
 }
@@ -139,7 +135,7 @@ static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actGenericOptionsDirectDeclarator] %s", n->children->token);
-  option->name=strdup(n->children->token);
+  option->name=sdup(n->children->token);
   //printf("\noption: %s",n->children->token);
   //option->name=utf2ascii(n->children->token);
 }
@@ -152,8 +148,10 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsExpression] rule=%s", n->rule);
-  option->dflt=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
-  nMiddleCatTillToken(n->children, &option->dflt);
+  char *dflt=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
+  nMiddleCatTillToken(n->children, &dflt);
+  option->dflt=sdup(dflt);
+  free(dflt);
   dbg("\n\t\t[actOptionsExpression] final option->dflt is '%s'", option->dflt);
 }
 

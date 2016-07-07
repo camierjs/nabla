@@ -104,14 +104,14 @@ void arcaneHookReduction(nablaMain *nabla, astNode *n){
 
   redjob->is_an_entry_point=true;
   redjob->is_a_function=false;
-  redjob->scope  = strdup("NoGroup");
-  redjob->region = strdup("NoRegion");
-  redjob->item   = strdup(nabla_items->token);
-  redjob->return_type  = strdup("void");
-  redjob->name   = strdup(job_name);
-  redjob->name_utf8 = strdup(job_name);
-  redjob->xyz    = strdup("NoXYZ");
-  redjob->direction  = strdup("NoDirection");
+  redjob->scope  = sdup("NoGroup");
+  redjob->region = sdup("NoRegion");
+  redjob->item   = sdup(nabla_items->token);
+  redjob->return_type  = sdup("void");
+  redjob->name   = sdup(job_name);
+  redjob->name_utf8 = sdup(job_name);
+  redjob->xyz    = sdup("NoXYZ");
+  redjob->direction  = sdup("NoDirection");
   
 
   nMiddleJobAdd(nabla->entity, redjob);

@@ -61,9 +61,10 @@ int toolMkstemp(const char *entity_name, char **unique_temporary_file_name){
 // * nToolUnlink: deletes a name from the filesystem
 // ****************************************************************************
 void toolUnlink(char *pathname){
-  if (pathname!=NULL)
-    if (unlink(pathname)!=0)
-      nablaError("Error while removing '%s' file", pathname);
+  if (pathname==NULL) return;
+  if (unlink(pathname)!=0)
+    nablaError("Error while removing '%s' file", pathname);
+  free(pathname);
 }
 
 
@@ -78,7 +79,7 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
   char *buf=(char*)calloc(BUFSIZ+1,sizeof(char));
   char *pointer_that_matches=NULL;
   char *nabla_file_name=NULL;
-  char *dup_list_of_nabla_files=strdup(list_of_nabla_files);
+  char *dup_list_of_nabla_files=sdup(list_of_nabla_files);
   FILE *cat_sed_temporary_file=NULL;
   
   printf("\r%s:1: is our temporary sed file\n",cat_sed_temporary_file_name);
@@ -107,7 +108,7 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
   }
   assert(fclose(cat_sed_temporary_file)==0);
   free(buf);
-  free(dup_list_of_nabla_files);
+  // done by sfree: free(dup_list_of_nabla_files);
   return NABLA_OK;
 }
  

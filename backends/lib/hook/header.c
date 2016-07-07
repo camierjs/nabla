@@ -46,7 +46,7 @@
 // * xHookHeaderOpen
 // ****************************************************************************
 void xHookHeaderOpen(nablaMain *nabla){
-  char hdrFileName[NABLA_MAX_FILE_NAME];
+  char hdrFileName[1024];
   sprintf(hdrFileName, "%s.h", nabla->name);
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }

@@ -104,7 +104,7 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
             n->next->token);
         dbg("\n\t[nablaFunctionParse] n->next->next->token=%s",
             n->next->next->token);
-        support=strdup(n->next->token);
+        support=sdup(n->next->token);
         tokenid=n->next->next->tokenid;
       }else{
         tokenid=n->next->children->tokenid;
@@ -279,22 +279,22 @@ void nMiddleFunctionFill(nablaMain *nabla,
   assert(nFctName->children->tokenid==IDENTIFIER);
   dbg("\n* Fonction '%s'", nFctName->children->token); // org-mode function item
   dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
-  fct->name=strdup(nFctName->children->token);
+  fct->name=sdup(nFctName->children->token);
   dbg("\n\t[nablaFctFill] Coté UTF-8, on a: '%s'", nFctName->children->token_utf8);
-  fct->name_utf8=strdup(nFctName->children->token_utf8);
+  fct->name_utf8=sdup(nFctName->children->token_utf8);
   fct->is_a_function=true;
   assert(fct != NULL);
   if (fct->xyz!=NULL)
     dbg("\n\t[nablaFctFill] direction=%s, xyz=%s",
         fct->direction?fct->direction:"NULL", fct->xyz?fct->xyz:"NULL");
-  fct->scope  = strdup("NoGroup");
-  fct->region = strdup("NoRegion");
-  fct->item   = strdup("\0function\0");fct->item[0]=0; 
+  fct->scope  = sdup("NoGroup");
+  fct->region = sdup("NoRegion");
+  fct->item   = sdup("\0function\0");fct->item[0]=0; 
   dbg("\n\t[nablaFctFill] Looking for fct->rtntp:");
   fct->return_type  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->return_type);
-  fct->xyz    = strdup("NoXYZ");
-  fct->direction  = strdup("NoDirection");
+  fct->xyz    = sdup("NoXYZ");
+  fct->direction  = sdup("NoDirection");
   dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
   fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");

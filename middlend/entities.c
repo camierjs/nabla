@@ -42,6 +42,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+
+void nMiddleEntityFree(nablaEntity *entities){
+  for(nablaEntity *this,*entity=this=entities;entity!=NULL;free(this))
+    entity=(this=entity)->next;
+}
+
 // Allocation d'une nouvelle structure de entity
 nablaEntity *nMiddleEntityNew(nablaMain *nabla){
 	nablaEntity *entity;
@@ -56,13 +62,12 @@ nablaEntity *nMiddleEntityNew(nablaMain *nabla){
 }
 
 nablaEntity *nMiddleEntityAddEntity(nablaMain *nabla, nablaEntity *entity) {
-  nablaEntity *iterator;
   assert(entity != NULL);
-  if (nabla->entity==NULL){
-    nabla->entity=entity;
-    return entity;
-  }
-  iterator = nabla->entity->next;
+  
+  if (nabla->entity==NULL)
+    return nabla->entity=entity;
+  
+  nablaEntity *iterator = nabla->entity->next;
   if(iterator == NULL)
     iterator = entity;
   else {

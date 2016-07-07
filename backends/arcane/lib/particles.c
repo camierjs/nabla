@@ -97,14 +97,14 @@ char* nccArcLibParticlesPrivates(const nablaEntity *entity){
     if (var->item[0]!='p') continue;
     varToCat[0]=0;
     // On transforme la premiere majuscule
-    type=strdup(var->type); type[0]-=32;
+    type=sdup(var->type); type[0]-=32;
     dbg("\n\t\t[nccArcLibParticlesPrivates] m_%s_%s", var->item, var->name);
     snprintf(varToCat,local_size,"\n\tVariableParticle%s m_particle_%s;", type, var->name);
     //dbg("\n\t\t[nccArcLibParticlesPrivates] varToCat=%s", varToCat);
     strcat(privates,varToCat);
     //dbg("\n\t\t[nccArcLibParticlesPrivates] privates=%s", privates);    
   }
-  return strdup(privates);
+  return sdup(privates);
 }
 
 
@@ -131,7 +131,7 @@ char* nccArcLibParticlesConstructor(const nablaEntity *entity){
             var->name,var->name);
     strcat(particleVars,VariableBuildInfo);
   }
-  return strdup(particleVars);
+  return sdup(particleVars);
 }
 
 
@@ -159,14 +159,14 @@ void nccArcLibParticlesIni(nablaMain *arc){
   nablaJob *particlesInit=nMiddleJobNew(arc->entity);
   particlesInit->is_an_entry_point=true;
   particlesInit->is_a_function=true;
-  particlesInit->scope  = strdup("NoGroup");
-  particlesInit->region = strdup("NoRegion");
-  particlesInit->item   = strdup("\0");
-  particlesInit->return_type  = strdup("void");
-  particlesInit->name   = strdup("particlesInit");
-  particlesInit->name_utf8   = strdup("particlesInit");
-  particlesInit->xyz    = strdup("NoXYZ");
-  particlesInit->direction  = strdup("NoDirection");
+  particlesInit->scope  = sdup("NoGroup");
+  particlesInit->region = sdup("NoRegion");
+  particlesInit->item   = sdup("\0");
+  particlesInit->return_type  = sdup("void");
+  particlesInit->name   = sdup("particlesInit");
+  particlesInit->name_utf8   = sdup("particlesInit");
+  particlesInit->xyz    = sdup("NoXYZ");
+  particlesInit->direction  = sdup("NoDirection");
   sprintf(&particlesInit->at[0],"-huge_valf");
   particlesInit->when_index  = 1;
   particlesInit->whens[0] = ENTRY_POINT_init;

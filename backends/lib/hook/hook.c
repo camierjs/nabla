@@ -152,7 +152,7 @@ void xHookAddCallNames(struct nablaMainStruct *nabla,nablaJob *fct,astNode *n){
   if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
     if (foundJob->is_a_function!=true){
       nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=strdup(callName);
+      fct->parse.function_call_name=sdup(callName);
     }else{
       nprintf(nabla, "/*isNablaFunction*/", NULL);
     }

@@ -180,6 +180,7 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   // Initial files setup and checkup
   if (nabla_entity_name==NULL)
     return NABLA_ERROR | dbg("\n[nccParseur] No entity name has been set!");
+  
   dbg("\n\t[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
   dbg("\n\t[nablaParsing] nabla_input_file=%s", nabla_input_file);
   dbg("\n\t[nablaParsing] Now launching nablaMiddlendSwitch");
@@ -242,10 +243,16 @@ static int sysPreprocessor(const char *nabla_entity_name,
            unique_temporary_file_name
            );
   dbg("\n\t[sysPreprocessor] gcc_command=%s", gcc_command);
-  if (system(gcc_command)<0)
+  if (system(gcc_command)<0){
+    free(gcc_command);
     exit(NABLA_ERROR|fprintf(stderr, "\n\t[sysPreprocessor] Error while preprocessing!\n"));
-  if (unlink(cat_sed_temporary_file_name)<0)
+  }
+  if (unlink(cat_sed_temporary_file_name)<0){
+    free(cat_sed_temporary_file_name);
     exit(NABLA_ERROR|fprintf(stderr, "\n\t[sysPreprocessor] Error while unlinking sed file!\n"));
+  }
+  free(gcc_command);
+  free(cat_sed_temporary_file_name);
   return NABLA_OK;
 }
  
@@ -627,7 +634,8 @@ int main(int argc, char * argv[]){
                     input_file_list,
                     unique_temporary_file_name,
                     unique_temporary_file_fd);
-
+  free(input_file_list);
+  
   dbg("\n\t[nabla] Now triggering nablaParsing with these options");
   if (nablaParsing(nabla_entity_name?nabla_entity_name:argv[argc-1],
                    optionDumpTree,

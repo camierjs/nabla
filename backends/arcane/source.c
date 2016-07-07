@@ -91,5 +91,5 @@ void aHookSourceInclude(nablaMain *nabla){
 // * aHookSourceName
 // ****************************************************************************
 char* aHookSourceNamespace(nablaMain *nabla){
-  return strdup(nabla->name);//nablaArcaneColor(nabla);
+  return sdup(nabla->name);//nablaArcaneColor(nabla);
 }

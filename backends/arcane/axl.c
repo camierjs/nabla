@@ -166,7 +166,7 @@ char* nccAxlGeneratorEntryPointWhenName(double when){
   //dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] when=%f => %p",when, *adrs);
   /*dbg("\n\t\t[nccAxlGeneratorEntryPointWhenName] ENTRY_POINT_build=%f ENTRY_POINT_init=%f",
       ENTRY_POINT_build,ENTRY_POINT_init);*/
-  return strdup(name);
+  return sdup(name);
 }
 
 
@@ -176,7 +176,7 @@ static char* tab(int k){
   char tabs[32]; assert(k<32);
   for(int i=0;i<k;i+=1) tabs[i]='\t';
   tabs[k]=0;
-  return strdup(tabs);
+  return sdup(tabs);
 }
 
 // *************************************************************
