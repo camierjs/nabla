@@ -724,7 +724,7 @@ selection_statement
 
 iteration_statement
 : FORALL nabla_item statement {forall;}
-| FORALL nabla_item AT at_constant statement {forall;}
+// pas sûr que cela serve encore | FORALL nabla_item AT at_constant statement {forall;}
 | FORALL IDENTIFIER CELL statement {forall;}
 | FORALL IDENTIFIER NODE statement {forall;}
 | FORALL IDENTIFIER FACE statement {forall;}

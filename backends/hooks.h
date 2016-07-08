@@ -130,6 +130,7 @@ typedef struct hookHeaderStruct{
   void (*enums)(nablaMain*); // animate
   void (*prefix)(nablaMain*); // animate
   void (*include)(nablaMain*); // animate
+  void (*alloc)(nablaMain*); // animate
   void (*postfix)(nablaMain*); // animate
 } hookHeader;
 

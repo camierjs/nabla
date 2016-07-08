@@ -47,7 +47,7 @@
 // * Node structure used for the AST
 // ****************************************************************************
 typedef struct astNodeStruct{
-  /*const*/ unsigned int id; // Unique node ID
+  unsigned int id; // Unique node ID
   char *token;
   const char *token_utf8;
   int tokenid;
@@ -70,7 +70,7 @@ astNode *astAddNext(astNode*,astNode*);
 // ****************************************************************************
 // * Forward declaration of AST TREE functions
 // ****************************************************************************
-NABLA_STATUS astTreeSave(const char*, const astNode*);
+NABLA_STATUS astTreeSave(const char*, astNode*);
 void getInOutPutsNodes(FILE*,astNode*,char*);
 void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
 

@@ -131,6 +131,7 @@ const static hookHeader header={
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
   xHookHeaderIncludes,
+  xHookHeaderAlloc,
   xHookHeaderPostfix
 };
 

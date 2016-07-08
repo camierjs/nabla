@@ -460,7 +460,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     // Attention au cas où on a un @ au lieu d'un statement
     if (n->next->next->tokenid == AT)
       nprintf(arc, "/* Found AT */", "knAt");
-#warning Skip du 'nabla_item' qui renseigne sur le type de forall
+//#warning Skip du 'nabla_item' qui renseigne sur le type de forall
     *n=*n->next->next;
     break;
   }

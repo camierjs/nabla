@@ -216,6 +216,7 @@ const static hookHeader header={
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
   rajaHookHeaderIncludes,
+  xHookHeaderAlloc,
   rajaHookHeaderPostfix
 };
 

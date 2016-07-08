@@ -66,9 +66,23 @@ void xHookHeaderPrefix(nablaMain *nabla){
   assert(nabla->entity->name);
   fprintf(nabla->entity->hdr,
           "#ifndef __BACKEND_%s_H__\n#define __BACKEND_%s_H__",
-          nabla->entity->name,
-          nabla->entity->name);
+          nabla->entity->name,nabla->entity->name);
 }
+
+
+// ****************************************************************************
+// * hookHeaderAlloc
+// ****************************************************************************
+void xHookHeaderAlloc(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+// *********************************************************\n\
+// * Allocation Tweaks\n\
+// *********************************************************\n\
+#if defined(__APPLE__)\n\
+\t#define aligned_alloc(align,size) calloc(1,size)\n\
+#endif\n\n");
+}
+
 
 // ****************************************************************************
 // * ENUMERATES Work

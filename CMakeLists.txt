@@ -63,9 +63,12 @@ endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 ############
 # PACKAGES #
 ############
-set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
-set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
 set(MPI_C_INCLUDE_PATH /usr/include/mpi)
+set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
+
+set(MPI_CXX_INCLUDE_PATH /usr/include/mpi)
+set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
+
 find_package(MPI)
 find_package(CUDA)
 find_package(OpenMP)
@@ -113,6 +116,7 @@ add_subdirectory(orgopt)
 add_subdirectory(frontend)
 add_subdirectory(middlend)
 add_subdirectory(tools)
+add_subdirectory(aleph)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
@@ -127,8 +131,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lib)
 # Backends common lib #
 #######################
 if(HYPRE_FOUND)
-  info("root ALEPH_LIB is ${VT100_FG_MAGENTA}${ALEPH_LIB}${VT100_RESET}")
-  info("root ALEPH_HYPRE_LIB is ${VT100_FG_MAGENTA}${ALEPH_HYPRE_LIB}${VT100_RESET}")
+  info("root LIB_ALEPH is ${VT100_FG_MAGENTA}${LIB_ALEPH}${VT100_RESET}")
+  info("root LIB_ALEPH_HYPRE is ${VT100_FG_MAGENTA}${LIB_ALEPH_HYPRE}${VT100_RESET}")
 endif(HYPRE_FOUND)
 
 

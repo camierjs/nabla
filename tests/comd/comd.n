@@ -354,6 +354,7 @@ void cellComputeForce(Cell i, Cell j){
       strss += 2.0*fr*dr.x*dr.x;
     } // loop over atoms in j
   } // loop over atoms in i
+  
   cell_energy[i]+=etotl;
   cell_stress[i]+=strss;
 }

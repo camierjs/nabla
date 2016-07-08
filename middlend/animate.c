@@ -57,6 +57,7 @@ NABLA_STATUS animate(nablaMain *nabla){
   HOOK(header,open);
   HOOK(header,prefix);
   HOOK(header,include);
+  HOOK(header,alloc);
   HOOK(mesh,prefix);
   HOOK(header,enums);
   HOOK(header,dump);

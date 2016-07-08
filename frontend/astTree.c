@@ -45,13 +45,14 @@
 
 
 // ****************************************************************************
-// * tr \" to spaces
+// * tr \" to \'
 // ****************************************************************************
-static const char *strKillQuote(const char *str,char* kQTok){
-  //printf("\n[strKillQuote] str=%s", str);
-  for(char *p=memcpy(kQTok,str,strlen(str));*p!=0;p++)
-    if (*p==34) *p=32;
-  return str;
+static char *strKillQuote(const char *str){
+  char *bkp,*p=bkp=sdup(str);
+  //printf("\n[strKillQuote] in=%s", str);
+  for(;*p!=0;p++) if (*p==34) *p=39;
+  //printf("\n[strKillQuote] out=%s", bkp);
+  return bkp;
 } 
 
 
@@ -59,22 +60,20 @@ static const char *strKillQuote(const char *str,char* kQTok){
  * astTreeSaveNodes
  *****************************************************************************/
 static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
-                                     const astNode *l,
+                                     astNode *n,
                                      unsigned int id){
-  char *kQTok=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
-  for(;l not_eq NULL;l=l->next){
-    if (l->rule not_eq NULL)
+  for(;n not_eq NULL;n=n->next){
+    if (n->rule not_eq NULL)
       fprintf(fTreeOutput,
               "\n\tnode_%d [label=\"%s\" color=\"#CCDDCC\"]",
-              id++,strKillQuote(l->rule,kQTok));
-    else if (l->token not_eq NULL)
+              n->id=id++,strKillQuote(n->rule));
+    else if (n->token not_eq NULL)
       fprintf(fTreeOutput,
               "\n\tnode_%d [label=\"%s\" color=\"#CCCCDD\"]",
-              id++,strKillQuote(l->token,kQTok));
+              n->id=id++,strKillQuote(n->token));
     else /* */ ;
-    id=astTreeSaveNodes(fTreeOutput, l->children, id);
+    id=astTreeSaveNodes(fTreeOutput, n->children, id);
   }
-  free(kQTok);
   return id;
 }
 
@@ -83,12 +82,12 @@ static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
  * astTreeSaveEdges
  *****************************************************************************/
 static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
-                                     const astNode *l,
+                                     const astNode *n,
                                      const astNode *father){
   dbg("\n\t\t[astTreeSaveEdges]");
-  for(;l not_eq NULL;l=l->next){
-    fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, l->id);
-    astTreeSaveEdges(fTreeOutput, l->children, l);
+  for(;n not_eq NULL;n=n->next){
+    fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, n->id);
+    astTreeSaveEdges(fTreeOutput, n->children, n);
   }
   return NABLA_OK;
 }
@@ -97,7 +96,7 @@ static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
 /*****************************************************************************
  * astTreeSave
  *****************************************************************************/
-NABLA_STATUS astTreeSave(const char *nabla_entity_name, const astNode *root){
+NABLA_STATUS astTreeSave(const char *nabla_entity_name, astNode *root){
   FILE *fDot;
   char fName[NABLA_MAX_FILE_NAME];
   sprintf(fName, "%s.dot", nabla_entity_name);

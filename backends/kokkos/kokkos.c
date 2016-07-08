@@ -204,6 +204,7 @@ const static hookHeader header={
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
   kHookHeaderIncludes,
+  xHookHeaderAlloc,
   kHookHeaderPostfix
 };
 

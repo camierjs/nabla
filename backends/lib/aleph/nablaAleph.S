@@ -64,44 +64,44 @@ ${ABI_UNDERSCORE}nablaAleph_h:
 
    
 ${ABI_UNDERSCORE}AlephStd_c: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.cc"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephStd.cc"
    .byte 0
 ${ABI_UNDERSCORE}AlephStd_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephStd.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephStd.h"
    .byte 0
    
 ${ABI_UNDERSCORE}Aleph_h: 
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/Aleph.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/Aleph.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephTypesSolver_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTypesSolver.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephTypesSolver.h"
    .byte 0
 
 ${ABI_UNDERSCORE}AlephParams_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephParams.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephParams.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephVector_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephVector.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephVector.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephMatrix_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephMatrix.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephMatrix.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephKernel_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephKernel.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephKernel.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephOrdering_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephOrdering.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephOrdering.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephIndexing_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephIndexing.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephIndexing.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephTopology_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephTopology.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephTopology.h"
    .byte 0
 ${ABI_UNDERSCORE}AlephInterface_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/AlephInterface.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/AlephInterface.h"
    .byte 0
    
 ${ABI_UNDERSCORE}IAlephFactory_h:
-	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/IAlephFactory.h"
+	.incbin "${NABLA_SOURCE_DIR}/aleph/IAlephFactory.h"
    .byte 0

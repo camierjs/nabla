@@ -162,6 +162,7 @@ const static hookHeader cuHookHeader={
   NULL,
   xHookHeaderPrefix,
   cuHookHeaderIncludes, // cuda_runtime
+  xHookHeaderAlloc,
   cuHookHeaderPostfix
 };
 

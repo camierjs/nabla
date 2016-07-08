@@ -6,8 +6,7 @@ TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 ARC_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).arc
 
-LOG =
-#-v $(TGT).log
+LOG ?= -t #-v $(TGT).log
 
 
 ########################## 
@@ -128,7 +127,7 @@ cln:
 #############
 # DOT 2 PNG #
 #############
-png:
-	dot -v -Tpng $(TGT).dot -O #$(TGT).png
+svg:
+	dot -O -Tsvg $(TGT).dot
 gthumb:
 	gthumb . 2>/dev/null 

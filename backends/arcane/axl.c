@@ -209,8 +209,8 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   // Et on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin
   dbg("\n\tEt on rescan afin de dumper, on rajoute les +2 ComputeLoopEnd|Begin:");
   for(int i=0;i<number_of_entry_points+2;++i){
-    if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0)continue;
-    if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0)continue;
+    if (strcmp(entry_point[i].name,"ComputeLoopEnd")==0) continue;
+    if (strcmp(entry_point[i].name,"ComputeLoopBegin")==0) continue;
     const int HLT_depth=entry_point[i].when_depth;
     const char* HLT_cfg_comment_in=(HLT_depth>0)?"!--":"";
     const char* HLT_cfg_comment_out=(HLT_depth>0)?"--":"";
@@ -313,7 +313,8 @@ NABLA_STATUS nccAxlGenerator(nablaMain *arc){
   for(opt=arc->options;opt!=NULL;opt=opt->next)
     if (nccAxlGenerateOption(arc, opt)!=NABLA_OK) return NABLA_ERROR;
   fprintf(arc->axl,"\n\t\t</options>");
-
+  
+//  free(hlt_dive_when);
   free(entry_point);
 
   return NABLA_OK;

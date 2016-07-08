@@ -83,6 +83,7 @@ void xHookHeaderDump(nablaMain*);
 void xHookHeaderOpen(nablaMain*);
 void xHookHeaderDefineEnumerates(nablaMain*);
 void xHookHeaderPrefix(nablaMain*);
+void xHookHeaderAlloc(nablaMain*);
 void xHookHeaderIncludes(nablaMain*);
 void xHookHeaderPostfix(nablaMain*);
 

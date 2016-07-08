@@ -158,7 +158,7 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       }
       default: nablaError("[nablaFunctionParse] Could not distinguish FORALL!");
       }
-#warning On skip le nabla_item qui renseigne sur le type de forall
+//#warning On skip le nabla_item qui renseigne sur le type de forall
       *n=*n->next->next;
       break;
     }

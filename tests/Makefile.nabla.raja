@@ -33,5 +33,5 @@ run1:$(TGT) $(NABLA)
 	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
 run4:$(TGT) $(NABLA) 
 	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
-png:
-	dot -O -Tpng $(TGT).time.dot
+svg:
+	dot -O -Tsvg $(TGT).time.dot

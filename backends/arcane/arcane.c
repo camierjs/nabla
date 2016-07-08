@@ -49,6 +49,7 @@ static const hookHeader header={
   aHookHeaderEnums,
   aHookHeaderPrefix,
   aHookHeaderIncludes,
+  NULL,
   aHookHeaderPostfix
 };
 
