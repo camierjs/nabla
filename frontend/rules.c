@@ -40,46 +40,70 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_AST_H_
-#define _NABLA_AST_H_
-
-// ****************************************************************************
-// * Node structure used for the AST
-// ****************************************************************************
-typedef struct astNodeStruct{
-  /*const*/ unsigned int id; // Unique node ID
-  char *token;
-  const char *token_utf8;
-  int tokenid;
-  const char *rule;
-  int ruleid;
-  bool type_name;
-  struct astNodeStruct *next, *children, *parent;  
-}astNode;
+#include "nabla.h"
+#include "nabla.tab.h"
 
 
 // ****************************************************************************
-// * Forward declaration of AST NODE functions
+// * Rules still used directly by Nabla
 // ****************************************************************************
-void nAstListFree(void);
-astNode *astNewNode(char*, const unsigned int);
-astNode *astNewNodeRule(const char*,unsigned int);
-astNode *astAddChild(astNode*,astNode*);
-astNode *astAddNext(astNode*,astNode*);
+#define NB_USED_RULENAMES 39
+const static char* usedRuleNames[NB_USED_RULENAMES]={
+  "argument_expression_list",
+  "assignment_expression",
+  "assignment_operator",
+  "at_constant",
+  "compound_statement",
+  "declaration",
+  "direct_declarator",
+  "expression",
+  "function_definition",
+  "is_test",
+  "jump_statement",
+  "nabla_direct_declarator",
+  "nabla_item",
+  "nabla_item_definition",
+  "nabla_item_declaration",
+  "nabla_items",
+  "nabla_job_definition",
+  "nabla_options_definition",
+  "nabla_option_declaration",
+  "nabla_parameter_declaration",
+  "nabla_parameter_list",
+  "nabla_reduction",
+  "nabla_region",
+  "nabla_scope",
+  "nabla_system",
+  "nabla_xyz_declaration",
+  "nabla_xyz_direction",
+  "parameter_declaration",
+  "parameter_type_list",
+  "postfix_expression",
+  "preproc",
+  "primary_expression",
+  "selection_statement",
+  "single_library",
+  "storage_class_specifier",
+  "type_qualifier",
+  "type_specifier",
+  "unary_expression",
+  "with_library"
+};
+static int usedRuleNamesId[NB_USED_RULENAMES];
 
-// ****************************************************************************
-// * Forward declaration of AST TREE functions
-// ****************************************************************************
-NABLA_STATUS astTreeSave(const char*, const astNode*);
-void getInOutPutsNodes(FILE*,astNode*,char*);
-void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
+
+void iniUsedRuleNames(void){
+  const int nb_used_rulename=NB_USED_RULENAMES;
+  dbg("[1;31m[iniUsedRuleNames] iniUsedRuleNames=%d[0m\n",nb_used_rulename);
+  for(int i=0;i<nb_used_rulename;i+=1){
+    const int ruleid=rulenameToId(usedRuleNames[i]);
+    dbg("\t[1;31m[iniUsedRuleNames] #%d %s %d[0m\n",i,usedRuleNames[i],ruleid);
+    usedRuleNamesId[i]=ruleid;
+  }
+}
 
 
-int yyUndefTok(void);
-int yyTranslate(int);
-int tokenidToRuleid(int);
-int yyNameTranslate(int);
-const int rulenameToId(const char*);
-const int ruleToId(const int);
-
-#endif // _NABLA_AST_H_
+const int ruleToId(const int rule){
+  assert(rule<NB_USED_RULENAMES);
+  return usedRuleNamesId[rule]; 
+}

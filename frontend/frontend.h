@@ -46,6 +46,53 @@
 #include "ast.h"
 #include "dbg.h"
 
+
+// ****************************************************************************
+// * Rules still used directly by Nabla
+// ****************************************************************************
+enum{
+  rule_argument_expression_list=0,
+  rule_assignment_expression,
+  rule_assignment_operator,
+  rule_at_constant,
+  rule_compound_statement,
+  rule_declaration,
+  rule_direct_declarator,
+  rule_expression,
+  rule_function_definition,
+  rule_is_test,
+  rule_jump_statement,
+  rule_nabla_direct_declarator,
+  rule_nabla_item,
+  rule_nabla_item_definition,
+  rule_nabla_item_declaration,
+  rule_nabla_items,
+  rule_nabla_job_definition,
+  rule_nabla_options_definition,
+  rule_nabla_option_declaration,
+  rule_nabla_parameter_declaration,
+  rule_nabla_parameter_list,
+  rule_nabla_reduction,
+  rule_nabla_region,
+  rule_nabla_scope,
+  rule_nabla_system,
+  rule_nabla_xyz_declaration,
+  rule_nabla_xyz_direction,
+  rule_parameter_declaration,
+  rule_parameter_type_list,
+  rule_postfix_expression,
+  rule_preproc,
+  rule_primary_expression,
+  rule_selection_statement,
+  rule_single_library,
+  rule_storage_class_specifier,
+  rule_type_qualifier,
+  rule_type_specifier,
+  rule_unary_expression,
+  rule_with_library
+} used_rulenames;
+
+
 // ****************************************************************************
 // * Structure used to pass a batch of actions for each ruleid found while DFS
 // ****************************************************************************
@@ -69,5 +116,6 @@ astNode *dfsFetchTokenId(astNode*,int);
 astNode *dfsFetchToken(astNode*, const char *);
 astNode *dfsFetchRule(astNode*,int);
 int dfsScanJobsCalls(void*,void*,astNode*);
+void iniUsedRuleNames(void);
 
 #endif // _NABLA_FRONTEND_H_

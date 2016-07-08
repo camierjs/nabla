@@ -54,7 +54,7 @@ char* nccArcSystemPrefix(void){ return "m_"; }
 // * hookPrimaryExpressionToReturn
 // ****************************************************************************
 bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
-  const char* var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+  const char* var=dfsFetchFirst(job->stdParamsNode,ruleToId(rule_direct_declarator));
   dbg("\n\t[hookPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
     dbg("\n\t[hookPrimaryExpressionToReturn] primaryExpression hits returned argument");

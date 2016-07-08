@@ -155,13 +155,13 @@ static void actNablaJobParameterDirectDeclarator(astNode * n, void *current_item
 void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
   char *current_item=NULL;
   RuleAction tokact[]={
-    {rulenameToId("nabla_item"),actNablaJobParameterItem},
-    {rulenameToId("direct_declarator"),actNablaJobParameterDirectDeclarator},
+    {ruleToId(rule_nabla_item),actNablaJobParameterItem},
+    {ruleToId(rule_direct_declarator),actNablaJobParameterDirectDeclarator},
     {0,NULL}};
   
   //dbg("\n\t[scanForNablaJobParameter] %s", n->token);
   if (n->tokenid=='@') return;
-  if (n->ruleid==rulenameToId("compound_statement")) return;
+  if (n->ruleid==ruleToId(rule_compound_statement)) return;
   
   if (ruleid ==  n->ruleid){
     //dbg("\n\t[scanForNablaJobParameter] %s", n->token);
@@ -295,15 +295,15 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
       job->parse.got_a_return_and_the_semi_colon) return;
    
   // On regarde si on a un appel de fonction avec l'argument_expression_list
-  if ((n->ruleid == rulenameToId("argument_expression_list"))
+  if ((n->ruleid == ruleToId(rule_argument_expression_list))
       && (job->parse.function_call_arguments==false))
     job->parse.function_call_arguments=true;
 
     // On regarde de quel coté d'un assignment nous sommes
-  if (n->ruleid == rulenameToId("assignment_expression"))
+  if (n->ruleid == ruleToId(rule_assignment_expression))
     if (n->children!=NULL)
       if (n->children->next!=NULL)
-        if (n->children->next->ruleid == rulenameToId("assignment_operator"))
+        if (n->children->next->ruleid == ruleToId(rule_assignment_operator))
           job->parse.left_of_assignment_operator=true;
   
   // On cherche les doubles postfix_expression suivies d'un '[' pour gestion des variables
@@ -311,8 +311,8 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   //             0 pour continuer (pas une variable nabla),
   //            '1' s'il faut return'er car on y a trouvé un nNablaSystem,
   //             2 pour continuer mais en informant turnTokenToVariable (hit but unknown)
-  if (n->ruleid == rulenameToId("postfix_expression"))
-    if (n->children->ruleid == rulenameToId("postfix_expression"))
+  if (n->ruleid == ruleToId(rule_postfix_expression))
+    if (n->children->ruleid == ruleToId(rule_postfix_expression))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '[')
           if ((job->parse.isPostfixed=nMiddleVariables(nabla,n,cnfgem,job->parse.enum_enum))==1)
@@ -320,8 +320,8 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
           
 
   // On on va chercher les .[x|y|z]
-  if (n->ruleid == rulenameToId("postfix_expression"))
-    if (n->children->ruleid == rulenameToId("postfix_expression"))
+  if (n->ruleid == ruleToId(rule_postfix_expression))
+    if (n->children->ruleid == ruleToId(rule_postfix_expression))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '.')
           if (n->children->next->next != NULL)
@@ -331,8 +331,8 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
               job->parse.isDotXYZ=n->children->next->next->token[0]-'w';
   
   // C'est le cas primary_expression suivi d'un nabla_item
-  if ((n->ruleid == rulenameToId("primary_expression"))
-      && (n->children->ruleid == rulenameToId("nabla_item"))
+  if ((n->ruleid == ruleToId(rule_primary_expression))
+      && (n->children->ruleid == ruleToId(rule_nabla_item))
       && (nabla->hook->forall->item))
     nprintf(nabla, "/*nabla_item*/", "\t%s",
             nabla->hook->forall->item(job,
@@ -341,14 +341,14 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
                                       job->parse.enum_enum));
     
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
-  if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL))
+  if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL))
     if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL)
       return;
   
   // Dés qu'on a une primary_expression,
   // on teste pour voir si ce n'est pas un argument que l'on return
   // A confirmer si cela est toujours utile
-  if ((n->ruleid == rulenameToId("primary_expression"))
+  if ((n->ruleid == ruleToId(rule_primary_expression))
       && (n->children->token!=NULL)
       && (job->parse.returnFromArgument)){
     dbg("\n\t[nablaJobParse] primary_expression test for return");
@@ -362,7 +362,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   }
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
-  if ((n->ruleid == rulenameToId("primary_expression")) && (n->children->token!=NULL)){
+  if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL)){
     nablaVariable *var;
     //dbg("\n\t[nablaJobParse] primaryExpression=%s child->token=%s",n->rule,n->children->token);
     if ((var=nabla->hook->token->variable(n->children, nabla,job))!=NULL){
@@ -375,7 +375,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   // Gestion du 'is_test', IS_OP_INI & IS_OP_END
   if (n->tokenid == IS_OP_INI) nabla->hook->token->isTest(nabla,job,n,IS_OP_INI);
   if (n->tokenid == IS_OP_END) nabla->hook->token->isTest(nabla,job,n,IS_OP_END);
-  if (n->ruleid == rulenameToId("is_test")) nabla->hook->token->isTest(nabla,job,n,IS);
+  if (n->ruleid == ruleToId(rule_is_test)) nabla->hook->token->isTest(nabla,job,n,IS);
 
   // On fait le switch du token
   nabla->hook->token->svvitch(n, job);
@@ -402,23 +402,23 @@ void nMiddleJobFill(nablaMain *nabla,
   dbg("\n\t[nMiddleJobFill] job != NULL");
   
   dbg("\n\tRécupération scope");
-  job->scope  = dfsFetchFirst(n->children,rulenameToId("nabla_scope"));
+  job->scope  = dfsFetchFirst(n->children,ruleToId(rule_nabla_scope));
   dbg("\n\tRécupération region");
-  job->region = dfsFetchFirst(n->children,rulenameToId("nabla_region"));
+  job->region = dfsFetchFirst(n->children,ruleToId(rule_nabla_region));
   dbg("\n\tRécupération items");
-  job->item   = dfsFetchFirst(n->children,rulenameToId("nabla_items"));
+  job->item   = dfsFetchFirst(n->children,ruleToId(rule_nabla_items));
   
   // On va chercher tous les items de l'ensemble, on stop au token SET_END
   dbg("\n\tdfsFetchAll item_set");
   job->item_set = dfsFetchAll(n->children->children,
-                              rulenameToId("nabla_items"),
+                              ruleToId(rule_nabla_items),
                               &job->nb_in_item_set,
                               set);
   assert(job->item);
   
   // On test en DFS dans le nabla_job_decl pour voir s'il y a un type retour
   dbg("\n\tdfsFetchFirst return_type");
-  job->return_type = dfsFetchFirst(n->children->children,rulenameToId("type_specifier"));
+  job->return_type = dfsFetchFirst(n->children->children,ruleToId(rule_type_specifier));
   
   // Nom du job:
   // On va chercher le premier identifiant qui est le nom du job *ou pas*
@@ -458,9 +458,9 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // On va chercher s'il y a des xyz dans les parameter_type_list
   // Ne devrait plus être utilisé
-  job->xyz = dfsFetchFirst(n,rulenameToId("nabla_xyz_declaration"));
+  job->xyz = dfsFetchFirst(n,ruleToId(rule_nabla_xyz_declaration));
   job->direction = dfsFetchFirst(n->children,
-                              rulenameToId("nabla_xyz_direction"));
+                              ruleToId(rule_nabla_xyz_direction));
   
   // Vérification si l'on a des 'directions' dans les paramètres
   if (job->xyz!=NULL){
@@ -470,10 +470,10 @@ void nMiddleJobFill(nablaMain *nabla,
     nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
   // Récupération du type de retour
-  job->returnTypeNode=dfsFetch(n->children->children,rulenameToId("type_specifier"));
+  job->returnTypeNode=dfsFetch(n->children->children,ruleToId(rule_type_specifier));
   
   // Récupération de la liste des paramètres
-  astNode *nd=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  astNode *nd=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
   if (nd) job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",
@@ -509,7 +509,7 @@ void nMiddleJobFill(nablaMain *nabla,
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     
   // On va chercher les paramètres nabla in/out/inout
-  job->nblParamsNode=dfsFetch(n->children,rulenameToId("nabla_parameter_list"));
+  job->nblParamsNode=dfsFetch(n->children,ruleToId(rule_nabla_parameter_list));
 
   // Si on a un type de retour et des arguments
   // Ne devrait plus y en avoir
@@ -546,7 +546,7 @@ void nMiddleJobFill(nablaMain *nabla,
   //n=n->next; // On saute le COMPOUND_JOB_INI *ou pas*
   
   dbg("\n\t[nablaJobFill] On cherche s'il y a un selection statement");
-  if (dfsFetch(n,rulenameToId("selection_statement"))!=NULL){
+  if (dfsFetch(n,ruleToId(rule_selection_statement))!=NULL){
     dbg("\n\t[nablaJobFill] Found a selection statement in this job!");
     job->parse.selection_statement_in_compound_statement=true;
   }else{

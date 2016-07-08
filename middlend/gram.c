@@ -50,11 +50,11 @@ void nMiddleInsertSpace(nablaMain *nabla, astNode * n){
   if (n->token!=NULL) {
     if (n->parent!=NULL){
       if (n->parent->rule!=NULL){
-        if ((n->parent->ruleid==rulenameToId("type_qualifier")) ||
-            (n->parent->ruleid==rulenameToId("type_specifier")) ||
-            (n->parent->ruleid==rulenameToId("jump_statement")) ||
-            (n->parent->ruleid==rulenameToId("selection_statement")) ||
-            (n->parent->ruleid==rulenameToId("storage_class_specifier"))){
+        if ((n->parent->ruleid==ruleToId(rule_type_qualifier)) ||
+            (n->parent->ruleid==ruleToId(rule_type_specifier)) ||
+            (n->parent->ruleid==ruleToId(rule_jump_statement)) ||
+            (n->parent->ruleid==ruleToId(rule_selection_statement)) ||
+            (n->parent->ruleid==ruleToId(rule_storage_class_specifier))){
           nprintf(nabla, NULL, " ");
           //nprintf(nabla, NULL, "/*%s*/ ",n->parent->rule);
         }
@@ -108,7 +108,7 @@ static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
 // *    - nabla_job_definition
 // *    - nabla_reduction
 // ****************************************************************************
-void nMiddleGrammar(astNode * n, nablaMain *nabla){
+void nMiddleGrammar(astNode *n, nablaMain *nabla){
     
   /////////////////////////////////////
   // Règle de définitions des includes
@@ -121,7 +121,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   /////////////////////////////////////
   // Règle de définitions des preprocs 
   /////////////////////////////////////
-  if (n->ruleid == rulenameToId("preproc")){
+  if (n->ruleid == ruleToId(rule_preproc)){
     // We do not want preprocs declarations down to the source file
     //nprintf(nabla, NULL, "%s\n", n->children->token);
     dbg("\n\t[nMiddleGrammar] preproc '%s'", n->children->token);
@@ -130,7 +130,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   ///////////////////////////////
   // Déclaration des libraries //
   ///////////////////////////////
-  if (n->ruleid == rulenameToId("with_library")){
+  if (n->ruleid == ruleToId(rule_with_library)){
     dbg("\n\t[nMiddleGrammar] with_library hit!");
     nMiddleLibraries(n,nabla->entity);
     dbg("\n\t[nMiddleGrammar] library done");
@@ -141,7 +141,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   //////////////////////////////
   // Règle ∇ de 'declaration' //
   //////////////////////////////
-  if (n->ruleid == rulenameToId("declaration")){
+  if (n->ruleid == ruleToId(rule_declaration)){
     dbg("\n\t[nMiddleGrammar] declaration hit:");
     nMiddleDeclarationDump(nabla,n);
     nprintf(nabla, NULL, "\n");
@@ -151,7 +151,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   ///////////////////////////////////////////////////////
   // Règle de définitions des items sur leurs supports //
   ///////////////////////////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_item_definition")){
+  if (n->ruleid == ruleToId(rule_nabla_item_definition)){
     const char *item_support=n->children->children->token;
     // Nodes|Cells|Global|Faces|Particles
     int item_support_tokenid=n->children->children->tokenid;
@@ -160,7 +160,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
     // On backup temporairement le support (kind) de l'item
     nabla->tmpVarKinds=sdup(switchItemSupportTokenid(item_support_tokenid));
     nMiddleItems(n->children->next,
-               rulenameToId("nabla_item_declaration"),
+               ruleToId(rule_nabla_item_declaration),
                nabla);
     dbg("\n\t[nMiddleGrammar] item done");
   }
@@ -168,17 +168,17 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   //////////////////////////////////////
   // Règle de définitions des options //
   //////////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_options_definition")){
+  if (n->ruleid == ruleToId(rule_nabla_options_definition)){
     dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     nMiddleOptions(n->children,
-                   rulenameToId("nabla_option_declaration"), nabla);
+                   ruleToId(rule_nabla_option_declaration), nabla);
     dbg("\n\t[nMiddleGrammar] option done");
   }
 
   /////////////////////////////////////////////////
   // On a une définition d'une fonction standard //
   /////////////////////////////////////////////////
-  if (n->ruleid == rulenameToId("function_definition")){
+  if (n->ruleid == ruleToId(rule_function_definition)){
     dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     bool is_an_entry_point=false;
     // On scan pour trouver un '@'
@@ -204,7 +204,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   ////////////////////////////////////////
   // On a une définition d'un job Nabla //
   ////////////////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_job_definition")){
+  if (n->ruleid == ruleToId(rule_nabla_job_definition)){
     dbg("\n\t[nMiddleGrammar] rule hit %s", n->rule);
     bool job_to_add=true;
     bool is_an_entry_point=false;
@@ -242,7 +242,7 @@ void nMiddleGrammar(astNode * n, nablaMain *nabla){
   //////////////////////////////
   // On a une reduction Nabla //
   //////////////////////////////
-  if (n->ruleid == rulenameToId("nabla_reduction")){
+  if (n->ruleid == ruleToId(rule_nabla_reduction)){
     astNode *global_node = n->children->next;
     astNode *item_node =n->children->next->next->next;
     const char *global_var_name = global_node->token;

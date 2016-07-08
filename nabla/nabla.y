@@ -164,7 +164,7 @@ extern char *last_identifier;
 /////////////////////////////////
 // Entry point of input stream //
 /////////////////////////////////
-entry_point: nabla_inputstream{*root=$1;};
+entry_point: nabla_inputstream {iniUsedRuleNames();*root=$1;};
 nabla_inputstream
 : nabla_grammar {rhs;}
 | nabla_inputstream nabla_grammar {astAddChild($1,$2);}
@@ -1004,36 +1004,16 @@ inline int yyNameTranslate(int tokenid){
 // ****************************************************************************
 // * rulenameToId
 // ****************************************************************************
-int rulenameToId(const char *rulename){
+const int rulenameToId(const char *rulename){
   //printf("[1;33m[rulenameToId] looking for '%s':[0m",rulename);    
-  //const size_t rnLength=strlen(rulename);
+  const size_t rnLength=strlen(rulename);
   for(int i=YYNTOKENS; yytname[i]!=NULL;i+=1){
-    //if (strlen(yytname[i])!=rnLength) continue;
+    if (strlen(yytname[i])!=rnLength) continue;
     if (strcmp(yytname[i], rulename)!=0) continue;
-    //if (strncmp(yytname[i], rulename, rnLength)!=0) continue;
-    //printf("[1;33m #%d, line %d[0m\n",i,yyrline[i]);    
-//#warning rulenameToId exit
-    //exit(0);
     return i;
   }
   dbg("[rulenameToId] error with '%s'",rulename);
-  return 1; // error
-}
-
-
-// ****************************************************************************
-// * tokenToId
-// ****************************************************************************
-int tokenToId(const char *token){
-  unsigned int i;
-  const size_t rnLength=strlen(token);
-  for(i=0; yytname[i]!=NULL;++i){
-    if (strlen(yytname[i])!=rnLength) continue;
-    if (strcmp(yytname[i], token)!=0) continue;
-    return i;
-  }
-  dbg("[tokenToId] error with '%s'",token);
-  return 1; // error
+  return fprintf(stderr,"[1;31mrulenameToId error with '%s'[0m\n", rulename);
 }
 
 
@@ -1121,11 +1101,20 @@ inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
 
 // *****************************************************************************
 // * Standard rhsAdd
+// *              YYR2[YYN] -- Number of symbols on the right hand side of rule YYN
+// * SYMBOL-NUM = YYR1[YYN] -- Symbol number of symbol that rule YYN derives
+// *    YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM
+// * YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
 // *****************************************************************************
 inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
+  //const int symbol_num = yyr1[yyn];
+  //const char *rule=yytname[symbol_num];
+  //const int line=yyrline[yyn];
   // On accroche le nouveau noeud au lhs
+  //printf("[1;33m[rhsAdd] rule '%s', id #%d, line=%d[0m\n",rule,symbol_num,line);
+  //astNode *first=*lhs=astNewNodeRule(rule,symbol_num);
   astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On va scruter tous les éléments
   // On commence par rajouter le premier comme fils

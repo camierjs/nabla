@@ -160,6 +160,5 @@ m_hlt_entry_points.at(level).at(i)->name()<<\"'[m\";\n \
      m_hlt_dive[level] = false;\n\
      m_hlt_level=bkp_level;\n\
    }",i,i,tabs,tabs,tabs);//nccAxlGeneratorEntryPointWhenName(hlt_dive_when[i])
-    free(tabs);
   }
 }

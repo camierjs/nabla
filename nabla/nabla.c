@@ -170,11 +170,12 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
     fclose(yyin);
     return NABLA_ERROR | dbg("\n\t[nablaParsing] Error while parsing!");
   }
-  dbg("\n\t[nablaParsing] Closing & Quit");
-  fclose (yyin);
+  dbg("\n\t[nablaParsing] Parsing done!");
+  fclose(yyin);
   
   if (optionDumpTree!=0){
-    dbg("\n\t[nablaParsing] On dump l'arbre créé");
+    dbg("\n\t[nablaParsing] On dump l'arbre créé (%s.dot)", nabla_entity_name);
+    assert(root);
     astTreeSave(nabla_entity_name, root);
   }
   // Initial files setup and checkup

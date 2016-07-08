@@ -259,7 +259,7 @@ static void addNablaVariableList(nablaMain *nabla,
     dbg("\n\t\t\t[addNablaVariableList] token is '%s'",n->token);
 
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) {
+  if (n->ruleid==ruleToId(rule_compound_statement)) {
     dbg("\n\t\t\t[addNablaVariableList] '{', returning");
     return;
   }
@@ -269,7 +269,7 @@ static void addNablaVariableList(nablaMain *nabla,
     return;
   }
     
-  if (n->ruleid==rulenameToId("direct_declarator")){
+  if (n->ruleid==ruleToId(rule_direct_declarator)){
     dbg("\n\t\t\t[addNablaVariableList] Found a direct_declarator!");
     dbg("\n\t\t\t[addNablaVariableList] Now looking for: '%s'",
         n->children->token);

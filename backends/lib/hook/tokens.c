@@ -527,13 +527,13 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case (RETURN):{
     if (nabla->parallelism==BACKEND_PARALLELISM_OMP){
       char mnx[4]={'M','x','x','\0'};
-      const char *var=dfsFetchFirst(job->stdParamsNode,rulenameToId("direct_declarator"));
+      const char *var=dfsFetchFirst(job->stdParamsNode,ruleToId(rule_direct_declarator));
       astNode *compound_statement=
-        dfsFetch(job->nblParamsNode,rulenameToId("compound_statement"))->parent;
+        dfsFetch(job->nblParamsNode,ruleToId(rule_compound_statement))->parent;
       //compound_statement=compound_statement->parent;
       assert(compound_statement!=NULL);
       //printf("compound_statement->rule=%s",compound_statement->rule);
-      assert(compound_statement->ruleid==rulenameToId("compound_statement"));
+      assert(compound_statement->ruleid==ruleToId(rule_compound_statement));
       /////////////////////////////////////
       // A *little* bit too cavalier here!
       /////////////////////////////////////

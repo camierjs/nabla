@@ -161,9 +161,9 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
 // ****************************************************************************
 void nMiddleOptions(astNode * n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
-    {rulenameToId("type_specifier"),actOptionsTypeSpecifier},
-    {rulenameToId("direct_declarator"),actOptionsDirectDeclarator},
-    {rulenameToId("expression"),actOptionsExpression},
+    {ruleToId(rule_type_specifier),actOptionsTypeSpecifier},
+    {ruleToId(rule_direct_declarator),actOptionsDirectDeclarator},
+    {ruleToId(rule_expression),actOptionsExpression},
     {0,NULL}};
   assert(ruleid!=1);
   if (n->rule != NULL)

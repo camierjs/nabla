@@ -275,13 +275,13 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
                                                          char enum_enum){
   // On cherche la primary_expression coté gauche du premier postfix_expression
   //dbg("\n\t[nMiddleVariables] Looking for 'primary_expression':");
-  astNode *primary_expression=dfsFetch(n->children,rulenameToId("primary_expression"));
+  astNode *primary_expression=dfsFetch(n->children,ruleToId(rule_primary_expression));
   // On va chercher l'éventuel 'nabla_item' après le '['
   //dbg("\n\t[nMiddleVariables] Looking for 'nabla_item':");
-  astNode *nabla_item=dfsFetch(n->children->next->next,rulenameToId("nabla_item"));
+  astNode *nabla_item=dfsFetch(n->children->next->next,ruleToId(rule_nabla_item));
   // On va chercher l'éventuel 'nabla_system' après le '['
   //dbg("\n\t[nMiddleVariables] Looking for 'nabla_system':");
-  astNode *nabla_system=dfsFetch(n->children->next->next,rulenameToId("nabla_system"));
+  astNode *nabla_system=dfsFetch(n->children->next->next,ruleToId(rule_nabla_system));
   
   /*dbg("\n\t[nMiddleVariables] primary_expression->token=%s, nabla_item=%s, nabla_system=%s",
       (primary_expression!=NULL)?primary_expression->token:"NULL",
@@ -352,7 +352,7 @@ bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char 
     dbg("\n\t\t\t\t\t[dfsUsedInThisForall] NULL, returning");
     return false;
   }
-  if (n->ruleid==rulenameToId("primary_expression")){
+  if (n->ruleid==ruleToId(rule_primary_expression)){
     dbg("\n\t\t\t\t\t[dfsUsedInThisForall] primary_expression");
     if (n->children->token!=NULL){
       dbg(", token: '%s'",n->children->token?n->children->token:"id");
@@ -466,18 +466,18 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   // Par défault, left_of_assignment_expression arrive à false
   // Si on tombe sur un assignment_expression, et un en fils en unary_expression
   // c'est qu'on passe à gauche du '=' et qu'on 'écrit'
-  if (n->ruleid==rulenameToId("assignment_expression")&&
-      (n->children->ruleid==rulenameToId("unary_expression"))){
+  if (n->ruleid==ruleToId(rule_assignment_expression)&&
+      (n->children->ruleid==ruleToId(rule_unary_expression))){
     //dbg("\n\t\t\t[dfsVariables] left_of_assignment_expression @ TRUE!");
     left_of_assignment_expression=true;
   }
   // Si on passe par l'opérateur, on retombe du coté 'lecture'
-  if (n->ruleid==rulenameToId("assignment_operator")){
+  if (n->ruleid==ruleToId(rule_assignment_operator)){
     //dbg("\n\t\t\t[dfsVariables] left_of_assignment_expression @ FALSE!");
     left_of_assignment_expression=false;
   }
   
-  if (n->ruleid==rulenameToId("nabla_system")){
+  if (n->ruleid==ruleToId(rule_nabla_system)){
     // Si on tombe sur la variable systeme TIME,
     // il faudra qu'on la rajoute au arguments
     if (n->children->tokenid == TIME){
@@ -508,7 +508,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
     dfsVarThisOne(nabla,job,n,NEXTCELL_Z,"cell_next",left_of_assignment_expression);    
   }
       
-  if (n->ruleid==rulenameToId("primary_expression")){
+  if (n->ruleid==ruleToId(rule_primary_expression)){
     if (n->children->tokenid == IDENTIFIER){
       dbg("\n\t\t\t[dfsVariables] primary_expression (%s)!", n->children->token);
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
@@ -559,7 +559,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
 void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
   if (n==NULL) return;
   
-  if (n->tokenid==FORALL && n->next->ruleid==rulenameToId("nabla_item")){
+  if (n->tokenid==FORALL && n->next->ruleid==ruleToId(rule_nabla_item)){
     if (n->next->children->tokenid==CELL) job->enum_enum='c';
     if (n->next->children->tokenid==NODE) job->enum_enum='n';
     if (n->next->children->tokenid==FACE) job->enum_enum='f';
@@ -576,7 +576,7 @@ void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
 // ****************************************************************************
 void dfsExit(nablaMain *nabla, nablaJob *job, astNode *n){
   if (n==NULL) return;  
-  if (n->ruleid==rulenameToId("nabla_system")
+  if (n->ruleid==ruleToId(rule_nabla_system)
       && (n->children->tokenid==EXIT)){
     job->exists=true;
     //printf("[1;33m[dfsExit] job %s exits[m\n",job->name);

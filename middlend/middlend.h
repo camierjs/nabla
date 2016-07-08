@@ -71,7 +71,7 @@ typedef enum {
   with_mathematica,
   with_real,          // 1D only, no Real3 admitted
   with_real2          // 2D only, no Real3 admitted
-} with_library;
+} enum_library;
 
 
 // ****************************************************************************
@@ -233,7 +233,7 @@ typedef struct nablaEntityStruct{
   const char *name;
   const char *name_upcase;
   nablaJob *jobs;
-  with_library libraries;
+  enum_library libraries;
   struct nablaMainStruct *main; 
   struct nablaEntityStruct *next;
 } nablaEntity;
@@ -301,7 +301,7 @@ typedef struct nablaMainStruct{
 void middleGlobals(nablaMain*);
  
 // nMiddleLibraries.c
-bool isWithLibrary(nablaMain*,with_library);
+bool isWithLibrary(nablaMain*,enum_library);
 void nMiddleLibraries(astNode*,nablaEntity*);
 
 // nMiddleEntities.c

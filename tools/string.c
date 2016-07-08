@@ -44,50 +44,6 @@
 
 
 // ****************************************************************************
-// * sdup
-// ****************************************************************************
-char *strdup(const char *s);
-
-typedef struct nStrDup{
-  char *str;
-  struct nStrDup *next; 
-} nStrDup;
-
-static nStrDup *duped=NULL;
-static nStrDup *dplst=NULL;
-
-static nStrDup* snew(const char* str){
-  nStrDup *new=(nStrDup *)calloc(1,sizeof(nStrDup));
-  assert(new);
-  new->str=strdup(str);
-  return new;
-}
-
-static nStrDup *sadd(const char* str){
-  nStrDup *dup=duped;
-  if (duped == NULL) return dplst=duped=snew(str);
-  //for(;dup->next!=NULL;dup=dup->next);
-  dup=dplst;
-  return dplst=dup->next=snew(str);
-}
-
-char *sdup(const char *s){
-  //printf("[1;33m[sdup] '%s'[0m\n",s);
-  return sadd(s)->str;
-}
-
-void sfree(void){
-  //printf("[1;31m[sfree][0m\n");    
-  for(nStrDup *this,*dup=this=duped;dup!=NULL;){
-    dup=(this=dup)->next;
-    //printf("\t[1;33m[sfree] '%s'[0m\n",this->str);    
-    free(this->str);//if (this->str!=NULL){ free(this->str); this->str=NULL;}
-    free(this);//if (this!=NULL){ free(this);this=NULL;}
-  }
-}
-
-
-// ****************************************************************************
 // * strDownCase
 // ****************************************************************************
 char *toolStrDownCase(const char * str){

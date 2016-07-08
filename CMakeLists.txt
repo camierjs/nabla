@@ -63,7 +63,10 @@ endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 ############
 # PACKAGES #
 ############
-#find_package(MPI)
+set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
+set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
+set(MPI_C_INCLUDE_PATH /usr/include/mpi)
+find_package(MPI)
 find_package(CUDA)
 find_package(OpenMP)
 include(cmake/FindARCANE.cmake)

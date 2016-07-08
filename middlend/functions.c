@@ -50,7 +50,7 @@
 // ****************************************************************************
 void nMiddleFunctionDumpHeader(FILE *file, astNode *n){
   if (n->rule!=NULL)
-    if (n->ruleid == rulenameToId("compound_statement"))
+    if (n->ruleid == ruleToId(rule_compound_statement))
       return;
   for(;n->token != NULL;){
     if (n->tokenid == AT) return; // Pas besoin des @ dans le header
@@ -71,10 +71,10 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
  
   // On regarde si on est 'à gauche' d'un 'assignment_expression',
   // dans quel cas il faut rajouter ou pas de '()' aux variables globales
-  if (n->ruleid == rulenameToId("assignment_expression"))
+  if (n->ruleid == ruleToId(rule_assignment_expression))
     if (n->children!=NULL)
       if (n->children->next!=NULL)
-        if (n->children->next->ruleid == rulenameToId("assignment_operator"))
+        if (n->children->next->ruleid == ruleToId(rule_assignment_operator))
           fct->parse.left_of_assignment_operator=true;
 
   // On ne traite qu'un TOKEN ici, on break systématiquement
@@ -275,7 +275,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   int numParams;
   fct->jobNode=n;
   fct->called_variables=NULL;
-  astNode *nFctName = dfsFetch(n->children,rulenameToId("direct_declarator"));
+  astNode *nFctName = dfsFetch(n->children,ruleToId(rule_direct_declarator));
   assert(nFctName->children->tokenid==IDENTIFIER);
   dbg("\n* Fonction '%s'", nFctName->children->token); // org-mode function item
   dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
@@ -291,12 +291,12 @@ void nMiddleFunctionFill(nablaMain *nabla,
   fct->region = sdup("NoRegion");
   fct->item   = sdup("\0function\0");fct->item[0]=0; 
   dbg("\n\t[nablaFctFill] Looking for fct->rtntp:");
-  fct->return_type  = dfsFetchFirst(n->children,rulenameToId("type_specifier"));
+  fct->return_type  = dfsFetchFirst(n->children,ruleToId(rule_type_specifier));
   dbg("\n\t[nablaFctFill] fct->rtntp=%s", fct->return_type);
   fct->xyz    = sdup("NoXYZ");
   fct->direction  = sdup("NoDirection");
   dbg("\n\t[nablaFctFill] On refait (sic) pour le noeud");
-  fct->returnTypeNode=dfsFetch(n->children,rulenameToId("type_specifier"));
+  fct->returnTypeNode=dfsFetch(n->children,ruleToId(rule_type_specifier));
   dbg("\n\t[nablaFctFill] On va chercher le nom de la fonction");
   
   //dbg("\n\t[nablaFctFill] fct->name=%s", fct->name);
@@ -311,7 +311,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
 
   // Récupération de la liste des paramètres
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
-  astNode *nParams=dfsFetch(n->children,rulenameToId("parameter_type_list"));
+  astNode *nParams=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
   fct->stdParamsNode=nParams->children;
   
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
@@ -355,7 +355,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   // On avance jusqu'au compound_statement afin de sauter les listes de paramètres
   dbg("\n\t[nablaFctFill] On avance jusqu'au compound_statement");
   for(n=n->children->next;
-      n->ruleid!=rulenameToId("compound_statement");
+      n->ruleid!=ruleToId(rule_compound_statement);
       n=n->next) {
     //dbg("\n\t[nablaFctFill] n rule is '%s'", n->rule);
   }

@@ -166,12 +166,11 @@ static void actItemComa(astNode * n, void *generic_arg){
  *****************************************************************************/
 void nMiddleItems(astNode * n, int ruleid, nablaMain *arc){
   RuleAction tokact[]={
-    {rulenameToId("type_specifier"),actItemTypeSpecifier},
-    //{rulenameToId("nabla_direct_declarator_list") ,actItemList},
+    {ruleToId(rule_type_specifier),actItemTypeSpecifier},
     {tokenidToRuleid(',') ,actItemComa},
-    {rulenameToId("nabla_direct_declarator"),actItemDirectDeclarator},
-    {rulenameToId("nabla_items"), actItemNablaItems},
-    {rulenameToId("primary_expression"), actItemPrimaryExpression},
+    {ruleToId(rule_nabla_direct_declarator),actItemDirectDeclarator},
+    {ruleToId(rule_nabla_items), actItemNablaItems},
+    {ruleToId(rule_primary_expression), actItemPrimaryExpression},
     {0,NULL}
   };
   if (n==NULL) return;

@@ -105,9 +105,9 @@ stars: '*'| stars '*';
 
 header: stars IDENTIFIER;
 
-///////////////
-// ∇ grammar //
-///////////////
+////////////////////
+// orgopt grammar //
+////////////////////
 orgopt_grammar: header | option;
 
 %%
@@ -187,25 +187,12 @@ int inOpt(char *file,int *argc, char **argv){
   return 0;
 }
 
-
-// ****************************************************************************
-// * rulenameToId
-// ****************************************************************************
-int rulenameToId(const char *rulename){
-  unsigned int i;
-  const size_t rnLength=strlen(rulename);
-  for(i=0; yytname[i]!=NULL;i+=1){
-    if (strlen(yytname[i])!=rnLength) continue;
-    if (strcmp(yytname[i], rulename)!=0) continue;
-    return i;
-  }
-  dbg("[rulenameToId] error with '%s'",rulename);
-  return 1; // error
-}
-
-
 // *****************************************************************************
 // * Standard rhsAdd
+// *              YYR2[YYN] -- Number of symbols on the right hand side of rule YYN
+// * SYMBOL-NUM = YYR1[YYN] -- Symbol number of symbol that rule YYN derives
+// *    YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM
+// * YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
 // *****************************************************************************
 inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
   // Nombre d'éléments dans notre RHS
@@ -225,3 +212,18 @@ inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
   }
 }
 
+
+// ****************************************************************************
+// * rulenameToId
+// ****************************************************************************
+const int rulenameToId(const char *rulename){
+  //printf("[1;33m[rulenameToId] looking for '%s':[0m",rulename);    
+  const size_t rnLength=strlen(rulename);
+  for(int i=YYNTOKENS; yytname[i]!=NULL;i+=1){
+    if (strlen(yytname[i])!=rnLength) continue;
+    if (strcmp(yytname[i], rulename)!=0) continue;
+    return i;
+  }
+  dbg("[rulenameToId] error with '%s'",rulename);
+  return fprintf(stderr,"[1;31mrulenameToId error with '%s'[0m\n", rulename);
+}

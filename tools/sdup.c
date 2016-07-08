@@ -40,46 +40,48 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_AST_H_
-#define _NABLA_AST_H_
-
-// ****************************************************************************
-// * Node structure used for the AST
-// ****************************************************************************
-typedef struct astNodeStruct{
-  /*const*/ unsigned int id; // Unique node ID
-  char *token;
-  const char *token_utf8;
-  int tokenid;
-  const char *rule;
-  int ruleid;
-  bool type_name;
-  struct astNodeStruct *next, *children, *parent;  
-}astNode;
+#include "nabla.h"
 
 
 // ****************************************************************************
-// * Forward declaration of AST NODE functions
+// * sdup
 // ****************************************************************************
-void nAstListFree(void);
-astNode *astNewNode(char*, const unsigned int);
-astNode *astNewNodeRule(const char*,unsigned int);
-astNode *astAddChild(astNode*,astNode*);
-astNode *astAddNext(astNode*,astNode*);
+char *strdup(const char *s);
 
-// ****************************************************************************
-// * Forward declaration of AST TREE functions
-// ****************************************************************************
-NABLA_STATUS astTreeSave(const char*, const astNode*);
-void getInOutPutsNodes(FILE*,astNode*,char*);
-void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
+typedef struct nStrDup{
+  char *str;
+  struct nStrDup *next; 
+} nStrDup;
 
+static nStrDup *duped=NULL;
+static nStrDup *dplst=NULL;
 
-int yyUndefTok(void);
-int yyTranslate(int);
-int tokenidToRuleid(int);
-int yyNameTranslate(int);
-const int rulenameToId(const char*);
-const int ruleToId(const int);
+static nStrDup* snew(const char* str){
+  nStrDup *new=(nStrDup *)calloc(1,sizeof(nStrDup));
+  assert(new);
+  new->str=strdup(str);
+  return new;
+}
 
-#endif // _NABLA_AST_H_
+static nStrDup *sadd(const char* str){
+  nStrDup *dup=duped;
+  if (duped == NULL) return dplst=duped=snew(str);
+  //for(;dup->next!=NULL;dup=dup->next);
+  dup=dplst;
+  return dplst=dup->next=snew(str);
+}
+
+char *sdup(const char *s){
+  //printf("[1;33m[sdup] '%s'[0m\n",s);
+  return sadd(s)->str;
+}
+
+void sfree(void){
+  //printf("[1;31m[sfree][0m\n");    
+  for(nStrDup *this,*dup=this=duped;dup!=NULL;){
+    dup=(this=dup)->next;
+    //printf("\t[1;33m[sfree] '%s'[0m\n",this->str);    
+    free(this->str);//if (this->str!=NULL){ free(this->str); this->str=NULL;}
+    free(this);//if (this!=NULL){ free(this);this=NULL;}
+  }
+}

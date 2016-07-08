@@ -71,7 +71,7 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode *n){
     }
   }
   // A chaque parameter_declaration, on incrémente le compteur de paramètre
-  if (n->ruleid==rulenameToId("parameter_declaration")){
+  if (n->ruleid==ruleToId(rule_parameter_declaration)){
     dbg("\n\t\t[nMiddleDumpParameterTypeList] number_of_parameters_here+=1");
     number_of_parameters_here+=1;
   }
@@ -224,11 +224,11 @@ void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
   //nprintf(nabla,"\n\t[nMiddleArgsDump]",NULL);
   if (n==NULL) return;
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'
-  if (n->ruleid==rulenameToId("compound_statement")) return;
+  if (n->ruleid==ruleToId(rule_compound_statement)) return;
   if (n->tokenid=='@') return;
-  //if (n->ruleid==rulenameToId("nabla_parameter_declaration"))
+  //if (n->ruleid==ruleToId(rule_nabla_parameter_declaration))
   //   if (*numParams!=0) nprintf(nabla, NULL, ",");
-  if (n->ruleid==rulenameToId("direct_declarator")){
+  if (n->ruleid==ruleToId(rule_direct_declarator)){
     nablaVariable *var=nMiddleVariableFind(nabla->variables, n->children->token);
     //nprintf(nabla, NULL, "\n\t\t/*[cudaDumpNablaArgumentList] looking for %s*/", n->children->token);
     *numParams+=1;

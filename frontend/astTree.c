@@ -82,7 +82,10 @@ static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
 /*****************************************************************************
  * astTreeSaveEdges
  *****************************************************************************/
-static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput, const astNode *l, const astNode *father){
+static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
+                                     const astNode *l,
+                                     const astNode *father){
+  dbg("\n\t\t[astTreeSaveEdges]");
   for(;l not_eq NULL;l=l->next){
     fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, l->id);
     astTreeSaveEdges(fTreeOutput, l->children, l);
@@ -94,18 +97,21 @@ static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput, const astNode *l, const 
 /*****************************************************************************
  * astTreeSave
  *****************************************************************************/
-NABLA_STATUS astTreeSave(const char *nabla_entity_name, astNode *root){
+NABLA_STATUS astTreeSave(const char *nabla_entity_name, const astNode *root){
   FILE *fDot;
   char fName[NABLA_MAX_FILE_NAME];
   sprintf(fName, "%s.dot", nabla_entity_name);
   // Saving tree file
   if ((fDot=fopen(fName, "w")) == 0) return NABLA_ERROR|dbg("[nccTreeSave] fopen ERROR");
   fprintf(fDot, "digraph {\nordering=out;\n\tnode [style = filled, shape = circle];");
+  dbg("\n\t[astTreeSave] Saving nodes");
   astTreeSaveNodes(fDot, root, 0);
+  dbg("\n\t[astTreeSave] Saving edges");
   if (astTreeSaveEdges(fDot, root->children, root) not_eq NABLA_OK)
     return NABLA_ERROR|dbg("[nccTreeSave] ERROR");
   fprintf(fDot, "\n}\n");
   fclose(fDot);
+  dbg("\n\t[astTreeSave] Done!");
   return NABLA_OK;
 }		
 

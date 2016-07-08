@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * isWithLibrary
 // ****************************************************************************
-bool isWithLibrary(nablaMain *nabla, with_library lib){
+bool isWithLibrary(nablaMain *nabla, enum_library lib){
   const int this_lib = 1<<lib;
   return ((nabla->entity->libraries & this_lib)==this_lib);
 }
@@ -168,7 +168,7 @@ static void nMiddleLibrariesSwitch(const astNode * n, nablaEntity *entity){
 // * DFS scan for libraries
 // ****************************************************************************
 void nMiddleLibraries(astNode * n, nablaEntity *entity){
-  if (n->ruleid == rulenameToId("single_library"))
+  if (n->ruleid == ruleToId(rule_single_library))
     nMiddleLibrariesSwitch(n,entity);
   if(n->children != NULL) nMiddleLibraries(n->children,  entity);
   if(n->next != NULL) nMiddleLibraries(n->next, entity);
