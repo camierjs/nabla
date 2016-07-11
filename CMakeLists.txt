@@ -78,6 +78,7 @@ include(cmake/FindIceT.cmake)
 include(cmake/FindKokkos.cmake)
 include(cmake/FindRAJA.cmake)
 #include(cmake/FindPETSc.cmake)
+include(cmake/FindMFEM.cmake)
 
 #################
 # PACKAGES INFO #
@@ -117,6 +118,7 @@ add_subdirectory(frontend)
 add_subdirectory(middlend)
 add_subdirectory(tools)
 add_subdirectory(aleph)
+add_subdirectory(glvis)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)

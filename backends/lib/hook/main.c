@@ -44,12 +44,19 @@
 
 extern char* nablaAlephHeader(nablaMain*);
 
+
+// ****************************************************************************
+// * Forward des fonctions utilisées dans le main
+// ****************************************************************************
+#define BACKEND_MAIN_FORWARDS "\n\
+extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
+extern void glvis(const int,const int,const int,const double,double*,double*);\n\n\n"
+
 // ****************************************************************************
 // * Backend PREFIX - Génération du 'main'
 // * look at c++/4.7/bits/ios_base.h for cout options
 // ****************************************************************************
 #define BACKEND_MAIN_FUNCTION "\n\
-extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
 // ******************************************************************************\n\
 // * Main\n\
 // ******************************************************************************\n\
@@ -61,6 +68,7 @@ int main(int argc, char *argv[]){\n"
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
 \t// Initialisation des Swirls\n\
 \tint hlt_level=0;\n\
+\tbool visualization=false;\n\
 \tbool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
@@ -80,6 +88,7 @@ int main(int argc, char *argv[]){\n"
 \t// ********************************************************\n\
 \tint o; int longindex=0;\n\
 \tconst struct option longopts[]={\n\
+\t\t{\"vis\",no_argument,NULL,0x5d8a73d0},\n\
 \t\t{\"org\",required_argument,NULL,0x3c0f6f4c},\n"
 #define BACKEND_MAIN_OPTIONS_POSTFIX "\
 \t\t{NULL,0,NULL,0}\n\
@@ -87,6 +96,10 @@ int main(int argc, char *argv[]){\n"
 #define BACKEND_MAIN_OPTIONS_WHILE_PREFIX "\
 \twhile ((o=getopt_long_only(argc, argv, \"\",longopts,&longindex))!=-1){\n\
 \t\tswitch (o){\n\
+\t\tcase 0x5d8a73d0:{\n\
+\t\t\tvisualization=true;\n\
+\t\t\tbreak;\n\
+\t\t\t};\n\
 \t\tcase 0x3c0f6f4c:{//optorg\n\
 \t\t\tconst int org_optind=optind;\n\
 \t\t\toptind=0;\n\
@@ -139,6 +152,7 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
   if ((nabla->entity->libraries&(1<<with_aleph))!=0)
     fprintf(nabla->entity->hdr, "%s", nablaAlephHeader(nabla));
+  fprintf(nabla->entity->src, BACKEND_MAIN_FORWARDS);
   fprintf(nabla->entity->src, BACKEND_MAIN_FUNCTION);
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
@@ -343,6 +357,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);\n\
+\t//if (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_e);\n\
 \twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
     }
     
@@ -420,6 +435,7 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 \n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
+\n\tif (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_p);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"
 

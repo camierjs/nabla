@@ -21,13 +21,13 @@
    - option_δt_mult_lower_b    = 1.1
    - option_δt_mult_upper_b    = 1.2
 ** stop
-   - option_stoptime           = 1.0e-2
+   - option_stoptime           = 2.0e-3
 * mesh
 ** xyz 
   - LENGTH = +1.125
-  - X_EDGE_ELEMS = 8
-  - Y_EDGE_ELEMS = 8
-  - Z_EDGE_ELEMS = 8
+  - X_EDGE_ELEMS = 16
+  - Y_EDGE_ELEMS = 16
+  - Z_EDGE_ELEMS = 16
 
 * cuts
   - option_e_cut = 1.0e-7

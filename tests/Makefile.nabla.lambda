@@ -24,6 +24,9 @@ LIB_ALEPH = ${LIB_ALEPH} ${LIB_ALEPH_HYPRE}
 # A mettre lors du configure
 LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
+LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libOrgOpt.a
+LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/libmfem.a
+
 
 all:$(TGT) $(NABLA) 
 
@@ -34,7 +37,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) ${NABLA_BINARY_DIR}/orgopt/libOrgOpt.a
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_GLVIS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
