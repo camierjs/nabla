@@ -36,4 +36,6 @@ set(LIBRARIES_ARCANE_C
 
 add_library(NablaArcane ${BACKEND_ARCANE_C} ${LIBRARIES_ARCANE_C})
 
-add_dependencies(NablaArcane libNabla)
+add_dependencies(NablaArcane Nabla)
+
+#install(TARGETS NablaArcane DESTINATION lib)

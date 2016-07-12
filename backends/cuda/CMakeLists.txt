@@ -14,9 +14,11 @@ set(BACKEND_CUDA_C cuda.c
     reduce.c)
 
 add_library(NablaCuda ${BACKEND_CUDA_C})
-add_dependencies(NablaCuda libNabla)
+add_dependencies(NablaCuda Nabla)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/cuSolver)
 
 target_link_libraries(NablaCuda NablaCuSolver NablaCudaDump)
+
+#install(TARGETS NablaCuda DESTINATION lib)

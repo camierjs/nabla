@@ -17,8 +17,10 @@ CXX = ${CMAKE_CXX_COMPILER}
 
 CFLAGS = $(SIMD_std_FLAGS) -finline $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
 
-LIB_ALEPH = ${ALEPH_LIB} ${ALEPH_HYPRE_LIB}
+LIB_ALEPH = ${NABLA_BINARY_DIR}/aleph/libAleph.a ${NABLA_BINARY_DIR}/aleph/hypre/libAlephHYPRE.a
 LIB_HYPRE = ${HYPRE_LIB}
+LIB_NOPTS = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
+LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/libmfem.a
 
 all:$(TGT) $(NABLA) 
 

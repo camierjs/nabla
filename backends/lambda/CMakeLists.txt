@@ -10,4 +10,5 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_LAMBDA_C lambda.c)
 
 add_library(NablaLambda ${BACKEND_LAMBDA_C})
-add_dependencies(NablaLambda libNabla)
+add_dependencies(NablaLambda Nabla)
+#install(TARGETS NablaLambda DESTINATION lib)

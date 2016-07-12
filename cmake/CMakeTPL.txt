@@ -1,3 +1,8 @@
+set(MPI_C_INCLUDE_PATH /usr/include/mpi)
+set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
+set(MPI_CXX_INCLUDE_PATH /usr/include/mpi)
+set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
+
 set(ICET_ROOT /usr/local/iceT)
 set(RAJA_ROOT /usr/local/raja)
 #set(RAJA_ROOT /Users/camierjs/raja/RAJA)

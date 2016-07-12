@@ -67,9 +67,9 @@ int main(int argc, char *argv[]){\n"
 \tstruct timeval st, et;\n\
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
 \t// Initialisation des Swirls\n\
-\tint hlt_level=0;\n\
-\tbool visualization=false;\n\
-\tbool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
+\t__attribute__((unused)) int hlt_level=0;\n\
+\t__attribute__((unused)) bool visualization=false;\n\
+\t__attribute__((unused)) bool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
 \t//std::cout.setf(std::ios::floatfield);\n\
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){\n"
 static void dumpOptions(nablaMain *nabla,const int tabs){
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
     const char *ascii_name=opt->name;
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase 0x%X: //%s %s\n",*(unsigned int*)&opt, opt->type, ascii_name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase %p: //%s %s\n",opt, opt->type, ascii_name);
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
@@ -157,7 +157,7 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
-    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,(int)0x%X},\n",opt->name,*(unsigned int*)&opt);
+    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,(int)%p},\n",opt->name,opt);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
 
@@ -435,7 +435,8 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 \n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
-\n\tif (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_p);\n\
+\n\t#warning no visualization\n\
+\n\t//if (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_p);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"
 

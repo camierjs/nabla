@@ -8,8 +8,5 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/nablaAleph.S
              PROPERTY OBJECT_DEPENDS 
              ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
-
-#configure_file(Aleph.h ${CMAKE_CURRENT_BINARY_DIR}/Aleph.h)
-#configure_file(AlephTypesSolver.h ${CMAKE_CURRENT_BINARY_DIR}/AlephTypesSolver.h)
-
-add_library(NablaLibAleph ${NABLA_ALEPH_SOURCES})
+add_library(NablaAleph ${NABLA_ALEPH_SOURCES})
+#install(TARGETS NablaAleph DESTINATION lib)

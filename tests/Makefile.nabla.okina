@@ -50,6 +50,11 @@ LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 #CXX=/usr/local/bin/bf-clang++
 #CLANG_FLAGS = -bf-by-func -bf-call-stack #-nobuiltininc -fno-builtin -fno-math-builtin
 
+########
+# LIBS #
+########
+LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
+
 all:$(TGT) $(NABLA) 
 
 $(TGT).cc: $(TGT_FILE) $(NABLA)
@@ -59,7 +64,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_$(PARALLEL)_GOMP) ${NABLA_BINARY_DIR}/orgopt/libOrgOpt.a
+	$(CXX) $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_$(PARALLEL)_GOMP) $(LIB_ORGOPT)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

@@ -13,4 +13,4 @@ set(BACKEND_LIB_HOOK_C
     tokens.c)
 
 add_library(NablaLibHook ${BACKEND_LIB_HOOK_C})
-add_dependencies(NablaLibHook libNabla)
+add_dependencies(NablaLibHook Nabla)

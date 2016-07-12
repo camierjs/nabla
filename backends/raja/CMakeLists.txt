@@ -14,4 +14,5 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/raja.S
 configure_file(raja.S ${CMAKE_CURRENT_BINARY_DIR}/raja.S)
 
 add_library(NablaRaja ${BACKEND_RAJA_C})
-add_dependencies(NablaRaja libNabla)
+add_dependencies(NablaRaja Nabla)
+#install(TARGETS NablaRaja DESTINATION lib)

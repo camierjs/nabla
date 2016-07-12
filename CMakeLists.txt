@@ -1,15 +1,41 @@
-execute_process(COMMAND "tput" "reset")
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+######################################
+# Test if we're not in top directory #
+######################################
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+  message(FATAL_ERROR "Cannot build in top directory,\
+                       please (mkdir build && cd build && cmake ..)")
+endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+
+#####################
+# Clean and process #
+#####################
+execute_process(COMMAND "tput" "reset")
 include(cmake/VT100.cmake)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+################
+# Nabla banner #
+################
 info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}# Welcome to the NABLA Project! #${VT100_RESET}")
 info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RESET}")
 
+#################
+# Nabla project #
+#################
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(Nabla C CXX ASM)
 
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_VERBOSE_MAKEFILE YES)
+set(CMAKE_INSTALL_PREFIX /usr/local/nabla)
+#set(CMAKE_INSTALL_DO_STRIP "1")
+
+#####################################
+# Test if we're an old Linux kernel #
+#####################################
 string(FIND ${CMAKE_HOST_SYSTEM} "Linux-2.6" OLD_LINUX_KERNEL)
 if (OLD_LINUX_KERNEL EQUAL 0)
   info("${VT100_BOLD}${VT100_FG_GREEN}Found an old 2.6 Linux kernel!${VT100_RESET}")
@@ -50,25 +76,19 @@ endif(APPLE)
 ###############
 # FLEX, BISON #
 ###############
-info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} subdirectory, looking for: ${VT100_FG_YELLOW}BISON${VT100_RESET}, ${VT100_FG_YELLOW}FLEX${VT100_RESET} and ${VT100_FG_YELLOW}CUDA${VT100_RESET}")
-find_package(BISON)
+#info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} subdirectory, looking for: ${VT100_FG_YELLOW}BISON${VT100_RESET}, ${VT100_FG_YELLOW}FLEX${VT100_RESET} and ${VT100_FG_YELLOW}CUDA${VT100_RESET}")
+find_package(BISON REQUIRED)
 info("\t${VT100_FG_MAGENTA}BISON${VT100_RESET} version is ${VT100_BOLD}${BISON_VERSION}${VT100_RESET}")
-find_package(FLEX)
+find_package(FLEX REQUIRED)
 info("\t${VT100_FG_MAGENTA}FLEX${VT100_RESET} version is ${VT100_BOLD}${FLEX_VERSION}${VT100_RESET}")
 if ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
-	info("${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET} return")
-	return()
+	message(FATAL_ERROR "${VT100_BOLD}${VT100_FG_RED}((NOT BISON_FOUND) OR (NOT FLEX_FOUND))${VT100_RESET}")
 endif ((NOT BISON_FOUND) OR (NOT FLEX_FOUND))
 
 ############
 # PACKAGES #
 ############
-set(MPI_C_INCLUDE_PATH /usr/include/mpi)
-set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
-
-set(MPI_CXX_INCLUDE_PATH /usr/include/mpi)
-set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
-
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 find_package(MPI)
 find_package(CUDA)
 find_package(OpenMP)
@@ -77,37 +97,8 @@ include(cmake/FindHYPRE.cmake)
 include(cmake/FindIceT.cmake)
 include(cmake/FindKokkos.cmake)
 include(cmake/FindRAJA.cmake)
-#include(cmake/FindPETSc.cmake)
+include(cmake/FindPETSc.cmake)
 include(cmake/FindMFEM.cmake)
-
-#################
-# PACKAGES INFO #
-#################
-if (CUDA_FOUND)
-  info("\t${VT100_FG_MAGENTA}CUDA${VT100_RESET} version is ${VT100_BOLD}${CUDA_VERSION_STRING}${VT100_RESET}")
-endif(CUDA_FOUND)
-
-if(ARCANE_FOUND)
-  info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
-endif(ARCANE_FOUND)
-
-if(HYPRE_FOUND)
-  info("\t${VT100_FG_MAGENTA}HYPRE${VT100_RESET} has been found in ${VT100_BOLD}${HYPRE_ROOT}${VT100_RESET}")
-endif(HYPRE_FOUND)
-
-if(ICET_FOUND)
-  info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} has been found in ${VT100_BOLD}${ICET_ROOT}${VT100_RESET}")
-  info("\t${VT100_FG_MAGENTA}IceT${VT100_RESET} libraries are ${VT100_BOLD}${ICET_LIBRARIES}${VT100_RESET}")
-endif(ICET_FOUND)
-  
-if(KOKKOS_FOUND)
-  info("\t${VT100_FG_MAGENTA}KOKKOS${VT100_RESET} has been found in ${VT100_BOLD}${KOKKOS_ROOT}${VT100_RESET}")
-endif(KOKKOS_FOUND)
-  
-if(RAJA_FOUND)
-  info("\t${VT100_FG_MAGENTA}RAJA${VT100_RESET} has been found in ${VT100_BOLD}${RAJA_ROOT}${VT100_RESET}")
-endif(RAJA_FOUND)
-
 
 ##################
 # SUBDIRECTORIES #
@@ -119,24 +110,15 @@ add_subdirectory(middlend)
 add_subdirectory(tools)
 add_subdirectory(aleph)
 add_subdirectory(glvis)
+add_subdirectory(okina)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/arcane)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/cuda)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/okina)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lambda)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/kokkos)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/raja)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/backends/lib)
-
-
-#######################
-# Backends common lib #
-#######################
-if(HYPRE_FOUND)
-  info("root LIB_ALEPH is ${VT100_FG_MAGENTA}${LIB_ALEPH}${VT100_RESET}")
-  info("root LIB_ALEPH_HYPRE is ${VT100_FG_MAGENTA}${LIB_ALEPH_HYPRE}${VT100_RESET}")
-endif(HYPRE_FOUND)
-
+add_subdirectory(backends/arcane)
+add_subdirectory(backends/cuda)
+add_subdirectory(backends/okina)
+add_subdirectory(backends/lambda)
+add_subdirectory(backends/kokkos)
+add_subdirectory(backends/raja)
+add_subdirectory(backends/lib)
 
 #########
 # TESTS #

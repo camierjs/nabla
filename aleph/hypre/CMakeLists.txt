@@ -12,4 +12,6 @@ add_library(AlephHYPRE IAlephHypre.cc)
 
 add_dependencies(AlephHYPRE Aleph)
 
-set(LIB_ALEPH_HYPRE ${CMAKE_CURRENT_BINARY_DIR}/libAlephHYPRE.a PARENT_SCOPE)
+#set(LIB_ALEPH_HYPRE ${CMAKE_CURRENT_BINARY_DIR}/libAlephHYPRE.a PARENT_SCOPE)
+
+install(TARGETS AlephHYPRE DESTINATION lib)

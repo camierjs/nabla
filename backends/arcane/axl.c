@@ -172,7 +172,7 @@ char* nccAxlGeneratorEntryPointWhenName(double when){
 
 // *************************************************************
 // *************************************************************
-static char* tab(int k){
+static char* tab(size_t k){
   char tabs[32]; assert(k<32);
   for(int i=0;i<k;i+=1) tabs[i]='\t';
   tabs[k]=0;

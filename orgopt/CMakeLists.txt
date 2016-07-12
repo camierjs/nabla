@@ -3,12 +3,14 @@ bison_target(oParser orgopt.y ${CMAKE_CURRENT_BINARY_DIR}/orgopt.tab.c COMPILE_F
 flex_target(oScanner orgopt.l ${CMAKE_CURRENT_BINARY_DIR}/orgopt.lex.c)
 add_flex_bison_dependency(oScanner oParser)
 
-add_library(OrgOpt ${BISON_oParser_OUTPUTS}
-            ${FLEX_oScanner_OUTPUTS}
+add_library(NablaOrgOpt ${BISON_oParser_OUTPUTS} ${FLEX_oScanner_OUTPUTS}
             ${NABLA_SOURCE_DIR}/tools/utf8.c
             ${NABLA_SOURCE_DIR}/tools/sdup.c
             ${NABLA_SOURCE_DIR}/frontend/astNode.c
             ${NABLA_SOURCE_DIR}/frontend/dbg.c)
 
-#add_executable(orgopt orgopt.c)
-#target_link_libraries(orgopt OrgOpt NablaFrontend NablaToolbox)
+add_executable(orgopt orgopt.c)
+target_link_libraries(orgopt NablaOrgOpt)
+
+install(TARGETS orgopt DESTINATION bin)
+install(TARGETS NablaOrgOpt DESTINATION lib)

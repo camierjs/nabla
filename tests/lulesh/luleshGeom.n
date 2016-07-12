@@ -183,12 +183,9 @@ void Σ_FaceNormal(ℝ³* restrict β,
   const ℝ z0=Χ0.z; const ℝ z1=Χ1.z;
   const ℝ z2=Χ2.z; const ℝ z3=Χ3.z;
   const ℝ z4=Χ4.z; const ℝ z5=Χ5.z;
-  const ℝ x = (y1+y2)*(z0+z1)-(y0+y1)*(z1+z2)+(y0+y4)*(z3+z4)
-    -(y3+y4)*(z0+z4)-(y2+y5)*(z3+z5)+(y3+y5)*(z2+z5);
-  const ℝ y =-(x1+x2)*(z0+z1)+(x0+x1)*(z1+z2)-(x0+x4)*(z3+z4)
-    +(x3+x4)*(z0+z4)+(x2+x5)*(z3+z5)-(x3+x5)*(z2+z5);
-  const ℝ z =-(y1+y2)*(x0+x1)+(y0+y1)*(x1+x2)-(y0+y4)*(x3+x4)
-    +(y3+y4)*(x0+x4)+(y2+y5)*(x3+x5)-(y3+y5)*(x2+x5);
+  const ℝ x = (y1+y2)*(z0+z1)-(y0+y1)*(z1+z2)+(y0+y4)*(z3+z4)-(y3+y4)*(z0+z4)-(y2+y5)*(z3+z5)+(y3+y5)*(z2+z5);
+  const ℝ y =-(x1+x2)*(z0+z1)+(x0+x1)*(z1+z2)-(x0+x4)*(z3+z4)+(x3+x4)*(z0+z4)+(x2+x5)*(z3+z5)-(x3+x5)*(z2+z5);
+  const ℝ z =-(y1+y2)*(x0+x1)+(y0+y1)*(x1+x2)-(y0+y4)*(x3+x4)+(y3+y4)*(x0+x4)+(y2+y5)*(x3+x5)-(y3+y5)*(x2+x5);
   return (1.0/12.0)*ℝ³(x,y,z);
 }
 
@@ -202,7 +199,7 @@ void calcElemFBHourglassForce(const ℝ³* restrict xd,
                               const ℝ* restrict h4, const ℝ* restrict h5,
                               const ℝ* restrict h6, const ℝ* restrict h7,
                               const ℝ θ, ℝ³* restrict η){
-  const ℝ³ h00=h0[0]*xd[0] + h1[0]*xd[1] + h2[0]*xd[2] + h3[0]*xd[3] +h4[0]*xd[4] + h5[0]*xd[5] + h6[0]*xd[6] +h7[0]*xd[7];
+  const ℝ³ h00=h0[0]*xd[0]+h1[0]*xd[1]+h2[0]*xd[2]+h3[0]*xd[3]+h4[0]*xd[4]+h5[0]*xd[5]+h6[0]*xd[6]+h7[0]*xd[7];
   const ℝ³ h01=h0[1]*xd[0]+h1[1]*xd[1]+h2[1]*xd[2]+h3[1]*xd[3]+h4[1]*xd[4]+h5[1]*xd[5]+h6[1]*xd[6]+h7[1]*xd[7];
   const ℝ³ h02=h0[2]*xd[0]+h1[2]*xd[1]+h2[2]*xd[2]+h3[2]*xd[3]+h4[2]*xd[4]+h5[2]*xd[5]+h6[2]*xd[6]+h7[2]*xd[7];
   const ℝ³ h03=h0[3]*xd[0]+h1[3]*xd[1]+h2[3]*xd[2]+h3[3]*xd[3]+h4[3]*xd[4]+h5[3]*xd[5]+h6[3]*xd[6]+h7[3]*xd[7];

@@ -20,11 +20,11 @@ CXX = ${CMAKE_CXX_COMPILER}
 #CXX = mpc_g++
 CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline
 LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
-LIB_ALEPH = ${LIB_ALEPH} ${LIB_ALEPH_HYPRE}
+LIB_ALEPH = ${NABLA_BINARY_DIR}/aleph/libAleph.a ${NABLA_BINARY_DIR}/aleph/hypre/libAlephHYPRE.a
 # A mettre lors du configure
 LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = #/usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
-LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libOrgOpt.a
+LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
 LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/libmfem.a
 
 

@@ -23,7 +23,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_RAJA) ${NABLA_BINARY_DIR}/orgopt/libOrgOpt.a
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_RAJA) ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

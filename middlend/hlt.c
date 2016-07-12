@@ -48,8 +48,7 @@
 // * dumpAtEndofAt
 // ****************************************************************************
 static void dumpAtEndofAt(nablaJob *job, const char *token){
-  const double h=atof(token);
-  assert(h>=0.0);
+  assert(atof(token)>=0.0);
   job->whens[job->when_index]+=
     job->when_sign*atof(token)*pow(10.0,-job->when_depth*NABLA_JOB_WHEN_HLT_FACTOR);
   dbg("\n\t\t[nMiddleAtConstantParse/dumpAtEndofAt] HLT level #%d => %.12e ",

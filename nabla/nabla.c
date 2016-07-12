@@ -239,11 +239,11 @@ static int sysPreprocessor(const char *nabla_entity_name,
   // Porting to GCC 4.8: to disable the stdc-predef.h preinclude: -ffreestanding or use the -P
   snprintf(gcc_command,size,
            // Il faut garder les linemarkers afin de metre à jour 'nabla_input_file' dans nabla.y
-           "gcc -ffreestanding -std=c99 -C -E -Wall -x c %s > %s",
-           cat_sed_temporary_file_name,
-           unique_temporary_file_name
-           );
-  dbg("\n\t[sysPreprocessor] gcc_command=%s", gcc_command);
+           "gcc -ffreestanding -std=c99 -C -E -Wall -x c %s -o %s",
+           cat_sed_temporary_file_name, unique_temporary_file_name );
+  dbg("\n\t[sysPreprocessor] gcc_command='%s'", gcc_command);
+  // We flush all open output streams
+  fflush(NULL);
   if (system(gcc_command)<0){
     free(gcc_command);
     exit(NABLA_ERROR|fprintf(stderr, "\n\t[sysPreprocessor] Error while preprocessing!\n"));
@@ -265,7 +265,7 @@ static void nablaPreprocessor(char *nabla_entity_name,
                               char *list_of_nabla_files,
                               char *unique_temporary_file_name,
                               const int unique_temporary_file_fd){
-  printf("\r%s:1: is our temporary file\n",unique_temporary_file_name);
+  dbg("\r%s:1: is our preprocessing temporary file\n",unique_temporary_file_name);
   if (sysPreprocessor(nabla_entity_name,
                       list_of_nabla_files,
                       unique_temporary_file_name,
@@ -643,8 +643,10 @@ int main(int argc, char * argv[]){
                    unique_temporary_file_name,
                    backend,option,parallelism,compiler,
                    interface_name,specific_path,
-                   service_name)!=NABLA_OK)
+                   service_name)!=NABLA_OK){
+    toolUnlink(unique_temporary_file_name);
     exit(NABLA_ERROR);
+  }
   toolUnlink(unique_temporary_file_name);
   return NABLA_OK;
 }

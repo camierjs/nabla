@@ -10,4 +10,6 @@ add_library(NablaMiddlend ${MIDDLEND_C})
 # Add math library for pow *sic*
 target_link_libraries(NablaMiddlend m)
 
-add_dependencies(NablaMiddlend libNabla)
+add_dependencies(NablaMiddlend Nabla)
+
+#install(TARGETS NablaMiddlend DESTINATION lib)

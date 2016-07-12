@@ -15,9 +15,10 @@ The standard steps for installation are:
     7. You can rerun make clean/config/install to clean/configure/install as you wish
     8. Run 'make install' to try to push the nabla binary to /usr/local/bin
 
-    9. To try it by yourself, go for example to: ./build/tests/lulesh/okina/1/run/avx2/omp,
+    9. To try it by yourself, go for example to:
+       'your_build_path'/tests/lulesh/okina/1/run/avx2/omp,
        and launch: PARALLEL=omp SIMD=avx2 make -kB run1
-   10. You can switch mesh size within the Makefile.okina file
+    10. You can switch mesh size within the Makefile.okina file
 
 For troubleshooting of some common installation problems, mail me
 at Jean-Sylvain.Camier@cea.fr

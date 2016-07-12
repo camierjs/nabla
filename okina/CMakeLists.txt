@@ -1,0 +1,13 @@
+add_subdirectory(std)
+add_subdirectory(sse)
+add_subdirectory(avx)
+add_subdirectory(mic)
+add_subdirectory(512)
+
+add_library(Okina INTERFACE)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+        FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        DIRECTORY_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+        FILES_MATCHING PATTERN "*.h")

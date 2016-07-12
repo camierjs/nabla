@@ -8,3 +8,7 @@ find_path(ARCANE_INCLUDE_DIR arcane_config.h ${ARCANE_ROOT}/include)
 if(ARCANE_INCLUDE_DIR)
   set(ARCANE_FOUND "YES")
 endif(ARCANE_INCLUDE_DIR)
+
+if(ARCANE_FOUND)
+  info("\t${VT100_FG_MAGENTA}ARCANE${VT100_RESET} has been found in ${VT100_BOLD}${ARCANE_ROOT}${VT100_RESET}")
+endif(ARCANE_FOUND)

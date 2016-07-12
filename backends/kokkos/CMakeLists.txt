@@ -13,4 +13,5 @@ set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/kokkos.S
 configure_file(kokkos.S ${CMAKE_CURRENT_BINARY_DIR}/kokkos.S)
 
 add_library(NablaKokkos ${BACKEND_KOKKOS_C})
-add_dependencies(NablaKokkos libNabla)
+add_dependencies(NablaKokkos Nabla)
+#install(TARGETS NablaKokkos DESTINATION lib)

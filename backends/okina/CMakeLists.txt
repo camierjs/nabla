@@ -6,10 +6,11 @@ info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} adding ${VT100_FG_YELLOW}
 set(BACKEND_OKINA_C okina.c header.c)
 
 add_library(NablaOkina ${BACKEND_OKINA_C})
-add_dependencies(NablaOkina libNabla)
+add_dependencies(NablaOkina Nabla)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/call/para)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/call/simd)
 
 target_link_libraries(NablaOkina NablaOkinaCallSimd NablaOkinaCallPara NablaOkinaDump)
+#install(TARGETS NablaOkina DESTINATION lib)

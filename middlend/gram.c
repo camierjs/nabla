@@ -255,8 +255,8 @@ void nMiddleGrammar(astNode *n, nablaMain *nabla){
       nMiddleVariableFind(nabla->variables, global_var_name);
     const nablaVariable *item_var =
       nMiddleVariableFind(nabla->variables, item_var_name);
-    dbg("\n\t[nMiddleGrammar] global_var->item '%s'",
-        global_var->item);
+    dbg("\n\t[nMiddleGrammar] global_var->item '%s'", global_var->item);
+    dbg("\n\t[nMiddleGrammar] item_var->item '%s'", item_var->item);
     // global_var must be 'global'
     assert(global_var->item[0]=='g');
     // item_var must not be 'global'
