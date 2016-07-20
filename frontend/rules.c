@@ -94,10 +94,10 @@ static int usedRuleNamesId[NB_USED_RULENAMES];
 
 void iniUsedRuleNames(void){
   const int nb_used_rulename=NB_USED_RULENAMES;
-  dbg("[1;31m[iniUsedRuleNames] iniUsedRuleNames=%d[0m\n",nb_used_rulename);
+  dbg("\n\t[iniUsedRuleNames] iniUsedRuleNames=%d",nb_used_rulename);
   for(int i=0;i<nb_used_rulename;i+=1){
     const int ruleid=rulenameToId(usedRuleNames[i]);
-    dbg("\t[1;31m[iniUsedRuleNames] #%d %s %d[0m\n",i,usedRuleNames[i],ruleid);
+    dbg("\n\t[iniUsedRuleNames] #%d %s %d",i,usedRuleNames[i],ruleid);
     usedRuleNamesId[i]=ruleid;
   }
 }

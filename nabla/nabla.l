@@ -150,6 +150,7 @@ __asm__           { return tok(&yylval, ASM);}
 "ℝ"			      { return tok(&yylval, REAL);}
 "ℤ"		         { return tok(&yylval, INTEGER);}
 "ℕ"		         { return tok(&yylval, NATURAL);}
+"ℂ"               { return tok(&yylval, COMPLEX);}
 "ℾ"		         { return tok(&yylval, BOOL);}
 
 "size_t"			   { return tok(&yylval, SIZE_T);}
@@ -232,22 +233,24 @@ __asm__           { return tok(&yylval, ASM);}
 "boundaryCell"    { return tok(&yylval, BOUNDARY_CELL);}
 
 "&&"					{ return tok(&yylval, AND_OP);}
-"∧"					{ return tok(&yylval, AND_OP);}  // a788e2
+"∧"					{ return tok(&yylval, AND_OP);}
 "and"             { return tok(&yylval, AND_OP);}
 
 "||"					{ return tok(&yylval, IOR_OP);}
-"∨"					{ return tok(&yylval, IOR_OP);}  // a888e2
+"∨"					{ return tok(&yylval, IOR_OP);}
 "or"              { return tok(&yylval, IOR_OP);}
 
-{L}({L}|{D})*		{ return tok_type(&yylval); }
+{L}({L}|{D})*		{ return tok_type(&yylval); } // TYPEDEF or IDENTIFIER
+
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
 {D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
-L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CONSTANT);}
 {D}+{E}{FS}?		     { return tok(&yylval, R_CONSTANT);}
 {D}*"."{D}+({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
 {D}+"."{D}*({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
-L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
+
+\"(\\.|[^\\\"])*\" { return tok(&yylval, STRING);} // L?
+\'(\\.|[^\\\'])+\' { return tok(&yylval, QUOTE);}  // L?
 
 "..."					{ return tok(&yylval, ELLIPSIS);}
 ">>="					{ return tok(&yylval, RSH_ASSIGN);}
@@ -288,7 +291,7 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 "."					{ return tok(&yylval, '.');}
 "&"					{ return tok(&yylval, '&');}
 "!"					{ return tok(&yylval, '!');}
-"¬"					{ return tok(&yylval, '!');} // 00AC
+"¬"					{ return tok(&yylval, '!');}
 "~"					{ return tok(&yylval, '~');}
 "-"					{ return tok(&yylval, '-');}
 "+"					{ return tok(&yylval, '+');}
@@ -303,29 +306,29 @@ L?\"(\\.|[^\\\"])*\"	  { return tok(&yylval, STRING_LITERAL);}
 
 "²"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_TWO);}
 "³"					{ return tok(&yylval, SUPERSCRIPT_DIGIT_THREE);}
-"√"					{ return tok(&yylval, SQUARE_ROOT_OP);}// SQUARE ROOT 9a88e2
-"∛"					{ return tok(&yylval, CUBE_ROOT_OP);}//9a88e2
-
-"½"					{ return tok(&yylval, FRACTION_ONE_HALF_CST);}//bdc2
-"⅓"					{ return tok(&yylval, FRACTION_ONE_THIRD_CST);}//9385e2
-"¼"					{ return tok(&yylval, FRACTION_ONE_QUARTER_CST);}//bcc2
-"⅛"					{ return tok(&yylval, FRACTION_ONE_EIGHTH_CST);}//9b85e2
-
-"∞"               { return tok(&yylval, BUILTIN_INFF);}//9e88e2
-
 "ⁿ⁺¹"             { return tok(&yylval, SUPERSCRIPT_N_PLUS_ONE);}
+
+"√"					{ return tok(&yylval, SQUARE_ROOT_OP);}
+"∛"					{ return tok(&yylval, CUBE_ROOT_OP);}
+
+"½"					{ return tok(&yylval, FRACTION_ONE_HALF_CST);}
+"⅓"					{ return tok(&yylval, FRACTION_ONE_THIRD_CST);}
+"¼"					{ return tok(&yylval, FRACTION_ONE_QUARTER_CST);}
+"⅛"					{ return tok(&yylval, FRACTION_ONE_EIGHTH_CST);}
+
+"∞"               { return tok(&yylval, BUILTIN_INFF);}
 
 "[n]"             { return tok(&yylval, FORALL_NODE_INDEX);}
 "[c]"             { return tok(&yylval, FORALL_CELL_INDEX);}
 "[m]"             { return tok(&yylval, FORALL_MTRL_INDEX);}
 
+"⋅"					{ return tok(&yylval, CENTER_DOT_OP);} 
+"⨯"					{ return tok(&yylval, CROSS_OP);}
+"⤫"					{ return tok(&yylval, CROSS_OP_2D);}
 
-"⋅"					{ return tok(&yylval, CENTER_DOT_OP);} // MIDDLE DOT 858be2
-"⨯"					{ return tok(&yylval, CROSS_OP);}//afa8e2
-"⤫"					{ return tok(&yylval, CROSS_OP_2D);}//afa8e2
-"⊗"					{ return tok(&yylval, CIRCLED_TIMES_OP);} // 978ae2
-"⨂"					{ return tok(&yylval, N_ARY_CIRCLED_TIMES_OP);}//82a8e2
-"⊛"					{ return tok(&yylval, CIRCLED_ASTERISK_OP);}//9b8ae2
+"⊗"					{ return tok(&yylval, CIRCLED_TIMES_OP);}
+"⊛"					{ return tok(&yylval, CIRCLED_ASTERISK_OP);}
+"⨂"					{ return tok(&yylval, N_ARY_CIRCLED_TIMES_OP);}
 
 [ \t\v\f]		   { /*ignore*/ }
 
@@ -364,11 +367,11 @@ loop:
 // * Tokenizer
 // ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
-  dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
+  //dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
   if (tokenid==PREPROCS){
     long line_jump=atol(yytext+1);
     assert(line_jump>0);
-    dbg("\n\t\t[tok] PREPROCS: line_jump=%d and yylineno=%d", line_jump, yylineno);
+    //dbg("\n\t\t[tok] PREPROCS: line_jump=%d and yylineno=%d", line_jump, yylineno);
     yylineno=line_jump-1;
   }
   (*yylval) = astNewNode(yytext,tokenid);

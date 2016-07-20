@@ -64,7 +64,7 @@ extern char *last_identifier;
 
 // C-GRAMMAR
 %token SPACE PREPROCS INCLUDES 
-%token IDENTIFIER STRING_LITERAL QUOTE_LITERAL SIZEOF
+%token IDENTIFIER STRING QUOTE SIZEOF
 %token PTR_OP INC_OP DEC_OP LSH_OP RSH_OP LEQ_OP GEQ_OP EEQ_OP NEQ_OP
 %token AND_OP IOR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token NULL_ASSIGN MIN_ASSIGN MAX_ASSIGN
@@ -98,7 +98,8 @@ extern char *last_identifier;
 %token AT DIESE
 %token IN OUT INOUT
 %token ALL OWN INNER OUTER
-%token BOOL NATURAL INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
+%token BOOL NATURAL COMPLEX INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
+%token POWER
 %token CELLTYPE NODETYPE FACETYPE
 %token CELL CELLS FACE FACES NODE NODES
 %token FORALL FORALL_INI FORALL_END FORALL_NODE_INDEX FORALL_CELL_INDEX FORALL_MTRL_INDEX
@@ -209,7 +210,24 @@ asm_list
 | asm_list asm_code {rhs;}
 ;
 asm_code
-: STRING_LITERAL {rhs;}
+: STRING {rhs;}
+;
+
+//////////////////////
+// Power dimensions //
+//////////////////////
+power_args
+: IDENTIFIER {rhs;}
+| power_args ',' IDENTIFIER {ast($1,$3);}
+;
+power_function: IDENTIFIER '(' power_args ')' {ast($1,$3);};
+power_dimension
+: IDENTIFIER {rhs;}
+| power_function {rhs;}
+;
+power_dimensions
+: power_dimension {rhs;}
+| power_dimensions ',' power_dimension {ast($1,$3);}
 ;
 
 //////////////////////////////////////////////////
@@ -230,8 +248,10 @@ type_specifier
 | TYPEDEF_NAME {rhs;}		/* after it has been defined as such */
 | BOOL {rhs;}
 | SIZE_T {rhs;}
+| REAL '^' '{' power_dimensions '}' {powerType($$,$1,$4);}
 | REAL { if (type_precise) preciseY1($$,GMP_REAL) else {rhs;}; type_precise=type_volatile=false;}
 | NATURAL {rhs;}
+| COMPLEX {rhs;}
 | INTEGER {
     if (type_precise){
       if (type_volatile) volatilePreciseY1($$,GMP_INTEGER)
@@ -252,7 +272,7 @@ type_specifier
 | UIDTYPE {rhs;}
 | FILETYPE {rhs;} 
 | OFSTREAM {rhs;} 
-| FILECALL '(' IDENTIFIER ',' IDENTIFIER ')' {rhs;} 
+| FILECALL '(' IDENTIFIER ',' IDENTIFIER ')' {rhs;}
 ;
 
 storage_class_specifier 
@@ -426,7 +446,7 @@ direct_declarator
 : IDENTIFIER {rhs;}
 | IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 | '(' declarator ')' {rhs;}
-| direct_declarator '(' STRING_LITERAL ')' {rhs;}
+| direct_declarator '(' STRING ')' {rhs;}
 | direct_declarator '[' constant_expression ']' {rhs;}
 | direct_declarator '[' ']' {rhs;}
 | direct_declarator '(' parameter_type_list ')' {rhs;}
@@ -549,8 +569,8 @@ primary_expression
 | DIESE {rhs;}
 | nabla_item {rhs;}
 | nabla_system {rhs;}
-| QUOTE_LITERAL {rhs;}
-| STRING_LITERAL {rhs;}
+| QUOTE {rhs;}
+| STRING {rhs;}
 | '(' expression ')'	{rhs;}
 ;
 postfix_expression
@@ -572,7 +592,7 @@ postfix_expression
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
   astNode *callNode=astNewNode("/*call*/",CALL);
   astNode *argsNode=astNewNode("/*args*/",END_OF_CALL);
-  RHS($$,callNode,$1,$2,$3,argsNode,$4);
+  ast(callNode,$1,$2,$3,argsNode,$4);
   }
 | postfix_expression '.' IDENTIFIER {rhs;}
 | postfix_expression '.' nabla_item '(' Z_CONSTANT ')'{rhs;}

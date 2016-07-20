@@ -341,9 +341,9 @@ __attribute__((unused)) const int NABLA_NB_OUTER_CELLS_WARP = (((2*X_EDGE_ELEMS*
 // * On a pas encore parsé!, on ne peut pas jouer avec les isWithLibrary
 // ****************************************************************************
 void xHookMeshPrefix(nablaMain *nabla){
-  dbg("\n[lambdaMainMeshPrefix]");
+  dbg("\n\t[lambdaMainMeshPrefix]");
   //fprintf(nabla->entity->src,"\t//[lambdaMainMeshPrefix] Allocation des connectivités");
-  dbg("\n[xHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
+  dbg("\n\t[xHookMeshCore] nabla->entity->libraries=0x%X",nabla->entity->libraries);
 }
 
 // ****************************************************************************

@@ -84,7 +84,7 @@ static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
 static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
                                      const astNode *n,
                                      const astNode *father){
-  dbg("\n\t\t[astTreeSaveEdges]");
+  //dbg("\n\t\t[astTreeSaveEdges]");
   for(;n not_eq NULL;n=n->next){
     fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, n->id);
     astTreeSaveEdges(fTreeOutput, n->children, n);

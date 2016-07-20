@@ -116,6 +116,19 @@ typedef struct nablaOptionStruct{
 
 
 // ****************************************************************************
+// * PowerType struct
+// * Soit on a un ID direct sous le power_dimension
+// * Soit l'ID est le nom de la function et les args les ID des dimensions
+// ****************************************************************************
+typedef struct nablaPowerTypeStruct{
+  char* id;
+  size_t nargs;
+  char* *args;
+  struct nablaPowerTypeStruct *next;
+}nablaPowerType;
+
+
+// ****************************************************************************
 // * Nabla VARIABLE struct
 // ****************************************************************************
 typedef struct nablaVariableStruct{
@@ -132,6 +145,7 @@ typedef struct nablaVariableStruct{
   bool is_gathered;
   inout_mode inout;
   bool axl_it;
+  struct nablaPowerTypeStruct power_type;
   struct nablaMainStruct *main;
   struct nablaVariableStruct *next;
 }nablaVariable;

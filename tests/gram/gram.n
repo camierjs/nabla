@@ -87,18 +87,14 @@ options{
 
 
 cells{
-  ℝ α,β,γ;
-  ℝ v;
-  ℝ e,volo;
+  ℝ α;
+  ℝ^{Nb} β;
+  ℝ^{l(nvx,nvy,nvz),nc} γ;
+//  ℝ v;  ℝ e,volo;
 };
 
-nodes{
-  ℝ u;
-};
-//
-global{
-  ℝ α_global;
-};
+//nodes{  ℝ u;};
+//global{  ℝ α_global;};
 
 
 //void ini(void) @ -10.0{}
@@ -113,7 +109,7 @@ global{
   volo += e*v;
   }*/
 
-∀ cells void blabla(void) @ 8.0 { α=0.0; }
+//∀ cells void blabla(void) @ 8.0 { α=0.0; }
 ∀ cells @ 8.0 { ∀ node α=0.0; }
 
 //∀ cells @ 8.0 {volo += (α=1.0)*α_global*β*(e=1.0)*v*α;}

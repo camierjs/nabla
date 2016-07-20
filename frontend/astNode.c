@@ -79,7 +79,7 @@ astNode *astNewNode(char *token, const unsigned int tokenid) {
   //dbg("\n\t[astNewNode] Non-Empty UTF8 Token: ('%s',#%d)", token, tokenid);
   n->token_utf8=sdup(token);
   n->token=utf2ascii(n->token_utf8);
-  dbg("\n\t[astNewNode] Non-Empty ASCII Token: ('%s',#%d)", n->token, tokenid);
+  //dbg("\n\t[astNewNode] Non-Empty ASCII Token: ('%s',#%d)", n->token, tokenid);
   return n; 
 }
 

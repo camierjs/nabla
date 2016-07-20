@@ -165,7 +165,7 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
     return NABLA_ERROR | dbg("\n\t[nablaParsing] Could not open '%s' file",
                              npFileName);
   dbg("\n* nablaParsing");
-  dbg("\n\t[nablaParsing] Starting parsing");
+  dbg("\n** [nablaParsing] Starting parsing");
   if (yyparse(&root)){
     fclose(yyin);
     return NABLA_ERROR | dbg("\n\t[nablaParsing] Error while parsing!");
@@ -174,7 +174,7 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   fclose(yyin);
   
   if (optionDumpTree!=0){
-    dbg("\n\t[nablaParsing] On dump l'arbre créé (%s.dot)", nabla_entity_name);
+    dbg("\n** [nablaParsing] On dump l'arbre créé (%s.dot)", nabla_entity_name);
     assert(root);
     astTreeSave(nabla_entity_name, root);
   }
@@ -182,9 +182,9 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   if (nabla_entity_name==NULL)
     return NABLA_ERROR | dbg("\n[nccParseur] No entity name has been set!");
   
-  dbg("\n\t[nablaParsing] nabla_entity_name=%s", nabla_entity_name);
-  dbg("\n\t[nablaParsing] nabla_input_file=%s", nabla_input_file);
-  dbg("\n\t[nablaParsing] Now launching nablaMiddlendSwitch");
+  dbg("\n** [nablaParsing] nabla_entity_name=%s", nabla_entity_name);
+  dbg("\n** [nablaParsing] nabla_input_file=%s", nabla_input_file);
+  dbg("\n** [nablaParsing] Now launching nablaMiddlendSwitch");
   return nMiddleSwitch(root,
                        optionDumpTree,
                        nabla_entity_name,
@@ -265,7 +265,7 @@ static void nablaPreprocessor(char *nabla_entity_name,
                               char *list_of_nabla_files,
                               char *unique_temporary_file_name,
                               const int unique_temporary_file_fd){
-  dbg("\r%s:1: is our preprocessing temporary file\n",unique_temporary_file_name);
+  //dbg("\r%s:1: is our preprocessing temporary file\n",unique_temporary_file_name);
   if (sysPreprocessor(nabla_entity_name,
                       list_of_nabla_files,
                       unique_temporary_file_name,

@@ -25,9 +25,9 @@
 * mesh
 ** xyz 
   - LENGTH = +1.125
-  - X_EDGE_ELEMS = 16
-  - Y_EDGE_ELEMS = 16
-  - Z_EDGE_ELEMS = 16
+  - X_EDGE_ELEMS = 32
+  - Y_EDGE_ELEMS = 32
+  - Z_EDGE_ELEMS = 32
 
 * cuts
   - option_e_cut = 1.0e-7

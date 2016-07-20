@@ -47,10 +47,13 @@
 /***************************************************************************** 
  * type_specifier
  *****************************************************************************/
-static void actItemTypeSpecifier(astNode * n, void *generic_arg){
-  nablaMain *arc=(nablaMain*)generic_arg;
-  nablaVariable *variable = nMiddleVariableNew(arc);
-  dbg("\n\t\t[actItemTypeSpecifier] %s:%s", arc->tmpVarKinds, n->children->token);
+static void actItemTypeSpecifier(astNode *n, void *generic_arg){
+  nablaMain *nabla=(nablaMain*)generic_arg;
+  nablaVariable *variable = nMiddleVariableNew(nabla);
+  if (n->children->tokenid==POWER)
+    dbg("\n\t\t[actItemTypeSpecifier] %s:POWER", nabla->tmpVarKinds);
+  else
+    dbg("\n\t\t[actItemTypeSpecifier] %s:%s", nabla->tmpVarKinds, n->children->token);
 
   if (n->children->token!=NULL){ // Peut arriver avec le TYPEDEF_NAME
     // On regarde s'il n'y a pas un noeud à coté qui nous dit de ne pas backuper
@@ -63,8 +66,8 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
     }
   }
   dbg("\n\t\t[actItemTypeSpecifier] nMiddleVariableAdd:");
-  nMiddleVariableAdd(arc, variable);
-  variable->item=sdup(arc->tmpVarKinds);
+  nMiddleVariableAdd(nabla, variable);
+  variable->item=sdup(nabla->tmpVarKinds);
   dbg("\n\t\t[actItemTypeSpecifier] item=%s",variable->item);
   // Par défaut, on met à '0' la dimension de la variable
   variable->dim=0;
@@ -75,7 +78,7 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
   dbg("\n\t\t[actItemTypeSpecifier] type=%s", variable->type);
     // Si on a un gmp precise integer, on dit que c'est un tableau de 'byte'
   if (strcmp(variable->type, "mpinteger")==0){
-    variable->gmpRank=nMiddleVariableGmpRank(arc->variables);
+    variable->gmpRank=nMiddleVariableGmpRank(nabla->variables);
     dbg("\n\t\t[actItemTypeSpecifier] Found GMP rank=%d", variable->gmpRank);
     variable->type=sdup("integer");
     variable->dim=1;
@@ -86,9 +89,9 @@ static void actItemTypeSpecifier(astNode * n, void *generic_arg){
 /***************************************************************************** 
  * direct_declarator
  *****************************************************************************/
-static void actItemDirectDeclarator(astNode * n, void *generic_arg){
-  nablaMain *arc=(nablaMain*)generic_arg;
-  nablaVariable *variable =nMiddleVariableLast(arc->variables);
+static void actItemDirectDeclarator(astNode *n, void *generic_arg){
+  nablaMain *nabla=(nablaMain*)generic_arg;
+  nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   dbg("\n\t\t[actItemDirectDeclarator]");
   dbg("\n\t\t[actItemDirectDeclarator] %s", n->children->token);
   variable->name=sdup(n->children->token);
@@ -100,9 +103,9 @@ static void actItemDirectDeclarator(astNode * n, void *generic_arg){
 // ***************************************************************************** 
 // * actItemNablaItems
 // *****************************************************************************
-static void actItemNablaItems(astNode * n, void *generic_arg){
-  nablaMain *arc=(nablaMain*)generic_arg;
-  nablaVariable *variable =nMiddleVariableLast(arc->variables);
+static void actItemNablaItems(astNode *n, void *generic_arg){
+  nablaMain *nabla=(nablaMain*)generic_arg;
+  nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   const char cfgn=variable->item[0];
   dbg("\n\t\t[actItemNablaItems] variable '%s' on '%s' array of [%s]",
       variable->name, variable->item, n->children->token);
@@ -124,9 +127,9 @@ static void actItemNablaItems(astNode * n, void *generic_arg){
 //***************************************************************************** 
 // * actItemPrimaryExpression
 // ****************************************************************************
-static void actItemPrimaryExpression(astNode * n, void *generic_arg){
-  nablaMain *arc=(nablaMain*)generic_arg;
-  nablaVariable *variable =nMiddleVariableLast(arc->variables);
+static void actItemPrimaryExpression(astNode *n, void *generic_arg){
+  nablaMain *nabla=(nablaMain*)generic_arg;
+  nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   dbg("\n\t\t[actItemPrimaryExpression] %s", n->children->token);
   // Si on tombe sur un primary_expression ici, c'est que c'est un tableau à la dimension constante
   variable->dim=1;
@@ -136,25 +139,17 @@ static void actItemPrimaryExpression(astNode * n, void *generic_arg){
 
 
 //***************************************************************************** 
-// * actItemList
-// ****************************************************************************
-__attribute__((unused)) static void actItemList(astNode * n, void *generic_arg){
-  dbg("\n\t\t[actItemList]");
-}
-
-
-//***************************************************************************** 
 // * actItemComa
 // ****************************************************************************
-static void actItemComa(astNode * n, void *generic_arg){
+static void actItemComa(astNode *n, void *generic_arg){
   dbg("\n\t\t[actItemComa]");
-  nablaMain *arc=(nablaMain*)generic_arg;
-  nablaVariable *variable = nMiddleVariableNew(arc);
+  nablaMain *nabla=(nablaMain*)generic_arg;
+  nablaVariable *variable = nMiddleVariableNew(nabla);
   // On va chercher la dernière variable créée
-  nablaVariable *last_variable = nMiddleVariableLast(arc->variables);
+  nablaVariable *last_variable = nMiddleVariableLast(nabla->variables);
   variable->dump=true;
-  nMiddleVariableAdd(arc, variable);
-  variable->item=sdup(arc->tmpVarKinds);
+  nMiddleVariableAdd(nabla, variable);
+  variable->item=sdup(nabla->tmpVarKinds);
   // On utilise le type de la dernière variable pour cette nouvelle
   variable->type=last_variable->type;
   variable->dim=0;
@@ -164,7 +159,7 @@ static void actItemComa(astNode * n, void *generic_arg){
 /***************************************************************************** 
  * Scan pour la déclaration des variables
  *****************************************************************************/
-void nMiddleItems(astNode * n, int ruleid, nablaMain *arc){
+void nMiddleItems(astNode *n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
     {ruleToId(rule_type_specifier),actItemTypeSpecifier},
     {tokenidToRuleid(',') ,actItemComa},
@@ -176,8 +171,8 @@ void nMiddleItems(astNode * n, int ruleid, nablaMain *arc){
   if (n==NULL) return;
   if(n->rule != NULL)
     if (ruleid ==  n->ruleid)
-      scanTokensForActions(n, tokact, (void*)arc);
-  nMiddleItems(n->children, ruleid, arc);
-  nMiddleItems(n->next, ruleid, arc);
+      scanTokensForActions(n, tokact, (void*)nabla);
+  nMiddleItems(n->children, ruleid, nabla);
+  nMiddleItems(n->next, ruleid, nabla);
 }
 

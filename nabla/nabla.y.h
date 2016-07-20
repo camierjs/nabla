@@ -69,7 +69,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // ****************************************************************************
 #define rhs rhsAdd(&yyval,yyn,yyvsp)
 #define rhsPatch(i,chr) rhsPatchAndAdd(i,chr,&yyval,yyn,yyvsp)
-#define RHS(lhs, ...) rhsAddVariadic(&yyval,yyn,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
+#define ast(...) rhsAddVariadic(&yyval,yyn,NB_ARGS(__VA_ARGS__),__VA_ARGS__)
 
 
 // ****************************************************************************
@@ -114,14 +114,17 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 #define Yp3p(lhs, n1, n2, n3)                                         \
   tailSandwich('(', ')',yyr2[yyn],n1,n2,n3)
 
+// *****************************************************************************
+// * Power Types
+// *****************************************************************************
+#define powerType(lhs,type,dims)                                       \
+  ast(astNewNode("power",POWER),type,dims)
 
 // *****************************************************************************
 // * Yadrs and YadrsSandwich that uses tailSandwich
 // *****************************************************************************
 #define Yadrs(lhs,and,expr)                                           \
-  astNode *i=astNewNode(NULL,ADRS_IN);                                \
-  astNode *o=astNewNode(NULL,ADRS_OUT);                               \
-  RHS(lhs,i,and,expr,o)
+  ast(astNewNode(NULL,ADRS_IN),and,expr,astNewNode(NULL,ADRS_OUT))
 #define YadrsSandwich(lhs,nd,expr)                                    \
   tailSandwich(ADRS_IN,ADRS_OUT,2,nd,expr)
 
@@ -134,7 +137,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
   astNode *nComa=astNewNode(",",YYTRANSLATE(','));                    \
   astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
-  RHS(lhs,nOp,pIn,n1,nComa,n3,pOut)
+  ast(nOp,pIn,n1,nComa,n3,pOut)
  
 #define YopTernary5p(lhs,cond,qstn,if,doubleDot,else)                   \
   astNode *nOp=astNewNode("opTernary",0);                               \
@@ -142,7 +145,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   astNode *nComa=astNewNode(",",YYTRANSLATE(','));                      \
   astNode *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
   astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
-  RHS(lhs,nOp,pIn,cond,nComa,if,nComa2,else,pOut)
+  ast(nOp,pIn,cond,nComa,if,nComa2,else,pOut)
 
 #define YopDuaryExpression(lhs,ident,op,cond,ifState)                   \
   astNode *nOp=astNewNode("opTernary",0);                               \
@@ -152,7 +155,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
   astNode *elseState=astNewNodeRule(ident->rule,ident->ruleid);         \
   elseState->children=ident->children;                                  \
-  RHS(lhs,ident,op,nOp,pIn,cond,nComa,ifState,nComa2,elseState,pOut)
+  ast(ident,op,nOp,pIn,cond,nComa,ifState,nComa2,elseState,pOut)
 
 
 
@@ -164,22 +167,22 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   dest=strcat(dest,ident->token);                                     \
   dest=strcat(dest,"np1");                                            \
   astNode *superNP1Node=astNewNode(dest,IDENTIFIER);                  \
-  RHS(lhs,superNP1Node)
+  ast(superNP1Node)
 
 #define Ypow(lhs,n1,pow)                                              \
   astNode *pPow=astNewNode("pow",IDENTIFIER);                         \
   astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
   astNode *pTwo=astNewNode("," #pow ".0",IDENTIFIER);                 \
   astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
-  RHS(lhs,pPow,pIn,n1,pTwo,pOut)
+  ast(pPow,pIn,n1,pTwo,pOut)
 
 #define remainY1(lhs)                                                   \
   astNode *timeRemainNode=astNewNode("slurmTremain()",YYTRANSLATE(REMAIN)); \
-  RHS(lhs,timeRemainNode)
+  ast(timeRemainNode)
 
 #define limitY1(lhs)                                                  \
   astNode *timeLimitNode=astNewNode("slurmTlimit()",YYTRANSLATE(LIMIT)); \
-  RHS(lhs,timeLimitNode)
+  ast(timeLimitNode)
 
 #define volatilePreciseY1(lhs, gmpType){                              \
     astNode *mpTypeNode;                                              \
@@ -188,7 +191,7 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
     else                                                              \
       mpTypeNode=astNewNode("mpReal",YYTRANSLATE(gmpType));           \
     astNode *volatileNode=astNewNode("VOLATILE",VOLATILE);            \
-    RHS(lhs,mpTypeNode,volatileNode);}
+    ast(mpTypeNode,volatileNode);}
 
 #define preciseY1(lhs, gmpType){                                      \
     astNode *mpTypeNode;                                              \
@@ -196,19 +199,19 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
       mpTypeNode=astNewNode("mpInteger",YYTRANSLATE(gmpType));        \
     else                                                              \
       mpTypeNode=astNewNode("mpReal",YYTRANSLATE(gmpType));           \
-    RHS(lhs,mpTypeNode);}
+    ast(mpTypeNode);}
 
 #define primeY1ident(lhs, ident)                                      \
   char token[1024];                                                   \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",ident->token);          \
   astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK);  \
-  RHS(lhs,mathlinkPrimeNode)
+  ast(mathlinkPrimeNode)
 
 #define primeY1(lhs, cst)                                             \
   char token[1024];                                                   \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",cst->token);            \
   astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK)); \
-  RHS(lhs,mathlinkPrimeNode)
+  ast(mathlinkPrimeNode)
 
 
 #endif // _NABLA_Y_H_

@@ -109,12 +109,14 @@ options{
   ℝ omega0            = 1./(tau0*Comega); 
 };
 
+//N{1..nvx}
+//nvx + nvy*nvx + nvz*nvx*nvy;
 
 // ****************************************************************************
 // * Element Variables
 // ****************************************************************************
 cells/*x*/{
-  ℝ³ˣ³ fe0,fe1;
+  ℝ^{l(nvx,nvy,nvz),nc} fe0,fe1;
   
   ℝ initial_kinetic_energy0;
   ℝ initial_variance;
