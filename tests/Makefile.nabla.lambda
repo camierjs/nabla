@@ -8,7 +8,7 @@ PARALLEL ?= seq
 BYFL_FLAGS  = #-bf-verbose #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
 
 AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
-SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -O2 -Wall -DNO_SSE2 -mno-avx  #-fPIC
+SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -g -O2 -Wall -DNO_SSE2 -mno-avx  #-fPIC
 
 LOG ?= -tnl #-v $(TGT).log
 

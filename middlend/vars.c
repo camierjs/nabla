@@ -44,8 +44,10 @@
 #include "nabla.tab.h"
 
 void nMiddleVariableFree(nablaVariable *variable){
-  for(nablaVariable *this,*var=this=variable;var!=NULL;free(this))
+  for(nablaVariable *this,*var=this=variable;var!=NULL;free(this)){
+    //if (this->power_type) free(this->power_type);
     var=(this=var)->next;
+  }
 }
 
 // ****************************************************************************

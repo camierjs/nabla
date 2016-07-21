@@ -243,6 +243,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
     nprintf(nabla,NULL,"\n\tFOR_EACH_PARTICLE(p){");
     for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
       if (var->item[0]!='p') continue;
+      if (var->power_type) {nprintf(nabla,NULL,"\n#warning power_type init\n;"); continue;}
       nprintf(nabla,NULL,"\n\t\t%s_%s[p]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
@@ -263,6 +264,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
     nprintf(nabla,NULL,"\n\tFOR_EACH_NODE_WARP(n){");
     for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
       if (var->item[0]!='n') continue;
+      if (var->power_type) {nprintf(nabla,NULL,"\n#warning power_type init\n;"); continue;}
       if (strcmp(var->name, "coord")==0) continue;
       nprintf(nabla,NULL,"\n\t\t%s_%s[n]=",var->item,var->name);
       if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
@@ -284,6 +286,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
     nprintf(nabla,NULL,"\n\tFOR_EACH_CELL_WARP(c){");
     for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
       if (var->item[0]!='c') continue;
+      if (var->power_type) {nprintf(nabla,NULL,"\n#warning power_type init\n;"); continue;}
       if (var->dim==0){
         nprintf(nabla,NULL,"\n\t\t%s_%s[c]=",var->item,var->name);
         if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"zero();");
@@ -435,7 +438,7 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 \n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
-\n\t#warning no visualization\n\
+\n\t//#warning no visualization\n\
 \n\t//if (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_p);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"

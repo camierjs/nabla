@@ -313,6 +313,7 @@ if (HYPRE_FOUND)
 endif (HYPRE_FOUND)
    
 nabla_add_lambda_test(p12d 1 run seq)
+nabla_add_lambda_test(pdfLgvn 1 run seq)
 nabla_add_lambda_test(propagateur 1 run seq)
 
 

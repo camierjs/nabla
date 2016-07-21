@@ -97,6 +97,7 @@ static NABLA_STATUS generateSingleVariableMalloc(nablaMain *nabla,
                                                  char *depth){
   const char *type=dimType(nabla,var->type);
   nprintf(nabla,NULL,"\n\t// generateSingleVariableMalloc %s",var->name);
+  if (var->power_type) return fprintf(nabla->entity->src,"\n#warning power_type allocation");
   if (var->dim==0)
     fprintf(nabla->entity->src,
             //"\n\t%s* %s_%s=(%s*)malloc(sizeof(%s)*%s);// WARP_ALIGN",
@@ -126,9 +127,13 @@ static NABLA_STATUS generateSingleVariableFree(nablaMain *nabla,
                                                char *depth){  
   //if (var->item[0]!='p') return NABLA_OK;
   //nprintf(nabla,NULL,"\n\t// generateSingleVariableFree %s",var->name);
-  if (var->dim==0)
-    fprintf(nabla->entity->src,"\n\tdelete [] %s_%s;",//"\n\tfree(%s_%s);",
-            var->item, var->name);
+  if (var->power_type)
+    return fprintf(nabla->entity->src,"\n#warning power_type %s_%s free",
+                   var->item, var->name);
+  // Mismatched free() / delete / delete []
+  //  if (var->dim==0)
+  fprintf(nabla->entity->src,"\n\tfree(%s_%s);",var->item, var->name);
+  //fprintf(nabla->entity->src,"\n\tdelete [] %s_%s;",var->item, var->name);
   return NABLA_OK;
 }
 

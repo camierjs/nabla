@@ -41,7 +41,7 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-
+with ℝ;
 //∀ x,vx,vy,vz,c;
 
 
@@ -50,63 +50,69 @@
 // ****************************************************************************
 options{
   // Mesh options
-  ℝ LENGTH                    = 1.0;
-  ℕ X_EDGE_ELEMS              = 8;
-  ℕ Y_EDGE_ELEMS              = 1;
-  ℕ Z_EDGE_ELEMS              = 1;
-
-  ℕ steps_p_period = 200;   // NumberOfIterationsPerPeriod
-  ℝ nb_period      = 5.0;   // NumberOfPeriod
-  ℝ frequence      = 0.01;  // TimeFrequencyOfDiagnostics
+  ℝ LENGTH                   = 1.0;
+  ℕ X_EDGE_ELEMS             = 8;
+  ℕ Y_EDGE_ELEMS             = 1;
+  ℕ Z_EDGE_ELEMS             = 1;
   
-  ℕ nx             = 128;   // NumberOfPointsInX
-  ℝ xmin           = -60.0; // MinimumValueOfX
-  ℝ xmax           = +60.0; // MaximumValueOfX
+  // Time options
+  ℝ option_stoptime          = 1.0;
   
-  ℕ nvx            = 128;   // NumberOfPointsInVX
-  ℝ vxmin          = -8.0;  // MinimumValueOfVX
-  ℝ vxmax          = +8.0;  // MaximumValueOfVX
+  // Iterations options
+  ℕ option_max_iterations    = 8;
   
-  ℕ nvy            = 1;     // NumberOfPointsInVY
-  ℝ vymin          = -0.5;  // MinimumValueOfVY
-  ℝ vymax          = +0.5;  // MaximumValueOfVY
+  ℕ option_steps_p_period    = 200;   // NumberOfIterationsPerPeriod
+  ℝ option_nb_period         = 5.0;   // NumberOfPeriod
+  ℝ option_frequence         = 0.01;  // TimeFrequencyOfDiagnostics
   
-  ℕ nvz            = 1;     // NumberOPointsInVZ
-  ℝ vzmin          = -0.5;  // MinimumValueOfVZ
-  ℝ vzmax          = +0.5;  // MaximumValueOfVZ
+  ℕ option_nx                = 128;   // NumberOfPointsInX
+  ℝ option_xmin              = -60.0; // MinimumValueOfX
+  ℝ option_xmax              = +60.0; // MaximumValueOfX
   
-  ℕ nc             = 1;     // NumberOfPointsInConc
-  ℝ cmin           = -0.5;  // MinimumValueOfConc
-  ℝ cmax           = +0.5;  // MaximumValueOfConc
+  ℕ option_nvx               = 128;   // NumberOfPointsInVX
+  ℝ option_vxmin             = -8.0;  // MinimumValueOfVX
+  ℝ option_vxmax             = +8.0;  // MaximumValueOfVX
+  
+  ℕ option_nvy               = 1;     // NumberOfPointsInVY
+  ℝ option_vymin             = -0.5;  // MinimumValueOfVY
+  ℝ option_vymax             = +0.5;  // MaximumValueOfVY
+  
+  ℕ option_nvz               = 1;     // NumberOPointsInVZ
+  ℝ option_vzmin             = -0.5;  // MinimumValueOfVZ
+  ℝ option_vzmax             = +0.5;  // MaximumValueOfVZ
+  
+  ℕ option_nc                = 1;     // NumberOfPointsInConc
+  ℝ option_cmin              = -0.5;  // MinimumValueOfConc
+  ℝ option_cmax              = +0.5;  // MaximumValueOfConc
   //
-  ℕ my_proc        = 0;     // rank of process
-  ℕ nb_proc        = 1;     // number of processes
+  ℕ option_my_proc           = 0;     // rank of process
+  ℕ option_nb_proc           = 1;     // number of processes
   //
-  ℝ C1                = 2.73;
-  ℝ Cc                = 3.;
-  ℝ C0                = 1.73;
-  ℝ Cc0               = 0.;
-  ℝ Cepsilon          = 1.;
-  ℝ Comega            = 0.9;
-  ℝ reynolds_xx       = 1.;
-  ℝ reynolds_yy       = 1.;
-  ℝ mean_vx           = 0.;
-  ℝ mean_vy           = 0.;
-  ℝ c_variance        = 0.5;
-  ℝ mean_c            = 0.;
-  ℝ zmt_lowbound      = -10.;
-  ℝ zmt_highbound     =  10.;
-  ℝ reynolds_xx_dirac = 0.001;
-  ℝ reynolds_yy_dirac = 0.01;
-  ℝ c_variance_dirac  = 0.01;
+  ℝ option_C1                = 2.73;
+  ℝ option_Cc                = 3.;
+  ℝ option_C0                = 1.73;
+  ℝ option_Cc0               = 0.;
+  ℝ option_Cepsilon          = 1.;
+  ℝ option_Comega            = 0.9;
+  ℝ option_reynolds_xx       = 1.;
+  ℝ option_reynolds_yy       = 1.;
+  ℝ option_mean_vx           = 0.;
+  ℝ option_mean_vy           = 0.;
+  ℝ option_c_variance        = 0.5;
+  ℝ option_mean_c            = 0.;
+  ℝ option_zmt_lowbound      = -10.;
+  ℝ option_zmt_highbound     =  10.;
+  ℝ option_reynolds_xx_dirac = 0.001;
+  ℝ option_reynolds_yy_dirac = 0.01;
+  ℝ option_c_variance_dirac  = 0.01;
   //
-  ℝ pi                = 3.14159265359;
-  ℝ Ck                = 6./(3.*C1+2.*Comega-4.);
-  ℝ beta              = (2.*(1.+Comega)-3.)/(3.*Comega);
-  ℝ dissipation_rate  = sqrt(2.*Ck/(beta*Comega))*sqrt(reynolds_xx)*reynolds_xx/zmt_highbound;
-  ℝ tau0              = reynolds_xx/(Comega*dissipation_rate);
+  ℝ option_pi                = 3.14159265359;
+  ℝ option_Ck                = 6./(3.*option_C1+2.*option_Comega-4.);
+  ℝ option_beta              = (2.*(1.+option_Comega)-3.)/(3.*option_Comega);
+  ℝ option_dissipation_rate  = sqrt(2.*option_Ck/(option_beta*option_Comega))*sqrt(option_reynolds_xx)*option_reynolds_xx/option_zmt_highbound;
+  ℝ option_tau0              = option_reynolds_xx/(option_Comega*option_dissipation_rate);
   //frequence turbulente initiale, independante de l'espace
-  ℝ omega0            = 1./(tau0*Comega); 
+  ℝ option_omega0            = 1./(option_tau0*option_Comega); 
 };
 
 //N{1..nvx}
@@ -115,8 +121,9 @@ options{
 // ****************************************************************************
 // * Element Variables
 // ****************************************************************************
-cells/*x*/{
-  ℝ^{l(nvx,nvy,nvz),nc} fe0,fe1;
+cells{
+  ℝ^{l(nvx,nvy,nvz),nc} fe0;
+  ℝ^{l(nvx,nvy,nvz),nc} fe1;
   
   ℝ initial_kinetic_energy0;
   ℝ initial_variance;
@@ -146,77 +153,88 @@ cells/*x*/{
 // ****************************************************************************
 // * Global Variables
 // ****************************************************************************
+#warning No global arrays
 global{
-  ℕ piece_x;
-  ℕ ix_start;
-  ℕ ix_end;
-  ℕ nx_max;
-  ℝ xb[2];
-  ℝ dx;
-  ℕ nvtot;
-  ℝ vb[6];
-  ℝ dvx,dvy,dvz;
-  ℝ cb[2];
-  ℝ dc;
-  ℝ vbcol[6];
+  ℕ global_piece_x;
+  ℕ global_ix_start, global_ix_end;
+  ℕ global_nx_max;
+  ℝ global_xb_min,global_xb_max;
+  ℝ global_dx;
+  ℕ global_nvtot;
+  ℝ global_vb_xmin,global_vb_xmax;
+  ℝ global_vb_ymin,global_vb_ymax;
+  ℝ global_vb_zmin,global_vb_zmax;
+  ℝ global_dvx,global_dvy,global_dvz;
+  ℝ global_cb_min,global_cb_max;
+  ℝ global_dc;
+  ℝ global_vbcol_xmin,global_vbcol_xmax;
+  ℝ global_vbcol_ymin,global_vbcol_ymax;
+  ℝ global_vbcol_zmin,global_vbcol_zmax;
 
-  ℕ bsize;
-  ℕ l,l1,l2;
+  ℕ global_bsize;
+  ℕ global_l1,global_l2;
   
-  ℝ velocity_diffusion_coeff;
-  ℝ c_diffusion_coeff;
+  ℝ global_velocity_diffusion_coeff;
+  ℝ global_c_diffusion_coeff;
   
   // diffusion_H
-  ℕ sizeAvx,sizeAvy,sizeAc;
+  ℕ global_sizeAvx,global_sizeAvy,global_sizeAc;
 
   // Initialize
-  ℝ kx,Lx;
-  ℝ zmt_halfsize2;
+  ℝ global_kx,global_Lx;
+  ℝ global_zmt_halfsize2;
+
+  // Temporaries
+  ℝ tmp_mvx;
 };
 
 // ****************************************************************************
 // * Initialization Part @ ]-∞,-0.0[
 // ****************************************************************************
 void ini(void) @ -10.0{
-  piece_x  = (nx-1 + nb_proc)/nb_proc;
-  ix_start = my_proc*piece_x;
-  ix_end   = min(nx-1,ix_start+piece_x-1);
-  nx_max = piece_x*nb_proc;
+  global_piece_x  = (option_nx-1 + option_nb_proc)/option_nb_proc;
+  global_ix_start = option_my_proc*global_piece_x;
+  global_ix_end   = min(option_nx-1,global_ix_start+global_piece_x-1);
+  global_nx_max = global_piece_x*option_nb_proc;
   
-  assert((nb_proc-1)*piece_x<=nx-1);
+  assert((option_nb_proc-1)*global_piece_x<=option_nx-1);
   // Minimum number of points per processor
-  assert(ix_end-ix_start+1>=2);
+  assert(global_ix_end-global_ix_start+1>=2);
 
-  xb[0]=xmin; xb[1] = xmax;
-  dx = (xmax-xmin)/(nx);
-  nvtot = nvx*nvy*nvz;
+  global_xb_min = option_xmin;
+  global_xb_max = option_xmax;
+  global_dx = (option_xmax-option_xmin)/(option_nx);
+  global_nvtot = option_nvx*option_nvy*option_nvz;
   
   // Grid intended for finite volume treatement of advection
   // vxmin is located at the interface
-  vb[0] = vxmin; vb[1] = vxmax;
-  vb[2] = vymin; vb[3] = vymax;
-  vb[4] = vzmin; vb[5] = vzmax;
+  global_vb_xmin = option_vxmin; global_vb_xmax = option_vxmax;
+  global_vb_ymin = option_vymin; global_vb_ymax = option_vymax;
+  global_vb_zmin = option_vzmin; global_vb_zmax = option_vzmax;
   
-  dvx = (vxmax-vxmin)/(nvx);
-  dvy = (vymax-vymin)/(nvy);
-  dvz = (vzmax-vzmin)/(nvz);
+  global_dvx = (option_vxmax-option_vxmin)/(option_nvx);
+  global_dvy = (option_vymax-option_vymin)/(option_nvy);
+  global_dvz = (option_vzmax-option_vzmin)/(option_nvz);
 
-  cb[0] = cmin;  cb[1] = cmax;
-  dc = (cmax-cmin)/(nc);
+  global_cb_min = option_cmin;  global_cb_max = option_cmax;
+  global_dc = (option_cmax-option_cmin)/(option_nc);
   
   // Grid intended for finite difference treatement of collisions
   // vxmin is now a grid point
-  vbcol[0] = vxmin+0.5*dvx; vbcol[1] = vxmax-0.5*dvx;
-  vbcol[2] = vymin+0.5*dvy; vbcol[3] = vymax-0.5*dvy;
-  vbcol[4] = vzmin+0.5*dvz; vbcol[5] = vzmax-0.5*dvz;
+  global_vbcol_xmin = option_vxmin+0.5*global_dvx;
+  global_vbcol_xmax = option_vxmax-0.5*global_dvx;
+  global_vbcol_ymin = option_vymin+0.5*global_dvy;
+  global_vbcol_ymax = option_vymax-0.5*global_dvy;
+  global_vbcol_zmin = option_vzmin+0.5*global_dvz;
+  global_vbcol_zmax = option_vzmax-0.5*global_dvz;
 
-  bsize = 2;//vlasov.buffer_size();
-  l1 = ix_start - bsize;
-  l2 = ix_start + piece_x - 1 + bsize;
+  global_bsize = 2;//vlasov.buffer_size();
+  global_l1 = global_ix_start - global_bsize;
+  global_l2 = global_ix_start + global_piece_x - 1 + global_bsize;
   
-  sizeAvx = nvx*2;
-  sizeAvy = nvy*2;
-  sizeAc = nc*2; 
+  global_sizeAvx = option_nvx*2;
+  global_sizeAvy = option_nvy*2;
+  global_sizeAc = option_nc*2; 
 }
 
 
@@ -232,4 +250,4 @@ void ini(void) @ -10.0{
 // ****************************************************************************
 ∀ cells @ 1.0 { initial_kinetic_energy0=0.0; }
 
-void end(void) @ 2.0 {piece_x=0;}
+void end(void) @ 2.0 {global_piece_x=0;}

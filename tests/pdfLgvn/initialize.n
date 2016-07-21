@@ -41,27 +41,28 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-/*
+
 //initialise(my_proc,nb_proc,nx,nvx,nvy,nvz,nc,reynolds_xx_dirac,xb,vb,cb,fe0,dissipation_rate0);
-void initialise(void) @ -9.0{
-  Lx = xmax-xmin;
-  kx = 2.*pi/Lx;
+/*void initialise(void) @ -9.0{
+  global_Lx = option_xmax-option_xmin;
+  global_kx = 2.*option_pi/global_Lx;
 }
+*/
 
-
-void init_inhomogeneous_grid_turbulence_01(void){
-  zmt_halfsize2 = zmt_highbound*zmt_highbound;
-  mvx = 0.;
-  mvx_dirac = 0.;
-  mc = 0.;
-  mc_dirac = 0.;
+/*void init_inhomogeneous_grid_turbulence_01(void){
+  global_zmt_halfsize2 = option_zmt_highbound*option_zmt_highbound;
+  tmp_mvx = 0.;
+  tmp_mvx_dirac = 0.;
+  tmp_mc = 0.;
+  tmp_mc_dirac = 0.;
 }
-
-∀ cells @ -8.0 {
-  x = xmin +(uid+0.5)*dx;
+*/
+/*∀ cells @ -8.0 {
+  x = xmin +(#+0.5)*global_dx;
   reynolds_xx_profile = reynolds_xx*DMAX(reynolds_xx_dirac, (1.-x*x/zmt_halfsize2));
-}
+  }*/
 
+/*
 ∀ vx @ -8.0 {
   vx = vxmin + (ivx+0.5)*dvx;
   mvx += exp(-0.5*(vx-mean_vx)*(vx-mean_vx)/reynolds_xx)/(sqrt(2*pi*reynolds_xx));
@@ -81,14 +82,15 @@ void init_inhomogeneous_grid_turbulence_02(void){
   if (ctransport_H) mc *= dc;
   if (ctransport_H) mc_dirac *= dc;
 }
+*/
 
-
-int l(int ivx,int nvx,
+/*int l(int ivx,int nvx,
       int ivy,int nvy,
       int ivz,int nvz){
   return ivx + ivy*nvx + ivz*nvx*nvy;
-}
+  }*/
 
+/*
 ∀ cells {
   x = xmin + (uid+0.5)*dx;
   if ( x>zmt_lowbound and x<zmt_highbound) continue;
@@ -119,28 +121,29 @@ int l(int ivx,int nvx,
   //pour respecter le fait que la fréquence turbulente soit indépendante de l'espace
   dissipation_rate0[ix] = reynolds_xx_profile[ix]*omega0;
 }
+*/
 
-
-∀ cells {
-  x = xmin + (uid+0.5)*dx;
+/*
+∀ cells void tryThisOne(void) {
+  const int 
+  x = xmin + (#+0.5)*global_dx;
   if (!(x>zmt_lowbound and x<zmt_highbound)) continue;
   //dirac numerique
-  ∀ l{
+  ∀ l set{
+    const int 
 //  ∀ vz{    ∀ vy{      ∀ vx{
-    vx = vxmin + (ivx+0.5)*dvx;
+    vx = vxmin + (ivx+0.5)*global_dvx;
     //l  = ivx + ivy*nvx + ivz*nvx*nvy;
-        ∀ c{
-          conc = cmin + (ic+0.5)*dc;	    
-          f[ix][l][ic] =
-            exp(-0.5*vx*vx/reynolds_xx_dirac)
-            /(sqrt(2*pi*reynolds_xx_dirac))/mvx_dirac;
-          if ( ctransport_H)
-            f[ix][l][ic] *= exp(-0.5*conc*conc/c_variance_dirac)
-              /(sqrt(2*pi*c_variance_dirac))/mc_dirac;
-        }
-      }
+    ∀ nc set{
+      conc = cmin + (ic+0.5)*dc;	    
+      f =
+        exp(-0.5*vx*vx/reynolds_xx_dirac)
+        /(sqrt(2*pi*reynolds_xx_dirac))/mvx_dirac;
+      if ( ctransport_H)
+        f[ix][l][ic] *= exp(-0.5*conc*conc/c_variance_dirac)
+          /(sqrt(2*pi*c_variance_dirac))/mc_dirac;
     }
-  }	      
+  }//}}
   dissipation_rate0[ix] = 0.; // pas de turbulence hors zmt
 }
 */
