@@ -47,7 +47,7 @@
 // ****************************************************************************
 // * Rules still used directly by Nabla
 // ****************************************************************************
-#define NB_USED_RULENAMES 39
+#define NB_USED_RULENAMES 44
 const static char* usedRuleNames[NB_USED_RULENAMES]={
   "argument_expression_list",
   "assignment_expression",
@@ -87,7 +87,12 @@ const static char* usedRuleNames[NB_USED_RULENAMES]={
   "type_qualifier",
   "type_specifier",
   "unary_expression",
-  "with_library"
+  "with_library",
+  "power_dimensions",
+  "power_dimension",
+  "power_function",
+  "power_args",
+  "forall_switch"
 };
 static int usedRuleNamesId[NB_USED_RULENAMES];
 

@@ -143,6 +143,7 @@ __asm__           { return tok(&yylval, ASM);}
 "Particle"        { return tok(&yylval, PARTICLETYPE);}
 "particles"			{ return tok(&yylval, PARTICLES);}
 "options"		   { return tok(&yylval, OPTIONS);}
+"set"             { return tok(&yylval, SET);}
 
 "ℝ³ˣ³"	         { return tok(&yylval, REAL3x3);}
 "ℝ³"			      { return tok(&yylval, REAL3);}

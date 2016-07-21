@@ -94,7 +94,14 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
   if (n->token) dbg("\n\t\t\t\t\t[hookSwitchForall] ");//token=%s",n->token);
   
   // Now we're allowed to work
-  switch(n->next->children->tokenid){
+  const int tokenid = // si on a un identifiant ici
+    (n->next->children->tokenid==IDENTIFIER)?
+    n->next->children->next->children->tokenid: // on prend celui sous le forall_switch
+    n->next->children->children->tokenid; // sinon il est là
+
+  dbg("\n\t\t\t\t\t[hookSwitchForall] tokenid=%d",tokenid);
+  
+  switch(tokenid){
   case(CELL):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] CELL");
     //assert(job->enum_enum==0||job->enum_enum=='c');
@@ -132,7 +139,16 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
       nprintf(job->entity->main, "/*chsf fn*/", "for(nFACE)");
     break;
   }
-  default: dbg("\n\t\t\t\t\t[hookSwitchForall] UNKNOWN!");
+  case(SET):{
+    const char *idMax=n->next->children->token;
+    dbg("\n\t\t\t\t\t[hookSwitchForall] SET");
+    nprintf(job->entity->main, "/*set*/", "for(int s=0;s<%s;s+=1)",idMax);
+    //Skip de l'id et du forall_switch
+    *n=*n->next->next;
+    break;
+  }
+    
+  default: exit(printf("[hookSwitchForall] UNKNOWN!"));
   }
   // Attention au cas où on a un @ au lieu d'un statement
   if (n->next->next->tokenid == AT){

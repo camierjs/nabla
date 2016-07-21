@@ -116,6 +116,11 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 
 
 // ****************************************************************************
+// * xHookPowerTypeDump
+// ****************************************************************************
+//static char* xHookPowerTypeDump(nablaVariable *var){  return sdup(var->power_type->id);}
+
+// ****************************************************************************
 // * Tokens to variables 'CELL Job' switch
 // ****************************************************************************
 static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
@@ -138,13 +143,13 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
   case ('c'):{
     nvar(nabla,var,job);
     nprintf(nabla, "/*CellVar*/",
-            "%s",
-            ((var->dim==0)? (isPostfixed==2)?"":"[c":
-             (enum_enum!='\0')?"[n+NABLA_NODE_PER_CELL*c":
-             (var->dim==1)?"[NABLA_NODE_PER_CELL*c":"[c"));
+            "%s",((var->power_type)?"[c][s"://xHookPowerTypeDump(var): // PowerType
+                  (var->dim==0)? (isPostfixed==2)?"":"[c":
+                  (enum_enum!='\0')?"[n+NABLA_NODE_PER_CELL*c":
+                  (var->dim==1)?"[NABLA_NODE_PER_CELL*c":
+                  "[c"));
     job->parse.variableIsArray=(var->dim==1)?true:false;
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true)
+    if (job->parse.postfix_constant && job->parse.variableIsArray)
       nprintf(nabla, NULL,"+");
     else
       nprintf(nabla, NULL,"]");

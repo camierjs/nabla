@@ -43,18 +43,20 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-
-/***************************************************************************** 
- * type_specifier
- *****************************************************************************/
+// ****************************************************************************
+// * type_specifier
+// ****************************************************************************
 static void actItemTypeSpecifier(astNode *n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable = nMiddleVariableNew(nabla);
-  if (n->children->tokenid==POWER)
-    dbg("\n\t\t[actItemTypeSpecifier] %s:POWER", nabla->tmpVarKinds);
-  else
+  if (n->children->tokenid==POWER){
+    variable->type=sdup("power");
+    dbg("\n\t\t[actItemTypeSpecifier] %s:power", nabla->tmpVarKinds);
+    nMiddlePower(n->children->next->next,nabla,variable);
+  }else{
     dbg("\n\t\t[actItemTypeSpecifier] %s:%s", nabla->tmpVarKinds, n->children->token);
-
+  }
+  
   if (n->children->token!=NULL){ // Peut arriver avec le TYPEDEF_NAME
     // On regarde s'il n'y a pas un noeud à coté qui nous dit de ne pas backuper
     if (n->children->next != NULL &&  n->children->next->tokenid==VOLATILE){
@@ -72,7 +74,7 @@ static void actItemTypeSpecifier(astNode *n, void *generic_arg){
   // Par défaut, on met à '0' la dimension de la variable
   variable->dim=0;
   if (n->children->token==NULL)
-    variable->type="real";
+    variable->type=sdup("real");
   else
     variable->type=toolStrDownCase(n->children->token);
   dbg("\n\t\t[actItemTypeSpecifier] type=%s", variable->type);

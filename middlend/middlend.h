@@ -123,7 +123,7 @@ typedef struct nablaOptionStruct{
 typedef struct nablaPowerTypeStruct{
   char* id;
   size_t nargs;
-  char* *args;
+  char* args[8];
   struct nablaPowerTypeStruct *next;
 }nablaPowerType;
 
@@ -145,7 +145,7 @@ typedef struct nablaVariableStruct{
   bool is_gathered;
   inout_mode inout;
   bool axl_it;
-  struct nablaPowerTypeStruct power_type;
+  struct nablaPowerTypeStruct *power_type;
   struct nablaMainStruct *main;
   struct nablaVariableStruct *next;
 }nablaVariable;
@@ -399,8 +399,12 @@ NABLA_STATUS nMiddleSwitch(astNode*,
 int nprintf(const struct nablaMainStruct*,const char*,const char*,...);
 int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 
-// nMiddleItems
+// Items
 void nMiddleItems(astNode*,int,nablaMain*);
+
+// Power Types Declarations
+void nMiddlePower(astNode*,nablaMain*,nablaVariable*);
+void nMiddlePowerFree(nablaPowerType*);
 
 // nMiddleHLT: @ + When[s]
 void nMiddleAtConstantParse(nablaJob*,astNode*,nablaMain*);

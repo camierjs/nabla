@@ -270,8 +270,8 @@ void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
 // *****************************************************************************
 char nMiddleScanForNablaJobForallItem(astNode *n){
   char it;
-  if (n->tokenid==FORALL)
-    return n->next->children->token[0];
+  //if (n->tokenid==FORALL) return n->next->children->token[0];
+  if (n->ruleid==ruleToId(rule_forall_switch)) return n->children->token[0];
   if(n->children != NULL)
     if ((it=nMiddleScanForNablaJobForallItem(n->children))!='\0')
       return it;
@@ -452,6 +452,7 @@ void nMiddleJobFill(nablaMain *nabla,
   //      on dump dans le log les tokens de ce job
   dbg("\n\t[nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
+  dbg("\n\t[nablaJobFill] Now dfsEnumMax:");
   dfsEnumMax(nabla,job,n);
   dfsVariablesDump(nabla,job,n);
 
@@ -566,7 +567,7 @@ void nMiddleJobFill(nablaMain *nabla,
     nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
-  dbg("\n\t[nablaJobFill] NOW PARSING...");
+  dbg("\n\t[nablaJobFill] Now parsing:");
   nMiddleJobParse(n,job);
 
   if (!job->parse.got_a_return)

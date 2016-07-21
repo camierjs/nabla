@@ -40,87 +40,69 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_FRONTEND_H_
-#define _NABLA_FRONTEND_H_
+#include "nabla.h"
+#include "nabla.tab.h"
 
-#include "ast.h"
-#include "dbg.h"
+
+void nMiddlePowerFree(nablaPowerType *ptype){
+  for(nablaPowerType *this,*ptp=this=ptype;ptp!=NULL;free(this))
+    ptp=(this=ptp)->next;
+}
+nablaPowerType *nMiddlePowerTypeNew(void){
+	nablaPowerType *ptype = (nablaPowerType*) calloc(1,sizeof(nablaPowerType));
+ 	assert(ptype);
+  	return ptype; 
+}
+nablaPowerType *nMiddlePowerTypeLast(nablaPowerType *ptype) {
+   while(ptype->next != NULL) ptype = ptype->next;
+   return ptype;
+}
+nablaPowerType *nMiddlePowerTypeAdd(nablaVariable *var, nablaPowerType *ptype) {
+  assert(ptype);
+  if (var->power_type==NULL) var->power_type=ptype;
+  else nMiddlePowerTypeLast(var->power_type)->next=ptype;
+  return NABLA_OK;
+}
+
+// ****************************************************************************
+// * dfsPowerArgs
+// ****************************************************************************
+static void dfsPowerArgs(astNode *n, nablaPowerType *ptype){
+  if (n->tokenid==IDENTIFIER){
+    dbg("\n\t\t\t\t[1;33m[dfsPower] arg '%s'[0m",n->token);
+    ptype->args[ptype->nargs++]=sdup(n->token);
+  }
+  if (n->children != NULL) dfsPowerArgs(n->children,ptype);
+  if (n->next != NULL) dfsPowerArgs(n->next,ptype);
+}
 
 
 // ****************************************************************************
-// * Rules still used directly by Nabla
+// * dfsPower
 // ****************************************************************************
-enum{
-  rule_argument_expression_list=0,
-  rule_assignment_expression,
-  rule_assignment_operator,
-  rule_at_constant,
-  rule_compound_statement,
-  rule_declaration,
-  rule_direct_declarator,
-  rule_expression,
-  rule_function_definition,
-  rule_is_test,
-  rule_jump_statement,
-  rule_nabla_direct_declarator,
-  rule_nabla_item,
-  rule_nabla_item_definition,
-  rule_nabla_item_declaration,
-  rule_nabla_items,
-  rule_nabla_job_definition,
-  rule_nabla_options_definition,
-  rule_nabla_option_declaration,
-  rule_nabla_parameter_declaration,
-  rule_nabla_parameter_list,
-  rule_nabla_reduction,
-  rule_nabla_region,
-  rule_nabla_scope,
-  rule_nabla_system,
-  rule_nabla_xyz_declaration,
-  rule_nabla_xyz_direction,
-  rule_parameter_declaration,
-  rule_parameter_type_list,
-  rule_postfix_expression,
-  rule_preproc,
-  rule_primary_expression,
-  rule_selection_statement,
-  rule_single_library,
-  rule_storage_class_specifier,
-  rule_type_qualifier,
-  rule_type_specifier,
-  rule_unary_expression,
-  rule_with_library,
-  rule_power_dimensions,
-  rule_power_dimension,
-  rule_power_function,
-  rule_power_args,
-  rule_forall_switch
-} used_rulenames;
+static void dfsPower(astNode *n, nablaPowerType *ptype){
+  if (n->ruleid==ruleToId(rule_power_dimension)){
+    if (n->children->ruleid==ruleToId(rule_power_function)){
+      dbg("\n\t\t\t[1;33m[dfsPower] power '%s' function[0m",n->children->children->token);
+      ptype->id=sdup(n->children->children->token);
+      dfsPowerArgs(n->children->children->next,ptype);
+    }
+    if (n->children->tokenid==IDENTIFIER){
+      ptype->id=sdup(n->children->token);
+      dbg("\n\t\t\t[1;33m[dfsPower] power '%s' ident[0m",n->children->token);
+    }
+  }
+  if (n->children != NULL) dfsPower(n->children,ptype);
+  if (n->next != NULL) dfsPower(n->next,ptype);
+}
 
 
 // ****************************************************************************
-// * Structure used to pass a batch of actions for each ruleid found while DFS
+// * nMiddlePower
 // ****************************************************************************
-typedef struct RuleActionStruct{
-  int ruleid;
-  void (*action)(astNode*,void*);
-} RuleAction;
-
-
-// ****************************************************************************
-// * DFS functions
-// ****************************************************************************
-void dfsDumpToken(astNode*);
-
-void scanTokensForActions(astNode*, RuleAction*, void*);
-char *dfsFetchFirst(astNode*, int);
-char *dfsFetchAll(astNode*,const int,int*,char*);
-astNode *dfsFetch(astNode*,int);
-
-astNode *dfsFetchTokenId(astNode*,int);
-astNode *dfsFetchToken(astNode*, const char *);
-astNode *dfsFetchRule(astNode*,int);
-int dfsScanJobsCalls(void*,void*,astNode*);
-void iniUsedRuleNames(void);
-
-#endif // _NABLA_FRONTEND_H_
+void nMiddlePower(astNode *n,nablaMain *nabla,nablaVariable *var){
+  nablaPowerType *ptype=nMiddlePowerTypeNew();
+  assert(ptype);
+  dfsPower(n,ptype);
+  nMiddlePowerTypeAdd(var,ptype);
+}

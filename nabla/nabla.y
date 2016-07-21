@@ -99,7 +99,7 @@ extern char *last_identifier;
 %token IN OUT INOUT
 %token ALL OWN INNER OUTER
 %token BOOL NATURAL COMPLEX INTEGER INT32 INT64 REAL REAL2 REAL2x2 REAL3 REAL3x3 UIDTYPE SIZE_T
-%token POWER
+%token POWER SET
 %token CELLTYPE NODETYPE FACETYPE
 %token CELL CELLS FACE FACES NODE NODES
 %token FORALL FORALL_INI FORALL_END FORALL_NODE_INDEX FORALL_CELL_INDEX FORALL_MTRL_INDEX
@@ -742,13 +742,24 @@ selection_statement
 | IF '(' expression ')' statement ELSE statement {rhs;}
 ;
 
+
+//////////////////
+// FORALL RANGE //
+//////////////////
+forall_switch
+: CELL {rhs;}
+| NODE {rhs;}
+| FACE {rhs;}
+| PARTICLE {rhs;}
+| SET {rhs;}
+;
+forall_range
+: forall_switch {rhs;}
+| IDENTIFIER forall_switch {rhs;}
+;
+
 iteration_statement
-: FORALL nabla_item statement {forall;}
-// pas sûr que cela serve encore | FORALL nabla_item AT at_constant statement {forall;}
-| FORALL IDENTIFIER CELL statement {forall;}
-| FORALL IDENTIFIER NODE statement {forall;}
-| FORALL IDENTIFIER FACE statement {forall;}
-| FORALL IDENTIFIER PARTICLE statement {forall;}
+: FORALL forall_range statement {forall;}
 | WHILE '(' expression ')' statement {rhs;}
 | DO statement WHILE '(' expression ')' ';' {rhs;}
 | FOR '(' expression_statement expression_statement ')' statement {rhs;}

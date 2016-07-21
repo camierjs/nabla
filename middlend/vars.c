@@ -383,7 +383,7 @@ static void dfsAddToUsedVariables(nablaJob *job,
   if (new!=NULL) return;
   
   // Si c'est une variable qu'on a pas déjà placée dans la liste connue
-  dbg("\n\t[dfsVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
+  dbg("\n\t[dfsAddToUsedVariables] Variable '%s' is used (%s) in this job!",var->name,rw);
   // Création d'une nouvelle used_variable
   new = nMiddleVariableNew(NULL);
   new->name=sdup(var->name);
@@ -396,13 +396,13 @@ static void dfsAddToUsedVariables(nablaJob *job,
   if (!left_of_assignment_expression) new->in|=true;
   // Si elles n'ont pas le même support,
   // c'est qu'il va falloir insérer un gather/scatter
-  dbg("\n\t[dfsVariables] new->name=%s new->item='%s' vs job->item='%s'",
+  dbg("\n\t[dfsAddToUsedVariables] new->name=%s new->item='%s' vs job->item='%s'",
       new->name, new->item, job->item);
   if (!job->is_a_function && // que pour les jobs
       var->item[0]!='g' && // pas de gather des globales
       var->item[0]!='x' && // pas de gather des xs
       new->item[0]!=job->item[0]){
-    dbg("\n\t[dfsVariables] This variable will be gathered in this job!");
+    dbg("\n\t[dfsAddToUsedVariables] This variable will be gathered in this job!");
     new->is_gathered=true;
   }
   // Rajout à notre liste
@@ -558,13 +558,13 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
 // ****************************************************************************
 void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
   if (n==NULL) return;
-  
-  if (n->tokenid==FORALL && n->next->ruleid==ruleToId(rule_nabla_item)){
-    if (n->next->children->tokenid==CELL) job->enum_enum='c';
-    if (n->next->children->tokenid==NODE) job->enum_enum='n';
-    if (n->next->children->tokenid==FACE) job->enum_enum='f';
-    if (n->next->children->tokenid==PARTICLE) job->enum_enum='p';
-    //printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum);
+  //if (n->tokenid==FORALL) printf("[1;33m[dfsEnumMax] FORALL[m");
+  if (n->tokenid==FORALL && n->next->children->ruleid==ruleToId(rule_forall_switch)){
+    if (n->next->children->children->tokenid==CELL) job->enum_enum='c'; //printf("[1;33m cell[m\n");}
+    if (n->next->children->children->tokenid==NODE) job->enum_enum='n'; //printf("[1;33m node[m\n");}
+    if (n->next->children->children->tokenid==FACE) job->enum_enum='f'; //printf("[1;33m face[m\n");}
+    if (n->next->children->children->tokenid==PARTICLE) job->enum_enum='p'; //printf("[1;33m particle[m\n");}
+    //exit(printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum));
   }
   if (n->children!=NULL) dfsEnumMax(nabla,job,n->children);
   if (n->next!=NULL) dfsEnumMax(nabla,job,n->next);

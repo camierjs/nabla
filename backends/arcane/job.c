@@ -418,13 +418,13 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL):{
     int tokenid;
     char *iterator=NULL;
-    if (n->next->tokenid==IDENTIFIER){
-      dbg("\n\t[arcaneHookSwitchToken] n->next->token is IDENTIFIER %s", n->next->token);
-      dbg("\n\t[arcaneHookSwitchToken] n->next->next->token=%s", n->next->next->token);
-      iterator=sdup(n->next->token);
-      tokenid=n->next->next->tokenid;
+    if (n->next->children->tokenid==IDENTIFIER){
+      dbg("\n\t[arcaneHookSwitchToken] iterator %s", n->next->children->token);
+      dbg("\n\t[arcaneHookSwitchToken] n->next->next->token=%s", n->next->children->next->children->token);
+      iterator=sdup(n->next->children->token);
+      tokenid=n->next->children->next->children->tokenid;
     }else{
-      tokenid=n->next->children->tokenid;
+      tokenid=n->next->children->children->tokenid;
     }
     switch(tokenid){
     case(CELL):{
@@ -454,13 +454,14 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
       break;
     }
       //case (MATERIAL): break;
+    case(SET):{break;}
     
     default: nablaError("[arcaneHookSwitchToken] Could not distinguish FORALL!");
     }
     // Attention au cas où on a un @ au lieu d'un statement
     if (n->next->next->tokenid == AT)
       nprintf(arc, "/* Found AT */", "knAt");
-//#warning Skip du 'nabla_item' qui renseigne sur le type de forall
+//#warning Skip du 'forall_range' qui renseigne sur le type de forall
     *n=*n->next->next;
     break;
   }

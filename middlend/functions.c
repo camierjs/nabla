@@ -99,15 +99,13 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
     if (n->tokenid==FORALL){
       int tokenid;
       char *support=NULL;
-      if (n->next->tokenid==IDENTIFIER){
-        dbg("\n\t[nablaFunctionParse] n->next->token is IDENTIFIER %s",
-            n->next->token);
-        dbg("\n\t[nablaFunctionParse] n->next->next->token=%s",
-            n->next->next->token);
-        support=sdup(n->next->token);
-        tokenid=n->next->next->tokenid;
+      if (n->next->children->tokenid==IDENTIFIER){
+        dbg("\n\t[nablaFunctionParse] IDENTIFIER=%s",n->next->children->token);
+        dbg("\n\t[nablaFunctionParse] token=%s",n->next->children->next->token);
+        support=sdup(n->next->children->token);
+        tokenid=n->next->children->next->children->tokenid;
       }else{
-        tokenid=n->next->children->tokenid;
+        tokenid=n->next->children->children->tokenid;
       }
       switch(tokenid){
       case(CELL):{
@@ -156,6 +154,7 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
                   support,support,support,support);
         break;
       }
+        //case(SET):{        break;      }
       default: nablaError("[nablaFunctionParse] Could not distinguish FORALL!");
       }
 //#warning On skip le nabla_item qui renseigne sur le type de forall
