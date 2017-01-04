@@ -104,6 +104,7 @@ extern char nabla_license[];
 \t\t\t(still experimental with latest GNU GCC)\n\
 \t\t[36m--gcc[0m\tGNU GCC pragma generation (default)\n\
 \t\t[36m--icc[0m\tIntel ICC pragma generation\n\
+\t\t[0mif [36;4mname[36;0m==mfem[0m, generates intrinsics classes for MFEM (mfem.org)\n\
 [1;36mEMACS MODE[0m\n\
 \tYou can find a nabla-mode.el file within the distribution.\n\
 \tLoading emacs utf-8 locale coding system could be a good idea:\n\
@@ -164,14 +165,16 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
   if(!(yyin=fopen(npFileName,"r")))
     return NABLA_ERROR | dbg("\n\t[nablaParsing] Could not open '%s' file",
                              npFileName);
-  dbg("\n* nablaParsing");
+  dbg("\n* nablaParsing, options= 0x%0X",option);
   dbg("\n** [nablaParsing] Starting parsing");
-  if (yyparse(&root)){
+  if (option!=BACKEND_OPTION_OKINA_MFEM){
+    if (yyparse(&root)){
+      fclose(yyin);
+      return NABLA_ERROR | dbg("\n\t[nablaParsing] Error while parsing!");
+    }
+    dbg("\n\t[nablaParsing] Parsing done!");
     fclose(yyin);
-    return NABLA_ERROR | dbg("\n\t[nablaParsing] Error while parsing!");
   }
-  dbg("\n\t[nablaParsing] Parsing done!");
-  fclose(yyin);
   
   if (optionDumpTree!=0){
     dbg("\n** [nablaParsing] On dump l'arbre créé (%s.dot)", nabla_entity_name);
@@ -319,6 +322,7 @@ int main(int argc, char * argv[]){
        {"seq",no_argument,NULL,BACKEND_PARALLELISM_SEQ},
        {"gcc",no_argument,NULL,BACKEND_COMPILER_GCC},
        {"icc",no_argument,NULL,BACKEND_COMPILER_ICC},
+    //{"mfem",no_argument,NULL,BACKEND_OPTION_OKINA_MFEM},
     {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"raja",required_argument,NULL,BACKEND_RAJA},
     {"kokkos",required_argument,NULL,BACKEND_KOKKOS},
@@ -451,6 +455,11 @@ int main(int argc, char * argv[]){
       dbg("\n\t[nabla] Command line hits long option %s",
           longopts[longindex].name);
       nabla_entity_name=optarg;
+      if (strncmp(nabla_entity_name,"mfem",4)==0){
+        dbg("\n\t[nabla] Command line hits MFEM");
+        assert(option==0);
+        option=BACKEND_OPTION_OKINA_MFEM;
+      }
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n\t[nabla] Command line specifies new OKINA nabla_entity_name: %s",
@@ -462,13 +471,13 @@ int main(int argc, char * argv[]){
       dbg("\n\t[nabla] Command line specifies OKINA's STD option");
       break;
     case BACKEND_OPTION_OKINA_SSE:
-       assert(option==0);
-     option=BACKEND_OPTION_OKINA_SSE;
+      assert(option==0);
+      option=BACKEND_OPTION_OKINA_SSE;
       dbg("\n\t[nabla] Command line specifies OKINA's SSE option");
       break;
     case BACKEND_OPTION_OKINA_AVX:
       assert(option==0);
-      option|=BACKEND_OPTION_OKINA_AVX;
+      option=BACKEND_OPTION_OKINA_AVX;
       dbg("\n\t[nabla] Command line specifies OKINA's AVX option");
       break;
     case BACKEND_OPTION_OKINA_AVX2:

@@ -158,7 +158,7 @@ extern char *last_identifier;
 %token-table
 %parse-param {astNode **root}
 %right '?' ':' ','
-%right REAL REAL3 REAL3x3 '('
+%right REAL REAL2 REAL3 REAL3x3 '('
 
 %%
 
@@ -581,6 +581,8 @@ postfix_expression
 | postfix_expression '[' expression ']' {rhs;}
 | REAL '(' ')'{rhs;}
 | REAL '(' expression ')' {rhs;}
+| REAL2 '(' ')'{rhs;}
+| REAL2 '(' expression ')' {rhs;}
 | REAL3 '(' ')'{rhs;}
 | REAL3 '(' expression ')' {rhs;}
 | REAL3x3 '(' ')'{rhs;}
@@ -748,7 +750,9 @@ selection_statement
 //////////////////
 forall_switch
 : CELL {rhs;}
+| CELLS {rhs;}
 | NODE {rhs;}
+| NODES {rhs;}
 | FACE {rhs;}
 | PARTICLE {rhs;}
 | SET {rhs;}
@@ -792,6 +796,7 @@ statement_list
 function_definition
 : declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
+| IDENTIFIER AT at_constant compound_statement {voidIDvoid_rhs($$,$1,$2,$3,$4);}
 ;
 
 /////////////////////////
@@ -868,6 +873,7 @@ nabla_job_prefix
 ;
 nabla_job_decl
 : nabla_job_prefix {rhs;}
+| nabla_job_prefix IDENTIFIER {nabla_job_id_rhs($$,$1,$2);}
 | nabla_job_prefix declaration_specifiers IDENTIFIER '(' parameter_type_list ')' {rhs;}
 ;
 

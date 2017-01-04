@@ -1,0 +1,136 @@
+// *************************************************************
+// * Options utilisateurs
+// *************************************************************
+ℝ γ = 1.4;
+ℝ option_x_min = 0.0;
+ℝ option_x_max = 1.0;
+ℝ option_x_interface = 0.5;
+ℝ option_y_min = 0.0;
+ℝ option_y_max = 4.0;
+
+ℝ option_δt_ini = 1.e-5;
+ℝ option_δt_cfl = 0.15;
+
+ℝ option_ρ_ini_zg = 1.0;
+ℝ option_ρ_ini_zd = 0.125;
+ℝ option_p_ini_zg = 1.0; 
+ℝ option_p_ini_zd = 0.1;
+
+// *************************************************************
+// Variables globales
+// *************************************************************
+ℝ t=0;
+ℝ δt=0;
+
+// *************************************************************
+// * Variables aux noeuds
+// *************************************************************
+ℝ³ u,X,X⁰;
+ℝ³ b,b̃;
+ℝ³ˣ³ M,M̃;
+
+// *************************************************************
+// * Variables aux mailles
+// *************************************************************
+ℝ p⁰,ρ⁰,V⁰;
+ℝ c,m,p,ρ,e,E,V;
+ℝ metric_δt;
+ℝ³ u,center;
+ℝ³[4] C,F;
+ℝ[4] absC;
+ℝ³ˣ³[4] A;
+
+// *************************************************************
+// * Déclaration des fonctions
+// *************************************************************
+id:∅→ℝ³
+normale:ℕ→ℝ³
+trace:ℝ³ˣ³→ℝ;
+perp: ℝ³⨯ℝ³→ℝ³;
+operator*:ℝ³ˣ³⨯ℝ³→ℝ³
+operator*:ℝ³⨯ℝ³→ℝ³ˣ³
+operator*:ℝ³ˣ³⨯ℝ³ˣ³→ℝ³ˣ³
+operator-:ℝ³ˣ³⨯ℝ³ˣ³→ℝ³ˣ³
+
+// *************************************************************
+// * Init: X⁰(par le mailleur), ρ⁰, p⁰, V⁰ & m
+// *************************************************************
+∀ j∈cells, ∀ r∈nodes(j) centerⱼ=¼*∑ᵣX⁰ᵣ;
+∀ cells{
+  if (center.x < option_x_interface){
+    ρ⁰=option_ρ_ini_zg;
+    p⁰=option_p_ini_zg;
+  }else{
+    ρ⁰=option_ρ_ini_zd;
+    p⁰=option_p_ini_zd;
+  }
+}
+∀ cells m=ρ⁰*V⁰; // m est constant
+∀ j∈cells, ∀ r∈nodes(j) V⁰ⱼ = ½*∑ᵣCⱼᵣ⋅X⁰ᵣ;
+
+// *************************************************************
+// * Calcul des Cⱼᵣ et des variables qui en découlent
+// *************************************************************
+∀ j∈cells, ∀ r∈nodes(j) Cⱼᵣ=½*perp(X_{(r-1)%4},X_{(r+1)%4});
+∀ j∈cells, ∀ r∈nodes(j) absCⱼᵣ=norm(Cⱼᵣ);
+∀ j∈cells, ∀ r∈nodes(j) metric_δtⱼ=2.0*Vⱼ/(cⱼ*ΣᵣabsCⱼᵣ);
+
+// *************************************************************
+// * Règles EOS standards: m, ρ, c, p, e
+// *************************************************************
+∀ cells ρ = m/V;
+∀ cells p=(γ-1.0)*ρ*e;
+∀ cells e = E-½*dot(u,u);
+∀ cells c=√(option_γ*p/ρ);
+
+// *************************************************************
+// * Initialisation de la boucle en 'n'
+// *************************************************************
+tⁿ⁼⁰=0.0;
+δtⁿ⁼⁰=option_δt_ini;
+∀ nodes Xⁿ⁼⁰=X⁰;
+∀ cells uⁿ⁼⁰=0;
+∀ cells Eⁿ⁼⁰ = p⁰/((γ-1.0)*ρ⁰);
+∀ cells Vⁿ⁼⁰=V⁰;
+
+// *************************************************************
+// * Cell-centered Godunov Scheme for Lagragian gas dynamics
+// *************************************************************
+∀ j∈cells, ∀ r∈nodes(j) Aⱼᵣ=ρⱼ*cⱼ*(Cⱼᵣ*Cⱼᵣ)/absCⱼᵣ;
+∀ j∈cells, ∀ r∈nodes(j) Fⱼᵣ=pⱼ*Cⱼᵣ+Aⱼᵣ*(uⱼ-uᵣ);
+∀ r∈nodes, ∀ j∈cells(r) Mᵣ=∑ⱼAⱼᵣ;
+∀ r∈nodes, ∀ j∈cells(r) bᵣ=∑ⱼ(Cⱼᵣ*pⱼ+Aⱼᵣ*uⱼ);
+∀ inner nodes M̃ = M;
+∀ inner nodes b̃ = b;
+∀ k∈outer faces, ∀ r∈nodes(k){
+  ℝ³ I=id();
+  ℝ³ n=normale(k);
+  b̃ᵣ=(I-n⊗n)*bᵣ;
+  M̃ᵣ=(I-n⊗n)*Mᵣ*(I-n⊗n)+trace(Mᵣ)*(I-n⊗n);
+  if (!((Χᵣ.x==option_x_min)||(Χᵣ.x==option_x_max))) continue;
+  M̃ᵣ=I;
+  b̃ᵣ=option_u_ini;
+}
+∀ nodes u=b̃/M̃;
+
+// *************************************************************
+// * Itérations de la boucle en 'n'
+// * Et calcule du δt pour mise-à-jour du temps de la simulation
+// *************************************************************
+∀ n∈ℕ, ∀ r∈nodes Xᵣⁿ⁺¹=Xᵣⁿ+δtⁿ*uᵣⁿ;
+∀ n∈ℕ, ∀ j∈cells, ∀ r∈nodes(j) Vⱼⁿ⁺¹=½*∑ᵣCⱼᵣⁿ⁺¹⋅Xᵣⁿ⁺¹;
+∀ n∈ℕ, ∀ j∈cells, ∀ r∈nodes(j) uⱼⁿ⁺¹=uⱼⁿ-δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ;
+∀ n∈ℕ, ∀ j∈cells, ∀ r∈nodes(j) Eⱼⁿ⁺¹=Eⱼⁿ-δtⁿ/mⱼⁿ*ΣᵣFⱼᵣⁿ⋅uᵣⁿ;
+∀ n∈ℕ, ∀ j∈cells δtⁿ⁺¹=option_δt_cfl*minⱼ(metric_δtⱼ);
+∀ n∈ℕ tⁿ⁺¹=tⁿ+δtⁿ⁺¹;
+
+// *************************************************************
+// * Fonctions
+// *************************************************************
+ℝ trace(ℝ³ˣ³ m){ return m.x.x+m.y.y+m.z.z;}
+ℝ³ perp(ℝ³ a, ℝ³ b){ return ℝ³(b.y-a.y,-b.x+a.x,0.0);}
+ℝ³ˣ³ operator*(ℝ³ˣ³ u,ℝ³ˣ³ v){ return u*v;}
+ℝ operator*(ℝ³ˣ³ t, ℝ³ v){ return dot(t,v);}
+ℝ³ˣ³ operator*(ℝ³ u,ℝ³ v){ return ℝ³ˣ³(u.x*v,u.y*v,u.z*v);}
+ℝ³ˣ³ operator-(ℝ³ˣ³ u,ℝ³ˣ³ v){ return ℝ³ˣ³(u.x-v.x,u.y-v.y,u.z-v.z);}
+ℝ³ operator*(ℝ³ˣ³ t, ℝ³ v){ return ℝ³(dot(t.x,v),dot(t.y,v),dot(t.z,v));}

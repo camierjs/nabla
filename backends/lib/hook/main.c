@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){\n"
 static void dumpOptions(nablaMain *nabla,const int tabs){
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
     const char *ascii_name=opt->name;
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase %p: //%s %s\n",opt, opt->type, ascii_name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase (int)%p: //%s %s\n",opt, opt->type, ascii_name);
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);

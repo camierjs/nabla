@@ -70,7 +70,11 @@ public:
   
   friend inline __m256d operator==(const integer &a, const int i);
 
-  inline const int& operator[](int i) const  {
+  inline const int& operator[](int i) const {
+    int *a=(int*)&vec;
+    return a[i];
+  }  
+  inline int& operator[](int i) {
     int *a=(int*)&vec;
     return a[i];
   }  

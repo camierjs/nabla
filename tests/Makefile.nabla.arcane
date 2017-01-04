@@ -25,12 +25,12 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_core\
  -larcane_utils\
  -larcane_driverlib\
+ -larcane_hyoda\
  -larcane_aleph\
  -larcane_aleph_hypre\
  $(ARCANE_PKG_LIBS)\
  -Wl,-rpath,${ARCANE_ROOT}/lib
 # -larcane_ios\
-# -larcane_hyoda\
 # -larcane_cea\
 # -larcane_aleph_sloop\
 # -larcane_aleph_trilinos\
@@ -87,10 +87,10 @@ main.o:$(TGT)Module.o
 
 
 $(TGT):main.o
-	$(CXX) -g -o $(TGT) $(ARCANE_LIBS) -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib main.o $(TGT)Module.o -Wl,-rpath,/usr/lib/openmpi/lib
+	$(CXX) -g -o $(TGT) $(ARCANE_LIBS) -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib main.o $(TGT)Module.o -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -lGL /usr/lib/libmpi.so /usr/lib/libmpi_cxx.so
 #-Wl,-rpath,. -Wl,-rpath,/usr/lib/openmpi/lib -Wl,-rpath,${ICET_ROOT}/lib
 #${MPI_CXX_LIBRARIES} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
-#${ICET_LIBRARIES} ${CEA_LIB} ${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib ${MPI_CXX_LIBRARIES}
+#${CEA_LIB} ${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
 
 
 #####################

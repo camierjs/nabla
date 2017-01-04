@@ -161,7 +161,65 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 // *****************************************************************************
 // * Other singular operations
+// * astNode *pi=astNewNode("(",YYTRANSLATE('('));                       
+// * astNode *po=astNewNode(")",YYTRANSLATE(')'));                     
+// * decl_spec->children=type_spec;                                      
+// * type_spec->children=vd;                                             
+// * astNode *decl_spec=astNewNode(NULL,rulenameToId("declaration_specifiers")); 
 // *****************************************************************************
+#define voidIDvoid_rhs(lhs,id,at,cst,statement)                         \
+  astNode *decl_spec=astNewNodeRule("declaration_specifiers",           \
+                                    rulenameToId("declaration_specifiers")); \
+  astNode *type_spec=astNewNodeRule("type_specifier",                   \
+                                    rulenameToId("type_specifier"));    \
+  decl_spec->children=type_spec;                                        \
+  astNode *rvd=astNewNode("void",VOID);                                 \
+  astNode *avd=astNewNode("void",VOID);                                 \
+  type_spec->children=rvd;                                              \
+  astNode *decl=astNewNodeRule("declarator",rulenameToId("declarator")); \
+  astNode *direct_decl=astNewNodeRule("direct_declarator",              \
+                                      rulenameToId("direct_declarator")); \
+  astNode *direct_decl_bis=astNewNodeRule("direct_declarator",          \
+                                          rulenameToId("direct_declarator")); \
+  decl->children=direct_decl;                                           \
+  direct_decl->children=id;                                             \
+  direct_decl->children=direct_decl_bis;                                \
+  direct_decl_bis->children=id;                                         \
+  astNode *parameter_type_list=astNewNodeRule("parameter_type_list",    \
+                                              rulenameToId("parameter_type_list")); \
+  astNode *parameter_declaration=astNewNodeRule("parameter_declaration",    \
+                                              rulenameToId("parameter_declaration")); \
+  astNode *arg_type_spec=astNewNodeRule("type_specifier",               \
+                                        rulenameToId("type_specifier")); \
+  astNode *pi=astNewNode("(",YYTRANSLATE('('));                         \
+  astNode *po=astNewNode(")",YYTRANSLATE(')'));                         \
+  direct_decl_bis->next=pi;                                             \
+  pi->next=parameter_type_list;                                         \
+  parameter_type_list->next=po;                                         \
+  parameter_type_list->children=parameter_declaration;                  \
+  parameter_declaration->children=arg_type_spec;                        \
+  arg_type_spec->children=avd;                                          \
+  ast(decl_spec,decl,at,cst,statement)
+
+#define nabla_job_id_rhs(lhs,prefix,id)                                 \
+  astNode *decl_spec=astNewNodeRule("declaration_specifiers",rulenameToId("declaration_specifiers")); \
+  astNode *type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  astNode *return_void=astNewNode("void",VOID);                         \
+  astNode *pi=astNewNode("(",YYTRANSLATE('('));                         \
+  astNode *po=astNewNode(")",YYTRANSLATE(')'));                         \
+  astNode *parameter_type_list=astNewNodeRule("parameter_type_list",rulenameToId("parameter_type_list")); \
+  astNode *parameter_list=astNewNodeRule("parameter_list",rulenameToId("parameter_list")); \
+  astNode *parameter_declaration=astNewNodeRule("parameter_declaration",rulenameToId("parameter_declaration")); \
+  astNode *parameter_type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  astNode *parameter_void=astNewNode("void",VOID);                      \
+  decl_spec->children=type_spec;                                        \
+  type_spec->children=return_void;                                      \
+  parameter_type_list->children=parameter_list;                         \
+  parameter_list->children=parameter_declaration;                       \
+  parameter_declaration->children=parameter_type_spec;                  \
+  parameter_type_spec->children=parameter_void;       \
+  ast(prefix,decl_spec,id,pi,parameter_type_list,po)
+
 #define superNP1(lhs,ident)                                           \
   char *dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));         \
   dest=strcat(dest,ident->token);                                     \

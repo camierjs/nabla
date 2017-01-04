@@ -102,7 +102,8 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
   dbg("\n\t\t\t\t\t[hookSwitchForall] tokenid=%d",tokenid);
   
   switch(tokenid){
-  case(CELL):{
+  case(CELL):
+  case(CELLS):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] CELL");
     //assert(job->enum_enum==0||job->enum_enum=='c');
     /*job->enum_enum='c';*/job->parse.enum_enum='c';
@@ -112,7 +113,8 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
       nprintf(job->entity->main, "/*n_foreach_c*/", "FOR_EACH_NODE_CELL(c)");
     break;
   }
-  case(NODE):{
+  case(NODE):
+  case(NODES):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] NODE");
     //assert(job->enum_enum==0||job->enum_enum=='n');
     /*job->enum_enum='n';*/job->parse.enum_enum='n';
@@ -129,7 +131,8 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
     }
     break;
   }
-  case(FACE):{
+  case(FACE):
+  case(FACES):{
     dbg("\n\t\t\t\t\t[hookSwitchForall] FACE");
     //assert(job->enum_enum==0||job->enum_enum=='f');
     /*job->enum_enum='f';*/job->parse.enum_enum='f';

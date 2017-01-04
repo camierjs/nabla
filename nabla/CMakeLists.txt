@@ -19,4 +19,3 @@ target_link_libraries(nabla Nabla NablaMiddlend NablaFrontend NablaTools
 # INSTALL #
 ###########
 install(TARGETS nabla DESTINATION bin)
-#install(TARGETS Nabla DESTINATION lib)

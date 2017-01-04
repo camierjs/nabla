@@ -110,10 +110,13 @@ NABLA_STATUS nMiddleSwitch(astNode *root,
          fprintf(stderr,
                  "\nError while switching backend!\n"));
   }
-  if (animate(nabla)!=NABLA_OK)
-    exit(NABLA_ERROR|
-         fprintf(stderr,
-                 "\nError while animating backend!\n"));
+  dbg("\n\t[nablaMiddlendSwitch] Now animating...");
+  if (option!=BACKEND_OPTION_OKINA_MFEM)
+      if (animate(nabla)!=NABLA_OK)
+        exit(NABLA_ERROR|
+             fprintf(stderr,
+                     "\nError while animating backend!\n"));
+  dbg("\n\t[nablaMiddlendSwitch] Now freeing");
   nMiddleJobFree(nabla);
   nMiddleEntityFree(nabla->entity);
   nMiddleOptionFree(nabla->options);
@@ -122,5 +125,6 @@ NABLA_STATUS nMiddleSwitch(astNode *root,
   nAstListFree();
   free(nabla);
   yylex_destroy();
+  dbg("\n\t[nablaMiddlendSwitch] & return");
   return NABLA_OK;   
 }

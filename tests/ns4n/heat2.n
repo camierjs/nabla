@@ -1,0 +1,95 @@
+// Input parameters
+ℕ N=50; // How many nodes
+ℝ nu=1.0; // diffusion coefficient
+ℕ max_iteration=100; // How many timesteps to take
+
+// Derived variables
+ℝ x;  // node positions
+ℝ xc; // cell center
+ℝ L;  // cell length
+ℝ u;  // Solution variable
+ℝ ub; // solution variable at boundary
+ℝ R;  // steady state residual
+ℝ uflux; // flux of u at interface
+ℝ u_ic;
+
+// Timestepping control
+ℝ dt; // timestep
+ℝ solution; // final value
+ℝ X,Y,Y_ic;
+
+ℝ cellIntegrate(X);
+ℝ Y=EulerIntegrate(X,Y);
+
+// *********************************************************
+// * A general function for integrating over a cell boundary
+// *********************************************************
+∀ cells cellIntegrate(X)=0;
+∀ nodes cellIntegrate(X)_{left_cell} += X;
+∀ nodes cellIntegrate(X)_{rght_cell} -= X;
+
+// *********************************************************
+// * EulerIntegrate
+// *********************************************************
+EulerIntegrate(X,Y)^{n=0} = Y_ic;
+// Compute u{n+1} based on explicit euler time integration method
+EulerIntegrate(X,Y)^{n+1} = EulerIntegrate(X,Y)^{n}+dt^{n}*X^{n};
+// When simulation is finished, copy current iteration results to solution
+EulerIntegrate(X,Y) = EulerIntegrate(X,Y)^{n} if (n >= max_iteration);
+
+
+
+// We find the length of an interval by integrating the position x
+∀ cells L = cellIntegrate(x);
+
+∀ cells xc = 0;
+∀ nodes xc_{left_cell} += 0.5*x;
+∀ nodes xc_{rght_cell} += 0.5*x;
+
+// Initializing values at time= 0 using u(x,0) = f(x).
+ℝ initialCondition(ℝ x){ return x*(1-x); }
+∀ cells u_ic = initialCondition(xc);
+
+// Ask to solve the problem by using the Euler Integration
+// on the function residual, integrating the variable u
+solution = EulerIntegrate(R,u);
+
+// The 1d diffusion residue
+∀ cells R = nu*cellIntegrate(ux)/L;
+
+
+// Compute boundary condition at leftmost interface.
+// At left we are imposing Neumann Boundary Condition, u_x = -1;
+∀ left_boundary nodes ux = -1;
+
+// Compute boundary condition at rightmost interface.
+// At right we are imposing Dirichlet boundary condition, u=0;
+∀ right_boundary nodes ub = 0;
+
+// Compute gradient of u at all internal interfaces.
+// An internal face is a face having left and right cell mapping defined.
+// Since a boundary face has only one cell adjacent to it,
+// it willn't calculate gradient at those points.
+∀ inner nodes {
+  ℝ dx = xc_{rght_cell} - xc_{left_cell};
+  ℝ du =  u_{rght_cell} - u_{left_cell};
+  ux = du/dx;
+}
+
+// Compute gradient at boundary
+∀ right_boundary nodes {
+  ℝ dx =  x - xc_{left_cell};
+  ℝ du = ub -  u_{left_cell};
+  ux = du/dx;
+}
+
+// Compute maximum stable timestep for simulation.
+// Use reduction rule and calculate timestep
+// The global timestep is the minimum of these local timesteps
+∀ /*inner */ r∈nodes {
+  ℝ dx = abs(xc_{rght_cell}-xc_{left_cell});
+  ℝ local_dt = dx*dx/(nu*2.0);  
+  dt=min_{r}(local_dt); // Set dt = min(dt,local_dt)
+}
+
+

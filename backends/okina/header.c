@@ -99,7 +99,7 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 void nOkinaHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-  
+
   if (nabla->option==BACKEND_OPTION_OKINA_AVX512){
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Integer_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real_h));
@@ -146,4 +146,52 @@ void nOkinaHeaderDump(nablaMain *nabla){
     fprintf(nabla->entity->hdr,dumpExternalFile(knStdOStream_h));
   }
   fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
+}
+
+
+
+// ****************************************************************************
+// * nOkinaMfemDump
+// ****************************************************************************
+void nOkinaMfemDump(nablaMain *nabla){
+  FILE *knSse;
+  FILE *knAvx;
+  FILE *knAvx2;
+  FILE *knAvx512;
+  
+  if ((knSse=fopen("knSse.h", "w")) == NULL) exit(NABLA_ERROR);
+  if ((knAvx=fopen("knAvx.h", "w")) == NULL) exit(NABLA_ERROR);
+  if ((knAvx2=fopen("knAvx2.h", "w")) == NULL) exit(NABLA_ERROR);
+  if ((knAvx512=fopen("knAvx512.h", "w")) == NULL) exit(NABLA_ERROR);
+
+  fprintf(knAvx512,kn512Integer_h);
+  fprintf(knAvx512,dumpExternalFile(kn512Real_h));
+  fprintf(knAvx512,dumpExternalFile(kn512Real3_h));
+  fprintf(knAvx512,dumpExternalFile(kn512Ternary_h));
+  fprintf(knAvx512,dumpExternalFile(kn512Gather_h));
+  fprintf(knAvx512,dumpExternalFile(kn512Scatter_h));
+  fprintf(knAvx512,dumpExternalFile(kn512OStream_h));
+    
+  fprintf(knAvx,knAvxInteger_h);
+  fprintf(knAvx,dumpExternalFile(knAvxReal_h));
+  fprintf(knAvx,dumpExternalFile(knAvxReal3_h));
+  fprintf(knAvx,dumpExternalFile(knAvxTernary_h));
+  fprintf(knAvx,dumpExternalFile(knAvxGather_h));
+  fprintf(knAvx2,knAvx2Gather_h);
+  fprintf(knAvx,dumpExternalFile(knAvxScatter_h));
+  fprintf(knAvx,dumpExternalFile(knAvxOStream_h));
+    
+  fprintf(knSse,knSseInteger_h);
+  fprintf(knSse,dumpExternalFile(knSseReal_h));
+  fprintf(knSse,dumpExternalFile(knSseReal3_h));
+  fprintf(knSse,dumpExternalFile(knSseTernary_h));
+  fprintf(knSse,dumpExternalFile(knSseGather_h));
+  fprintf(knSse,dumpExternalFile(knSseScatter_h));
+  fprintf(knSse,dumpExternalFile(knSseOStream_h));
+
+  
+  fclose(knSse);
+  fclose(knAvx);
+  fclose(knAvx2);
+  fclose(knAvx512);
 }

@@ -22,24 +22,24 @@
    </arcane-checkpoint>
    
    <mesh>
-     <!--file internal-partition="true">../nabla.unf</file-->
+     <!--file internal-partition="true">./nabla.unf</file-->
      <meshgenerator>
        <sod zyx='true'>
-         <x set='true' delta='0.1'>16</x>
-         <y set='true' delta='0.1'>16</y>
+         <x set='true' delta='0.02'>8</x>
+         <y set='true' delta='0.02'>8</y>
          <!--z set='true' delta='0.1125' total='true'>4</z-->
        </sod>
      </meshgenerator>
    </mesh>
 
    <schrodinger>
-     <option_deltat>0.005</option_deltat>
+     <option_deltat>0.001</option_deltat>
      <option_epsilon>0.01</option_epsilon>
 
      <option_ini_borders>1.0</option_ini_borders>
 
      <option_ini_iterations>1</option_ini_iterations>
-     <option_max_iterations>8</option_max_iterations>
+     <option_max_iterations>128</option_max_iterations>
 
      <alephEpsilon>1.e-8</alephEpsilon>
      <alephMaxIterations>16384</alephMaxIterations>

@@ -120,10 +120,10 @@ clean:cln
 #############
 # 2014~20XY #
 #############
-grep2015:
-	@grep -r 2014~2015 *
-sed2015:
-	@find . -type f -exec grep -l 2014~2016 {} \; |xargs  sed -i 's/2014\~2015/2014\~2016/g'
+grep2016:
+	@grep -r 2014~2016 *
+sed2016:
+	@find . -type f -exec grep -l 2014~2016 {} \; |xargs  sed -i 's/2014\~2016/2014\~2017/g'
 
 ###########
 # PHONIES #

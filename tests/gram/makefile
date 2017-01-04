@@ -5,7 +5,7 @@ SIMD = std
 COLORS = 
 PARALLEL = omp
 
-NABLA = /tmp/nabla/nabla
+NABLA = /tmp/nabla/nabla/nabla
 
 
 all:$(TGT).cc

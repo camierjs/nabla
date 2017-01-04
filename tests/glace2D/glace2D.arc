@@ -53,24 +53,13 @@
 	  </meshgenerator>
 	</mesh>
    <glace2-d>
-     <!--DEBUG>true</DEBUG>
+     <DEBUG>false</DEBUG>
      
-     <option_chic>false</option_chic>
-     <option_glace>true</option_glace>
 
      <option_test_sod>true</option_test_sod>
 
-     <option_hexa>false</option_hexa>
-     <option_cylinder>false</option_cylinder>
-
-     <option_quads>true</option_quads>
-     <option_triangles>false</option_triangles>
-
-     <option_dtt_initial>0.0001</option_dtt_initial>
-     <option_dtt_min>1e-12</option_dtt_min>
-     <option_dtt_max>0.01</option_dtt_max>
-     <option_dtt_control>0.15</option_dtt_control>
-     <option_stoptime>0.2</option_stoptime>
+     <option_greek_deltat_max>0.0001</option_greek_deltat_max>
+     <option_stoptime>1.0</option_stoptime>
 
      <option_x_min>0.0</option_x_min>
      <option_x_interface>0.5</option_x_interface>
@@ -79,15 +68,13 @@
      <option_y_min>0.0</option_y_min>
      <option_y_max>1.125</option_y_max>
 
-     <option_z_min>0.0</option_z_min>
-     <option_z_max>0.125</option_z_max>
-
-     <option_ini_zg_rh>1.0</option_ini_zg_rh>
+ 
+     <option_ini_zg_greek_rho>1.0</option_ini_zg_greek_rho>
      <option_ini_zg_p>1.0</option_ini_zg_p>
 
-     <option_ini_zd_rh>0.125</option_ini_zd_rh>
+     <option_ini_zd_greek_rho>0.125</option_ini_zd_greek_rho>
      <option_ini_zd_p>0.1</option_ini_zd_p>
 
-     <option_max_iterations>8</option_max_iterations-->
+     <option_max_iterations>32768</option_max_iterations>
    </glace2-d>
 </case>

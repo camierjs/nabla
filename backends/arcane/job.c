@@ -427,25 +427,29 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
       tokenid=n->next->children->children->tokenid;
     }
     switch(tokenid){
-    case(CELL):{
+    case(CELL):
+    case(CELLS):{
       job->parse.enum_enum='c';
       if (support=='c') nprintf(arc,NULL,"ENUMERATE_SUB_ITEM(Cell,cc,cell)");
       if (support=='n') nprintf(arc,NULL,"for(CellEnumerator c(node->cells()); c.hasNext(); ++c)\n\t\t\t");
       break;
     }
-    case(FACE):{
-      job->parse.enum_enum='f';
+    case(FACE):
+    case(FACES):{
+     job->parse.enum_enum='f';
       if (support=='c') nprintf(arc,NULL,"for(FaceEnumerator f(cell->faces()); f.hasNext(); ++f)\n\t\t\t");
       if (support=='n') nprintf(arc,NULL,"for(FaceEnumerator f(node->faces()); f.hasNext(); ++f)\n\t\t\t");
       break;
     }
-    case(NODE):{
+    case(NODE):
+    case(NODES):{
       job->parse.enum_enum='n';
       if (support=='c') nprintf(arc,NULL,"for(NodeEnumerator n(cell->nodes()); n.hasNext(); ++n)\n\t\t\t");
       if (support=='f') nprintf(arc,NULL,"for(NodeEnumerator n(face->nodes()); n.hasNext(); ++n)\n\t\t\t");
       break;
     }
-    case(PARTICLE):{
+    case(PARTICLE):
+    case(PARTICLES):{
       job->parse.enum_enum='p';
       if (iterator==NULL)
         nprintf(arc,NULL,"for(ParticleEnumerator p(cellParticles(cell->localId())); p.hasNext(); ++p)");

@@ -1,0 +1,84 @@
+module glace;
+
+// *** Options utilisateurs
+ℝ γ = 1.4;
+ℝ option_x_interface = 0.5;
+ℝ option_x_min = 0.0;
+ℝ option_x_max = 1.0;
+ℝ option_δt_ini = 0.00001;
+ℝ option_δt_cfl = 0.0;
+ℝ option_ini_zg_ρ = 1.0;
+ℝ option_ini_zd_ρ = 0.125;
+ℝ option_ini_zg_p = 1.0;
+ℝ option_ini_zd_p = 0.1;
+
+// *** Variables globales
+ℝ δt, t, glace_δt;
+ℝ² X0, X;				// Positions noeuds et mailles à t=0 et tn
+ℝ² u,b;					// Vitesses & Second membre
+
+ℝ e,E;					// Energies	
+ℝ c,m,p0,p,ρ0,ρ,V0,V;	// Masse, Pression, Densités, Volume
+ℝ² C,F;					// Résultantes aux sommets
+
+ℝ²ˣ² A;					// Matrices de contribution aux sommets
+
+// *** Fonctions
+scalProd: ℝ²хℝ²→ℝ;
+perp: ℝ²→ℝ²;
+norm: ℝ²→ℝ;
+min: ℝ→ℝ;
+sqrt: ℝ→ℝ;
+tensorialProduct: ℝ²хℝ²→ℝ;
+
+// *** Conditions initiales: X0, p0, ρ0, V0 & m
+∀{j ∈ cells} X{j} = ∑{r ∈ nodesOfCell(j)} X0{r} * 0.25;
+∀{j ∈ cells} {
+	if (X{j}.x < option_x_interface) {
+		ρ0=option_ini_zg_ρ;
+		p0=option_ini_zg_p;
+	} else {
+		ρ0=option_ini_zd_ρ;
+		p0=option_ini_zd_p;
+	}
+}
+∀{j ∈ cells} V0{j} = 0.25 * ∑{r ∈ nodes(j)} scalProd(C{j,r}, X0{r});
+∀{j ∈ cells} m{j} = ρ0{j}*V0{j};
+
+
+// *** Calcul des Cjr
+∀{j ∈ cells, r ∈ nodes(j)} C{j,r} = 0.5*perp(X{prev(r)}-X{next(r)});
+
+// *** Règles EOS standards
+∀{j ∈ cells} c{j} = sqrt(γ*p{j}/ρ{j});
+∀{j ∈ cells} p{j} = (γ-1.0)*ρ{j}*e{j};
+∀{j ∈ cells} ρ{j} = E{j}-0.5*scalProd(u{j}, u{j});
+
+// *** Init n=0
+t⁰ = 0.0;
+δt⁰ = option_δt_ini;
+∀{r  ∈ nodes} X{r}⁰ = X0;
+∀{j ∈ cells} u{j}⁰ = { 0.0, 0.0 };   // il manque l'énergie cinétique dans l'énergie totale
+∀{j ∈ cells} E{j}⁰ = p0/((γ-1.0)*ρ0);
+
+// *** Cell-centered Godunov Scheme for Lagragian gas dynamics
+∀{j ∈ cells, r ∈ nodes(j)} A{j,r} = ρ{j}*c{j}*tensorialProduct(C{j,r},C{j,r})/norm(C{j,r});
+∀{r ∈ nodes} A{r} = ∑{j ∈ cells} A{j,r};
+∀{r ∈ nodes} b{r} = ∑{j ∈ cells} (A{j,r}*u{j}+C{j,r}*p{j});
+∀{r ∈ nodes} u{r} = b{r}/A{r};
+∀{j ∈ cells, r ∈ nodes(j)} F{j,r} = p{j}*C{j,r}+A{j,r}*(u{r}-u{j});
+
+∀{j ∈ cells} E{j}ⁿ⁺¹ = E{j}ⁿ + δt/m{j} * ∑{r  ∈ nodes}scalProd(F{j,r},u{r}ⁿ);
+∀{j ∈ cells} u{j}ⁿ⁺¹ = u{j}ⁿ + δt/m{j} * ∑{r  ∈ nodes}F{j,r};
+∀{r ∈ nodes} X{r}ⁿ⁺¹ = X{r}ⁿ + δt * u{r}ⁿ;
+
+∀{j ∈ cells} V{j} = 0.5 * ∑{r  ∈ nodes}(C{j,r}*X{r});
+
+∀{j ∈ cells} glace_δt{j} = 2.0*V{j}/(c{j}*∑{r  ∈ nodes}norm(C{j,r}));
+δt = option_δt_cfl*min(glace_δt);
+tⁿ⁺¹ = tⁿ + δt;
+
+
+// *** Boundary conditions
+// Y'a un souci... les variables tilde ne sont jamais utilisées
+// A affiner plus tard...

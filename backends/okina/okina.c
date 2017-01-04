@@ -295,6 +295,10 @@ static hooks okinaHooks={
   &mains
 };
 
+static hooks* mfem(nablaMain *nabla){
+  nOkinaMfemDump(nabla);
+  return NULL;
+}
 
 // ****************************************************************************
 // * okina with animate
@@ -302,6 +306,9 @@ static hooks okinaHooks={
 hooks* okina(nablaMain *nabla){
   nabla->call=&okinaCalls;
   
+  if (nabla->option==BACKEND_OPTION_OKINA_MFEM)
+    return mfem(nabla);
+ 
   // Call switch between STD, SSE, AVX, MIC
   if (nabla->option==BACKEND_OPTION_OKINA_SSE){
     nabla->call->simd=&okinaSimdSse;

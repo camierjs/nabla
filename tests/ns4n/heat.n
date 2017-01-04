@@ -1,0 +1,73 @@
+// Input parameters
+ℕ N=50; // How many nodes
+ℝ nu=1.0; // diffusion coefficient
+ℕ max_iteration=100; // How many timesteps to take
+ℝ h=-1; // h(t) = -1 ;
+ℝ g=0;  // g(t) = 0 ;
+
+// Derived variables
+ℝ x;  // node positions
+ℝ xc; // cell center
+ℝ L;  // cell length
+ℝ u;  // Solution variable
+ℝ ub; // solution variable at boundary
+ℝ ux; // derivative of u (du/dx)
+ℝ R;  // Diffusion residual equation
+
+// Timestepping control
+ℝ dt; // timestep
+ℝ solution; // final value
+ℾ simulation_finished; // check for completion
+
+
+// Rule 1: compute the cell center from node positions
+∀ j∈cells, r∈nodes(j) xcⱼ=½*∑ᵣxᵣ; // xc=½*(il→x+il→x);
+
+// Rule 2: compute the cell integral (Length)
+∀ j∈cells Lⱼ = x_{rght_node(j)}-x_{left_node(j)};  // L=ir→x-il→x;
+
+// Rule 3: compute the gradient of u
+∀ inner r∈nodes{
+  const ℝ dx = xc_{rght_cell(r)}-xc_{left_cell(r)}; // cr→xc-cl→xc;
+  const ℝ du =  u_{rght_cell(r)}- u_{left_cell(r)}; // cr→u -cl→u;
+  uxⱼ = du/dx;
+}
+
+// Rules 4 and 5: Compute gradient at boundary
+
+// Neuman boundary condition at left boundary (h(t) = -1)
+∀ left_boundary nodes, ux = h;
+
+// Dirichlet boundary at right boundary (g(t) = 0 )
+∀ right_boundary nodes, ub = g;
+
+// Compute gradient at boundary from ub
+∀ right_boundary nodes{
+  const ℝ dx = x  - xc_{left};
+  const ℝ du = ub - u_{left};
+  ux = du/dx ;
+}
+
+// Rule 6: residual equation used by time integration
+∀ j∈cells R = nu*(ux_{rght_node(j)}-ux_{left_node(j)})/L;
+
+// Timestepping Algorithm
+ℝ f(ℝ xc) { return xc*(1-xc);}
+
+// Rule 7: initialization of iteration (build rule)
+∀ cells u^{n=0} = f(xc);
+
+// Rule 8: time advance using explicit Euler time integration algorithm
+∀ cells u^{n+1} = u^{n}+dt^{n}*R^{n};
+
+∀ cells solution = u^{n} if simulation_finished^{n};
+simulation_finished = (n >= max_iteration);
+
+// Compute maximum stable timestep for simulation.  Use reduction rule
+// and calculate timestep as a function of local conditions.  The global
+// timestep is the minimum of these local timesteps
+∀ j∈cells{
+  ℝ local_dt = L*L/(2.0*nu);
+  dt=minⱼ(local_dt) ; // Set dt = min(dt,local_dt)
+}
+

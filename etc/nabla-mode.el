@@ -1,6 +1,6 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
-(defconst nabla-version "151118" "Nabla Mode version number")
-(defconst nabla-time-stamp "2015-11-18"
+(defconst nabla-version "160930" "Nabla Mode version number")
+(defconst nabla-time-stamp "2016-09-30"
   "Nabla Mode time stamp for last update.")
 
 
@@ -15,7 +15,7 @@
 
 (defconst nabla-maths
   '("sqrt" "norm" "dot" "cross" "min" "max" 
-    "mathlink" "Prime"
+    "mathlink" "Prime" "operator"
     ) "List of Nabla mathematical tools")
 
 (defconst nabla-builtins
@@ -42,7 +42,7 @@
     ) "List of Nabla libraries")
 
 (defconst nabla-items
-  '("global"
+  '("global" "set"
     "cell" "cells" 
     "node" "nodes"
     "edge" "edges"
@@ -63,6 +63,9 @@
     "Particle"
     "edge" "edges"
     "face" "faces" "Face"
+    ;"ℕ" "ℝ" "ℝᵈ" "ℝᵈ⨯ℝᵈ" 
+    "real" "natural"
+    "reals" "naturals"
     ) "List of Nabla types")
 
 (defconst nabla-preprocessors
@@ -154,9 +157,14 @@
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
    ;; highlight special keywords
-   '("\\(∀\\|ℵ\\|³\\|ᵈ\\)" . font-lock-keyword-face)
+   ;'("\\(⁰\\)" . font-lock-variable-name-face)
+   '("\\(ⁿ⁺¹\\|ⁿ⁼⁰\\|ⁿ\\)" . font-lock-constant-face)
+   '("\\(²ˣ²\\|³ˣ³\\)" . font-lock-type-face)
+   '("\\(ˣ\\|⁺\\|⁼\\|¹\\|²\\|³\\|ˣ\\)" . font-lock-type-face)
+   ;; highlight special keywords
+   '("\\(∀\\|ℵ\\)" . font-lock-keyword-face)
    ;; highlight special characters
-   '("\\(ℝ\\|ℤ\\|ℕ\\|ℾ\\|ℂ\\)" . font-lock-type-face)
+   '("\\(ℝ\\|ℤ\\|ℕ\\|ℾ\\|ℂ\\|ℿ\\)" . font-lock-type-face)
    ;; highlight numbers[-+]?
    '("\\W\\([0-9._]+\\)\\>" 1 font-lock-constant-face)
    ;; highlight true, false
