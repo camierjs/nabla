@@ -1,0 +1,661 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// This NABLA port is an implementation of the PENNANT Mini-App.
+
+// Charles R. Ferenbaugh, Los Alamos National Laboratory, cferenba@lanl.gov
+
+// PENNANT is an unstructured mesh physics mini-app designed for
+// advanced architecture research. It contains mesh data structures
+// and a few physics algorithms adapted from the LANL rad-hydro code FLAG,
+// and gives a sample of the typical memory access patterns of FLAG.
+
+// Copyright 2012, Los Alamos National Security, LLC. All rights reserved.
+
+// This software was produced under U.S. Government contract DE-AC52-06NA25396
+// for Los Alamos National Laboratory (LANL), which is operated by Los Alamos
+// National Security, LLC for the U.S. Department of Energy.
+
+// The U.S. Government has rights to use, reproduce, and distribute this software.
+
+// NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY,
+// EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+
+// If software is modified to produce derivative works, such modified software should
+// be clearly marked, so as not to confuse it with the version available from LANL.
+
+// Additionally, redistribution and use in source and binary forms,
+// with or without modification, are permitted provided that the following conditions are met:
+//   1. Redistributions of source code must retain the above copyright notice,
+//      this list of conditions and the following disclaimer.
+//   2. Redistributions in binary form must reproduce the above copyright notice,
+//      this list of conditions and the following disclaimer in the documentation
+//      and/or other materials provided with the distribution.
+//   3. Neither the name of Los Alamos National Security, LLC, Los Alamos National Laboratory,
+//      LANL, the U.S. Government, nor the names of its contributors may be used to endorse
+//      or promote products derived from this software without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY,
+// LLC AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+///////////////////////////////////////////////////////////////////////////////
+with ℝ²;
+
+///////////////////////////////////////////////////////////////////////////////
+// /tmp/nabla/nabla/nabla --lambda pennant -i pennant.n
+///////////////////////////////////////////////////////////////////////////////
+options{
+  // Mesh options
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 1;
+  ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
+  ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
+  ℝ option_stoptime = 1.;     // ! utilisé en dur dans le backend lambda !
+
+
+  // Pennant options
+  ℾ option_debug = false;
+  ℕ cstop=999999; // simulation stop cycle
+  ℝ tstop=1.e99;  // simulation stop time
+  ℝ dtmax=1.e99;  // maximum timestep size
+  ℝ dtinit=1.e99; // initial timestep size
+  ℝ dtfac=1.2;    // factor limiting timestep growth
+  ℕ dtreport=10;  // frequency for timestep reports
+  ℝ cfl=0.6;      // Courant number, limits timestep
+  ℝ cflv=0.1;     // volume change limit for timestep
+  ℝ rinit=1.0;    // initial density for main mesh
+  ℝ einit=0.0;    // initial energy for main mesh
+  ℾ subregion=true;
+  ℝ subrgn_xmin=0.0;
+  ℝ subrgn_xmax=0.025;
+  ℝ subrgn_ymin=0.0;
+  ℝ subrgn_ymax=0.025;
+  ℝ rinitsub=1.0; // initial density in subregion
+  ℝ einitsub=0.0; // initial energy in subregion
+  ℝ uinitradial=0.0; // initial velocity in radial direction
+  //std::vector<ℝ> bcx; // x values of x-plane fixed boundaries
+  //std::vector<ℝ> bcy; // y values of y-plane fixed boundaries
+  ℝ option_gamma=5./3.; // coeff. for ideal gas equation
+  ℝ ssmin=0;      // minimum sound speed for gas
+  ℝ alfa=0.5;     // alpha coefficient for TTS model
+  ℝ qgamma=5./3.; // gamma coefficient for Q model
+  ℝ q1=0.0;       // linear coefficients for Q model
+  ℝ q2=2.0;       // quadratic coefficients for Q model
+};
+
+#define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[0m")
+
+// ****************************************************************************
+// * Zone Variables
+// ****************************************************************************
+cells{
+  ℝ² zx;    // zone center coordinates
+  ℝ² zxp;   // zone ctr coords, middle of cycle
+  ℝ zarea;  // zone area
+  ℝ zvol;   // zone volume
+  ℝ zareap; // zone area, middle of cycle
+  ℝ zvolp;  // zone volume, middle of cycle
+  ℝ zvol0;  // zone volume, start of cycle
+  ℝ zdl;    // zone characteristic length
+  ℝ zm;     // zone mass
+  ℝ zr;     // zone density
+  ℝ zrp;    // zone density, middle of cycle
+  ℝ ze;     // zone specific internal energy (energy per unit mass)
+  ℝ zetot;  // zone total internal energy
+  ℝ zw;     // zone work done in cycle
+  ℝ zwrate; // zone work rate
+  ℝ zp;     // zone pressure
+  ℝ zss;    // zone sound speed
+  ℝ zdu;    // zone velocity difference
+  ℝ z0per;  // zone tmp variable in PolyGas calcStateAtHalf
+  ℝ² z0uc;  // zone tmp centered velocity
+  ℝ zr0;    // zone tmp
+  ℝ z0tmp;  // zone tmp
+  ℝ sarea[faces];  // side area
+  ℝ svol[faces];   // side volume
+  ℝ sareap[faces]; // side area, middle of cycle
+  ℝ svolp[faces];  // side volume, middle of cycle
+  ℝ² ssurfp[faces];// side surface vector
+  ℝ smf[faces];    // side mass fraction
+  ℝ² sfp[faces];   // side force from pressure
+  ℝ² sfq[faces];   // side force from artificial visc.
+  ℝ² sft[faces];   // side force from tts
+  ℝ² cftot[nodes]; // corner force, total from all sources
+  ℝ cmaswt[nodes]; // corner contribution to pmaswt
+  ℝ c0area[nodes]; // corner tmp
+  ℝ c0evol[nodes]; // corner tmp
+  ℝ c0du[nodes];   // corner tmp
+  ℝ c0div[nodes];  // corner tmp
+  ℝ c0cos[nodes];  // corner tmp
+  ℝ² c0qe[nodes];  // corner tmp
+  ℝ c0w;           // corner tmp
+  ℝ c0rmu;         // corner tmp
+};
+
+
+// ****************************************************************************
+// * Point Variables
+// ****************************************************************************
+nodes{
+  ℝ² px0;   // point coords, start of cycle
+  ℝ² px;    // point coordinates
+  ℝ² pxp;   // point coords, middle of cycle
+  ℝ² pu;    // point velocity
+  ℝ² pu0;   // point velocity, start of cycle
+  ℝ² pap;   // point acceleration
+  ℝ² pf;    // point force
+  ℝ pmaswt; // point mass, weighted by 1/r
+};
+
+
+// ****************************************************************************
+// * Edge Variables
+// ****************************************************************************
+faces{
+  ℝ² ex;    // edge center coordinates
+  ℝ² exp;   // edge ctr coords, middle of cycle
+  ℝ elen;   // edge length
+};
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  //ℝ time; // simulation time
+  ℕ cycle;  // simulation cycle number
+  ℝ dt;     // current timestep
+  ℝ dtlast; // previous timestep
+  ℝ dtrec;  // maximum timestep for hydro
+  ℝ² vfix;// vector perp. to fixed plane
+  ℝ dvovmax;
+};
+
+
+
+// ****************************************************************************
+// * Partie d'initialisation ]-∞,-0.0[
+// ****************************************************************************
+
+optTest @ -30.0 {
+  dbg("optTest");
+  if (cstop == 999999 && tstop == 1.e99) {
+    cerr << "Must specify either cstop or tstop" << endl;
+    exit;
+  }
+}
+
+iniGlobals @ -20.0 {
+  time = 0.0;
+  cycle = 0;
+}
+
+// initializeHydroVars: Hydro::init
+∀ cells iniZr @ -14.9 { zr=rinit; }
+∀ cells iniZe @ -14.9 { ze=einit; }
+∀ cells iniZwrate @ -14.9 { zwrate=0.0; }
+∀ cells @ -14.8 if (subregion) {
+  const double eps = 1.e-12;
+  if (!(zx.x > (subrgn_xmin - eps) && zx.x < (subrgn_xmax + eps) &&
+        zx.y > (subrgn_ymin - eps) && zx.y < (subrgn_ymax + eps))) continue;
+  zr = rinitsub;
+  ze = einitsub;
+}
+∀ cells iniZm @ -14.7 { zm = zr * zvol; }
+∀ cells iniZetot @ -14.6 { zetot = ze * zm;}
+
+
+∀ nodes iniPuRadial @ -14.5 if (uinitradial!=0.0) {
+  const ℝ eps = 1.e-12;
+  const ℝ pmag = length(px);
+  if (pmag > eps)
+    pu = uinitradial * px / pmag;
+  else pu = 0.0;
+}
+∀ nodes iniPuStd @ -14.5 if (uinitradial==0.0) { pu=0.0; }
+
+resetDtHydro2 @ -14.4 { dtrec = 1.e99; }
+// End of Hydro::init
+
+
+// ****************************************************************************
+// * Partie boucle de calcul ]+0.0,+∞[ 
+// ****************************************************************************
+incCycle @ 1.0 { cycle += 1; }
+
+calcGlobalDt @ 2.0 {
+  // Save timestep from last cycle
+  dtlast = dt;
+  // Compute timestep for this cycle
+  dt = dtmax;
+  if (cycle == 1) {    // compare to initial timestep
+    if (dtinit < dt) dt = dtinit;
+  } else {
+    const double dtrecover = dtfac * dtlast;
+    if (dtrecover < dt) dt = dtrecover;
+  }
+  // compare to time-to-end
+  if ((tstop - time) < dt) dt = tstop - time;
+  // compare to hydro dt
+  if (dtrec < dt) dt = dtrec;
+}
+
+// Hydro::doCycle
+// Begin hydro cycle
+
+∀ nodes saveOffPxFromPreviousCycle @ 3.0 { px0=px; }
+∀ nodes saveOffPuFromPreviousCycle @ 3.0 { pu0=pu; }
+
+// ===== Predictor step =====
+// 1. advance mesh to center of time step
+∀ nodes advPosHalf0 @ 3.1 { pxp = px0 + pu0 * ½ * dt; }
+
+// save off zone variable values from previous cycle
+∀ cells saveOffZvolFromPreviousCycle @ 3.2 { zvol0=zvol; }
+
+// 1a. compute new mesh geometry
+∀ cells computeZxp @ 3.3 {
+  zxp=0.0;
+  ∀ node zxp+=pxp;
+  zxp /= nbNode;
+}
+
+∀ faces computeExp @ 3.3 {
+  exp = 0.0;
+  ∀ node exp += pxp;
+  exp /= nbNode;
+  assert(nbNode==2);
+}
+
+∀ cells calcVols @ 3.4 {
+  zvolp=0.0;
+  zareap=0.0; 
+  const double third = ⅓;
+  //int count = 0;
+#warning cells face supported
+  const int n=0;
+  ∀ face {
+    const ℝ sap = ½ * cross2D(pxp/*[1]*/ - pxp/*[0]*/, zxp    - pxp);
+    const ℝ svp = third * sap * (pxp/*[0]*/.x + pxp/*[1]*/.x + zxp.x);
+    sareap = sap;
+    svolp = svp;
+    zarea += sap;
+    zvol += svp;
+    // check for negative side volumes
+    //if (svp <= 0.) exit;
+  } 
+  //if (count > 0) numsbad += count;
+}
+
+∀ cells calcSurfVecs @ 3.5 { ∀ face { const int n=f; ssurfp = rotateCCW(exp - zxp);} }
+
+∀ faces calcEdgeLen @ 3.5 { elen = length(pxp[1] - pxp[0]); }
+
+∀ cells calcCharLen @ 3.5 {
+  zdl = 1.e99;
+  const int n=0;
+  ∀ face {
+    const ℝ area = sareap;
+    ℝ base = elen;
+    ℝ fac = 4.0;//(znump == 3 ? 3.0 : 4.0);
+    ℝ sdl = fac * area / base;
+    zdl = min(zdl, sdl);
+  }
+}
+
+// 2. compute point masses
+∀ cells calcRhoIni @ 4.0 { zrp = zm / zvolp; }
+∀ cells calcRhoCompute @ 4.1 {
+  const int n=0;
+  ∀ face {
+    const ℝ m = zrp * zareap * 0.5 * (smf + smf/*[+1]*/);
+    cmaswt = m;
+  }
+}
+
+// 3. compute material state (half-advanced)
+// calcStateAtHalf
+∀ cells computeEosAtBeginningOfTimeStep @ 5.0 {
+  const ℝ gm1 = option_gamma - 1.;
+  const ℝ ss2 = max(ssmin * ssmin, 1.e-99);
+  ℝ rx = zr;
+  ℝ local_ex = max(ze, 0.0);
+  ℝ local_px = gm1 * rx * local_ex;
+  ℝ prex = gm1 * local_ex;
+  ℝ perx = gm1 * rx;
+  ℝ csqd = max(ss2, prex + perx * local_px / (rx * rx));
+  zp =local_px;
+  z0per = perx;
+  zss = √(csqd);
+  }
+
+∀ cells advancePressureToTheHalfStep @ 5.0 {
+  const ℝ dth = ½ * dt;
+  ℝ zminv = 1. / zm;
+  ℝ dv = (zvolp - zvol0) * zminv;
+  ℝ bulk = zr0 * zss * zss;
+  ℝ denom = 1. + 0.5 * z0per * dv;
+  ℝ src = zwrate * dth * zminv;
+  zp += (z0per * src - zr0 * bulk * dv) / denom;
+}
+
+// 4. compute forces
+∀ cells pgasCalcForce @ 6.0 {
+  const int n=0;
+  ∀ face {
+    //const ℝ² sfx = -zp * ssurfp;
+    sfp=-zp * ssurfp;;
+  }
+}
+∀ cells ttsCalcForce @ 6.1 {
+  const int n=0;
+  ∀ face {
+    ℝ svfacinv = zareap / sareap;
+    ℝ srho = zrp * smf * svfacinv;
+    ℝ sstmp = max(zss, ssmin);
+    sstmp = alfa * sstmp * sstmp;
+    ℝ sdp = sstmp * (srho - zrp);
+    //ℝ² sqq = -sdp * ssurfp;
+    sft = -sdp * ssurfp;
+  }
+}
+
+∀ cells qcsCalcForce_zoneCenteredVelocity @ 6.2 {
+  z0uc=0;
+  ∀ node z0uc += pu;
+  z0uc /= nbNode;  
+}
+
+∀ cells qcsCalcForce_divergenceAtTheCorner @ 6.3 {
+  ∀ node {
+    // Velocities and positions
+    // 0 = point p
+/*
+    ℝ³ up0 = pu;
+    ℝ³ xp0 = px;
+    // 1 = edge e2
+    ℝ² up1 = 0.5 * (pu + pu);
+    ℝ² xp1 = ex;
+    // 2 = zone center z
+    ℝ² up2 = z0uc;
+    ℝ² xp2 = zx;
+    // 3 = edge e1
+    up3 = ½ * (pu + pu);
+    xp3 = ex;
+    // compute 2d cartesian volume of corner
+    ℝ cvolume = 0.5 * cross(xp2 - xp0, xp3 - xp1);
+    c0area[c0] = cvolume;
+    // compute cosine angle
+    ℝ² v1 = xp3 - xp0;
+    ℝ² v2 = xp1 - xp0;
+    ℝ de1 = elen;
+    ℝ de2 = elen;
+    ℝ minelen = min(de1, de2);
+    c0cos = ((minelen < 1.e-12) ?
+                 0. :
+                 4. * dot2D(v1, v2) / (de1 * de2));
+    // compute divergence of corner
+    c0div = (cross(up2 - up0, xp3 - xp1) -
+                 cross(up3 - up1, xp2 - xp0)) /
+      (2.0 * cvolume);
+    // compute evolution factor
+    ℝ² dxx1 = 0.5 * (xp1 + xp2 - xp0 - xp3);
+    ℝ² dxx2 = 0.5 * (xp2 + xp3 - xp0 - xp1);
+    ℝ dx1 = length(dxx1);
+    ℝ dx2 = length(dxx2);
+    // average corner-centered velocity
+    ℝ² duav = 0.25 * (up0 + up1 + up2 + up3);
+    ℝ test1 = abs(dot2D(dxx1, duav) * dx2);
+    ℝ test2 = abs(dot2D(dxx2, duav) * dx1);
+    ℝ num = (test1 > test2 ? dx1 : dx2);
+    ℝ den = (test1 > test2 ? dx2 : dx1);
+    ℝ r = num / den;
+    ℝ evol = sqrt(4.0 * cvolume * r);
+    evol = min(evol, 2.0 * minelen);
+    // compute delta velocity
+    ℝ dv1 = length2(up1 + up2 - up0 - up3);
+    ℝ dv2 = length2(up2 + up3 - up0 - up1);
+    ℝ du = sqrt(max(dv1, dv2));
+    c0evol = (c0div < 0.0 ? evol : 0.);
+    c0du   = (c0div < 0.0 ? du   : 0.);
+*/
+  }
+}
+
+∀ cells qcsCalcForce_setQCnForce @ 6.4 {
+  const ℝ gammap1 = qgamma + 1.0;
+  // [4.1] Compute the c0rmu (real Kurapatenko viscous scalar)
+  ∀ node {
+    // Kurapatenko form of the viscosity
+    ℝ ztmp2 = q2 * 0.25 * gammap1 * c0du;
+    ℝ ztmp1 = q1 * zss;
+    ℝ zkur = ztmp2 + sqrt(ztmp2 * ztmp2 + ztmp1 * ztmp1);
+    // Compute c0rmu for each corner
+    ℝ rmu = zkur * zrp * c0evol;
+    c0rmu = ((c0div > 0.0) ? 0. : rmu);
+  }  
+  // [4.2] Compute the c0qe for each corner
+/*  ∀ node {
+    // Compute: c0qe(1,2,3)=edge 1, y component (2nd), 3rd corner
+    //          c0qe(2,1,3)=edge 2, x component (1st)
+    c0qe[2 * c0]     = c0rmu[c0] * (pu[p] - pu[p1]) / elen[e1];
+    c0qe[2 * c0 + 1] = c0rmu[c0] * (pu[p2] - pu[p]) / elen[e2];
+  }
+*/
+}
+
+// [5] Compute the Q forces
+// Routine number [5]  in the full algorithm CS2DQforce(...)
+// [5.1] Preparation of extra variables
+∀ cells qcsCalcForce_setForce_preparationOfExtraVariables @ 6.5 {
+  ∀ node {
+    ℝ csin2 = 1.0 - c0cos * c0cos;
+    c0w   = ((csin2 < 1.e-4) ? 0. : c0area / csin2);
+    c0cos = ((csin2 < 1.e-4) ? 0. : c0cos);
+  }
+}
+∀ cells qcsCalcForce_setForce_setUpTheForcesOnCorners @ 6.6 {
+  //const int n=0;
+  ∀ face {
+    // Edge length for c1, c2 contribution to s
+    //ℝ el = elen;
+//    sfq = (c0w[c10] * (c0qe[2*c10+1] + c0cos[c10] * c0qe[2*c10]) +
+//           c0w[c20] * (c0qe[2*c20] + c0cos[c20] * c0qe[2*c20+1])) / el;
+  }
+}
+// Routine number [6] in the full algorithm
+∀ cells qcsCalcForce_setVelDiff @ 6.7 {
+  z0tmp=0;
+  ∀ node {
+    ℝ³ dx = px - px;
+    ℝ³ du = pu - pu;
+    //ℝ lenx = elen;
+    ℝ dux = dot2D(du, dx);
+    //dux = (lenx > 0. ? abs(dux) / lenx : 0.);
+    z0tmp = max(z0tmp, dux);
+  }
+  zdu = q1 * zss + 2. * q2 * z0tmp;
+}
+
+∀ cells sumCrnrForce @ 7.0 {
+  const int n=0;
+  ∀ face {
+    const ℝ³ f = (sfp + sfq + sft) - (sfp/*[-1]*/ + sfq/*[-1]*/ + sft/*[-1]*/);
+    cftot = f;
+  }
+}
+
+
+∀ nodes sumCornerMassesToPoints @ 8.0{
+  pmaswt=0;
+  //∀ cell pmaswt+=cmaswt;
+}
+∀ nodes sumCornerForcesToPoints @ 8.1{
+  pmaswt=0;
+  ∀ cell pf+=cftot;
+}
+
+// 4a. apply boundary conditions
+//∀ bcs applyFixedBC(pu0, pf, bfirst, blast);
+∀ nodes applyFixedBC @ 9.0 {
+  pu = project(pu, vfix);
+  pf = project(pf, vfix);
+}
+
+∀ nodes calcAccel @ 10.0 { //(pf, pmaswt, pap, pfirst, plast);
+  const double fuzz = 1.e-99;
+  pap = pf / max(pmaswt, fuzz);
+}
+// ===== Corrector step =====
+// 6. advance mesh to end of time step
+∀ nodes advPosFull @ 11.0 { //(px0, pu0, pap, dt, px, pu, pfirst, plast);
+  pu = pu0 + pap * dt;
+  px = px0 + 0.5 * (pu + pu0) * dt;
+}
+
+resetDtHydro @ 12.0 { dtrec = 1.e99; }
+
+// 6a. compute new mesh geometry
+∀ cells computeNewMeshGeometry @ 13.0 { // px, ex, zx, sfirst, slast);
+  zx=0.0;
+  ∀ node zx+=px;
+  zx /= nbNode;
+}
+∀ faces computeExpBis @ 13.1 {
+  ex = 0.0;
+  ∀ node ex += px;
+  ex /= nbNode;
+  assert(nbNode==2);
+}
+∀ cells calcVolsBis @ 13.2 { // (px, zx, sarea, svol, zarea, zvol6
+  zvolp=0.0;
+  zareap=0.0;
+  const ℝ third = ⅓;
+  const ℕ n=0;
+  ∀ face {
+    const int n=f;
+    const ℝ sa = ½ * cross2D(px - px, zx - px);
+    const ℝ sv = third * sa * (pxp.x + px.x + zx.x);
+    sarea = sa;
+    svol = sv;
+    zarea += sa;
+    zvol += sv;
+    //if (svp <= 0.) exit;
+  }
+}
+
+// 7. compute work
+∀ cells computeWork @ 14.0 {
+  zw=0; 
+/*  const ℝ dth = 0.5 * dt;
+  ℝ³ sftot = sf + sf2;
+  ℝ sd1 = dot2D( sftot, (pu0 + pu));
+  ℝ sd2 = dot2D(-sftot, (pu0 + pu));
+  ℝ dwork = -dth * (sd1 * px.x + sd2 * px.x);
+  zetot += dwork;
+  zw += dwork;
+*/
+}
+
+// 7a. compute work rate
+∀ cells calcWorkRate @ 15.0 { //(zvol0, zvol, zw, zp, dt, zwrate, zfirst, zlast);
+  ℝ dtinv = 1. / dt;
+  ℝ dvol = zvol - zvol0;
+  zwrate = (zw + zp * dvol) * dtinv;
+}
+
+// 8. update state variables
+∀ cells calcEnergy @ 16.0 { //(zetot, zm, ze, zfirst, zlast);
+  const ℝ fuzz = 1.e-99;
+  ze = zetot / (zm + fuzz);
+}
+
+∀ cells calcRho @ 17.0 { //(zm, zvol, zr, zfirst, zlast);
+  zr = zm / zvol;
+}
+
+// 9.  compute timestep for next cycle
+∀ cells calcDtHydro @ 18.0 { //(zdl, zvol, zvol0, dt, zfirst, zlast);
+  //ℝ dtchunk = 1.e99;
+}
+∀ cells calcDtHydro_Courant @ 19.0 {
+  const ℝ fuzz = 1.e-99;
+  ℝ dtnew = 1.e99;
+  ℝ cdu = max(zdu, max(zss, fuzz));
+  ℝ zdthyd = zdl * cfl / cdu;
+  //int zmin = -1;
+  //zmin = (zdthyd < dtnew ? z : zmin);
+  dtnew = (zdthyd < dtnew ? zdthyd : dtnew);
+  if (dtnew < dtrec) dtrec = dtnew;
+  // reduce
+}
+∀ cells calcDtHydro_Volume @ 20.0 {
+  dvovmax = 1.e-99;
+  ℝ zdvov = fabs((zvol - zvol0) / zvol0);
+  //zmax = (zdvov > dvovmax ? z : zmax);
+  dvovmax = (zdvov > dvovmax ? zdvov : dvovmax);
+}
+calcDtHydro_Volume_test @ 20.1 {
+  ℝ dtnew = dtlast * cflv / dvovmax;
+  if (dtnew < dtrec) dtrec = dtnew;
+}
+
+// End of Hydro::doCycle
+
+incTime @ 30.0 { time += dt; }
+
+tstExit @ 40.0 {
+  if (cycle < cstop && time < tstop) return;
+  exit;
+}

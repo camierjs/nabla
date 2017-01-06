@@ -1,0 +1,99 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// Initial coordinates defined by grid positions
+∀ nodes, coord_ic = pos; //$rule pointwise(coord_ic<-pos)
+// First iteration coordinate set by initial conditions
+∀ nodes, coordⁿ⁼⁰ = coord_ic;
+// Advance position using velocity at next timestep
+∀ nodes, coordⁿ⁺¹ = coordⁿ + velⁿ⁺¹*dtⁿ;
+
+// Set up the velocity initial conditions to be zero
+∀ nodes, vel_ic = ℝ³(0.,0.,0.);
+∀ nodes, velⁿ⁼⁰ = vel_ic;
+
+
+// Collect nodal boundary condition information
+
+//$rule apply(face2node->nodeConstraint)[LogicalOr],constraint(Xsymmetry_BC) {
+∀ f∈Xsymmetry_BC {
+  char symtype = 0x1;
+  //const int fsz = $face2node.size();
+  ∀ r∈face2node(f) //for(int i=0;i<fsz;++i)
+      nodeConstraintᵣ|= symtype;//join($face2node[i]->$nodeConstraint,symtype);
+}
+
+∀ f∈Ysymmetry_BC {//$rule apply(face2node->nodeConstraint)[LogicalOr],constraint(Ysymmetry_BC) {
+  char symtype = 0x2;
+  //const int fsz = $face2node.size();
+  ∀ r∈face2node(f)//for(int i=0;i<fsz;++i)
+      nodeConstraintᵣ|= symtype;//join($face2node[i]->$nodeConstraint,symtype);
+}
+∀ f∈Zsymmetry_BC {//$rule apply(face2node->nodeConstraint)[LogicalOr],constraint(Zsymmetry_BC) {
+  char symtype = 0x4;
+  //const int fsz = $face2node.size();
+  ∀ r∈face2node(f)//for(int i=0;i<fsz;++i)
+      nodeConstraintᵣ|= symtype;//join($face2node[i]->$nodeConstraint,symtype);
+}
+
+// Advance velocities in time using newtons laws
+
+∀ nodes {//(vel{n+1}<-vel{n},force{n},nodalMass{n},dt{n},option_u_cut,nodeConstraint),
+         //inplace(vel{n+1}|vel{n})
+  velⁿ⁺¹ = velⁿ + dtⁿ*forceⁿ/nodalMassⁿ;
+  if ((nodeConstraint&0x1)!=0 || FABS(velⁿ⁺¹.x)<option_u_cut) velⁿ⁺¹.x = 0.0;
+  if ((nodeConstraint&0x2)!=0 || FABS(velⁿ⁺¹.y)<option_u_cut) velⁿ⁺¹.y = 0.0;
+  if ((nodeConstraint&0x4)!=0 || FABS(velⁿ⁺¹.z)<option_u_cut) velⁿ⁺¹.z = 0.0;
+}
+
+// Compute nodal mass
+//unit ∀ nodes, nodalMass = 0.0; //$rule unit(nodalMass),constraint(nodes) {
+// divide element mass equally among 8 nodes, sum all elements to get nodal mass
+∀ r∈nodes {//$rule apply(hexnodes->nodalMass<-elemMass)[Loci::Summation] {
+  ∀ j∈cell//for(int i=0;i<8;++i)
+    nodalMassᵣ+=0.125*elemMassⱼ;
+}
+
+// To end simulation, collapse coordinate to solution
+∀ nodes, if (endSimulationⁿ) solution = coordⁿ;
+

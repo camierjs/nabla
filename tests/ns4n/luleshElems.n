@@ -1,0 +1,346 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// *************************************************************
+// * Elems
+// *************************************************************
+
+// Compute the volume of the original non-deformed element
+∀ j∈cells {
+  ℝ³ locs[8];
+  ∀ r∈hexnodes(j) locs[r] = posᵣ;
+  voloⱼ = HexVolume(locs);
+}
+
+// Compute element mass
+∀ cells, elemMass = volo;
+
+// New volume for this timestep
+∀ cells {
+  vnew = HexVolume(elemNodes)/volo;
+  if(vnew < 0.0) {
+    cerr << "negative volume" << endl;
+    abort();
+  }
+}
+
+// Keep up with volume history
+∀ cells, vhistⁿ⁼⁰ = 1.0;
+
+// this allows us to perform clipping on history volume,
+// otherwise we could access vnew{n-1} to get same effect
+∀ cells {//$rule pointwise(vhist{n+1}<-vhist{n},vnew{n},option_v_cut), inplace(vhist{n+1}|vhist{n}) {
+  ℝ tmpV = vnewⁿ;
+  if(fabs(tmpV-1.0) < option_v_cut) tmpV = 1.0;
+  vhistⁿ⁺¹ = tmpV;
+}
+
+// element characteristic length
+∀ cells, arealg = ElemCharacteristicLength(elemNodes,vnew*volo);
+
+// Gather element nodes into contiguous array
+∀ j∈cells {//$rule pointwise(elemNodes<-hexnodes->coord) {
+  ∀ r∈hexnodes(j) //for(size_t i=0;i<8;++i) 
+    elemNodesⱼ[r] = coordᵣ;
+}
+
+// Gather nodal velocities into contiguous array
+∀ j∈cells {//$rule pointwise(elemVels<-hexnodes->vel) {
+  ∀ r∈hexnodes(j)//for(int i=0;i<8;++i)
+    elemVelsⱼ[r] = velᵣ;
+}
+
+// Compute shape function derivatives
+∀ cells {//$rule pointwise(vdov,D<-elemNodes,elemVels,dt) {
+  ℝ³ B[8];
+  ℝ Dret[6];
+  ℝ³ xhalfstep[8];
+  for(int i=0;i<8;++i)
+    xhalfstep[i] = elemNodes[i] - ½*dt*elemVels[i];
+  ℝ detJ = ShapeFunctionDerivatives(B,xhalfstep);
+  CalcElemVelocityGradient(Dret,elemVels,B,detJ);
+  vdov = (Dret[0]+Dret[1]+Dret[2]);
+  ℝ vdovthird = vdov/3.0;
+  D.x = Dret[0]-vdovthird;
+  D.y = Dret[1]-vdovthird;
+  D.z = Dret[2]-vdovthird;
+}
+
+// Compute initial conditions for energy,
+// deposit energy into element that contains node at origin.
+∀ j∈cells {//$rule pointwise(e_ic<-hexnodes->pos) {
+  ℝ minnorm = 1.0;
+  ∀ r∈hexnodes(j)//for(int i=0;i<8;++i)
+    minnorm = min(minnorm,dot(posᵣ,posᵣ));
+  e_ic = 0;
+  if(minnorm < 1e-16) // This element is at origin, so deposit energy
+    e_ic = option_initial_energy;
+}
+
+// Define initial value for energy
+∀ cells, eⁿ⁼⁰=e_ic;
+
+// Define energy advance
+//$rule pointwise(e{n+1}<-e_next{n}),inplace(e{n+1}|e_next{n}),prelude {};
+∀ cells, eⁿ⁺¹=e_nextⁿ;
+
+// Setup pressure evolution in time
+∀ cells, p_ic = 0;
+∀ cells, pⁿ⁼⁰=p_ic;
+∀ cells, pⁿ⁺¹=p_nextⁿ;
+
+// Setup artificial dissipation term temporal evolution
+∀ cells, q_ic = 0;
+∀ cells, qⁿ⁼⁰=q_ic;
+∀ cells, qⁿ⁺¹=q_nextⁿ;
+
+// Compute gradients for artificial dissipation
+// $rule pointwise(delx,delv<-elemNodes,elemVels,volo,vnew) !!
+∀ cells, CalcMonotonicQGradientsForElems(delx[0],delv[0],
+                                         delx[1],delv[1],
+                                         delx[2],delv[2],
+                                         elemNodes,elemVels,volo*vnew);
+}
+
+// compute dissipation linear and quadratic terms
+∀ cells {
+//$rule pointwise(qq,ql<-option_qlc_monoq,option_qqc_monoq,option_monoq_limiter_mult,option_monoq_max_slope,
+//                delx,delv,(zetap,zetam,etap,etam,xip,xim)->(delv),
+//                zetap_map,zetam_map,etap_map,etam_map,xip_map,xim_map,
+//                vdov,elemMass,vnew,volo) {
+  ℝ qlin, qquad;
+  ℝ phixi, phieta, phizeta;
+  const ℝ ptiny = 1.e-36;
+  
+  ℝ nrm = 1.0 / ( delv[1] + ptiny );
+  ℝ delvm = $xim->$delv[$xim_map&0x3]*((($xim_map&0x4)==0x4)?-1.:1.);
+  ℝ delvp = $xip->$delv[$xip_map&0x3]*((($xip_map&0x4)==0x4)?-1.:1.);
+  delvm = delvm * nrm;
+  delvp = delvp * nrm;
+  phixi = 0.5 * ( delvm + delvp );
+  delvm *= $option_monoq_limiter_mult;
+  delvp *= $option_monoq_limiter_mult;
+  if ( delvm < phixi ) phixi = delvm;
+  if ( delvp < phixi ) phixi = delvp;
+  if ( phixi < 0.0) phixi = 0.0;
+  if ( phixi > $option_monoq_max_slope) phixi = $option_monoq_max_slope;
+  
+  /*  phieta     */
+  nrm = 1.0 / ( delv[2] + ptiny );
+  delvm = $etam->$delv[$etam_map&0x3]*((($etam_map&0x4)==0x4)?-1.:1.);
+  delvp = $etap->$delv[$etap_map&0x3]*((($etap_map&0x4)==0x4)?-1.:1.);
+  delvm = delvm * nrm;
+  delvp = delvp * nrm;
+  phieta = 0.5 * ( delvm + delvp );
+  delvm *= $option_monoq_limiter_mult;
+  delvp *= $option_monoq_limiter_mult;
+  if ( delvm  < phieta ) phieta = delvm;
+  if ( delvp  < phieta ) phieta = delvp;
+  if ( phieta < 0.0) phieta = 0.0;
+  if ( phieta > $option_monoq_max_slope)  phieta = $option_monoq_max_slope;
+
+  /*  phizeta     */
+  nrm = 1.0 / ( $elv[0] + ptiny );
+  delvm = $zetam->$delv[$zetam_map&0x3]*((($zetam_map&0x4)==0x4)?-1.:1.);
+  delvp = $zetap->$delv[$zetap_map&0x3]*((($zetap_map&0x4)==0x4)?-1.:1.);
+  delvm = delvm * nrm;
+  delvp = delvp * nrm;
+  phizeta = 0.5 * ( delvm + delvp );
+  delvm *= $option_monoq_limiter_mult;
+  delvp *= $option_monoq_limiter_mult;
+  if ( delvm   < phizeta ) phizeta = delvm;
+  if ( delvp   < phizeta ) phizeta = delvp;
+  if ( phizeta < 0.0) phizeta = 0.0;
+  if ( phizeta > $option_monoq_max_slope  ) phizeta = $option_monoq_max_slope;
+  
+  /* Remove length scale */
+  if ( $vdov > 0.0 )  {
+    qlin  = 0.0;
+    qquad = 0.0;
+  } else {
+    ℝ delvxxi   = $delv[1]   * $delx[1];
+    ℝ delvxeta  = $delv[2]   * $delx[2];
+    ℝ delvxzeta = $delv[0]   * $delx[0];
+
+    if ( delvxxi   > 0.0 ) delvxxi   = 0.0;
+    if ( delvxeta  > 0.0 ) delvxeta  = 0.0;
+    if ( delvxzeta > 0.0 ) delvxzeta = 0.0;
+
+    ℝ rho = $elemMass / ($volo * $vnew);
+
+    qlin = -$option_qlc_monoq * rho *
+            (  delvxxi   * (1.0 - phixi) +
+               delvxeta  * (1.0 - phieta) +
+               delvxzeta * (1.0 - phizeta)  );
+
+    qquad = $option_qqc_monoq * rho *
+      (  delvxxi*delvxxi     * (1.0 - phixi*phixi) +
+         delvxeta*delvxeta   * (1.0 - phieta*phieta) +
+         delvxzeta*delvxzeta * (1.0 - phizeta*phizeta)  );
+  }
+  $qq = qquad;
+  $ql = qlin;
+}
+
+
+// Compute next timestep energy, pressure and dissipation
+∀ cells {
+//$rule pointwise(e_next,p_next,q_next,bvc,pbvc<-p,e,q,
+//                vnew,vhist,option_pmin,option_p_cut,option_e_cut,option_q_cut,option_emin,qq,ql,option_refdens,option_eosvmax) {
+
+  ℝ compression = 1.0/$vnew - 1.0;
+  ℝ delv = $vnew-$vhist;
+  ℝ vchalf = $vnew - delv*0.5;
+  ℝ compHalfStep = 1.0/vchalf - 1.0;
+
+  ℝ e_new = max($e - 0.5*delv*($p+$q),$option_emin);
+  
+  ℝ pHalfStep;
+  CalcPressure(pHalfStep,$bvc,$pbvc,e_new,compHalfStep,$vnew,
+               $option_pmin,$option_p_cut,$option_eosvmax);
+  ℝ vhalf = 1./(1.+compHalfStep);
+  
+  ℝ q_new = 0.0;
+  if(delv <= 0.0) {
+    ℝ ssc = ($pbvc*e_new + vhalf*vhalf*$bvc*pHalfStep)/$option_refdens;
+    if(ssc <= 0.0)
+      ssc = 0.333333e-36;
+    else
+      ssc = SQRT(ssc);
+    q_new = (ssc*$ql + $qq);
+  }
+  e_new = e_new + 0.5*delv*(3.0*($p+$q) - 4.0*(pHalfStep + q_new));
+  if(FABS(e_new)< $option_e_cut)
+    e_new = 0.0;
+  if(e_new < $option_emin)
+    e_new = $option_emin;
+
+  ℝ p_new;
+  CalcPressure(p_new,$bvc,$pbvc,e_new,compression,$vnew,
+               $option_pmin,$option_p_cut,$option_eosvmax);
+
+  ℝ q_tilde = 0.0;
+  if(delv <= 0.0) {
+    ℝ ssc = ($pbvc*e_new + $vnew*$vnew*$bvc*p_new)/$option_refdens;
+    if(ssc <= 0.0)
+      ssc = 0.333333e-36;
+    else
+      ssc = SQRT(ssc);
+    q_tilde = (ssc*$ql+$qq);
+  }
+  
+  const ℝ sixth = 1.0 / 6.0;
+  e_new = e_new - (7.0*($p + $q) - 8.0*(pHalfStep + q_new)
+                   + (p_new + q_tilde)) * delv*sixth;
+
+  if (FABS(e_new) < $option_e_cut) {
+    e_new = 0.0;
+  }
+  if ( e_new  < $option_emin ) {
+    e_new = $option_emin;
+  }
+  CalcPressure(p_new,$bvc,$pbvc,e_new,compression,$vnew,
+               $option_pmin,$option_p_cut,$option_eosvmax);
+  if ( delv <= 0.0 ) {
+    ℝ ssc = ( $pbvc * e_new + $vnew* $vnew* $bvc* p_new) / $option_refdens;
+    
+    if ( ssc <= 0.0 ) {
+      ssc = 0.333333e-36;
+    } else {
+      ssc = SQRT(ssc);
+    }
+    
+    q_new = (ssc*$ql + $qq);
+    
+    if (FABS(q_new) < $option_q_cut) q_new = 0.0;
+  }
+  $e_next = e_new;
+  $p_next = p_new;
+  $q_next = q_new;
+}
+
+
+// compute sound speed in element
+∀ cells {//$rule pointwise(ss<-vnew,option_refdens,e_next,p_next,pbvc,bvc,ss4o3) {
+  ℝ ss2 = (pbvc*e_next + vnew*vnew*bvc*p_next)/option_refdens;
+  ss2 = max(ss2,1.111111e-36);
+  ss = sqrt(ss2);
+}
+
+// Compute Nodal Forces
+
+∀ cells {//$rule pointwise(elemStress<-p_next,q_next) {
+  elemStress.x = -p_next - q_next;
+  elemStress.y = elemStress.x;
+  elemStress.z = elemStress.x;
+}
+
+// Unit rule for nodal forces
+∀ nodes, force = ℝ³(0,0,0);
+
+// Sum Stress forces to nodes
+∀ j∈cells {//$rule apply(hexnodes->force<-elemNodes,elemStress)[Loci::Summation] {
+  ℝ³ B[8];
+  ElemNodeNormals(B,elemNodes);
+  
+  ℝ nforce[8];
+  ElemStressToNodeForces(nforce,B,elemStress);
+  // Here we join (using the summation operator) the
+  // hourglass forces to the node
+  ∀ r∈hexnodes(j) //for(int i=0;i<8;++i)
+    join(forceᵣ,nforce[r]);
+}
+
+// Hourglass force to nodes
+∀ j∈cells {//$rule apply(hexnodes->force<-vnew,volo,ss,elemNodes,elemVels,elemMass,option_hgcoef)[Loci::Summation] {
+  ℝ³ dvdc[8];
+  CalcElemVolumeDerivative(dvdc,elemNodes);
+  ℝ hgf[8];
+  ℝ determ = volo*vnew;
+  ℝ coef = -option_hgcoef*0.01*$ss*elemMass/CBRT(determ);
+  HourglassForce(hgf,elemNodes,elemVels,dvdc,determ,coef);
+  // Here we join the element forces to the node
+  ∀ r∈hexnodes(j)//for(int i=0;i<8;++i)
+    join(forceᵣ,hgf[r]);
+}
+

@@ -1,0 +1,132 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+ℝ LENGTH                    = 1.125;
+ℕ X_EDGE_ELEMS              = 8;
+ℕ Y_EDGE_ELEMS              = 8;
+ℕ Z_EDGE_ELEMS              = 8;
+
+ℝ option_dtfixed            = -1.0e-7;  // fixed time increment
+ℝ option_δt_initial         = 1.0e-7;   // variable time increment
+ℝ option_δt_courant         = 1.0e+20;
+ℝ option_δt_hydro           = 1.0e+20;
+ℝ option_δt_mult_lower_b    = 1.1;
+ℝ option_δt_mult_upper_b    = 1.2;
+ℝ option_initial_energy     = 3.948746e+7;
+ℝ option_stoptime           = 1.0e-2;   // end time for simulation
+ℝ option_hgcoef             = 3.0;      // hourglass control
+ℝ option_qstop              = 1.0e+12;  // excessive q indicator
+ℝ option_monoq_max_slope    = 1.0;
+ℝ option_monoq_limiter_mult = 2.0;
+ℝ option_e_cut              = 1.0e-7;   // energy tolerance
+ℝ option_p_cut              = 1.0e-7;   // pressure tolerance
+ℝ option_q_cut              = 1.0e-7;   // q tolerance
+ℝ option_u_cut              = 1.0e-7;   // node velocity cut-off value
+ℝ option_v_cut              = 1.0e-10;  // relative volume tolerance
+ℝ option_qlc_monoq          = 0.5;      // linear term coef for q
+ℝ option_qqc_monoq          = 0.6666666666667;//666666; // quadratic term coef for q
+ℝ option_qqc                = 2.0;
+ℝ option_eosvmax            = 1.0e+9;
+ℝ option_eosvmin            = 1.0e-9;
+ℝ option_pmin               = 0.0;      // pressure floor
+ℝ option_emin               = -1.0e+15; // energy floor
+ℝ option_dvovmax            = 0.1;      // maximum allowable volume change
+ℝ option_refdens            = 1.0;      // reference density
+ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
+ℾ option_chaos              = false;
+ℝ option_chaos_seed         = 1.1234567890123;//456789;
+ℕ option_max_iterations     = 32768;
+
+
+// ****************************************************************************
+// * Node Variables
+// ****************************************************************************
+ℝ³ 𝜕x,𝜕𝜕x;    // Velocity vector, Acceleration vector
+ℝ³ nForce;   // Force vector
+ℝ nodalMass; // Nodal mass
+
+
+// ****************************************************************************
+// * Element Variables
+// ****************************************************************************
+ℝ p,e,q; // pressure,internal energy, artificial viscosity, relative volume
+ℝ v,calc_volume,vdov; // instant and relative volume
+ℝ delv,volo; // relative volume change, reference (initial) volume
+ℝ arealg; // characteristic length
+ℝ³ ε; // diagonal terms of deviatoric strain  dxx(),dyy(),dzz()
+ℝ ql,qq; // artificial viscosity linear and quadratic term
+ℝ³ cForce[nodes];
+// Temporaries
+ℝ delv_xi, delv_eta, delv_zeta; // velocity gradient
+ℝ delx_xi, delx_eta, delx_zeta; // coordinate gradient
+ℝ phixi, phieta, phizeta;
+ℝ vnew; // new relative volume
+ℝ elemMass; // mass
+// EoS
+ℝ e_old,p_old,q_old;
+ℝ delvc;
+ℝ compression;
+ℝ compHalfStep;
+ℝ work;
+ℝ p_new,e_new,q_new;
+ℝ bvc,pbvc;
+ℝ vnewc;
+ℝ pHalfStep;
+ℝ sound_speed;
+// Boundary Conditions Flags
+ℕ elemBC; // symmetry/free-surface flags for each elem face
+// Reductions
+ℝ δt_cell_hydro;
+ℝ δt_cell_courant;
+
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+ℝ δt,time;
+ℝ δt_courant; // Courant time constraint
+ℝ δt_hydro;   // Hydro time constraint
+
