@@ -1,0 +1,3 @@
+  - first_is_lost = 0
+  - cstop = 100
+  - tstop = 1.0

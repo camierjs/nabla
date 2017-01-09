@@ -2,8 +2,7 @@ inline ℝ length(const ℝ² v){
   return sqrt(v.x * v.x + v.y * v.y);
 }
 
-inline ℝ dot2D(const ℝ² v1, const ℝ² v2)
-{
+inline ℝ dot2D(const ℝ² v1, const ℝ² v2){
     return(v1.x * v2.x + v1.y * v2.y);
 }
 
@@ -12,8 +11,7 @@ inline ℝ² rotateCCW(const ℝ² v){
   return ℝ²(-v.y, v.x,0);
 }
 
-inline ℝ cross2D(const ℝ² v1, const ℝ² v2)
-{
+inline ℝ cross2D(const ℝ² v1, const ℝ² v2){
     return (v1.x * v2.y - v1.y * v2.x);
 }
 

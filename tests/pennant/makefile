@@ -6,8 +6,11 @@ LIB_ORGOPT = /tmp/nabla/orgopt/libNablaOrgOpt.a
 lambda: pennant.cc
 	g++ $(CFLAGS) -o pennant pennant.cc $(LIB_ORGOPT)
 
+tst:
+	tput reset && ./pennant --org pennant.org 
+
 %.cc:%.n $(ADDITIONAL_NABLA_FILES)
-	$(nabla) --lambda $* --std --seq -i $*.n $(ADDITIONAL_NABLA_FILES)
+	$(nabla) --lambda $* -i $*.n $(ADDITIONAL_NABLA_FILES)
 
 arcane:
 	$(nabla) --arcane --alone pennant -i pennant.n

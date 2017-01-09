@@ -95,9 +95,9 @@ with ℝ²;
 ///////////////////////////////////////////////////////////////////////////////
 options{
   // Mesh options
-  ℝ LENGTH                    = 1.0;
-  ℕ X_EDGE_ELEMS              = 8;
-  ℕ Y_EDGE_ELEMS              = 8;
+  ℝ LENGTH                    = 1.125;
+  ℕ X_EDGE_ELEMS              = 3;
+  ℕ Y_EDGE_ELEMS              = 3;
   ℕ Z_EDGE_ELEMS              = 1;
   ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
   ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
@@ -105,7 +105,7 @@ options{
 
 
   // Pennant options
-  ℾ option_debug = false;
+  ℾ option_debug = true;
   ℕ cstop=999999; // simulation stop cycle
   ℝ tstop=1.e99;  // simulation stop time
   ℝ dtmax=1.e99;  // maximum timestep size
@@ -134,7 +134,15 @@ options{
   ℝ q2=2.0;       // quadratic coefficients for Q model
 };
 
-#define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[0m")
+#define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
+#define dbc(clr,...) if (option_debug) printf("\n[%dm%s%s",clr,__VA_ARGS__,"[m")
+#define red 31
+#define green 32
+#define yellow 33
+#define blue 34
+#define magenta 35
+#define cyan 36
+#define white 37
 
 // ****************************************************************************
 // * Zone Variables
@@ -227,16 +235,69 @@ global{
 // ****************************************************************************
 // * Partie d'initialisation ]-∞,-0.0[
 // ****************************************************************************
+∀ nodes @ -32.0{
+  px=coord;
+  cout<<"\n[37m[Mesh::init] coord["<<n<<"]="<<coord<<"[m";
+}
+
+∀ cells meshCalcCtrs_zx @ -31.9 {
+  zx=0;
+  ∀ node zx+=px;
+  zx /= nbNode;
+  cout<<"\n[37m[Mesh::calcCtrs] zx["<<c<<"]="<<zx<<"[m";
+}
+
+∀ faces meshCalcCtrs_ex @ -31.9 {
+  ex = 0.0;
+  ∀ node ex += px; 
+  ex /= nbNode;
+  assert(nbNode==2);
+  cout<<"\n[37m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m";
+}
+
+
+∀ cells iniMeshCalcVolsCross2D @ -31.8 {
+  //const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
+  const ℝ³ edge0 = px[1]-px[0];
+  const ℝ³ edge1 = px[2]-px[1];
+  const ℝ³ edge2 = px[3]-px[2];
+  const ℝ³ edge3 = px[0]-px[3];
+  const ℝ sa0 = ½ * cross2D(edge0, zx-px[0]);
+  const ℝ sa1 = ½ * cross2D(edge1, zx-px[1]);
+  const ℝ sa2 = ½ * cross2D(edge2, zx-px[2]);
+  const ℝ sa3 = ½ * cross2D(edge3, zx-px[3]);
+  ∀ face sarea=sa[#];
+}
+ 
+/*
+∀ cells iniMeshCalcVols @ -31.8 {
+  zvol=0.0;
+  zarea=0.0; 
+  const double third = ⅓;
+  ∀ face {
+    const ℝ sa = ½ * cross2D(px[1] - px[0], zx - px[0]);
+    const ℝ sv = third * sa * (px[0].x + px[1].x + zx.x);
+    sarea = sa;
+    svol = sv;
+    zarea += sa;
+    zvol += sv;
+  }
+  }*/
+
+
+//Mesh::calcVols
+
 
 optTest @ -30.0 {
-  dbg("optTest");
+  dbc(magenta,"optTest");
   if (cstop == 999999 && tstop == 1.e99) {
-    cerr << "Must specify either cstop or tstop" << endl;
+    cerr << endl << "Must specify either cstop or tstop" << endl;
     exit;
   }
 }
 
 iniGlobals @ -20.0 {
+  dbc(magenta,"iniGlobals");
   time = 0.0;
   cycle = 0;
 }
@@ -252,7 +313,10 @@ iniGlobals @ -20.0 {
   zr = rinitsub;
   ze = einitsub;
 }
-∀ cells iniZm @ -14.7 { zm = zr * zvol; }
+∀ cells iniZm @ -14.7 {
+  zm = zr * zvol;
+  cout<<"\n[37m[Hydro::init] zm["<<c<<"]="<<zm<<"[m";
+}
 ∀ cells iniZetot @ -14.6 { zetot = ze * zm;}
 
 

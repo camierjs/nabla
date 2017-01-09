@@ -75,21 +75,21 @@ options{
   ℝ option_ini_oil_viscosity = 1.0;
   ℝ option_ini_water_viscosity = 1.0;
   // Yet required options for Okina 
-  ℝ option_δt_initial = 0.001;
-  ℝ option_stoptime = 0.0012;
-  ℕ option_max_iterations = -1;
+  ℝ option_δt_initial = 0.002;
+  ℝ option_stoptime = 0.001;
+  ℕ option_max_iterations = 8;
   // Options d'Aleph
   // ! l'ε a l'air d'être très sensible
-  // Ici, en ramenat en sęquentiel
+  // Ici, en ramenat en séquentiel
   // ET en réordonnant les lignes 'comme en séquentiel',
   // on recale séquentiel et parallèle
-  ℝ alephEpsilon = 1.e-16;
+  ℝ alephEpsilon = 1.e-12;
   // 0=auto, 1:sloop, 2:hypre, 3:CUDA, 4:trilinos, 5: PETSc
   ℕ alephUnderlyingSolver = 2; // Ici Hypre
   ℕ alephMaxIterations = 1024;
   // DIAGONAL=0, AINV=1, AMG=2, IC=3, POLY=4, ILU=5, ILUp=6,
   // SPAIstat=7, SPAIdyn=8, DDMCriteriaAdaptedSelector=9, NONE=10
-  ℕ alephPreconditionerMethod = 2; // Ici AMG
+  ℕ alephPreconditionerMethod = 0; // Ici AMG
   // PCG=0, BiCGStab=1 , BiCGStab2=2, GMRES=3, SAMG=4, QMR=5, SuperLU=6
   ℕ alephSolverMethod = 0; // PCG
   // Je ramène tout sur un coeur car mon installation d'HYPRE est séquentielle
