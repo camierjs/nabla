@@ -65,6 +65,12 @@ inline real3x3 rGatherAndZeroNegOnes(const int a,const  real3x3 *data){
   if (a>=0) return data[a];
   return 0.0;
 }
+inline real rGatherAndZeroNegOnes(const int a, const int corner, const real *data){
+  const int i=4*a+corner;
+  const double *p=(double*)data;
+  if (a>=0) return real(p[i]);
+  return 0.0;
+}
 inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const real3 *data){
   const int i=3*8*a+3*corner;
   const double *p=(double*)data;

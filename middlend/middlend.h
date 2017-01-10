@@ -139,6 +139,7 @@ typedef struct nablaVariableStruct{
   int gmpRank;   // est-il géré par une indirection multi precision? -1 == non, sinon le rank
   int dim;    // sa dimension
   long size;  // sa taille dans le cas où dim vaut '1'
+  char vitem; // le premier chr du dimensionnement du vecteur
   bool dump;
   bool in;
   bool out;

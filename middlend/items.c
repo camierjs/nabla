@@ -116,9 +116,9 @@ static void actItemNablaItems(astNode *n, void *generic_arg){
   variable->size=0;
   if (cfgn=='n'&& n->children->tokenid==CELLS) variable->size=8; // node_var[cells]: tied @ 8 (hex mesh)
   if (cfgn=='f'&& n->children->tokenid==CELLS) variable->size=2; // face_var[cells]: backCell & frontCell
-//#warning cell_var[nodes]: tied @ 8 (hex mesh), should depend on domension
-  if (cfgn=='c'&& n->children->tokenid==NODES) variable->size=8; // cell_var[nodes]: tied @ 8 (hex mesh), should depend on dimension
-  if (n->children->tokenid==FACES) variable->size=8;
+//#warning cell_var[***] stuck @
+  if (cfgn=='c'&& n->children->tokenid==NODES){ variable->size=8; variable->vitem='n';}
+  if (n->children->tokenid==FACES){ variable->size=8; variable->vitem='f';}
   if (n->children->tokenid==PARTICLES) variable->size=8;
   //if (n->children->tokenid==MATERIALS) variable->size=8;
   //if (n->children->tokenid==ENVIRONMENTS) variable->size=8;

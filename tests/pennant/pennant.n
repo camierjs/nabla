@@ -95,10 +95,10 @@ with ℝ²;
 ///////////////////////////////////////////////////////////////////////////////
 options{
   // Mesh options
-  ℝ LENGTH                    = 1.125;
-  ℕ X_EDGE_ELEMS              = 3;
-  ℕ Y_EDGE_ELEMS              = 3;
-  ℕ Z_EDGE_ELEMS              = 1;
+  ℝ LENGTH       = 1.125;
+  ℕ X_EDGE_ELEMS = 3;
+  ℕ Y_EDGE_ELEMS = 3;
+  ℕ Z_EDGE_ELEMS = 1;
   ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
   ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
   ℝ option_stoptime = 1.;     // ! utilisé en dur dans le backend lambda !
@@ -135,7 +135,8 @@ options{
 };
 
 #define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
-#define dbc(clr,...) if (option_debug) printf("\n[%dm%s%s",clr,__VA_ARGS__,"[m")
+//#define dbc(clr,...) if (option_debug) printf("\n[%dm%s%s",clr,__VA_ARGS__,"[m")
+#define dbc(clr,...) if (option_debug) cout<<"\n["<<clr<<"m"<<__VA_ARGS__<<"[m";
 #define red 31
 #define green 32
 #define yellow 33
@@ -187,7 +188,7 @@ cells{
   ℝ c0div[nodes];  // corner tmp
   ℝ c0cos[nodes];  // corner tmp
   ℝ² c0qe[nodes];  // corner tmp
-  ℝ c0w;           // corner tmp
+  ℝ c0w[nodes];    // corner tmp
   ℝ c0rmu;         // corner tmp
 };
 
@@ -226,69 +227,58 @@ global{
   ℝ dt;     // current timestep
   ℝ dtlast; // previous timestep
   ℝ dtrec;  // maximum timestep for hydro
-  ℝ² vfix;// vector perp. to fixed plane
-  ℝ dvovmax;
+  ℝ² vfix;  // vector perp. to fixed plane
+  ℝ dvovmax;//
+  //ℝ sumi;   // tmp var for sumEnergy
 };
-
 
 
 // ****************************************************************************
 // * Partie d'initialisation ]-∞,-0.0[
 // ****************************************************************************
-∀ nodes @ -32.0{
+∀ nodes iniMeshCoords @ -32.0{
   px=coord;
-  cout<<"\n[37m[Mesh::init] coord["<<n<<"]="<<coord<<"[m";
+  //dbc(white,"[Mesh::init] px["<<n<<"]="<<coord<<"[m");
 }
 
-∀ cells meshCalcCtrs_zx @ -31.9 {
+∀ cells iniMeshCalcCtrs_zx @ -31.9 {
   zx=0;
   ∀ node zx+=px;
   zx /= nbNode;
-  cout<<"\n[37m[Mesh::calcCtrs] zx["<<c<<"]="<<zx<<"[m";
+  //cout<<"\n[37m[Mesh::calcCtrs] zx["<<c<<"]="<<zx<<"[m";
 }
 
-∀ faces meshCalcCtrs_ex @ -31.9 {
+∀ faces iniMeshCalcCtrs_ex @ -31.9 {
   ex = 0.0;
   ∀ node ex += px; 
   ex /= nbNode;
   assert(nbNode==2);
-  cout<<"\n[37m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m";
+  //cout<<"\n[37m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m";
 }
-
 
 ∀ cells iniMeshCalcVolsCross2D @ -31.8 {
-  //const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
-  const ℝ³ edge0 = px[1]-px[0];
-  const ℝ³ edge1 = px[2]-px[1];
-  const ℝ³ edge2 = px[3]-px[2];
-  const ℝ³ edge3 = px[0]-px[3];
-  const ℝ sa0 = ½ * cross2D(edge0, zx-px[0]);
-  const ℝ sa1 = ½ * cross2D(edge1, zx-px[1]);
-  const ℝ sa2 = ½ * cross2D(edge2, zx-px[2]);
-  const ℝ sa3 = ½ * cross2D(edge3, zx-px[3]);
-  ∀ face sarea=sa[#];
-}
- 
-/*
-∀ cells iniMeshCalcVols @ -31.8 {
-  zvol=0.0;
-  zarea=0.0; 
-  const double third = ⅓;
-  ∀ face {
-    const ℝ sa = ½ * cross2D(px[1] - px[0], zx - px[0]);
-    const ℝ sv = third * sa * (px[0].x + px[1].x + zx.x);
-    sarea = sa;
-    svol = sv;
-    zarea += sa;
-    zvol += sv;
+  const int N = nbNode;
+  const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
+  zvol=0;
+  zarea=0; 
+  ∀ node{
+    const int i=(#+N)%N;
+    const int j=(#+N+1)%N;
+    //cout<<"\n[37m[iniMeshCalcVolsCross2D] i="<<i<<", j="<<j<<", N="<<N<<"[m";
+    sarea = ½ * cross2D(X[j]-X[i],zx-X[i]);
+    svol = ⅓* sarea * (X[i].x+X[j].x+zx.x);
+    zarea += sarea;
+    zvol  += svol;
+    //cout<<"\n[37m[iniMeshCalcVolsCross2D] sarea["<<uid<<","<<n<<"]="<<sarea<<"[m";
   }
-  }*/
+}
 
+∀ cells iniMeshCalcSideFracs @ -31.7 {
+  ∀ face smf = sarea / zarea;
+  //cout<<"[37m[iniMeshCalcSideFracs] smf["<<c<<"]="<<smf<<"[m"<<endl;
+}
 
-//Mesh::calcVols
-
-
-optTest @ -30.0 {
+iniTstOptions @ -30.0 {
   dbc(magenta,"optTest");
   if (cstop == 999999 && tstop == 1.e99) {
     cerr << endl << "Must specify either cstop or tstop" << endl;
@@ -302,7 +292,6 @@ iniGlobals @ -20.0 {
   cycle = 0;
 }
 
-// initializeHydroVars: Hydro::init
 ∀ cells iniZr @ -14.9 { zr=rinit; }
 ∀ cells iniZe @ -14.9 { ze=einit; }
 ∀ cells iniZwrate @ -14.9 { zwrate=0.0; }
@@ -313,29 +302,34 @@ iniGlobals @ -20.0 {
   zr = rinitsub;
   ze = einitsub;
 }
+
 ∀ cells iniZm @ -14.7 {
   zm = zr * zvol;
   cout<<"\n[37m[Hydro::init] zm["<<c<<"]="<<zm<<"[m";
 }
-∀ cells iniZetot @ -14.6 { zetot = ze * zm;}
 
+∀ cells iniZetot @ -14.6 {
+  zetot = ze * zm;
+  cout<<"\n[37m[Hydro::init] zetot["<<c<<"]="<<zetot<<"[m";
+}
 
 ∀ nodes iniPuRadial @ -14.5 if (uinitradial!=0.0) {
   const ℝ eps = 1.e-12;
   const ℝ pmag = length(px);
-  if (pmag > eps)
-    pu = uinitradial * px / pmag;
+  if (pmag > eps) pu = uinitradial * px / pmag;
   else pu = 0.0;
 }
 ∀ nodes iniPuStd @ -14.5 if (uinitradial==0.0) { pu=0.0; }
 
-resetDtHydro2 @ -14.4 { dtrec = 1.e99; }
-// End of Hydro::init
+iniRstDtHydro @ -14.4 { dtrec = 1.e99; }
+
 
 
 // ****************************************************************************
 // * Partie boucle de calcul ]+0.0,+∞[ 
 // ****************************************************************************
+
+
 incCycle @ 1.0 { cycle += 1; }
 
 calcGlobalDt @ 2.0 {
@@ -344,6 +338,7 @@ calcGlobalDt @ 2.0 {
   // Compute timestep for this cycle
   dt = dtmax;
   if (cycle == 1) {    // compare to initial timestep
+    cout<<"\n\t[35m[Driver::calcGlobalDt] initial timestep, dtinit="<<dtinit<<"[m"<<endl;
     if (dtinit < dt) dt = dtinit;
   } else {
     const double dtrecover = dtfac * dtlast;
@@ -353,6 +348,7 @@ calcGlobalDt @ 2.0 {
   if ((tstop - time) < dt) dt = tstop - time;
   // compare to hydro dt
   if (dtrec < dt) dt = dtrec;
+  cout<<"\t[35m[Driver::calcGlobalDt] dt="<<dt<<"[m"<<endl;
 }
 
 // Hydro::doCycle
@@ -370,100 +366,102 @@ calcGlobalDt @ 2.0 {
 
 // 1a. compute new mesh geometry
 ∀ cells computeZxp @ 3.3 {
-  zxp=0.0;
+  zxp=0;
   ∀ node zxp+=pxp;
-  zxp /= nbNode;
+  zxp/= nbNode;
 }
 
 ∀ faces computeExp @ 3.3 {
   exp = 0.0;
   ∀ node exp += pxp;
   exp /= nbNode;
-  assert(nbNode==2);
 }
 
 ∀ cells calcVols @ 3.4 {
-  zvolp=0.0;
-  zareap=0.0; 
-  const double third = ⅓;
-  //int count = 0;
-#warning cells face supported
-  const int n=0;
-  ∀ face {
-    const ℝ sap = ½ * cross2D(pxp/*[1]*/ - pxp/*[0]*/, zxp    - pxp);
-    const ℝ svp = third * sap * (pxp/*[0]*/.x + pxp/*[1]*/.x + zxp.x);
-    sareap = sap;
-    svolp = svp;
-    zarea += sap;
-    zvol += svp;
-    // check for negative side volumes
-    //if (svp <= 0.) exit;
+  const int N = nbNode;
+  const ℝ³ X[4] = {pxp[0],pxp[1],pxp[2],pxp[3]};
+  zvolp=0;
+  zareap=0; 
+  ∀ node {
+    const ℕ i=(#+N)%N;
+    const ℕ j=(#+N+1)%N;
+    sareap = ½ * cross2D(X[j]-X[i],zxp-X[i]);
+    svolp = ⅓* sareap * (X[i].x+X[j].x+zxp.x);
+    zareap += sareap;
+    zvolp  += svolp;
   } 
-  //if (count > 0) numsbad += count;
 }
 
-∀ cells calcSurfVecs @ 3.5 { ∀ face { const int n=f; ssurfp = rotateCCW(exp - zxp);} }
+∀ cells calcSurfVecs @ 3.5 {
+  ∀ face ssurfp = rotateCCW(exp - zxp);
+  //cout<<"\t[35m[calcSurfVecs] ssurfp="<<ssurfp<<"[m"<<endl;
+}
 
-∀ faces calcEdgeLen @ 3.5 { elen = length(pxp[1] - pxp[0]); }
+∀ faces calcEdgeLen @ 3.5 {
+  elen = length(pxp[1]-pxp[0]);
+  //cout<<"\t[35m[calcEdgeLen] elen="<<elen<<"[m"<<endl;
+}
 
 ∀ cells calcCharLen @ 3.5 {
   zdl = 1.e99;
-  const int n=0;
   ∀ face {
-    const ℝ area = sareap;
-    ℝ base = elen;
-    ℝ fac = 4.0;//(znump == 3 ? 3.0 : 4.0);
-    ℝ sdl = fac * area / base;
+    const ℝ sdl = 4.0 * sareap / elen;
     zdl = min(zdl, sdl);
   }
+  //cout<<"\t[35m[calcCharLen] zdl="<<zdl<<"[m"<<endl;
 }
 
 // 2. compute point masses
-∀ cells calcRhoIni @ 4.0 { zrp = zm / zvolp; }
+∀ cells calcRhoBis @ 4.0 {
+  zrp = zm / zvolp;
+  //cout<<"\t[35m[calcRho] zrp="<<zrp<<"[m"<<endl;
+}
+
 ∀ cells calcRhoCompute @ 4.1 {
-  const int n=0;
+  const ℕ N = nbNode;
   ∀ face {
-    const ℝ m = zrp * zareap * 0.5 * (smf + smf/*[+1]*/);
-    cmaswt = m;
+    const ℕ j=(#+N-1)%N;
+    cmaswt = ½ * zrp * zareap * (smf + smf[j]);
+    //cout<<"\t[35m[calcRhoCompute] cmaswt="<<cmaswt<<"[m"<<endl;
   }
 }
 
 // 3. compute material state (half-advanced)
 // calcStateAtHalf
-∀ cells computeEosAtBeginningOfTimeStep @ 5.0 {
+∀ cells calcStateAtHalf_calcEOS @ 5.0 {
   const ℝ gm1 = option_gamma - 1.;
   const ℝ ss2 = max(ssmin * ssmin, 1.e-99);
-  ℝ rx = zr;
-  ℝ local_ex = max(ze, 0.0);
-  ℝ local_px = gm1 * rx * local_ex;
-  ℝ prex = gm1 * local_ex;
-  ℝ perx = gm1 * rx;
-  ℝ csqd = max(ss2, prex + perx * local_px / (rx * rx));
+  const ℝ local_rx = zr;
+  const ℝ local_ex = max(ze, 0.0);
+  const ℝ local_px = gm1 * local_rx * local_ex;
+  const ℝ prex = gm1 * local_ex;
+  const ℝ perx = gm1 * local_rx;
+  const ℝ csqd = max(ss2, prex + perx * local_px / (local_rx * local_rx));
   zp =local_px;
   z0per = perx;
   zss = √(csqd);
-  }
+  //cout<<"[36m[PolyGas::calcEOS] zss="<<zss<<"[m"<<endl;
+}
 
-∀ cells advancePressureToTheHalfStep @ 5.0 {
+∀ cells calcStateAtHalf_next @ 5.0 {
   const ℝ dth = ½ * dt;
-  ℝ zminv = 1. / zm;
-  ℝ dv = (zvolp - zvol0) * zminv;
-  ℝ bulk = zr0 * zss * zss;
-  ℝ denom = 1. + 0.5 * z0per * dv;
-  ℝ src = zwrate * dth * zminv;
+  const ℝ zminv = 1. / zm;
+  const ℝ dv = (zvolp - zvol0) * zminv;
+  const ℝ bulk = zr0 * zss * zss;
+  const ℝ denom = 1. + 0.5 * z0per * dv;
+  const ℝ src = zwrate * dth * zminv;
   zp += (z0per * src - zr0 * bulk * dv) / denom;
 }
 
 // 4. compute forces
 ∀ cells pgasCalcForce @ 6.0 {
-  const int n=0;
   ∀ face {
     //const ℝ² sfx = -zp * ssurfp;
-    sfp=-zp * ssurfp;;
+    sfp=-zp * ssurfp;
+    //cout<<"[36m[PolyGas::calcForce] sf["<<f<<"]="<<sfp[f]<<"[m"<<endl;
   }
 }
 ∀ cells ttsCalcForce @ 6.1 {
-  const int n=0;
   ∀ face {
     ℝ svfacinv = zareap / sareap;
     ℝ srho = zrp * smf * svfacinv;
@@ -472,6 +470,7 @@ calcGlobalDt @ 2.0 {
     ℝ sdp = sstmp * (srho - zrp);
     //ℝ² sqq = -sdp * ssurfp;
     sft = -sdp * ssurfp;
+    //cout<<"[34m[TTS::calcForce] sft="<<sft[f]<<"[m"<<endl;
   }
 }
 
@@ -479,67 +478,71 @@ calcGlobalDt @ 2.0 {
   z0uc=0;
   ∀ node z0uc += pu;
   z0uc /= nbNode;  
+  cout<<"[32m[QCS::setCornerDiv] z0uc="<<z0uc<<"[m"<<endl;
 }
 
 ∀ cells qcsCalcForce_divergenceAtTheCorner @ 6.3 {
+  const ℕ N = nbNode;
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ³ _px[4] = {px[0],px[1],px[2],px[3]};
+  const ℝ³ _ex[4] = {ex[0],ex[1],ex[2],ex[3]};
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   ∀ node {
+    const ℕ i=(#+N-1)%N; // previous
+    const ℕ j=(#);       // current
+    const ℕ k=(#+N+1)%N; // next
     // Velocities and positions
     // 0 = point p
-/*
-    ℝ³ up0 = pu;
-    ℝ³ xp0 = px;
+    const ℝ³ up0 = _pu[j];
+    const ℝ³ xp0 = _px[j];
     // 1 = edge e2
-    ℝ² up1 = 0.5 * (pu + pu);
-    ℝ² xp1 = ex;
+    const ℝ³ up1 = 0.5 * (_pu[j] + _pu[k]);
+    const ℝ³ xp1 = _ex[j];
     // 2 = zone center z
-    ℝ² up2 = z0uc;
-    ℝ² xp2 = zx;
+    const ℝ³ up2 = z0uc;
+    const ℝ³ xp2 = zx;
     // 3 = edge e1
-    up3 = ½ * (pu + pu);
-    xp3 = ex;
+    const ℝ³ up3 = ½ * (_pu[k] + _pu[j]);
+    const ℝ³ xp3 = _ex[k];
     // compute 2d cartesian volume of corner
-    ℝ cvolume = 0.5 * cross(xp2 - xp0, xp3 - xp1);
-    c0area[c0] = cvolume;
+    const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
+    c0area = cvolume;
     // compute cosine angle
-    ℝ² v1 = xp3 - xp0;
-    ℝ² v2 = xp1 - xp0;
-    ℝ de1 = elen;
-    ℝ de2 = elen;
+    const ℝ³ v1 = xp3-xp0;
+    const ℝ³ v2 = xp1-xp0;
+    const ℝ de1 = _elen[i];
+    const ℝ de2 = _elen[j];
     ℝ minelen = min(de1, de2);
     c0cos = ((minelen < 1.e-12) ?
-                 0. :
-                 4. * dot2D(v1, v2) / (de1 * de2));
+                 0.0 : 4.0 * dot2D(v1,v2)/(de1*de2));
     // compute divergence of corner
-    c0div = (cross(up2 - up0, xp3 - xp1) -
-                 cross(up3 - up1, xp2 - xp0)) /
-      (2.0 * cvolume);
+    c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
     // compute evolution factor
-    ℝ² dxx1 = 0.5 * (xp1 + xp2 - xp0 - xp3);
-    ℝ² dxx2 = 0.5 * (xp2 + xp3 - xp0 - xp1);
-    ℝ dx1 = length(dxx1);
-    ℝ dx2 = length(dxx2);
+    const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
+    const ℝ³ dxx2 = ½ * (xp2+xp3-xp0-xp1);
+    const ℝ dx1 = length(dxx1);
+    const ℝ dx2 = length(dxx2);
     // average corner-centered velocity
-    ℝ² duav = 0.25 * (up0 + up1 + up2 + up3);
-    ℝ test1 = abs(dot2D(dxx1, duav) * dx2);
-    ℝ test2 = abs(dot2D(dxx2, duav) * dx1);
-    ℝ num = (test1 > test2 ? dx1 : dx2);
-    ℝ den = (test1 > test2 ? dx2 : dx1);
-    ℝ r = num / den;
-    ℝ evol = sqrt(4.0 * cvolume * r);
-    evol = min(evol, 2.0 * minelen);
+    const ℝ³ duav = 0.25 * (up0+up1+up2+up3);
+    const ℝ test1 = fabs(dot2D(dxx1,duav)*dx2);
+    const ℝ test2 = fabs(dot2D(dxx2,duav)*dx1);
+    const ℝ num = (test1>test2?dx1:dx2);
+    const ℝ den = (test1>test2?dx2:dx1);
+    const ℝ r = num / den;
+    //ℝ evol = sqrt(4.0 * cvolume * r);
+    const ℝ evol = min(sqrt(4.0*cvolume*r),2.0*minelen);
     // compute delta velocity
-    ℝ dv1 = length2(up1 + up2 - up0 - up3);
-    ℝ dv2 = length2(up2 + up3 - up0 - up1);
-    ℝ du = sqrt(max(dv1, dv2));
+    const ℝ dv1 = length2(up1+up2-up0-up3);
+    const ℝ dv2 = length2(up2+up3-up0-up1);
+    const ℝ du = sqrt(max(dv1, dv2));
     c0evol = (c0div < 0.0 ? evol : 0.);
     c0du   = (c0div < 0.0 ? du   : 0.);
-*/
   }
 }
 
-∀ cells qcsCalcForce_setQCnForce @ 6.4 {
+// [4.1] Compute the c0rmu (real Kurapatenko viscous scalar)
+∀ cells qcsCalcForce_setQCnForce_4_1 @ 6.4 {
   const ℝ gammap1 = qgamma + 1.0;
-  // [4.1] Compute the c0rmu (real Kurapatenko viscous scalar)
   ∀ node {
     // Kurapatenko form of the viscosity
     ℝ ztmp2 = q2 * 0.25 * gammap1 * c0du;
@@ -548,15 +551,23 @@ calcGlobalDt @ 2.0 {
     // Compute c0rmu for each corner
     ℝ rmu = zkur * zrp * c0evol;
     c0rmu = ((c0div > 0.0) ? 0. : rmu);
-  }  
-  // [4.2] Compute the c0qe for each corner
-/*  ∀ node {
+  }
+}
+
+// [4.2] Compute the c0qe for each corner
+∀ cells qcsCalcForce_setQCnForce_4_2 @ 6.4 {
+  const int N = nbNode;
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  ∀ node {
+    const ℕ p1=(#+N-1)%N; // previous
+    const ℕ p=(#);       // current
+    const ℕ p2=(#+N+1)%N; // next
     // Compute: c0qe(1,2,3)=edge 1, y component (2nd), 3rd corner
     //          c0qe(2,1,3)=edge 2, x component (1st)
-    c0qe[2 * c0]     = c0rmu[c0] * (pu[p] - pu[p1]) / elen[e1];
-    c0qe[2 * c0 + 1] = c0rmu[c0] * (pu[p2] - pu[p]) / elen[e2];
+    c0qe/*[2 * c0]*/     = c0rmu * (_pu[p] - _pu[p1]) / _elen[p1];
+    c0qe/*[2 * c0 + 1]*/ = c0rmu * (_pu[p2] - _pu[p]) / _elen[p2];
   }
-*/
 }
 
 // [5] Compute the Q forces
@@ -564,46 +575,63 @@ calcGlobalDt @ 2.0 {
 // [5.1] Preparation of extra variables
 ∀ cells qcsCalcForce_setForce_preparationOfExtraVariables @ 6.5 {
   ∀ node {
-    ℝ csin2 = 1.0 - c0cos * c0cos;
+    const ℝ csin2 = 1.0 - c0cos * c0cos;
     c0w   = ((csin2 < 1.e-4) ? 0. : c0area / csin2);
     c0cos = ((csin2 < 1.e-4) ? 0. : c0cos);
   }
 }
 ∀ cells qcsCalcForce_setForce_setUpTheForcesOnCorners @ 6.6 {
-  //const int n=0;
-  ∀ face {
+  const ℕ N = nbNode;
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  ∀ node {
     // Edge length for c1, c2 contribution to s
-    //ℝ el = elen;
-//    sfq = (c0w[c10] * (c0qe[2*c10+1] + c0cos[c10] * c0qe[2*c10]) +
-//           c0w[c20] * (c0qe[2*c20] + c0cos[c20] * c0qe[2*c20+1])) / el;
+    const ℝ _el = _elen[#];
+    const ℕ c10 = #;
+    const ℕ c2p1 = #;
+    const ℕ c2p = #;
+    const ℕ c220 = #;
+    const ℕ c20=(#+N+1)%N; // next
+    sfq = (c0w[c10]*(c0qe[c2p1]+c0cos[c10]*c0qe[c2p])+
+           c0w[c20]*(c0qe[c220]+c0cos[c20]*c0qe[c2p1])) / _el;
   }
 }
 // Routine number [6] in the full algorithm
 ∀ cells qcsCalcForce_setVelDiff @ 6.7 {
+  const ℕ N = nbNode;
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ³ _px[4] = {px[0],px[1],px[2],px[3]};
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   z0tmp=0;
   ∀ node {
-    ℝ³ dx = px - px;
-    ℝ³ du = pu - pu;
-    //ℝ lenx = elen;
-    ℝ dux = dot2D(du, dx);
-    //dux = (lenx > 0. ? abs(dux) / lenx : 0.);
+    //const ℕ i=(#+N-1)%N; // previous
+    const ℕ j=(#);       // current
+    const ℕ k=(#+N+1)%N; // next
+    const ℝ³ dx = _px[k] - _px[j];
+    const ℝ³ du = _pu[k] - _pu[j];
+    const ℝ lenx = _elen[j];
+    ℝ dux = dot2D(du,dx);
+    dux = (lenx > 0. ? fabs(dux) / lenx : 0.);
     z0tmp = max(z0tmp, dux);
   }
   zdu = q1 * zss + 2. * q2 * z0tmp;
 }
 
 ∀ cells sumCrnrForce @ 7.0 {
-  const int n=0;
+  const ℕ N = nbNode;
+  const ℝ³ _fp[4] = {sfp[0],sfp[1],sfp[2],sfp[3]};
+  const ℝ³ _fq[4] = {sfq[0],sfq[1],sfq[2],sfq[3]};
+  const ℝ³ _ft[4] = {sft[0],sft[1],sft[2],sft[3]};
   ∀ face {
-    const ℝ³ f = (sfp + sfq + sft) - (sfp/*[-1]*/ + sfq/*[-1]*/ + sft/*[-1]*/);
-    cftot = f;
+    //const ℕ j=(#);       // current
+    const ℕ k=(#+N+1)%N; // next
+    cftot = (sfp + sfq + sft) - (_fp[k] + _fq[k] + _ft[k]);
   }
 }
 
 
 ∀ nodes sumCornerMassesToPoints @ 8.0{
   pmaswt=0;
-  //∀ cell pmaswt+=cmaswt;
+  ∀ cell pmaswt+=cmaswt;
 }
 ∀ nodes sumCornerForcesToPoints @ 8.1{
   pmaswt=0;
@@ -612,7 +640,7 @@ calcGlobalDt @ 2.0 {
 
 // 4a. apply boundary conditions
 //∀ bcs applyFixedBC(pu0, pf, bfirst, blast);
-∀ nodes applyFixedBC @ 9.0 {
+∀ outer nodes applyFixedBC @ 9.0 {
   pu = project(pu, vfix);
   pf = project(pf, vfix);
 }
@@ -643,39 +671,44 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
   assert(nbNode==2);
 }
 ∀ cells calcVolsBis @ 13.2 { // (px, zx, sarea, svol, zarea, zvol6
-  zvolp=0.0;
-  zareap=0.0;
-  const ℝ third = ⅓;
-  const ℕ n=0;
-  ∀ face {
-    const int n=f;
-    const ℝ sa = ½ * cross2D(px - px, zx - px);
-    const ℝ sv = third * sa * (pxp.x + px.x + zx.x);
-    sarea = sa;
-    svol = sv;
-    zarea += sa;
-    zvol += sv;
-    //if (svp <= 0.) exit;
+  const int N = nbNode;
+  const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
+  zvol=0;
+  zarea=0; 
+  ∀ node {
+    const ℕ i=(#+N)%N;
+    const ℕ j=(#+N+1)%N;
+    sarea = ½ * cross2D(X[j]-X[i],zx-X[i]);
+    svol = ⅓* sarea * (X[i].x+X[j].x+zx.x);
+    zarea += sarea;
+    zvol  += svol;
   }
 }
 
 // 7. compute work
-∀ cells computeWork @ 14.0 {
+∀ cells computeWork @ 14.0 { // sfp, sfq, pu0, pu, pxp, dt, zw, zetot,
   zw=0; 
-/*  const ℝ dth = 0.5 * dt;
-  ℝ³ sftot = sf + sf2;
-  ℝ sd1 = dot2D( sftot, (pu0 + pu));
-  ℝ sd2 = dot2D(-sftot, (pu0 + pu));
-  ℝ dwork = -dth * (sd1 * px.x + sd2 * px.x);
-  zetot += dwork;
-  zw += dwork;
-*/
+  const int N = nbNode;
+  const ℝ dth = 0.5 * dt;
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ³ _fp[4] = {sfp[0],sfp[1],sfp[2],sfp[3]};
+  ∀ node {
+    const ℕ i=(#+N-1)%N; // previous
+    const ℕ j=(#);       // current
+    const ℕ k=(#+N+1)%N; // next
+    const ℝ³ sftot = _fp[j] + _fp[k];
+    const ℝ sd1 = dot2D( sftot, (_pu[i] + _pu[j]));
+    const ℝ sd2 = dot2D(-sftot, (_pu[i] + _pu[j]));
+    const ℝ dwork = -dth * (sd1 * pxp.x + sd2 * pxp.x);
+    zetot += dwork;
+    zw += dwork;
+  }
 }
 
 // 7a. compute work rate
 ∀ cells calcWorkRate @ 15.0 { //(zvol0, zvol, zw, zp, dt, zwrate, zfirst, zlast);
-  ℝ dtinv = 1. / dt;
-  ℝ dvol = zvol - zvol0;
+  const ℝ dtinv = 1. / dt;
+  const ℝ dvol = zvol - zvol0;
   zwrate = (zw + zp * dvol) * dtinv;
 }
 

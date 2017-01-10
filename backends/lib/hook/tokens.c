@@ -422,9 +422,10 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   }
     
   case('['):{
-    if (job->parse.postfix_constant==true &&
-        job->parse.variableIsArray==true) break;
-    if (job->parse.turnBracketsToParentheses==true)
+    
+    if (job->parse.postfix_constant||job->parse.variableIsArray) break;
+    
+    if (job->parse.turnBracketsToParentheses)
       nprintf(nabla, NULL, "");
     else
       nprintf(nabla, NULL, "[");
@@ -433,17 +434,26 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
 
   case(']'):{
     //nprintf(nabla, NULL, "/*swTkn ']'*/");
-    if (job->parse.turnBracketsToParentheses==true){
+    if (job->parse.turnBracketsToParentheses){
       switch  (job->item[0]){
-      case('c'):{nprintf(nabla, NULL, "]]"); break;}
-      case('n'):{nprintf(nabla, NULL, "]]"); break;}
-      case('f'):{nprintf(nabla, NULL, "]]"); break;}
-      default:{nprintf(nabla, NULL, "/*]?*/)]");}
+      case('c'):{
+        // Combinaison ∀ cells, ∀ face smf[j], par exemple
+        if ((job->parse.enum_enum!='\0'&&job->parse.isPostfixed==2)||
+            (job->parse.enum_enum=='\0'&&job->parse.isPostfixed==2&&job->parse.variableIsArray))
+          nprintf(nabla, "/*0*/", "/*0*/]");
+        else
+          nprintf(nabla, "/*1*/", "/*1*/]]");
+       break;
+      }
+      case('n'):{nprintf(nabla, "/*2*/", "/*2*/]]"); break;}
+      case('f'):{nprintf(nabla, "/*3*/", "/*3*/]]"); break;}
+      default:{nprintf(nabla, "/*?*/", ")]");}
       }
       job->parse.turnBracketsToParentheses=false;
     }else{
-      nprintf(nabla, NULL, "]");
+      nprintf(nabla, NULL, "/*e*/]");
     }
+    job->parse.variableIsArray=false;
     job->parse.isPostfixed=0;
     job->parse.isDotXYZ=0;
     break;
@@ -527,7 +537,6 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     nprintf(nabla, "/*'='->!isLeft*/", "=");
     job->parse.left_of_assignment_operator=false;
     job->parse.turnBracketsToParentheses=false;
-    job->parse.variableIsArray=false;
     break;
   }
   case (RSH_ASSIGN):{ job->parse.left_of_assignment_operator=false; nprintf(nabla, NULL, ">>="); break; }
@@ -579,7 +588,6 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case ('{'):{nprintf(nabla, NULL, "{\n\t\t"); break; }    
   case ('&'):{nprintf(nabla, NULL, "&"); break; }    
   case (';'):{
-    job->parse.variableIsArray=false;
     job->parse.alephKeepExpression=false;
     job->parse.turnBracketsToParentheses=false;
     nprintf(nabla, NULL, ";\n\t\t");

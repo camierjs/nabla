@@ -1,3 +1,9 @@
   - first_is_lost = 0
   - cstop = 100
   - tstop = 1.0
+  - rinitsub = 1.0
+  - einitsub = 40.222
+  - ssmin = 0.1
+  - q1 = 0.1
+  - q2 = 1.0
+  - dtinit = 0.0025

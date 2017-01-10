@@ -336,7 +336,7 @@ static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
 // ****************************************************************************
 static bool isInXS(const char j,const char v,const char d,
                    const char *XS, const int m){
-  for(int i=0;i<m;i+=3)
+  for(int i=0;i<3*m;i+=3)
     if (j==XS[i] and v==XS[i+1] and d==XS[i+2]) return true;
   return false;
 }
@@ -416,7 +416,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     const char j=job->item[0];
     const char v=var->item[0];
     const char d='0'+var->dim;
-    //nprintf(nabla, NULL,"/*isInXS(%c,%c,%c,\"%s\",%d)?*/",j,v,d,XS,nXS);
+    nprintf(nabla, NULL,"/*isInXS(%c,%c,%c,\"%s\",%d)?*/",j,v,d,XS,nXS);
     if (isInXS(j,v,d,XS,nXS)){
       nprintf(nabla, NULL,"/*isInXS, continuing!*/");
       continue;

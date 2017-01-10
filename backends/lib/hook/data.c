@@ -52,7 +52,7 @@ void xHookTurnBracketsToParentheses(nablaMain* nabla,
                                     nablaVariable *var,
                                     char cnfg){
   dbg("\n\t[hookTurnBracketsToParentheses] primaryExpression hits variable");
-  if (  (cnfg=='c' && var->item[0]=='n')
+  if (    (cnfg=='c' && var->item[0]=='n')
         ||(cnfg=='c' && var->item[0]=='f')
         ||(cnfg=='n' && var->item[0]!='n')            
         ||(cnfg=='f' && var->item[0]!='f')
@@ -61,8 +61,9 @@ void xHookTurnBracketsToParentheses(nablaMain* nabla,
         ){
     job->parse.turnBracketsToParentheses=true;
   }else{
-    if (job->parse.postfix_constant==true
-        && job->parse.variableIsArray==true) return;
+    if (job->parse.postfix_constant==true) return;
+    // ∀ cells, ∀ face smf[j], par exemple
+    if (job->parse.isPostfixed==2) return;
     if (job->parse.isDotXYZ==1)
       nprintf(nabla, "/*hookTurnBracketsToParentheses_X*/", NULL);
     if (job->parse.isDotXYZ==2)
@@ -142,28 +143,34 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
   switch (var->item[0]){
   case ('c'):{
     nvar(nabla,var,job);
-    nprintf(nabla, "/*CellVar*/",
-            "%s",((var->power_type)?"[c][s"://xHookPowerTypeDump(var): // PowerType
-                  (var->dim==0)? (isPostfixed==2)?"":"[c":
-                  (enum_enum!='\0')?"[n+NABLA_NODE_PER_CELL*c":
-                  (var->dim==1)?"[NABLA_NODE_PER_CELL*c":
-                  "[c"));
-    job->parse.variableIsArray=(var->dim==1)?true:false;
-    if (job->parse.postfix_constant && job->parse.variableIsArray)
-      nprintf(nabla, NULL,"+");
-    else
-      nprintf(nabla, NULL,"]");
+    
+    if (var->power_type) nprintf(nabla, NULL, "[c][s");//xHookPowerTypeDump(var): // PowerType
+
+    // Variable aux mailles, sans postfix
+    if (var->dim==0 && isPostfixed!=2) nprintf(nabla, NULL, "[c]");
+
+    // Variables tableaux
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='n') nprintf(nabla, NULL, "[n+NABLA_NODE_PER_CELL*c]");
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='f') nprintf(nabla, NULL, "[f+NABLA_FACE_PER_CELL*c]");
+    // Mais on est pas encore dans le ∀ du ∀
+    if (var->dim==1 && isPostfixed==2 &&  var->vitem=='f' && enum_enum=='\0'){
+      nprintf(nabla, NULL,"[c+NABLA_NB_CELLS*");
+      job->parse.variableIsArray=true;
+    }
+    
     break;
   }
   case ('n'):{
     nvar(nabla,var,job);
     if (enum_enum=='f') nprintf(nabla, "/*f*/", "[");
     if (enum_enum=='n') nprintf(nabla, "/*n*/", "[xs_cell_node[n*NABLA_NB_CELLS+c]]");
+    
     if (isPostfixed!=2 && enum_enum=='\0'){
       if (job->parse.postfix_constant==true)
         nprintf(nabla, NULL, "/*NodeVar + postfix_constant*/[");
       else nprintf(nabla, "/*NodeVar 0*/", "[xs_cell_node_");
     }
+    
     if (isPostfixed==2 && enum_enum=='\0') {
       if (job->parse.postfix_constant==true){
         nprintf(nabla, NULL, "/*NodeVar + postfix_constant*/[");
@@ -175,7 +182,13 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
   case ('f'):{
     nvar(nabla,var,job);
     if (enum_enum=='f') nprintf(nabla, "/*FaceVar*/", "[f]");
-    if (enum_enum=='\0') nprintf(nabla, "/*FaceVar*/", "[cell->face");
+    if (isPostfixed!=2 && enum_enum=='\0') nprintf(nabla, "/*FaceVar*/", "[cell->face");
+    if (isPostfixed==2 && enum_enum=='\0') {
+      if (job->parse.postfix_constant==true){
+        nprintf(nabla, NULL, "/*FaceVar + postfix_constant*/[");
+      }else
+        nprintf(nabla, "/*FaceVar 2&0*/", "/*p2&0*/[xs_cell_face[c+NABLA_NB_CELLS*");
+    }
     break;
   }
   case ('g'):{

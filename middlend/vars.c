@@ -269,7 +269,7 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
 /*
  * 0 il faut continuer
  * 1 il faut returner
- * postfixed_nabla_variable_with_item ou  postfixed_nabla_variable_with_unknown il faut continuer en skippant le turnTokenToVariable
+ * postfixed_nabla_variable_with_item ou postfixed_nabla_variable_with_unknown il faut continuer en skippant le turnTokenToVariable
  */
 what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
                                                          astNode * n,
