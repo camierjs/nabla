@@ -1,98 +1,53 @@
 ///////////////////////////////////////////////////////////////////////////////
-// NABLA - a Numerical Analysis Based LAnguage                               //
-//                                                                           //
-// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
-// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
-//                                                                           //
-// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
-//                                                                           //
-// This software is a computer program whose purpose is to translate         //
-// numerical-analysis specific sources and to generate optimized code        //
-// for different targets and architectures.                                  //
-//                                                                           //
-// This software is governed by the CeCILL license under French law and      //
-// abiding by the rules of distribution of free software. You can  use,      //
-// modify and/or redistribute the software under the terms of the CeCILL     //
-// license as circulated by CEA, CNRS and INRIA at the following URL:        //
-// "http://www.cecill.info".                                                 //
-//                                                                           //
-// The CeCILL is a free software license, explicitly compatible with         //
-// the GNU GPL.                                                              //
-//                                                                           //
-// As a counterpart to the access to the source code and rights to copy,     //
-// modify and redistribute granted by the license, users are provided only   //
-// with a limited warranty and the software's author, the holder of the      //
-// economic rights, and the successive licensors have only limited liability.//
-//                                                                           //
-// In this respect, the user's attention is drawn to the risks associated    //
-// with loading, using, modifying and/or developing or reproducing the       //
-// software by the user in light of its specific status of free software,    //
-// that may mean that it is complicated to manipulate, and that also         //
-// therefore means that it is reserved for developers and experienced        //
-// professionals having in-depth computer knowledge. Users are therefore     //
-// encouraged to load and test the software's suitability as regards their   //
-// requirements in conditions enabling the security of their systems and/or  //
-// data to be ensured and, more generally, to use and operate it in the      //
-// same conditions as regards security.                                      //
-//                                                                           //
-// The fact that you are presently reading this means that you have had      //
-// knowledge of the CeCILL license and that you accept its terms.            //
-//                                                                           //
-// See the LICENSE file for details.                                         //
+// This NABLA port is an implementation of the PENNANT Mini-App              //
+// from Charles R. Ferenbaugh (cferenba@lanl.gov), LANL                      //
+// ∇ contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr        //
 ///////////////////////////////////////////////////////////////////////////////
-
-// This NABLA port is an implementation of the PENNANT Mini-App.
-
-// Charles R. Ferenbaugh, Los Alamos National Laboratory, cferenba@lanl.gov
-
-// PENNANT is an unstructured mesh physics mini-app designed for
-// advanced architecture research. It contains mesh data structures
-// and a few physics algorithms adapted from the LANL rad-hydro code FLAG,
-// and gives a sample of the typical memory access patterns of FLAG.
-
-// Copyright 2012, Los Alamos National Security, LLC. All rights reserved.
-
-// This software was produced under U.S. Government contract DE-AC52-06NA25396
-// for Los Alamos National Laboratory (LANL), which is operated by Los Alamos
-// National Security, LLC for the U.S. Department of Energy.
-
-// The U.S. Government has rights to use, reproduce, and distribute this software.
-
-// NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY,
-// EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
-
-// If software is modified to produce derivative works, such modified software should
-// be clearly marked, so as not to confuse it with the version available from LANL.
-
-// Additionally, redistribution and use in source and binary forms,
-// with or without modification, are permitted provided that the following conditions are met:
-//   1. Redistributions of source code must retain the above copyright notice,
-//      this list of conditions and the following disclaimer.
-//   2. Redistributions in binary form must reproduce the above copyright notice,
-//      this list of conditions and the following disclaimer in the documentation
-//      and/or other materials provided with the distribution.
-//   3. Neither the name of Los Alamos National Security, LLC, Los Alamos National Laboratory,
-//      LANL, the U.S. Government, nor the names of its contributors may be used to endorse
-//      or promote products derived from this software without specific prior written permission.
-
-// THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY,
-// LLC AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// PENNANT is an unstructured mesh physics mini-app designed for advanced    //
+// architecture research. It contains mesh data structures and a few physics //
+// algorithms adapted from the LANL rad-hydro code FLAG, and gives a sample  //
+// of the typical memory access patterns of FLAG.                            //
+///////////////////////////////////////////////////////////////////////////////
+// Copyright 2012, Los Alamos National Security, LLC. All rights reserved.   //
+// This software was produced under US Government contract DE-AC52-06NA25396 //
+// for Los Alamos National Laboratory, which is operated by Los Alamos       //
+// National Security, LLC for the U.S. Department of Energy.                 //
+// The US Government has rights to use, reproduce and distribute this        //
+// software.                                                                 //
+// NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY    //
+// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF     //
+// THIS SOFTWARE.                                                            //
+// If this software is modified to produce derivative works, such modified   //
+// software should be clearly marked, so as not to confuse it with the       //
+// version available from LANL.                                              //
+// Additionally, redistribution and use in source and binary forms, with or  //
+// without modification, are permitted provided that the following           //
+// conditions are met:                                                       //
+//  1. Redistributions of source code must retain the above copyright notice,//
+//     this list of conditions and the following disclaimer.                 //
+//  2. Redistributions in binary form must reproduce the above copyright     //
+//     notice, this list of conditions and the following disclaimer in the   //
+//     documentation and/or other materials provided with the distribution.  //
+//  3. Neither the name of Los Alamos National Security, LLC, Los Alamos     //
+//     National Laboratory, LANL, the U.S. Government, nor the names of its  //
+//     contributors may be used to endorse or promote products derived from  //
+//     this software without specific prior written permission.              //
+///////////////////////////////////////////////////////////////////////////////
+// THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND        //
+// CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,    //
+// BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS //
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED.                                  //
+// IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE    //
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR       //
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF      //
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS  //
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN   //
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)   //
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF    //
+// THE POSSIBILITY OF SUCH DAMAGE.                                           //
 ///////////////////////////////////////////////////////////////////////////////
 with ℝ²;
 
-///////////////////////////////////////////////////////////////////////////////
-// /tmp/nabla/nabla/nabla --lambda pennant -i pennant.n
-///////////////////////////////////////////////////////////////////////////////
 options{
   // Mesh options
   ℝ LENGTH       = 1.125;
@@ -102,8 +57,6 @@ options{
   ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
   ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
   ℝ option_stoptime = 1.;     // ! utilisé en dur dans le backend lambda !
-
-
   // Pennant options
   ℾ option_debug = true;
   ℕ cstop=999999; // simulation stop cycle
@@ -134,16 +87,9 @@ options{
   ℝ q2=2.0;       // quadratic coefficients for Q model
 };
 
+enum{red=31,green,yellow,blue,magenta,cyan,white};
 #define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
-//#define dbc(clr,...) if (option_debug) printf("\n[%dm%s%s",clr,__VA_ARGS__,"[m")
 #define dbc(clr,...) if (option_debug) cout<<"\n["<<clr<<"m"<<__VA_ARGS__<<"[m";
-#define red 31
-#define green 32
-#define yellow 33
-#define blue 34
-#define magenta 35
-#define cyan 36
-#define white 37
 
 // ****************************************************************************
 // * Zone Variables
@@ -478,35 +424,48 @@ calcGlobalDt @ 2.0 {
   z0uc=0;
   ∀ node z0uc += pu;
   z0uc /= nbNode;  
-  cout<<"[32m[QCS::setCornerDiv] z0uc="<<z0uc<<"[m"<<endl;
+  //cout<<"[32m[QCS::setCornerDiv] z0uc="<<z0uc<<"[m"<<endl;
 }
 
 ∀ cells qcsCalcForce_divergenceAtTheCorner @ 6.3 {
   const ℕ N = nbNode;
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _px[4] = {px[0],px[1],px[2],px[3]};
   const ℝ³ _ex[4] = {ex[0],ex[1],ex[2],ex[3]};
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
+      <<xs_cell_node[c+NABLA_NB_CELLS*0]<<","
+      <<xs_cell_node[c+NABLA_NB_CELLS*1]<<","
+      <<xs_cell_node[c+NABLA_NB_CELLS*2]<<","
+      <<xs_cell_node[c+NABLA_NB_CELLS*3]
+      <<"[m"<<endl;
+  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" faces: "
+      <<xs_cell_face[c+NABLA_NB_CELLS*0]<<","
+      <<xs_cell_face[c+NABLA_NB_CELLS*1]<<","
+      <<xs_cell_face[c+NABLA_NB_CELLS*2]<<","
+      <<xs_cell_face[c+NABLA_NB_CELLS*3]
+      <<"[m"<<endl;
   ∀ node {
     const ℕ i=(#+N-1)%N; // previous
     const ℕ j=(#);       // current
     const ℕ k=(#+N+1)%N; // next
+//    cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
     // Velocities and positions
     // 0 = point p
-    const ℝ³ up0 = _pu[j];
-    const ℝ³ xp0 = _px[j];
+    const ℝ³ up0 = pu;
+    const ℝ³ xp0 = px;
     // 1 = edge e2
-    const ℝ³ up1 = 0.5 * (_pu[j] + _pu[k]);
-    const ℝ³ xp1 = _ex[j];
+    const ℝ³ up1 = ½ * (_pu[#] + _pu[k]);
+    const ℝ³ xp1 = _ex[k];
     // 2 = zone center z
     const ℝ³ up2 = z0uc;
     const ℝ³ xp2 = zx;
     // 3 = edge e1
-    const ℝ³ up3 = ½ * (_pu[k] + _pu[j]);
-    const ℝ³ xp3 = _ex[k];
+    const ℝ³ up3 = ½ * (_pu[i] + _pu[#]);
+    const ℝ³ xp3 = _ex[i];
     // compute 2d cartesian volume of corner
     const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
     c0area = cvolume;
+    cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
     // compute cosine angle
     const ℝ³ v1 = xp3-xp0;
     const ℝ³ v2 = xp1-xp0;
@@ -640,7 +599,7 @@ calcGlobalDt @ 2.0 {
 
 // 4a. apply boundary conditions
 //∀ bcs applyFixedBC(pu0, pf, bfirst, blast);
-∀ outer nodes applyFixedBC @ 9.0 {
+∀ /*outer*/ nodes applyFixedBC @ 9.0 {
   pu = project(pu, vfix);
   pf = project(pf, vfix);
 }

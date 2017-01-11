@@ -77,6 +77,7 @@ const nWhatWith kCallHeaderDefines[]={
   {"DBG_INI", "0x0100ul"},
   {"DBG_INI_CELL", "0x0200ul"},
   {"DBG_INI_NODE", "0x0400ul"},
+  {"DBG_INI_FACE", "DBG_INI_NODE"},
   {"DBG_LOOP", "0x0800ul"},
   {"DBG_FUNC_IN", "0x1000ul"},
   {"DBG_FUNC_OUT", "0x2000ul"},

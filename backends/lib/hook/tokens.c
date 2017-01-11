@@ -440,18 +440,18 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
         // Combinaison ∀ cells, ∀ face smf[j], par exemple
         if ((job->parse.enum_enum!='\0'&&job->parse.isPostfixed==2)||
             (job->parse.enum_enum=='\0'&&job->parse.isPostfixed==2&&job->parse.variableIsArray))
-          nprintf(nabla, "/*0*/", "/*0*/]");
+          nprintf(nabla, "/*0*/", "]");
         else
-          nprintf(nabla, "/*1*/", "/*1*/]]");
+          nprintf(nabla, "/*1*/", "]]");
        break;
       }
-      case('n'):{nprintf(nabla, "/*2*/", "/*2*/]]"); break;}
-      case('f'):{nprintf(nabla, "/*3*/", "/*3*/]]"); break;}
+      case('n'):{nprintf(nabla, "/*2*/", "]]"); break;}
+      case('f'):{nprintf(nabla, "/*3*/", "]]"); break;}
       default:{nprintf(nabla, "/*?*/", ")]");}
       }
       job->parse.turnBracketsToParentheses=false;
     }else{
-      nprintf(nabla, NULL, "/*e*/]");
+      nprintf(nabla, "/*e*/", "]");
     }
     job->parse.variableIsArray=false;
     job->parse.isPostfixed=0;

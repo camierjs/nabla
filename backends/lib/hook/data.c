@@ -175,7 +175,7 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
       if (job->parse.postfix_constant==true){
         nprintf(nabla, NULL, "/*NodeVar + postfix_constant*/[");
       }else
-        nprintf(nabla, "/*NodeVar 2&0*/", "/*p2&0*/[xs_cell_node[c+NABLA_NB_CELLS*");
+        nprintf(nabla, "/*NodeVar 2&0*/", "[xs_cell_node[c+NABLA_NB_CELLS*");
     }
     break;
   }
@@ -187,7 +187,7 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
       if (job->parse.postfix_constant==true){
         nprintf(nabla, NULL, "/*FaceVar + postfix_constant*/[");
       }else
-        nprintf(nabla, "/*FaceVar 2&0*/", "/*p2&0*/[xs_cell_face[c+NABLA_NB_CELLS*");
+        nprintf(nabla, "/*FaceVar 2&0*/", "[xs_cell_face[c+NABLA_NB_CELLS*");
     }
     break;
   }

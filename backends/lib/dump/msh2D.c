@@ -51,19 +51,19 @@
 static void nabla_ini_cell_node(const nablaMesh msh,
                                 int *cell_node){
   if (DBG_DUMP) printf("\n[1;33mcell->node:[0m");
-  dbg(DBG_INI,"\nOn associe a chaque maille ses noeuds");
+  dbg(DBG_INI_CELL,"\nOn associe a chaque maille ses noeuds");
   int iCell=0;
   for(int iY=0;iY<msh.NABLA_NB_CELLS_Y_AXIS;iY++){
     for(int iX=0;iX<msh.NABLA_NB_CELLS_X_AXIS;iX++,iCell+=1){
       const int cell_uid=iX + iY*msh.NABLA_NB_CELLS_X_AXIS;
       const int node_bid=iX + iY*msh.NABLA_NB_NODES_X_AXIS;
-      dbg(DBG_INI,"\n\tSetting cell #%%d %%dx%%d, cell_uid=%%d, node_bid=%%d",
+      dbg(DBG_INI_CELL,"\n\tSetting cell #%%d %%dx%%d, cell_uid=%%d, node_bid=%%d",
           iCell,iX,iY,cell_uid,node_bid);
       cell_node[0*msh.NABLA_NB_CELLS+iCell] = node_bid;
       cell_node[1*msh.NABLA_NB_CELLS+iCell] = node_bid + 1;
       cell_node[2*msh.NABLA_NB_CELLS+iCell] = node_bid + msh.NABLA_NB_NODES_X_AXIS + 1;
       cell_node[3*msh.NABLA_NB_CELLS+iCell] = node_bid + msh.NABLA_NB_NODES_X_AXIS + 0;
-      dbg(DBG_INI,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d", iCell,
+      dbg(DBG_INI_CELL,"\n\tCell_%%d's nodes are %%d,%%d,%%d,%%d", iCell,
           cell_node[0*msh.NABLA_NB_CELLS+iCell],
           cell_node[1*msh.NABLA_NB_CELLS+iCell],
           cell_node[2*msh.NABLA_NB_CELLS+iCell],
@@ -84,13 +84,13 @@ __attribute__((unused)) static
 void verifNextPrev(const nablaMesh msh,
                    int *cell_prev, int *cell_next){
  for (int i=0; i<msh.NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
+    dbg(DBG_INI_CELL,"\nNext/Prev(X) for cells %%d <- #%%d -> %%d: ",
         cell_prev[MD_DirX*msh.NABLA_NB_CELLS+i],
         i,
         cell_next[MD_DirX*msh.NABLA_NB_CELLS+i]);
   }
   for (int i=0; i<msh.NABLA_NB_CELLS; ++i) {
-    dbg(DBG_INI,"\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
+    dbg(DBG_INI_CELL,"\nNext/Prev(Y) for cells %%d <- #%%d -> %%d: ",
         cell_prev[MD_DirY*msh.NABLA_NB_CELLS+i],
         i,
         cell_next[MD_DirY*msh.NABLA_NB_CELLS+i]);
@@ -102,7 +102,7 @@ void verifNextPrev(const nablaMesh msh,
 // ****************************************************************************
 static void nabla_ini_cell_next_prev(const nablaMesh msh,
                                      int *cell_prev, int *cell_next){
-  dbg(DBG_INI,"\nOn associe a chaque maille ses next et prev");
+  dbg(DBG_INI_CELL,"\nOn associe a chaque maille ses next et prev");
   // On met des valeurs négatives pour rGatherAndZeroNegOnes
   // Dans la direction X
   for (int i=0; i<msh.NABLA_NB_CELLS; ++i) {
@@ -154,13 +154,13 @@ static void verifConnectivity(const nablaMesh msh,
                               int* node_cell,
                               int *node_cell_and_corner){
   if (DBG_DUMP) printf("\n[1;33mnode->cell:[0m");
-  dbg(DBG_INI,"\nVérification des connectivité des noeuds");
+  dbg(DBG_INI_NODE,"\nVérification des connectivité des noeuds");
   FOR_EACH_NODE_MSH(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
+    dbg(DBG_INI_NODE,"\nFocusing on node %%d",n);
     if (DBG_DUMP) printf("\n\t");
     FOR_EACH_NODE_CELL_MSH(c){
-      dbg(DBG_INI,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
-      dbg(DBG_INI,", and node_%%d knows cell %%d",n,node_cell_and_corner[2*nc+0]);
+      dbg(DBG_INI_NODE,"\n\tnode_%%d knows cell %%d",n,node_cell[nc]);
+      dbg(DBG_INI_NODE,", and node_%%d knows cell %%d",n,node_cell_and_corner[2*nc+0]);
       if (DBG_DUMP) printf(" %%d,",node_cell[nc]);
     }
   }
@@ -171,13 +171,13 @@ static void verifCorners(const nablaMesh msh,
                          int* node_cell,
                          int *node_cell_corner){
   if (DBG_DUMP) printf("\n[1;33mnode->corner:[0m");
-  dbg(DBG_INI,"\nVérification des coins des noeuds");
+  dbg(DBG_INI_NODE,"\nVérification des coins des noeuds");
   FOR_EACH_NODE_MSH(n){
-    dbg(DBG_INI,"\nFocusing on node %%d",n);
+    dbg(DBG_INI_NODE,"\nFocusing on node %%d",n);
     if (DBG_DUMP) printf("\n\t");
     FOR_EACH_NODE_CELL_MSH(c){
       //if (node_cell_corner[nc]==-1) continue;
-      dbg(DBG_INI,"\n\tnode_%%d is corner #%%d of cell %%d",n,
+      dbg(DBG_INI_NODE,"\n\tnode_%%d is corner #%%d of cell %%d",n,
           node_cell_corner[nc],node_cell[nc]);
       if (DBG_DUMP) printf(" %%d,",node_cell_corner[nc]);
       //dbg(DBG_INI,", and node_%%d is corner #%%d of cell %%d",n,node_cell_and_corner[2*nc+1],node_cell_and_corner[2*nc+0]);
@@ -193,8 +193,8 @@ static void nabla_ini_node_cell(const nablaMesh msh,
                                 int *node_cell,
                                 int* node_cell_corner,
                                 int* node_cell_and_corner){
-  dbg(DBG_INI,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
-  dbg(DBG_INI,"\nOn flush le nombre de mailles attachées à ce noeud");
+  dbg(DBG_INI_NODE,"\nMaintenant, on re-scan pour remplir la connectivité des noeuds et des coins");
+  dbg(DBG_INI_NODE,"\nOn flush le nombre de mailles attachées à ce noeud");
   for(int n=0;n<msh.NABLA_NB_NODES;n+=1){
     for(int c=0;c<msh.NABLA_CELL_PER_NODE;++c){
       node_cell[msh.NABLA_CELL_PER_NODE*n+c]=-1;
@@ -204,10 +204,10 @@ static void nabla_ini_node_cell(const nablaMesh msh,
     }
   }  
   for(int c=0;c<msh.NABLA_NB_CELLS;c+=1){
-    dbg(DBG_INI,"\nFocusing on cell %%d",c);
+    dbg(DBG_INI_NODE,"\nFocusing on cell %%d",c);
     for(int n=0;n<msh.NABLA_CELL_PER_NODE;n++){
       const int iNode = cell_node[n*msh.NABLA_NB_CELLS+c];
-      dbg(DBG_INI,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
+      dbg(DBG_INI_NODE,"\n\tcell_%%d @%%d: pushs node %%d",c,n,iNode);
       // les NABLA_CELL_PER_NODE emplacements donnent l'offset jusqu'aux mailles
       // node_corner a une structure en NABLA_CELL_PER_NODE*NABLA_NB_NODES
       node_cell[msh.NABLA_CELL_PER_NODE*iNode+n]=c;
@@ -274,7 +274,7 @@ static int nabla_ini_face_cell_outer_minus(const nablaMesh msh,
   const int f=iof[1];
   face_cell[0*msh.NABLA_NB_FACES+f] = (c<<MD_Shift)|MD_Negt|(MD_Dir+1);
   face_cell[1*msh.NABLA_NB_FACES+f] = -(MD_Negt|(MD_Dir+1));
-  dbg(DBG_INI," %%s-%%c->%%s",
+  dbg(DBG_INI_FACE," %%s-%%c->%%s",
       f2d(face_cell[0*msh.NABLA_NB_FACES+f]),
       cXY(MD_Dir),
       f2d(face_cell[1*msh.NABLA_NB_FACES+f]));
@@ -290,7 +290,7 @@ static int nabla_ini_face_cell_inner(const nablaMesh msh,
   if (MD_Dir==MD_DirY) face_cell[1*msh.NABLA_NB_FACES+f] = c+msh.NABLA_NB_CELLS_X_AXIS;
   face_cell[1*msh.NABLA_NB_FACES+f] <<= MD_Shift;
   face_cell[1*msh.NABLA_NB_FACES+f] |= (MD_Plus|(MD_Dir+1));
-  dbg(DBG_INI," %%s-%%c->%%s",
+  dbg(DBG_INI_FACE," %%s-%%c->%%s",
       f2d(face_cell[0*msh.NABLA_NB_FACES+f]),
       cXY(MD_Dir),
       f2d(face_cell[1*msh.NABLA_NB_FACES+f]));
@@ -303,7 +303,7 @@ static int nabla_ini_face_cell_outer_plus(const nablaMesh msh,
   const int f=iof[1];
   face_cell[0*msh.NABLA_NB_FACES+f] = (c<<MD_Shift)|MD_Plus|(MD_Dir+1);
   face_cell[1*msh.NABLA_NB_FACES+f] = -(MD_Plus|(MD_Dir+1));
-  dbg(DBG_INI," %%s-%%c->%%s",
+  dbg(DBG_INI_FACE," %%s-%%c->%%s",
       f2d(face_cell[0*NABLA_NB_FACES+f]),
       cXY(MD_Dir),
       f2d(face_cell[1*NABLA_NB_FACES+f]));
@@ -322,17 +322,17 @@ static void nabla_ini_face_cell_XY(const nablaMesh msh,
 }
 static void nabla_ini_face_cell(const nablaMesh msh,
                                 int* face_cell){
-  dbg(DBG_INI,"\n[1;33mOn associe a chaque maille ses faces:[m");
+  dbg(DBG_INI_FACE,"\n[1;33m[nabla_ini_face_cell] On associe a chaque maille ses faces:[m");
   int f[2]={0,msh.NABLA_NB_FACES_INNER}; // inner and outer faces
   for(int iY=0;iY<msh.NABLA_NB_CELLS_Y_AXIS;iY++){
     for(int iX=0;iX<msh.NABLA_NB_CELLS_X_AXIS;iX++){
       const int c=iX + iY*msh.NABLA_NB_CELLS_X_AXIS;
-      dbg(DBG_INI,"\n\tCell #[1;36m%%d[m @ %%dx%%d:",c,iX,iY);
+      dbg(DBG_INI_FACE,"\n\tCell #[1;36m%%d[m @ %%dx%%d:",c,iX,iY);
       nabla_ini_face_cell_XY(msh,face_cell,f,c,iX,MD_DirX);
       nabla_ini_face_cell_XY(msh,face_cell,f,c,iY,MD_DirY);
     }
   }
-  dbg(DBG_INI,"\n\tNumber of faces = %%d",f[0]+f[1]-msh.NABLA_NB_FACES_INNER);
+  dbg(DBG_INI_FACE,"\n\tNumber of faces = %%d",f[0]+f[1]-msh.NABLA_NB_FACES_INNER);
   assert(f[0]==msh.NABLA_NB_FACES_INNER);
   assert(f[1]==msh.NABLA_NB_FACES_INNER+msh.NABLA_NB_FACES_OUTER);
   assert((f[0]+f[1])==msh.NABLA_NB_FACES+msh.NABLA_NB_FACES_INNER);
@@ -348,20 +348,20 @@ void nabla_ini_shift_back_face_cell(const nablaMesh msh,
     if (face_cell[0*msh.NABLA_NB_FACES+f]>0) face_cell[0*msh.NABLA_NB_FACES+f]>>=MD_Shift;
     if (face_cell[1*msh.NABLA_NB_FACES+f]>0) face_cell[1*msh.NABLA_NB_FACES+f]>>=MD_Shift;
   }
-  dbg(DBG_INI,"\n[nabla_ini_shift_back_face_cell] Inner faces:\n");
+  dbg(DBG_INI_FACE,"\n[nabla_ini_shift_back_face_cell] Inner faces:\n");
   for(int f=0;f<msh.NABLA_NB_FACES_INNER;f+=1)
-    dbg(DBG_INI," %%s->%%s",
+    dbg(DBG_INI_FACE," %%s->%%s",
         f2d(face_cell[0*msh.NABLA_NB_FACES+f],false),
         f2d(face_cell[1*msh.NABLA_NB_FACES+f],false));
-  dbg(DBG_INI,"\n[nabla_ini_shift_back_face_cell] Outer faces:\n");
+  dbg(DBG_INI_FACE,"\n[nabla_ini_shift_back_face_cell] Outer faces:\n");
   for(int f=msh.NABLA_NB_FACES_INNER;f<msh.NABLA_NB_FACES_INNER+msh.NABLA_NB_FACES_OUTER;f+=1)
-    dbg(DBG_INI," %%s->%%s",
+    dbg(DBG_INI_FACE," %%s->%%s",
         f2d(face_cell[0*msh.NABLA_NB_FACES+f],false),
         f2d(face_cell[1*msh.NABLA_NB_FACES+f],false));
-  dbg(DBG_INI,"\n[nabla_ini_shift_back_face_cell] All faces:\n");
+  dbg(DBG_INI_FACE,"\n[nabla_ini_shift_back_face_cell] All faces:\n");
   if (DBG_DUMP) printf("\n[1;33mface->cell:[0m");
   for(int f=0;f<msh.NABLA_NB_FACES;f+=1){
-    dbg(DBG_INI," %%d->%%d",
+    dbg(DBG_INI_FACE," %%d->%%d",
         face_cell[0*msh.NABLA_NB_FACES+f],
         face_cell[1*msh.NABLA_NB_FACES+f]);
     if (DBG_DUMP) printf("\n\t%%d,%%d,",
@@ -373,22 +373,46 @@ void nabla_ini_shift_back_face_cell(const nablaMesh msh,
 // ****************************************************************************
 // * Connectivité cell->face
 // ****************************************************************************
-static void addThisfaceToCellConnectivity(const nablaMesh msh,
+/*static void addThisfaceToCellConnectivity(const nablaMesh msh,
                                           int* cell_face,
                                           const int f, const int c){
-  dbg(DBG_INI,"\n\t\t[addThisfaceToCellConnectivity] Adding face #%%d to cell %%d ",f,c);
+  dbg(DBG_INI_FACE,"\n\t\t[addThisfaceToCellConnectivity] Adding face #%%d to cell %%d ",f,c);
   for(int i=0;i<msh.NABLA_FACE_PER_CELL;i+=1){
     // On scrute le premier emplacement 
     if (cell_face[i*msh.NABLA_NB_CELLS+c]>=0) continue;
-    dbg(DBG_INI,"[%%d] ",i);
+    dbg(DBG_INI_FACE,"[%%d] ",i);
     cell_face[i*msh.NABLA_NB_CELLS+c]=f;
     break; // We're finished here
   }
+  }*/
+static void addThisfaceToCellConnectivity(const nablaMesh msh,
+                                          const int* cell_node,const int c,
+                                          const int* face_node,const int f,
+                                          int* cell_face){
+  const int n0 = face_node[0*msh.NABLA_NB_FACES+f];
+  const int n1 = face_node[1*msh.NABLA_NB_FACES+f];
+  dbg(DBG_INI_FACE,"\n\t\t[addThisfaceToCellConnectivity] Adding face #%%d (%%d->%%d) to cell %%d ",f,n0,n1,c);
+  for(int i=0;i<msh.NABLA_FACE_PER_CELL;i+=1){
+    const int cn0=cell_node[i*msh.NABLA_NB_CELLS+c];
+    const int cn1=cell_node[((i+1)%NABLA_NODE_PER_CELL)*msh.NABLA_NB_CELLS+c];
+    const int ocn0=min(cn0,cn1);
+    const int ocn1=max(cn0,cn1);
+    dbg(DBG_INI_FACE,", cell_nodes %%d->%%d",ocn0,ocn1); 
+    if (ocn0!=n0) continue;
+    if (ocn1!=n1) continue;
+    dbg(DBG_INI_FACE," at %%d",i);
+    cell_face[i*msh.NABLA_NB_CELLS+c]=f;
+    return; // We're finished here
+  }
 }
+
+
 static void nabla_ini_cell_face(const nablaMesh msh,
                                 const int* face_cell,
+                                const int* cell_node,
+                                const int* face_node,
                                 int* cell_face){
-  dbg(DBG_INI,"\n[1;33mOn revient pour remplir cell->face:[m (flushing)");
+  dbg(DBG_INI_FACE,"\n[1;33mOn revient pour remplir cell->face:[m (flushing)");
   for(int c=0;c<msh.NABLA_NB_CELLS;c+=1){
     for(int f=0;f<msh.NABLA_FACE_PER_CELL;f+=1){
       cell_face[f*msh.NABLA_NB_CELLS+c]=-1;
@@ -398,19 +422,19 @@ static void nabla_ini_cell_face(const nablaMesh msh,
   for(int f=0;f<msh.NABLA_NB_FACES;f+=1){
     const int cell0 = face_cell[0*msh.NABLA_NB_FACES+f];
     const int cell1 = face_cell[1*msh.NABLA_NB_FACES+f];
-    dbg(DBG_INI,"\n\t[nabla_ini_cell_face] Pushing face #%%d: %%d->%%d",f,cell0,cell1);
-    if (cell0>=0) addThisfaceToCellConnectivity(msh,cell_face,f,cell0);
-    if (cell1>=0) addThisfaceToCellConnectivity(msh,cell_face,f,cell1);
+    dbg(DBG_INI_FACE,"\n\t[nabla_ini_cell_face] Pushing face #%%d: %%d->%%d",f,cell0,cell1);
+    if (cell0>=0) addThisfaceToCellConnectivity(msh,cell_node,cell0,face_node,f,cell_face);
+    if (cell1>=0) addThisfaceToCellConnectivity(msh,cell_node,cell1,face_node,f,cell_face);
   }
-
-  dbg(DBG_INI,"\n[1;33mOn revient pour dumper cell->face:[m");
+  
+  dbg(DBG_INI_FACE,"\n[1;33mOn revient pour dumper cell->face:[m");
   if (DBG_DUMP) printf("\n[1;33mcell->face:[0m");
   for(int c=0;c<msh.NABLA_NB_CELLS;c+=1){
     if (DBG_DUMP) printf("\n");
     for(int f=0;f<msh.NABLA_FACE_PER_CELL;f+=1){
       if (DBG_DUMP) printf(" %%d,",cell_face[f*msh.NABLA_NB_CELLS+c]);
       if (cell_face[f*msh.NABLA_NB_CELLS+c]<0) continue;
-      dbg(DBG_INI,"\n\t[nabla_ini_cell_face] cell[%%d]_face[%%d] %%d",
+      dbg(DBG_INI_FACE,"\n\t[nabla_ini_cell_face] cell[%%d]_face[%%d] %%d",
           c,f,cell_face[f*msh.NABLA_NB_CELLS+c]);
     }
   }
@@ -422,7 +446,7 @@ static void nabla_ini_cell_face(const nablaMesh msh,
 // ****************************************************************************
 static const char* i2XY(const int i){
   const int c=i&MD_Mask;
-  //dbg(DBG_INI,"\n\t\t[33m[i2XY] i=%%d, Shift=%%d, c=%%d[m",i,MD_Shift,c);
+  //dbg(DBG_INI_FACE,"\n\t\t[33m[i2XY] i=%%d, Shift=%%d, c=%%d[m",i,MD_Shift,c);
   if (c==(MD_Plus|(MD_DirX+1))) return strdup("x+");
   if (c==(MD_Negt|(MD_DirX+1))) return strdup("x-");
   if (c==(MD_Plus|(MD_DirY+1))) return strdup("y+");
@@ -445,14 +469,17 @@ static void setFWithTheseNodes(const nablaMesh msh,
                                int* cell_node,
                                const int f, const int c,
                                const int n0, const int n1){
-  face_node[0*msh.NABLA_NB_FACES+f]=cell_node[n0*msh.NABLA_NB_CELLS+c];
-  face_node[1*msh.NABLA_NB_FACES+f]=cell_node[n1*msh.NABLA_NB_CELLS+c];
+  //dbg(DBG_INI_FACE,"\n[1;33m[setFWithTheseNodes] %%d & %%d[m",n0,n1);
+  const int nid0=cell_node[n0*msh.NABLA_NB_CELLS+c];
+  const int nid1=cell_node[n1*msh.NABLA_NB_CELLS+c];
+  face_node[0*msh.NABLA_NB_FACES+f]=min(nid0,nid1);
+  face_node[1*msh.NABLA_NB_FACES+f]=max(nid0,nid1);
 }
 static void nabla_ini_face_node(const nablaMesh msh,
                                 const int* face_cell,
                                 int* face_node,
                                 int* cell_node){
-  dbg(DBG_INI,"\n[1;33mOn associe a chaque faces ses noeuds:[m");
+  dbg(DBG_INI_FACE,"\n[1;33m[nabla_ini_face_node] On associe a chaque faces ses noeuds:[m");
   // On flush toutes les connectivités face_noeuds
   for(int f=0;f<msh.NABLA_NB_FACES;f+=1)
     for(int n=0;n<msh.NABLA_NODE_PER_FACE;n+=1)
@@ -461,12 +488,13 @@ static void nabla_ini_face_node(const nablaMesh msh,
   for(int f=0;f<msh.NABLA_NB_FACES;f+=1){
     const int backCell=face_cell[0*msh.NABLA_NB_FACES+f];
     const int frontCell=face_cell[1*msh.NABLA_NB_FACES+f];
-    dbg(DBG_INI,"\n\tFace #[1;36m%%d[m: %%d => %%d, ",f, backCell, frontCell);
-    dbg(DBG_INI,"\t%%s => %%s: ", c2XY(backCell), c2XY(frontCell));
+    dbg(DBG_INI_FACE,"\n\tFace #[1;36m%%d[m: %%d => %%d, ",f, backCell>>MD_Shift, frontCell>>MD_Shift);
+    dbg(DBG_INI_FACE,"\t%%s => %%s: ", c2XY(backCell), c2XY(frontCell));
     // On va travailler avec sa backCell
     const int c=backCell>>MD_Shift;
     const int d=backCell &MD_Mask;
-    dbg(DBG_INI,"\t%%d ", c);
+    dbg(DBG_INI_FACE,"\t%%d ", c);
+    dbg(DBG_INI_FACE,"\t%%d ", d);
     assert(c>=0);
     if (d==(MD_Plus|(MD_DirX+1)))
       { setFWithTheseNodes(msh,face_node,cell_node,f,c,1,2); continue; }
@@ -479,14 +507,14 @@ static void nabla_ini_face_node(const nablaMesh msh,
     fprintf(stderr,"[nabla_ini_face_node] Error!");
     exit(-1);
     //for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)
-    //  dbg(DBG_INI,"%%d ", cell_node[n*NABLA_NB_CELLS+c]);
+    //  dbg(DBG_INI_FACE,"%%d ", cell_node[n*NABLA_NB_CELLS+c]);
   }
   if (DBG_DUMP) printf("\n[1;33mface->node:[0m");
   for(int f=0;f<msh.NABLA_NB_FACES;f+=1){
-    dbg(DBG_INI,"\n\tface #%%d: nodes ",f);
+    dbg(DBG_INI_FACE,"\n\tface #%%d: nodes ",f);
     if (DBG_DUMP) printf("\n");
     for(int n=0;n<msh.NABLA_NODE_PER_FACE;++n){
-      dbg(DBG_INI,"%%d ",face_node[n*msh.NABLA_NB_FACES+f]);
+      dbg(DBG_INI_FACE,"%%d ",face_node[n*msh.NABLA_NB_FACES+f]);
       if (DBG_DUMP) printf(" %%d,",face_node[n*msh.NABLA_NB_FACES+f]);
       assert(face_node[n*msh.NABLA_NB_FACES+f]>=0);
     }
@@ -514,12 +542,12 @@ static double yOf7(const nablaMesh msh,
 __attribute__((unused))
 static void verifCoords(const nablaMesh msh,
                         Real3 *node_coord){
-  dbg(DBG_INI,"\nVérification des coordonnés des noeuds");
-  if (DBG_DUMP) printf("\n[1;33mnode_coord:[0m");
+  dbg(DBG_INI_NODE,"\nVérification des coordonnés des noeuds");
+  if (DBG_DUMP && DBG_LVL&DBG_INI_NODE) printf("\n[1;33mnode_coord:[0m");
   FOR_EACH_NODE_MSH(n){
-    dbg(DBG_INI,"\n%%d:",n);
-    if (DBG_DUMP) printf("\n\t%%f,%%f,%%f,",node_coord[n].x,node_coord[n].y,node_coord[n].z);
-    dbgReal3(DBG_INI,node_coord[n]);
+    dbg(DBG_INI_NODE,"\n%%d:",n);
+    if (DBG_DUMP && DBG_LVL&DBG_INI_NODE) printf("\n\t%%f,%%f,%%f,",node_coord[n].x,node_coord[n].y,node_coord[n].z);
+    dbgReal3(DBG_INI_NODE,node_coord[n]);
   }
 }
 
@@ -528,10 +556,10 @@ static void verifCoords(const nablaMesh msh,
 // ****************************************************************************
 static void nabla_ini_node_coord(const nablaMesh msh,
                                  Real3 *node_coord){
-  dbg(DBG_INI,"\nasserting NABLA_NB_NODES_Y_AXIS >= 1...");
+  dbg(DBG_INI_NODE,"\nasserting NABLA_NB_NODES_Y_AXIS >= 1...");
   assert((msh.NABLA_NB_NODES_Y_AXIS >= 1));
 
-  dbg(DBG_INI,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
+  dbg(DBG_INI_NODE,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
   assert((msh.NABLA_NB_CELLS %% 1)==0);
     
   for(int iNode=0; iNode<NABLA_NB_NODES; iNode+=1){
@@ -540,7 +568,6 @@ static void nabla_ini_node_coord(const nablaMesh msh,
     x=set(xOf7(msh,n));
     y=set(yOf7(msh,n));
     node_coord[iNode]=Real3(x,y,0.0);
-    //dbgReal3(DBG_INI,node_coord[iNode]);
   }
   verifCoords(msh,node_coord);
 }
@@ -569,7 +596,7 @@ static void nabla_ini_connectivity(const nablaMesh msh,
   nabla_ini_face_cell(msh,face_cell);
   nabla_ini_face_node(msh,face_cell,face_node,cell_node);
   nabla_ini_shift_back_face_cell(msh,face_cell);
-  nabla_ini_cell_face(msh,face_cell,cell_face);
+  nabla_ini_cell_face(msh,face_cell,cell_node,face_node,cell_face);
   if (DBG_DUMP){
     printf("\n");
     exit(-1);
