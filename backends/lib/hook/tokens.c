@@ -438,11 +438,11 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
       switch  (job->item[0]){
       case('c'):{
         // Combinaison ∀ cells, ∀ face smf[j], par exemple
-        if ((job->parse.enum_enum!='\0'&&job->parse.isPostfixed==2)||
-            (job->parse.enum_enum=='\0'&&job->parse.isPostfixed==2&&job->parse.variableIsArray))
-          nprintf(nabla, "/*0*/", "]");
+        if ((job->parse.enum_enum!='\0'&&job->parse.isPostfixed==2)
+             ||(job->parse.enum_enum=='\0'&&job->parse.isPostfixed==2&&job->parse.variableIsArray))
+          nprintf(nabla, "/*0*/", "/*0*/]");
         else
-          nprintf(nabla, "/*1*/", "]]");
+          nprintf(nabla, "/*1*/", "/*1*/]]");
        break;
       }
       case('n'):{nprintf(nabla, "/*2*/", "]]"); break;}
@@ -451,7 +451,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
       }
       job->parse.turnBracketsToParentheses=false;
     }else{
-      nprintf(nabla, "/*e*/", "]");
+      nprintf(nabla, "/*e*/", "/*e*/]");
     }
     job->parse.variableIsArray=false;
     job->parse.isPostfixed=0;

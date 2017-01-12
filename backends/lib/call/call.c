@@ -124,6 +124,7 @@ const nWhatWith xCallHeaderDefines[]={
   {"xs_node_cell(c)", "xs_node_cell[n*NABLA_NODE_PER_CELL+c]"},
   {"xs_face_cell(c)", "xs_face_cell[f+NABLA_NB_FACES*c]"},
   {"xs_face_node(n)", "xs_face_node[f+NABLA_NB_FACES*n]"},
+  {"xs_cell_face(f)", "xs_cell_face[f+NABLA_NB_CELLS*c]"},
   {"synchronize(v)",""},
   {NULL,NULL}
 };

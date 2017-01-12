@@ -152,9 +152,11 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
     // Variables tableaux
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='n') nprintf(nabla, NULL, "[n+NABLA_NODE_PER_CELL*c]");
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='f') nprintf(nabla, NULL, "[f+NABLA_FACE_PER_CELL*c]");
-    // Mais on est pas encore dans le ∀ du ∀
+   // Mais on est pas encore dans le ∀ du ∀
     if (var->dim==1 && isPostfixed==2 &&  var->vitem=='f' && enum_enum=='\0'){
-      nprintf(nabla, NULL,"[c+NABLA_NB_CELLS*");
+      //nprintf(nabla, NULL,"[xs_cell_node[c+NABLA_NB_CELLS*");
+      nprintf(nabla, NULL,"[c*NABLA_FACE_PER_CELL+");
+      //job->parse.turnBracketsToParentheses=true;
       job->parse.variableIsArray=true;
     }
     

@@ -297,9 +297,16 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
         if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
         if (strcmp(var->type, "integer")==0) nprintf(nabla,NULL,"0;");
         if (strcmp(var->type, "real3x3")==0) nprintf(nabla,NULL,"real3x3();");
-      }else{
+      }
+      if (var->dim==1 && var->vitem=='n'){
         nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE(n)");
         nprintf(nabla,NULL," %s_%s[n+NABLA_NODE_PER_CELL*c]=",var->item,var->name);
+      }
+      if (var->dim==1 && var->vitem=='f'){
+        nprintf(nabla,NULL,"\n\t\tFOR_EACH_CELL_WARP_NODE/*FACE*/(n)");
+        nprintf(nabla,NULL," %s_%s[n+NABLA_FACE_PER_CELL*c]=",var->item,var->name);
+      }
+      if (var->dim==1){
         if (strcmp(var->type, "real")==0) nprintf(nabla,NULL,"0.0;");
         if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
         if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
