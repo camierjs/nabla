@@ -202,14 +202,14 @@ iniCout @ -48.0{
   cout<<"[33m[Mesh::calcCtrs] zx["<<c<<"]="<<zx<<"[m"<<endl;
 }
 
-endlZxEx @-31.89{ cout<<endl;}
+//endlZxEx @-31.89{ cout<<endl;}
 
 ∀ faces iniMeshCalcCtrs_ex @ -31.88 {
   ex = 0.0;
   ∀ node ex += px; 
   ex /= nbNode;
   assert(nbNode==2);
-  cout<<"[33m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m"<<endl;
+  //cout<<"[33m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m"<<endl;
 }
 
 ∀ cells iniMeshCalcVols @ -31.8 {
@@ -233,7 +233,7 @@ endlZxEx @-31.89{ cout<<endl;}
 ∀ cells iniMeshCalcSideFracs @ -31.7 {
   ∀ face {
     smf = sarea / zarea;
-    cout<<"[33m[iniMeshCalcSideFracs] smf["<<c<<"]="<<smf<<"[m"<<endl;
+    //cout<<"[33m[iniMeshCalcSideFracs] smf["<<c<<"]="<<smf<<"[m"<<endl;
   }
 }
 
@@ -338,13 +338,13 @@ calcGlobalDt @ 2.0 {
   cout<<"[33m[Mesh::calcCtrs] zxp["<<c<<"]="<<zxp<<"[m"<<endl;
 }
 
-endlZxpExp @ 3.31{ cout<<endl;}
+//endlZxpExp @ 3.31{ cout<<endl;}
 
 ∀ faces computeExp @ 3.32 {
   exp = 0.0;
   ∀ node exp += pxp;
   exp /= nbNode;
-  cout<<"[33m[Mesh::calcCtrs] exp["<<f<<"]="<<exp<<"[m"<<endl;
+  //cout<<"[33m[Mesh::calcCtrs] exp["<<f<<"]="<<exp<<"[m"<<endl;
 }
 
 ∀ cells calcVols @ 3.4 {
@@ -363,19 +363,19 @@ endlZxpExp @ 3.31{ cout<<endl;}
   } 
   cout<<"\t[33m[calcVols] zvolp="<<zvolp<<"[m"<<endl;
 }
-∀ cells dumpZareap @ 3.41{cout<<"\t[33m[calcVols] zareap="<<zareap<<"[m"<<endl;} 
-∀ cells dumpSareap @ 3.42{ ∀ node cout<<"\t[33m[calcVols] sareap="<<sareap<<"[m"<<endl;} 
+//∀ cells dumpZareap @ 3.41{cout<<"\t[33m[calcVols] zareap="<<zareap<<"[m"<<endl;} 
+//∀ cells dumpSareap @ 3.42{ ∀ node cout<<"\t[33m[calcVols] sareap="<<sareap<<"[m"<<endl;} 
 
 ∀ cells calcSurfVecs @ 3.5 {
   ∀ face{
     ssurfp = rotateCCW(exp - zxp);
-    cout<<"\t[33m[calcSurfVecs] ssurfp="<<ssurfp<<"[m"<<endl;
+    //cout<<"\t[33m[calcSurfVecs] ssurfp="<<ssurfp<<"[m"<<endl;
   }
 }
 
 ∀ faces calcEdgeLen @ 3.5 {
   elen = length(pxp[1]-pxp[0]);
-  cout<<"\t[33m[calcEdgeLen] elen["<<f<<"]="<<elen<<"[m"<<endl;
+  //cout<<"\t[33m[calcEdgeLen] elen["<<f<<"]="<<elen<<"[m"<<endl;
 }
 
 ∀ cells calcCharLen @ 3.6 {
@@ -384,7 +384,7 @@ endlZxpExp @ 3.31{ cout<<endl;}
     const ℝ sdl = 4.0 * sareap / elen;
     zdl = min(zdl, sdl);
   }
-  //cout<<"\t[33m[calcCharLen] zdl="<<zdl<<"[m"<<endl;
+  cout<<"\t[33m[calcCharLen] zdl="<<zdl<<"[m"<<endl;
 }
 
 // 2. compute point masses
@@ -414,13 +414,11 @@ endlZxpExp @ 3.31{ cout<<endl;}
   const ℝ perx = gm1 * local_rx;
   const ℝ csqd = max(ss2, prex + perx * local_px / (local_rx * local_rx));
   zp =local_px;
-  cout<<"[36m[PolyGas::calcEOS] zp=px="<<zp<<"[m"<<endl;
+  //cout<<"[36m[PolyGas::calcEOS] zp=px="<<zp<<"[m"<<endl;
   z0per = perx;
   zss = √(csqd);
 }
-∀ cells dumpZss @ 5.01 {
-  cout<<"[36m[PolyGas::calcEOS] zss="<<zss<<"[m"<<endl;
-}
+//∀ cells dumpZss @ 5.01 {cout<<"[36m[PolyGas::calcEOS] zss="<<zss<<"[m"<<endl;}
 ∀ cells calcStateAtHalf_next @ 5.1 {
   const ℝ dth = ½ * dt;
   const ℝ zminv = 1. / zm;
@@ -429,7 +427,7 @@ endlZxpExp @ 3.31{ cout<<endl;}
   const ℝ denom = 1. + 0.5 * z0per * dv;
   const ℝ src = zwrate * dth * zminv;
   zp += (z0per * src - zr/*0*/ * bulk * dv) / denom;
-  cout<<"[36m[PolyGas::calcStateAtHalf_next] zp="<<zp<<"[m"<<endl;
+  //cout<<"[36m[PolyGas::calcStateAtHalf_next] zp="<<zp<<"[m"<<endl;
 }
 
 // 4. compute forces
@@ -442,16 +440,16 @@ endlZxpExp @ 3.31{ cout<<endl;}
 ∀ cells ttsCalcForce @ 6.1 {
   ∀ face {
     const ℝ svfacinv = zareap / sareap;
-    cout<<"[35m[TTS::calcForce] svfacinv="<<svfacinv<<"[m"<<endl;
+    //cout<<"[35m[TTS::calcForce] svfacinv="<<svfacinv<<"[m"<<endl;
     const ℝ srho = zrp * smf * svfacinv;
-    cout<<"[35m[TTS::calcForce] srho="<<srho<<"[m"<<endl;
+    //cout<<"[35m[TTS::calcForce] srho="<<srho<<"[m"<<endl;
     ℝ sstmp = max(zss, ssmin);
     sstmp = alfa * sstmp * sstmp;
-    cout<<"[35m[TTS::calcForce] sstmp="<<sstmp<<"[m"<<endl;
+    //cout<<"[35m[TTS::calcForce] sstmp="<<sstmp<<"[m"<<endl;
     const ℝ sdp = sstmp * (srho - zrp);
-    cout<<"[35m[TTS::calcForce] sdp="<<sdp<<"[m"<<endl;
+    //cout<<"[35m[TTS::calcForce] sdp="<<sdp<<"[m"<<endl;
     const ℝ³ sqq = -sdp * ssurfp;
-    cout<<"[35m[TTS::calcForce] sqq="<<sqq<<"[m"<<endl;
+    //cout<<"[35m[TTS::calcForce] sqq="<<sqq<<"[m"<<endl;
     sft = sqq;
     cout<<"[35m[TTS::calcForce] sft="<<sft<<"[m"<<endl;
   }
@@ -469,7 +467,7 @@ endlZxpExp @ 3.31{ cout<<endl;}
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
   const ℝ³ _ex[4] = {exp[0],exp[1],exp[2],exp[3]};
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
-  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
+/*  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
       <<xs_cell_node[c+NABLA_NB_CELLS*0]<<","
       <<xs_cell_node[c+NABLA_NB_CELLS*1]<<","
       <<xs_cell_node[c+NABLA_NB_CELLS*2]<<","
@@ -481,33 +479,33 @@ endlZxpExp @ 3.31{ cout<<endl;}
       <<xs_cell_face[c+NABLA_NB_CELLS*2]<<","
       <<xs_cell_face[c+NABLA_NB_CELLS*3]
       <<"[m"<<endl;
-
+*/
   ∀ node {
     const ℕ i=(#+N-1)%N; // previous
     const ℕ j=(#);       // current
     const ℕ k=(#+1)%N;   // next
-    cout<<"[32m[QCS::setCornerDiv] i="<<i<<", j="<<j<<", k="<<k<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] i="<<i<<", j="<<j<<", k="<<k<<"[m"<<endl;
     // Velocities and positions
     // 0 = point p
     const ℝ³ up0 = pu;
     const ℝ³ xp0 = pxp;
-    cout<<"[32m[QCS::setCornerDiv] up0="<<up0<<", xp0="<<xp0<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] up0="<<up0<<", xp0="<<xp0<<"[m"<<endl;
     // 1 = edge e2
     const ℝ³ up1 = ½ * (_pu[#] + _pu[k]);
     const ℝ³ xp1 = _ex[j];
-    cout<<"[32m[QCS::setCornerDiv] up1="<<up1<<", xp1="<<xp1<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] up1="<<up1<<", xp1="<<xp1<<"[m"<<endl;
     // 2 = zone center z
     const ℝ³ up2 = z0uc;
     const ℝ³ xp2 = zxp;
-    cout<<"[32m[QCS::setCornerDiv] up2="<<up2<<", xp2="<<xp2<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] up2="<<up2<<", xp2="<<xp2<<"[m"<<endl;
     // 3 = edge e1
     const ℝ³ up3 = ½ * (_pu[i] + _pu[#]);
     const ℝ³ xp3 = _ex[i];
-    cout<<"[32m[QCS::setCornerDiv] up3="<<up3<<", xp3="<<xp3<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] up3="<<up3<<", xp3="<<xp3<<"[m"<<endl;
     // compute 2d cartesian volume of corner
     const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
     c0area = cvolume;
-    cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
     // compute cosine angle
     const ℝ³ v1 = xp3-xp0;
     const ℝ³ v2 = xp1-xp0;
@@ -517,10 +515,10 @@ endlZxpExp @ 3.31{ cout<<endl;}
     //cout<<"[32m[QCS::setCornerDiv] minelen="<<minelen<<"[m"<<endl;
     c0cos = ((minelen < 1.e-12) ?
                  0.0 : 4.0 * dot2D(v1,v2)/(de1*de2));
-    cout<<"[32m[QCS::setCornerDiv] c0cos="<<c0cos<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] c0cos="<<c0cos<<"[m"<<endl;
     // compute divergence of corner
     c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
-    cout<<"[32m[QCS::setCornerDiv] c0div="<<c0div<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] c0div="<<c0div<<"[m"<<endl;
     // compute evolution factor
     const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
     const ℝ³ dxx2 = ½ * (xp2+xp3-xp0-xp1);
@@ -540,9 +538,9 @@ endlZxpExp @ 3.31{ cout<<endl;}
     const ℝ dv2 = length2(up2+up3-up0-up1);
     const ℝ du = sqrt(max(dv1, dv2));
     c0evol = (c0div < 0.0 ? evol : 0.);
-    cout<<"[32m[QCS::setCornerDiv] c0evol="<<c0evol<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] c0evol="<<c0evol<<"[m"<<endl;
     c0du   = (c0div < 0.0 ? du   : 0.);
-    cout<<"[32m[QCS::setCornerDiv] c0du="<<c0du<<"[m"<<endl;
+    //cout<<"[32m[QCS::setCornerDiv] c0du="<<c0du<<"[m"<<endl;
   }
 }
 
@@ -557,7 +555,7 @@ endlZxpExp @ 3.31{ cout<<endl;}
     // Compute c0rmu for each corner
     const ℝ rmu = zkur * zrp * c0evol;
     c0rmu = ((c0div > 0.0) ? 0. : rmu);
-    cout<<"[32m[QCS::setQCnForce] c0rmu="<<c0rmu<<"[m"<<endl;
+    //cout<<"[32m[QCS::setQCnForce] c0rmu="<<c0rmu<<"[m"<<endl;
   }
 }
 
@@ -580,8 +578,8 @@ endlZxpExp @ 3.31{ cout<<endl;}
     //cout<<"[32m[QCS::setQCnForce] c0qe1="<<c0qe1<<"[m"<<endl;
   }
 }
-∀ cells @ 6.51 { ∀ node cout<<"[32;1m[QCS::setQCnForce] c0qe0="<<c0qe0<<"[m"<<endl;}
-∀ cells @ 6.52 { ∀ node cout<<"[32m[QCS::setQCnForce] c0qe1="<<c0qe1<<"[m"<<endl;}
+//∀ cells @ 6.51 { ∀ node cout<<"[32;1m[QCS::setQCnForce] c0qe0="<<c0qe0<<"[m"<<endl;}
+//∀ cells @ 6.52 { ∀ node cout<<"[32m[QCS::setQCnForce] c0qe1="<<c0qe1<<"[m"<<endl;}
 
 // [5] Compute the Q forces
 // Routine number [5]  in the full algorithm CS2DQforce(...)
@@ -595,8 +593,8 @@ endlZxpExp @ 3.31{ cout<<endl;}
     //cout<<"[32m[QCS::setForce] c0cos="<<c0cos<<"[m"<<endl;
   }
 }
-∀ cells @ 6.61 { ∀ node cout<<"[32m[QCS::setForce] c0w="<<c0w<<"[m"<<endl;}
-∀ cells @ 6.62 { ∀ node cout<<"[32m[QCS::setForce] c0cos="<<c0cos<<"[m"<<endl;}
+//∀ cells @ 6.61 { ∀ node cout<<"[32m[QCS::setForce] c0w="<<c0w<<"[m"<<endl;}
+//∀ cells @ 6.62 { ∀ node cout<<"[32m[QCS::setForce] c0cos="<<c0cos<<"[m"<<endl;}
 
 ∀ cells qcsCalcForce_setForce_setUpTheForcesOnCorners @ 6.7 {
   const ℕ N = nbNode;
@@ -796,23 +794,26 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
 ∀ cells calcDtCourant @ 19.0 {
   const ℝ fuzz = 1.e-99;
   ℝ dtnew = 1.e99;
-  ℝ cdu = max(zdu, max(zss, fuzz));
-  ℝ zdthyd = zdl * cfl / cdu;
-  //int zmin = -1;
-  //zmin = (zdthyd < dtnew ? z : zmin);
+  const ℝ cdu = max(zdu, max(zss, fuzz));
+  const ℝ zdthyd = zdl * cfl / cdu;
   dtnew = (zdthyd < dtnew ? zdthyd : dtnew);
   //cout<<"\t[37m[Hydro::calcDtCourant] dtnew="<<dtnew<<"[m"<<endl;
   if (dtnew < dtrec){
-    cout<<"\t[37m[calcDtCourant] dtrec="<<dtrec<<"[m"<<endl;
+    //cout<<"\t[37m[calcDtCourant] dtrec="<<dtrec<<"[m"<<endl;
     dtrec = dtnew;
   }
 }
-∀ cells calcDtVolume @ 20.0 {
+calcDtCourantDump @ 19.1 {
+  cout<<"\t[37m[Hydro::calcDtCourant] dtrec="<<dtrec<<"[m"<<endl;
+}
+
+calcDtVolumeIni @ 20.0 {
   dvovmax = 1.e-99;
+}
+∀ cells calcDtVolume @ 20.0 {
   const ℝ zdvov = fabs((zvol - zvol0) / zvol0);
-  //zmax = (zdvov > dvovmax ? z : zmax);
   dvovmax = (zdvov > dvovmax ? zdvov : dvovmax);
-  //cout<<"\t[37m[Hydro::calcDtVolume] dvovmax="<<dvovmax<<"[m"<<endl;
+  cout<<"\t[37m[Hydro::calcDtVolume] dvovmax="<<dvovmax<<"[m"<<endl;
 }
 calcDtVolumeTst @ 20.1 {
   const ℝ dtnew = dt * cflv / dvovmax;
@@ -820,9 +821,9 @@ calcDtVolumeTst @ 20.1 {
   //cout<<"\t[37m[Hydro::calcDtVolume] dt="<<dt<<"[m"<<endl;
   //cout<<"\t[37m[Hydro::calcDtVolume] cflv="<<cflv<<"[m"<<endl;
   //cout<<"\t[37m[Hydro::calcDtVolume] dvovmax="<<dvovmax<<"[m"<<endl;
-  //cout<<"\t[37m[Hydro::calcDtVolume] dtnew="<<dtnew<<"[m"<<endl;
+  cout<<"\t[37m[Hydro::calcDtVolume] dtnew="<<dtnew<<"[m"<<endl;
   if (dtnew < dtrec){
-    cout<<"\t[37m[calcDtVolume] dtrec="<<dtrec<<"[m"<<endl;
+    //cout<<"\t[37m[calcDtVolume] dtrec="<<dtrec<<"[m"<<endl;
     dtrec = dtnew;
   }
 }
@@ -835,7 +836,7 @@ calcDtHydro @ 20.2 {
 
 incTime @ 30.0 {
   time += dt;
-  cout << "\t[35mEnd cycle "  << cycle
+  cout << "\t[35;1mEnd cycle "  << cycle
        << ", time = "  << time
        << ", dt = "  << dt << "[m"<<endl;
 }
