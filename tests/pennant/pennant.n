@@ -138,7 +138,7 @@ cells{
   ℝ² c0qe0[nodes]; // corner tmp
   ℝ² c0qe1[nodes]; // corner tmp
   ℝ c0w[nodes];    // corner tmp
-  ℝ c0rmu;         // corner tmp
+  ℝ c0rmu[nodes];  // corner tmp
 };
 
 
@@ -192,7 +192,7 @@ iniCout @ -48.0{
 ∀ nodes iniMeshCoords @ -32.0{
   px = coord;
   px *= (option_chaos)?option_chaos_seed:1.0;
-  cout<<"\t[33m[iniMeshCoords] px["<<n<<"]="<<px<<"[m"<<endl;
+  cout<<"[33m[iniMeshCoords] px["<<n<<"]="<<px<<"[m"<<endl;
 }
 
 ∀ cells iniMeshCalcCtrs_zx @ -31.9 {
@@ -202,12 +202,14 @@ iniCout @ -48.0{
   cout<<"[33m[Mesh::calcCtrs] zx["<<c<<"]="<<zx<<"[m"<<endl;
 }
 
-∀ faces iniMeshCalcCtrs_ex @ -31.9 {
+endlZxEx @-31.89{ cout<<endl;}
+
+∀ faces iniMeshCalcCtrs_ex @ -31.88 {
   ex = 0.0;
   ∀ node ex += px; 
   ex /= nbNode;
   assert(nbNode==2);
-  //cout<<"\n[33m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m";
+  cout<<"[33m[Mesh::calcCtrs] ex["<<uid<<"]="<<ex<<"[m"<<endl;
 }
 
 ∀ cells iniMeshCalcVols @ -31.8 {
@@ -225,7 +227,7 @@ iniCout @ -48.0{
     zvol  += svol;
     //cout<<"\n[33m[iniMeshCalcVolsCross2D] sarea["<<uid<<","<<n<<"]="<<sarea<<"[m";
   }
-  cout<<"\t[33m[iniMeshCalcVols] zvol="<<zvol<<"[m"<<endl;
+  cout<<"[33m[iniMeshCalcVols] zvol="<<zvol<<"[m"<<endl;
 }
 
 ∀ cells iniMeshCalcSideFracs @ -31.7 {
@@ -336,11 +338,13 @@ calcGlobalDt @ 2.0 {
   cout<<"[33m[Mesh::calcCtrs] zxp["<<c<<"]="<<zxp<<"[m"<<endl;
 }
 
-∀ faces computeExp @ 3.3 {
+endlZxpExp @ 3.31{ cout<<endl;}
+
+∀ faces computeExp @ 3.32 {
   exp = 0.0;
   ∀ node exp += pxp;
   exp /= nbNode;
-  //cout<<"\n[33m[Mesh::calcCtrs] exp["<<c<<"]="<<exp<<"[m";
+  cout<<"[33m[Mesh::calcCtrs] exp["<<f<<"]="<<exp<<"[m"<<endl;
 }
 
 ∀ cells calcVols @ 3.4 {
@@ -351,7 +355,7 @@ calcGlobalDt @ 2.0 {
   zvolp=0;
   ∀ node {
     const ℕ i=#;
-    const ℕ j=(#+N+1)%N;
+    const ℕ j=(#+1)%N;
     sareap = ½ * cross2D(X[j]-X[i],zxp-X[i]);
     svolp = ⅓* sareap * (X[i].x+X[j].x+zxp.x);
     zareap += sareap;
@@ -359,6 +363,8 @@ calcGlobalDt @ 2.0 {
   } 
   cout<<"\t[33m[calcVols] zvolp="<<zvolp<<"[m"<<endl;
 }
+∀ cells dumpZareap @ 3.41{cout<<"\t[33m[calcVols] zareap="<<zareap<<"[m"<<endl;} 
+∀ cells dumpSareap @ 3.42{ ∀ node cout<<"\t[33m[calcVols] sareap="<<sareap<<"[m"<<endl;} 
 
 ∀ cells calcSurfVecs @ 3.5 {
   ∀ face{
@@ -369,7 +375,7 @@ calcGlobalDt @ 2.0 {
 
 ∀ faces calcEdgeLen @ 3.5 {
   elen = length(pxp[1]-pxp[0]);
-  //cout<<"\t[33m[calcEdgeLen] elen="<<elen<<"[m"<<endl;
+  cout<<"\t[33m[calcEdgeLen] elen["<<f<<"]="<<elen<<"[m"<<endl;
 }
 
 ∀ cells calcCharLen @ 3.6 {
@@ -384,14 +390,14 @@ calcGlobalDt @ 2.0 {
 // 2. compute point masses
 ∀ cells calcRhoOne @ 4.0 {
   zrp = zm / zvolp;
-  cout<<"\t[37m[calcRhoOne] zrp="<<zrp<<"[m"<<endl;
+  cout<<"\t[37m[calcRhoOne] zr="<<zrp<<"[m"<<endl;
 }
 
 ∀ cells calcCrnrMass @ 4.1 {
   const ℕ N = nbNode;
   ∀ node {
     const ℕ j=(#+N-1)%N;
-    cmaswt = ½ * zrp * zareap * (smf + smf[j]);
+    cmaswt = ½ * zrp * zareap * (smf + smf[c*4+j]);
     cout<<"\t[37m[calcCrnrMass] cmaswt="<<cmaswt<<"[m"<<endl;
   }
 }
@@ -408,21 +414,22 @@ calcGlobalDt @ 2.0 {
   const ℝ perx = gm1 * local_rx;
   const ℝ csqd = max(ss2, prex + perx * local_px / (local_rx * local_rx));
   zp =local_px;
-  //cout<<"[36m[PolyGas::calcEOS] zp="<<zp<<"[m"<<endl;
+  cout<<"[36m[PolyGas::calcEOS] zp=px="<<zp<<"[m"<<endl;
   z0per = perx;
   zss = √(csqd);
+}
+∀ cells dumpZss @ 5.01 {
   cout<<"[36m[PolyGas::calcEOS] zss="<<zss<<"[m"<<endl;
 }
-
 ∀ cells calcStateAtHalf_next @ 5.1 {
   const ℝ dth = ½ * dt;
   const ℝ zminv = 1. / zm;
   const ℝ dv = (zvolp - zvol0) * zminv;
-  const ℝ bulk = zr0 * zss * zss;
+  const ℝ bulk = zr/*0*/ * zss * zss;
   const ℝ denom = 1. + 0.5 * z0per * dv;
   const ℝ src = zwrate * dth * zminv;
-  zp += (z0per * src - zr0 * bulk * dv) / denom;
-  //cout<<"[36m[PolyGas::calcStateAtHalf_next] zp="<<zp<<"[m"<<endl;
+  zp += (z0per * src - zr/*0*/ * bulk * dv) / denom;
+  cout<<"[36m[PolyGas::calcStateAtHalf_next] zp="<<zp<<"[m"<<endl;
 }
 
 // 4. compute forces
@@ -434,14 +441,19 @@ calcGlobalDt @ 2.0 {
 }
 ∀ cells ttsCalcForce @ 6.1 {
   ∀ face {
-    ℝ svfacinv = zareap / sareap;
-    ℝ srho = zrp * smf * svfacinv;
+    const ℝ svfacinv = zareap / sareap;
+    cout<<"[35m[TTS::calcForce] svfacinv="<<svfacinv<<"[m"<<endl;
+    const ℝ srho = zrp * smf * svfacinv;
+    cout<<"[35m[TTS::calcForce] srho="<<srho<<"[m"<<endl;
     ℝ sstmp = max(zss, ssmin);
     sstmp = alfa * sstmp * sstmp;
-    ℝ sdp = sstmp * (srho - zrp);
-    //ℝ² sqq = -sdp * ssurfp;
-    sft = -sdp * ssurfp;
-    //cout<<"[34m[TTS::calcForce] sft="<<sft[f]<<"[m"<<endl;
+    cout<<"[35m[TTS::calcForce] sstmp="<<sstmp<<"[m"<<endl;
+    const ℝ sdp = sstmp * (srho - zrp);
+    cout<<"[35m[TTS::calcForce] sdp="<<sdp<<"[m"<<endl;
+    const ℝ³ sqq = -sdp * ssurfp;
+    cout<<"[35m[TTS::calcForce] sqq="<<sqq<<"[m"<<endl;
+    sft = sqq;
+    cout<<"[35m[TTS::calcForce] sft="<<sft<<"[m"<<endl;
   }
 }
 
@@ -452,12 +464,12 @@ calcGlobalDt @ 2.0 {
   //cout<<"[32m[QCS::setCornerDiv] z0uc="<<z0uc<<"[m"<<endl;
 }
 
-∀ cells qcsCalcForce_divergenceAtTheCorner @ 6.3 {
+∀ cells qcsCalcForce_setCornerDiv @ 6.3 {
   const ℕ N = nbNode;
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _ex[4] = {ex[0],ex[1],ex[2],ex[3]};
+  const ℝ³ _ex[4] = {exp[0],exp[1],exp[2],exp[3]};
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
-/*  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
+  cout<<"[32m[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
       <<xs_cell_node[c+NABLA_NB_CELLS*0]<<","
       <<xs_cell_node[c+NABLA_NB_CELLS*1]<<","
       <<xs_cell_node[c+NABLA_NB_CELLS*2]<<","
@@ -469,33 +481,33 @@ calcGlobalDt @ 2.0 {
       <<xs_cell_face[c+NABLA_NB_CELLS*2]<<","
       <<xs_cell_face[c+NABLA_NB_CELLS*3]
       <<"[m"<<endl;
-*/
+
   ∀ node {
     const ℕ i=(#+N-1)%N; // previous
     const ℕ j=(#);       // current
     const ℕ k=(#+1)%N;   // next
-    //cout<<"[32m[QCS::setCornerDiv] i="<<i<<", j="<<j<<", k="<<k<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] i="<<i<<", j="<<j<<", k="<<k<<"[m"<<endl;
     // Velocities and positions
     // 0 = point p
     const ℝ³ up0 = pu;
-    const ℝ³ xp0 = px;
-    //cout<<"[32m[QCS::setCornerDiv] up0="<<up0<<", xp0="<<xp0<<"[m"<<endl;
+    const ℝ³ xp0 = pxp;
+    cout<<"[32m[QCS::setCornerDiv] up0="<<up0<<", xp0="<<xp0<<"[m"<<endl;
     // 1 = edge e2
     const ℝ³ up1 = ½ * (_pu[#] + _pu[k]);
     const ℝ³ xp1 = _ex[j];
-    //cout<<"[32m[QCS::setCornerDiv] up1="<<up1<<", xp1="<<xp1<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] up1="<<up1<<", xp1="<<xp1<<"[m"<<endl;
     // 2 = zone center z
     const ℝ³ up2 = z0uc;
-    const ℝ³ xp2 = zx;
-    //cout<<"[32m[QCS::setCornerDiv] up2="<<up2<<", xp2="<<xp2<<"[m"<<endl;
+    const ℝ³ xp2 = zxp;
+    cout<<"[32m[QCS::setCornerDiv] up2="<<up2<<", xp2="<<xp2<<"[m"<<endl;
     // 3 = edge e1
     const ℝ³ up3 = ½ * (_pu[i] + _pu[#]);
     const ℝ³ xp3 = _ex[i];
-    //cout<<"[32m[QCS::setCornerDiv] up3="<<up3<<", xp3="<<xp3<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] up3="<<up3<<", xp3="<<xp3<<"[m"<<endl;
     // compute 2d cartesian volume of corner
     const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
-    //c0area = cvolume;
-    //cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
+    c0area = cvolume;
+    cout<<"[32m[QCS::setCornerDiv] c0area="<<c0area<<"[m"<<endl;
     // compute cosine angle
     const ℝ³ v1 = xp3-xp0;
     const ℝ³ v2 = xp1-xp0;
@@ -505,10 +517,10 @@ calcGlobalDt @ 2.0 {
     //cout<<"[32m[QCS::setCornerDiv] minelen="<<minelen<<"[m"<<endl;
     c0cos = ((minelen < 1.e-12) ?
                  0.0 : 4.0 * dot2D(v1,v2)/(de1*de2));
-    //cout<<"[32m[QCS::setCornerDiv] c0cos="<<c0cos<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] c0cos="<<c0cos<<"[m"<<endl;
     // compute divergence of corner
     c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
-    //cout<<"[32m[QCS::setCornerDiv] c0div="<<c0div<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] c0div="<<c0div<<"[m"<<endl;
     // compute evolution factor
     const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
     const ℝ³ dxx2 = ½ * (xp2+xp3-xp0-xp1);
@@ -528,9 +540,9 @@ calcGlobalDt @ 2.0 {
     const ℝ dv2 = length2(up2+up3-up0-up1);
     const ℝ du = sqrt(max(dv1, dv2));
     c0evol = (c0div < 0.0 ? evol : 0.);
-    //cout<<"[32m[QCS::setCornerDiv] c0evol="<<c0evol<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] c0evol="<<c0evol<<"[m"<<endl;
     c0du   = (c0div < 0.0 ? du   : 0.);
-    //cout<<"[32m[QCS::setCornerDiv] c0du="<<c0du<<"[m"<<endl;
+    cout<<"[32m[QCS::setCornerDiv] c0du="<<c0du<<"[m"<<endl;
   }
 }
 
@@ -545,7 +557,7 @@ calcGlobalDt @ 2.0 {
     // Compute c0rmu for each corner
     const ℝ rmu = zkur * zrp * c0evol;
     c0rmu = ((c0div > 0.0) ? 0. : rmu);
-    //cout<<"[32m[QCS::setQCnForce] c0rmu="<<c0rmu<<"[m"<<endl;
+    cout<<"[32m[QCS::setQCnForce] c0rmu="<<c0rmu<<"[m"<<endl;
   }
 }
 
@@ -560,12 +572,16 @@ calcGlobalDt @ 2.0 {
     const ℕ p2=(#+1)%N;   // next
     // Compute: c0qe(1,2,3)=edge 1, y component (2nd), 3rd corner
     //          c0qe(2,1,3)=edge 2, x component (1st)
+    //cout<<"[32m[QCS::setQCnForce] pu[p]="<<_pu[p]<<", pu[p2]="<<_pu[p2]<<"[m"<<endl;
+    //cout<<"[32m[QCS::setQCnForce] elen[e2]="<<_elen[p]<<", c0rmu="<<c0rmu<<"[m"<<endl;
     c0qe0 = c0rmu * (_pu[p] - _pu[p1]) / _elen[p1];
-    //cout<<"[32m[QCS::setQCnForce] c0qe0="<<c0qe0<<"[m"<<endl;
-    c0qe1 = c0rmu * (_pu[p2] - _pu[p]) / _elen[p2];
+    //cout<<"[32;1m[QCS::setQCnForce] c0qe0="<<c0qe0<<"[m"<<endl;
+    c0qe1 = c0rmu * (_pu[p2] - _pu[p]) / _elen[p];
     //cout<<"[32m[QCS::setQCnForce] c0qe1="<<c0qe1<<"[m"<<endl;
   }
 }
+∀ cells @ 6.51 { ∀ node cout<<"[32;1m[QCS::setQCnForce] c0qe0="<<c0qe0<<"[m"<<endl;}
+∀ cells @ 6.52 { ∀ node cout<<"[32m[QCS::setQCnForce] c0qe1="<<c0qe1<<"[m"<<endl;}
 
 // [5] Compute the Q forces
 // Routine number [5]  in the full algorithm CS2DQforce(...)
@@ -573,30 +589,33 @@ calcGlobalDt @ 2.0 {
 ∀ cells qcsCalcForce_setForce_preparationOfExtraVariables @ 6.6 {
   ∀ node {
     const ℝ csin2 = 1.0 - c0cos * c0cos;
+    //cout<<"[32m[QCS::setForce] csin2="<<csin2<<"[m"<<endl;
     c0w   = ((csin2 < 1.e-4) ? 0. : c0area / csin2);
-    //cout<<"[32m[QCS::setForce] c0w="<<c0w<<"[m"<<endl;
     c0cos = ((csin2 < 1.e-4) ? 0. : c0cos);
     //cout<<"[32m[QCS::setForce] c0cos="<<c0cos<<"[m"<<endl;
   }
 }
+∀ cells @ 6.61 { ∀ node cout<<"[32m[QCS::setForce] c0w="<<c0w<<"[m"<<endl;}
+∀ cells @ 6.62 { ∀ node cout<<"[32m[QCS::setForce] c0cos="<<c0cos<<"[m"<<endl;}
+
 ∀ cells qcsCalcForce_setForce_setUpTheForcesOnCorners @ 6.7 {
   const ℕ N = nbNode;
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   ∀ face {
     // Edge length for c1, c2 contribution to s
     const ℝ _el = _elen[#];
-    const ℕ c10 = #;
+    //const ℕ c10 = #;
     const ℕ c20 = (#+1)%N; // next
-    sfq = (c0w[c10]*(c0qe1[c10]+c0cos[c10]*c0qe0[c10])+
-           c0w[c20]*(c0qe0[c20]+c0cos[c20]*c0qe1[c20])) / _el;
-    //cout<<"[32m[QCS::setForce] sfq="<<sfq<<"[m"<<endl;
+    sfq = (c0w*(c0qe1+c0cos*c0qe0)+
+           c0w[NABLA_FACE_PER_CELL*c+c20]*(c0qe0[NABLA_FACE_PER_CELL*c+c20]+c0cos[NABLA_FACE_PER_CELL*c+c20]*c0qe1[NABLA_FACE_PER_CELL*c+c20])) / _el;
+    cout<<"[32m[QCS::setForce] sfq="<<sfq<<"[m"<<endl;
   }
 }
 // Routine number [6] in the full algorithm
 ∀ cells qcsCalcForce_setVelDiff @ 6.8 {
   const ℕ N = nbNode;
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _px[4] = {px[0],px[1],px[2],px[3]};
+  const ℝ³ _px[4] = {pxp[0],pxp[1],pxp[2],pxp[3]};
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   z0tmp=0;
   ∀ node {
@@ -613,8 +632,9 @@ calcGlobalDt @ 2.0 {
     //cout<<"[32m[QCS::setVelDiff] z0tmp="<<z0tmp<<"[m"<<endl;
   }
   zdu = q1 * zss + 2. * q2 * z0tmp;
-  //cout<<"[32m[QCS::setVelDiff] zdu="<<zdu<<"[m"<<endl;
+  cout<<"[32m[QCS::setVelDiff] zdu="<<zdu<<"[m"<<endl;
 }
+//∀ cells @ 6.61 { ∀ node cout<<"[32m[QCS::setVelDiff] zdu="<<zdu<<"[m"<<endl;}
 
 
 ∀ cells sumCrnrForce @ 7.0 {
@@ -624,8 +644,10 @@ calcGlobalDt @ 2.0 {
   ℝ³ t[4]; ∀ face t[#]=sft;
   ∀ node {
     const ℕ i=(#+N-1)%N; // previous
+    //cout<<"\t[37m[Hydro::sumCrnrForce] s="<<#<<", s3="<<i<<"[m"<<endl;
+    //cout<<"\t[37m[Hydro::sumCrnrForce] sf[s]="<<p[#]<<", sf2[s]="<<q[#]<<", sf3[s]="<<t[#]<<"[m"<<endl;
     cftot = (p[#] + q[#] + t[#]) - (p[i] + q[i] + t[i]);
-    cout<<"[32m[QCS::sumCrnrForce] cftot["<<(uid*4+n)<<"]="<<cftot<<"[m"<<endl;
+    cout<<"\t[37m[QCS::sumCrnrForce] cftot["<<(uid*4+n)<<"]="<<cftot<<"[m"<<endl;
   }
 }
 
@@ -722,8 +744,8 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
   //cout<<"[37m[calcWork] dth="<<dth<<"[m"<<endl;
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
   const ℝ³ _pu0[4] = {pu0[0],pu0[1],pu0[2],pu0[3]};
-  const ℝ³ _fp[4] = {sfp[0],sfp[1],sfp[2],sfp[3]};
-  const ℝ³ _fq[4] = {sfq[0],sfq[1],sfq[2],sfq[3]};
+  //const ℝ³ _fp[4] = {sfp[0],sfp[1],sfp[2],sfp[3]};
+  //const ℝ³ _fq[4] = {sfq[0],sfq[1],sfq[2],sfq[3]};
   const ℝ _xp[4] = {pxp[0].x,pxp[1].x,pxp[2].x,pxp[3].x};
   ∀ face { 
     const ℕ j=(#);       // current
@@ -732,7 +754,7 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
         <<" p1="<<xs_cell_node[c+NABLA_NB_CELLS*j]
         <<" p2="<<xs_cell_node[c+NABLA_NB_CELLS*k]
         <<"[m"<<endl;*/
-    const ℝ³ sftot = _fp[j] + _fq[j];
+    const ℝ³ sftot = sfp + sfq/*[c*4+j]*/;
     //cout<<"[37m[calcWork] sfp="<<_fp[j]<<"[m"<<endl;
     //cout<<"[37m[calcWork] sfq="<<_fq[j]<<"[m"<<endl;
     //cout<<"[37m[calcWork] sftot="<<sftot<<"[m"<<endl;

@@ -114,7 +114,8 @@ static void actItemNablaItems(astNode *n, void *generic_arg){
   // Si on tombe sur un nabla_item ici, c'est que c'est un tableau à la dimension de cet item
   variable->dim=1;
   variable->size=0;
-  if (cfgn=='n'&& n->children->tokenid==CELLS) variable->size=8; // node_var[cells]: tied @ 8 (hex mesh)
+  if (cfgn=='n'&& n->children->tokenid==CELLS) variable->size=8;
+#warning node_var[cells] tied @ 8 (hex mesh)
   if (cfgn=='f'&& n->children->tokenid==CELLS) variable->size=2; // face_var[cells]: backCell & frontCell
 //#warning cell_var[***] stuck @
   if (cfgn=='c'&& n->children->tokenid==NODES){ variable->size=8; variable->vitem='n';}
