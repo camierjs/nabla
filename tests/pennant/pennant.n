@@ -48,6 +48,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 with ℝ²;
 
+// ****************************************************************************
+// Default options should match test/sedovsmall/sedovsmall.pnt
+// cstop=100, tstop=1.0, meshtype=rect, meshparams=3 3 1.125 1.125
+// subregion=0.0 0.3 0.0 0.3, rinitsub=1.0, einitsub=40.222, bcx=0.0 1.125
+// bcy=0.0 1.125, ssmin=0.1, q1=0.1, q2=1.0, dtinit=0.0025
+// ****************************************************************************
 options{
   // Mesh options
   ℝ LENGTH       = 1.125;
@@ -56,42 +62,40 @@ options{
   ℕ Z_EDGE_ELEMS = 1;
   ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
   ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
-  ℝ option_stoptime = 1.;     // ! utilisé en dur dans le backend lambda !
+  ℝ option_stoptime = 1.0;     // ! utilisé en dur dans le backend lambda !
   // Pennant options
-  ℾ option_debug = false;
-  ℕ cstop=999999; // simulation stop cycle
-  ℝ tstop=1.e99;  // simulation stop time
-  ℝ dtmax=1.e99;  // maximum timestep size
-  ℝ dtinit=1.e99; // initial timestep size
-  ℝ dtfac=1.2;    // factor limiting timestep growth
-  ℕ dtreport=10;  // frequency for timestep reports
-  ℝ cfl=0.6;      // Courant number, limits timestep
-  ℝ cflv=0.1;     // volume change limit for timestep
-  ℝ rinit=1.0;    // initial density for main mesh
-  ℝ einit=0.0;    // initial energy for main mesh
-  ℾ subregion=true;
-  ℝ subrgn_xmin=0.0;
-  ℝ subrgn_xmax=0.3;
-  ℝ subrgn_ymin=0.0;
-  ℝ subrgn_ymax=0.3;
-  ℝ rinitsub=1.0; // initial density in subregion
-  ℝ einitsub=0.0; // initial energy in subregion
-  ℝ uinitradial=0.0; // initial velocity in radial direction
-  //std::vector<ℝ> bcx; // x values of x-plane fixed boundaries
-  //std::vector<ℝ> bcy; // y values of y-plane fixed boundaries
-  ℝ option_gamma=5./3.; // coeff. for ideal gas equation
-  ℝ ssmin=0;      // minimum sound speed for gas
-  ℝ alfa=0.5;     // alpha coefficient for TTS model
-  ℝ qgamma=5./3.; // gamma coefficient for Q model
-  ℝ q1=0.0;       // linear coefficients for Q model
-  ℝ q2=2.0;       // quadratic coefficients for Q model
-  ℾ option_chaos = true;
-  ℝ option_chaos_seed = 1.1234567890123;//456789;
+  ℾ trace       = false;
+  ℕ cstop       = 100;    // simulation stop cycle
+  ℝ tstop       = 1.0;    // simulation stop time
+  ℝ dtmax       = 1.e99;  // maximum timestep size
+  ℝ dtinit      = 0.0025; // initial timestep size
+  ℝ dtfac       = 1.2;    // factor limiting timestep growth
+  ℕ dtreport    = 10;  // frequency for timestep reports
+  ℝ cfl         = 0.6;      // Courant number, limits timestep
+  ℝ cflv        = 0.1;     // volume change limit for timestep
+  ℝ rinit       = 1.0;    // initial density for main mesh
+  ℝ einit       = 0.0;    // initial energy for main mesh
+  ℾ subregion   = true;
+  ℝ subrgn_xmin = 0.0;
+  ℝ subrgn_xmax = 0.3;
+  ℝ subrgn_ymin = 0.0;
+  ℝ subrgn_ymax = 0.3;
+  ℝ rinitsub    = 1.0;    // initial density in subregion
+  ℝ einitsub    = 40.222; // initial energy in subregion
+  ℝ uinitradial = 0.0;    // initial velocity in radial direction
+  ℝ ggamma      = 5./3.;  // coeff. for ideal gas equation
+  ℝ ssmin       = 0.1;    // minimum sound speed for gas
+  ℝ alpha       = 0.5;    // alpha coefficient for TTS model
+  ℝ qgamma      = 5./3.; // gamma coefficient for Q model
+  ℝ q1          = 0.1; // linear coefficients for Q model
+  ℝ q2          = 1.0; // quadratic coefficients for Q model
+  ℾ chaos       = false;
+  ℝ chaos_seed  = 1.1234567890123;
 };
 
 enum{red=31,green,yellow,blue,magenta,cyan,white};
-#define dbg(...) if (option_debug) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
-#define dbc(clr,...) if (option_debug) cout<<"["<<clr<<"m"<<__VA_ARGS__<<"[m"<<endl;
+#define dbg(...) if (trace) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
+#define dbc(clr,...) if (trace) cout<<"["<<clr<<"m"<<__VA_ARGS__<<"[m"<<endl;
 
 // ****************************************************************************
 // * Zone Variables
@@ -117,28 +121,28 @@ cells{
   ℝ zdu;    // zone velocity difference
   ℝ z0per;  // zone tmp variable in PolyGas calcStateAtHalf
   ℝ² z0uc;  // zone tmp centered velocity
-  //ℝ zr0;    // zone tmp
-  ℝ z0tmp;  // zone tmp
-  ℝ sarea[faces];  // side area
-  ℝ svol[faces];   // side volume
-  ℝ sareap[faces]; // side area, middle of cycle
-  ℝ svolp[faces];  // side volume, middle of cycle
-  ℝ² ssurfp[faces];// side surface vector
-  ℝ smf[faces];    // side mass fraction
-  ℝ² sfp[faces];   // side force from pressure
-  ℝ² sfq[faces];   // side force from artificial visc.
-  ℝ² sft[faces];   // side force from tts
-  ℝ² cftot[nodes]; // corner force, total from all sources
-  ℝ cmaswt[nodes]; // corner contribution to pmaswt
-  ℝ c0area[nodes]; // corner tmp
-  ℝ c0evol[nodes]; // corner tmp
-  ℝ c0du[nodes];   // corner tmp
-  ℝ c0div[nodes];  // corner tmp
-  ℝ c0cos[nodes];  // corner tmp
-  ℝ² c0qe0[nodes]; // corner tmp
-  ℝ² c0qe1[nodes]; // corner tmp
-  ℝ c0w[nodes];    // corner tmp
-  ℝ c0rmu[nodes];  // corner tmp
+  // Sides
+  ℝ sarea[faces];  // area
+  ℝ svol[faces];   // volume
+  ℝ sareap[faces]; // area, middle of cycle
+  ℝ svolp[faces];  // volume, middle of cycle
+  ℝ² ssurfp[faces];// surface vector
+  ℝ smf[faces];    // mass fraction
+  ℝ² sfp[faces];   // force from pressure
+  ℝ² sfq[faces];   // force from artificial visc.
+  ℝ² sft[faces];   // force from tts
+  // Corners
+  ℝ² cftot[nodes]; // force, total from all sources
+  ℝ cmaswt[nodes]; // contribution to pmaswt
+  ℝ c0area[nodes]; // tmp
+  ℝ c0evol[nodes]; // tmp
+  ℝ c0du[nodes];   // tmp
+  ℝ c0div[nodes];  // tmp
+  ℝ c0cos[nodes];  // tmp
+  ℝ² c0qe0[nodes]; // tmp
+  ℝ² c0qe1[nodes]; // tmp
+  ℝ c0w[nodes];    // tmp
+  ℝ c0rmu[nodes];  // tmp
 };
 
 
@@ -146,14 +150,10 @@ cells{
 // * Point Variables
 // ****************************************************************************
 nodes{
-  ℝ² px0;   // point coords, start of cycle
-  ℝ² px;    // point coordinates
-  ℝ² pxp;   // point coords, middle of cycle
-  ℝ² pu;    // point velocity
-  ℝ² pu0;   // point velocity, start of cycle
-  ℝ² pap;   // point acceleration
-  ℝ² pf;    // point force
-  ℝ pmaswt; // point mass, weighted by 1/r
+  ℝ² px,px0,pxp; // point coordinates, start & middle of cycle
+  ℝ² pu,pu0;     // point velocity
+  ℝ² pap,pf;     // point acceleration, force
+  ℝ pmaswt;      // point mass, weighted by 1/r
 };
 
 
@@ -161,9 +161,8 @@ nodes{
 // * Edge Variables
 // ****************************************************************************
 faces{
-  ℝ² ex;    // edge center coordinates
-  ℝ² exp;   // edge ctr coords, middle of cycle
-  ℝ elen;   // edge length
+  ℝ² ex,exp; // edge center coordinates & middle of cycle
+  ℝ elen;    // edge length
 };
 
 
@@ -171,14 +170,12 @@ faces{
 // * Global Variables
 // ****************************************************************************
 global{
-  //ℝ time; // simulation time
   ℕ cycle;  // simulation cycle number
   ℝ dt;     // current timestep
   ℝ dtlast; // previous timestep
   ℝ dtrec;  // maximum timestep for hydro
   ℝ² vfix;  // vector perp. to fixed plane
   ℝ dvovmax;//
-  //ℝ sumi;   // tmp var for sumEnergy
 };
 
 
@@ -189,7 +186,7 @@ iniCout @ -48.0 {cout<<"\n[m";}
 
 ∀ nodes iniMeshCoords @ -32.0{
   px = coord;
-  px *= (option_chaos)?option_chaos_seed:1.0;
+  px *= (chaos)?chaos_seed:1.0;
   dbc(yellow,"[iniMeshCoords] px["<<n<<"]="<<px);
 }
 
@@ -199,8 +196,6 @@ iniCout @ -48.0 {cout<<"\n[m";}
   zx /= nbNode;
   dbc(yellow,"[Mesh::calcCtrs] zx["<<c<<"]="<<zx);
 }
-
-//endlZxEx @-31.89{ cout<<endl;}
 
 ∀ faces iniMeshCalcCtrs_ex @ -31.88 {
   ex = 0.0;
@@ -212,18 +207,16 @@ iniCout @ -48.0 {cout<<"\n[m";}
 
 ∀ cells iniMeshCalcVols @ -31.8 {
   const int N = nbNode;
-  const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
+  ℝ³ X[4]; ∀ node X[#]=px;
   zvol=0;
   zarea=0; 
   ∀ node{
     const int i=#;
     const int j=(#+1)%N;
-    //dbc(yellow,"[iniMeshCalcVolsCross2D] i="<<i<<", j="<<j<<", N="<<N<<"[m";
     sarea = ½ * cross2D(X[j]-X[i],zx-X[i]);
     svol = ⅓* sarea * (X[i].x+X[j].x+zx.x);
     zarea += sarea;
     zvol  += svol;
-    //dbc(yellow,"[iniMeshCalcVolsCross2D] sarea["<<uid<<","<<n<<"]="<<sarea<<"[m";
   }
   dbc(yellow,"[iniMeshCalcVols] zvol="<<zvol);
 }
@@ -254,9 +247,6 @@ iniGlobals @ -20.0 {
 ∀ cells iniZwrate @ -14.9 { zwrate=0.0; }
 ∀ cells @ -14.8 if (subregion) {
   const double eps = 1.e-12;
-  //dbc(white,"[subregion] zx["<<c<<"]="<<zx);
-  //dbc(white,"[subregion] subrgn_xmin="<<subrgn_xmin);
-  //dbc(white,"[subregion] subrgn_xmax="<<subrgn_xmax);
   if (!(zx.x > (subrgn_xmin - eps) && zx.x < (subrgn_xmax + eps) &&
         zx.y > (subrgn_ymin - eps) && zx.y < (subrgn_ymax + eps))) continue;
   dbc(white,"[subregion] zx["<<c<<"] in subregion!");
@@ -285,11 +275,9 @@ iniGlobals @ -20.0 {
 iniRstDtHydro @ -14.4 { dtrec = 1.e99; }
 
 
-
 // ****************************************************************************
 // * Partie boucle de calcul ]+0.0,+∞[ 
 // ****************************************************************************
-
 
 incCycle @ 1.0 { cycle += 1; }
 
@@ -317,6 +305,7 @@ calcGlobalDt @ 2.0 {
 
 ∀ nodes saveOffPxFromPreviousCycle @ 3.0 { px0=px; }
 ∀ nodes saveOffPuFromPreviousCycle @ 3.0 { pu0=pu; }
+∀ cells saveOffZvolFromPreviousCycle @ 3.0 { zvol0=zvol; }
 
 // ===== Predictor step =====
 // 1. advance mesh to center of time step
@@ -325,20 +314,15 @@ calcGlobalDt @ 2.0 {
   dbc(white,"[Hydro::advPosHalf] pxp"<<pxp);
 }
 
-// save off zone variable values from previous cycle
-∀ cells saveOffZvolFromPreviousCycle @ 3.2 { zvol0=zvol; }
-
 // 1a. compute new mesh geometry
-∀ cells computeZxp @ 3.3 {
+∀ cells computeZxp @ 3.2 {
   zxp=0;
   ∀ node zxp+=pxp;
   zxp/= nbNode;
   dbc(yellow,"[Mesh::calcCtrs] zxp["<<c<<"]="<<zxp);
 }
 
-//endlZxpExp @ 3.31{ cout<<endl;}
-
-∀ faces computeExp @ 3.32 {
+∀ faces computeExp @ 3.2 {
   exp = 0.0;
   ∀ node exp += pxp;
   exp /= nbNode;
@@ -347,15 +331,13 @@ calcGlobalDt @ 2.0 {
 
 ∀ cells calcVols @ 3.4 {
   const int N = nbNode;
-  const ℝ³ X[4] = {pxp[0],pxp[1],pxp[2],pxp[3]};
-  //ℝ³ X[4];  ∀ node X[#]=pxp;
+  ℝ³ X[4]; ∀ node X[#]=pxp;
   zareap=0; 
   zvolp=0;
   ∀ node {
-    const ℕ i=#;
     const ℕ j=(#+1)%N;
-    sareap = ½ * cross2D(X[j]-X[i],zxp-X[i]);
-    svolp = ⅓* sareap * (X[i].x+X[j].x+zxp.x);
+    sareap = ½ * cross2D(X[j]-X[#],zxp-X[#]);
+    svolp = ⅓* sareap * (X[#].x+X[j].x+zxp.x);
     zareap += sareap;
     zvolp  += svolp;
   } 
@@ -393,9 +375,10 @@ calcGlobalDt @ 2.0 {
 
 ∀ cells calcCrnrMass @ 4.1 {
   const ℕ N = nbNode;
+  ℝ m[4]; ∀ node m[#]=smf;
   ∀ node {
     const ℕ j=(#+N-1)%N;
-    cmaswt = ½ * zrp * zareap * (smf + smf[c*4+j]);
+    cmaswt = ½ * zrp * zareap * (m[#] + m[j]);
     dbc(white,"[calcCrnrMass] cmaswt="<<cmaswt);
   }
 }
@@ -403,28 +386,27 @@ calcGlobalDt @ 2.0 {
 // 3. compute material state (half-advanced)
 // calcStateAtHalf
 ∀ cells calcStateAtHalf_calcEOS @ 5.0 {
-  const ℝ gm1 = option_gamma - 1.;
-  const ℝ ss2 = max(ssmin * ssmin, 1.e-99);
-  const ℝ local_rx = zr;
-  const ℝ local_ex = max(ze, 0.0);
-  const ℝ local_px = gm1 * local_rx * local_ex;
+  const ℝ gm1 = ggamma - 1.0;
+  const ℝ ss2 = fmax(ssmin * ssmin, 1.e-99);
+  const ℝ rx = zr;
+  const ℝ local_ex = fmax(ze, 0.0);
+  const ℝ local_px = gm1 * rx * local_ex;
   const ℝ prex = gm1 * local_ex;
-  const ℝ perx = gm1 * local_rx;
-  const ℝ csqd = max(ss2, prex + perx * local_px / (local_rx * local_rx));
+  const ℝ perx = gm1 * rx;
+  const ℝ csqd = fmax(ss2, prex + perx * local_px / (rx * rx));
   zp =local_px;
-  //dbc(cyan,"[PolyGas::calcEOS] zp=px="<<zp);
   z0per = perx;
   zss = √(csqd);
 }
 //∀ cells dumpZss @ 5.01 {dbc(cyan,"[PolyGas::calcEOS] zss="<<zss);}
 ∀ cells calcStateAtHalf_next @ 5.1 {
   const ℝ dth = ½ * dt;
-  const ℝ zminv = 1. / zm;
+  const ℝ zminv = 1.0 / zm;
   const ℝ dv = (zvolp - zvol0) * zminv;
-  const ℝ bulk = zr/*0*/ * zss * zss;
-  const ℝ denom = 1. + 0.5 * z0per * dv;
+  const ℝ bulk = zr * zss * zss;
+  const ℝ denom = 1.0 + ½ * z0per * dv;
   const ℝ src = zwrate * dth * zminv;
-  zp += (z0per * src - zr/*0*/ * bulk * dv) / denom;
+  zp += (z0per * src - zr * bulk * dv) / denom;
   //dbc(cyan,"[PolyGas::calcStateAtHalf_next] zp="<<zp);
 }
 
@@ -438,16 +420,11 @@ calcGlobalDt @ 2.0 {
 ∀ cells ttsCalcForce @ 6.1 {
   ∀ face {
     const ℝ svfacinv = zareap / sareap;
-    //dbc(magenta,"[TTS::calcForce] svfacinv="<<svfacinv);
     const ℝ srho = zrp * smf * svfacinv;
-    //dbc(magenta,"[TTS::calcForce] srho="<<srho);
-    ℝ sstmp = max(zss, ssmin);
-    sstmp = alfa * sstmp * sstmp;
-    //dbc(magenta,"[TTS::calcForce] sstmp="<<sstmp);
+    ℝ sstmp = fmax(zss, ssmin);
+    sstmp = alpha * sstmp * sstmp;
     const ℝ sdp = sstmp * (srho - zrp);
-    //dbc(magenta,"[TTS::calcForce] sdp="<<sdp);
     const ℝ³ sqq = -sdp * ssurfp;
-    //dbc(magenta,"[TTS::calcForce] sqq="<<sqq);
     sft = sqq;
     dbc(magenta,"[TTS::calcForce] sft="<<sft);
   }
@@ -465,19 +442,6 @@ calcGlobalDt @ 2.0 {
   const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
   const ℝ³ _ex[4] = {exp[0],exp[1],exp[2],exp[3]};
   const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
-/*  dbc(green,"[QCS::setCornerDiv] cell #"<<uid<<" nodes: "
-      <<xs_cell_node[c+NABLA_NB_CELLS*0]<<","
-      <<xs_cell_node[c+NABLA_NB_CELLS*1]<<","
-      <<xs_cell_node[c+NABLA_NB_CELLS*2]<<","
-      <<xs_cell_node[c+NABLA_NB_CELLS*3]
-      );
-  dbc(green,"[QCS::setCornerDiv] cell #"<<uid<<" faces: "
-      <<xs_cell_face[c+NABLA_NB_CELLS*0]<<","
-      <<xs_cell_face[c+NABLA_NB_CELLS*1]<<","
-      <<xs_cell_face[c+NABLA_NB_CELLS*2]<<","
-      <<xs_cell_face[c+NABLA_NB_CELLS*3]
-      );
-*/
   ∀ node {
     const ℕ i=(#+N-1)%N; // previous
     const ℕ j=(#);       // current
@@ -600,28 +564,30 @@ calcGlobalDt @ 2.0 {
   ∀ face {
     // Edge length for c1, c2 contribution to s
     const ℝ _el = _elen[#];
-    //const ℕ c10 = #;
     const ℕ c20 = (#+1)%N; // next
-    sfq = (c0w*(c0qe1+c0cos*c0qe0)+
-           c0w[NABLA_FACE_PER_CELL*c+c20]*(c0qe0[NABLA_FACE_PER_CELL*c+c20]+c0cos[NABLA_FACE_PER_CELL*c+c20]*c0qe1[NABLA_FACE_PER_CELL*c+c20])) / _el;
+    sfq = (c0w*(c0qe1+c0cos*c0qe0)
+           +c0w[NABLA_FACE_PER_CELL*c+c20]
+           *(c0qe0[NABLA_FACE_PER_CELL*c+c20]
+             +c0cos[NABLA_FACE_PER_CELL*c+c20]
+             *c0qe1[NABLA_FACE_PER_CELL*c+c20]))/_el;
     dbc(green,"[QCS::setForce] sfq="<<sfq);
   }
 }
 // Routine number [6] in the full algorithm
 ∀ cells qcsCalcForce_setVelDiff @ 6.8 {
+  ℝ z0tmp=0;
   const ℕ N = nbNode;
-  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _px[4] = {pxp[0],pxp[1],pxp[2],pxp[3]};
-  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
-  z0tmp=0;
+  ℝ³ u[4]; ∀ node u[#]=pu;
+  ℝ³ x[4]; ∀ node x[#]=pxp;
+  ℝ e[4]; ∀ face e[#]=elen;
   ∀ node {
     //const ℕ i=(#+N-1)%N; // previous
     const ℕ j=(#);       // current
     const ℕ k=(#+1)%N; // next
-    const ℝ³ dx = _px[k] - _px[j];
-    const ℝ³ du = _pu[k] - _pu[j];
+    const ℝ³ dx = x[k]-x[j];
+    const ℝ³ du = u[k]-u[j];
     //dbc(green,"[QCS::setVelDiff] dx="<<dx<<", du="<<du);
-    const ℝ lenx = _elen[j];
+    const ℝ lenx = e[j];
     const ℝ dux = (lenx > 0. ? fabs(dot2D(du,dx)) / lenx : 0.);
     //dbc(green,"[QCS::setVelDiff] dux="<<dux);
     z0tmp = max(z0tmp, dux);
@@ -631,7 +597,6 @@ calcGlobalDt @ 2.0 {
   dbc(green,"[QCS::setVelDiff] zdu="<<zdu);
 }
 //∀ cells @ 6.61 { ∀ node dbc(green,"[QCS::setVelDiff] zdu="<<zdu);}
-
 
 ∀ cells sumCrnrForce @ 7.0 {
   const ℕ N = nbNode;
@@ -683,7 +648,7 @@ calcGlobalDt @ 2.0 {
   pf = project(pf, vfixy);
 } 
 
-∀ nodes calcAccel @ 10.0 { //(pf, pmaswt, pap, pfirst, plast);
+∀ nodes calcAccel @ 10.0 {
   const double fuzz = 1.e-99;
   pap = pf / max(pmaswt, fuzz);
   dbc(white,"[calcAccel] pap="<<pap);
@@ -691,18 +656,18 @@ calcGlobalDt @ 2.0 {
 
 // ===== Corrector step =====
 // 6. advance mesh to end of time step
-∀ nodes advPosFull @ 11.0 { //(px0, pu0, pap, dt, px, pu, pfirst, plast);
+∀ nodes advPosFull @ 11.0 {
   pu = pu0 + pap * dt;
   //dbc(white,"[Hydro::advPosFull] pu0="<<pu0);
   //dbc(white,"[Hydro::advPosFull] pu="<<pu);
-  px = px0 + 0.5 * (pu + pu0) * dt;
+  px = px0 + ½ * (pu + pu0) * dt;
   //dbc(white,"[Hydro::advPosFull] px="<<px);
 }
 
 resetDtHydro @ 12.0 { dtrec = 1.e99; }
 
 // 6a. compute new mesh geometry
-∀ cells computeNewMeshGeometry @ 13.0 { // px, ex, zx, sfirst, slast);
+∀ cells computeNewMeshGeometry @ 13.0 {
   zx=0.0;
   ∀ node zx+=px;
   zx /= nbNode;
@@ -715,9 +680,9 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
   assert(nbNode==2);
   //dbc(yellow,"[computeExpBis] ex["<<uid<<"]="<<ex);
 }
-∀ cells calcVolsBis @ 13.2 { // (px, zx, sarea, svol, zarea, zvol6
+∀ cells calcVolsBis @ 13.2 { 
   const int N = nbNode;
-  const ℝ³ X[4] = {px[0],px[1],px[2],px[3]};
+  ℝ³ X[4]; ∀ node X[#]=px;
   zvol=0;
   zarea=0; 
   ∀ node {
@@ -736,32 +701,19 @@ resetDtHydro @ 12.0 { dtrec = 1.e99; }
 ∀ cells calcWork @ 14.0 { // sfp, sfq, pu0, pu, pxp, dt, zw, zetot,
   zw=0; 
   const int N = nbNode;
-  const ℝ dth = 0.5 * dt;
+  const ℝ dth = ½ * dt;
   //dbc(white,"[calcWork] dth="<<dth);
-  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _pu0[4] = {pu0[0],pu0[1],pu0[2],pu0[3]};
-  //const ℝ³ _fp[4] = {sfp[0],sfp[1],sfp[2],sfp[3]};
-  //const ℝ³ _fq[4] = {sfq[0],sfq[1],sfq[2],sfq[3]};
+  ℝ³ _pu[4]; ∀ node _pu[#]=pu;
+  ℝ³ _pu0[4]; ∀ node _pu0[#]=pu0;
   const ℝ _xp[4] = {pxp[0].x,pxp[1].x,pxp[2].x,pxp[3].x};
   ∀ face { 
-    const ℕ j=(#);       // current
-    const ℕ k=(#+1)%N;   // next
-    /*dbc(green,"[Hydro::calcWork]"
-        <<" p1="<<xs_cell_node[c+NABLA_NB_CELLS*j]
-        <<" p2="<<xs_cell_node[c+NABLA_NB_CELLS*k]
-        );*/
-    const ℝ³ sftot = sfp + sfq/*[c*4+j]*/;
-    //dbc(white,"[calcWork] sfp="<<_fp[j]);
-    //dbc(white,"[calcWork] sfq="<<_fq[j]);
-    //dbc(white,"[calcWork] sftot="<<sftot);
+    const ℕ j=(#);
+    const ℕ k=(#+1)%N;
+    const ℝ³ sftot = sfp + sfq;
     const ℝ sd1 = dot2D( sftot, (_pu0[j] + _pu[j]));
-    //dbc(white,"[calcWork] sd1="<<sd1);
     const ℝ sd2 = dot2D(-sftot, (_pu0[k] + _pu[k]));
-    //dbc(white,"[calcWork] sd2="<<sd2);
     const ℝ dwork = -dth * (sd1 * _xp[j] + sd2 * _xp[k]);
-    //dbc(white,"[calcWork] dwork["<<(uid*4+f)<<"]="<<dwork);
     zetot += dwork;
-    //dbc(white,"[calcWork] zetot="<<zetot);
     zw += dwork;
   }
   dbc(white,"[calcWork] zw="<<zw);
@@ -815,7 +767,6 @@ calcDtVolumeIni @ 20.0 {
 }
 calcDtVolumeTst @ 20.1 {
   const ℝ dtnew = dt * cflv / dvovmax;
-  //dbc(white,"[Hydro::calcDtVolume] dtlast="<<dtlast);
   //dbc(white,"[Hydro::calcDtVolume] dt="<<dt);
   //dbc(white,"[Hydro::calcDtVolume] cflv="<<cflv);
   //dbc(white,"[Hydro::calcDtVolume] dvovmax="<<dvovmax);
