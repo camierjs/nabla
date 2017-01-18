@@ -62,7 +62,7 @@ options{
   ℕ Z_EDGE_ELEMS = 1;
   ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
   ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
-  ℝ option_stoptime = 1.0;     // ! utilisé en dur dans le backend lambda !
+  ℝ option_stoptime = 1.0;    // ! utilisé en dur dans le backend lambda !
   // Pennant options
   ℾ trace       = false;
   ℕ cstop       = 100;    // simulation stop cycle
@@ -70,9 +70,9 @@ options{
   ℝ dtmax       = 1.e99;  // maximum timestep size
   ℝ dtinit      = 0.0025; // initial timestep size
   ℝ dtfac       = 1.2;    // factor limiting timestep growth
-  ℕ dtreport    = 10;  // frequency for timestep reports
-  ℝ cfl         = 0.6;      // Courant number, limits timestep
-  ℝ cflv        = 0.1;     // volume change limit for timestep
+  ℕ dtreport    = 10;     // frequency for timestep reports
+  ℝ cfl         = 0.6;    // Courant number, limits timestep
+  ℝ cflv        = 0.1;    // volume change limit for timestep
   ℝ rinit       = 1.0;    // initial density for main mesh
   ℝ einit       = 0.0;    // initial energy for main mesh
   ℾ subregion   = true;
@@ -86,19 +86,24 @@ options{
   ℝ ggamma      = 5./3.;  // coeff. for ideal gas equation
   ℝ ssmin       = 0.1;    // minimum sound speed for gas
   ℝ alpha       = 0.5;    // alpha coefficient for TTS model
-  ℝ qgamma      = 5./3.; // gamma coefficient for Q model
-  ℝ q1          = 0.1; // linear coefficients for Q model
-  ℝ q2          = 1.0; // quadratic coefficients for Q model
+  ℝ qgamma      = 5./3.;  // gamma coefficient for Q model
+  ℝ q1          = 0.1;    // linear coefficients for Q model
+  ℝ q2          = 1.0;    // quadratic coefficients for Q model
   ℾ chaos       = false;
   ℝ chaos_seed  = 1.1234567890123;
 };
 
+
+// ****************************************************************************
+// * Trace & Debug
+// ****************************************************************************
 enum{red=31,green,yellow,blue,magenta,cyan,white};
 #define dbg(...) if (trace) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
 #define dbc(clr,...) if (trace) cout<<"["<<clr<<"m"<<__VA_ARGS__<<"[m"<<endl;
 
+
 // ****************************************************************************
-// * Zone Variables
+// * Zone/Sides/Corners Variables
 // ****************************************************************************
 cells{
   ℝ² zx;    // zone center coordinates
@@ -172,9 +177,7 @@ faces{
 global{
   ℕ cycle;  // simulation cycle number
   ℝ dt;     // current timestep
-  ℝ dtlast; // previous timestep
   ℝ dtrec;  // maximum timestep for hydro
-  ℝ² vfix;  // vector perp. to fixed plane
   ℝ dvovmax;//
 };
 
@@ -283,14 +286,14 @@ incCycle @ 1.0 { cycle += 1; }
 
 calcGlobalDt @ 2.0 {
   // Save timestep from last cycle
-  dtlast = dt;
+  const ℝ dtlast = dt;
   // Compute timestep for this cycle
   dt = dtmax;
   if (cycle == 1) {    // compare to initial timestep
     dbc(magenta,"[Driver::calcGlobalDt] initial timestep, dtinit="<<dtinit);
     if (dtinit < dt) dt = dtinit;
   } else {
-    const double dtrecover = dtfac * dtlast;
+    const ℝ dtrecover = dtfac * dtlast;
     if (dtrecover < dt) dt = dtrecover;
   }
   // compare to time-to-end

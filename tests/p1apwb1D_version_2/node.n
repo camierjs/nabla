@@ -86,7 +86,7 @@
   if (n==(NABLA_NB_NODES-1)) continue;
   const ℝ b=exp(-2*tau*δt/epsilon²);
   const ℝ a=√(0.5 + 0.5*exp(-2*tau*δt/epsilon²));
-  const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
+  //const ℝ r=epsilon/(2*epsilon*a+sigma*δx);
   nP=0.0;
   ∀ cell {
     // maille de droite, on ajoute l'invariant de Rieman pour la vp 1

@@ -126,6 +126,7 @@ typedef struct hookPragmaStruct{
 
 typedef struct hookHeaderStruct{
   void (*dump)(nablaMain*); // animate
+  void (*dumpWithLibs)(nablaMain*); // animate
   void (*open)(nablaMain*); // animate
   void (*enums)(nablaMain*); // animate
   void (*prefix)(nablaMain*); // animate

@@ -201,6 +201,7 @@ const static hookXyz xyz={
 
 const static hookHeader header={
   kHookHeaderDump,
+  xHookHeaderDumpWithLibs,
   xHookHeaderOpen,
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,

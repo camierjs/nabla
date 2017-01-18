@@ -158,6 +158,7 @@ const static hookPragma cuHookPragma={
 
 const static hookHeader cuHookHeader={
   cuHookHeaderDump,
+  NULL,//dumpForLibs
   xHookHeaderOpen,
   NULL,
   xHookHeaderPrefix,

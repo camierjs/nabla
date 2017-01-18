@@ -45,6 +45,7 @@
 
 static const hookHeader header={
   aHookHeaderDump,
+  NULL,
   aHookHeaderOpen,
   aHookHeaderEnums,
   aHookHeaderPrefix,

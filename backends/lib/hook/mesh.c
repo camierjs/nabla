@@ -352,9 +352,6 @@ void xHookMeshPrefix(nablaMain *nabla){
 // ****************************************************************************
 void xHookMeshCore(nablaMain *nabla){
   dbg("\n[xHookMeshCore]");
-  
-
-  
   xDumpMesh(nabla);
 }
 

@@ -44,6 +44,7 @@
 #define _NABLA_LIB_DUMP_H_
 
 void xDumpHeader(nablaMain*);
+void xDumpHeaderWithLibs(nablaMain*);
 void xDumpMesh(nablaMain*);
 
 #endif // _NABLA_LIB_DUMP_H_

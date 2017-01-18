@@ -68,15 +68,38 @@ extern char msh3D_c[];
 
 // ****************************************************************************
 // * dumpHeader
+// * On a pas accès ici encore aux librairie
 // ****************************************************************************
 void xDumpHeader(nablaMain *nabla){
   assert(nabla->entity->name);
   fprintf(nabla->entity->hdr,dumpExternalFile(types_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(ternary_h));
-  fprintf(nabla->entity->hdr,dumpExternalFile(gather_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(scatter_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(ostream_h));
   fprintf(nabla->entity->hdr,dumpExternalFile(debug_h));
+}
+
+
+// ****************************************************************************
+// * dumpHeader
+// * On a accès ici aux librairie
+// ****************************************************************************
+void xDumpHeaderWithLibs(nablaMain *nabla){
+  int factor=8;
+  if ((nabla->entity->libraries&(1<<with_real))!=0){
+    //printf("[37;1m[xDumpMesh] 1D[m\n");
+    factor=2;
+  }
+  if ((nabla->entity->libraries&(1<<with_real2))!=0){
+    //printf("[37;1m[xDumpMesh] 2D[m\n");
+    factor=4;
+  }
+  if ((nabla->entity->libraries&(1<<with_real))==0 &&
+      (nabla->entity->libraries&(1<<with_real2))==0){
+    //printf("[37;1m[xDumpMesh] 3D[m\n");
+    factor=8;
+  }
+  fprintf(nabla->entity->hdr,dumpExternalFile(gather_h),factor);
 }
 
 
@@ -87,12 +110,16 @@ void xDumpMesh(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n");
   // On rajoute les tests 'is something'
   fprintf(nabla->entity->hdr,dumpExternalFile(items_c));
+  
   // Et les constantes des connectivités
+  // 1D
   if ((nabla->entity->libraries&(1<<with_real))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(msh1D_c));
-  else
-    if ((nabla->entity->libraries&(1<<with_real2))!=0)
+  // 2D
+  if ((nabla->entity->libraries&(1<<with_real2))!=0)
     fprintf(nabla->entity->src,dumpExternalFile(msh2D_c));
-  else
+  // 3D
+  if ((nabla->entity->libraries&(1<<with_real))==0 &&
+      (nabla->entity->libraries&(1<<with_real2))==0)
     fprintf(nabla->entity->src,dumpExternalFile(msh3D_c));
 }

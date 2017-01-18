@@ -212,6 +212,7 @@ const static hookXyz xyz={
 
 const static hookHeader header={
   rajaHookHeaderDump,
+  xHookHeaderDumpWithLibs,
   xHookHeaderOpen,
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,

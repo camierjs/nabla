@@ -59,6 +59,10 @@ void xHookHeaderDump(nablaMain *nabla){
   xDumpHeader(nabla);
 }
 
+void xHookHeaderDumpWithLibs(nablaMain *nabla){
+  xDumpHeaderWithLibs(nabla);
+}
+
 // ****************************************************************************
 // * hookHeaderPrefix
 // ****************************************************************************

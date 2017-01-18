@@ -80,6 +80,7 @@ char* xHookSysPostfix(void);
 
 // header
 void xHookHeaderDump(nablaMain*);
+void xHookHeaderDumpWithLibs(nablaMain*);
 void xHookHeaderOpen(nablaMain*);
 void xHookHeaderDefineEnumerates(nablaMain*);
 void xHookHeaderPrefix(nablaMain*);

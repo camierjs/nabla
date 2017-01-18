@@ -68,6 +68,7 @@ NABLA_STATUS animate(nablaMain *nabla){
 
   // On a besoin d'avoir parsé pour le core afin d'avoir renseigné les librairies
   HOOK(mesh,core);
+  HOOK(header,dumpWithLibs);
 
   // Rapidement on place dans le header les variables et options
   // qui pourront etre utilisées par d'autres dump

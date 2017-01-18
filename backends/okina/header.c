@@ -99,7 +99,15 @@ static char *dumpExternalFile(char *file){
 // ****************************************************************************
 void nOkinaHeaderDump(nablaMain *nabla){
   assert(nabla->entity->name!=NULL);
-
+  
+  if ((nabla->entity->libraries&(1<<with_real))!=0)
+    printf("[37;1m[xDumpMesh] 1D[m\n");
+  if ((nabla->entity->libraries&(1<<with_real2))!=0)
+    printf("[37;1m[xDumpMesh] 2D[m\n");
+    if ((nabla->entity->libraries&(1<<with_real))==0 &&
+      (nabla->entity->libraries&(1<<with_real2))==0)
+    printf("[37;1m[xDumpMesh] 3D[m\n");
+    
   if (nabla->option==BACKEND_OPTION_OKINA_AVX512){
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Integer_h));
     fprintf(nabla->entity->hdr,dumpExternalFile(kn512Real_h));
