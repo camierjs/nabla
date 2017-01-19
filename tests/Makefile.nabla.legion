@@ -1,0 +1,43 @@
+NABLA = ${NABLA_BINARY_DIR}/nabla/nabla
+TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
+TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
+
+SIMD = std
+PARALLEL ?= seq
+
+SIMD_std_FLAGS = -std=c++11 -O2 -Wall -DNO_SSE2
+
+LOG = -t -v $(TGT).log
+
+CXX = ${CMAKE_CXX_COMPILER}
+
+CFLAGS = $(SIMD_std_FLAGS) -finline $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
+
+LIB_NOPTS = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
+LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/libmfem.a
+
+all:$(TGT) $(NABLA) 
+
+$(TGT).cc: $(TGT_FILE) $(NABLA)
+	$(NABLA) $(LOG) --legion $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
+
+$(TGT).o: $(TGT).cc $(TGT_FILE)
+	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
+
+$(TGT):$(TGT).o $(TGT_FILE)
+	$(CXX) $(KOKKOS_CXXFLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(KOKKOS_LDFLAGS) $(TGT).o $(KOKKOS_LIBS)
+
+cln:
+	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
+
+gen1:$(TGT).cc
+run1:$(TGT) $(NABLA) 
+	OMP_NUM_THREADS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
+run4:$(TGT) $(NABLA) 
+	OMP_NUM_THREADS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
+
+#############
+# DOT 2 PNG #
+#############
+svg:
+	dot -O -Tsvg $(TGT).time.dot

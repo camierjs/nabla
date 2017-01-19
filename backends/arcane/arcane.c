@@ -101,7 +101,8 @@ static const hookGrammar grammar={
   arcaneHookDfsExtra,
   arcaneHookDfsArgType,
   NULL,
-  aHookJobHit
+  aHookJobHit,
+  NULL
 };
 
 const static hookSource source={

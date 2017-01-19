@@ -494,7 +494,8 @@ void nMiddleJobFill(nablaMain *nabla,
 // * %s job\n\
 // ********************************************************\n\
 %s %s %s%s%s(", job->name,
-          nabla->hook->call->entryPointPrefix(nabla,job),
+          nabla->hook->call->entryPointPrefix?
+          nabla->hook->call->entryPointPrefix(nabla,job):"",
           job->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla))?"Module::":
@@ -506,7 +507,8 @@ void nMiddleJobFill(nablaMain *nabla,
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   
   //nprintf(nabla, NULL,"/*job numParams=%d*/",numParams);
-  if (nabla->hook->grammar->dfsVariable(nabla)) 
+  if (nabla->hook->grammar->dfsVariable?
+      nabla->hook->grammar->dfsVariable(nabla):false) 
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     
   // On va chercher les paramètres nabla in/out/inout

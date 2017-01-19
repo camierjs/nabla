@@ -41,112 +41,30 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "raja.h"
+#include "legion.h"
 
-const nWhatWith rajaCallHeaderTypedef[]={
-  {"int","integer"},
-  //{"double","real"},
-  {"struct real3","Real3"},
-  {"struct real3x3","Real3x3"},
-  {"RAJA::Real_type","Real_t"},
-  {"RAJA::Real_ptr","Real_p"},
-  {"RAJA::const_Real_ptr","const_Real_p"},
-  {NULL,NULL}
-};
-
-const nWhatWith rajaCallHeaderDefines[]={
-  {"__host__", ""},
-  {"__global__", ""},
-  {"WARP_BIT", "0"},
-  {"WARP_SIZE", "1"},
-  {"WARP_ALIGN", "8"}, 
-  {"NABLA_NB_GLOBAL","1"},
-  {"Bool", "bool"},
-  {"Integer", "int"},
-  {"Real", "RAJA::Real_type"},
-  {"real", "RAJA::Real_type"},
-  {"Real2", "real3"},
-  {"real2", "real3"},
-  {"rabs(a)","fabs(a)"},
-  {"set(a)", "a"},
-  {"set1(cst)", "cst"},
-  {"square_root(u)", "sqrt(u)"},
-  {"cube_root(u)", "cbrt(u)"},
-  {"store(u,_u)", "(*u=_u)"},
-  {"load(u)", "(*u)"},
-  {"zero()", "0.0"},
-  {"DBG_MODE", "(false)"},
-  {"DBG_LVL", "(DBG_ALL)"},
-  {"DBG_OFF", "0x0000ul"},
-  {"DBG_CELL_VOLUME", "0x0001ul"},
-  {"DBG_CELL_CQS", "0x0002ul"},
-  {"DBG_GTH", "0x0004ul"},
-  {"DBG_NODE_FORCE", "0x0008ul"},
-  {"DBG_INI_EOS", "0x0010ul"},
-  {"DBG_EOS", "0x0020ul"},
-  {"DBG_DENSITY", "0x0040ul"},
-  {"DBG_MOVE_NODE", "0x0080ul"},
-  {"DBG_INI", "0x0100ul"},
-  {"DBG_INI_CELL", "0x0200ul"},
-  {"DBG_INI_NODE", "0x0400ul"},
-  {"DBG_LOOP", "0x0800ul"},
-  {"DBG_FUNC_IN", "0x1000ul"},
-  {"DBG_FUNC_OUT", "0x2000ul"},
-  {"DBG_VELOCITY", "0x4000ul"},
-  {"DBG_BOUNDARIES", "0x8000ul"},
-  {"DBG_ALL", "0xFFFFul"},
-  {"DBG_DUMP", "false"},
-  {"opAdd(u,v)", "(u+v)"},
-  {"opSub(u,v)", "(u-v)"},
-  {"opDiv(u,v)", "(u/v)"},
-  {"opMul(u,v)", "(u*v)"},
-  {"opMod(u,v)", "(u%v)"},
-  {"opScaMul(u,v)","dot3(u,v)"},
-  {"opVecMul(u,v)","cross(u,v)"},    
-  {"dot", "dot3"},
-  {"ReduceMinToDouble(a)","a"},
-  {"ReduceMaxToDouble(a)","a"},
-  {"knAt(a)",""},
-  {"fatal(a,b)","exit(-1)"},
-  {"mpi_reduce(how,what)","how##ToDouble(what)"},
-  {"xyz","int"},
-  {"GlobalIteration", "global_iteration"},
-  {"MD_DirX","0"},
-  {"MD_DirY","1"},
-  {"MD_DirZ","2"},
-  {"MD_Plus","0"},
-  {"MD_Negt","4"},
-  {"MD_Shift","3"},
-  {"MD_Mask","7"}, // [sign,..]
-  {"File", "std::ofstream&"},
-  {"file(name,ext)", "std::ofstream name(#name \".\" #ext)"},
-  //{"xs_node_cell(c)", "xs_node_cell[n*NABLA_NODE_PER_CELL+c]"},
-  //{"xs_face_cell(c)", "xs_face_cell[f+NABLA_NB_FACES*c]"},
-  //{"xs_face_node(n)", "xs_face_node[f+NABLA_NB_FACES*n]"},
-  {"synchronize(v)",""},
-  {NULL,NULL}
-};
+const nWhatWith legionCallHeaderDefines[]={{NULL,NULL}};
 
 // ****************************************************************************
 // * CALLS
 // ****************************************************************************
-static const callHeader xHeader={
-  xCallHeaderForwards,
-  rajaCallHeaderDefines,
-  rajaCallHeaderTypedef
+const static callHeader xHeader={
+  NULL,
+  NULL,
+  NULL
 };
-static const callSimd simd={
+const static callSimd simd={
   NULL,
   xCallGather,
   xCallScatter,
   NULL,
   xCallUid
 };
-static const callParallel parallel={
+const static callParallel parallel={
   NULL,
   NULL,
   xParallelLoop,
-  rajaParallelIncludes
+  legionCallParallelIncludes
 };
 static backendCalls calls={
   &xHeader,
@@ -160,106 +78,108 @@ static backendCalls calls={
 // ****************************************************************************
 const static hookForAll forall={
   NULL,
-  rajaHookForAllDump,
-  xHookForAllItem,
-  xHookForAllPostfix
+  legionHookForAllDump,
+  NULL,//xHookForAllItem, // traite les items
+  legionHookForAllPostfix
 };
 
-const static hookToken token={
+  const static hookToken token={
   NULL,
-  xHookSwitchToken,
-  xHookTurnTokenToVariable,
-  xHookTurnTokenToOption,
-  xHookSystem,
-  xHookIteration,
-  xHookExit,
-  xHookError,
-  xHookTime,
-  xHookFatal,
-  xHookTurnBracketsToParentheses,
-  xHookIsTest,
+  legionHookSwitchToken,
+  legionHookTurnTokenToVariable,
+  legionHookTurnTokenToOption,
+  NULL,//xHookSystem,
+  NULL,//xHookIteration,
+  legionHookExit,
+  NULL,//xHookError,
+  legionHookTime,
+  NULL,//xHookFatal,
+  NULL,//xHookTurnBracketsToParentheses,
+  NULL,//xHookIsTest,
   NULL
 };
+
+bool legionHookGramSkip(nablaMain *nabla){return false;}
 
 const static hookGrammar gram={
   NULL,
   NULL,
-  rajaHookReduction,
+  NULL,//legionHookReduction,
   NULL,
   NULL,
-  xHookDfsVariable,
-  rajaHookDfsExtra,
+  NULL,//xHookDfsVariable,   // return true pour dire qu'on supporte le scan des in&out
+  legionHookDfsExtra, // return false
   NULL,
-  rajaHookEoe,
+  NULL,//legionHookEoe,
+  NULL,
+  legionHookGramSkip
+};
+
+const static hookCall call={
+  xHookAddCallNames,        // utilisé pour dumper le nom des fonctions
+  NULL,//xHookAddArguments, // rajoute les arguments des fonctions appelées
+  NULL,//xHookEntryPointPrefix,    // retourne static inline
+  NULL,//xHookDfsForCalls,  // Dump des variables appelées
   NULL,
   NULL
 };
 
-const static hookCall call={
-  xHookAddCallNames,
-  xHookAddArguments,
-  xHookEntryPointPrefix,
-  xHookDfsForCalls,
-  NULL, // addExtraParameters
-  NULL  // dumpNablaParameterList
-};
-
 const static hookXyz xyz={
   NULL,
-  xHookPrevCell,
-  xHookNextCell,
-  xHookSysPostfix
+  NULL,//xHookPrevCell,
+  NULL,//xHookNextCell,
+  NULL,//xHookSysPostfix
 };
 
 const static hookHeader header={
-  rajaHookHeaderDump,
-  xHookHeaderDumpWithLibs,
+  legionHookHeaderDump,
+  NULL,//xHookHeaderDumpWithLibs,
   xHookHeaderOpen,
-  xHookHeaderDefineEnumerates,
-  xHookHeaderPrefix,
-  rajaHookHeaderIncludes,
-  xHookHeaderAlloc,
-  rajaHookHeaderPostfix
+  NULL,//xHookHeaderDefineEnumerates,
+  xHookHeaderPrefix, // #ifndef __BACKEND_pennant_H__
+  legionHookHeaderIncludes,
+  NULL,//xHookHeaderAlloc,
+  legionHookHeaderPostfix // Avant le #endif // __BACKEND_pennantH__
 };
 
 const static hookSource source={
-  xHookSourceOpen,
-  xHookSourceInclude,
-  xHookSourceNamespace
+  xHookSourceOpen,    // Ouvre le fichier source
+  xHookSourceInclude, // Rajoute l'include .h
+  NULL
 };
 
 const static hookMesh mesh={
-  xHookMeshPrefix,
-  xHookMeshCore,
-  xHookMeshPostfix
+  NULL,//xHookMeshPrefix,
+  NULL,//xHookMeshCore,
+  NULL,//xHookMeshPostfix
 };
 
 const static hookVars vars={
-  xHookVariablesInit,
-  xHookVariablesPrefix,
-  xHookVariablesMalloc,
-  xHookVariablesFree,
+  NULL,//xHookVariablesInit, // rajoute global int iteration
+  legionHookVariablesPrefix, // Au dessus du main
+  legionHookVariablesMalloc, // Juste apres la déclaration du main
+  legionHookVariablesFree,   // A la fin du main
   NULL,
-  xHookVariablesODecl
+  NULL
 };  
 
 const static hookMain mains={
-  xHookMainPrefix,
-  rajaHookMainPreInit,
-  xHookMainVarInitKernel,
-  xHookMainVarInitCall,
-  xHookMainHLT,
-  xHookMainPostInit,
-  xHookMainPostfix
+  legionHookMainPrefix,
+  legionHookMainPreInit,
+  NULL,//xHookMainVarInitKernel, // ne fait rien
+  NULL,//xHookMainVarInitCall,
+  NULL,//xHookMainHLT,
+  NULL,//xHookMainPostInit, // ne fait rien
+  legionHookMainPostfix
 };  
 
-static hooks rajaHooks={
+static hooks legionHooks={
   &forall,
   &token,
   &gram,
   &call,
   &xyz,
-  NULL,//pragma
+  NULL,
   &header,
   &source,
   &mesh,
@@ -269,9 +189,9 @@ static hooks rajaHooks={
 
 
 // ****************************************************************************
-// * raja
+// * Legion
 // ****************************************************************************
-hooks* raja(nablaMain *nabla){
+hooks* legion(nablaMain *nabla){
   nabla->call=&calls;
-  return &rajaHooks;
+  return &legionHooks;
 }

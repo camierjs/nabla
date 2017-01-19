@@ -237,6 +237,7 @@ const static hookGrammar cuHookGrammar={
   NULL,
   NULL,
   NULL,
+  NULL,
   NULL
 };
   

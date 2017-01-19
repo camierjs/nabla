@@ -189,6 +189,7 @@ const hookGrammar gram={
   NULL,
   NULL,
   NULL,
+  NULL,
   NULL
 };
 

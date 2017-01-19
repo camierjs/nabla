@@ -120,7 +120,8 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   
   // On remplit la ligne du hdr
   hprintf(nabla, NULL, "\n%s %s %s%s(",
-          nabla->hook->call->entryPointPrefix(nabla,fct),
+          nabla->hook->call->entryPointPrefix?
+          nabla->hook->call->entryPointPrefix(nabla,fct):"",
           fct->return_type,
           namespace?"Entity::":"",
           fct->name);

@@ -68,7 +68,10 @@ void nMiddleFunctionDumpHeader(FILE *file, astNode *n){
 // ****************************************************************************
 static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
- 
+  // On utilise hook->grammar->skipBody
+  const bool dump = (nabla->hook->grammar->skipBody?
+                     nabla->hook->grammar->skipBody(nabla):true);
+
   // On regarde si on est 'à gauche' d'un 'assignment_expression',
   // dans quel cas il faut rajouter ou pas de '()' aux variables globales
   if (n->ruleid == ruleToId(rule_assignment_expression))
@@ -81,15 +84,15 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   for(;n->token != NULL;){
     //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
     
-    if(n->tokenid==CONST){
-      nprintf(nabla,
+    if(dump && n->tokenid==CONST){
+      dprintf(dump,nabla,
               "/*CONST*/", "%s const ",
               cHOOK(fct->entity->main,pragma,align));
       break;
     }
         
     if(n->tokenid==FORALL_END){
-      nprintf(nabla, "/*FORALL_END*/",NULL);
+      dprintf(dump,nabla, "/*FORALL_END*/",NULL);
       fct->parse.enum_enum='\0';
       break;
     }
@@ -109,47 +112,47 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       }
       switch(tokenid){
       case(CELL):{
-        nprintf(nabla, NULL, "/*FORALL CELL*/");
+        dprintf(dump,nabla, NULL, "/*FORALL CELL*/");
         // On annonce que l'on va travailler sur un forall cell
         fct->parse.enum_enum='c';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          nprintf(nabla, NULL,
+          dprintf(dump,nabla, NULL,
                   "for(CellEnumerator c%s(%s->cells()); c%s.hasNext(); ++c%s)",
                   support,support,support,support);
         break;
       }
       case(FACE):{
-        nprintf(nabla, NULL, "/*FORALL FACE*/");
+        dprintf(dump,nabla, NULL, "/*FORALL FACE*/");
         fct->parse.enum_enum='f';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          nprintf(nabla, NULL,
+          dprintf(dump,nabla, NULL,
                   "for(FaceEnumerator f%s(%s->faces()); f%s.hasNext(); ++f%s)",
                   support,support,support,support);
         break;
       }
       case(NODE):{
-        nprintf(nabla, NULL, "/*FORALL NODE*/");
+        dprintf(dump,nabla, NULL, "/*FORALL NODE*/");
         // On annonce que l'on va travailler sur un forall node
         fct->parse.enum_enum='n';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          nprintf(nabla, NULL,
+          dprintf(dump,nabla, NULL,
                   "for(NodeEnumerator n%s(%s->nodes()); n%s.hasNext(); ++n%s)",
                   support,support,support,support);
         break;
       }
       case(PARTICLE):{
-        nprintf(nabla, NULL, "/*FORALL PARTICLE*/");
+        dprintf(dump,nabla, NULL, "/*FORALL PARTICLE*/");
         fct->parse.enum_enum='p';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          nprintf(nabla, NULL,
+          dprintf(dump,nabla, NULL,
                   "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",
                   support,support,support,support);
         break;
@@ -162,17 +165,17 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
 
-    if (n->tokenid == FATAL){
+    if (dump && n->tokenid == FATAL){
       nabla->hook->token->fatal(nabla);
       break;
     }
     
-    if(n->tokenid == INT64){
-      nprintf(nabla, NULL, "Int64 ");
+    if(dump && n->tokenid == INT64){
+      dprintf(dump,nabla, NULL, "Int64 ");
       break;
     }
     
-    if (n->tokenid == CALL){
+    if (dump && n->tokenid == CALL){
       dbg("\n\t[nablaFunctionParse] CALL");
       nabla->hook->call->addCallNames(nabla,fct,n);
       dbg("\n\t[nablaFunctionParse] CALL done");
@@ -184,29 +187,37 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       break;
     }
 
-    if (n->tokenid == TIME){
+    if (n->tokenid == RETURN){
+      if (dump) nprintf(nabla,NULL,"return ");
+      if (!dump && strncmp(fct->return_type,"void",4)!=0){
+        nprintf(nabla,NULL,"return 0;");
+      }
+      break;
+    }
+    
+    if (dump && n->tokenid == TIME){
       nabla->hook->token->time(nabla);
       break;
     }
 
-    if (n->tokenid == EXIT){
+    if (dump && n->tokenid == EXIT){
       nabla->hook->token->exit(nabla,fct);
       break;
     }
     
-    if (n->tokenid == ERROR){
+    if (dump && n->tokenid == ERROR){
       nabla->hook->token->error(nabla,fct);
       break;
     }
 
-    if (n->tokenid == ITERATION){
+    if (dump && n->tokenid == ITERATION){
       nabla->hook->token->iteration(nabla);
       break;
     }
 
     if (n->tokenid == PREPROCS){
       dbg("\n\t[nablaFunctionParse] PREPROCS");
-      nprintf(nabla, "/*Preprocs*/", "\n");
+      dprintf(dump,nabla, "/*Preprocs*/", "\n");
       break;
     }
     
@@ -217,45 +228,45 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
       }*/
     
     if (n->tokenid == LIB_ALEPH){
-      nprintf(nabla, "/*LIB_ALEPH*/", NULL);
+      dprintf(dump,nabla, "/*LIB_ALEPH*/", NULL);
       break;
     }
     
     if (n->tokenid == ALEPH_RESET){
-      nprintf(nabla, "/*ALEPH_RESET*/", ".reset()");
+      dprintf(dump,nabla, "/*ALEPH_RESET*/", ".reset()");
       break;
     }
     
     if (n->tokenid == ALEPH_SOLVE){
-      nprintf(nabla, "/*ALEPH_SOLVE*/", "alephSolve()");
+      dprintf(dump,nabla, "/*ALEPH_SOLVE*/", "alephSolve()");
       break;
     }
     
-    if (nMiddleTurnTokenToOption(n,nabla)!=NULL){
+    if (dump && nMiddleTurnTokenToOption(n,nabla)!=NULL){
       dbg("\n\t[nablaFunctionParse] OPTION hit!");
       break;
     }
 
     // dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
-    if (nabla->hook->token->variable(n, nabla, fct)!=NULL) break;
-    if (n->tokenid == '{'){ fprintf(nabla->entity->src, "{\n"); break; }
-    if (n->tokenid == '}'){ fprintf(nabla->entity->src, "}\n"); break; }
-    if (n->tokenid == ';'){ fprintf(nabla->entity->src, ";\n"); break; }
+    if (dump && nabla->hook->token->variable(n, nabla, fct)!=NULL) break;
+    if (n->tokenid == '{'){ nprintf(nabla, NULL,"{\n"); break; }
+    if (n->tokenid == '}'){ nprintf(nabla, NULL,"}\n"); break; }
+    if (n->tokenid == ';'){ dprintf(dump,nabla, NULL,";\n"); break; }
     
     if (n->tokenid==MIN_ASSIGN){
-      fprintf(nabla->entity->src, "/*MIN_ASSIGN*/=ReduceMinToDouble");
+      dprintf(dump,nabla,"/*MIN_ASSIGN*/","=ReduceMinToDouble");
       break;
     }
     if (n->tokenid==MAX_ASSIGN){
-      fprintf(nabla->entity->src,  "/*MAX_ASSIGN*/=ReduceMaxToDouble");
+      dprintf(dump,nabla, "/*MAX_ASSIGN*/","=ReduceMaxToDouble");
       break;
     }
     
     // Dernière action possible: on dump
     //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;
-    fprintf(nabla->entity->src,"%s",n->token);
-    nMiddleInsertSpace(nabla,n);
+    dprintf(dump,nabla,NULL,"%s",n->token);
+    if (dump) nMiddleInsertSpace(nabla,n);
     break;
   }
   if(n->children != NULL) nMiddleFunctionParse(n->children, fct);
@@ -325,19 +336,21 @@ void nMiddleFunctionFill(nablaMain *nabla,
 // * %s fct\n\
 // ********************************************************\n\
 %s %s %s%s%s(", fct->name, 
-          nabla->hook->call->entryPointPrefix(nabla,fct),
+          (nabla->hook->call->entryPointPrefix)?
+          nabla->hook->call->entryPointPrefix(nabla,fct):"",
           fct->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla))?"Module::":
           isAnArcaneService(nabla)?"Service::":"::":"",
           fct->name);
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
-
+  
   // On va chercher les paramètres standards
   // Si used_options et used_variables ont été utilisées
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, nParams);
   //nprintf(nabla, NULL,"/*fct numParams=%d*/",numParams);
-  if (nabla->hook->grammar->dfsVariable(nabla))
+  if (nabla->hook->grammar->dfsVariable?
+      nabla->hook->grammar->dfsVariable(nabla):false)
     nMiddleParamsDumpFromDFS(nabla,fct,numParams);
       
   // On s'autorise un endroit pour insérer des paramètres
@@ -362,6 +375,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   // On saute le premier '{'
   n=n->children->next;
   nprintf(nabla, NULL, "){\n\t");
+
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");
   nMiddleFunctionParse(n,fct);

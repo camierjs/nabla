@@ -44,149 +44,137 @@
 
 
 // ****************************************************************************
-// * hookAddArguments
+// * Fonction produisant l'ENUMERATE_*
 // ****************************************************************************
-void xHookAddArguments(nablaMain *nabla,
-                       nablaJob *job){
-  // Si notre job a appelé des fonctions
-  if (job->parse.function_call_name!=NULL){
-    nMiddleArgsDumpFromDFS(nabla, job);
-  }
+char* legionHookForAllDump(nablaJob *job){
+  return "// legionHookForAllDump";
 }
 
-// ****************************************************************************
-// * hookDfsVariable
-// * 'true' means that this backend supports
-// * in/out scan for variable from middlend
-// ****************************************************************************
-bool xHookDfsVariable(nablaMain *nabla){ return true; }
-
-
-
-// ****************************************************************************
-// * System Prev Cell
-// ****************************************************************************
-char* xHookPrevCell(int direction){
-  if (direction==DIR_X)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Y)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Z)
-    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+c],";
-  assert(NULL);
-  return NULL;
+// **************************************************************************** 
+// * legionHookForAllPostfix
+// **************************************************************************** 
+char* legionHookForAllPostfix(nablaJob *job){
+  return "// legionHookForAllPostfix";
 }
 
 
+void legionHookSwitchToken(astNode *n, nablaJob *job){}
+
+nablaVariable *legionHookTurnTokenToVariable(astNode * n,
+                                             nablaMain *nabla,
+                                             nablaJob *job){return NULL;}
+void legionHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){}
+void legionHookExit(nablaMain *nabla, nablaJob *job){}
+void legionHookTime(nablaMain *nabla){}
+
+
 // ****************************************************************************
-// * System Next Cell
+// * legionHookHeaderDump
 // ****************************************************************************
-char* xHookNextCell(int direction){
-  if (direction==DIR_X)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirX*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Y)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS+c],";
-  if (direction==DIR_Z)
-    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirZ*NABLA_NB_CELLS+c],";
-  assert(NULL);
-  return NULL;
+void legionHookHeaderDump(nablaMain *nabla){
+}
+
+// ****************************************************************************
+// * legionHookHeaderIncludes
+// ****************************************************************************
+void legionHookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n\
+#include <cstdio>\n\
+#include <cassert>\n\
+#include <cstdlib>\n\
+//#include \"legion.h\"\n\
+//using namespace Legion;\n\
+\n\
+typedef double Real;\n\
+typedef double Real2;\n\
+");
 }
 
 
 // ****************************************************************************
-// * System Postfix
+// * legionHookHeaderPostfix
 // ****************************************************************************
-char* xHookSysPostfix(void){ return "/*xHookSysPostfix*/)"; }
+void legionHookHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n//legionHookHeaderPostfix\n");  
+  fprintf(nabla->entity->hdr,"\n#endif // __BACKEND_%sH__\n",
+          nabla->entity->name);
+}
+
+
+// ****************************************************************************
+// * legionsHookParallelIncludes
+// ****************************************************************************
+char *legionCallParallelIncludes(void){
+  return "\n//legionCallParallelIncludes\n";
+}
 
 
 // ****************************************************************************
-// * Function Hooks
+// * legionHookEoe - End Of Enumerate
 // ****************************************************************************
-void xHookFunctionName(nablaMain *nabla){
-  nprintf(nabla, NULL, "%s", nabla->name);
+char* legionHookEoe(nablaMain* nabla){
+  return "//legionHookEoe";
+}
+
+
+// ****************************************************************************
+// * legionHookDfsExtra
+// ****************************************************************************
+bool legionHookDfsExtra(nablaMain* nabla,nablaJob* job, bool arg_test){
+  return false;
 }
 
 // ****************************************************************************
-// * Dump des variables appelées
+// * Dump des options dans le header
 // ****************************************************************************
-void xHookDfsForCalls(nablaMain *nabla,
-                      nablaJob *fct,
-                      astNode *n,
-                      const char *namespace,
-                      astNode *nParams){
-  nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
+void legionHookVariablesPrefix(nablaMain *nabla){
+  fprintf(nabla->entity->src, "\n// legionHookVariablesPrefix");
 }
 
-// ****************************************************************************
-// * Dump du préfix des points d'entrées: inline ou pas
-// ****************************************************************************
-char* xHookEntryPointPrefix(nablaMain *nabla,
-                            nablaJob *entry_point){
-  return "static inline";
-}
-
-void xHookError(nablaMain *nabla, nablaJob *job){
-  nprintf(nabla, "/*ERROR*/", "exit(-1)");
-}
-void xHookExit(nablaMain *nabla, nablaJob *job){
-  if (job->when_depth==0)
-    nprintf(nabla, "/*EXIT*/", "exit(0)");
-  else
-    nprintf(nabla, "/*EXIT*/", "hlt_exit[hlt_level]=false");
-}
-void xHookTime(nablaMain *nabla){
-  nprintf(nabla, "/*TIME*/", "global_time[0]");
-}
-void xHookFatal(nablaMain *nabla){
-  nprintf(nabla, NULL, "fatal");
-}
-void xHookIteration(nablaMain *nabla){
-  nprintf(nabla, "/*ITERATION*/", "global_iteration[0]");
-}
-
-void xHookAddCallNames(nablaMain *nabla,nablaJob *fct,astNode *n){
-  nablaJob *foundJob;
-  const char *callName=n->next->children->children->token;
-  nprintf(nabla, "/*function_got_call*/", "/*xHookAddCallNames*/");
-  fct->parse.function_call_name=NULL;
-  if ((foundJob=nMiddleJobFind(fct->entity->jobs,callName))!=NULL){
-    if (foundJob->is_a_function!=true){
-      nprintf(nabla, "/*isNablaJob*/", NULL);
-      fct->parse.function_call_name=sdup(callName);
-    }else{
-      nprintf(nabla, "/*isNablaFunction*/", NULL);
-    }
-  }else{
-    nprintf(nabla, "/*has not been found*/", NULL);
-  }
-}
 
 // ****************************************************************************
-// * xHookHeaderIncludes
+// * Malloc des variables
 // ****************************************************************************
-void xHookHeaderIncludes(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\n\n\
-// *****************************************************************************\n\
-// * Includes\n\
-// *****************************************************************************\n\
-%s // from nabla->simd->includes\n\
-#include <sys/time.h>\n\
-#include <getopt.h>\n\
-#include <stdlib.h>\n\
-#include <stdio.h>\n\
-#include <string.h>\n\
-#include <vector>\n\
-#include <math.h>\n\
-#include <assert.h>\n\
-#include <stdarg.h>\n\
-#include <iostream>\n\
-#include <sstream>\n\
-#include <fstream>\n\
-using namespace std;\n\
-%s // from nabla->parallel->includes()\n",
-          cCALL(nabla,simd,includes),
-          cCALL(nabla,parallel,includes));
-  nMiddleDefines(nabla,nabla->call->header->defines);
-  nMiddleTypedefs(nabla,nabla->call->header->typedefs);
-  nMiddleForwards(nabla,nabla->call->header->forwards);
+void legionHookVariablesMalloc(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n// legionHookVariablesMalloc");
+}
+
+
+// ****************************************************************************
+// * Variables Postfix
+// ****************************************************************************
+void legionHookVariablesFree(nablaMain *nabla){
+  fprintf(nabla->entity->src, "\n// legionHookVariablesFree");
+}
+
+
+// ****************************************************************************
+// * legionHookMainPrefix
+// ****************************************************************************
+NABLA_STATUS legionHookMainPrefix(nablaMain *nabla){
+  fprintf(nabla->entity->src, "\n\
+// ******************************************************************************\n\
+// * Main\n\
+// ******************************************************************************\n\
+int main(int argc, char *argv[]){");
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * legionHookMainPreInit
+// ****************************************************************************
+NABLA_STATUS legionHookMainPreInit(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n// legionHookMainPreInit");
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * legionHookMainPostfix
+// ****************************************************************************
+NABLA_STATUS legionHookMainPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->src, "\n// legionHookMainPostfix");
+  fprintf(nabla->entity->src, "\n}");
+  return NABLA_OK;
 }

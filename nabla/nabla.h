@@ -87,7 +87,8 @@ typedef enum {
   BACKEND_OKINA       = 0x3fda1e56,
   BACKEND_ARCANE      = 0xcbbe711d,
   BACKEND_LAMBDA      = 0x1393b187,
-  BACKEND_KOKKOS      = 0x5a83b2b0
+  BACKEND_KOKKOS      = 0x5a83b2b0,
+  BACKEND_LEGION      = 0x902F0156
 //  BACKEND_LOCI      = 0x9FE3840F,
 //  BACKEND_UINTAH    = 0x12B30ED1,
 //  BACKEND_MMA       = 0xE949383D,
@@ -182,6 +183,7 @@ void nablaErrorVariadic(const char *,const int,const char *,...);
 #include "backends/arcane/arcane.h"
 #include "backends/cuda/cuda.h"
 #include "backends/kokkos/kokkos.h"
+#include "backends/legion/legion.h"
 #include "backends/lambda/lambda.h"
 #include "backends/okina/okina.h"
 #include "backends/raja/raja.h"

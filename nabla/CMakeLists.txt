@@ -12,7 +12,8 @@ add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 # Link libraries #
 ##################
 target_link_libraries(nabla Nabla NablaMiddlend NablaFrontend NablaTools
-                      NablaArcane NablaCuda NablaKokkos NablaRaja NablaLambda NablaOkina
+                      NablaArcane NablaCuda NablaOkina NablaLambda
+                      NablaRaja NablaKokkos NablaLegion
                       NablaLibCall NablaLibHook NablaLibDump NablaAleph)
 
 ###########

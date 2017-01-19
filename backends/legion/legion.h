@@ -40,153 +40,37 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#include "nabla.h"
+#ifndef _NABLA_LEGION_HOOK_H_
+#define _NABLA_LEGION_HOOK_H_
 
-// ****************************************************************************
-// * CALLS
-// ****************************************************************************
-static const callHeader xHeader={
-  xCallHeaderForwards,
-  xCallHeaderDefines,
-  xCallHeaderTypedef
-};
-static const callSimd simd={
-  NULL,
-  xCallGather,
-  xCallScatter,
-  NULL,
-  xCallUid
-};
-static const callParallel parallel={
-  NULL,
-  NULL,
-  xParallelLoop,
-  xParallelIncludes
-};
-static backendCalls calls={
-  &xHeader,
-  &simd,
-  &parallel
-};
+void legionHookHeaderDump(nablaMain*);
 
+char *legionCallParallelIncludes(void);
 
-// ****************************************************************************
-// * HOOKS
-// ****************************************************************************
-const static hookForAll forall={
-  NULL,
-  xHookForAllDump,
-  xHookForAllItem,
-  xHookForAllPostfix
-};
+void legionHookHeaderIncludes(nablaMain*);
+void legionHookHeaderPostfix(nablaMain*);
 
-const static hookToken token={
-  NULL,
-  xHookSwitchToken,
-  xHookTurnTokenToVariable,
-  xHookTurnTokenToOption,
-  xHookSystem,
-  xHookIteration,
-  xHookExit,
-  xHookError,
-  xHookTime,
-  xHookFatal,
-  xHookTurnBracketsToParentheses,
-  xHookIsTest,
-  NULL
-};
+NABLA_STATUS legionHookMainPrefix(nablaMain*);
+NABLA_STATUS legionHookMainPreInit(nablaMain*);
+NABLA_STATUS legionHookMainPostfix(nablaMain*);
 
-const static hookGrammar gram={
-  NULL,
-  NULL,
-  xHookReduction,
-  NULL,
-  NULL,
-  xHookDfsVariable,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-};
+void legionHookSwitchToken(astNode*, nablaJob*);
+nablaVariable *legionHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void legionHookTurnTokenToOption(nablaMain*,nablaOption*);
+void legionHookExit(nablaMain*, nablaJob*);
+void legionHookTime(nablaMain*);
 
-const static hookCall call={
-  xHookAddCallNames,
-  xHookAddArguments,
-  xHookEntryPointPrefix,
-  xHookDfsForCalls,
-  NULL, // addExtraParameters
-  NULL  // dumpNablaParameterList
-};
+void legionHookVariablesPrefix(nablaMain*);
+void legionHookVariablesMalloc(nablaMain*);
+void legionHookVariablesFree(nablaMain*);
 
-const static hookXyz xyz={
-  NULL,
-  xHookPrevCell,
-  xHookNextCell,
-  xHookSysPostfix
-};
+char* legionHookEoe(nablaMain*); 
+bool legionHookDfsExtra(nablaMain*,nablaJob*,bool);
 
-const static hookHeader header={
-  xHookHeaderDump,
-  xHookHeaderDumpWithLibs,
-  xHookHeaderOpen,
-  xHookHeaderDefineEnumerates,
-  xHookHeaderPrefix,
-  xHookHeaderIncludes,
-  xHookHeaderAlloc,
-  xHookHeaderPostfix
-};
+char* legionHookForAllDump(nablaJob*);
+char* legionHookForAllPostfix(nablaJob*);
 
-const static hookSource source={
-  xHookSourceOpen,
-  xHookSourceInclude,
-  xHookSourceNamespace
-};
+hooks* legion(nablaMain*);
 
-const static hookMesh mesh={
-  xHookMeshPrefix,
-  xHookMeshCore,
-  xHookMeshPostfix
-};
-
-const static hookVars vars={
-  xHookVariablesInit,
-  xHookVariablesPrefix,
-  xHookVariablesMalloc,
-  xHookVariablesFree,
-  NULL,
-  xHookVariablesODecl
-};  
-
-const static hookMain mains={
-  xHookMainPrefix,
-  xHookMainPreInit,
-  xHookMainVarInitKernel,
-  xHookMainVarInitCall,
-  xHookMainHLT,
-  xHookMainPostInit,
-  xHookMainPostfix
-};  
-
-static hooks lambdaHooks={
-  &forall,
-  &token,
-  &gram,
-  &call,
-  &xyz,
-  NULL,//pragma
-  &header,
-  &source,
-  &mesh,
-  &vars,
-  &mains
-};
-
-
-// ****************************************************************************
-// * lambda
-// ****************************************************************************
-hooks* lambda(nablaMain *nabla){
-  nabla->call=&calls;
-  return &lambdaHooks;
-}
+#endif // _NABLA_LEGION_HOOK_H_
+ 

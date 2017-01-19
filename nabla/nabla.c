@@ -90,6 +90,7 @@ extern char nabla_license[];
 \t[1;35m--cuda [36;4mname[0m\tCode generation for CUDA\n\
 \t[1;35m--raja [36;4mname[0m\tCode generation for RAJA\n\
 \t[1;35m--kokkos [36;4mname[0m\tCode generation for KOKKOS\n\
+\t[1;35m--legion [36;4mname[0m\tCode generation for LEGION\n\
 \t[1;35m--lambda [36;4mname[0m\tCode generation for LAMBDA (C/C++11) stand-alone target\n\
 \t[1;35m--okina [36;4mname[0m\tCode generation for OKINA  (C/C++11) stand-alone target\n\
 \t\t[36m--std[0m\t\tStandard code generation with no explicit vectorization\n\
@@ -326,6 +327,7 @@ int main(int argc, char * argv[]){
     {"lambda",required_argument,NULL,BACKEND_LAMBDA},
     {"raja",required_argument,NULL,BACKEND_RAJA},
     {"kokkos",required_argument,NULL,BACKEND_KOKKOS},
+    {"legion",required_argument,NULL,BACKEND_LEGION},
     //{"loci",required_argument,NULL,BACKEND_LOCI},
     //{"uintah",required_argument,NULL,BACKEND_UINTAH},
     //{"mma",no_argument,NULL,BACKEND_MMA},
@@ -557,6 +559,19 @@ int main(int argc, char * argv[]){
       unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
                                            &unique_temporary_file_name);
       dbg("\n\t[nabla] Command line specifies new KOKKOS nabla_entity_name: %s",
+          nabla_entity_name);
+      break;      
+      // ************************************************************
+      // * BACKEND LEGION
+      // ************************************************************
+    case BACKEND_LEGION:
+      backend=BACKEND_LEGION;
+      dbg("\n\t[nabla] Command line hits long option %s",
+          longopts[longindex].name);
+      nabla_entity_name=optarg;
+      unique_temporary_file_fd=toolMkstemp(nabla_entity_name,
+                                           &unique_temporary_file_name);
+      dbg("\n\t[nabla] Command line specifies new LEGION nabla_entity_name: %s",
           nabla_entity_name);
       break;      
       // ************************************************************

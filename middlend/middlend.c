@@ -69,7 +69,6 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 
 // ****************************************************************************
 // * nMiddleSwitch
-// * The CUDA, KOKKOS & LAMBDA backends uses middlend/animate.c
 // ****************************************************************************
 NABLA_STATUS nMiddleSwitch(astNode *root,
                            const int optionDumpTree,
@@ -105,6 +104,7 @@ NABLA_STATUS nMiddleSwitch(astNode *root,
   case BACKEND_LAMBDA: { nabla->hook=lambda(nabla); break;}
   case BACKEND_RAJA:   { nabla->hook=raja(nabla); break;}
   case BACKEND_KOKKOS: { nabla->hook=kokkos(nabla); break;}
+  case BACKEND_LEGION: { nabla->hook=legion(nabla); break;}
   default:
     exit(NABLA_ERROR|
          fprintf(stderr,

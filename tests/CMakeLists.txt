@@ -135,6 +135,11 @@ endfunction(nabla_add_test)
 ##################################
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.kokkos ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.kokkos)
 
+##################################
+# NABLA TESTS FOR LEGION BACKEND #
+##################################
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.legion ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.legion)
+
 ################################
 # NABLA TESTS FOR RAJA BACKEND #
 ################################
@@ -346,12 +351,21 @@ if(KOKKOS_FOUND)
   #   nabla_add_test_with_defines(kokkos ${VT100_FG_GREEN} darcy 1 run seq -DALEPH_INDEX 100000)
   #   nabla_add_test(kokkos ${VT100_FG_GREEN} p1apwb1D_implicite 1 run std seq)
   #endif (HYPRE_FOUND)
-  endif(KOKKOS_FOUND)
+endif(KOKKOS_FOUND)
 
-  
+
 ##########################
+# NABLA TESTS FOR LEGION #
+##########################
+if(LEGION_FOUND)
+  nabla_add_test(legion ${VT100_FG_MAGENTA} pennant 1 gen seq)
+  nabla_add_test(legion ${VT100_FG_MAGENTA} pennant 1 run seq)
+endif(LEGION_FOUND)
+
+
+########################
 # NABLA TESTS FOR RAJA #
-##########################
+########################
 if(RAJA_FOUND)
   set(TESTS_NOT_YET_SUPPORTED_WITH_RAJA "shydro sethi anyItem gad comd pDDFV")
   foreach(TST ${NABLA_TESTS})
@@ -378,6 +392,7 @@ if(RAJA_FOUND)
   #   nabla_add_test(raja ${VT100_FG_BLUE} p1apwb1D_implicite 1 run std seq)
   #endif (HYPRE_FOUND)
 endif(RAJA_FOUND)
+
 
 ########################
 # NABLA TESTS FOR CUDA #

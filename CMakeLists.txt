@@ -99,6 +99,7 @@ include(cmake/FindKokkos.cmake)
 include(cmake/FindRAJA.cmake)
 include(cmake/FindPETSc.cmake)
 include(cmake/FindMFEM.cmake)
+include(cmake/FindLegion.cmake)
 
 ##################
 # SUBDIRECTORIES #
@@ -117,6 +118,7 @@ add_subdirectory(backends/cuda)
 add_subdirectory(backends/okina)
 add_subdirectory(backends/lambda)
 add_subdirectory(backends/kokkos)
+add_subdirectory(backends/legion)
 add_subdirectory(backends/raja)
 add_subdirectory(backends/lib)
 

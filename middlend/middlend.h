@@ -397,6 +397,7 @@ NABLA_STATUS nMiddleSwitch(astNode*,
                            char*,char*,char*);
 
 // nMiddlePrintf
+int dprintf(const bool,const nablaMain*,const char*,const char*,...);
 int nprintf(const struct nablaMainStruct*,const char*,const char*,...);
 int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 

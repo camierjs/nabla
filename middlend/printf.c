@@ -44,6 +44,25 @@
 
 
 // ****************************************************************************
+// * dprintf
+// ****************************************************************************
+int dprintf(const bool dump,
+            const nablaMain *nabla,
+            const char *debug, const char *format, ...){
+  if (!dump) return 0;
+  int rtn;
+  va_list args;
+  if (format==NULL) return 0;
+  va_start(args, format);
+  if ((rtn=vfprintf(nabla->entity->src, format, args))<0)
+    exit(printf("[dprintf] error, format='%s'\n",format));
+  if (fflush(nabla->entity->src)!=0)
+    exit(printf("[dprintf] Could not flush to file\n"));
+  va_end(args);
+  return rtn;
+}
+
+// ****************************************************************************
 // * nprintf
 // ****************************************************************************
 int nprintf(const nablaMain *nabla, const char *debug, const char *format, ...){

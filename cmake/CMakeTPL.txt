@@ -12,3 +12,5 @@ set(KOKKOS_ROOT /usr/local/kokkos)
 set(ARCANE_ROOT /usr/local/arcane/testing)
 set(Trilinos_ROOT_PATH /usr/local/trilinos/11.12.1)
 set(MFEM_ROOT_PATH ${NABLA_SOURCE_DIR}/tpl/mfem)
+
+set(LEGION_ROOT /usr/local/legion)

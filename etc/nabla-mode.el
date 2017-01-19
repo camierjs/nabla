@@ -1,8 +1,7 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
-(defconst nabla-version "160930" "Nabla Mode version number")
-(defconst nabla-time-stamp "2016-09-30"
+(defconst nabla-version "nabla" "Nabla Mode version number")
+(defconst nabla-time-stamp "2017-01-19"
   "Nabla Mode time stamp for last update.")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defconst nabla-keywords
@@ -102,34 +101,6 @@
   "Regexp for Nabla warnings.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar nabla-font-inout-face 'nabla-font-inout-face)
-
-(defvar nabla-font-at-face 'nabla-font-at-face)
-
-(defvar nabla-font-comment-face 'nabla-font-comment-face)
-
-(defface nabla-font-inout-face
-  '((((class color) (background light)) (:foreground "Blue" :bold t))
-    (((class color) (background dark)) (:foreground "RoyalBlue" :bold t))
-    (t (:italic t :bold t)))
-  "Font lock mode face used to highlight @ definitions."
-  :group 'font-lock-highlighting-faces)
-
-(defface nabla-font-at-face
-  '((((class color) (background light)) (:foreground "Blue" :bold nil))
-    (((class color) (background dark)) (:foreground "RoyalBlue" :bold nil))
-    (t (:italic t :bold t)))
-  "Font lock mode face used to highlight @ definitions."
-  :group 'font-lock-highlighting-faces)
-
-(defface nabla-font-comment-face
-  '((((class color) (background light)) (:foreground "Salmon"))
-    (((class color) (background dark)) (:foreground "Salmon"))
-    (t (:italic t :bold t)))
-  "Font lock mode face used for comments."
-  :group 'font-lock-highlighting-faces)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Keywords
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; font-lock-comment-face
@@ -172,7 +143,7 @@
    ;; highlight functions
    '("\\<\\(\\w+\\)\\s-*(" 1 font-lock-function-name-face)
    ;; highlight @,#
-   '("\\(@\\)" . font-lock-function-name-face)
+   '("\\(@\\)" . font-lock-type-face)
    '("\\(#\\)" . font-lock-constant-face)
    ;; highlight (/*-+)=
    '("\\<\\(/=\\|*=\\|-=\\|+=\\)\\>" . font-lock-builtin-face)
@@ -183,8 +154,9 @@
    '("\\<\\(and\\|or\\|not\\|xor\\)\\>" . font-lock-builtin-face)
     ;; highlight directives and directive names
    '("^\\s-*\\(#\\)\\(\\w+\\)\\s-*\\(\\w+\\|\"\\).*" (1 font-lock-builtin-face) (2 font-lock-preprocessor-face) (3 font-lock-variable-name-face))
+   ;; highlight job and function names
+   '("\\<\\(\\w+\\)\\s-*\\(@\\)" (1 font-lock-function-name-face) (2 font-lock-type-face))
    ))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mode definitions

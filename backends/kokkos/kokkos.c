@@ -180,6 +180,7 @@ const static hookGrammar gram={
   kHookDfsExtra,
   NULL,
   kHookEoe,
+  NULL,
   NULL
 };
 

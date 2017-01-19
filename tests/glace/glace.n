@@ -128,12 +128,12 @@ global{
 // * Partie d'initialisation ]-∞,-0.0[
 // ****************************************************************************
 
-void hydroInit(void) @ -25.0{
+hydroInit @ -25.0{
   δt=option_δt_ini;
   assert(option_triangles^option_quads^option_hexa^option_cylinder);
 }
 
-∀ cells void cellHydroMaterialInitZone(void) @ -25.0{
+∀ cells cellHydroMaterialInitZone @ -25.0{
   Real3 centre; 
   λ=1.0;
   foreach node centre+=coord;
@@ -151,22 +151,22 @@ void hydroInit(void) @ -25.0{
   }
 }
 
-∀ cells void cellIniMassCompute(void) @ -19.0 {
+∀ cells cellIniMassCompute @ -19.0 {
   c=0.0;
   u = 0.0;
   m = ρ*V;
 }
 
-∀ cells void iniEOS(void) @ -18.0{
+∀ cells iniEOS @ -18.0{
   ρΕ = p/((γ-1.0)*ρ);
 }
 
-∀ nodes void flushNodeGroups(void)@-18.0{
+∀ nodes flushNodeGroups @ -18.0{
   //node_u=0;
   node_x_min_max=false;
 }
 
-∀ outer nodes void iniNodeGroups(void)@-17.0{
+∀ outer nodes iniNodeGroups @ -17.0{
   //if (!(coord.x==option_x_min || coord.x==option_x_max)) continue;
   if (coord.x<=(option_x_min+0.01) || coord.x>=(option_x_max-0.01))
     node_x_min_max=true;
@@ -176,29 +176,29 @@ void hydroInit(void) @ -25.0{
 // * Partie boucle de calcul ]+0.0,+∞[ 
 // ****************************************************************************
 
-∀ cells void temporalScheme_spatialScheme_GLACE_computeAQsMatrices(void) @ 9.0 if (option_glace){ // 18%
+∀ cells temporalScheme_spatialScheme_GLACE_computeAQsMatrices @ 9.0 if (option_glace){ // 18%
   const Real ρc = λ*ρ*c;
   foreach node{
     AQs = CQs⊗CQs;
     AQs *= ρc/absCQs;
   }
 }
-∀ cells void temporalSchemeReconstructPressure(void) @ 10.0{
+∀ cells temporalSchemeReconstructPressure @ 10.0{
   foreach node reconstructed_p=p;
 }
 
-∀ cells void temporalSchemeReconstructVelocity(void) @ 10.0{
+∀ cells temporalSchemeReconstructVelocity @ 10.0{
   foreach node reconstructed_u=u;
 }
 
-∀ nodes void temporalSchemeIniMatricesAndSecondMember(void) @ 11.0{
+∀ nodes temporalSchemeIniMatricesAndSecondMember @ 11.0{
   node_u_matrix=Real3x3();
 //#warning 3D Real3(0,0,1));
   //Real3(0,0,1));
   node_u_second_member=0.0;//Real3(0,0,0);
 }
 
-∀ cells void temporalSchemeAssembleMatricesAndSecondMember(void) @ 12.0{ // 16%
+∀ cells temporalSchemeAssembleMatricesAndSecondMember @ 12.0{ // 16%
   foreach node{
     const Real3x3 local_matrix = AQs;
     node_u_matrix += local_matrix;
@@ -207,12 +207,12 @@ void hydroInit(void) @ -25.0{
   }
 }
 
-void eieioNode_u_matrix_second_member(void)@ 13.4{
+eieioNode_u_matrix_second_member @ 13.4{
   synchronize(node_u_matrix);
   synchronize(node_u_second_member);
 }
 
-∀ nodes void temporalSchemeComputeNodesVelocity(void) @ 14.0{ // 11%
+∀ nodes temporalSchemeComputeNodesVelocity @ 14.0{ // 11%
   const Real determinent = matrixDeterminant(node_u_matrix);
   node_u_matrix = inverseMatrix(node_u_matrix, determinent);
   node_u = node_u_matrix ⨂ node_u_second_member;
@@ -220,10 +220,10 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
   //node_u.z=0.0;
 }
   
-∀ cells void temporalSchemeIniFluxesSum(void) @ 15.0{
+∀ cells temporalSchemeIniFluxesSum @ 15.0{
   momentum_fluxes_Σ=total_energy_fluxes_Σ=0.0;
 }
-∀ cells void temporalSchemeComputeStandardFluxesSum(void) @ 16.0{ // 14%
+∀ cells temporalSchemeComputeStandardFluxesSum @ 16.0{ // 14%
   foreach node{
     const Real3 Δu = reconstructed_u-node_u;
     Real3 FQs = AQs ⨂ Δu;
@@ -233,12 +233,12 @@ void eieioNode_u_matrix_second_member(void)@ 13.4{
   }
 }
 
-∀ cells void temporalSchemeApplyFluxesStandard(void) @ 19.0{
+∀ cells temporalSchemeApplyFluxesStandard @ 19.0{
   u += δt*momentum_fluxes_Σ/m;
   ρΕ += δt*total_energy_fluxes_Σ/m;
 }
 
-∀ nodes void temporalSchemeMoveNodes(void) @ 22.0{
+∀ nodes temporalSchemeMoveNodes @ 22.0{
   coord += δt*node_u;
 }
 /*#warning Still ReMaxMin
@@ -247,20 +247,19 @@ nodes void temporalSchemeMoveNodesReMaxMin(void) @ 23.0{
   if (coord.x>=option_x_max) coord.x=option_x_max;
   }*/
 
-∀ cells void updatePhysicalDensity(void)
-  in (cell m, cell V) out (cell ρ) @ 26.0{
+∀ cells updatePhysicalDensity @ 26.0{
   ρ = m/V;
 }
 
-∀ cells void computeTotalInternalEnergyFromTotalEnergy(void) @ -16.0,26.0{
+∀ cells computeTotalInternalEnergyFromTotalEnergy @ -16.0,26.0{
   ιΕ = ρΕ-½*u.abs2();
 }
 
-∀ cells void updateTotalPressure(void) @ 27.0{
+∀ cells updateTotalPressure @ 27.0{
   p=(γ-1.0)*ρ*ιΕ;
 }
 
-∀ cells void updateTotalPressureZgZd(void) @ 28.0{
+∀ cells updateTotalPressureZgZd @ 28.0{
   Real3 centre; 
   ∀ node centre+=coord;
   centre/=nbNode;
@@ -273,12 +272,12 @@ nodes void temporalSchemeMoveNodesReMaxMin(void) @ 23.0{
   }
 }
 
-∀ cells void computeTotalSoundSpeed(void) @ -18.0,28.0{
+∀ cells computeTotalSoundSpeed @ -18.0,28.0{
   c=√(γ*p/ρ);
 }
 
 // Calcul du δt par maille
-∀ cells void hydroTimeStepCtrlCells(void) out (cell glace_δt) @ 30.0{ // 8%
+∀ cells hydroTimeStepCtrlCells @ 30.0{ // 8%
   Real Σljr=0.0;
   ∀ node Σljr+=absCQs;
   glace_δt=2.0*λ*V/(c*Σljr);
@@ -287,7 +286,7 @@ nodes void temporalSchemeMoveNodesReMaxMin(void) @ 23.0{
 // Réduction min vers le global_δt
 ∀ cells global_δt <?= glace_δt @ 31.0;
 
-void hydroTimeStepCtrl(void) @ 35.0{
+hydroTimeStepCtrl @ 35.0{
   Real new_δt=option_δt_control*global_δt;
   // on calcule les variations min et max autorisées
   const Real max_time_step = (1.0+option_δt_max_variation)*δt;

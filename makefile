@@ -78,7 +78,7 @@ test:
 ####################
 # BACKEND TEMPLATE #
 ####################
-backends = arcane cuda kokkos lambda okina raja
+backends = arcane cuda kokkos lambda okina raja legion
 define BACKEND_template =
 $(1):
 	(cd $(BUILD_PATH)/tests && $(CTEST) --schedule-random -j $(NUMBR_PROCS) -R $(1))
@@ -96,7 +96,7 @@ tests = pennant ndspmhd comd pDDFV schrodinger glace aecjs nvknl darcy amber hea
 procs = 1 2 4
 types = gen run
 simds = std sse avx avx2 avx512 #mic warp
-backends = lambda okina cuda kokkos arcane raja
+backends = lambda okina cuda kokkos arcane raja legion
 parallels = seq omp smp mpi family #cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):

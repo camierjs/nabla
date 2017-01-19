@@ -1,0 +1,14 @@
+include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
+
+
+find_path(LEGION_ROOT_PATH include/legion/legion.h ${LEGION_ROOT})
+info("${VT100_FG_MAGENTA}LEGION${VT100_RESET} set to ${VT100_BOLD}${LEGION_ROOT_PATH}${VT100_RESET}")
+
+if(LEGION_ROOT_PATH)
+  set(LEGION_FOUND "YES")
+endif(LEGION_ROOT_PATH)
+  
+if(LEGION_FOUND)
+  info("\t${VT100_FG_MAGENTA}LEGION${VT100_RESET} has been found in ${VT100_BOLD}${LEGION_ROOT}${VT100_RESET}")
+endif(LEGION_FOUND)
+  
