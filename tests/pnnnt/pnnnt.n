@@ -223,7 +223,7 @@ iniGlobals @ -20.0 { time=0; cycle=0; }
 }
 ∀ nodes @ -14.5 if (uinitradial==0.0) { pu=0.0; }
 
-iniRstDtHydro @ -14.4 { dtrec = 1.e99; }
+iniRstDtHydro @ -14.4 { dtrec = +∞; }
 
 
 // ****************************************************************************
@@ -255,12 +255,13 @@ calcGlobalDt @ 2.0 {
 ∀ cells @ 3.2 { zxp=0; ∀ nodes zxp+=pxp; zxp/=#nodes; }
 ∀ faces @ 3.2 { exp=0; ∀ nodes exp+=pxp; exp/=#nodes; }
 
-∀ cells @ 3.4 {
+∀ cells iniArea @ 3.4 {
   ℝ³ X[4]; ∀ nodes X[#]=pxp;
   zareap=0; 
   zvolp=0;
   ∀ nodes {
     const ℕ j=(#+1)%#nodes;
+    cout<<"pxp="<<pxp[#];
     sareap = ½*cross2D(X[j]-X[#],zxp-X[#]);
     svolp = ⅓*sareap*(X[#].x+X[j].x+zxp.x);
     zareap+=sareap;

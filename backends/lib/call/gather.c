@@ -152,16 +152,16 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
   
   //nprintf(job->entity->main, NULL,"/*filterGather*/");
 
-    dbg("\n\t\t\t\t[xFilterGather] for");
+  dbg("\n\t\t\t\t[xFilterGather] Looping on all used_variables of this job:");
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
     if (!var->is_gathered) continue;
-    dbg("\n\t\t\t\t[xFilterGather] var '%s'", var->name);
-    //nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
+    dbg("\n\t\t\t\t\t[xFilterGather] variable: '%s'", var->name);
+    nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
     if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)){
-      //nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
+      nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
       continue;
     }
-    //nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
+    nprintf(job->entity->main, NULL, " and IS used InThisForall! */");
     dbg("\n\t\t\t\t[xFilterGather] strcat");
     if (job->entity->main->call){
       strcat(gather_src_buffer,

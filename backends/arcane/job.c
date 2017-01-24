@@ -308,6 +308,14 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
 
+  case(K_OFFSET):{
+    nprintf(arc, "/*DIESE*/", NULL);
+    if (support=='c' && forall!='\0') nprintf(arc, NULL, "[%c.index()]", forall);
+    if (support=='n' && forall!='\0') nprintf(arc, NULL, "[%c.index()]", forall);
+    if (support=='f' && forall!='\0') nprintf(arc, NULL, "[%c.index()]", forall);
+    break;
+  }
+    
   case(DIESE):{
     nprintf(arc, "/*DIESE*/", NULL);
     if (support=='c' && forall!='\0') nprintf(arc, NULL, "%c.index()", forall);

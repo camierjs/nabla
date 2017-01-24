@@ -427,6 +427,7 @@ nablaVariable *xHookTurnTokenToVariable(astNode * n,
 
   // Check whether this variable is being gathered
   if (xHookTurnTokenToGatheredVariable(nabla,used,job)){
+    dbg("\n\t[xHookTurnTokenToVariable] gathered variable!");
     nprintf(nabla, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
     return var;
   }

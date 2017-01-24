@@ -156,7 +156,7 @@ nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
   nprintf(arc,NULL,particleJobGlobalVar(arc,job,var),NULL);
 
 
-// Lancement de tous les transformations connues au sein des fonctions
+  // Lancement de tous les transformations connues au sein des fonctions
   nprintf(arc,NULL,functionGlobalVar(arc,job,var),NULL);
   
   if (adrs_it==true) nprintf(arc, NULL, ")");

@@ -348,7 +348,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   // Dés qu'on a une primary_expression,
   // on teste pour voir si ce n'est pas un argument que l'on return
   // A confirmer si cela est toujours utile
-  if ((n->ruleid == ruleToId(rule_primary_expression))
+  /*if ((n->ruleid == ruleToId(rule_primary_expression))
       && (n->children->token!=NULL)
       && (job->parse.returnFromArgument)){
     dbg("\n\t[nablaJobParse] primary_expression test for return");
@@ -359,19 +359,19 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
     }else{
        dbg("\n\t\t[nablaJobParse] ELSE primary_expression_to_return");
     }
-  }
+    }*/
   
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
   if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL)){
     nablaVariable *var;
-    //dbg("\n\t[nablaJobParse] primaryExpression=%s child->token=%s",n->rule,n->children->token);
+    dbg("\n\t[nablaJobParse] PRIMARYExpression=%s child->token=%s",n->rule,n->children->token);
     if ((var=nabla->hook->token->variable(n->children, nabla,job))!=NULL){
       if (nabla->hook->token->turnBracketsToParentheses)
         nabla->hook->token->turnBracketsToParentheses(nabla,job,var,cnfgem);
       return;
     }
   }
-
+ 
   // Gestion du 'is_test', IS_OP_INI & IS_OP_END
   if (n->tokenid == IS_OP_INI) nabla->hook->token->isTest(nabla,job,n,IS_OP_INI);
   if (n->tokenid == IS_OP_END) nabla->hook->token->isTest(nabla,job,n,IS_OP_END);
@@ -449,11 +449,12 @@ void nMiddleJobFill(nablaMain *nabla,
   //dbg("\n\t// **********************************************************************");
   
   // Scan DFS pour récuérer les in/inout/out,
-  //      on dump dans le log les tokens de ce job
+  // on dump dans le log les tokens de ce job
   dbg("\n\t[nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
+  
   dbg("\n\t[nablaJobFill] Now dfsEnumMax:");
-  dfsEnumMax(nabla,job,n);
+  //dfsEnumMax(nabla,job,n);
   dfsVariablesDump(nabla,job,n);
 
   

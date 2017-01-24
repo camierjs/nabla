@@ -274,6 +274,13 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case (IS_OP_INI): break;
   case (IS_OP_END): break;
 
+  case (K_OFFSET):{
+    if (cnfgem=='c' && forall!='\0') nprintf(nabla, NULL, "[%c]", forall);
+    if (cnfgem=='n' && forall!='\0') nprintf(nabla, NULL, "[%c]", forall);
+    if (cnfgem=='f' && forall!='\0') nprintf(nabla, NULL, "[%c]", forall);
+    break;    
+  }
+
   case (DIESE):{
     //nprintf(nabla, "/*DIESE*/", "/*DIESE*/");
     if (cnfgem=='c' && forall!='\0') nprintf(nabla, NULL, "%c", forall);

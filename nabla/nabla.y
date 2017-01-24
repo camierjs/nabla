@@ -82,6 +82,7 @@ extern char *last_identifier;
 %token ATTRIBUTE ASM // GNU_VA_LIST
 %token IS IS_OP_INI IS_OP_END
 %token SET_INI SET_END
+%token K_OFFSET
 
  // MATHS tokens
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
@@ -556,6 +557,7 @@ argument_expression_list
 /////////////////
 primary_expression
 : IDENTIFIER {rhs;}
+| IDENTIFIER K_OFFSET {rhs;}
 | IDENTIFIER SUPERSCRIPT_N_PLUS_ONE {superNP1($$,$1);}
 | BUILTIN_INFF {rhs;}
 | FRACTION_ONE_HALF_CST {rhs;}
@@ -621,7 +623,7 @@ unary_expression
 | '&' unary_expression {Yadrs($$,$1,$2);}
 | unary_prefix_operator cast_expression {rhs;}
 | SIZEOF unary_expression {rhs;}
-| SIZEOF '(' type_name ')'{rhs;}
+| SIZEOF '(' type_name ')' {rhs;}
 ;
 cast_expression
 : unary_expression {rhs;}
@@ -719,6 +721,7 @@ expression
 : assignment_expression {rhs;}
 | expression ',' assignment_expression {rhs;}
 ;
+
 constant_expression
 : conditional_expression {rhs;}
 ;
@@ -838,6 +841,13 @@ nabla_option_declaration
 | type_specifier direct_declarator '=' expression ';' {rhs;}  
 | preproc {rhs;}
 ;
+
+///////////////////////////
+// ∇ '[#(±k)]' definitions //
+///////////////////////////
+//k_offset
+//: DIESE '+' Z_CONSTANT {rhs;}
+//;
 
 ///////////////////////
 // ∇ '@' definitions //

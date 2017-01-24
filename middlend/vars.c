@@ -346,7 +346,7 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
 
 // ****************************************************************************
 // * We check if the given variable name is used
-// * in the current forall statement, given from the 'n' astNode
+// * in the current forall statement, from the given 'n' astNode
 // ****************************************************************************
 bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char *name){
   nablaVariable *var=NULL;
@@ -466,7 +466,7 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   if (n==NULL) return;
   
   // Par défault, left_of_assignment_expression arrive à false
-  // Si on tombe sur un assignment_expression, et un en fils en unary_expression
+  // Si on tombe sur un assignment_expression, et un fils en unary_expression
   // c'est qu'on passe à gauche du '=' et qu'on 'écrit'
   if (n->ruleid==ruleToId(rule_assignment_expression)&&
       (n->children->ruleid==ruleToId(rule_unary_expression))){
@@ -513,6 +513,11 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
   if (n->ruleid==ruleToId(rule_primary_expression)){
     if (n->children->tokenid == IDENTIFIER){
       dbg("\n\t\t\t[dfsVariables] primary_expression (%s)!", n->children->token);
+      // On cherche un 
+      if (n->children->next && n->children->next->tokenid==K_OFFSET)
+        dbg("\n\t\t\t[dfsVariables] hum, here what I found on my left: %s (id #%d)!",
+            n->children->next->token,
+            n->children->next->tokenid);
       const char *rw=(left_of_assignment_expression==true)?"WRITE":"READ";
       const char* token = n->children->token;
       // Est-ce une variable connue?
@@ -562,10 +567,13 @@ void dfsEnumMax(nablaMain *nabla, nablaJob *job, astNode *n){
   if (n==NULL) return;
   //if (n->tokenid==FORALL) printf("[1;33m[dfsEnumMax] FORALL[m");
   if (n->tokenid==FORALL && n->next->children->ruleid==ruleToId(rule_forall_switch)){
-    if (n->next->children->children->tokenid==CELL) job->enum_enum='c'; //printf("[1;33m cell[m\n");}
-    if (n->next->children->children->tokenid==NODE) job->enum_enum='n'; //printf("[1;33m node[m\n");}
-    if (n->next->children->children->tokenid==FACE) job->enum_enum='f'; //printf("[1;33m face[m\n");}
-    if (n->next->children->children->tokenid==PARTICLE) job->enum_enum='p'; //printf("[1;33m particle[m\n");}
+    if (n->next->children->children->tokenid==CELL)    { job->enum_enum='c'; /*printf("[1;33m cell[m\n");*/}
+    if (n->next->children->children->tokenid==CELLS)   { job->enum_enum='c'; /*printf("[1;33m cell[m\n");*/}
+    if (n->next->children->children->tokenid==NODE)    { job->enum_enum='n'; /*printf("[1;33m node[m\n");*/}
+    if (n->next->children->children->tokenid==NODES)   { job->enum_enum='n'; /*printf("[1;33m node[m\n");*/}
+    if (n->next->children->children->tokenid==FACE)    { job->enum_enum='f'; /*printf("[1;33m face[m\n");*/}
+    if (n->next->children->children->tokenid==FACES)   { job->enum_enum='f'; /*printf("[1;33m face[m\n");*/}
+    if (n->next->children->children->tokenid==PARTICLE){ job->enum_enum='p'; /*printf("[1;33m particle[m\n");*/}
     //exit(printf("[1;33m[dfsEnumMax] job %s, enum_enum=%c[m\n",job->name,job->enum_enum));
   }
   if (n->children!=NULL) dfsEnumMax(nabla,job,n->children);
