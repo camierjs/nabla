@@ -1,0 +1,542 @@
+///////////////////////////////////////////////////////////////////////////////
+// This NABLA port is an implementation of the PENNANT Mini-App              //
+// from Charles R. Ferenbaugh (cferenba@lanl.gov), LANL                      //
+// ∇ contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr        //
+///////////////////////////////////////////////////////////////////////////////
+// PENNANT is an unstructured mesh physics mini-app designed for advanced    //
+// architecture research. It contains mesh data structures and a few physics //
+// algorithms adapted from the LANL rad-hydro code FLAG, and gives a sample  //
+// of the typical memory access patterns of FLAG.                            //
+///////////////////////////////////////////////////////////////////////////////
+// Copyright 2012, Los Alamos National Security, LLC. All rights reserved.   //
+// This software was produced under US Government contract DE-AC52-06NA25396 //
+// for Los Alamos National Laboratory, which is operated by Los Alamos       //
+// National Security, LLC for the U.S. Department of Energy.                 //
+// The US Government has rights to use, reproduce and distribute this        //
+// software.                                                                 //
+// NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY    //
+// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF     //
+// THIS SOFTWARE.                                                            //
+// If this software is modified to produce derivative works, such modified   //
+// software should be clearly marked, so as not to confuse it with the       //
+// version available from LANL.                                              //
+// Additionally, redistribution and use in source and binary forms, with or  //
+// without modification, are permitted provided that the following           //
+// conditions are met:                                                       //
+//  1. Redistributions of source code must retain the above copyright notice,//
+//     this list of conditions and the following disclaimer.                 //
+//  2. Redistributions in binary form must reproduce the above copyright     //
+//     notice, this list of conditions and the following disclaimer in the   //
+//     documentation and/or other materials provided with the distribution.  //
+//  3. Neither the name of Los Alamos National Security, LLC, Los Alamos     //
+//     National Laboratory, LANL, the U.S. Government, nor the names of its  //
+//     contributors may be used to endorse or promote products derived from  //
+//     this software without specific prior written permission.              //
+///////////////////////////////////////////////////////////////////////////////
+// THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND        //
+// CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,    //
+// BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS //
+// FOR A PARTICULAR PURPOSE ARE DISCLAIMED.                                  //
+// IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE    //
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR       //
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF      //
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS  //
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN   //
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)   //
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF    //
+// THE POSSIBILITY OF SUCH DAMAGE.                                           //
+///////////////////////////////////////////////////////////////////////////////
+with ℝ²;
+
+// ****************************************************************************
+// Default options should match test/sedovsmall/sedovsmall.pnt
+// cstop=100, tstop=1.0, meshtype=rect, meshparams=3 3 1.125 1.125
+// subregion=0.0 0.3 0.0 0.3, rinitsub=1.0, einitsub=40.222, bcx=0.0 1.125
+// bcy=0.0 1.125, ssmin=0.1, q1=0.1, q2=1.0, dtinit=0.0025
+// ****************************************************************************
+options{
+  // Mesh options
+  ℝ LENGTH       = 1.125;
+  ℕ X_EDGE_ELEMS = 3;
+  ℕ Y_EDGE_ELEMS = 3;
+  ℕ Z_EDGE_ELEMS = 1;
+  ℕ option_max_iterations = 0;// ! utilisé en dur dans le backend lambda !
+  ℝ option_δt_initial = 1e-7; // ! utilisé en dur dans le backend lambda !
+  ℝ option_stoptime = 1.0;    // ! utilisé en dur dans le backend lambda !
+  // Pennant options
+  ℾ trace       = false;
+  ℕ cstop       = 100;    // simulation stop cycle
+  ℝ tstop       = 1.0;    // simulation stop time
+  ℝ dtmax       = 1.e99;  // maximum timestep size
+  ℝ dtinit      = 0.0025; // initial timestep size
+  ℝ dtfac       = 1.2;    // factor limiting timestep growth
+  ℕ dtreport    = 10;     // frequency for timestep reports
+  ℝ cfl         = 0.6;    // Courant number, limits timestep
+  ℝ cflv        = 0.1;    // volume change limit for timestep
+  ℝ rinit       = 1.0;    // initial density for main mesh
+  ℝ einit       = 0.0;    // initial energy for main mesh
+  ℾ subregion   = true;
+  ℝ sbxmin      = 0.0;
+  ℝ sbxmax      = 0.3;
+  ℝ sbymin      = 0.0;
+  ℝ sbymax      = 0.3;
+  ℝ rinitsub    = 1.0;    // initial density in subregion
+  ℝ einitsub    = 40.222; // initial energy in subregion
+  ℝ uinitradial = 0.0;    // initial velocity in radial direction
+  ℝ γ           = 5./3.;  // coeff. for ideal gas equation
+  ℝ ssmin       = 0.1;    // minimum sound speed for gas
+  ℝ alpha       = 0.5;    // alpha coefficient for TTS model
+  ℝ q1          = 0.1;    // linear coefficients for Q model
+  ℝ q2          = 1.0;    // quadratic coefficients for Q model
+  ℝ ε           = 1.e-12;
+  ℝ ι           = 1.e-99;
+};
+
+
+// ****************************************************************************
+// * Trace & Debug
+// ****************************************************************************
+enum{red=31,green,yellow,blue,magenta,cyan,white};
+#define dbg(...) if (trace) printf("%s%s%s","\n[35m",__VA_ARGS__,"[m")
+#define dbc(clr,...) if (trace) cout<<"["<<clr<<"m"<<__VA_ARGS__<<"[m"<<endl;
+
+
+// ****************************************************************************
+// * Zone/Sides/Corners Variables
+// ****************************************************************************
+cells{
+  ℝ² zx;    // zone center coordinates
+  ℝ² zxp;   // zone ctr coords, middle of cycle
+  ℝ zarea;  // zone area
+  ℝ zvol;   // zone volume
+  ℝ zareap; // zone area, middle of cycle
+  ℝ zvolp;  // zone volume, middle of cycle
+  ℝ zvol0;  // zone volume, start of cycle
+  ℝ zdl;    // zone characteristic length
+  ℝ zm;     // zone mass
+  ℝ zr;     // zone density
+  ℝ zrp;    // zone density, middle of cycle
+  ℝ ze;     // zone specific internal energy (energy per unit mass)
+  ℝ zetot;  // zone total internal energy
+  ℝ zw;     // zone work done in cycle
+  ℝ zwrate; // zone work rate
+  ℝ zp;     // zone pressure
+  ℝ zss;    // zone sound speed
+  ℝ zdu;    // zone velocity difference
+  ℝ z0per;  // zone tmp variable in PolyGas calcStateAtHalf
+  ℝ² z0uc;  // zone tmp centered velocity
+  // Sides
+  ℝ sarea[faces];  // area
+  ℝ svol[faces];   // volume
+  ℝ sareap[faces]; // area, middle of cycle
+  ℝ svolp[faces];  // volume, middle of cycle
+  ℝ² ssurfp[faces];// surface vector
+  ℝ smf[faces];    // mass fraction
+  ℝ² sfp[faces];   // force from pressure
+  ℝ² sfq[faces];   // force from artificial visc.
+  ℝ² sft[faces];   // force from tts
+  // Corners
+  ℝ² cftot[nodes]; // force, total from all sources
+  ℝ cmaswt[nodes]; // contribution to pmaswt
+  ℝ c0area[nodes]; // tmp
+  ℝ c0evol[nodes]; // tmp
+  ℝ c0du[nodes];   // tmp
+  ℝ c0div[nodes];  // tmp
+  ℝ c0cos[nodes];  // tmp
+  ℝ² c0qe0[nodes]; // tmp
+  ℝ² c0qe1[nodes]; // tmp
+  ℝ c0w[nodes];    // tmp
+  ℝ c0rmu[nodes];  // tmp
+};
+
+// ****************************************************************************
+// * Point Variables
+// ****************************************************************************
+nodes{
+  ℝ² px,px0,pxp; // point coordinates, start & middle of cycle
+  ℝ² pu,pu0;     // point velocity
+  ℝ² pap,pf;     // point acceleration, force
+  ℝ pmaswt;      // point mass, weighted by 1/r
+};
+
+// ****************************************************************************
+// * Edge Variables
+// ****************************************************************************
+faces{
+  ℝ² ex,exp; // edge center coordinates & middle of cycle
+  ℝ elen;    // edge length
+};
+
+// ****************************************************************************
+// * Global Variables
+// ****************************************************************************
+global{
+  ℕ cycle;  // simulation cycle number
+  ℝ dt;     // current timestep
+  ℝ dtrec;  // maximum timestep for hydro
+  ℝ dvovmax;//
+};
+
+// ****************************************************************************
+// * Initialization ]-∞,-0.0[
+// ****************************************************************************
+
+∀ nodes @ -33 { px = coord; }
+
+∀ cells @ -32 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
+∀ faces @ -32 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
+
+∀ cells iniMeshCalcVols @ -31.8 {
+  ℝ³ X[4]; ∀ nodes X[#]=px;
+  zvol=0;
+  zarea=0; 
+  ∀ nodes{
+    const int j=(#+1)%#nodes;
+    sarea = ½ * cross2D(X[j]-X[#],zx-X[#]);
+    svol = ⅓* sarea * (X[#].x+X[j].x+zx.x);
+    zarea += sarea;
+    zvol  += svol;
+  }
+}
+
+∀ cells @ -31.7 { ∀ faces smf = sarea/zarea; }
+
+iniGlobals @ -20.0 { time=0; cycle=0; }
+
+∀ cells @ -14.9 { zr=rinit; }
+∀ cells @ -14.9 { ze=einit; }
+∀ cells @ -14.9 { zwrate=0; }
+∀ cells @ -14.8 if (subregion) {
+  if (!(zx.x > (sbxmin-ε) && zx.x < (sbxmax+ε) &&
+        zx.y > (sbymin-ε) && zx.y < (sbymax+ε))) continue;
+  zr = rinitsub;
+  ze = einitsub;
+}
+
+∀ cells @ -14.7 { zm=zr*zvol; }
+
+∀ cells @ -14.6 { zetot=ze*zm; }
+
+∀ nodes @ -14.5 if (uinitradial!=0.0) {
+  const ℝ pmag = length(px);
+  pu=(pmag>ε)?uinitradial*px/pmag:0;
+}
+∀ nodes @ -14.5 if (uinitradial==0.0) { pu=0.0; }
+
+iniRstDtHydro @ -14.4 { dtrec = 1.e99; }
+
+
+// ****************************************************************************
+// * Partie boucle de calcul ]+0.0,+∞[ 
+// ****************************************************************************
+
+incCycle @ 1.0 { cycle += 1; }
+
+calcGlobalDt @ 2.0 {
+  const ℝ dtlast = dt;
+  dt = dtmax;
+  if (cycle == 1) {
+    dt=(dtinit<dt)?dtinit;
+  } else {
+    const ℝ dtrecover = dtfac * dtlast;
+    if (dtrecover<dt) dt = dtrecover;
+  }
+  dt=((tstop-time)<dt)?tstop-time;
+  dt=(dtrec<dt)?dtrec;
+}
+
+
+∀ nodes @ 3.0 { px0=px; }
+∀ nodes @ 3.0 { pu0=pu; }
+∀ cells @ 3.0 { zvol0=zvol; }
+
+∀ nodes @ 3.1 { pxp = px0+½*pu0*dt; }
+
+∀ cells @ 3.2 { zxp=0; ∀ nodes zxp+=pxp; zxp/=#nodes; }
+∀ faces @ 3.2 { exp=0; ∀ nodes exp+=pxp; exp/=#nodes; }
+
+∀ cells @ 3.4 {
+  ℝ³ X[4]; ∀ nodes X[#]=pxp;
+  zareap=0; 
+  zvolp=0;
+  ∀ nodes {
+    const ℕ j=(#+1)%#nodes;
+    sareap = ½*cross2D(X[j]-X[#],zxp-X[#]);
+    svolp = ⅓*sareap*(X[#].x+X[j].x+zxp.x);
+    zareap+=sareap;
+    zvolp +=svolp;
+  } 
+}
+
+∀ cells @ 3.5 { ∀ faces ssurfp = rotateCCW(exp-zxp); }
+∀ faces @ 3.5 { elen = length(pxp[1]-pxp[0]); }
+
+∀ cells @ 3.6 { zdl = 1.e99; ∀ faces zdl=min(zdl,4.0*sareap/elen); }
+
+∀ cells @ 4.0 { zrp = zm/zvolp; }
+
+∀ cells @ 4.1 {
+  ℝ m[4]; ∀ nodes m[#]=smf;
+  ∀ nodes {
+    const ℕ j=(#+#nodes-1)%#nodes;
+    cmaswt = ½*zrp*zareap*(m[#]+m[j]);
+  }
+}
+
+∀ cells @ 5.0 {
+  const ℝ γm1 = γ - 1.0;
+  const ℝ ss2 = fmax(ssmin*ssmin,1.e-99);
+  const ℝ rx = zr;
+  const ℝ local_ex = fmax(ze,0.0);
+  const ℝ local_px = γm1*rx*local_ex;
+  const ℝ prex = γm1*local_ex;
+  const ℝ perx = γm1*rx;
+  const ℝ csqd = fmax(ss2, prex+perx*local_px/(rx*rx));
+  zp =local_px;
+  z0per = perx;
+  zss = √(csqd);
+}
+
+∀ cells @ 5.1 {
+  const ℝ dth = ½ * dt;
+  const ℝ zminv = 1.0 / zm;
+  const ℝ dv = (zvolp - zvol0) * zminv;
+  const ℝ bulk = zr * zss * zss;
+  const ℝ denom = 1.0 + ½ * z0per * dv;
+  const ℝ src = zwrate * dth * zminv;
+  zp += (z0per * src - zr * bulk * dv) / denom;
+}
+
+∀ cells @ 6.0 { ∀ faces sfp=-zp * ssurfp; }
+
+∀ cells @ 6.1 {
+  ∀ faces {
+    const ℝ svfacinv = zareap / sareap;
+    const ℝ srho = zrp * smf * svfacinv;
+    ℝ sstmp = fmax(zss, ssmin);
+    sstmp = alpha * sstmp * sstmp;
+    const ℝ sdp = sstmp * (srho - zrp);
+    const ℝ³ sqq = -sdp * ssurfp;
+    sft = sqq;
+  }
+}
+
+∀ cells @ 6.2 { z0uc=0; ∀ nodes z0uc += pu; z0uc/=#nodes; }
+
+∀ cells @ 6.3 {
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ³ _ex[4] = {exp[0],exp[1],exp[2],exp[3]};
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  ∀ nodes {
+    const ℕ i=(#+#nodes-1)%#nodes; // previous
+    const ℕ k=(#+1)%#nodes;   // next
+    const ℝ³ up0 = pu;
+    const ℝ³ xp0 = pxp;
+    const ℝ³ up1 = ½ * (_pu[#] + _pu[k]);
+    const ℝ³ xp1 = _ex[#];
+    const ℝ³ up2 = z0uc;
+    const ℝ³ xp2 = zxp;
+    const ℝ³ up3 = ½ * (_pu[i] + _pu[#]);
+    const ℝ³ xp3 = _ex[i];
+    const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
+    c0area = cvolume;
+    const ℝ³ v1 = xp3-xp0;
+    const ℝ³ v2 = xp1-xp0;
+    const ℝ de1 = _elen[i];
+    const ℝ de2 = _elen[#];
+    ℝ minelen = min(de1, de2);
+    c0cos = ((minelen<ε)?0.0:4.0*dot2D(v1,v2)/(de1*de2));
+    c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
+    const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
+    const ℝ³ dxx2 = ½ * (xp2+xp3-xp0-xp1);
+    const ℝ dx1 = length(dxx1);
+    const ℝ dx2 = length(dxx2);
+    const ℝ³ duav = ¼*(up0+up1+up2+up3);
+    const ℝ test1 = fabs(dot2D(dxx1,duav)*dx2);
+    const ℝ test2 = fabs(dot2D(dxx2,duav)*dx1);
+    const ℝ num = (test1>test2?dx1:dx2);
+    const ℝ den = (test1>test2?dx2:dx1);
+    const ℝ r = num / den;
+    const ℝ evol = min(sqrt(4.0*cvolume*r),2.0*minelen);
+    const ℝ dv1 = length2(up1+up2-up0-up3);
+    const ℝ dv2 = length2(up2+up3-up0-up1);
+    const ℝ du = sqrt(max(dv1, dv2));
+    c0evol = (c0div < 0.0 ? evol : 0.);
+    c0du   = (c0div < 0.0 ? du   : 0.);
+  }
+}
+
+∀ cells @ 6.4 {
+  const ℝ γp1 = γ + 1.0;
+  ∀ nodes {
+    const ℝ ztmp2 = ¼*q2*γp1*c0du;
+    const ℝ ztmp1 = q1 * zss;
+    const ℝ zkur = ztmp2 + √(ztmp2² + ztmp1²);
+    const ℝ rmu = zkur * zrp * c0evol;
+    c0rmu = (c0div>0.0)?0.0:rmu;
+  }
+}
+
+∀ cells @ 6.5 {
+  const int N = #nodes;
+  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  ∀ nodes {
+    const ℕ p1=(#+N-1)%N; // previous
+    const ℕ p=(#);        // current
+    const ℕ p2=(#+1)%N;   // next
+    c0qe0 = c0rmu * (_pu[p] - _pu[p1]) / _elen[p1];
+    c0qe1 = c0rmu * (_pu[p2] - _pu[p]) / _elen[p];
+  }
+}
+
+∀ cells @ 6.6 {
+  ∀ nodes {
+    const ℝ csin2 = 1.0-c0cos²;
+    c0w   = ((csin2 < 1.e-4) ? 0.0:c0area/csin2);
+    c0cos = ((csin2 < 1.e-4) ? 0.0:c0cos);
+  }
+}
+
+∀ cells @ 6.7 {
+  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
+  ∀ faces {
+    const ℝ _el = _elen[#];
+    const ℕ c20 = (#+1)%#nodes; // next
+    sfq = (c0w*(c0qe1+c0cos*c0qe0)
+           +c0w[NABLA_FACE_PER_CELL*c+c20]
+           *(c0qe0[NABLA_FACE_PER_CELL*c+c20]
+             +c0cos[NABLA_FACE_PER_CELL*c+c20]
+             *c0qe1[NABLA_FACE_PER_CELL*c+c20]))/_el;
+  }
+}
+
+∀ cells  @ 6.8 {
+  ℝ z0tmp=0;
+  ℝ³ u[4]; ∀ nodes u[#]=pu;
+  ℝ³ x[4]; ∀ nodes x[#]=pxp;
+  ℝ e[4]; ∀ faces e[#]=elen;
+  ∀ nodes {
+    const ℕ k=(#+1)%#nodes; // next
+    const ℝ³ dx = x[k]-x[#];
+    const ℝ³ du = u[k]-u[#];
+    const ℝ lenx = e[#];
+    const ℝ dux = (lenx > 0.0)?fabs(dot2D(du,dx))/lenx:0.0;
+    z0tmp = max(z0tmp, dux);
+  }
+  zdu = q1 * zss + 2.0 * q2 * z0tmp;
+}
+
+∀ cells @ 7.0 {
+  ℝ³ p[4]; ∀ faces p[#]=sfp;
+  ℝ³ q[4]; ∀ faces q[#]=sfq;
+  ℝ³ t[4]; ∀ faces t[#]=sft;
+  ∀ nodes {
+    const ℕ i=(#+#nodes-1)%#nodes; // previous
+    cftot = (p[#]+q[#]+t[#]) - (p[i]+q[i]+t[i]);
+  }
+}
+
+∀ nodes @ 8.0 { pmaswt=0; ∀ cells pmaswt+=cmaswt; }
+
+∀ nodes @ 8.1 { pf=0; ∀ cells pf+=cftot; }
+ 
+∀ /*outer*/ nodes @ 9.0 {
+  if (px.x!=0.0 && px.x!=LENGTH) continue;
+  const ℝ³ vfixx = ℝ³(1,0,0);
+  pu = project(pu, vfixx);
+  pf = project(pf, vfixx);
+}
+∀ /*outer*/ nodes @ 9.1 {
+  if (px.y!=0.0 && px.y!=LENGTH) continue;
+  const ℝ³ vfixy = ℝ³(0,1,0);
+  pu = project(pu, vfixy);
+  pf = project(pf, vfixy);
+} 
+
+∀ nodes @ 10.0 { pap = pf/fmax(pmaswt,ι); }
+
+∀ nodes @ 11.0 { pu = pu0 + pap*dt; }
+∀ nodes @ 11.1 { px = px0 + ½*(pu+pu0)*dt; }
+
+∀ cells @ 13.0 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
+∀ faces @ 13.0 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
+
+∀ cells @ 13.2 { 
+  ℝ³ X[4]; ∀ nodes X[#]=px;
+  zvol=0;
+  zarea=0; 
+  ∀ nodes {
+    const ℕ i=#;
+    const ℕ j=(#+1)%#nodes;
+    sarea = ½ * cross2D(X[j]-X[i],zx-X[i]);
+    svol = ⅓* sarea * (X[i].x+X[j].x+zx.x);
+    zarea += sarea;
+    zvol  += svol;
+  }
+}
+
+∀ cells @ 14.0 {
+  zw=0; 
+  const ℝ dth = ½ * dt;
+  ℝ³ _pu[4]; ∀ nodes _pu[#]=pu;
+  ℝ³ _pu0[4]; ∀ nodes _pu0[#]=pu0;
+  const ℝ _xp[4] = {pxp[0].x,pxp[1].x,pxp[2].x,pxp[3].x};
+  ∀ faces { 
+    const ℕ j=(#);
+    const ℕ k=(#+1)%#nodes;
+    const ℝ³ sftot = sfp + sfq;
+    const ℝ sd1 = dot2D( sftot, (_pu0[j] + _pu[j]));
+    const ℝ sd2 = dot2D(-sftot, (_pu0[k] + _pu[k]));
+    const ℝ dwork = -dth * (sd1 * _xp[j] + sd2 * _xp[k]);
+    zetot += dwork;
+    zw += dwork;
+  }
+}
+
+∀ cells @ 15.0 { 
+  const ℝ dvol = zvol - zvol0;
+  zwrate = (zw+zp*dvol)/dt;
+}
+
+∀ cells @ 16.0 { ze = zetot/(zm+ι); }
+∀ cells @ 16.0 { zr = zm / zvol; }
+
+
+resetDtHydro @ 12.0 { dtrec=dtmax; dvovmax=ι;}
+
+∀ cells @ 19.0 {
+  const ℝ cdu = fmax(zdu, fmax(zss,ι));
+  const ℝ zdthyd = zdl * cfl / cdu;
+  const ℝ dtnew = (zdthyd < dtmax)?zdthyd:dtmax;
+  if (dtnew < dtrec) dtrec = dtnew;
+}
+
+∀ cells @ 20.0 {
+  const ℝ zdvov = fabs((zvol-zvol0)/zvol0);
+  dvovmax = (zdvov>dvovmax)?zdvov;
+}
+
+calcDtVolumeTst @ 20.1 {
+  const ℝ dtnew = dt * cflv / dvovmax;
+  if (dtnew < dtrec) dtrec = dtnew;
+}
+
+incTime @ 30.0 {
+  time += dt;
+  cout<<"End cycle "<<cycle
+      <<", time = "<<time<<", dt = "<<dt<<endl;
+}
+
+tstExit @ 40.0 { if (cycle>=cstop||time>=tstop) exit; }
+
+
+// ****************************************************************************
+// * Mathematical functions
+// ****************************************************************************
+ℝ length(const ℝ² v){ return sqrt(v.x*v.x + v.y*v.y); }
+ℝ length2(const ℝ² v){ return(v.x*v.x + v.y*v.y); }
+ℝ dot2D(const ℝ² v1, const ℝ² v2){ return(v1.x*v2.x + v1.y*v2.y); }
+ℝ² rotateCCW(const ℝ² v){ return ℝ²(-v.y, v.x,0); }
+ℝ cross2D(const ℝ² v1, const ℝ² v2){ return (v1.x*v2.y - v1.y*v2.x); }
+ℝ² project(ℝ² v, const ℝ² u){ return v-dot(v,u)*u; }

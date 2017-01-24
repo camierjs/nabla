@@ -1,6 +1,6 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
 (defconst nabla-version "nabla" "Nabla Mode version number")
-(defconst nabla-time-stamp "2017-01-19"
+(defconst nabla-time-stamp "2017-01-24"
   "Nabla Mode time stamp for last update.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,6 +144,7 @@
    '("\\<\\(\\w+\\)\\s-*(" 1 font-lock-function-name-face)
    ;; highlight @,#
    '("\\(@\\)" . font-lock-type-face)
+   ;'("\\(#nodes\\)" . font-lock-builtin-face)
    '("\\(#\\)" . font-lock-constant-face)
    ;; highlight (/*-+)=
    '("\\<\\(/=\\|*=\\|-=\\|+=\\)\\>" . font-lock-builtin-face)
@@ -152,7 +153,7 @@
    ;; highlight and, or, not, xor
    '("\\<\\(&&\\|||\\|!\\|^\\)\\>" 1 font-lock-builtin-face)
    '("\\<\\(and\\|or\\|not\\|xor\\)\\>" . font-lock-builtin-face)
-    ;; highlight directives and directive names
+   ;; highlight directives and directive names
    '("^\\s-*\\(#\\)\\(\\w+\\)\\s-*\\(\\w+\\|\"\\).*" (1 font-lock-builtin-face) (2 font-lock-preprocessor-face) (3 font-lock-variable-name-face))
    ;; highlight job and function names
    '("\\<\\(\\w+\\)\\s-*\\(@\\)" (1 font-lock-function-name-face) (2 font-lock-type-face))

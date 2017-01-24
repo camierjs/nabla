@@ -226,6 +226,7 @@ __asm__           { return tok(&yylval, ASM);}
 "iteration"       { return tok(&yylval, ITERATION);}
 "fatal"           { return tok(&yylval, FATAL);}
 "nbNode"          { return tok(&yylval, NBNODE);}
+"#nodes"          { return tok(&yylval, NBNODE);}
 "nbCell"          { return tok(&yylval, NBCELL);}
 "this"            { return tok(&yylval, THIS);}
 "lid" 	         { return tok(&yylval, LID);}

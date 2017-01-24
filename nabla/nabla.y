@@ -754,6 +754,7 @@ forall_switch
 | NODE {rhs;}
 | NODES {rhs;}
 | FACE {rhs;}
+| FACES {rhs;}
 | PARTICLE {rhs;}
 | SET {rhs;}
 ;
