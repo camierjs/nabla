@@ -261,9 +261,11 @@ calcGlobalDt @ 2.0 {
   zvolp=0;
   ∀ nodes {
     const ℕ j=(#+1)%#nodes;
-    cout<<"pxp="<<pxp[#];
+    //cout<<"pxp="<<pxp[#];
     sareap = ½*cross2D(X[j]-X[#],zxp-X[#]);
     svolp = ⅓*sareap*(X[#].x+X[j].x+zxp.x);
+    //sareap = ½*cross2D(pxp[#+1]-pxp,zxp-pxp);
+    //svolp = ⅓*sareap*(pxp.x+pxp[#+1].x+zxp.x);
     zareap+=sareap;
     zvolp +=svolp;
   } 

@@ -63,7 +63,6 @@ void middleGlobals(nablaMain *nabla){
   time->item=sdup("global");
   time->type=sdup("double");
   time->name=sdup("time");
-  dbg("\n\t[nablaMiddlendVariableGlobalAdd] Adding AoS variables Real3 coord");
   
   nablaVariable *coord = nMiddleVariableNew(nabla);
   nMiddleVariableAdd(nabla, coord);
@@ -71,6 +70,5 @@ void middleGlobals(nablaMain *nabla){
   coord->item=sdup("node");
   coord->type=sdup("real3");
   coord->name=sdup("coord");
-  coord->field_name=sdup("NodeCoord");
 }
 

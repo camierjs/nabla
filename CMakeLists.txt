@@ -27,8 +27,8 @@ info("${VT100_BOLD}${VT100_FG_GREEN}#################################${VT100_RES
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(Nabla C CXX ASM)
 
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_VERBOSE_MAKEFILE YES)
 set(CMAKE_INSTALL_PREFIX /usr/local/nabla)
 #set(CMAKE_INSTALL_DO_STRIP "1")

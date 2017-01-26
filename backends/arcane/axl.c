@@ -88,8 +88,9 @@ static NABLA_STATUS nccAxlGenerateVariable(nablaMain *arc, nablaVariable *var){
   fprintf(arc->axl,"\n\t\t\t<!-- %s %s -->",var->item, var->name);
   // Be carefull: Variables field-name and name are swaped
   fprintf(arc->axl,"\n\t\t\t\t<variable\n\t\t\tfield-name=\"%s_%s\"", var->item, var->name);
-  if (var->field_name!=NULL)
-    fprintf(arc->axl,"\n\t\t\t\tname=\"%s\"", var->field_name);
+  // Arcane 'coord' var field-name an name are not the same
+  if (strncmp(var->name,"coord",5)==0)
+    fprintf(arc->axl,"\n\t\t\t\tname=\"NodeCoord\"");
   else
     fprintf(arc->axl,"\n\t\t\t\tname=\"%s_%s\"", var->item, var->name);
   if (var->type[0]=='u')

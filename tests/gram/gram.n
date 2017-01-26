@@ -114,11 +114,9 @@ nodes{ ℝ π;};
 //∀ cells @ 8.0 { ∀ node α=0.0; }
 ∀ cells try @ 8.0 {
   ∀ nodes {
-    //printf("%d",#);
-    //π[#]=1.0;
     const ℝ r=π;
     const ℝ s=π[#];
-    const ℝ t=π[#+1];
+    const ℝ s=π[#+1];
   }
 }
 //∀ cells @ 8.0 { /*∀ node α=0.0;*/ }

@@ -132,20 +132,20 @@ typedef struct nablaPowerTypeStruct{
 // * Nabla VARIABLE struct
 // ****************************************************************************
 typedef struct nablaVariableStruct{
-  char *item; // node, cell, etc.
-  char *type; // int, Real, Real3, etc.
-  char *name; // son nom
-  char *field_name; // son nom
-  int gmpRank;   // est-il géré par une indirection multi precision? -1 == non, sinon le rank
-  int dim;    // sa dimension
-  long size;  // sa taille dans le cas où dim vaut '1'
-  char vitem; // le premier chr du dimensionnement du vecteur
+  char *item;  // node, cell, etc.
+  char *type;  // int, Real, Real3, etc.
+  char *name;  // son nom
+  int dim;     // sa dimension
+  long size;   // sa taille dans le cas où dim vaut '1'
+  int koffset; // 
+  char vitem;  // le premier chr du dimensionnement du vecteur
   bool dump;
   bool in;
   bool out;
   bool is_gathered;
   inout_mode inout;
   bool axl_it;
+  int gmpRank;   // est-il géré par une indirection multi precision? -1 == non, sinon le rank
   struct nablaPowerTypeStruct *power_type;
   struct nablaMainStruct *main;
   struct nablaVariableStruct *next;
@@ -345,6 +345,7 @@ nablaVariable *nMiddleVariableNew(nablaMain*);
 nablaVariable *nMiddleVariableAdd(nablaMain*,nablaVariable*);
 nablaVariable *nMiddleVariableLast(nablaVariable*);
 nablaVariable *nMiddleVariableFind(nablaVariable*,const char*);
+nablaVariable *nMiddleVariableFindKoffset(nablaVariable*,const char*,const int);
 nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain*,nablaJob*,
                                                   nablaVariable*,const char*);
 what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
@@ -360,6 +361,7 @@ void dfsExit(nablaMain*,nablaJob*,astNode*);
 void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
 void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
 bool dfsUsedInThisForall(nablaMain*,nablaJob*,astNode*,const char*);
+bool dfsUsedInThisForallKoffset(nablaMain*,nablaJob*,astNode*,const char*,const int);
 
 // nMiddleType
 nablaType *nMiddleTypeNew(void);

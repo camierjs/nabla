@@ -73,7 +73,7 @@ FS					(f|F|l|L)
 IS					(u|U|l|L)*
 preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-4])*
 includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
-koffsets       [\[][#][+-]?[0-9]?[\]]
+koffsets       [\[][#][+-]?[0-9]*[\]]
 %%
 "/*"					{ ignoreBlocComments();}
 "//"              { ignoreLineComments();}

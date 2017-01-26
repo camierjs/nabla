@@ -417,7 +417,7 @@ nablaVariable *xHookTurnTokenToVariable(astNode * n,
   // On récupère la variable de ce job pour ces propriétés
   nablaVariable *used=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, n->token);
   assert(used);
-  dbg("\n\t[xHookTurnTokenToVariable] %s_%s token=%s", var->item, var->name, n->token);
+  dbg("\n\t[xHookTurnTokenToVariable] %s_%s (%d) token=%s", var->item, var->name, var->koffset, n->token);
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
   if (job->parse.alephKeepExpression){
@@ -427,8 +427,16 @@ nablaVariable *xHookTurnTokenToVariable(astNode * n,
 
   // Check whether this variable is being gathered
   if (xHookTurnTokenToGatheredVariable(nabla,used,job)){
+    const bool id_has_a_koffset = (n->next &&
+                                   n->next->tokenid==K_OFFSET);
+    const int k=id_has_a_koffset?atoi(&n->next->token[2]):0;
+    const int n_children_next_koffset=id_has_a_koffset?k:0;
+    char str_uds_koffset[32];
+    sprintf(str_uds_koffset,"_%d",n_children_next_koffset);
     dbg("\n\t[xHookTurnTokenToVariable] gathered variable!");
-    nprintf(nabla, "/*gathered variable!*/", "gathered_%s_%s",var->item,var->name);
+    nprintf(nabla, "/*gathered variable!*/", "gathered_%s_%s%s",
+            var->item, var->name,
+            id_has_a_koffset && k!=0 ? str_uds_koffset:"/**/");
     return var;
   }
   

@@ -50,14 +50,20 @@ static char* xCallGatherCells(nablaJob *job,
                               nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   char gather[1024];
-
+  const bool has_non_null_koffset = var->koffset!=0;
+  char str_pip_koffset[64];
+  char str_uds_koffset[64];
+  sprintf(str_pip_koffset,"(n+%d)",var->koffset);
+  sprintf(str_uds_koffset,"_%d",var->koffset);
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
-%s gathered_%s_%s=rgather%sk(xs_cell_node[n*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+%s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
              strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
              var->item,
              var->name,
+             has_non_null_koffset ? str_uds_koffset:"",             
              strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+             has_non_null_koffset ? str_pip_koffset:"n",
              var->item,
              var->name,
              strcmp(var->type,"real")==0?"":"");
@@ -149,15 +155,16 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
   char *gather_src_buffer=NULL;  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)
     nablaError("[xFilterGather] Could not calloc our gather_src_buffer!");
-  
-  //nprintf(job->entity->main, NULL,"/*filterGather*/");
 
   dbg("\n\t\t\t\t[xFilterGather] Looping on all used_variables of this job:");
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
-    if (!var->is_gathered) continue;
-    dbg("\n\t\t\t\t\t[xFilterGather] variable: '%s'", var->name);
+    dbg("\n\t\t\t\t\t[xFilterGather] variable: '%s-%d'", var->name, var->koffset);
+    if (!var->is_gathered){
+      dbg("\n\t\t\t\t\t[xFilterGather] not gathered");
+      continue;
+    }
     nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
-    if (!dfsUsedInThisForall(job->entity->main,job,n,var->name)){
+    if (!dfsUsedInThisForallKoffset(job->entity->main,job,n,var->name,var->koffset)){
       nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
       continue;
     }
