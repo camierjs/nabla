@@ -123,7 +123,8 @@ char *cellJobFaceVar(const nablaMain *arc, const nablaJob *job,  const nablaVari
   //nprintf(arc, "/*FaceVar*/", NULL); // FACE variable
   if (forall_face) return "[f]";
   if (forall_none) return "[cell->face";
-  
+  if (forall_node) return "[node->face"; // oups, should be checked!
+ 
   nablaError("Could not switch in cellJobFaceVar!");
   return NULL;
 }

@@ -187,13 +187,11 @@ global{
 ∀ faces @ -32 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
 
 ∀ cells iniMeshCalcVols @ -31.8 {
-  ℝ³ X[4]; ∀ nodes X[#]=px;
   zvol=0;
   zarea=0; 
   ∀ nodes{
-    const int j=(#+1)%#nodes;
-    sarea = ½ * cross2D(X[j]-X[#],zx-X[#]);
-    svol = ⅓* sarea * (X[#].x+X[j].x+zx.x);
+    sarea = ½ * cross2D(px[#+1]-px,zx-px);
+    svol = ⅓* sarea * (px.x+px[#+1].x+zx.x);
     zarea += sarea;
     zvol  += svol;
   }
@@ -256,16 +254,11 @@ calcGlobalDt @ 2.0 {
 ∀ faces @ 3.2 { exp=0; ∀ nodes exp+=pxp; exp/=#nodes; }
 
 ∀ cells iniArea @ 3.4 {
-  ℝ³ X[4]; ∀ nodes X[#]=pxp;
   zareap=0; 
   zvolp=0;
   ∀ nodes {
-    const ℕ j=(#+1)%#nodes;
-    //cout<<"pxp="<<pxp[#];
-    sareap = ½*cross2D(X[j]-X[#],zxp-X[#]);
-    svolp = ⅓*sareap*(X[#].x+X[j].x+zxp.x);
-    //sareap = ½*cross2D(pxp[#+1]-pxp,zxp-pxp);
-    //svolp = ⅓*sareap*(pxp.x+pxp[#+1].x+zxp.x);
+    sareap = ½*cross2D(pxp[#+1]-pxp,zxp-pxp);
+    svolp = ⅓*sareap*(pxp.x+pxp[#+1].x+zxp.x);
     zareap+=sareap;
     zvolp +=svolp;
   } 
@@ -274,17 +267,11 @@ calcGlobalDt @ 2.0 {
 ∀ cells @ 3.5 { ∀ faces ssurfp = rotateCCW(exp-zxp); }
 ∀ faces @ 3.5 { elen = length(pxp[1]-pxp[0]); }
 
-∀ cells @ 3.6 { zdl = 1.e99; ∀ faces zdl=min(zdl,4.0*sareap/elen); }
+∀ cells @ 3.6 { zdl = 1.e99; ∀ faces zdl=fmin(zdl,4.0*sareap/elen); }
 
 ∀ cells @ 4.0 { zrp = zm/zvolp; }
 
-∀ cells @ 4.1 {
-  ℝ m[4]; ∀ nodes m[#]=smf;
-  ∀ nodes {
-    const ℕ j=(#+#nodes-1)%#nodes;
-    cmaswt = ½*zrp*zareap*(m[#]+m[j]);
-  }
-}
+∀ cells @ 4.1 { ∀ nodes cmaswt = ½*zrp*zareap*(smf+smf[#-1]); }
 
 ∀ cells @ 5.0 {
   const ℝ γm1 = γ - 1.0;
@@ -327,27 +314,22 @@ calcGlobalDt @ 2.0 {
 ∀ cells @ 6.2 { z0uc=0; ∀ nodes z0uc += pu; z0uc/=#nodes; }
 
 ∀ cells @ 6.3 {
-  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ³ _ex[4] = {exp[0],exp[1],exp[2],exp[3]};
-  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   ∀ nodes {
-    const ℕ i=(#+#nodes-1)%#nodes; // previous
-    const ℕ k=(#+1)%#nodes;   // next
     const ℝ³ up0 = pu;
     const ℝ³ xp0 = pxp;
-    const ℝ³ up1 = ½ * (_pu[#] + _pu[k]);
-    const ℝ³ xp1 = _ex[#];
+    const ℝ³ up1 = ½ * (pu + pu[#+1]);
+    const ℝ³ xp1 = exp;
     const ℝ³ up2 = z0uc;
     const ℝ³ xp2 = zxp;
-    const ℝ³ up3 = ½ * (_pu[i] + _pu[#]);
-    const ℝ³ xp3 = _ex[i];
+    const ℝ³ up3 = ½ * (pu[#-1] + pu);
+    const ℝ³ xp3 = exp[#-1];
     const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
     c0area = cvolume;
     const ℝ³ v1 = xp3-xp0;
     const ℝ³ v2 = xp1-xp0;
-    const ℝ de1 = _elen[i];
-    const ℝ de2 = _elen[#];
-    ℝ minelen = min(de1, de2);
+    const ℝ de1 = elen[#-1];
+    const ℝ de2 = elen[#];
+    ℝ minelen = fmin(de1, de2);
     c0cos = ((minelen<ε)?0.0:4.0*dot2D(v1,v2)/(de1*de2));
     c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
     const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
@@ -360,10 +342,10 @@ calcGlobalDt @ 2.0 {
     const ℝ num = (test1>test2?dx1:dx2);
     const ℝ den = (test1>test2?dx2:dx1);
     const ℝ r = num / den;
-    const ℝ evol = min(sqrt(4.0*cvolume*r),2.0*minelen);
+    const ℝ evol = fmin(sqrt(4.0*cvolume*r),2.0*minelen);
     const ℝ dv1 = length2(up1+up2-up0-up3);
     const ℝ dv2 = length2(up2+up3-up0-up1);
-    const ℝ du = sqrt(max(dv1, dv2));
+    const ℝ du = sqrt(fmax(dv1, dv2));
     c0evol = (c0div < 0.0 ? evol : 0.);
     c0du   = (c0div < 0.0 ? du   : 0.);
   }
@@ -381,15 +363,9 @@ calcGlobalDt @ 2.0 {
 }
 
 ∀ cells @ 6.5 {
-  const int N = #nodes;
-  const ℝ³ _pu[4] = {pu[0],pu[1],pu[2],pu[3]};
-  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
   ∀ nodes {
-    const ℕ p1=(#+N-1)%N; // previous
-    const ℕ p=(#);        // current
-    const ℕ p2=(#+1)%N;   // next
-    c0qe0 = c0rmu * (_pu[p] - _pu[p1]) / _elen[p1];
-    c0qe1 = c0rmu * (_pu[p2] - _pu[p]) / _elen[p];
+    c0qe0 = c0rmu * (pu-pu[#-1])/elen[#-1];
+    c0qe1 = c0rmu * (pu[#+1]-pu)/elen;
   }
 }
 
@@ -402,43 +378,23 @@ calcGlobalDt @ 2.0 {
 }
 
 ∀ cells @ 6.7 {
-  const ℝ _elen[4] = {elen[0],elen[1],elen[2],elen[3]};
-  ∀ faces {
-    const ℝ _el = _elen[#];
-    const ℕ c20 = (#+1)%#nodes; // next
-    sfq = (c0w*(c0qe1+c0cos*c0qe0)
-           +c0w[NABLA_FACE_PER_CELL*c+c20]
-           *(c0qe0[NABLA_FACE_PER_CELL*c+c20]
-             +c0cos[NABLA_FACE_PER_CELL*c+c20]
-             *c0qe1[NABLA_FACE_PER_CELL*c+c20]))/_el;
-  }
+  ∀ faces sfq = (c0w*(c0qe1+c0cos*c0qe0)+
+                 c0w[#+1]*(c0qe0[#+1]+c0cos[#+1]*c0qe1[#+1]))/elen;
 }
 
 ∀ cells  @ 6.8 {
   ℝ z0tmp=0;
-  ℝ³ u[4]; ∀ nodes u[#]=pu;
-  ℝ³ x[4]; ∀ nodes x[#]=pxp;
-  ℝ e[4]; ∀ faces e[#]=elen;
-  ∀ nodes {
-    const ℕ k=(#+1)%#nodes; // next
-    const ℝ³ dx = x[k]-x[#];
-    const ℝ³ du = u[k]-u[#];
-    const ℝ lenx = e[#];
+   ∀ nodes {
+    const ℝ³ dx = pxp[#+1]-pxp;
+    const ℝ³ du = pu[#+1]-pu;
+    const ℝ lenx = elen;
     const ℝ dux = (lenx > 0.0)?fabs(dot2D(du,dx))/lenx:0.0;
-    z0tmp = max(z0tmp, dux);
+    z0tmp = fmax(z0tmp, dux);
   }
   zdu = q1 * zss + 2.0 * q2 * z0tmp;
 }
 
-∀ cells @ 7.0 {
-  ℝ³ p[4]; ∀ faces p[#]=sfp;
-  ℝ³ q[4]; ∀ faces q[#]=sfq;
-  ℝ³ t[4]; ∀ faces t[#]=sft;
-  ∀ nodes {
-    const ℕ i=(#+#nodes-1)%#nodes; // previous
-    cftot = (p[#]+q[#]+t[#]) - (p[i]+q[i]+t[i]);
-  }
-}
+∀ cells @ 7.0 { ∀ nodes cftot=(sfp+sfq+sft)-(sfp[#-1]+sfq[#-1]+sft[#-1]); }
 
 ∀ nodes @ 8.0 { pmaswt=0; ∀ cells pmaswt+=cmaswt; }
 
@@ -466,39 +422,31 @@ calcGlobalDt @ 2.0 {
 ∀ faces @ 13.0 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
 
 ∀ cells @ 13.2 { 
-  ℝ³ X[4]; ∀ nodes X[#]=px;
   zvol=0;
   zarea=0; 
   ∀ nodes {
-    const ℕ i=#;
-    const ℕ j=(#+1)%#nodes;
-    sarea = ½ * cross2D(X[j]-X[i],zx-X[i]);
-    svol = ⅓* sarea * (X[i].x+X[j].x+zx.x);
+    sarea = ½ * cross2D(px[#+1]-px,zx-px);
+    svol = ⅓* sarea * (px.x+px[#+1].x+zx.x);
     zarea += sarea;
     zvol  += svol;
   }
 }
 
-∀ cells @ 14.0 {
+∀ cells searchHere @ 14.0 {
   zw=0; 
   const ℝ dth = ½ * dt;
-  ℝ³ _pu[4]; ∀ nodes _pu[#]=pu;
-  ℝ³ _pu0[4]; ∀ nodes _pu0[#]=pu0;
-  const ℝ _xp[4] = {pxp[0].x,pxp[1].x,pxp[2].x,pxp[3].x};
-  ∀ faces { 
-    const ℕ j=(#);
-    const ℕ k=(#+1)%#nodes;
+  ∀ nodes { 
     const ℝ³ sftot = sfp + sfq;
-    const ℝ sd1 = dot2D( sftot, (_pu0[j] + _pu[j]));
-    const ℝ sd2 = dot2D(-sftot, (_pu0[k] + _pu[k]));
-    const ℝ dwork = -dth * (sd1 * _xp[j] + sd2 * _xp[k]);
+    const ℝ sd1 = dot2D( sftot, (pu0+pu));
+    const ℝ sd2 = dot2D(-sftot, (pu0[#+1]+pu[#+1]));
+    const ℝ dwork = -dth*(sd1*pxp.x+sd2*pxp[#+1].x);
     zetot += dwork;
     zw += dwork;
   }
 }
 
 ∀ cells @ 15.0 { 
-  const ℝ dvol = zvol - zvol0;
+  const ℝ dvol=zvol-zvol0;
   zwrate = (zw+zp*dvol)/dt;
 }
 

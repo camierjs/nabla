@@ -344,27 +344,11 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
   if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL))
     if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL)
       return;
-  
-  // Dés qu'on a une primary_expression,
-  // on teste pour voir si ce n'est pas un argument que l'on return
-  // A confirmer si cela est toujours utile
-  /*if ((n->ruleid == ruleToId(rule_primary_expression))
-      && (n->children->token!=NULL)
-      && (job->parse.returnFromArgument)){
-    dbg("\n\t[nablaJobParse] primary_expression test for return");
-    if (nabla->hook->grammar->primary_expression_to_return){
-      dbg("\n\t\t[nablaJobParse] primary_expression_to_return");
-      if (nabla->hook->grammar->primary_expression_to_return(nabla,job,n)==true)
-        return;
-    }else{
-       dbg("\n\t\t[nablaJobParse] ELSE primary_expression_to_return");
-    }
-    }*/
-  
+    
   // Dés qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
   if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL)){
     nablaVariable *var;
-    dbg("\n\t[nablaJobParse] PRIMARYExpression=%s child->token=%s",n->rule,n->children->token);
+    dbg("\n\t[nablaJobParse] PRIMARY Expression=%s child->token=%s",n->rule,n->children->token);
     if ((var=nabla->hook->token->variable(n->children, nabla,job))!=NULL){
       if (nabla->hook->token->turnBracketsToParentheses)
         nabla->hook->token->turnBracketsToParentheses(nabla,job,var,cnfgem);

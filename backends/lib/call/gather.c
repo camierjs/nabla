@@ -49,32 +49,44 @@
 static char* xCallGatherCells(nablaJob *job,
                               nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
   char gather[1024];
   const bool has_non_null_koffset = var->koffset!=0;
   char str_pip_koffset[64];
   char str_uds_koffset[64];
-  sprintf(str_pip_koffset,"(n+%d)",var->koffset);
-  sprintf(str_uds_koffset,"_%d",var->koffset);
+  char iterator[2]={job->parse.enum_enum,0};
+  
+  if (var->item[0]=='n')
+    sprintf(str_pip_koffset,"((n+NABLA_NODE_PER_CELL+(%d))%%NABLA_NODE_PER_CELL)",var->koffset);
+  
+  if (var->item[0]=='f')
+    sprintf(str_pip_koffset,"((%s+4+(%d))%%4)",iterator,var->koffset);
+  
+  sprintf(str_uds_koffset,"_%02x",var->koffset);
+  
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
-%s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+             strcmp(var->type,"real")==0?"real":dim1D?"real":
+             strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
              strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-             has_non_null_koffset ? str_pip_koffset:"n",
+             has_non_null_koffset ? str_pip_koffset:iterator,
              var->item,
              var->name,
              strcmp(var->type,"real")==0?"":"");
-
+  
   if (var->item[0]=='f')
-     snprintf(gather, 1024, "\
-%s gathered_%s_%s=rgather%sk(xs_cell_face[f*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-              strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+    snprintf(gather, 1024, "\
+/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+              strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
               var->item,
               var->name,
+              has_non_null_koffset ? str_uds_koffset:"",             
               strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+              has_non_null_koffset ? str_pip_koffset:iterator,
               var->item,
               var->name,
               strcmp(var->type,"real")==0?"":"");
@@ -146,9 +158,12 @@ char* xCallGather(nablaJob *job,nablaVariable* var){
 
 // ****************************************************************************
 // * Filtrage du GATHER
+// ****************************************************************************
 // * Une passe devrait être faite à priori afin de déterminer les contextes
 // * d'utilisation: au sein d'un forall, postfixed ou pas, etc.
 // * Et non pas que sur leurs déclarations en in et out
+// ****************************************************************************
+// * Idem, si on a différents ∀, pour l'instant ils gatherent trop!
 // ****************************************************************************
 char* xCallFilterGather(astNode *n,nablaJob *job){
   dbg("\n\t\t\t\t[xFilterGather]");

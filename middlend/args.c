@@ -396,7 +396,10 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     nabla->hook->token->prefix?
     nabla->hook->token->prefix(nabla):"";
   // Dump des variables du job
-  for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
+    // On évite brutalement pour l'instant les variables avec un koffset >0
+    // On fait l'hypothèse que la var à koffset=0 sera utilsée
+    if (var->koffset!=0) continue;
     nprintf(nabla, NULL, "%s%s%s%s %s%s_%s",//__restrict__
             (i==0)?"":",",
             //(var->in&&!var->out)?"":"",//const
@@ -410,7 +413,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
             nabla->hook->grammar->dfsArgType(nabla,var):var->type,
             cHOOKn(nabla,vars,odecl),
             prefix,var->item,var->name);
-
+  }
   // Dump des XS des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
     if (!var->is_gathered) continue;
@@ -442,6 +445,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
 
 // ****************************************************************************
 // * nMiddleArgsDumpFromDFS
+// * Dump dans le main des arguments des fonctions/jobs qui sont appelées
 // ****************************************************************************
 void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   int i=0;
@@ -491,10 +495,13 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   //  nprintf(nabla, NULL, "%s%s", (i==0)?"":",", opt->name);
   
   // Dump des variables du job
-  for(var=job->used_variables;var!=NULL;var=var->next,i+=1)
+  for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
+    // On ne dump pas les variables utilsées à koffset >0
+    if (var->koffset!=0) continue;
     nprintf(nabla, NULL, "%s%s_%s",
             (i==0)?"":",",
             var->item,var->name);
+  }
   
   // Dump des XS des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1){

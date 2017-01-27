@@ -126,7 +126,8 @@ static void nvar(nablaMain *nabla, nablaVariable *var, nablaJob *job){
 // ****************************************************************************
 static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
                                                nablaVariable *var,
-                                               nablaJob *job){
+                                               nablaJob *job,
+                                               const int koffset){
   const char cnfg=job->item[0];
   char enum_enum=job->parse.enum_enum;
   int isPostfixed=job->parse.isPostfixed;
@@ -150,9 +151,20 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
     if (var->dim==0 && isPostfixed!=2) nprintf(nabla, NULL, "[c]");
 
     // Variables tableaux
-    if (var->dim==1 && isPostfixed!=2 && enum_enum=='n') nprintf(nabla, NULL, "[n+NABLA_NODE_PER_CELL*c]");
-    if (var->dim==1 && isPostfixed!=2 && enum_enum=='f') nprintf(nabla, NULL, "[f+NABLA_FACE_PER_CELL*c]");
-   // Mais on est pas encore dans le ∀ du ∀
+    //if (koffset!=0) nprintf(nabla, NULL, "/*koffset*/");
+    // Attention, tous les cas ne sont pas traités ici !
+    
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='n' && koffset==0)
+      nprintf(nabla, NULL, "[n+NABLA_NODE_PER_CELL*c]");  
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='n' && koffset!=0)
+      nprintf(nabla, NULL, "[((n+NABLA_NODE_PER_CELL+(%d))%%NABLA_NODE_PER_CELL)+NABLA_NODE_PER_CELL*c]",koffset);
+    
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='f' && koffset==0)
+      nprintf(nabla, NULL, "[f+NABLA_FACE_PER_CELL*c]");
+    if (var->dim==1 && isPostfixed!=2 && enum_enum=='f' && koffset!=0)
+      nprintf(nabla, NULL, "[((f+NABLA_FACE_PER_CELL+(%d))%%NABLA_FACE_PER_CELL)+NABLA_FACE_PER_CELL*c]",koffset);
+    
+    // Mais on est pas encore dans le ∀ du ∀
     if (var->dim==1 && isPostfixed==2 &&  var->vitem=='f' && enum_enum=='\0'){
       //nprintf(nabla, NULL,"[xs_cell_node[c+NABLA_NB_CELLS*");
       nprintf(nabla, NULL,"[c*NABLA_FACE_PER_CELL+");
@@ -418,6 +430,11 @@ nablaVariable *xHookTurnTokenToVariable(astNode * n,
   nablaVariable *used=nMiddleVariableFindWithSameJobItem(nabla,job,job->used_variables, n->token);
   assert(used);
   dbg("\n\t[xHookTurnTokenToVariable] %s_%s (%d) token=%s", var->item, var->name, var->koffset, n->token);
+  
+  const bool id_has_a_koffset = (n->next && n->next->tokenid==K_OFFSET);
+  const int koffset=id_has_a_koffset?atoi(&n->next->token[2]):0;
+  const int n_children_next_koffset=id_has_a_koffset?koffset:0;
+  dbg("\n\t[xHookTurnTokenToVariable] id_has_a_koffset is %s: koffset=%d", id_has_a_koffset?"true":"false",koffset);
 
   // Si on est dans une expression d'Aleph, on garde la référence à la variable  telle-quelle
   if (job->parse.alephKeepExpression){
@@ -427,21 +444,17 @@ nablaVariable *xHookTurnTokenToVariable(astNode * n,
 
   // Check whether this variable is being gathered
   if (xHookTurnTokenToGatheredVariable(nabla,used,job)){
-    const bool id_has_a_koffset = (n->next &&
-                                   n->next->tokenid==K_OFFSET);
-    const int k=id_has_a_koffset?atoi(&n->next->token[2]):0;
-    const int n_children_next_koffset=id_has_a_koffset?k:0;
     char str_uds_koffset[32];
-    sprintf(str_uds_koffset,"_%d",n_children_next_koffset);
+    sprintf(str_uds_koffset,"_%02x",n_children_next_koffset);
     dbg("\n\t[xHookTurnTokenToVariable] gathered variable!");
     nprintf(nabla, "/*gathered variable!*/", "gathered_%s_%s%s",
             var->item, var->name,
-            id_has_a_koffset && k!=0 ? str_uds_koffset:"/**/");
+            id_has_a_koffset && koffset!=0 ? str_uds_koffset:"");
     return var;
   }
   
   // Check whether there's job for a cell job
-  xHookTurnTokenToVariableForCellJob(nabla,var,job);
+  xHookTurnTokenToVariableForCellJob(nabla,var,job,koffset);
   
   // Check whether there's job for a node job
   xHookTurnTokenToVariableForNodeJob(nabla,var,job);
