@@ -40,52 +40,35 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LEGION_HOOK_H_
-#define _NABLA_LEGION_HOOK_H_
+#include "nabla.h"
 
-// Calls
-char* legionHookCallPrefix(nablaMain*,const char*);
-void legionHookCallAddExtraParameters(nablaMain*, nablaJob*, int*);
-char* legionHookCallITask(nablaMain*,nablaJob*);
-char* legionHookCallOTask(nablaMain*,nablaJob*);
+// ****************************************************************************
+// * legionHookHeaderOpen
+// ****************************************************************************
+void legionHookHeaderOpen(nablaMain *nabla){
+  char hdrFileName[1024];
+  sprintf(hdrFileName, "%s_config.rg", nabla->name);
+  if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
+}
 
-// Header
-void legionHookHeaderOpen(nablaMain*);
-void legionHookHeaderIncludes(nablaMain*);
-void legionHookHeaderPostfix(nablaMain*);
+// ****************************************************************************
+// * legionHookHeaderIncludes
+// ****************************************************************************
+void legionHookHeaderIncludes(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\
+import \"regent\"\n\
+local c = regentlib.c");
+}
 
-// Source
-void legionHookSourceOpen(nablaMain*);
-void legionHookSourceInclude(nablaMain*);
 
-// MAIN
-NABLA_STATUS legionHookMainPrefix(nablaMain*);
-NABLA_STATUS legionHookMainPreInit(nablaMain*);
-NABLA_STATUS legionHookMainPostfix(nablaMain*);
+// ****************************************************************************
+// * legionHookHeaderPostfix
+// ****************************************************************************
+void legionHookHeaderPostfix(nablaMain *nabla){
+  fprintf(nabla->entity->hdr,"\n\n-- legionHookHeaderPostfix");
+  fprintf(nabla->entity->hdr,"\
+\nc.printf(\"[33m[pennant_common] config[m\\n\");\
+\nconfig = terralib.types.newstruct(\"config\")\
+\nconfig.entries:insertall(config_defaults)\n");
+}
 
-// TOKENS
-char* legionHookTokenPrefix(nablaMain*);
-void legionHookTokenSwitch(astNode*, nablaJob*);
-nablaVariable *legionHookTokenVariable(astNode*,nablaMain*,nablaJob*);
-void legionHookTokenOption(nablaMain*,nablaOption*);
-void legionHookTokenExit(nablaMain*, nablaJob*);
-void legionHookTokenTime(nablaMain*);
-
-// Variables
-void legionHookVarsPrefix(nablaMain*);
-void legionHookVarsFree(nablaMain*);
-
-// Grammar
-bool legionHookGramSkip(nablaMain*);
-char* legionHookGramEoe(nablaMain*); 
-bool legionHookGramDfsExtra(nablaMain*,nablaJob*,bool);
-
-// Forall
-char* legionHookForallPrefix(nablaJob*);
-char* legionHookForallDump(nablaJob*);
-char* legionHookForallPostfix(nablaJob*);
-
-hooks* legion(nablaMain*);
-
-#endif // _NABLA_LEGION_HOOK_H_
- 

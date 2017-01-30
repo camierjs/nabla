@@ -475,13 +475,16 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // On remplit la ligne du fichier SRC
   nprintf(nabla, NULL, "\n\
-// ********************************************************\n\
-// * %s job\n\
-// ********************************************************\n\
-%s %s %s%s%s(", job->name,
+%s ********************************************************\n\
+%s * %s job\n\
+%s ********************************************************\n\
+%s %s %s%s%s(", nabla->hook->token->comment,
+          nabla->hook->token->comment, job->name,
+          nabla->hook->token->comment,
           nabla->hook->call->entryPointPrefix?
           nabla->hook->call->entryPointPrefix(nabla,job):"",
-          job->return_type,
+          nabla->hook->call->prefixType?
+          nabla->hook->call->prefixType(nabla,job->return_type):job->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla))?"Module::":
           isAnArcaneService(nabla)?"Service::":"::":"",
@@ -517,7 +520,10 @@ void nMiddleJobFill(nablaMain *nabla,
     nabla->hook->call->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
   
   // On ferme la parenthèse des paramètres que l'on avait pas pris dans les tokens
-  nprintf(nabla, NULL, "){");// du job
+  nprintf(nabla, NULL, "%s",
+          nabla->hook->call->iTask?
+          nabla->hook->call->iTask(nabla,job):
+          "){");// du job
 
   if (job->parse.returnFromArgument)
     if (nabla->hook->grammar->returnFromArgument)
@@ -531,18 +537,17 @@ void nMiddleJobFill(nablaMain *nabla,
 
   dbg("\n\t[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramètres");
   for(n=n->children->next; n->tokenid!=COMPOUND_JOB_INI; n=n->next);
-  //n=n->next; // On saute le COMPOUND_JOB_INI *ou pas*
   
   dbg("\n\t[nablaJobFill] On cherche s'il y a un selection statement");
   if (dfsFetch(n,ruleToId(rule_selection_statement))!=NULL){
     dbg("\n\t[nablaJobFill] Found a selection statement in this job!");
     job->parse.selection_statement_in_compound_statement=true;
   }else{
-     dbg("\n\t[nablaJobFill] No selection statement in this job!");
- }
+    dbg("\n\t[nablaJobFill] No selection statement in this job!");
+  }
   
   dbg("\n\t[nablaJobFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\n\t%s",  cHOOKj(nabla,forall,prefix,job));
+  nprintf(nabla, NULL, "\n\t%s", cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
   if (nabla->hook->forall->dump)
@@ -560,7 +565,11 @@ void nMiddleJobFill(nablaMain *nabla,
   if (!job->parse.got_a_return)
     nprintf(nabla, NULL, "}%s",cHOOKn(nabla,grammar,eoe));/*ENUMERATE*/
   
-  nprintf(nabla, NULL, "\n}\n");// du job, on rajoute un \n pour les preproc possibles
+  // '}' du job, on rajoute un \n pour les preproc possibles
+  nprintf(nabla, NULL, "%s",
+          nabla->hook->call->oTask?
+          nabla->hook->call->oTask(nabla,job):"\n}\n");
+  
   dbg("\n\t[nablaJobFill] done");
 }
 

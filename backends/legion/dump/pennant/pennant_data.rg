@@ -14,11 +14,6 @@
 import "regent"
 local c = regentlib.c
 
-struct vec2 {
-  x : double,
-  y : double,
-}
-
 -- #####################################
 -- ## Data Structures
 -- #################
@@ -57,53 +52,10 @@ config_fields_input = terralib.newlist({
   {field = "meshparams_n", type = int64, default_value = 0, is_linked_field = true},
 })
 
-config_fields_meshgen = terralib.newlist({
-  -- Mesh generator variables.
-  {field = "meshtype", type = int64, default_value = 0},
-  {field = "nzx", type = int64, default_value = 0},
-  {field = "nzy", type = int64, default_value = 0},
-  {field = "numpcx", type = int64, default_value = 0},
-  {field = "numpcy", type = int64, default_value = 0},
-  {field = "lenx", type = double, default_value = 0.0},
-  {field = "leny", type = double, default_value = 0.0},
-})
-
-c.printf("[33m[pennant_common] Mesh variables[m\n");
-config_fields_mesh = terralib.newlist({
-  -- Mesh variables.
-  {field = "nz", type = int64, default_value = 0},
-  {field = "np", type = int64, default_value = 0},
-  {field = "ns", type = int64, default_value = 0},
-  {field = "maxznump", type = int64, default_value = 0},
-})
-
-c.printf("[33m[pennant_common] Command-line parameters[m\n");
-config_fields_cmd = terralib.newlist({
-  -- Command-line parameters.
-  {field = "npieces", type = int64, default_value = 1},
-  {field = "par_init", type = bool, default_value = true},
-  {field = "seq_init", type = bool, default_value = false},
-  {field = "print_ts", type = bool, default_value = false},
-  {field = "enable", type = bool, default_value = true},
-  {field = "warmup", type = bool, default_value = false},
-  {field = "compact", type = bool, default_value = true},
-  {field = "internal", type = bool, default_value = true},
-  {field = "interior", type = bool, default_value = true},
-  {field = "stripsize", type = int64, default_value = 128},
-  {field = "spansize", type = int64, default_value = 2048},
-  {field = "nspans_zones", type = int64, default_value = 0},
-  {field = "nspans_points", type = int64, default_value = 0},
-                                    })
-
-
-c.printf("[33m[pennant_common] config_fields_all[m\n");
-config_fields_all = terralib.newlist()
+c.printf("[33m[pennant_common] Adding config_fields_all[m\n");
 config_fields_all:insertall(config_fields_input)
-config_fields_all:insertall(config_fields_meshgen)
-config_fields_all:insertall(config_fields_mesh)
-config_fields_all:insertall(config_fields_cmd)
 
-c.printf("[33m[pennant_common] config[m\n");
+c.printf("[33m[pennant_common] Configuring entries[m\n");
 config = terralib.types.newstruct("config")
 config.entries:insertall(config_fields_all)
 

@@ -16,9 +16,9 @@ CFLAGS = $(SIMD_std_FLAGS) -finline $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS)
 LIB_NOPTS = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
 LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/libmfem.a
 
-all:$(TGT) $(NABLA) 
+all:$(TGT).rg $(NABLA) 
 
-$(TGT).cc: $(TGT_FILE) $(NABLA)
+$(TGT).rg: $(TGT_FILE) $(NABLA)
 	$(NABLA) $(LOG) --legion $(TGT) --std --$(PARALLEL) -i $(TGT_FILE)
 
 $(TGT).o: $(TGT).cc $(TGT_FILE)
@@ -30,11 +30,9 @@ $(TGT):$(TGT).o $(TGT_FILE)
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
-gen1:$(TGT).cc
-run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
-run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
+gen1:$(TGT).rg
+run1:$(TGT).rg $(NABLA) 
+run4:$(TGT).rg $(NABLA) 
 
 #############
 # DOT 2 PNG #

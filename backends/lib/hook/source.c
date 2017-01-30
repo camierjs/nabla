@@ -42,8 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 
+
 // ****************************************************************************
-// * nLambdaHookSourceOpen
+// * xHookSourceOpen
 // ****************************************************************************
 void xHookSourceOpen(nablaMain *nabla){
   char srcFileName[NABLA_MAX_FILE_NAME];
@@ -54,14 +55,15 @@ void xHookSourceOpen(nablaMain *nabla){
 
   
 // ****************************************************************************
-// * lambdaInclude
+// * xHookSourceInclude
 // ****************************************************************************
 void xHookSourceInclude(nablaMain *nabla){
   assert(nabla->entity->name);
   fprintf(nabla->entity->src,"#include \"%s.h\"\n", nabla->entity->name);
 }
 
+
 // ****************************************************************************
-// * lHookSourceName
+// * xHookSourceNamespace
 // ****************************************************************************
 char* xHookSourceNamespace(nablaMain *nabla){ return NULL;}

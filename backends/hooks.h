@@ -73,6 +73,7 @@ typedef struct hookTokenStruct{
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char); // jobs
   void (*isTest)(nablaMain*,nablaJob*,astNode*,int); // jobs
   char* (*postfix)(nablaMain*); // variables
+  char *comment; // prefix d'un commentaire
 } hookToken;
 
 
@@ -107,6 +108,9 @@ typedef struct hookCallStruct{
   void (*dfsForCalls)(nablaMain*,nablaJob*,astNode*,const char *,astNode *); // functions
   void (*addExtraParameters)(nablaMain*, nablaJob*, int*); // jobs, functions
   void (*dumpNablaParameterList)(nablaMain*, nablaJob*, astNode*,int*); // jobs
+  char* (*prefixType)(nablaMain*,const char*);
+  char* (*iTask)(nablaMain*,nablaJob*);
+  char* (*oTask)(nablaMain*,nablaJob*);
 } hookCall;
 
 

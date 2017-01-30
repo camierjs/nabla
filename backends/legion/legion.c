@@ -49,22 +49,22 @@ const nWhatWith legionCallHeaderDefines[]={{NULL,NULL}};
 // * CALLS
 // ****************************************************************************
 const static callHeader xHeader={
-  NULL,
-  NULL,
-  NULL
+  NULL, // forwards
+  NULL, // defines
+  NULL  // typedefs
 };
 const static callSimd simd={
-  NULL,
-  xCallGather,
-  xCallScatter,
-  NULL,
-  xCallUid
+  NULL, // bits
+  NULL, // xCallGather,
+  NULL, // xCallScatter,
+  NULL, // includes
+  NULL  // xCallUid
 };
 const static callParallel parallel={
-  NULL,
-  NULL,
-  xParallelLoop,
-  legionCallParallelIncludes
+  NULL, // sync
+  NULL, // spawn
+  xParallelLoop, // loop
+  NULL  // includes
 };
 static backendCalls calls={
   &xHeader,
@@ -77,75 +77,77 @@ static backendCalls calls={
 // * HOOKS
 // ****************************************************************************
 const static hookForAll forall={
-  NULL,
-  legionHookForAllDump,
-  NULL,//xHookForAllItem, // traite les items
-  legionHookForAllPostfix
+  legionHookForallPrefix, // prefix
+  legionHookForallDump, // dump
+  NULL, // items
+  legionHookForallPostfix // postfix
 };
 
-  const static hookToken token={
-  NULL,
-  legionHookSwitchToken,
-  legionHookTurnTokenToVariable,
-  legionHookTurnTokenToOption,
-  NULL,//xHookSystem,
-  NULL,//xHookIteration,
-  legionHookExit,
-  NULL,//xHookError,
-  legionHookTime,
-  NULL,//xHookFatal,
-  NULL,//xHookTurnBracketsToParentheses,
-  NULL,//xHookIsTest,
-  NULL
+const static hookToken token={
+  legionHookTokenPrefix, // prefix
+  legionHookTokenSwitch, // svvitch
+  legionHookTokenVariable, // variable
+  legionHookTokenOption, // option
+  NULL, // xHookSystem,
+  NULL, // xHookIteration,
+  legionHookTokenExit,
+  NULL, // xHookError,
+  legionHookTokenTime,
+  NULL, // xHookFatal,
+  NULL, // xHookTurnBracketsToParentheses,
+  NULL, // xHookIsTest,
+  NULL,  // postfix
+  "--"
 };
-
-bool legionHookGramSkip(nablaMain *nabla){return false;}
 
 const static hookGrammar gram={
-  NULL,
-  NULL,
-  NULL,//legionHookReduction,
-  NULL,
-  NULL,
-  NULL,//xHookDfsVariable,   // return true pour dire qu'on supporte le scan des in&out
-  legionHookDfsExtra, // return false
-  NULL,
-  NULL,//legionHookEoe,
-  NULL,
-  legionHookGramSkip
+  NULL, // function
+  NULL, // job
+  NULL, // reduction
+  NULL, // primary_expression_to_return
+  NULL, // returnFromArgument
+  NULL, // dfsVariable: true pour dire qu'on supporte le scan des in&out
+  legionHookGramDfsExtra, // return false
+  NULL, // dfsArgType
+  NULL, // legionHookGramEoe, // eoe,
+  NULL, // hit
+  legionHookGramSkip // skipBody
 };
 
 const static hookCall call={
-  xHookAddCallNames,        // utilisé pour dumper le nom des fonctions
-  NULL,//xHookAddArguments, // rajoute les arguments des fonctions appelées
-  NULL,//xHookEntryPointPrefix,    // retourne static inline
-  NULL,//xHookDfsForCalls,  // Dump des variables appelées
-  NULL,
-  NULL
+  xHookAddCallNames, // utilisé pour dumper le nom des fonctions
+  NULL, // xHookAddArguments, rajoute les arguments des fonctions appelées
+  NULL, // xHookEntryPointPrefix, retourne static inline
+  NULL, // xHookDfsForCalls, Dump des variables appelées
+  legionHookCallAddExtraParameters, // addExtraParameters
+  NULL, // dumpNablaParameterList
+  legionHookCallPrefix,
+  legionHookCallITask,
+  legionHookCallOTask
 };
 
 const static hookXyz xyz={
-  NULL,
-  NULL,//xHookPrevCell,
-  NULL,//xHookNextCell,
-  NULL,//xHookSysPostfix
+  NULL, // prefix
+  NULL, // prevCell,
+  NULL, // nextCell,
+  NULL, // postfix
 };
 
 const static hookHeader header={
-  legionHookHeaderDump,
-  NULL,//xHookHeaderDumpWithLibs,
-  xHookHeaderOpen,
-  NULL,//xHookHeaderDefineEnumerates,
-  xHookHeaderPrefix, // #ifndef __BACKEND_pennant_H__
-  legionHookHeaderIncludes,
-  NULL,//xHookHeaderAlloc,
-  legionHookHeaderPostfix // Avant le #endif // __BACKEND_pennantH__
+  NULL, // dump 
+  NULL, // dumpWithLibs
+  legionHookHeaderOpen, // open
+  NULL, // enums
+  NULL, // prefix
+  legionHookHeaderIncludes, // include
+  NULL, // alloc
+  legionHookHeaderPostfix // postfix
 };
 
 const static hookSource source={
-  xHookSourceOpen,    // Ouvre le fichier source
-  xHookSourceInclude, // Rajoute l'include .h
-  NULL
+  legionHookSourceOpen, // Ouvre le fichier source
+  legionHookSourceInclude, // Rajoute l'import
+  NULL  // namespace
 };
 
 const static hookMesh mesh={
@@ -156,11 +158,11 @@ const static hookMesh mesh={
 
 const static hookVars vars={
   NULL,//xHookVariablesInit, // rajoute global int iteration
-  legionHookVariablesPrefix, // Au dessus du main
-  legionHookVariablesMalloc, // Juste apres la déclaration du main
-  legionHookVariablesFree,   // A la fin du main
-  NULL,
-  NULL
+  legionHookVarsPrefix, // Au dessus du main
+  NULL,//legionHookVarsMalloc, // Juste apres la déclaration du main
+  legionHookVarsFree,   // A la fin du main
+  NULL, // idecl args
+  NULL  // odecl args
 };  
 
 const static hookMain mains={
@@ -179,7 +181,7 @@ static hooks legionHooks={
   &gram,
   &call,
   &xyz,
-  NULL,
+  NULL, // pragma
   &header,
   &source,
   &mesh,
@@ -190,7 +192,7 @@ static hooks legionHooks={
 
 
 // ****************************************************************************
-// * nLegionDump
+// * nLegionDumpGeneric
 // ****************************************************************************
 static void nLegionDumpGeneric(nablaMain *nabla, const char *filename, char *external){
   FILE *file;
@@ -267,6 +269,7 @@ static void nLegionDump(nablaMain *nabla){
   nLegionDumpGeneric(nabla,"sedovsmall.pnt",sedovsmall_pnt);
   nLegionDumpGeneric(nabla,"sedovsmall.xy.std",sedovsmall_xy_std);
 }
+
 
 // ****************************************************************************
 // * Legion

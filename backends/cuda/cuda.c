@@ -224,7 +224,8 @@ const static hookToken cuHookToken={
   xHookFatal,
   xHookTurnBracketsToParentheses,
   xHookIsTest,
-  NULL
+  NULL,
+  "//"
 };
 
 const static hookGrammar cuHookGrammar={
@@ -248,7 +249,9 @@ const static hookCall cuHookCall={
   cuHookEntryPointPrefix, // __device__ vs __global__
   xHookDfsForCalls,
   NULL,
-  NULL
+  NULL,
+  NULL, // prefixType
+  NULL,NULL
 };
 
 

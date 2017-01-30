@@ -40,52 +40,29 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LEGION_HOOK_H_
-#define _NABLA_LEGION_HOOK_H_
+#include "nabla.h"
 
-// Calls
-char* legionHookCallPrefix(nablaMain*,const char*);
-void legionHookCallAddExtraParameters(nablaMain*, nablaJob*, int*);
-char* legionHookCallITask(nablaMain*,nablaJob*);
-char* legionHookCallOTask(nablaMain*,nablaJob*);
+// **************************************************************************** 
+// * legionHookForAllPrefix
+// **************************************************************************** 
+char* legionHookForallPrefix(nablaJob *job){
+  return "-- legionHookForallPrefix";
+}
 
-// Header
-void legionHookHeaderOpen(nablaMain*);
-void legionHookHeaderIncludes(nablaMain*);
-void legionHookHeaderPostfix(nablaMain*);
+// ****************************************************************************
+// * Fonction produisant l'ENUMERATE_*
+// ****************************************************************************
+char* legionHookForallDump(nablaJob *job){
+  //if (job->item[0]=='c') return "for z in rz do -- ";
+  //if (job->item[0]=='n') return "for p in rp do -- ";
+  //if (job->item[0]=='f') return "for s in rs do -- ";
+  return "\n\t-- legionHookForallDump";
+}
 
-// Source
-void legionHookSourceOpen(nablaMain*);
-void legionHookSourceInclude(nablaMain*);
 
-// MAIN
-NABLA_STATUS legionHookMainPrefix(nablaMain*);
-NABLA_STATUS legionHookMainPreInit(nablaMain*);
-NABLA_STATUS legionHookMainPostfix(nablaMain*);
-
-// TOKENS
-char* legionHookTokenPrefix(nablaMain*);
-void legionHookTokenSwitch(astNode*, nablaJob*);
-nablaVariable *legionHookTokenVariable(astNode*,nablaMain*,nablaJob*);
-void legionHookTokenOption(nablaMain*,nablaOption*);
-void legionHookTokenExit(nablaMain*, nablaJob*);
-void legionHookTokenTime(nablaMain*);
-
-// Variables
-void legionHookVarsPrefix(nablaMain*);
-void legionHookVarsFree(nablaMain*);
-
-// Grammar
-bool legionHookGramSkip(nablaMain*);
-char* legionHookGramEoe(nablaMain*); 
-bool legionHookGramDfsExtra(nablaMain*,nablaJob*,bool);
-
-// Forall
-char* legionHookForallPrefix(nablaJob*);
-char* legionHookForallDump(nablaJob*);
-char* legionHookForallPostfix(nablaJob*);
-
-hooks* legion(nablaMain*);
-
-#endif // _NABLA_LEGION_HOOK_H_
- 
+// **************************************************************************** 
+// * legionHookForAllPostfix
+// **************************************************************************** 
+char* legionHookForallPostfix(nablaJob *job){
+  return "\n\t-- legionHookForallPostfix";
+}

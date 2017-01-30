@@ -40,52 +40,26 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LEGION_HOOK_H_
-#define _NABLA_LEGION_HOOK_H_
+#include "nabla.h"
 
-// Calls
-char* legionHookCallPrefix(nablaMain*,const char*);
-void legionHookCallAddExtraParameters(nablaMain*, nablaJob*, int*);
-char* legionHookCallITask(nablaMain*,nablaJob*);
-char* legionHookCallOTask(nablaMain*,nablaJob*);
 
-// Header
-void legionHookHeaderOpen(nablaMain*);
-void legionHookHeaderIncludes(nablaMain*);
-void legionHookHeaderPostfix(nablaMain*);
+// ****************************************************************************
+// * legionHookGramSkip
+// ****************************************************************************
+bool legionHookGramSkip(nablaMain *nabla){return false;}
 
-// Source
-void legionHookSourceOpen(nablaMain*);
-void legionHookSourceInclude(nablaMain*);
 
-// MAIN
-NABLA_STATUS legionHookMainPrefix(nablaMain*);
-NABLA_STATUS legionHookMainPreInit(nablaMain*);
-NABLA_STATUS legionHookMainPostfix(nablaMain*);
+// ****************************************************************************
+// * legionHookEoe - End Of Enumerate
+// ****************************************************************************
+char* legionHookGramEoe(nablaMain* nabla){
+  return "-- legionHookEoe";
+}
 
-// TOKENS
-char* legionHookTokenPrefix(nablaMain*);
-void legionHookTokenSwitch(astNode*, nablaJob*);
-nablaVariable *legionHookTokenVariable(astNode*,nablaMain*,nablaJob*);
-void legionHookTokenOption(nablaMain*,nablaOption*);
-void legionHookTokenExit(nablaMain*, nablaJob*);
-void legionHookTokenTime(nablaMain*);
 
-// Variables
-void legionHookVarsPrefix(nablaMain*);
-void legionHookVarsFree(nablaMain*);
-
-// Grammar
-bool legionHookGramSkip(nablaMain*);
-char* legionHookGramEoe(nablaMain*); 
-bool legionHookGramDfsExtra(nablaMain*,nablaJob*,bool);
-
-// Forall
-char* legionHookForallPrefix(nablaJob*);
-char* legionHookForallDump(nablaJob*);
-char* legionHookForallPostfix(nablaJob*);
-
-hooks* legion(nablaMain*);
-
-#endif // _NABLA_LEGION_HOOK_H_
- 
+// ****************************************************************************
+// * legionHookDfsExtra
+// ****************************************************************************
+bool legionHookGramDfsExtra(nablaMain* nabla,nablaJob* job, bool arg_test){
+  return false;
+}

@@ -40,52 +40,23 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _NABLA_LEGION_HOOK_H_
-#define _NABLA_LEGION_HOOK_H_
+#include "nabla.h"
 
-// Calls
-char* legionHookCallPrefix(nablaMain*,const char*);
-void legionHookCallAddExtraParameters(nablaMain*, nablaJob*, int*);
-char* legionHookCallITask(nablaMain*,nablaJob*);
-char* legionHookCallOTask(nablaMain*,nablaJob*);
+// ****************************************************************************
+// * legionHookSourceOpen
+// ****************************************************************************
+void legionHookSourceOpen(nablaMain *nabla){
+  char srcFileName[NABLA_MAX_FILE_NAME];
+  // Ouverture du fichier source
+  sprintf(srcFileName, "%s_kernels.rg", nabla->name);
+  if ((nabla->entity->src=fopen(srcFileName, "w")) == NULL) exit(NABLA_ERROR);
+}
 
-// Header
-void legionHookHeaderOpen(nablaMain*);
-void legionHookHeaderIncludes(nablaMain*);
-void legionHookHeaderPostfix(nablaMain*);
-
-// Source
-void legionHookSourceOpen(nablaMain*);
-void legionHookSourceInclude(nablaMain*);
-
-// MAIN
-NABLA_STATUS legionHookMainPrefix(nablaMain*);
-NABLA_STATUS legionHookMainPreInit(nablaMain*);
-NABLA_STATUS legionHookMainPostfix(nablaMain*);
-
-// TOKENS
-char* legionHookTokenPrefix(nablaMain*);
-void legionHookTokenSwitch(astNode*, nablaJob*);
-nablaVariable *legionHookTokenVariable(astNode*,nablaMain*,nablaJob*);
-void legionHookTokenOption(nablaMain*,nablaOption*);
-void legionHookTokenExit(nablaMain*, nablaJob*);
-void legionHookTokenTime(nablaMain*);
-
-// Variables
-void legionHookVarsPrefix(nablaMain*);
-void legionHookVarsFree(nablaMain*);
-
-// Grammar
-bool legionHookGramSkip(nablaMain*);
-char* legionHookGramEoe(nablaMain*); 
-bool legionHookGramDfsExtra(nablaMain*,nablaJob*,bool);
-
-// Forall
-char* legionHookForallPrefix(nablaJob*);
-char* legionHookForallDump(nablaJob*);
-char* legionHookForallPostfix(nablaJob*);
-
-hooks* legion(nablaMain*);
-
-#endif // _NABLA_LEGION_HOOK_H_
- 
+// ****************************************************************************
+// * legionHookSourceInclude
+// ****************************************************************************
+void legionHookSourceInclude(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\
+import \"regent\"\
+\nlocal c = regentlib.c\n");
+}

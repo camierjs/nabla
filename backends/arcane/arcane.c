@@ -79,16 +79,19 @@ static const hookToken token={
   arcaneFatal,
   arcaneHookTurnBracketsToParentheses,
   arcaneHookIsTest,
-  arcaneHookTokenPostfix
+  arcaneHookTokenPostfix,
+  "//"
 };
 
 static const hookCall call={
   arcaneAddCallNames,
   arcaneAddArguments,
   arcaneEntryPointPrefix,
-  NULL,//aHookDfsForCalls,
-  NULL,//aHookAddExtraParametersDFS,
-  NULL//aHookDumpNablaParameterListDFS
+  NULL, //aHookDfsForCalls,
+  NULL, //aHookAddExtraParametersDFS,
+  NULL, //aHookDumpNablaParameterListDFS
+  NULL, // prefixType
+  NULL,NULL
 };
 
 static const hookGrammar grammar={

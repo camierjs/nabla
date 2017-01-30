@@ -93,7 +93,8 @@ const static hookToken token={
   xHookFatal,
   xHookTurnBracketsToParentheses,
   xHookIsTest,
-  NULL
+  NULL,
+  "//"
 };
 
 const static hookGrammar gram={
@@ -116,7 +117,9 @@ const static hookCall call={
   xHookEntryPointPrefix,
   xHookDfsForCalls,
   NULL, // addExtraParameters
-  NULL  // dumpNablaParameterList
+  NULL, // dumpNablaParameterList
+  NULL, // prefixType
+  NULL,NULL
 };
 
 const static hookXyz xyz={

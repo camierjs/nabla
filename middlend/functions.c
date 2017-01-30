@@ -332,10 +332,13 @@ void nMiddleFunctionFill(nablaMain *nabla,
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
   dbg("\n\t[nablaFctFill] Now fillinf SRC file");
   nprintf(nabla, NULL, "\n\
-// ********************************************************\n\
-// * %s fct\n\
-// ********************************************************\n\
-%s %s %s%s%s(", fct->name, 
+%s ********************************************************\n\
+%s * %s fct\n\
+%s ********************************************************\n\
+%s %s %s%s%s(", nabla->hook->token->comment,
+          nabla->hook->token->comment,
+          fct->name,
+          nabla->hook->token->comment,
           (nabla->hook->call->entryPointPrefix)?
           nabla->hook->call->entryPointPrefix(nabla,fct):"",
           fct->return_type,

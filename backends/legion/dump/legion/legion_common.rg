@@ -12,6 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 require("legion_compile")
+require("legion_data")
 require("pennant_data")
 require("legion_math")
 require("legion_mesh")

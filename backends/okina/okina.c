@@ -176,7 +176,8 @@ const hookToken token={
   xHookFatal,
   xHookTurnBracketsToParentheses,
   xHookIsTest,
-  NULL
+  NULL,
+  "//"
 };
 
 const hookGrammar gram={
@@ -199,8 +200,10 @@ const hookCall call={
   xHookEntryPointPrefix,
   xHookDfsForCalls,
   NULL,
-  NULL
-  };
+  NULL,
+  NULL, // prefixType
+  NULL,NULL
+};
 
 const hookXyz xyzStd={
   NULL,
