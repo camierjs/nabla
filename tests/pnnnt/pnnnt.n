@@ -181,10 +181,10 @@ global{
 // * Initialization ]-∞,-0.0[
 // ****************************************************************************
 
-∀ nodes @ -33 { px = coord; }
+∀ nodes iniMeshPx @ -33 { px = coord; }
 
-∀ cells @ -32 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
-∀ faces @ -32 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
+∀ cells iniMeshZx @ -32 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
+∀ faces iniMeshEx @ -32 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
 
 ∀ cells iniMeshCalcVols @ -31.8 {
   zvol=0;
@@ -197,35 +197,35 @@ global{
   }
 }
 
-∀ cells @ -31.7 { ∀ faces smf = sarea/zarea; }
+∀ cells iniMeshCalcSideFracs @ -31.7 { ∀ faces smf = sarea/zarea; }
 
 iniGlobals @ -20.0 { time=0; cycle=0; }
 
-∀ cells @ -14.9 { zr=rinit; }
-∀ cells @ -14.9 { ze=einit; }
-∀ cells @ -14.9 { zwrate=0; }
-∀ cells @ -14.8 if (subregion) {
+∀ cells iniZr @ -14.9 { zr=rinit; }
+∀ cells iniZe @ -14.9 { ze=einit; }
+∀ cells iniZwrate @ -14.9 { zwrate=0; }
+
+∀ cells iniSubRegion @ -14.8 if (subregion) {
   if (!(zx.x > (sbxmin-ε) && zx.x < (sbxmax+ε) &&
         zx.y > (sbymin-ε) && zx.y < (sbymax+ε))) continue;
   zr = rinitsub;
   ze = einitsub;
 }
 
-∀ cells @ -14.7 { zm=zr*zvol; }
+∀ cells iniZm @ -14.7 { zm=zr*zvol; }
+∀ cells iniZetot @ -14.6 { zetot=ze*zm; }
 
-∀ cells @ -14.6 { zetot=ze*zm; }
-
-∀ nodes @ -14.5 if (uinitradial!=0.0) {
+∀ nodes niPuRadial @ -14.5 if (uinitradial!=0.0) {
   const ℝ pmag = length(px);
   pu=(pmag>ε)?uinitradial*px/pmag:0;
 }
-∀ nodes @ -14.5 if (uinitradial==0.0) { pu=0.0; }
+∀ nodes iniPuStd @ -14.5 if (uinitradial==0.0) { pu=0.0; }
 
 iniRstDtHydro @ -14.4 { dtrec = +∞; }
 
 
 // ****************************************************************************
-// * Partie boucle de calcul ]+0.0,+∞[ 
+// * Compute loop ⊂ ]+0.0,+∞[ 
 // ****************************************************************************
 
 incCycle @ 1.0 { cycle += 1; }
@@ -244,16 +244,16 @@ calcGlobalDt @ 2.0 {
 }
 
 
-∀ nodes @ 3.0 { px0=px; }
-∀ nodes @ 3.0 { pu0=pu; }
-∀ cells @ 3.0 { zvol0=zvol; }
+∀ nodes savePx @ 3.0 { px0=px; }
+∀ nodes savePu @ 3.0 { pu0=pu; }
+∀ cells saveZvol @ 3.0 { zvol0=zvol; }
 
-∀ nodes @ 3.1 { pxp = px0+½*pu0*dt; }
+∀ nodes advPosHalf0 @ 3.1 { pxp = px0+½*pu0*dt; }
 
-∀ cells @ 3.2 { zxp=0; ∀ nodes zxp+=pxp; zxp/=#nodes; }
-∀ faces @ 3.2 { exp=0; ∀ nodes exp+=pxp; exp/=#nodes; }
+∀ cells calcZxp @ 3.2 { zxp=0; ∀ nodes zxp+=pxp; zxp/=#nodes; }
+∀ faces calcExp @ 3.2 { exp=0; ∀ nodes exp+=pxp; exp/=#nodes; }
 
-∀ cells iniArea @ 3.4 {
+∀ cells calcVols @ 3.4 {
   zareap=0; 
   zvolp=0;
   ∀ nodes {
@@ -264,16 +264,16 @@ calcGlobalDt @ 2.0 {
   } 
 }
 
-∀ cells @ 3.5 { ∀ faces ssurfp = rotateCCW(exp-zxp); }
-∀ faces @ 3.5 { elen = length(pxp[1]-pxp[0]); }
+∀ cells calcSurfVecs @ 3.5 { ∀ faces ssurfp = rotateCCW(exp-zxp); }
+∀ faces calcEdgeLen @ 3.5 { elen = length(pxp[1]-pxp[0]); }
 
-∀ cells @ 3.6 { zdl = 1.e99; ∀ faces zdl=fmin(zdl,4.0*sareap/elen); }
+∀ cells calcCharLen @ 3.6 { zdl = 1.e99; ∀ faces zdl=fmin(zdl,4.0*sareap/elen); }
 
-∀ cells @ 4.0 { zrp = zm/zvolp; }
+∀ cells calcZrp @ 4.0 { zrp = zm/zvolp; }
 
-∀ cells @ 4.1 { ∀ nodes cmaswt = ½*zrp*zareap*(smf+smf[#-1]); }
+∀ cells calcCrnrMass @ 4.1 { ∀ nodes cmaswt = ½*zrp*zareap*(smf+smf[#-1]); }
 
-∀ cells @ 5.0 {
+∀ cells calcEOS1 @ 5.0 {
   const ℝ γm1 = γ - 1.0;
   const ℝ ss2 = fmax(ssmin*ssmin,1.e-99);
   const ℝ rx = zr;
@@ -287,7 +287,7 @@ calcGlobalDt @ 2.0 {
   zss = √(csqd);
 }
 
-∀ cells @ 5.1 {
+∀ cells calcEOS2 @ 5.1 {
   const ℝ dth = ½ * dt;
   const ℝ zminv = 1.0 / zm;
   const ℝ dv = (zvolp - zvol0) * zminv;
@@ -297,9 +297,9 @@ calcGlobalDt @ 2.0 {
   zp += (z0per * src - zr * bulk * dv) / denom;
 }
 
-∀ cells @ 6.0 { ∀ faces sfp=-zp * ssurfp; }
+∀ cells pgasCalcForce @ 6.0 { ∀ faces sfp=-zp * ssurfp; }
 
-∀ cells @ 6.1 {
+∀ cells ttsCalcForce @ 6.1 {
   ∀ faces {
     const ℝ svfacinv = zareap / sareap;
     const ℝ srho = zrp * smf * svfacinv;
@@ -311,9 +311,9 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells @ 6.2 { z0uc=0; ∀ nodes z0uc += pu; z0uc/=#nodes; }
+∀ cells qcsZuc @ 6.2 { z0uc=0; ∀ nodes z0uc += pu; z0uc/=#nodes; }
 
-∀ cells @ 6.3 {
+∀ cells qcsCornerDiv @ 6.3 {
   ∀ nodes {
     const ℝ³ up0 = pu;
     const ℝ³ xp0 = pxp;
@@ -351,7 +351,7 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells @ 6.4 {
+∀ cells qcsC0rmu @ 6.4 { // Kurapatenko viscous scalar
   const ℝ γp1 = γ + 1.0;
   ∀ nodes {
     const ℝ ztmp2 = ¼*q2*γp1*c0du;
@@ -362,14 +362,14 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells @ 6.5 {
+∀ cells qcsC0qe @ 6.5 {
   ∀ nodes {
     c0qe0 = c0rmu * (pu-pu[#-1])/elen[#-1];
     c0qe1 = c0rmu * (pu[#+1]-pu)/elen;
   }
 }
 
-∀ cells @ 6.6 {
+∀ cells qcsExtraVars @ 6.6 {
   ∀ nodes {
     const ℝ csin2 = 1.0-c0cos²;
     c0w   = ((csin2 < 1.e-4) ? 0.0:c0area/csin2);
@@ -377,12 +377,12 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells @ 6.7 {
+∀ cells qcsForcesCorners @ 6.7 {
   ∀ faces sfq = (c0w*(c0qe1+c0cos*c0qe0)+
                  c0w[#+1]*(c0qe0[#+1]+c0cos[#+1]*c0qe1[#+1]))/elen;
 }
 
-∀ cells  @ 6.8 {
+∀ cells qcsSetVelDiff @ 6.8 {
   ℝ z0tmp=0;
    ∀ nodes {
     const ℝ³ dx = pxp[#+1]-pxp;
@@ -394,36 +394,34 @@ calcGlobalDt @ 2.0 {
   zdu = q1 * zss + 2.0 * q2 * z0tmp;
 }
 
-∀ cells @ 7.0 { ∀ nodes cftot=(sfp+sfq+sft)-(sfp[#-1]+sfq[#-1]+sft[#-1]); }
+∀ cells sumCrnrForce @ 7.0 { ∀ nodes cftot=(sfp+sfq+sft)-(sfp[#-1]+sfq[#-1]+sft[#-1]); }
 
-∀ nodes @ 8.0 { pmaswt=0; ∀ cells pmaswt+=cmaswt; }
+∀ nodes sumCrnrMasses @ 8.0 { pmaswt=0; ∀ cells pmaswt+=cmaswt; }
 
-∀ nodes @ 8.1 { pf=0; ∀ cells pf+=cftot; }
+∀ nodes sumCrnrForces @ 8.1 { pf=0; ∀ cells pf+=cftot; }
  
-∀ /*outer*/ nodes @ 9.0 {
+∀ /*outer*/ nodes applyFixedBC_X @ 9.0 {
   if (px.x!=0.0 && px.x!=LENGTH) continue;
   const ℝ³ vfixx = ℝ³(1,0,0);
   pu = project(pu, vfixx);
   pf = project(pf, vfixx);
 }
-∀ /*outer*/ nodes @ 9.1 {
+∀ /*outer*/ nodes applyFixedBC_Y @ 9.1 {
   if (px.y!=0.0 && px.y!=LENGTH) continue;
   const ℝ³ vfixy = ℝ³(0,1,0);
   pu = project(pu, vfixy);
   pf = project(pf, vfixy);
 } 
 
-∀ nodes @ 10.0 { pap = pf/fmax(pmaswt,ι); }
+∀ nodes calcAccel @ 10.0 { pap = pf/fmax(pmaswt,ι); }
 
-∀ nodes @ 11.0 { pu = pu0 + pap*dt; }
-∀ nodes @ 11.1 { px = px0 + ½*(pu+pu0)*dt; }
+∀ nodes advPosFullPu @ 11.0 { pu = pu0 + pap*dt; }
+∀ nodes advPosFullPx @ 11.1 { px = px0 + ½*(pu+pu0)*dt; }
 
-∀ cells @ 13.0 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
-∀ faces @ 13.0 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
-
-∀ cells @ 13.2 { 
-  zvol=0;
-  zarea=0; 
+∀ cells updateZx @ 13.0 { zx=0; ∀ nodes zx+=px; zx/=#nodes; }
+∀ faces updateEx @ 13.0 { ex=0; ∀ nodes ex+=px; ex/=#nodes; }
+∀ cells updateVols @ 13.2 { 
+  zvol=zarea=0; 
   ∀ nodes {
     sarea = ½ * cross2D(px[#+1]-px,zx-px);
     svol = ⅓* sarea * (px.x+px[#+1].x+zx.x);
@@ -432,7 +430,7 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells searchHere @ 14.0 {
+∀ cells calcWork @ 14.0 {
   zw=0; 
   const ℝ dth = ½ * dt;
   ∀ nodes { 
@@ -445,25 +443,25 @@ calcGlobalDt @ 2.0 {
   }
 }
 
-∀ cells @ 15.0 { 
+∀ cells calcWorkRate @ 15.0 { 
   const ℝ dvol=zvol-zvol0;
   zwrate = (zw+zp*dvol)/dt;
 }
 
-∀ cells @ 16.0 { ze = zetot/(zm+ι); }
-∀ cells @ 16.0 { zr = zm / zvol; }
+∀ cells calcEnergy @ 16.0 { ze = zetot/(zm+ι); }
+∀ cells calcRho @ 16.0 { zr = zm / zvol; }
 
 
 resetDtHydro @ 12.0 { dtrec=dtmax; dvovmax=ι;}
 
-∀ cells @ 19.0 {
+∀ cells calcDtCourant @ 19.0 {
   const ℝ cdu = fmax(zdu, fmax(zss,ι));
   const ℝ zdthyd = zdl * cfl / cdu;
   const ℝ dtnew = (zdthyd < dtmax)?zdthyd:dtmax;
   if (dtnew < dtrec) dtrec = dtnew;
 }
 
-∀ cells @ 20.0 {
+∀ cells calcDtVolume @ 20.0 {
   const ℝ zdvov = fabs((zvol-zvol0)/zvol0);
   dvovmax = (zdvov>dvovmax)?zdvov;
 }

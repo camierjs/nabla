@@ -361,6 +361,8 @@ endif(KOKKOS_FOUND)
 if(LEGION_FOUND)
   nabla_add_test(legion ${VT100_FG_MAGENTA} pennant 1 gen seq)
   nabla_add_test(legion ${VT100_FG_MAGENTA} pennant 1 run seq)
+  nabla_add_test(legion ${VT100_FG_MAGENTA} pnnnt 1 gen seq)
+  nabla_add_test(legion ${VT100_FG_MAGENTA} pnnnt 1 run seq)
 endif(LEGION_FOUND)
 
 

@@ -188,10 +188,91 @@ static hooks legionHooks={
 };
 
 
+
+// ****************************************************************************
+// * nLegionDump
+// ****************************************************************************
+static void nLegionDumpGeneric(nablaMain *nabla, const char *filename, char *external){
+  FILE *file;
+  const int external_strlen = strlen(external);
+  int fprintf_strlen=0;
+  //printf("[33m[nLegionDumpGeneric] dumping (len=%d): %s",external_strlen,filename);
+  //fflush(stdout);
+  if ((file=fopen(filename, "w")) == NULL) exit(NABLA_ERROR);
+  // On ne peut pas comparer les strlen, car les '%%' sont transformés en '%'
+  if (external_strlen!=(fprintf_strlen=fprintf(file,external))){
+    //printf(", got %d![m\n", fprintf_strlen);fflush(stdout);
+    //exit(NABLA_ERROR);
+  }
+  if (fclose(file)!=0) exit(NABLA_ERROR);
+  //printf(", done![m\n");fflush(stdout);
+}
+extern char legion_args_rg[];
+extern char legion_common_rg[];
+extern char legion_compile_rg[];
+extern char legion_config_rg[];
+extern char legion_distri_rg[];
+extern char legion_geom_rg[];
+extern char legion_hacks_rg[];
+extern char legion_init_rg[];
+extern char legion_input_rg[];
+extern char legion_math_rg[];
+extern char legion_mesh_rg[];
+extern char legion_rg[];
+extern char legion_tools_rg[];
+
+extern char legion_cc[];
+extern char legion_h[];
+
+extern char makefile[];
+
+extern char pennant_data_rg[];
+extern char pennant_kernels_init_rg[];
+extern char pennant_kernels_loop_rg[];
+extern char pennant_main_init_rg[];
+extern char pennant_main_loop_rg[];
+extern char pennant_valid_rg[];
+   
+extern char sedovsmall_pnt[];
+extern char sedovsmall_xy_std[];
+
+// ****************************************************************************
+// * Dump de tous les fichiers legion/pennant/sedov utiles pour la compilation
+// ****************************************************************************
+static void nLegionDump(nablaMain *nabla){
+  nLegionDumpGeneric(nabla,"legion_args.rg",legion_args_rg);
+  nLegionDumpGeneric(nabla,"legion_common.rg",legion_common_rg);
+  nLegionDumpGeneric(nabla,"legion_compile.rg",legion_compile_rg);
+  nLegionDumpGeneric(nabla,"legion_config.rg",legion_config_rg);
+  nLegionDumpGeneric(nabla,"legion_distri.rg",legion_distri_rg);
+  nLegionDumpGeneric(nabla,"legion_geom.rg",legion_geom_rg);
+  nLegionDumpGeneric(nabla,"legion_hacks.rg",legion_hacks_rg);
+  nLegionDumpGeneric(nabla,"legion_init.rg",legion_init_rg);
+  nLegionDumpGeneric(nabla,"legion_input.rg",legion_input_rg);
+  nLegionDumpGeneric(nabla,"legion_math.rg",legion_math_rg);
+  nLegionDumpGeneric(nabla,"legion_mesh.rg",legion_mesh_rg);
+  nLegionDumpGeneric(nabla,"legion.rg",legion_rg);
+  nLegionDumpGeneric(nabla,"legion_tools.rg",legion_tools_rg);
+  nLegionDumpGeneric(nabla,"legion.cc",legion_cc);
+  nLegionDumpGeneric(nabla,"legion.h",legion_h);
+  nLegionDumpGeneric(nabla,"makefile",makefile);
+  
+  nLegionDumpGeneric(nabla,"pennant_data.rg",pennant_data_rg);
+  nLegionDumpGeneric(nabla,"pennant_kernels_init.rg",pennant_kernels_init_rg);
+  nLegionDumpGeneric(nabla,"pennant_kernels_loop.rg",pennant_kernels_loop_rg);
+  nLegionDumpGeneric(nabla,"pennant_main_init.rg",pennant_main_init_rg);
+  nLegionDumpGeneric(nabla,"pennant_main_loop.rg",pennant_main_loop_rg);
+  nLegionDumpGeneric(nabla,"pennant_valid.rg",pennant_valid_rg);
+  
+  nLegionDumpGeneric(nabla,"sedovsmall.pnt",sedovsmall_pnt);
+  nLegionDumpGeneric(nabla,"sedovsmall.xy.std",sedovsmall_xy_std);
+}
+
 // ****************************************************************************
 // * Legion
 // ****************************************************************************
 hooks* legion(nablaMain *nabla){
   nabla->call=&calls;
+  nLegionDump(nabla);
   return &legionHooks;
 }

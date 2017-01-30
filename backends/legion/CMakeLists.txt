@@ -11,3 +11,7 @@ set(BACKEND_LEGION_C legion.c hooks.c)
 
 add_library(NablaLegion ${BACKEND_LEGION_C})
 add_dependencies(NablaLegion Nabla)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dump)
+
+target_link_libraries(NablaLegion NablaLegionDump)
