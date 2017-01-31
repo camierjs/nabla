@@ -44,6 +44,7 @@
    .globl ${ABI_UNDERSCORE}legion_common_rg
    .globl ${ABI_UNDERSCORE}legion_compile_rg
   	.globl ${ABI_UNDERSCORE}legion_config_rg
+  	.globl ${ABI_UNDERSCORE}legion_data_rg
    .globl ${ABI_UNDERSCORE}legion_distri_rg
    .globl ${ABI_UNDERSCORE}legion_geom_rg
    .globl ${ABI_UNDERSCORE}legion_hacks_rg
@@ -81,6 +82,9 @@ ${ABI_UNDERSCORE}legion_compile_rg:
    .byte 0
 ${ABI_UNDERSCORE}legion_config_rg:
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/legion/legion_config.rg"
+   .byte 0
+${ABI_UNDERSCORE}legion_data_rg:
+	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/legion/legion_data.rg"
    .byte 0
 ${ABI_UNDERSCORE}legion_distri_rg:
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/legion/legion_distri.rg"

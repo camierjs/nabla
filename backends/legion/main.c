@@ -48,19 +48,129 @@
 // ****************************************************************************
 NABLA_STATUS legionHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, "\n\
-// ******************************************************************************\n\
-// * Main\n\
-// ******************************************************************************\n\
-int main(int argc, char *argv[]){");
+-- ******************************************************************************\n\
+-- * Main\n\
+-- ******************************************************************************\n\
+task main(rz_all : region(zone), rz_all_p : partition(disjoint, rz_all),\n\
+          rp_all : region(point),\n\
+          rp_all_private : region(point),\n\
+          rp_all_private_p : partition(disjoint, rp_all_private),\n\
+          rp_all_ghost : region(point),\n\
+          rp_all_ghost_p : partition(aliased, rp_all_ghost),\n\
+          rp_all_shared_p : partition(disjoint, rp_all_ghost),\n\
+          rs_all : region(side(wild, wild, wild, wild)),\n\
+          rs_all_p : partition(disjoint, rs_all),\n\
+          conf : config)\n\
+where\n\
+  reads writes(rz_all, rp_all_private, rp_all_ghost, rs_all),\n\
+  rp_all_private * rp_all_ghost\n\
+do\n\
+\tc.printf(\"\\t[32;1m[main][m\\n\");");
   return NABLA_OK;
 }
 
+
+// ***************************************************************************** 
+// * Dump des options
+// *****************************************************************************/
+static void legionHookMainOptions(nablaMain *nabla){
+  fprintf(nabla->entity->src,"\n\t-- legionHookMainOptions");
+  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
+    fprintf(nabla->entity->src,"\n\tvar %s = %s",opt->name,opt->dflt);
+}
 
 // ****************************************************************************
 // * legionHookMainPreInit
 // ****************************************************************************
 NABLA_STATUS legionHookMainPreInit(nablaMain *nabla){
-  fprintf(nabla->entity->src,"\n// legionHookMainPreInit");
+  legionHookMainOptions(nabla);
+  fprintf(nabla->entity->src,"\n\t-- legionHookMainPreInit");
+  return NABLA_OK;
+}
+
+
+// ****************************************************************************
+// * legionHookMainHLT
+// ****************************************************************************
+NABLA_STATUS legionHookMainHLT(nablaMain *n){
+  nablaVariable *var;
+  nablaJob *entry_points;
+  int i,numParams,number_of_entry_points;
+  bool is_into_compute_loop=false;
+  n->HLT_depth=0;
+  
+  dbg("\n[legionHookMainHLT]");
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
+  
+  // Et on rescan afin de dumper, on rajoute les +2 ComputeLoop[End|Begin]
+  for(i=0;i<number_of_entry_points+2;++i){
+    if (strncmp(entry_points[i].name,"hltDive",7)==0) continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
+    
+    dbg("%s\n\t[hookMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+        entry_points[i].name,
+        entry_points[i].whens[0],
+        entry_points[i].where);
+    
+    // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
+    if (entry_points[i].whens[0]>=0 && !is_into_compute_loop){
+      is_into_compute_loop=true;
+      nprintf(n, NULL, "\n\twhile continue_simulation(cycle, cstop, time, tstop) do");
+    }
+    
+    if (entry_points[i].when_depth==(n->HLT_depth+1))
+      n->HLT_depth=entry_points[i].when_depth;
+    
+    if (entry_points[i].when_depth==(n->HLT_depth-1))
+      n->HLT_depth=entry_points[i].when_depth;
+        
+    // \n ou if d'un IF after '@'
+    if (entry_points[i].ifAfterAt!=NULL){
+      dbg("\n\t[hookMain] dumpIfAfterAt!");
+      nprintf(n, NULL, "\n\tif");
+      nMiddleDumpIfAfterAt(entry_points[i].ifAfterAt, n,false);
+      nprintf(n, NULL, "then");
+    }else nprintf(n, NULL, "\n");
+        
+    // Dump de la tabulation et du nom du point d'entrée
+    if (!entry_points[i].is_a_function){
+      nprintf(n, NULL, "%sfor i=0,conf.npieces do\n%s\t%s(",
+              is_into_compute_loop?"\t\t":"\t",
+              is_into_compute_loop?"\t\t":"\t",
+              entry_points[i].name);
+      if (entry_points[i].item[0]=='c') nprintf(n, NULL, "rz_all_p[i])\n%send",is_into_compute_loop?"\t\t":"\t");
+      if (entry_points[i].item[0]=='n'|| entry_points[i].item[0]=='f')
+        nprintf(n, NULL, "rz_all_p[i],\
+ rp_all_private_p[i],\
+ rp_all_ghost_p[i],\
+ rs_all_p[i])\n%send",is_into_compute_loop?"\t\t":"\t");
+    }else{
+      nprintf(n, NULL, "%s-- Function: %s",
+              is_into_compute_loop?"\t\t":"\t",
+              entry_points[i].name);
+    }
+      
+    // On s'autorise un endroit pour insérer des arguments
+    //nMiddleArgsDumpFromDFS(n,&entry_points[i]);
+    
+    // Si on doit appeler des jobs depuis cette fonction @ée
+    if (entry_points[i].called_variables != NULL){
+      if (!entry_points[i].reduction)
+         nMiddleArgsAddExtra(n,&numParams);
+      //else nprintf(n, NULL, "NABLA_NB_CELLS_WARP,");
+      // Et on rajoute les called_variables en paramètre d'appel
+      dbg("\n\t[hookMain] Et on rajoute les called_variables en paramètre d'appel");
+      for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
+        nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
+      }
+    }//else nprintf(n,NULL,"/*NULL_called_variables*/");
+    
+    if (entry_points[i].ifAfterAt!=NULL)
+      nprintf(n, NULL, " end");
+  }
+  free(entry_points);
   return NABLA_OK;
 }
 
@@ -69,7 +179,8 @@ NABLA_STATUS legionHookMainPreInit(nablaMain *nabla){
 // * legionHookMainPostfix
 // ****************************************************************************
 NABLA_STATUS legionHookMainPostfix(nablaMain *nabla){
-  fprintf(nabla->entity->src, "\n// legionHookMainPostfix");
-  fprintf(nabla->entity->src, "\n}");
+  fprintf(nabla->entity->src, "\n\t-- legionHookMainPostfix");
+  fprintf(nabla->entity->src, "\n\tend -- while");
+  fprintf(nabla->entity->src, "\nend -- main");
   return NABLA_OK;
 }

@@ -69,8 +69,8 @@ void nMiddleFunctionDumpHeader(FILE *file, astNode *n){
 static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
   // On utilise hook->grammar->skipBody
-  const bool dump = (nabla->hook->grammar->skipBody?
-                     nabla->hook->grammar->skipBody(nabla):true);
+  const bool dump = (nabla->hook->grammar->dump?
+                     nabla->hook->grammar->dump(nabla):true);
 
   // On regarde si on est 'à gauche' d'un 'assignment_expression',
   // dans quel cas il faut rajouter ou pas de '()' aux variables globales
@@ -249,8 +249,8 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
 
     // dbg("\n\t[nablaFunctionParse] Trying turnTokenToVariable hook!");
     if (dump && nabla->hook->token->variable(n, nabla, fct)!=NULL) break;
-    if (n->tokenid == '{'){ nprintf(nabla, NULL,"{\n"); break; }
-    if (n->tokenid == '}'){ nprintf(nabla, NULL,"}\n"); break; }
+    if (dump && n->tokenid == '{'){ nprintf(nabla, NULL,"{\n"); break; }
+    if (dump && n->tokenid == '}'){ nprintf(nabla, NULL,"}\n"); break; }
     if (n->tokenid == ';'){ dprintf(dump,nabla, NULL,";\n"); break; }
     
     if (n->tokenid==MIN_ASSIGN){
@@ -335,12 +335,16 @@ void nMiddleFunctionFill(nablaMain *nabla,
 %s ********************************************************\n\
 %s * %s fct\n\
 %s ********************************************************\n\
-%s %s %s%s%s(", nabla->hook->token->comment,
+%s%s %s %s%s%s(", nabla->hook->token->comment,
           nabla->hook->token->comment,
           fct->name,
           nabla->hook->token->comment,
           (nabla->hook->call->entryPointPrefix)?
           nabla->hook->call->entryPointPrefix(nabla,fct):"",
+          // Si on ne dump pas les fonctions, on rajoute le token 'comment'
+          nabla->hook->grammar->dump?
+          !nabla->hook->grammar->dump(nabla)?
+          nabla->hook->token->comment:"":"",
           fct->return_type,
           namespace?namespace:"",
           namespace?(isAnArcaneModule(nabla))?"Module::":
@@ -377,7 +381,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
   //dbg("\n\t[nablaFctFill] n rule is finally '%s'", n->rule);
   // On saute le premier '{'
   n=n->children->next;
-  nprintf(nabla, NULL, "){\n\t");
+  nprintf(nabla, NULL, "){");
 
   // Et on dump les tokens dans ce fct
   dbg("\n\t[nablaFctFill] Now dumping function tokens");

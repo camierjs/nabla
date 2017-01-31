@@ -146,10 +146,3 @@ fspace side(rz : region(zone),
   cqe1 :   vec2,         -- ??????????
   cqe2 :   vec2,         -- ??????????
 }
-
-c.printf("[33m[pennant_common] span[m\n");
-fspace span {
-  start : int64,
-  stop  : int64,
-  internal : bool,
-}

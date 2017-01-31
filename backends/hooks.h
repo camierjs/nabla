@@ -93,7 +93,7 @@ typedef struct hookGrammarStruct{
   char* (*dfsArgType)(nablaMain*,nablaVariable*); // args
   char* (*eoe)(nablaMain*); // jobs
   bool (*hit)(nablaMain*,bool); // jobs
-  bool (*skipBody)(nablaMain*);
+  bool (*dump)(nablaMain*);
 } hookGrammar;
 
 

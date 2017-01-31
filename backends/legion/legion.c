@@ -111,7 +111,7 @@ const static hookGrammar gram={
   NULL, // dfsArgType
   NULL, // legionHookGramEoe, // eoe,
   NULL, // hit
-  legionHookGramSkip // skipBody
+  legionHookGramDump // dump
 };
 
 const static hookCall call={
@@ -170,7 +170,7 @@ const static hookMain mains={
   legionHookMainPreInit,
   NULL,//xHookMainVarInitKernel, // ne fait rien
   NULL,//xHookMainVarInitCall,
-  NULL,//xHookMainHLT,
+  legionHookMainHLT,//xHookMainHLT,
   NULL,//xHookMainPostInit, // ne fait rien
   legionHookMainPostfix
 };  
@@ -213,6 +213,7 @@ extern char legion_args_rg[];
 extern char legion_common_rg[];
 extern char legion_compile_rg[];
 extern char legion_config_rg[];
+extern char legion_data_rg[];
 extern char legion_distri_rg[];
 extern char legion_geom_rg[];
 extern char legion_hacks_rg[];
@@ -246,6 +247,7 @@ static void nLegionDump(nablaMain *nabla){
   nLegionDumpGeneric(nabla,"legion_common.rg",legion_common_rg);
   nLegionDumpGeneric(nabla,"legion_compile.rg",legion_compile_rg);
   nLegionDumpGeneric(nabla,"legion_config.rg",legion_config_rg);
+  nLegionDumpGeneric(nabla,"legion_data.rg",legion_data_rg);
   nLegionDumpGeneric(nabla,"legion_distri.rg",legion_distri_rg);
   nLegionDumpGeneric(nabla,"legion_geom.rg",legion_geom_rg);
   nLegionDumpGeneric(nabla,"legion_hacks.rg",legion_hacks_rg);

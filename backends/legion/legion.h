@@ -61,6 +61,7 @@ void legionHookSourceInclude(nablaMain*);
 // MAIN
 NABLA_STATUS legionHookMainPrefix(nablaMain*);
 NABLA_STATUS legionHookMainPreInit(nablaMain*);
+NABLA_STATUS legionHookMainHLT(nablaMain*);
 NABLA_STATUS legionHookMainPostfix(nablaMain*);
 
 // TOKENS
@@ -76,7 +77,7 @@ void legionHookVarsPrefix(nablaMain*);
 void legionHookVarsFree(nablaMain*);
 
 // Grammar
-bool legionHookGramSkip(nablaMain*);
+bool legionHookGramDump(nablaMain*);
 char* legionHookGramEoe(nablaMain*); 
 bool legionHookGramDfsExtra(nablaMain*,nablaJob*,bool);
 
