@@ -31,7 +31,8 @@ cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).rg
-run1:$(TGT).rg $(NABLA) 
+run1:$(TGT).rg $(NABLA)
+	make -f ./makefile
 run4:$(TGT).rg $(NABLA) 
 
 #############

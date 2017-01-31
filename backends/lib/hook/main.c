@@ -251,6 +251,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "bool")==0) nprintf(nabla,NULL,"false;");
     }
     nprintf(nabla,NULL,"\n\t}");
   }
@@ -274,6 +275,7 @@ NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
       if (strcmp(var->type, "real3")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "real2")==0) nprintf(nabla,NULL,"real3();");
       if (strcmp(var->type, "int")==0) nprintf(nabla,NULL,"0;");
+      if (strcmp(var->type, "bool")==0) nprintf(nabla,NULL,"false;");
     }
     nprintf(nabla,NULL,"\n\t}");
   }

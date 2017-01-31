@@ -46,6 +46,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF    //
 // THE POSSIBILITY OF SUCH DAMAGE.                                           //
 ///////////////////////////////////////////////////////////////////////////////
+// End cycle 48, time = 1.00000000000000e+00, dt = 7.22554862846492e-03
 with ℝ²;
 
 // ****************************************************************************
@@ -83,7 +84,7 @@ options{
   ℝ rinitsub    = 1.0;    // initial density in subregion
   ℝ einitsub    = 40.222; // initial energy in subregion
   ℝ uinitradial = 0.0;    // initial velocity in radial direction
-  ℝ γ           = 1.4;//5./3.;  // coeff. for ideal gas equation
+  ℝ γ           = 1.6666666666666667;//5./3.;  // coeff. for ideal gas equation
   ℝ ssmin       = 0.1;    // minimum sound speed for gas
   ℝ alpha       = 0.5;    // alpha coefficient for TTS model
   ℝ q1          = 0.1;    // linear coefficients for Q model
@@ -139,7 +140,7 @@ cells{
   ℝ² cqe1[nodes]; // tmp
   ℝ cw[nodes];    // tmp
   ℝ crmu[nodes];  // tmp
-  // Utilisé par legion framework
+  // Utilisé par legion
   ℕ znump;
 };
 
@@ -151,8 +152,8 @@ nodes{
   ℝ² pu,pu0;     // point velocity
   ℝ² pap,pf;     // point acceleration, force
   ℝ pmaswt;      // point mass, weighted by 1/r
-  ℾ has_bcx;     // Utilisé par legion framework
-  ℾ has_bcy;     // Utilisé par legion framework
+  ℾ has_bcx;     // Utilisé par legion
+  ℾ has_bcy;     // Utilisé par legion
 };
 
 // ****************************************************************************
@@ -211,12 +212,11 @@ iniGlobals @ -20.0 { time=0; cycle=0; }
 ∀ cells iniZm @ -14.7 { zm=zr*zvol; }
 ∀ cells iniZetot @ -14.6 { zetot=ze*zm; }
 
-/*
-  // Legion not vs != for the if statement
-  ∀ nodes niPuRadial @ -14.5 if (uinitradial != 0.0) {
-  const ℝ pmag = length(px);
-  pu=(pmag>ε)?uinitradial*px/pmag:0;
-  }*/
+// Legion not vs != for the if statement
+//∀ nodes niPuRadial @ -14.5 if (uinitradial != 0.0) {
+//  const ℝ pmag = length(px);
+//  pu=(pmag>ε)?uinitradial*px/pmag:0;
+//}
 ∀ nodes iniPuStd @ -14.5 if (uinitradial==0.0) { pu=0.0; }
 
 iniRstDtHydro @ -14.4 { dtrec = +∞; }
@@ -453,8 +453,8 @@ calcGlobalDt @ 2.0 {
 resetDtHydro @ 12.0 { dtrec=dtmax; dvovmax=ι;}
 
 ∀ cells calcDtCourant @ 19.0 {
-  const ℝ cdu = fmax(zdu, fmax(zss,ι));
-  const ℝ zdthyd = zdl * cfl / cdu;
+  const ℝ du = fmax(zdu, fmax(zss,ι));
+  const ℝ zdthyd = zdl * cfl / du;
   const ℝ dtnew = (zdthyd < dtmax)?zdthyd:dtmax;
   if (dtnew < dtrec) dtrec = dtnew;
 }
