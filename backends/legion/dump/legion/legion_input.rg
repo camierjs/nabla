@@ -15,16 +15,18 @@ import "regent"
 local c = regentlib.c
 local cmath = terralib.includec("math.h")
 
+-- HW values, pennant: 24/17/34
+-- HW pnnnt: 24/18/39
 terra read_input(runtime : c.legion_runtime_t,
                  ctx : c.legion_context_t,
                  rz_physical : c.legion_physical_region_t[24],
                  rz_fields : c.legion_field_id_t[24],
-                 rp_physical : c.legion_physical_region_t[17],
-                 rp_fields : c.legion_field_id_t[17],
-                 rs_physical : c.legion_physical_region_t[34],
-                 rs_fields : c.legion_field_id_t[34],
+                 rp_physical : c.legion_physical_region_t[18],
+                 rp_fields : c.legion_field_id_t[18],
+                 rs_physical : c.legion_physical_region_t[39],
+                 rs_fields : c.legion_field_id_t[39],
                  conf : config)
-  c.printf("[33m[read_input][m\n");
+  c.printf("\n[33m[read_input][m");
 
   var color_words : c.size_t = cmath.ceil(conf.npieces/64.0)
 
@@ -109,13 +111,13 @@ terra read_input(runtime : c.legion_runtime_t,
 
   do
     var rp_px_x = c.legion_physical_region_get_field_accessor_array(
-      rp_physical[4], rp_fields[4])
+      rp_physical[0], rp_fields[0])
     var rp_px_y = c.legion_physical_region_get_field_accessor_array(
-      rp_physical[5], rp_fields[5])
+      rp_physical[1], rp_fields[1])
     var rp_has_bcx = c.legion_physical_region_get_field_accessor_array(
-      rp_physical[15], rp_fields[15])
+      rp_physical[16], rp_fields[16]) -- 15
     var rp_has_bcy = c.legion_physical_region_get_field_accessor_array(
-      rp_physical[16], rp_fields[16])
+      rp_physical[17], rp_fields[17]) -- 16
 
     var eps : double = 1e-12
     for i = 0, conf.np do
@@ -266,8 +268,9 @@ terra read_input(runtime : c.legion_runtime_t,
 end
      
 
-c.printf("[33m[read_input:compile()][m\n");
+c.printf("\n[33m[read_input:compile()][m");
 read_input:compile()
+-- c.printf("[33;1m[read_input:sequential()] SKIPPING read_input!![m\n");
 
 -- ##########################
 -- ## read_input_sequential
@@ -277,10 +280,11 @@ task read_input_sequential(rz_all : region(zone),
                            rs_all : region(side(wild, wild, wild, wild)),
                            conf : config)
 where reads writes(rz_all, rp_all, rs_all) do
-  return read_input(
-    __runtime(), __context(),
-    __physical(rz_all), __fields(rz_all),
-    __physical(rp_all), __fields(rp_all),
-    __physical(rs_all), __fields(rs_all),
-    conf)
+    -- c.printf("[33;1m[NO read_input][m\n");
+    return read_input(
+      __runtime(), __context(),
+      __physical(rz_all), __fields(rz_all),
+      __physical(rp_all), __fields(rp_all),
+      __physical(rs_all), __fields(rs_all),
+      conf)
 end

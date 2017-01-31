@@ -34,7 +34,7 @@ config_fields_meshgen = terralib.newlist({
   {field = "leny", type = double, default_value = 0.0},
 })
 
-c.printf("[33m[pennant_common] Mesh variables[m\n");
+c.printf("[33m[legion_data] Mesh variables[m\n");
 config_fields_mesh = terralib.newlist({
   -- Mesh variables.
   {field = "nz", type = int64, default_value = 0},
@@ -43,12 +43,12 @@ config_fields_mesh = terralib.newlist({
   {field = "maxznump", type = int64, default_value = 0},
 })
 
-c.printf("[33m[pennant_common] Command-line parameters[m\n");
+c.printf("[33m[legion_data] Command-line parameters[m\n");
 config_fields_cmd = terralib.newlist({
   -- Command-line parameters.
   {field = "npieces", type = int64, default_value = 1},
-  {field = "par_init", type = bool, default_value = true},
-  {field = "seq_init", type = bool, default_value = false},
+  {field = "par_init", type = bool, default_value = false},
+  {field = "seq_init", type = bool, default_value = true},
   {field = "print_ts", type = bool, default_value = false},
   {field = "enable", type = bool, default_value = true},
   {field = "warmup", type = bool, default_value = false},
@@ -61,14 +61,14 @@ config_fields_cmd = terralib.newlist({
   {field = "nspans_points", type = int64, default_value = 0},
                                     })
 
-c.printf("[33m[pennant_common] config_fields_all[m\n");
+c.printf("[33m[legion_data] config_fields_all[m\n");
 config_fields_all = terralib.newlist()
---config_fields_all:insertall(config_fields_input)
+-- done in pennant_data: config_fields_all:insertall(config_fields_input)
 config_fields_all:insertall(config_fields_meshgen)
 config_fields_all:insertall(config_fields_mesh)
 config_fields_all:insertall(config_fields_cmd)
 
-c.printf("[33m[pennant_common] span[m\n");
+c.printf("[33m[legion_data] span[m\n");
 fspace span {
   start : int64,
   stop  : int64,

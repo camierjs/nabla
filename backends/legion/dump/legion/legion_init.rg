@@ -37,8 +37,8 @@ task test()
 
   if conf.seq_init then
     -- Hack: This had better run on the same node...
-    colorings = unwrap(read_input_sequential(
-      rz_all, rp_all, rs_all, conf))
+    -- c.printf("\n[31;1mNO unwrap(read_input_sequential[m\n")
+    colorings = unwrap(read_input_sequential(rz_all, rp_all, rs_all, conf))
   end
 
   if conf.par_init then
@@ -91,7 +91,7 @@ task test()
     end
   end
 
-  c.printf("Initializing (t=%%.1f)...\n", c.legion_get_current_time_in_micros()/1.e6)
+  c.printf("[31mInitializing (t=%%.1f)...[m\n", c.legion_get_current_time_in_micros()/1.e6)
   initialize(rz_all, rz_all_p,
              rp_all,
              rp_all_private, rp_all_private_p,
@@ -107,7 +107,7 @@ task test()
     wait_for(_)
   end
 
-  c.printf("Starting simulation (t=%%.1f)...\n", c.legion_get_current_time_in_micros()/1.e6)
+  c.printf("[31mStarting simulation (t=%%.1f)...[m\n", c.legion_get_current_time_in_micros()/1.e6)
   var start_time = c.legion_get_current_time_in_micros()/1.e6
   simulate(rz_all, rz_all_p,
            rp_all,
@@ -124,25 +124,25 @@ task test()
     wait_for(_)
   end
   var stop_time = c.legion_get_current_time_in_micros()/1.e6
-  c.printf("Elapsed time = %%.6e\n", stop_time - start_time)
+  c.printf("[31mElapsed time = %%.6e[m\n", stop_time - start_time)
 
   if conf.seq_init then
-    validate_output_sequential(
-      rz_all, rp_all, rs_all, conf)
+    c.printf("[31mWarning: Skipping sequential validation[m\n")
+    --validate_output_sequential(rz_all, rp_all, rs_all, conf)
   else
-    c.printf("Warning: Skipping sequential validation\n")
+    c.printf("[31mWarning: Skipping sequential validation[m\n")
   end
 
   -- write_output(conf, rz_all, rp_all, rs_all)
 end
 
 task toplevel()
-  c.printf("\t[32m[toplevel][m\n");
+  c.printf("\n[32m[toplevel][m");
   test()
 end
     
-c.printf("\t[32m[cpennant.register_mappers][m\n");
+c.printf("\n[32m[cpennant.register_mappers][m");
 cpennant.register_mappers()
         
-c.printf("\t[32m[regentlib.start][m\n");
+c.printf("\n[32m[regentlib.start][m");
 regentlib.start(toplevel)

@@ -65,7 +65,7 @@ options{
   ℝ option_stoptime = 1.0;    // ! utilisé en dur dans le backend lambda !
   // Pennant options
   ℾ trace       = false;
-  ℕ cstop       = 100;    // simulation stop cycle
+  ℕ cstop       = 64;     // simulation stop cycle
   ℝ tstop       = 1.0;    // simulation stop time
   ℝ dtmax       = 1.e99;  // maximum timestep size
   ℝ dtinit      = 0.0025; // initial timestep size
@@ -83,7 +83,7 @@ options{
   ℝ rinitsub    = 1.0;    // initial density in subregion
   ℝ einitsub    = 40.222; // initial energy in subregion
   ℝ uinitradial = 0.0;    // initial velocity in radial direction
-  ℝ γ           = 5./3.;  // coeff. for ideal gas equation
+  ℝ γ           = 1.4;//5./3.;  // coeff. for ideal gas equation
   ℝ ssmin       = 0.1;    // minimum sound speed for gas
   ℝ alpha       = 0.5;    // alpha coefficient for TTS model
   ℝ q1          = 0.1;    // linear coefficients for Q model
@@ -130,15 +130,17 @@ cells{
   // Corners
   ℝ² cftot[nodes]; // force, total from all sources
   ℝ cmaswt[nodes]; // contribution to pmaswt
-  ℝ c0area[nodes]; // tmp
-  ℝ c0evol[nodes]; // tmp
-  ℝ c0du[nodes];   // tmp
-  ℝ c0div[nodes];  // tmp
-  ℝ c0cos[nodes];  // tmp
-  ℝ² c0qe0[nodes]; // tmp
-  ℝ² c0qe1[nodes]; // tmp
-  ℝ c0w[nodes];    // tmp
-  ℝ c0rmu[nodes];  // tmp
+  ℝ carea[nodes]; // tmp
+  ℝ cevol[nodes]; // tmp
+  ℝ cdu[nodes];   // tmp
+  ℝ cdiv[nodes];  // tmp
+  ℝ ccos[nodes];  // tmp
+  ℝ² cqe0[nodes]; // tmp
+  ℝ² cqe1[nodes]; // tmp
+  ℝ cw[nodes];    // tmp
+  ℝ crmu[nodes];  // tmp
+  // Utilisé par legion framework
+  ℕ znump;
 };
 
 // ****************************************************************************
@@ -149,6 +151,8 @@ nodes{
   ℝ² pu,pu0;     // point velocity
   ℝ² pap,pf;     // point acceleration, force
   ℝ pmaswt;      // point mass, weighted by 1/r
+  ℾ has_bcx;     // Utilisé par legion framework
+  ℾ has_bcy;     // Utilisé par legion framework
 };
 
 // ****************************************************************************
@@ -207,10 +211,12 @@ iniGlobals @ -20.0 { time=0; cycle=0; }
 ∀ cells iniZm @ -14.7 { zm=zr*zvol; }
 ∀ cells iniZetot @ -14.6 { zetot=ze*zm; }
 
-∀ nodes niPuRadial @ -14.5 if (uinitradial!=0.0) {
+/*
+  // Legion not vs != for the if statement
+  ∀ nodes niPuRadial @ -14.5 if (uinitradial != 0.0) {
   const ℝ pmag = length(px);
   pu=(pmag>ε)?uinitradial*px/pmag:0;
-}
+  }*/
 ∀ nodes iniPuStd @ -14.5 if (uinitradial==0.0) { pu=0.0; }
 
 iniRstDtHydro @ -14.4 { dtrec = +∞; }
@@ -316,14 +322,14 @@ calcGlobalDt @ 2.0 {
     const ℝ³ up3 = ½ * (pu[#-1] + pu);
     const ℝ³ xp3 = exp[#-1];
     const ℝ cvolume = ½ * cross2D(xp2-xp0, xp3-xp1);
-    c0area = cvolume;
+    carea = cvolume;
     const ℝ³ v1 = xp3-xp0;
     const ℝ³ v2 = xp1-xp0;
     const ℝ de1 = elen[#-1];
     const ℝ de2 = elen[#];
     ℝ minelen = fmin(de1, de2);
-    c0cos = ((minelen<ε)?0.0:4.0*dot2D(v1,v2)/(de1*de2));
-    c0div = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
+    ccos = ((minelen<ε)?0.0:4.0*dot2D(v1,v2)/(de1*de2));
+    cdiv = (cross2D(up2-up0, xp3-xp1)-cross2D(up3-up1, xp2-xp0))/(2.0*cvolume);
     const ℝ³ dxx1 = ½ * (xp1+xp2-xp0-xp3);
     const ℝ³ dxx2 = ½ * (xp2+xp3-xp0-xp1);
     const ℝ dx1 = length(dxx1);
@@ -338,40 +344,40 @@ calcGlobalDt @ 2.0 {
     const ℝ dv1 = length2(up1+up2-up0-up3);
     const ℝ dv2 = length2(up2+up3-up0-up1);
     const ℝ du = sqrt(fmax(dv1, dv2));
-    c0evol = (c0div < 0.0 ? evol : 0.);
-    c0du   = (c0div < 0.0 ? du   : 0.);
+    cevol = (cdiv < 0.0 ? evol : 0.);
+    cdu   = (cdiv < 0.0 ? du   : 0.);
   }
 }
 
-∀ cells qcsC0rmu @ 6.4 { // Kurapatenko viscous scalar
+∀ cells qcsCrmu @ 6.4 { // Kurapatenko viscous scalar
   const ℝ γp1 = γ + 1.0;
   ∀ nodes {
-    const ℝ ztmp2 = ¼*q2*γp1*c0du;
+    const ℝ ztmp2 = ¼*q2*γp1*cdu;
     const ℝ ztmp1 = q1 * zss;
     const ℝ zkur = ztmp2 + √(ztmp2² + ztmp1²);
-    const ℝ rmu = zkur * zrp * c0evol;
-    c0rmu = (c0div>0.0)?0.0:rmu;
+    const ℝ rmu = zkur * zrp * cevol;
+    crmu = (cdiv>0.0)?0.0:rmu;
   }
 }
 
 ∀ cells qcsC0qe @ 6.5 {
   ∀ nodes {
-    c0qe0 = c0rmu * (pu-pu[#-1])/elen[#-1];
-    c0qe1 = c0rmu * (pu[#+1]-pu)/elen;
+    cqe0 = crmu * (pu-pu[#-1])/elen[#-1];
+    cqe1 = crmu * (pu[#+1]-pu)/elen;
   }
 }
 
 ∀ cells qcsExtraVars @ 6.6 {
   ∀ nodes {
-    const ℝ csin2 = 1.0-c0cos²;
-    c0w   = ((csin2 < 1.e-4) ? 0.0:c0area/csin2);
-    c0cos = ((csin2 < 1.e-4) ? 0.0:c0cos);
+    const ℝ csin2 = 1.0-ccos²;
+    cw   = ((csin2 < 1.e-4) ? 0.0:carea/csin2);
+    ccos = ((csin2 < 1.e-4) ? 0.0:ccos);
   }
 }
 
 ∀ cells qcsForcesCorners @ 6.7 {
-  ∀ faces sfq = (c0w*(c0qe1+c0cos*c0qe0)+
-                 c0w[#+1]*(c0qe0[#+1]+c0cos[#+1]*c0qe1[#+1]))/elen;
+  ∀ faces sfq = (cw*(cqe1+ccos*cqe0)+
+                 cw[#+1]*(cqe0[#+1]+ccos[#+1]*cqe1[#+1]))/elen;
 }
 
 ∀ cells qcsSetVelDiff @ 6.8 {

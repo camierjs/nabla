@@ -15,7 +15,7 @@ local c = regentlib.c
 
 -- Compile and link pennant.cc
 do
-  c.printf("[33m[pennant_common] Compile and link pennant.cc[m\n");
+  c.printf("[33m[legion_compile] Compile and link pennant.cc[m\n");
   local root_dir = arg[0]:match(".*/") or "./"
   local runtime_dir = "/tmp/runtime/"
   local legion_dir = runtime_dir .. "legion/"
@@ -42,16 +42,16 @@ do
   local cmd = (cxx .. " " .. cxx_flags .. " -I " .. runtime_dir .. " " ..
                 " -I " .. mapper_dir .. " " .. " -I " .. legion_dir .. " " ..
                 " -I " .. realm_dir .. " " ..  pennant_cc .. " -o " .. pennant_so)
-  c.printf("[33m[pennant_common] cmd=%%s[m\n",cmd);
+  c.printf("[33m[legion_compile] cmd=%%s[m\n",cmd);
   if os.execute(cmd) ~= 0 then
     print("Error: failed to compile " .. pennant_cc)
     assert(false)
   end
-  c.printf("[33m[pennant_common] done, linking[m\n");
+  c.printf("[33m[legion_compile] done, linking[m\n");
   terralib.linklibrary(pennant_so)
-  c.printf("[33m[pennant_common] done, includec[m\n");
+  c.printf("[33m[legion_compile] done, include[m\n");
   cpennant = terralib.includec("legion.h", {"-I", root_dir, "-I", runtime_dir,
                                              "-I", mapper_dir, "-I", legion_dir,
                                              "-I", realm_dir})
-  c.printf("[33m[pennant_common] done\n[m");
+  c.printf("[33m[legion_compile] done\n[m");
 end

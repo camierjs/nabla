@@ -55,10 +55,8 @@ char* legionHookCallPrefix(nablaMain *nabla,const char *type){
 // *
 // ****************************************************************************
 void legionHookCallAddExtraParameters(nablaMain *nabla, nablaJob *job, int *numParams){
-  if (job->item[0]=='c')
-    nprintf(nabla,NULL,"rz : region(zone)");
-  
-  if (job->item[0]=='n' || job->item[0]=='f')
+  //if (job->item[0]=='c') nprintf(nabla,NULL,"rz : region(zone)");
+  if (job->item[0]=='c' || job->item[0]=='n' || job->item[0]=='f')
   nprintf(nabla,NULL,"rz : region(zone),\
 \n\t\t\t\t\trpp : region(point),\
 \n\t\t\t\t\trpg : region(point),\
@@ -75,7 +73,8 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
   int c[2]={0,0};
   int n[2]={0,0};
   int f[2]={0,0};
-
+  int s[2]={0,0};
+  
   if (job->used_options!=NULL){
     for(nablaOption *opt=job->used_options;opt!=NULL;opt=opt->next)
       nprintf(nabla,NULL,",\n\t\t\t\t%s : %s",opt->name,
@@ -88,14 +87,19 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
   nprintf(nabla,NULL,"\nwhere");
   
   for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
-    if (var->in) r+=1; //nprintf(nabla,NULL,"\n-- r+=1 with %s\n", var->name);}
-    if (var->out) w+=1; //nprintf(nabla,NULL,"\n-- w+=1 with %s\n", var->name);}
-    if (var->in  && var->item[0]=='c') c[0]+=1; //nprintf(nabla,NULL,"\n-- c[0]+=1 with %s\n", var->name);}
-    if (var->out && var->item[0]=='c') c[1]+=1; //nprintf(nabla,NULL,"\n-- c[1]+=1 with %s\n", var->name);}
-    if (var->in  && var->item[0]=='n') n[0]+=1; //nprintf(nabla,NULL,"\n-- n[0]+=1 with %s\n", var->name);}
-    if (var->out && var->item[0]=='n') n[1]+=1; //nprintf(nabla,NULL,"\n-- n[1]+=1 with %s\n", var->name);}
-    if (var->in  && var->item[0]=='f') f[0]+=1; //nprintf(nabla,NULL,"\n-- f[0]+=1 with %s\n", var->name);}
-    if (var->out && var->item[0]=='f') f[1]+=1; //nprintf(nabla,NULL,"\n-- f[1]+=1 with %s\n", var->name);}
+    if (var->in  && var->item[0]!='g') { r+=1; nprintf(nabla,NULL,"\n-- r+=1 with %s",var->name);}
+    if (var->out && var->item[0]!='g') { w+=1; nprintf(nabla,NULL,"\n-- w+=1 with %s",var->name);}
+    if (var->in  && var->item[0]=='c' && var->dim==0){ c[0]+=1; nprintf(nabla,NULL,", c[0]+=1");}
+    if (var->out && var->item[0]=='c' && var->dim==0){ c[1]+=1; nprintf(nabla,NULL,", c[1]+=1");}
+    // Les variables de dim>0 sont portées par les 'sides'
+    if (var->in  && var->item[0]=='c' && var->dim==1 && var->vitem=='n'){ s[0]+=1; nprintf(nabla,NULL,", s[0]+=1");}
+    if (var->out && var->item[0]=='c' && var->dim==1 && var->vitem=='n'){ s[1]+=1; nprintf(nabla,NULL,", s[1]+=1");}
+    if (var->in  && var->item[0]=='c' && var->dim==1 && var->vitem=='f'){ s[0]+=1; nprintf(nabla,NULL,", s[0]+=1");}
+    if (var->out && var->item[0]=='c' && var->dim==1 && var->vitem=='f'){ s[1]+=1; nprintf(nabla,NULL,", s[1]+=1");}
+    if (var->in  && var->item[0]=='n'){ n[0]+=1; nprintf(nabla,NULL,", n[0]+=1");}
+    if (var->out && var->item[0]=='n'){ n[1]+=1; nprintf(nabla,NULL,", n[1]+=1");}
+    if (var->in  && var->item[0]=='f'){ f[0]+=1; nprintf(nabla,NULL,", f[0]+=1");}
+    if (var->out && var->item[0]=='f'){ f[1]+=1; nprintf(nabla,NULL,", f[1]+=1");}
   }
 
   // S'il y a des variables en lecture, on les annonce
@@ -108,6 +112,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,"rz.{");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->in) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='c') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -122,6 +127,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,"%srpp.{",c[0]>0?",":"");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->in) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='n') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -135,6 +141,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,",rpg.{");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->in) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='n') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -144,21 +151,29 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
     }
     
     // Troisième passe aux faces
-    if (f[0]>0){
+    if ((f[0]+s[0])>0){
       bool virgule=true;
-      nprintf(nabla,NULL,",rs.{");
+      nprintf(nabla,NULL,"%srs.{",c[0]+n[0]>0?",":"");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->in) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='f') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
         virgule=false;
       }
+      // On revient pour les variables tableaux aux mailles
+      for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+        if (!var->in) continue;
+        if (var->dim==0) continue;
+        if (var->koffset!=0) continue;
+        if (var->item[0]!='c') continue;
+        nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
+        virgule=false;
+      }
       nprintf(nabla,NULL,"}");
     }
-    
     nprintf(nabla,NULL,")%s",w>0?",":"");
-
   }
   
   // S'il y a des variables en écriture, on les annonce
@@ -170,6 +185,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,"rz.{");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->out) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='c') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -184,6 +200,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,"%srpp.{",c[1]>0?",":"");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->out) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='n') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -197,6 +214,7 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
       nprintf(nabla,NULL,",rpg.{");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->out) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
         if (var->item[0]!='n') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
@@ -206,13 +224,23 @@ char* legionHookCallITask(nablaMain *nabla, nablaJob *job){
     }
     
     // Troisième passe aux faces
-    if (f[1]>0){
+    if ((f[1]+s[1])>0){
       bool virgule=true;
       nprintf(nabla,NULL,"%srs.{",(c[1]+n[1])>0?",":"");
       for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
         if (!var->out) continue;
+        if (var->dim>0) continue;
         if (var->koffset!=0) continue;
-        if (var->item[1]!='f') continue;
+        if (var->item[0]!='f') continue;
+        nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
+        virgule=false;
+      }
+      // On revient pour reprendre les variables aux mailles de dim>0     
+      for(nablaVariable *var=job->used_variables;var!=NULL;var=var->next){
+        if (!var->out) continue;
+        if (var->dim==0) continue;
+        if (var->koffset!=0) continue;
+        if (var->item[0]!='c') continue;
         nprintf(nabla,NULL,"%s%s",!virgule?",":"",var->name);
         virgule=false;
       }

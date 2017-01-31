@@ -25,7 +25,7 @@ MESH_HEX = 2
 
 terra get_mesh_config(conf : &config)
   -- Calculate mesh size (nzx, nzy) and dimensions (lenx, leny).
-  c.printf("\n[33m[get_mesh_config] Calculate mesh size (nzx, nzy) and dimensions (lenx, leny)[m");
+  --c.printf("\n[33m[get_mesh_config] Calculate mesh size (nzx, nzy) and dimensions (lenx, leny)[m");
   conf.nzx = conf.meshparams[0]
   if conf.meshparams_n >= 2 then
     conf.nzy = conf.meshparams[1]
@@ -75,7 +75,7 @@ end
 
  terra get_submesh_config(conf : &config)
   -- Calculate numbers of submeshes.
-  c.printf("[33m[get_submesh_config] Calculate numbers of submeshes.[m\n");
+   --c.printf("\n[33m[get_submesh_config] Calculate numbers of submeshes.[m");
   var nx : double, ny : double = conf.nzx, conf.nzy
   var swapflag = nx > ny
   if swapflag then nx, ny = ny, nx end
@@ -96,7 +96,7 @@ end
 end
                      
 
-c.printf("[33mmax_items=1024[m\n");
+--c.printf("\n[33mmax_items=1024[m");
 do
 local max_items = 1024
 local max_item_len = 1024
@@ -170,7 +170,7 @@ local extract = terralib.memoize(function(t)
 end)
 
 terra read_config()
-  c.printf("[33m[read_config][m\n");
+  --c.printf("\n[33m[read_config][m");
   var input_filename = get_positional_arg()
   if input_filename == nil then
     c.printf("Usage: ./pennant <filename>\n")
@@ -295,7 +295,7 @@ terra read_config()
      end)]
 
   -- Configure and run mesh generator.
-  c.printf("[33m[read_config] Configure and run mesh generator.[m\n");
+  --c.printf("\n[33m[read_config] Configure and run mesh generator.[m");
   var meshtype : fixed_string
   if [extract(fixed_string)](items, nitems, "meshtype", &meshtype) < 1 then
     c.printf("Error: Missing meshtype\n")
@@ -330,7 +330,7 @@ terra read_config()
      end)]
 
   -- report mesh size in bytes
-  c.printf("[33m[read_config] report mesh size in bytes.[m\n");
+  --c.printf("\n[33m[read_config] report mesh size in bytes.[m");
   do
     var zone_size = terralib.sizeof(zone)
     var point_size = terralib.sizeof(point)

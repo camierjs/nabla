@@ -29,13 +29,3 @@ import "regent"
 local c = regentlib.c
 
 require("legion_common")
-
-require("legion_geom")
-require("pennant_kernels_init")
-require("pennant_kernels_loop")
-
-require("pennant_main_loop")
-require("pennant_main_init")
-
-require("legion_init")
-

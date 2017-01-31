@@ -22,15 +22,17 @@ local cstring = terralib.includec("string.h")
 
 c.printf("[33m[Validation][m\n");
 do
-local solution_filename_maxlen = 1024
+  local solution_filename_maxlen = 1024
+  -- 24/17/34
+  -- 24/18/39
 terra validate_output(runtime : c.legion_runtime_t,
                       ctx : c.legion_context_t,
                       rz_physical : c.legion_physical_region_t[24],
                       rz_fields : c.legion_field_id_t[24],
-                      rp_physical : c.legion_physical_region_t[17],
-                      rp_fields : c.legion_field_id_t[17],
-                      rs_physical : c.legion_physical_region_t[34],
-                      rs_fields : c.legion_field_id_t[34],
+                      rp_physical : c.legion_physical_region_t[18],
+                      rp_fields : c.legion_field_id_t[18],
+                      rs_physical : c.legion_physical_region_t[39],
+                      rs_fields : c.legion_field_id_t[39],
                       conf : config)
   c.printf("[33m[validate_output][m\n");
   c.printf("Running validate_output (t=%%.1f)...\n", c.legion_get_current_time_in_micros()/1.e6)
@@ -136,7 +138,7 @@ terra validate_output(runtime : c.legion_runtime_t,
 
   do
     var rz_zr = c.legion_physical_region_get_field_accessor_array(
-      rz_physical[12], rz_fields[12])
+      rz_physical[11], rz_fields[11])--12
     for i = 0, conf.nz do
       var p = c.legion_ptr_t { value = i }
       var ck = @[&double](c.legion_accessor_array_ref(rz_zr, p))
@@ -158,7 +160,7 @@ terra validate_output(runtime : c.legion_runtime_t,
 
   do
     var rz_ze = c.legion_physical_region_get_field_accessor_array(
-      rz_physical[13], rz_fields[13])
+      rz_physical[14], rz_fields[14])--13
     for i = 0, conf.nz do
       var p = c.legion_ptr_t { value = i }
       var ck = @[&double](c.legion_accessor_array_ref(rz_ze, p))
@@ -180,7 +182,7 @@ terra validate_output(runtime : c.legion_runtime_t,
 
   do
     var rz_zp = c.legion_physical_region_get_field_accessor_array(
-      rz_physical[17], rz_fields[17])
+      rz_physical[18], rz_fields[18])--17
     for i = 0, conf.nz do
       var p = c.legion_ptr_t { value = i }
       var ck = @[&double](c.legion_accessor_array_ref(rz_zp, p))
@@ -200,13 +202,13 @@ terra validate_output(runtime : c.legion_runtime_t,
     c.legion_accessor_array_destroy(rz_zp)
   end
 
-  c.printf("Successfully validate output\n")
+  c.printf("Successfully validate output")
 
   c.free(solution_zr)
   c.free(solution_ze)
   c.free(solution_zp)
 end
-c.printf("[33m[validate_output:compile][m\n");
+c.printf("[33m[validate_output:compile()][m");
 validate_output:compile()
 end
 
@@ -214,15 +216,17 @@ end
 -- ##########################
 -- ## validate_output_sequential
 -- ##########################     
+--c.printf("[33;1m[validate_output_sequential] SKIPPING validate_output!![m\n");
 task validate_output_sequential(rz_all : region(zone),
                                 rp_all : region(point),
                                 rs_all : region(side(wild, wild, wild, wild)),
                                 conf : config)
 where reads(rz_all, rp_all, rs_all) do
-  validate_output(
-    __runtime(), __context(),
-    __physical(rz_all), __fields(rz_all),
-    __physical(rp_all), __fields(rp_all),
-    __physical(rs_all), __fields(rs_all),
-    conf)
+    -- c.printf("[33;1m[NO validate_output][m\n");
+    validate_output(
+      __runtime(), __context(),
+      __physical(rz_all), __fields(rz_all),
+      __physical(rp_all), __fields(rp_all),
+      __physical(rs_all), __fields(rs_all),
+      conf)
 end

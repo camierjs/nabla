@@ -47,25 +47,30 @@
 // * legionHookMainPrefix
 // ****************************************************************************
 NABLA_STATUS legionHookMainPrefix(nablaMain *nabla){
-  fprintf(nabla->entity->src, "\n\
+  fprintf(nabla->entity->src, "\n\n\n\
+task continue_simulation(cycle : int64, cstop : int64,\n\
+                         time : double, tstop : double)\n\
+  return (cycle < cstop and time < tstop)\n\
+end\n\
+\n\n\
 -- ******************************************************************************\n\
--- * Main\n\
+-- * Initialize\n\
 -- ******************************************************************************\n\
-task main(rz_all : region(zone), rz_all_p : partition(disjoint, rz_all),\n\
-          rp_all : region(point),\n\
-          rp_all_private : region(point),\n\
-          rp_all_private_p : partition(disjoint, rp_all_private),\n\
-          rp_all_ghost : region(point),\n\
-          rp_all_ghost_p : partition(aliased, rp_all_ghost),\n\
-          rp_all_shared_p : partition(disjoint, rp_all_ghost),\n\
-          rs_all : region(side(wild, wild, wild, wild)),\n\
-          rs_all_p : partition(disjoint, rs_all),\n\
-          conf : config)\n\
+task initialize(rz_all : region(zone), rz_all_p : partition(disjoint, rz_all),\n\
+                rp_all : region(point),\n\
+                rp_all_private : region(point),\n\
+                rp_all_private_p : partition(disjoint, rp_all_private),\n\
+                rp_all_ghost : region(point),\n\
+                rp_all_ghost_p : partition(aliased, rp_all_ghost),\n\
+                rp_all_shared_p : partition(disjoint, rp_all_ghost),\n\
+                rs_all : region(side(wild, wild, wild, wild)),\n\
+                rs_all_p : partition(disjoint, rs_all),\n\
+                conf : config)\n\
 where\n\
   reads writes(rz_all, rp_all_private, rp_all_ghost, rs_all),\n\
   rp_all_private * rp_all_ghost\n\
 do\n\
-\tc.printf(\"\\t[32;1m[main][m\\n\");");
+\tc.printf(\"\\t[32;1m[initialize][m\\n\");");
   return NABLA_OK;
 }
 
@@ -117,7 +122,30 @@ NABLA_STATUS legionHookMainHLT(nablaMain *n){
     // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
     if (entry_points[i].whens[0]>=0 && !is_into_compute_loop){
       is_into_compute_loop=true;
-      nprintf(n, NULL, "\n\twhile continue_simulation(cycle, cstop, time, tstop) do");
+      nprintf(n,NULL, "\nend -- Initialize\n\n\n\
+-- ******************************************************************************\n\
+-- * Simulate\n\
+-- ******************************************************************************\n\
+task simulate(rz_all : region(zone), rz_all_p : partition(disjoint, rz_all),\n\
+              rp_all : region(point),\n\
+              rp_all_private : region(point),\n\
+              rp_all_private_p : partition(disjoint, rp_all_private),\n\
+              rp_all_ghost : region(point),\n\
+              rp_all_ghost_p : partition(aliased, rp_all_ghost),\n\
+              rp_all_shared_p : partition(disjoint, rp_all_ghost),\n\
+              rs_all : region(side(wild, wild, wild, wild)),\n\
+              rs_all_p : partition(disjoint, rs_all),\n\
+              conf : config)\n\
+where\n\
+  reads writes(rz_all, rp_all_private, rp_all_ghost, rs_all),\n\
+  rp_all_private * rp_all_ghost\n\
+do\n\
+\tc.printf(\"\\t[32;1m[simulate][m\\n\");");
+      legionHookMainOptions(n);
+      nprintf(n,NULL,"\n\tvar time = 0.0");
+      nprintf(n,NULL,"\n\tvar cycle : int64 = 0");
+      nprintf(n,NULL, "\n\twhile continue_simulation(cycle, cstop, time, tstop) do");
+      nprintf(n,NULL, "\n\tc.printf(\"\\n[32;1m[cycle] %%d[m\",cycle)");
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1))
@@ -129,27 +157,28 @@ NABLA_STATUS legionHookMainHLT(nablaMain *n){
     // \n ou if d'un IF after '@'
     if (entry_points[i].ifAfterAt!=NULL){
       dbg("\n\t[hookMain] dumpIfAfterAt!");
-      nprintf(n, NULL, "\n\tif");
+      nprintf(n, NULL, "\n\tif (");
       nMiddleDumpIfAfterAt(entry_points[i].ifAfterAt, n,false);
-      nprintf(n, NULL, "then");
+      nprintf(n, NULL, ") then");
     }else nprintf(n, NULL, "\n");
         
     // Dump de la tabulation et du nom du point d'entrée
     if (!entry_points[i].is_a_function){
-      nprintf(n, NULL, "%sfor i=0,conf.npieces do\n%s\t%s(",
-              is_into_compute_loop?"\t\t":"\t",
-              is_into_compute_loop?"\t\t":"\t",
+      nprintf(n, NULL, "\tfor i=0,conf.npieces do\n\t\t%s(",
               entry_points[i].name);
-      if (entry_points[i].item[0]=='c') nprintf(n, NULL, "rz_all_p[i])\n%send",is_into_compute_loop?"\t\t":"\t");
-      if (entry_points[i].item[0]=='n'|| entry_points[i].item[0]=='f')
-        nprintf(n, NULL, "rz_all_p[i],\
- rp_all_private_p[i],\
- rp_all_ghost_p[i],\
- rs_all_p[i])\n%send",is_into_compute_loop?"\t\t":"\t");
+      //if (entry_points[i].item[0]=='c') nprintf(n, NULL, "rz_all_p[i])\n\tend");
+      if (entry_points[i].item[0]=='c' ||
+          entry_points[i].item[0]=='n' ||
+          entry_points[i].item[0]=='f'){
+        nprintf(n, NULL, "rz_all_p[i],rp_all_private_p[i],rp_all_ghost_p[i],rs_all_p[i]");
+        if (entry_points[i].used_options!=NULL){
+          for(nablaOption *opt= entry_points[i].used_options;opt!=NULL;opt=opt->next)
+            nprintf(n,NULL,", %s",opt->name);
+        }
+        nprintf(n,NULL,")\n\tend");
+      }
     }else{
-      nprintf(n, NULL, "%s-- Function: %s",
-              is_into_compute_loop?"\t\t":"\t",
-              entry_points[i].name);
+      nprintf(n, NULL, "\t-- Function: %s", entry_points[i].name);
     }
       
     // On s'autorise un endroit pour insérer des arguments
@@ -180,6 +209,7 @@ NABLA_STATUS legionHookMainHLT(nablaMain *n){
 // ****************************************************************************
 NABLA_STATUS legionHookMainPostfix(nablaMain *nabla){
   fprintf(nabla->entity->src, "\n\t-- legionHookMainPostfix");
+  fprintf(nabla->entity->src, "\n\tcycle += 1");
   fprintf(nabla->entity->src, "\n\tend -- while");
   fprintf(nabla->entity->src, "\nend -- main");
   return NABLA_OK;

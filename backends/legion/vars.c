@@ -49,7 +49,14 @@
 static void legionHookVarsOptions(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\
 \nc.printf(\"[33m[pennant_common] Configuration variables.[m\\n\");\
-\nconfig_defaults = terralib.newlist({");
+\nconfig_fields_input = terralib.newlist({\n\
+  {field = \"bcx\", type = double[2], default_value = `array(0.0, 0.0), linked_field = \"bcx_n\"},\n\
+  {field = \"bcx_n\", type = int64, default_value = 0, is_linked_field = true},\n\
+  {field = \"bcy\", type = double[2], default_value = `array(0.0, 0.0), linked_field = \"bcy_n\"},\n\
+  {field = \"bcy_n\", type = int64, default_value = 0, is_linked_field = true},\n\
+  {field = \"meshparams\", type = double[4], default_value = `arrayof(double, 0, 0, 0, 0), linked_field = \"meshparams_n\"},\n\
+  {field = \"meshparams_n\", type = int64, default_value = 0, is_linked_field = true},\n\
+");
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
     fprintf(nabla->entity->hdr,
             "\n\t{field = \"%s\", type = %s, default_value = %s},",
@@ -61,7 +68,11 @@ static void legionHookVarsOptions(nablaMain *nabla){
             opt->dflt);
   fprintf(nabla->entity->hdr,"\n}) -- end of config_defaults\
 \nc.printf(\"[33m[pennant_common] Adding config_fields_all[m\\n\");\
-\nconfig_fields_all:insertall(config_defaults)");
+\nconfig_fields_all:insertall(config_fields_input)");
+  fprintf(nabla->entity->hdr,"\n\
+\nc.printf(\"[33m[pennant_common] Configuring entries[m\\n\");\
+\nconfig = terralib.types.newstruct(\"config\")\
+\nconfig.entries:insertall(config_fields_all)\n");
 }
 
 
@@ -70,19 +81,17 @@ static void legionHookVarsOptions(nablaMain *nabla){
 // ****************************************************************************
 static char *legionHookVarsType(nablaMain *nabla,
                      char *type){
-  //const bool dim1D = (nabla->entity->libraries&(1<<with_real))!=0;
-  //const bool dim2D = (nabla->entity->libraries&(1<<with_real2))!=0;
-  //if (strncmp(type,"real3x3",7)==0) return type;
-  //if (strncmp(type,"real3",5)==0) return "real";
-  //if (strncmp(type,"real3",5)==0) return "vec2";
   if (strncmp(type,"real2",5)==0) return "vec2";
   if (strncmp(type,"real",4)==0) return "double";
+  if (strncmp(type,"integer",4)==0) return "uint8";
   return type;
 }
 
 // ***************************************************************************** 
 // * Dump des variables
-// *****************************************************************************/
+// *****************************************************************************
+// * Attention read_input de legion_input utilise des offset en dur pour l'init!
+// *****************************************************************************
 static void legionHookVarsVariable(nablaMain *nabla){
   // Variables aux mailles = cells = zones
   fprintf(nabla->entity->hdr,"\n\n\
@@ -102,6 +111,7 @@ static void legionHookVarsVariable(nablaMain *nabla){
 \nfspace point {");
   for(nablaVariable *var=nabla->variables;var!=NULL;var=var->next){
     if (var->item[0]!='n') continue;
+    //if (strncmp(var->name,"coord",5)==0) continue;
     const char *type=legionHookVarsType(nabla,var->type);
     fprintf(nabla->entity->hdr,"\n\t%s :\t%s,",var->name,type);
   }

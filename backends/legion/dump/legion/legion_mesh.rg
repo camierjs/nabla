@@ -18,7 +18,7 @@ local c = regentlib.c
 -- ## Mesh Generator
 -- #################
 
-c.printf("[33m[mesh_colorings][m\n");
+c.printf("\n[33m[mesh_colorings][m");
 struct mesh_colorings {
   rz_all_c : c.legion_coloring_t,
   rz_spans_c : c.legion_coloring_t,
@@ -44,7 +44,7 @@ terra compute_coloring(ncolors : int64, nitems : int64,
                        coloring : c.legion_coloring_t,
                        colors : &int64, sizes : &int64,
                        filter : {int64, &int64} -> int64)
-  c.printf("[33m[compute_coloring][m\n");
+  c.printf("\n[33m[compute_coloring][m");
   if filter == nil then
     filter = filter_none
   end

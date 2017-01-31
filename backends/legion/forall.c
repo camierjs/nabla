@@ -47,7 +47,7 @@
 // **************************************************************************** 
 char* legionHookForallPrefix(nablaJob *job){
   char *prefix=(char*)calloc(1024,sizeof(char));
-  snprintf(prefix,1024,"\n\tc.printf(\"\\n\\t\\t[32m[%s][m\\n\")",job->name);
+  snprintf(prefix,1024,"\n\tc.printf(\"\\n\\t\\t[32m[%s][m\")",job->name);
   return prefix;
   //return "\n\t-- legionHookForallPrefix";
 }

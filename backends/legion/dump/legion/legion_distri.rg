@@ -197,7 +197,7 @@ terra ghost_left_p(conf : config, pcx : int64, pcy : int64)
 end
 
 terra read_partitions(conf : config) : mesh_colorings
-  c.printf("[33m[read_partitions][m\n");
+  c.printf("\n[33m[read_partitions][m");
   regentlib.assert(conf.npieces > 0, "npieces must be > 0")
   regentlib.assert(conf.compact, "parallel initialization requires compact")
   regentlib.assert(
@@ -350,11 +350,11 @@ terra read_partitions(conf : config) : mesh_colorings
 
   return result
 end
-c.printf("[33m[read_partitions:compile()][m\n");
+c.printf("\n[33m[read_partitions:compile()][m");
 read_partitions:compile()
 
 terra get_zone_position(conf : config, pcx : int64, pcy : int64, z : int64)
-  c.printf("[33m[get_zone_position][m\n");
+  c.printf("\n[33m[get_zone_position][m");
   var first_zx, last_zx, stride_zx = block_zx(conf, pcx)
   var first_zy, last_zy, stride_zy = block_zy(conf, pcy)
   var first_z, last_z = block_z(conf, pcx, pcy)
@@ -390,7 +390,7 @@ where
   rp_spans_private * rp_spans_shared, rp_spans_private * rs_spans,
   rp_spans_shared * rs_spans
 do
-  c.printf("[33m[initialize_spans][m\n");
+  c.printf("\n[33m[initialize_spans][m");
   -- Unfortunately, this duplicates a lot of functionality in read_partitions.
 
   regentlib.assert(conf.compact, "parallel initialization requires compact")
@@ -523,7 +523,7 @@ where reads writes(rz.znump,
                    rs.{mapsz, mapsp1, mapsp2, mapss3, mapss4}),
   reads(rpg.{px0}) -- Hack: Work around runtime bug with no-acccess regions.
 do
-  c.printf("[33m[initialize_topology][m\n");
+  c.printf("\n[33m[initialize_topology][m");
   regentlib.assert(
     conf.meshtype == MESH_RECT,
     "distributed initialization only works on rectangular meshes")
@@ -532,9 +532,11 @@ do
   var pcx, pcy = piece %% conf.numpcx, piece / conf.numpcx
 
   -- Initialize zones.
+  c.printf("\n[33m[initialize_topology] Initialize zones[m");
   fill(rz.znump, znump)
 
   -- Initialize points: private.
+  c.printf("\n[33m[initialize_topology] Initialize points:private[m");
   var dx = conf.lenx / double(conf.nzx)
   var dy = conf.leny / double(conf.nzy)
   var eps = 1e-12
@@ -571,6 +573,7 @@ do
   end
 
   -- Initialize points: shared.
+  c.printf("\n[33m[initialize_topology] Initialize points:shared[m");
   do
     var {first_zx = _0, last_zx = _1, stride_zx = _2} = block_zx(conf, pcx)
     var {first_zy = _0, last_zy = _1, stride_zy = _2} = block_zy(conf, pcy)
@@ -647,6 +650,7 @@ do
   end
 
   -- Initialize sides.
+  c.printf("\n[33m[initialize_topology] Initialize points:sides[m");
   do
     var {first_zx = _0, last_zx = _1, stride_zx = _2} = block_zx(conf, pcx)
     var {first_zy = _0, last_zy = _1, stride_zy = _2} = block_zy(conf, pcy)

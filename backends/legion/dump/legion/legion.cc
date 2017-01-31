@@ -26,9 +26,9 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
-void print_rusage(const char *message)
-{
-  std::cout<<"[36m[print_rusage][m\n";
+
+void print_rusage(const char *message){
+  std::cout<<"\n[36m[print_rusage][m";
   struct rusage usage;
   if (getrusage(RUSAGE_SELF, &usage) != 0) return;
   printf("%%s: %%ld MB\n", message, usage.ru_maxrss / 1024);
@@ -80,9 +80,8 @@ static void generate_mesh_rect(config &conf,
                                std::vector<int64_t> &zonepoints,
                                std::vector<int64_t> &zonecolors,
                                std::vector<int64_t> &zxbounds,
-                               std::vector<int64_t> &zybounds)
-{
-  std::cout<<"[36m[generate_mesh_rect][m\n";
+                               std::vector<int64_t> &zybounds){
+  std::cout<<"\n[36m[generate_mesh_rect][m";
   int64_t &nz = conf.nz;
   int64_t &np = conf.np;
 
@@ -155,9 +154,8 @@ static void generate_mesh_pie(config &conf,
                               std::vector<int64_t> &zonepoints,
                               std::vector<int64_t> &zonecolors,
                               std::vector<int64_t> &zxbounds,
-                              std::vector<int64_t> &zybounds)
-{
-  std::cout<<"[36m[generate_mesh_pie][m\n";
+                              std::vector<int64_t> &zybounds){
+  std::cout<<"\n[36m[generate_mesh_pie][m";
   int64_t &nz = conf.nz;
   int64_t &np = conf.np;
 
@@ -253,9 +251,8 @@ static void generate_mesh_hex(config &conf,
                               std::vector<int64_t> &zonepoints,
                               std::vector<int64_t> &zonecolors,
                               std::vector<int64_t> &zxbounds,
-                              std::vector<int64_t> &zybounds)
-{
-  std::cout<<"[36m[generate_mesh_piehex][m\n";
+                              std::vector<int64_t> &zybounds){
+  std::cout<<"\n[36m[generate_mesh_piehex][m";
   int64_t &nz = conf.nz;
   int64_t &np = conf.np;
 
@@ -382,9 +379,8 @@ static void generate_mesh_hex(config &conf,
   } // for j
 }
 
-static void calc_mesh_num_pieces(config &conf)
-{
-  std::cout<<"[36m[calc_mesh_num_pieces][m\n";
+static void calc_mesh_num_pieces(config &conf){
+  std::cout<<"\n[36m[calc_mesh_num_pieces][m";
     // pick numpcx, numpcy such that pieces are as close to square
     // as possible
     // we would like:  nzx / numpcx == nzy / numpcy,
@@ -422,7 +418,7 @@ static void generate_mesh(config &conf,
                           std::vector<int64_t> &zonepoints,
                           std::vector<int64_t> &zonecolors)
 {
-  std::cout<<"[36m[generate_mesh][m\n";
+  std::cout<<"\n[36m[generate_mesh][m";
    // Do calculations common to all mesh types:
   std::vector<int64_t> zxbounds;
   std::vector<int64_t> zybounds;
@@ -459,7 +455,7 @@ static void sort_zones_by_color(const config &conf,
                                 std::vector<int64_t> &zones_inverse_map,
                                 std::vector<int64_t> &zones_map)
 {
-  std::cout<<"[36m[sort_zones_by_color][m\n";
+  std::cout<<"\n[36m[sort_zones_by_color][m";
   // Sort zones by color.
   assert(int64_t(zonecolors.size()) == conf.nz);
   std::map<int64_t, std::vector<int64_t> > zones_by_color;
@@ -484,7 +480,7 @@ static std::set<int64_t> zone_point_set(
   const std::vector<int64_t> &zonesize,
   const std::vector<int64_t> &zonepoints)
 {
-  std::cout<<"[36m[zone_point_set][m\n";
+  std::cout<<"\n[36m[zone_point_set][m";
   std::set<int64_t> points;
   for (int64_t z_start = zonestart[z], z_size = zonesize[z],
          z_point = z_start; z_point < z_start + z_size; z_point++) {
@@ -503,7 +499,7 @@ static void sort_zones_by_color_strip(const config &conf,
                                       std::vector<int64_t> &zones_inverse_map,
                                       std::vector<int64_t> &zones_map)
 {
-  std::cout<<"[36m[sort_zones_by_color_strip][m\n";
+  std::cout<<"\n[36m[sort_zones_by_color_strip][m";
   int64_t stripsize = conf.stripsize;
 
   // Sort zones by color. Within each color, make strips of zones of
@@ -568,7 +564,7 @@ static void sort_points_by_color(
   std::vector<int64_t> &points_inverse_map,
   std::vector<int64_t> &points_map)
 {
-  std::cout<<"[36m[sort_points_by_color][m\n";
+  std::cout<<"\n[36m[sort_points_by_color][m";
   // Sort points by color; sort multi-color points by first color.
   assert(int64_t(pointcolors.size()) == conf.np);
   std::map<int64_t, std::vector<int64_t> > points_by_color;
@@ -612,7 +608,7 @@ static void compact_mesh(const config &conf,
                          std::vector<int64_t> &zonepoints,
                          std::vector<int64_t> &zonecolors)
 {
-  std::cout<<"[36m[compact_mesh][m\n";
+  std::cout<<"\n[36m[compact_mesh][m";
   // This stage is responsible for compacting the mesh so that each of
   // the pieces is dense (in the global coordinate space). This
   // involves sorting the various elements by color and then rewriting
@@ -741,7 +737,7 @@ color_spans(const config &conf,
             int64_t &nspans_zones,
             int64_t &nspans_points)
 {
-  std::cout<<"[36m[color_spans][m\n";
+  std::cout<<"\n[36m[color_spans][m";
   {
     // Compute zone spans.
     std::vector<std::vector<std::vector<int64_t> > > spans(conf.npieces);
@@ -865,7 +861,7 @@ void generate_mesh_raw(
   int64_t *nspans_zones,
   int64_t *nspans_points)
 {
-  std::cout<<"[36m[generate_mesh_raw][m\n";
+  std::cout<<"\n[36m[generate_mesh_raw][m";
   config conf;
   conf.np = conf_np;
   conf.nz = conf_nz;
@@ -1020,7 +1016,7 @@ PennantMapper::PennantMapper(MapperRuntime *rt, Machine machine, Processor local
     proc_sysmems(*_proc_sysmems)// ,
     // proc_regmems(*_proc_regmems)
 {
-  std::cout<<"[36m[PennantMapper][m\n";
+  std::cout<<"\n[36m[PennantMapper][m";
 }
 
 Processor PennantMapper::default_policy_select_initial_processor(
@@ -1056,7 +1052,7 @@ void PennantMapper::default_policy_select_target_processors(
 
 static void create_mappers(Machine machine, HighLevelRuntime *runtime, const std::set<Processor> &local_procs)
 {
-  std::cout<<"[36m[create_mappers][m\n";
+  std::cout<<"\n[36m[create_mappers][m";
   std::vector<Processor>* procs_list = new std::vector<Processor>();
   std::vector<Memory>* sysmems_list = new std::vector<Memory>();
   std::map<Memory, std::vector<Processor> >* sysmem_local_procs =
@@ -1107,6 +1103,6 @@ static void create_mappers(Machine machine, HighLevelRuntime *runtime, const std
 
 void register_mappers()
 {
-  std::cout<<"[36m[register_mappers][m\n";
+  std::cout<<"\n[36m[register_mappers][m";
   HighLevelRuntime::set_registration_callback(create_mappers);
 }

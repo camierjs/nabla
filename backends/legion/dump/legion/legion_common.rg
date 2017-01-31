@@ -13,7 +13,10 @@
 -- limitations under the License.
 require("legion_compile")
 require("legion_data")
-require("pennant_data")
+
+--require("pennant_data")
+require("pnnnt_data")
+
 require("legion_math")
 require("legion_mesh")
 require("legion_args")
@@ -23,3 +26,12 @@ require("legion_distri")
 require("pennant_valid")
 require("legion_hacks")
 require("legion_tools")
+require("legion_geom")
+
+--require("pennant_kernels_init")
+--require("pennant_kernels_loop")
+--require("pennant_main_loop")
+--require("pennant_main_init")
+require("pnnnt_kernels")
+
+require("legion_init")

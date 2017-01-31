@@ -443,6 +443,7 @@ static void dfsAddToUsedVariables(nablaJob *job,
   new->item=var->item;
   new->type=sdup(var->type);
   new->dim=var->dim;
+  new->vitem=var->vitem;
   new->size=var->size;
   new->koffset=koffset;
   // Et on mémorise ce que l'on a fait en in/out

@@ -18,7 +18,7 @@ local c = regentlib.c
 -- ## Data Structures
 -- #################
 
-c.printf("[33m[pennant_common] Configuration variables.[m\n");
+c.printf("[33m[pennant_data] Configuration variables.[m\n");
 config_fields_input = terralib.newlist({
   -- Configuration variables.
   {field = "alfa", type = double, default_value = 0.5},
@@ -52,14 +52,14 @@ config_fields_input = terralib.newlist({
   {field = "meshparams_n", type = int64, default_value = 0, is_linked_field = true},
 })
 
-c.printf("[33m[pennant_common] Adding config_fields_all[m\n");
+c.printf("[33m[pennant_data] Adding config_fields_all[m\n");
 config_fields_all:insertall(config_fields_input)
 
-c.printf("[33m[pennant_common] Configuring entries[m\n");
+c.printf("[33m[pennant_data] Configuring entries[m\n");
 config = terralib.types.newstruct("config")
 config.entries:insertall(config_fields_all)
 
-c.printf("[33m[pennant_common] fspace zone[m\n");
+c.printf("[33m[pennant_data] fspace zone[m\n");
 fspace zone {
   zxp :    vec2,         -- zone center coordinates, middle of cycle
   zx :     vec2,         -- zone center coordinates, end of cycle
@@ -88,7 +88,7 @@ fspace zone {
   znump :  uint8,        -- number of points in zone
 }
 
-c.printf("[33m[pennant_common] fspace point[m\n");
+c.printf("[33m[pennant_data] fspace point[m\n");
 fspace point {
   px0 : vec2,            -- point coordinates, start of cycle
   pxp : vec2,            -- point coordinates, middle of cycle
@@ -104,7 +104,7 @@ fspace point {
   has_bcy : bool,
 }
 
-c.printf("[33m[pennant_common] fspace side[m\n");
+c.printf("[33m[pennant_data] fspace side[m\n");
 fspace side(rz : region(zone),
             rpp : region(point),
             rpg : region(point),

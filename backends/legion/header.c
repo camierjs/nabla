@@ -47,7 +47,7 @@
 // ****************************************************************************
 void legionHookHeaderOpen(nablaMain *nabla){
   char hdrFileName[1024];
-  sprintf(hdrFileName, "%s_config.rg", nabla->name);
+  sprintf(hdrFileName, "%s_data.rg", nabla->name);
   if ((nabla->entity->hdr=fopen(hdrFileName, "w")) == NULL) exit(NABLA_ERROR);
 }
 
@@ -66,9 +66,5 @@ local c = regentlib.c");
 // ****************************************************************************
 void legionHookHeaderPostfix(nablaMain *nabla){
   fprintf(nabla->entity->hdr,"\n\n-- legionHookHeaderPostfix");
-  fprintf(nabla->entity->hdr,"\
-\nc.printf(\"[33m[pennant_common] config[m\\n\");\
-\nconfig = terralib.types.newstruct(\"config\")\
-\nconfig.entries:insertall(config_defaults)\n");
 }
 
