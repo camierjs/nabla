@@ -547,7 +547,7 @@ void nMiddleJobFill(nablaMain *nabla,
   }
   
   dbg("\n\t[nablaJobFill] prefixEnumerate");
-  nprintf(nabla, NULL, "\n\t%s", cHOOKj(nabla,forall,prefix,job));
+  nprintf(nabla, NULL, "%s", cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
   if (nabla->hook->forall->dump)
@@ -556,7 +556,7 @@ void nMiddleJobFill(nablaMain *nabla,
   
   dbg("\n\t[nablaJobFill] postfixEnumerate");
   if (nabla->hook->forall->postfix)
-    nprintf(nabla, NULL, "\n\t\t%s", nabla->hook->forall->postfix(job));
+    nprintf(nabla, NULL, "%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
   dbg("\n\t[nablaJobFill] Now parsing:");

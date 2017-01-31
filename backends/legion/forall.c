@@ -46,7 +46,7 @@
 // * legionHookForAllPrefix
 // **************************************************************************** 
 char* legionHookForallPrefix(nablaJob *job){
-  return "-- legionHookForallPrefix";
+  return "\n\t-- legionHookForallPrefix";
 }
 
 // ****************************************************************************

@@ -55,17 +55,17 @@ char* kHookForAllDump(nablaJob *job){
   dbg("\n\t\t[kokkosHookSelectEnumerate] cell?");
   if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE(p)";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER cells\n\tFOR_EACH_CELL(c)";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "\n#warning Should be INNER cells\n\tFOR_EACH_CELL(c)";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_CELL(c)";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_CELL(c)";
   dbg("\n\t\t[kokkosHookSelectEnumerate] node?");
   if (itm=='n' && grp==NULL && rgn==NULL)     return "FOR_EACH_NODE(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
-  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp==NULL && rgn[0]=='i')   return "\n#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp==NULL && rgn[0]=='o')   return "\n#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
   if (itm=='n' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_NODE(n)";
   if (itm=='n' && grp[0]=='a' && rgn==NULL)   return "FOR_EACH_NODE(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
-  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='i') return "\n#warning Should be INNER nodes\n\tFOR_EACH_NODE(n)";
+  if (itm=='n' && grp[0]=='o' && rgn[0]=='o') return "\n#warning Should be OUTER nodes\n\tFOR_EACH_NODE(n)";
   dbg("\n\t\t[kokkosHookSelectEnumerate] face? (itm=%c, grp='%s', rgn='%s')", itm, grp, rgn);
   if (itm=='f' && grp==NULL && rgn==NULL)     return "FOR_EACH_FACE(f)";
   if (itm=='f' && grp==NULL && rgn[0]=='i')   return "FOR_EACH_INNER_FACE(of)";
@@ -89,7 +89,7 @@ char* kHookForAllPostfix(nablaJob *job){
   
   if (itm=='f' && rgn && rgn[0]=='o')
     nprintf(nabla, NULL,
-            "\n\t\tconst int f=of+NABLA_NB_FACES_INNER;// outer face job");
+            "\n\t\tconst int f=of+NABLA_NB_FACES_INNER;");
 
   return xCallFilterGather(NULL,job);
 }

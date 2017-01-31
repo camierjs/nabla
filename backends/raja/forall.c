@@ -49,7 +49,7 @@ static char* forAllParticle(void){
 static char* forAllCell(void){
   return "RAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
 static char* forAllInnerCell(void){
-  return "#warning Should be INNER cells\n\
+  return "\n#warning Should be INNER cells\n\
 \tRAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
 static char* forAllOuterCell(void){
   return "RAJA::forall<cell_exec_policy>(*cellIdxSet,[=] RAJA_DEVICE (int c)";}
@@ -57,10 +57,10 @@ static char* forAllOuterCell(void){
 static char* forAllNode(void){
   return "RAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
 static char* forAllInnerNode(void){
-  return "#warning Should be INNER nodes\n\
+  return "\n#warning Should be INNER nodes\n\
 \tRAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
 static char* forAllOuterNode(void){
-  return "#warning Should be OUTER nodes\n\
+  return "\n#warning Should be OUTER nodes\n\
 \tRAJA::forall<node_exec_policy>(*nodeIdxSet,[=] RAJA_DEVICE (int n)";}
 
 
