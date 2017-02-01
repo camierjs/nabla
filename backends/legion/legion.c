@@ -194,21 +194,28 @@ static hooks legionHooks={
 // ****************************************************************************
 // * nLegionDumpGeneric
 // ****************************************************************************
-static void nLegionDumpGeneric(nablaMain *nabla, const char *filename, char *external){
+static void nLegionDumpGeneric(nablaMain *nabla,
+                               const char *filename,
+                               char *external,...){
   FILE *file;
+  va_list args;
   const int external_strlen = strlen(external);
   int fprintf_strlen=0;
   //printf("[33m[nLegionDumpGeneric] dumping (len=%d): %s",external_strlen,filename);
   //fflush(stdout);
   if ((file=fopen(filename, "w")) == NULL) exit(NABLA_ERROR);
+  va_start(args,external);
   // On ne peut pas comparer les strlen, car les '%%' sont transformés en '%'
-  if (external_strlen!=(fprintf_strlen=fprintf(file,external))){
+  if (external_strlen!=(fprintf_strlen=vfprintf(file,external,args))){
     //printf(", got %d![m\n", fprintf_strlen);fflush(stdout);
     //exit(NABLA_ERROR);
   }
+  va_end(args);
   if (fclose(file)!=0) exit(NABLA_ERROR);
   //printf(", done![m\n");fflush(stdout);
 }
+extern char legion_root_path[];
+
 extern char legion_args_rg[];
 extern char legion_common_rg[];
 extern char legion_compile_rg[];
@@ -245,7 +252,7 @@ extern char sedovsmall_xy_std[];
 static void nLegionDump(nablaMain *nabla){
   nLegionDumpGeneric(nabla,"legion_args.rg",legion_args_rg);
   nLegionDumpGeneric(nabla,"legion_common.rg",legion_common_rg);
-  nLegionDumpGeneric(nabla,"legion_compile.rg",legion_compile_rg);
+  nLegionDumpGeneric(nabla,"legion_compile.rg",legion_compile_rg,legion_root_path);
   nLegionDumpGeneric(nabla,"legion_config.rg",legion_config_rg);
   nLegionDumpGeneric(nabla,"legion_data.rg",legion_data_rg);
   nLegionDumpGeneric(nabla,"legion_distri.rg",legion_distri_rg);
@@ -259,7 +266,7 @@ static void nLegionDump(nablaMain *nabla){
   nLegionDumpGeneric(nabla,"legion_tools.rg",legion_tools_rg);
   nLegionDumpGeneric(nabla,"legion.cc",legion_cc);
   nLegionDumpGeneric(nabla,"legion.h",legion_h);
-  nLegionDumpGeneric(nabla,"makefile",makefile);
+  nLegionDumpGeneric(nabla,"makefile",makefile,legion_root_path);
   
   nLegionDumpGeneric(nabla,"pennant_data.rg",pennant_data_rg);
   nLegionDumpGeneric(nabla,"pennant_kernels_init.rg",pennant_kernels_init_rg);

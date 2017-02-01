@@ -17,7 +17,7 @@ local c = regentlib.c
 do
   c.printf("[33m[legion_compile] Compile and link pennant.cc[m\n");
   local root_dir = arg[0]:match(".*/") or "./"
-  local runtime_dir = "/tmp/runtime/"
+  local runtime_dir = "%s/include/"
   local legion_dir = runtime_dir .. "legion/"
   local mapper_dir = runtime_dir .. "mappers/"
   local realm_dir = runtime_dir .. "realm/"

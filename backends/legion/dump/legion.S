@@ -40,6 +40,8 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+   .globl ${ABI_UNDERSCORE}legion_root_path
+
    .globl ${ABI_UNDERSCORE}legion_args_rg
    .globl ${ABI_UNDERSCORE}legion_common_rg
    .globl ${ABI_UNDERSCORE}legion_compile_rg
@@ -70,6 +72,10 @@
    .globl ${ABI_UNDERSCORE}sedovsmall_pnt
    .globl ${ABI_UNDERSCORE}sedovsmall_xy_std
 
+
+${ABI_UNDERSCORE}legion_root_path:
+	.string "${LEGION_ROOT_PATH}"
+   .byte 0
    
 ${ABI_UNDERSCORE}legion_args_rg:
 	.incbin "${CMAKE_CURRENT_SOURCE_DIR}/legion/legion_args.rg"
