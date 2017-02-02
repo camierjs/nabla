@@ -1,10 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,90 +41,34 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_TERNARY_H_
-#define _KN_TERNARY_H_
 
-inline integer opTernary(const __mmask8 cond,
-                         const int ifStatement,
-                         const integer elseStatement){
-  return _mm512_mask_blend_epi64(cond, elseStatement, integer(ifStatement));
-}
-inline integer opTernary(const __mmask8 cond,
-                         const int ifStatement,
-                         const int elseStatement){
-  return _mm512_mask_blend_epi64(cond, integer(elseStatement), integer(ifStatement));
-}
 
-inline real opTernary(const __mmask8 cond,
-                      const __m512d ifStatement,
-                      const __m512d elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const double ifStatement,
-                      const double elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), _mm512_set1_pd(ifStatement));
-}
-
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const double elseStatement){
-  if (cond) return _mm512_set1_pd(ifStatement);
-  return _mm512_set1_pd(elseStatement);
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const double ifStatement,
-                      const real&  elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, _mm512_set1_pd(ifStatement));
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const real& ifStatement,
-                      const double elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), ifStatement);
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const real& ifStatement,
-                      const real& elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
-inline bool opTernary(const __mmask8 cond,
-                      const bool ifStatement,
-                      const bool elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), _mm512_set1_pd(ifStatement))[0];
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const __m512d ifStatement,
-                      const real& elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
-
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const real& elseStatement){
-  if (cond) return _mm512_set1_pd(ifStatement);
-  return elseStatement;
-}
-
-inline real opTernary(const bool cond,
-                      const real& ifStatement,
-                      const real& elseStatement){
-  if (cond) return ifStatement;
-  return elseStatement;
+//∀ cells dumpGnuplotp @ 34.0 if (option_dump_at_end and (((iteration-1)%dump_iterations)==0))
+∀ cells dumpGnuplot @ 34.0 if (option_dump_at_end and ((time+δt)>dump_time)){
+  if (uid==0) info()<<"\33[1;31m[dumpGnuplot] Now dumping to outputp.plot file!\33[0m";
+  output3 << p << " ";
+  ∀ node
+    output3 << coord.x << " " << coord.y << " ";
+  output3 << coord[0].x << " " << coord[0].y << " ";
+  output3 << "\n";
+  if (uid==NABLA_NB_CELLS-1) output3 << "\n\n";
 }
 
 
-inline real3 opTernary(const __mmask8 cond,
-                       const double ifStatement,
-                       const real3&  elseStatement){
-  //debug()<<"opTernary4";
-  return real3(_mm512_mask_blend_pd(cond, elseStatement.x, _mm512_set1_pd(ifStatement)),
-               _mm512_mask_blend_pd(cond, elseStatement.y, _mm512_set1_pd(ifStatement)),
-               _mm512_mask_blend_pd(cond, elseStatement.z, _mm512_set1_pd(ifStatement)));
-}
-
-#endif //  _KN_TERNARY_H_
+// ****************************************************************************
+// * Dump Solution
+// ****************************************************************************
+∀ cells dumpSolution @ 36.0 if (option_dump_output and (time>=(option_stoptime-δt))){ 
+  if (uid==0) info()<<"\33[1;31m[dumpSolution] Now dumping to result.plot file!\33[0m";
+  results << "\t" << center.x 
+          << "\t" << center.y
+          << "\t" << p
+          << "\t" << u.x
+          << "\t" << u.y
+          << "\t" << temperature
+          << "\t" << pana
+          << "\t" << uana.x
+          << "\t" << uana.y
+          << "\t" << tana
+          << "\n";
+ }  

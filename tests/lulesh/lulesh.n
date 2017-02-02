@@ -84,7 +84,7 @@ options{
   ℝ option_dvovmax            = 0.1;      // maximum allowable volume change
   ℝ option_refdens            = 1.0;      // reference density
   ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  Bool option_chaos           = false;
+  ℾ option_chaos           = false;
   ℝ option_chaos_seed         = 1.1234567890123;//456789;
   ℕ option_max_iterations     = 32768;//128;
 };
@@ -313,7 +313,9 @@ void timeIncrement(void) @ 0.1 {
   //δt = (iteration==3)?1.439999999999999924249e-07;
   //δt <?= (scaled_δt);
   //info()<<"ITERATION "<<iteration;
-  //printf("\nITERATION %d, δt=%.21e",iteration,δt[0]);
+  //printf("\nITERATION %d, time=%f, δt=%f (sum=%f)",iteration,time,δt,time+δt);
+  if (((time+δt)==option_stoptime)?true:false)
+    assert(X_EDGE_ELEMS==8 && Y_EDGE_ELEMS==8 && Z_EDGE_ELEMS==8 && iteration==470);
   if (iteration >= option_max_iterations) exit;
   //info()<< "\t\t\33[7mTimeIncrement δt="<<δt<<"\33[m";//0]
   //printf("\n\t\t\33[7mTimeIncrement dtt=%.21e\33[m", δt);

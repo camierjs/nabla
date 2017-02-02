@@ -1,0 +1,357 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+with ℝ²;
+#include "assert.h"
+ofstream output("evol.plot");
+ofstream output2("mesh.plot");
+ofstream output3("output.plot");
+ofstream results("result.plot");
+
+// ****************************************************************************
+// 8x8:
+// iteration=849, time=0.998615, global_greek_deltat=8.765777490988180e-03
+// [printL2Error]
+//   Erreur sur p=(9.053269089848581e-03),
+//   Erreur sur u=(5.144361464083334e-03),
+//   Erreur sur T=(4.023316714693764e-02).
+//   iteration=850, time=0.999929, global_greek_deltat=8.765777490988180e-03
+// ****************************************************************************
+
+// ****************************************************************************
+// 80x80:
+//[printL2Error]
+//  Erreur sur p=(1.005493153629198e-03),
+//  Erreur sur u=(7.697204504846219e-04),
+//  Erreur sur T=(5.046665725407224e-03).
+// ****************************************************************************
+
+// ****************************************************************************
+// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
+// * ∀ℝℕℤℾ√∛ ½⅓¼⅛𝜕ℵ∂⋅⨯⤫⊗⨂⊛⁾ⁱ²³ⁿ⁺¹∞
+// ****************************************************************************
+
+// ****************************************************************************
+// * Options du schéma
+// ****************************************************************************
+options{
+  // Mesh options
+  ℝ LENGTH       = 1.0;
+  ℕ X_EDGE_ELEMS = 4;
+  ℕ Y_EDGE_ELEMS = 4;
+  ℕ Z_EDGE_ELEMS = 1;
+
+  ℾ DEBUG = false;
+  ℾ option_test_sod = true;
+  ℾ option_semi_implicit = false;
+  ℕ option_case = 1;
+  ℝ option_coupling_coef=1;
+  ℝ option_ini_zg_p = 1.0;
+  ℝ option_ini_zd_p = 1.0;
+  ℝ option_ini_zg_u = 0.0;
+  ℝ option_ini_zd_u = 0.0;
+  ℝ option_ini_zg_t = 1.0;
+  ℝ option_ini_zd_t = 1.0;
+
+  ℝ option_x_min = 0.0;
+  ℝ option_y_min = 0.0;
+  ℝ option_x_interface = LENGTH/2.0;
+  ℝ option_x_max = LENGTH;
+  ℝ option_y_max = LENGTH;
+  
+  ℝ option_δt_initial = 1e-7;       // ! utilisé en dur dans le backend lambda !
+  ℝ option_δt_min = 1e-15;
+  ℝ option_δt_max = 1.e-1;
+  ℝ option_stoptime = 1.;           // ! utilisé en dur dans le backend lambda !
+  ℝ option_δt_control = 0.15;       // Contrôle du pas de temps hydrodynamique
+
+  ℝ option_δt_min_variation = 0.99; // Décroissance maximale tolérée du pas de temps
+  ℝ option_δt_max_variation = 0.10; // Amplitude maximale de croissance du pas de temps
+  ℾ option_δt_last_exact = true;
+  ℾ option_ini_exact = true;
+  
+  ℾ option_dump_at_end =false;
+  ℾ option_dump_output = false;          
+  ℕ option_max_iterations = 0;      // ! utilisé en dur dans le backend lambda !
+  ℝ dump_dt = 0.1;   
+  ℝ option_rdq_α=0.3;
+  ℝ λ = 1.0;
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux noeuds
+// ****************************************************************************
+nodes{
+  ℝ³   node_u;                      // Vitesse nodale du maillage
+  ℝ³ˣ³ node_u_matrix;               // Matrice aux sommets pour le calcul de la vitesse
+  ℝ³   node_u_second_member;        // Second membre aux sommets pour le calcul de la vitesse
+};
+
+// ****************************************************************************
+// * Déclaration des variables aux mailles
+// ****************************************************************************
+cells{  
+  ℝ³ center;
+  ℝ V;                              // Volume des mailles
+  ℝ p;                              // Pression
+  ℝ³ u;                             // Vitesse moyenne
+  ℝ temperature;                    // Temperature
+  ℝ pana;                           // Pression analytique
+  ℝ³ uana;                          // Vitesse moyenne analytique
+  ℝ tana;                           // Temperature analytique
+  ℝ p1_δt;
+  ℝ absCQs[nodes];
+  ℝ³ CQs[nodes];                    // Résultantes aux sommets
+  ℝ³ˣ³ AQs[nodes];                  // Matrices de contributions aux sommets
+  ℝ³ˣ³ BQs[nodes];                  // Matrices de contributions aux sommets
+  ℝ³ reconstructed_u[nodes];        // Tableau des vitesses reconstruites
+  ℝ reconstructed_p[nodes];         // Tableau des pressions reconstruites
+  ℝ³ velocity_fluxes_Σ;
+  ℝ pressure_fluxes_Σ;
+  ℝ temperature_source_Σ;
+  ℝ minCellDelta;
+};
+
+// ****************************************************************************
+// * Globals
+// ****************************************************************************
+global{
+  ℝ pL2error;
+  ℝ uL2error;
+  ℝ tL2error;
+  ℝ Vtot;
+  ℝ global_δt;
+  ℝ e_tp;
+  ℝ Δl;
+  ℝ minΔ;
+  ℝ σ_a;
+  ℝ σ_s;
+  ℝ σ;
+  ℝ epsilon;
+  ℝ dump_time;   
+};
+
+// ****************************************************************************
+// * Partie boucle de calcul ]+0.0,+∞[ 
+// ****************************************************************************
+
+// ****************************************************************************
+// * computeAQsMatrices
+// ****************************************************************************
+∀ cells computeAQsMatrices @ 9.0 {
+  ∀ node AQs = λ*(CQs⊗CQs)/absCQs;
+}
+
+// ****************************************************************************
+// * computeBQsMatrices
+// ****************************************************************************
+∀ cells computeBQsMatrices @ 9.1 {
+  const ℝ σIε = σ/epsilon;
+  ∀ node BQs = σIε*(CQs⊗(coord[#]-center));
+}
+
+// ****************************************************************************
+// * temporalSchemeReconstructPressure
+// ****************************************************************************
+∀ cells temporalSchemeReconstructPressure @ 10.0{
+  ∀ node reconstructed_p=p;
+}
+
+// ****************************************************************************
+// * temporalSchemeReconstructVelocity
+// ****************************************************************************
+∀ cells temporalSchemeReconstructVelocity @ 10.0{
+  ∀ node reconstructed_u=u;
+}
+
+// ****************************************************************************
+// * temporalSchemeIniMatricesAndSecondMember
+// ****************************************************************************
+∀ nodes temporalSchemeIniMatricesAndSecondMember @ 11.0{
+  node_u_matrix=ℝ³ˣ³();
+  node_u_matrix.z=ℝ³(0,0,1);
+  node_u_second_member=0;
+}
+
+// ****************************************************************************
+// * temporalSchemeAssembleMatricesAndSecondMember
+// ****************************************************************************
+∀ cells temporalSchemeAssembleMatricesAndSecondMember @ 12.0{
+  ∀ node{
+    const ℝ³ˣ³ local_matrix = AQs;
+    node_u_matrix += AQs;
+    node_u_matrix += BQs;
+    node_u_second_member += local_matrix ⨂ reconstructed_u;
+    node_u_second_member += CQs*reconstructed_p;
+  }
+}
+
+// ****************************************************************************
+// * Le calcul aux boundaries se fait ici @ 13.1,13.2
+// ****************************************************************************
+
+// ****************************************************************************
+// * synchronize pour Arcane node_u_matrix & node_u_matrix_second_member
+// ****************************************************************************
+synchronizeNodeUMatrixAndSecondMember @ 13.4{
+  synchronize(node_u_matrix);
+  synchronize(node_u_second_member);
+}
+
+// ****************************************************************************
+// * temporalSchemeComputeNodesVelocity
+// ****************************************************************************
+∀ nodes temporalSchemeComputeNodesVelocity @ 14.0{
+  const ℝ determinent = matrixDeterminant(node_u_matrix);
+  assert(determinent!=0.0);
+  node_u_matrix = inverseMatrix(node_u_matrix, determinent);
+  node_u = node_u_matrix ⨂ node_u_second_member;
+  node_u.z=0.0;
+}
+  
+// ****************************************************************************
+// * temporalSchemeIniFluxesSum
+// ****************************************************************************
+∀ cells temporalSchemeIniFluxesSum @ 15.0{
+  velocity_fluxes_Σ = ℝ³(0.,0.,0.);
+  pressure_fluxes_Σ = 0.0;
+  temperature_source_Σ = 0.0;
+}
+
+// ****************************************************************************
+// * temporalSchemeComputeStandardFluxesSum
+// ****************************************************************************
+∀ cells temporalSchemeComputeStandardFluxesSum @ 16.0{
+  ∀ node{
+    const ℝ³ Δu = -node_u+reconstructed_u;
+    ℝ³ FQs = AQs ⨂ Δu;
+    velocity_fluxes_Σ -= FQs/epsilon;
+    pressure_fluxes_Σ -= (CQs⋅node_u)/epsilon;
+  }
+}
+
+// ****************************************************************************
+// * temporalSchemeApplyFluxesStandard
+// ****************************************************************************
+∀ cells temporalSchemeApplyFluxesStandard @ 19.0{
+  u += δt*velocity_fluxes_Σ/V;
+  p += δt*pressure_fluxes_Σ/V;
+  if (option_coupling_coef==0)    e_tp = (σ_a * δt)/(epsilon*epsilon+2.*σ_a*δt);
+  if (option_coupling_coef==1)    e_tp = 0.5*(1.-exp(-2.*σ_a*δt/(epsilon*epsilon)));
+  if (option_coupling_coef==2)    e_tp = σ_a*δt/(epsilon*epsilon);
+  if (option_semi_implicit){    
+    temperature_source_Σ = e_tp/(1. + 2.*e_tp) * (p - temperature);
+    p-= temperature_source_Σ;
+    temperature += temperature_source_Σ;
+  } else {
+    temperature_source_Σ = e_tp * (p - temperature);
+    p-= temperature_source_Σ;
+    temperature += temperature_source_Σ;
+  }
+  //temperature_source_Σ -= e_tp * (temperature - p);    
+  //p += -temperature_source_Σ;///V;
+}
+
+// ****************************************************************************
+// * geomComputeCQsQuad @ 23.0
+// * geomComputeSurfaceAndVolume @ 24.0 
+// ****************************************************************************
+
+// ****************************************************************************
+// * glaceEOS vient se placer ici: [26.0 → 30.0]
+// ****************************************************************************
+
+// ****************************************************************************
+// * hydroTimeStepCtrlCells: Calcul du δt par maille
+// ****************************************************************************
+∀ cells hydroTimeStepCtrlCells @ 30.0{
+  ℝ Σljr=0.0;
+  ∀ node Σljr+=absCQs;
+  p1_δt=V*epsilon/(2.0*Σljr);
+}
+
+// ****************************************************************************
+// * Réduction min vers le global_δt
+// ****************************************************************************
+∀ cells global_δt <?= p1_δt @ 31.0;
+
+// ****************************************************************************
+// * dumpGnuplot @ 34.0
+// ****************************************************************************
+
+// ****************************************************************************
+// * glaceTimeStepCtrl
+// ****************************************************************************
+hydroTimeStepCtrl @ 35.0{
+  ℝ new_δt=option_δt_control*global_δt;
+  printf("\n\t[1m iteration=%d, time=%f, global_δt=%.15e[0m",iteration,time,global_δt);
+  // on calcule les variations min et max autorisées
+  const ℝ max_time_step = (1.0+option_δt_max_variation)*δt;
+  const ℝ min_time_step = (1.0-option_δt_min_variation)*δt;
+  if (new_δt > max_time_step) new_δt=max_time_step;
+  if (new_δt < min_time_step) new_δt=min_time_step;
+  new_δt = min(new_δt, option_δt_max);
+  new_δt = max(new_δt, option_δt_min);
+  // le dernier calcul se fait exactement au temps final
+  if (option_δt_last_exact && ((time + new_δt) > option_stoptime)) 
+      new_δt = option_stoptime - time;
+  δt=new_δt;
+}
+
+// ****************************************************************************
+// * dumpSolution @ 36.0
+// ****************************************************************************
+
+// ****************************************************************************
+// * Test for QUIT
+// ****************************************************************************
+testForQuit @ 40.0{
+  if (option_max_iterations!=0 && iteration >= option_max_iterations) exit;
+  if ((time<(option_stoptime-δt))) return;
+  fflush(NULL);
+  printf("\n[1;33m final δt=%.15e[0m\n",δt);
+  fflush(NULL);
+  if ((X_EDGE_ELEMS==8) && (Y_EDGE_ELEMS==8)) assert(tL2error==4.023316714693764e-02);
+  if ((X_EDGE_ELEMS==4) && (Y_EDGE_ELEMS==4)) assert(tL2error==6.093190912983532e-02);
+  exit;
+}

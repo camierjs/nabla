@@ -97,12 +97,17 @@ nablaVariable *nMiddleVariableFindKoffset(nablaVariable *variables,
                                           const int koffset){
   nablaVariable *variable=variables;
   assert(name!=NULL);
+  dbg("\n\t\t\t\t\t\t[nablaVariableFind] looking for '%s-k(%d)'", name,koffset);
   while(variable) {
-    if (strcmp(variable->name, name)==0 // Bon nom de variable
-        && variable->koffset==koffset)  // Bon k-offset de cette variable
+    dbg(" ?%s-k(%d)", variable->name,variable->koffset);
+    if (strcmp(variable->name, name)==0  // Bon name
+        && variable->koffset==koffset){  // Bon k-offset 
+      dbg(" Yes!");
       return variable;
+    }
     variable = variable->next;
   }
+  dbg(" Nope!");
   return NULL;
 }
 
@@ -397,22 +402,27 @@ bool dfsUsedInThisForallKoffset(nablaMain *nabla,
     return false;
   }
   if (n->ruleid==ruleToId(rule_primary_expression)){
-    dbg("\n\t\t\t\t\t[dfsUsedInThisForallKoffset] primary_expression");
-    if (n->children->tokenid==IDENTIFIER){
+    dbg("\n\t\t\t\t\t[dfsUsedInThisForallKoffset] primary_expression (%s)", n->children->token?n->children->token:"?");
+    if ((n->children->tokenid==IDENTIFIER) && (strcmp(n->children->token,name)==0)){
       const bool id_has_a_koffset = (n->children->next &&
                                      n->children->next->tokenid==K_OFFSET);
       const int n_children_next_koffset=id_has_a_koffset?getKoffset(n->children->next->token):0;
-      dbg(", token: '%s'",n->children->token?n->children->token:"id");
-      if ((var=nMiddleVariableFindKoffset(nabla->variables,
+      dbg(", token: '%s-k(%d) vs arg:%s-k(%d)",
+          n->children->token, n_children_next_koffset,
+          name,koffset);
+      if ((var=nMiddleVariableFindKoffset(job->used_variables,//nabla->variables,
                                           n->children->token,
                                           n_children_next_koffset))!=NULL){
-        dbg(", var-name: '%s' vs '%s'",var->name,name);
-        if (strcmp(var->name,name)==0) return true;
+        dbg(", hit var-name-k: '%s' vs '%s'",var->name,name);
+        if (strcmp(var->name,name)==0){
+          dbg("YES");
+          return true;
+        }
       }
     }
   }
-  if (n->children != NULL) if (dfsUsedInThisForall(nabla, job, n->children,name)) return true;
-  if (n->next != NULL) if (dfsUsedInThisForall(nabla, job, n->next,name)) return true;
+  if (n->children != NULL) if (dfsUsedInThisForallKoffset(nabla, job, n->children,name,koffset)) return true;
+  if (n->next != NULL) if (dfsUsedInThisForallKoffset(nabla, job, n->next,name,koffset)) return true;
   return false;
 }
 bool dfsUsedInThisForall(nablaMain *nabla, nablaJob *job, astNode *n,const char *name){
@@ -662,7 +672,7 @@ void dfsVariablesDump(nablaMain *nabla, nablaJob *job, astNode *n){
   nablaVariable *var=job->used_variables;
   dbg("\n\t[dfsVariablesDump]:");
   for(;var!=NULL;var=var->next){
-    dbg("\n\t\t[dfsVariablesDump] Variable '%s-%d' is used (%s) in this job!",
+    dbg("\n\t\t[dfsVariablesDump] Variable '%s:(%d)' is used (%s) in this job!",
         var->name,var->koffset,inout(var));
   }
 }

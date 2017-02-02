@@ -395,14 +395,20 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
   const char *prefix=
     nabla->hook->token->prefix?
     nabla->hook->token->prefix(nabla):"";
+  // List de variables déjà dans les arguments
+  nablaVariable *args_variables=NULL;
   // Dump des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
-    // On évite brutalement pour l'instant les variables avec un koffset >0
-    // On fait l'hypothèse que la var à koffset=0 sera utilsée
-    if (var->koffset!=0) continue;
+    // On regarde si l'on a pas déjà insérer l'argument corespondant à cette variable
+    if (nMiddleVariableFind(args_variables,var->name)!=NULL) continue;
+    // Si c'est la première fois, on l'ajoute à cette liste
+    nablaVariable *arg=nMiddleVariableNew(NULL);
+    arg->name=sdup(var->name);
+    if (args_variables==NULL) args_variables=arg;
+    else nMiddleVariableLast(args_variables)->next=arg;
+    
     nprintf(nabla, NULL, "%s%s%s%s %s%s_%s",//__restrict__
             (i==0)?"":",",
-            //(var->in&&!var->out)?"":"",//const
             cHOOKn(nabla,vars,idecl),
             // Si on est en 1D ou 2D et qu'on a un real3,
             // c'est qu'on joue peut-être avec les coords? => on force à real
@@ -489,15 +495,23 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
     }
   }
 
-// Dump des options du job
+  // Dump des options du job
   //nablaOption *opt=job->used_options;
   //for(i=0;opt!=NULL;opt=opt->next,i+=1)
   //  nprintf(nabla, NULL, "%s%s", (i==0)?"":",", opt->name);
   
+    // List de variables déjà dans les arguments
+  nablaVariable *args_variables=NULL;
   // Dump des variables du job
   for(var=job->used_variables;var!=NULL;var=var->next,i+=1){
-    // On ne dump pas les variables utilsées à koffset >0
-    if (var->koffset!=0) continue;
+    // On regarde si l'on a pas déjà insérer l'argument corespondant à cette variable
+    if (nMiddleVariableFind(args_variables,var->name)!=NULL) continue;
+    // Si c'est la première fois, on l'ajoute à cette liste
+    nablaVariable *arg=nMiddleVariableNew(NULL);
+    arg->name=sdup(var->name);
+    if (args_variables==NULL) args_variables=arg;
+    else nMiddleVariableLast(args_variables)->next=arg;
+    // Et on ajoute finalement l'argument
     nprintf(nabla, NULL, "%s%s_%s",
             (i==0)?"":",",
             var->item,var->name);

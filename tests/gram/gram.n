@@ -88,6 +88,7 @@ options{
 
 cells{
   ℝ α;
+  ℝ³ center;
 //  ℝ^{Nb} β;
 //  ℝ^{l(nvx,nvy,nvz),nc} γ;
 //  ℝ v;  ℝ e,volo;
@@ -112,7 +113,7 @@ nodes{ ℝ π;};
 //∀ cells void blabla(void) @ 8.0 { /*α=0.0;*/ }
 //∀ cells cellJob @ 8.0 { /*∀ node α=0.0;*/ }
 //∀ cells @ 8.0 { ∀ node α=0.0; }
-∀ cells try @ 8.0 {
+/*∀ cells try @ 8.0 {
   ∀ faces {
     //const ℝ r=π;
     //const ℝ s=π[#];
@@ -121,7 +122,8 @@ nodes{ ℝ π;};
     const ℝ u=α[#];
     const ℝ u=α[#+1];
   }
-}
+  }*/
+∀ cells @ 8.0 { center=0; ∀ node center+=coord; center/=4.0; }
 //∀ cells @ 8.0 { /*∀ node α=0.0;*/ }
 //∀ cells @ 8.0 { ∀ n node α=0.0; }
 //∀ cells @ 8.0 { ∀ Nb set{ β=0.0;} }

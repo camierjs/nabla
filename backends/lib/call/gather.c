@@ -67,8 +67,7 @@ static char* xCallGatherCells(nablaJob *job,
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
 /*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":dim1D?"real":
-             strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
+             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
@@ -84,7 +83,7 @@ static char* xCallGatherCells(nablaJob *job,
               strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
               var->item,
               var->name,
-              has_non_null_koffset ? str_uds_koffset:"",             
+             has_non_null_koffset ? str_uds_koffset:"",             
               strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
               has_non_null_koffset ? str_pip_koffset:iterator,
               var->item,
@@ -178,7 +177,7 @@ char* xCallFilterGather(astNode *n,nablaJob *job){
       dbg("\n\t\t\t\t\t[xFilterGather] not gathered");
       continue;
     }
-    nprintf(job->entity->main, NULL, "/* '%s' is gathered",var->name);
+    nprintf(job->entity->main, NULL, "/* '%s:k(%d)' is gathered",var->name,var->koffset);
     if (!dfsUsedInThisForallKoffset(job->entity->main,job,n,var->name,var->koffset)){
       nprintf(job->entity->main, NULL, " but NOT used InThisForall! */");
       continue;

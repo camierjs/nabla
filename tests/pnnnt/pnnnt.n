@@ -475,7 +475,11 @@ incTime @ 30.0 {
       <<", time = "<<time<<", dt = "<<dt<<endl;
 }
 
-tstExit @ 40.0 { if (cycle>=cstop||time>=tstop) exit; }
+tstExit @ 40.0 {
+  if (cycle < cstop && time < tstop) return;
+  if (X_EDGE_ELEMS==3 && Y_EDGE_ELEMS==3 && Z_EDGE_ELEMS==1) assert(iteration==48);
+  exit;
+}
 
 
 // ****************************************************************************

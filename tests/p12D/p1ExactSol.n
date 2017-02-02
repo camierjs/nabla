@@ -1,10 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -40,90 +41,75 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef _KN_TERNARY_H_
-#define _KN_TERNARY_H_
 
-inline integer opTernary(const __mmask8 cond,
-                         const int ifStatement,
-                         const integer elseStatement){
-  return _mm512_mask_blend_epi64(cond, elseStatement, integer(ifStatement));
-}
-inline integer opTernary(const __mmask8 cond,
-                         const int ifStatement,
-                         const int elseStatement){
-  return _mm512_mask_blend_epi64(cond, integer(elseStatement), integer(ifStatement));
-}
+ℝ  _exact_p_sol_0(ℝ t, ℝ³ pos){ return 1.0-pos.x;}
+ℝ³ _exact_u_sol_0(ℝ t, ℝ³ pos){ return ℝ³(1.0,0.0,0.0);}
+ℝ  _exact_t_sol_0(ℝ t, ℝ³ pos){ return 1.0-pos.x;}
 
-inline real opTernary(const __mmask8 cond,
-                      const __m512d ifStatement,
-                      const __m512d elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
+ℝ  _exact_p_sol_1(ℝ t, ℝ³ pos){ return exp(-t);}
+ℝ³ _exact_u_sol_1(ℝ t, ℝ³ pos){ return ℝ³(pos.x*exp(-t),0.0,0.0);}
+ℝ  _exact_t_sol_1(ℝ t, ℝ³ pos){ return exp(-t);}
 
-inline real opTernary(const __mmask8 cond,
-                      const double ifStatement,
-                      const double elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), _mm512_set1_pd(ifStatement));
-}
+ℝ  _exact_p_sol_2(ℝ t, ℝ³ pos){ return (0.5*(1.-exp(-2.*t)));}
+ℝ³ _exact_u_sol_2(ℝ t, ℝ³ pos){ return ℝ³(0.0,0.0,0.0);}
+ℝ  _exact_t_sol_2(ℝ t, ℝ³ pos){ return (0.5*(1.+exp(-2.*t)));}
 
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const double elseStatement){
-  if (cond) return _mm512_set1_pd(ifStatement);
-  return _mm512_set1_pd(elseStatement);
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const double ifStatement,
-                      const real&  elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, _mm512_set1_pd(ifStatement));
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const real& ifStatement,
-                      const double elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), ifStatement);
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const real& ifStatement,
-                      const real& elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
-inline bool opTernary(const __mmask8 cond,
-                      const bool ifStatement,
-                      const bool elseStatement){
-  return _mm512_mask_blend_pd(cond, _mm512_set1_pd(elseStatement), _mm512_set1_pd(ifStatement))[0];
-}
-
-inline real opTernary(const __mmask8 cond,
-                      const __m512d ifStatement,
-                      const real& elseStatement){
-  return _mm512_mask_blend_pd(cond, elseStatement, ifStatement);
-}
-
-inline real opTernary(const bool cond,
-                      const double ifStatement,
-                      const real& elseStatement){
-  if (cond) return _mm512_set1_pd(ifStatement);
-  return elseStatement;
-}
-
-inline real opTernary(const bool cond,
-                      const real& ifStatement,
-                      const real& elseStatement){
-  if (cond) return ifStatement;
-  return elseStatement;
-}
+ℝ  _exact_p_sol_3(ℝ t, ℝ³ pos){ return (exp(-0.25*t)*cos(pos.x));}
+ℝ³ _exact_u_sol_3(ℝ t, ℝ³ pos){ return ℝ³(0.75*exp(-0.25*t)*sin(pos.x),0.0,0.0);}
+ℝ  _exact_t_sol_3(ℝ t, ℝ³ pos){ return (2.*exp(-0.25*t)*cos(pos.x));}
 
 
-inline real3 opTernary(const __mmask8 cond,
-                       const double ifStatement,
-                       const real3&  elseStatement){
-  //debug()<<"opTernary4";
-  return real3(_mm512_mask_blend_pd(cond, elseStatement.x, _mm512_set1_pd(ifStatement)),
-               _mm512_mask_blend_pd(cond, elseStatement.y, _mm512_set1_pd(ifStatement)),
-               _mm512_mask_blend_pd(cond, elseStatement.z, _mm512_set1_pd(ifStatement)));
+ℝ _exact_p_sol(ℝ t, ℝ³ pos){
+  if (option_case==0) return _exact_p_sol_0(t, pos);
+  if (option_case==1) return _exact_p_sol_1(t, pos);
+  if (option_case==2) return _exact_p_sol_2(t, pos);
+  if (option_case==3) return _exact_p_sol_3(t, pos);
+  printf("\n The test problem (%d) does not exist",option_case);
+  assert(false);
 }
 
-#endif //  _KN_TERNARY_H_
+ℝ³ _exact_u_sol(ℝ t, ℝ³ pos){
+  if (option_case==0) return _exact_u_sol_0(t, pos);
+  if (option_case==1) return _exact_u_sol_1(t, pos);
+  if (option_case==2) return _exact_u_sol_2(t, pos);
+  if (option_case==3) return _exact_u_sol_3(t, pos);
+  printf("\n Cas test non géré");
+  assert(false);
+}
+
+ℝ _exact_t_sol(ℝ t, ℝ³ pos){
+  if (option_case==0) return _exact_t_sol_0(t, pos);
+  if (option_case==1) return _exact_t_sol_1(t, pos);
+  if (option_case==2) return _exact_t_sol_2(t, pos);
+  if (option_case==3) return _exact_t_sol_3(t, pos);
+  printf("\n Cas test non géré");
+  assert(false);
+}
+
+∀ cells analyticSol @ 30.1 {
+  pana=_exact_p_sol(time,center);
+  uana=_exact_u_sol(time,center);
+  tana=_exact_t_sol(time,center);
+}
+
+iniL2Error @ 30.0 {
+  pL2error=0.;
+  uL2error=0.;
+  tL2error=0.;
+  Vtot=0.;
+}
+
+∀ cells computeL2Error @ 30.1 {
+  pL2error+=(pana-p)*(pana-p)*V*V;
+  uL2error+=(uana-u)⋅(uana-u)*V*V;
+  tL2error+=(tana-temperature)*(tana-temperature)*V*V;
+  Vtot+=V;
+}
+
+printL2Error @ 30.2 {
+  pL2error=sqrt(pL2error)/Vtot;
+  uL2error=sqrt(uL2error)/Vtot;
+  tL2error=sqrt(tL2error)/Vtot;
+  printf("\n\t[33m[printL2Error]\n\t Erreur sur p=(%.15e),\n\t Erreur sur u=(%.15e),\n\t Erreur sur T=(%.15e).[0m",pL2error,uL2error,tL2error);
+
+}

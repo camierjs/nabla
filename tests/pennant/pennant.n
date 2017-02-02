@@ -794,5 +794,7 @@ incTime @ 30.0 {
 
 tstExit @ 40.0 {
   if (cycle < cstop && time < tstop) return;
+  cout<<"[35m[tstExit][m"<<endl;
+  if (X_EDGE_ELEMS==3 && Y_EDGE_ELEMS==3 && Z_EDGE_ELEMS==1) assert(iteration==48);
   exit;
 }

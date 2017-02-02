@@ -98,6 +98,11 @@ inline real opTernary(const __m128d cond,
                       const double elseStatement){
   return _mm_blendv_pd(_mm_set1_pd(elseStatement), _mm_set1_pd(ifStatement), cond);
 }
+inline bool opTernary(const __m128d cond,
+                      const bool ifStatement,
+                      const bool elseStatement){
+  return _mm_blendv_pd(_mm_set1_pd(elseStatement), _mm_set1_pd(ifStatement), cond)[0];
+}
 
 inline real opTernary(const bool cond,
                       const double ifStatement,

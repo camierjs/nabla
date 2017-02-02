@@ -249,6 +249,8 @@ void timeIncrement(void) @ 0.1 {
   const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = scaled_δt ;
+  if (((time+δt)==option_stoptime)?true:false)
+    assert(X_EDGE_ELEMS==8 && Y_EDGE_ELEMS==8 && Z_EDGE_ELEMS==8 && iteration==470);
   if (iteration >= option_max_iterations) exit;
 }
 

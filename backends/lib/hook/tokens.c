@@ -401,7 +401,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   case(FORALL_INI):{
     dbg("\n\t\t\t\t[xHookSwitchToken] FORALL_INI");
     nprintf(nabla, "/*FORALL_INI*/", "{\n\t\t\t");//FORALL_INI
-    nprintf(nabla, "/*xCallFilterGather*/",
+    nprintf(nabla, "/*xCallFilterGather*/\n",
             xCallFilterGather(n,job));
     break;
   }
