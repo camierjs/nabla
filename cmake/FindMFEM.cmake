@@ -1,6 +1,6 @@
 include(${NABLA_SOURCE_DIR}/cmake/CMakeTPL.txt)
 
-find_path(MFEM_INCLUDE_PATH mfem.hpp ${MFEM_ROOT_PATH})
+find_path(MFEM_INCLUDE_PATH mfem.hpp ${MFEM_ROOT_PATH}/include)
 info("${VT100_FG_MAGENTA}MFEM${VT100_RESET} set to ${VT100_BOLD}${MFEM_INCLUDE_PATH}${VT100_RESET}")
 
 if(MFEM_INCLUDE_PATH)

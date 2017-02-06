@@ -42,46 +42,46 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-ℝ  _exact_p_sol_0(ℝ t, ℝ³ pos){ return 1.0-pos.x;}
-ℝ³ _exact_u_sol_0(ℝ t, ℝ³ pos){ return ℝ³(1.0,0.0,0.0);}
-ℝ  _exact_t_sol_0(ℝ t, ℝ³ pos){ return 1.0-pos.x;}
+ℝ  _exact_p_sol_0(ℝ t, ℝ³ X){ return 1.0-X.x;}
+ℝ³ _exact_u_sol_0(ℝ t, ℝ³ X){ return ℝ³(1.,0.,0.);}
+ℝ  _exact_t_sol_0(ℝ t, ℝ³ X){ return 1.0-X.x;}
 
-ℝ  _exact_p_sol_1(ℝ t, ℝ³ pos){ return exp(-t);}
-ℝ³ _exact_u_sol_1(ℝ t, ℝ³ pos){ return ℝ³(pos.x*exp(-t),0.0,0.0);}
-ℝ  _exact_t_sol_1(ℝ t, ℝ³ pos){ return exp(-t);}
+ℝ  _exact_p_sol_1(ℝ t, ℝ³ X){ return exp(-t);}
+ℝ³ _exact_u_sol_1(ℝ t, ℝ³ X){ return ℝ³(X.x*exp(-t),0.,0.);}
+ℝ  _exact_t_sol_1(ℝ t, ℝ³ X){ return exp(-t);}
 
-ℝ  _exact_p_sol_2(ℝ t, ℝ³ pos){ return (0.5*(1.-exp(-2.*t)));}
-ℝ³ _exact_u_sol_2(ℝ t, ℝ³ pos){ return ℝ³(0.0,0.0,0.0);}
-ℝ  _exact_t_sol_2(ℝ t, ℝ³ pos){ return (0.5*(1.+exp(-2.*t)));}
+ℝ  _exact_p_sol_2(ℝ t, ℝ³ X){ return (½*(1.-exp(-2.*t)));}
+ℝ³ _exact_u_sol_2(ℝ t, ℝ³ X){ return ℝ³(0.,0.,0.);}
+ℝ  _exact_t_sol_2(ℝ t, ℝ³ X){ return (½*(1.+exp(-2.*t)));}
 
-ℝ  _exact_p_sol_3(ℝ t, ℝ³ pos){ return (exp(-0.25*t)*cos(pos.x));}
-ℝ³ _exact_u_sol_3(ℝ t, ℝ³ pos){ return ℝ³(0.75*exp(-0.25*t)*sin(pos.x),0.0,0.0);}
-ℝ  _exact_t_sol_3(ℝ t, ℝ³ pos){ return (2.*exp(-0.25*t)*cos(pos.x));}
+ℝ  _exact_p_sol_3(ℝ t, ℝ³ X){ return (exp(-¼*t)*cos(X.x));}
+ℝ³ _exact_u_sol_3(ℝ t, ℝ³ X){ return ℝ³(0.75*exp(-¼*t)*sin(X.x),0.,0.);}
+ℝ  _exact_t_sol_3(ℝ t, ℝ³ X){ return (2.*exp(-¼*t)*cos(X.x));}
 
 
-ℝ _exact_p_sol(ℝ t, ℝ³ pos){
-  if (option_case==0) return _exact_p_sol_0(t, pos);
-  if (option_case==1) return _exact_p_sol_1(t, pos);
-  if (option_case==2) return _exact_p_sol_2(t, pos);
-  if (option_case==3) return _exact_p_sol_3(t, pos);
+ℝ _exact_p_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_p_sol_0(t,X);
+  if (option_case==1) return _exact_p_sol_1(t,X);
+  if (option_case==2) return _exact_p_sol_2(t,X);
+  if (option_case==3) return _exact_p_sol_3(t,X);
   printf("\n The test problem (%d) does not exist",option_case);
   assert(false);
 }
 
-ℝ³ _exact_u_sol(ℝ t, ℝ³ pos){
-  if (option_case==0) return _exact_u_sol_0(t, pos);
-  if (option_case==1) return _exact_u_sol_1(t, pos);
-  if (option_case==2) return _exact_u_sol_2(t, pos);
-  if (option_case==3) return _exact_u_sol_3(t, pos);
+ℝ³ _exact_u_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_u_sol_0(t,X);
+  if (option_case==1) return _exact_u_sol_1(t,X);
+  if (option_case==2) return _exact_u_sol_2(t,X);
+  if (option_case==3) return _exact_u_sol_3(t,X);
   printf("\n Cas test non géré");
   assert(false);
 }
 
-ℝ _exact_t_sol(ℝ t, ℝ³ pos){
-  if (option_case==0) return _exact_t_sol_0(t, pos);
-  if (option_case==1) return _exact_t_sol_1(t, pos);
-  if (option_case==2) return _exact_t_sol_2(t, pos);
-  if (option_case==3) return _exact_t_sol_3(t, pos);
+ℝ _exact_t_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_t_sol_0(t,X);
+  if (option_case==1) return _exact_t_sol_1(t,X);
+  if (option_case==2) return _exact_t_sol_2(t,X);
+  if (option_case==3) return _exact_t_sol_3(t,X);
   printf("\n Cas test non géré");
   assert(false);
 }
@@ -100,16 +100,19 @@ iniL2Error @ 30.0 {
 }
 
 ∀ cells computeL2Error @ 30.1 {
-  pL2error+=(pana-p)*(pana-p)*V*V;
-  uL2error+=(uana-u)⋅(uana-u)*V*V;
-  tL2error+=(tana-temperature)*(tana-temperature)*V*V;
+  pL2error+=(pana-p)*(pana-p)*V²;
+  uL2error+=(uana-u)⋅(uana-u)*V²;
+  tL2error+=(tana-θ)*(tana-θ)*V²;
   Vtot+=V;
 }
 
-printL2Error @ 30.2 {
-  pL2error=sqrt(pL2error)/Vtot;
-  uL2error=sqrt(uL2error)/Vtot;
-  tL2error=sqrt(tL2error)/Vtot;
-  printf("\n\t[33m[printL2Error]\n\t Erreur sur p=(%.15e),\n\t Erreur sur u=(%.15e),\n\t Erreur sur T=(%.15e).[0m",pL2error,uL2error,tL2error);
+printL2Error @ 35.0 {
+  if ((time<(option_stoptime-δt))) return;
+  pL2error=√(pL2error)/Vtot;
+  uL2error=√(uL2error)/Vtot;
+  tL2error=√(tL2error)/Vtot;
+  printf("\n\t[33m[printL2Error] Erreur sur p=(%.15e)[m",pL2error);
+  printf("\n\t[33m[printL2Error] Erreur sur u=(%.15e)[m",uL2error);
+  printf("\n\t[33m[printL2Error] Erreur sur T=(%.15e)[m",tL2error);
 
 }

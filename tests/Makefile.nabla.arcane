@@ -26,6 +26,7 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
  -larcane_utils\
  -larcane_driverlib\
  -larcane_hyoda\
+ -larcane_cartesian\
  -larcane_aleph\
  -larcane_aleph_hypre\
  $(ARCANE_PKG_LIBS)\

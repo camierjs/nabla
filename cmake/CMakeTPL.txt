@@ -3,14 +3,21 @@ set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
 set(MPI_CXX_INCLUDE_PATH /usr/include/mpi)
 set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
 
+set(HYPRE_ROOT /usr/local/hypre)
+
+set(Trilinos_ROOT_PATH /usr/local/trilinos/11.12.1)
+
 set(ICET_ROOT /usr/local/iceT)
+
 set(RAJA_ROOT /usr/local/raja)
 #set(RAJA_ROOT /Users/camierjs/raja/RAJA)
-set(HYPRE_ROOT /usr/local/hypre)
+
 set(KOKKOS_ROOT /usr/local/kokkos)
 #set(KOKKOS_ROOT /Users/camierjs/kokkos)
+
 set(ARCANE_ROOT /usr/local/arcane/testing)
-set(Trilinos_ROOT_PATH /usr/local/trilinos/11.12.1)
-set(MFEM_ROOT_PATH ${NABLA_SOURCE_DIR}/tpl/mfem)
+
+set(MFEM_ROOT_PATH /usr/local/mfem)
+set(GLVIS_ROOT_PATH /usr/local/glvis)
 
 set(LEGION_ROOT /usr/local/legion)

@@ -105,6 +105,7 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 #define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
+#define FOR_EACH_OUTER_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=nxtOuterCellOffset(c))\n \
 #define FOR_EACH_OUTER_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=nxtOuterCellOffset(c))\n \
 #define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
@@ -116,6 +117,7 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
 #define FOR_EACH_NODE_MSH(n) for(int n=0;n<msh.NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_NODE(n) %sfor(int n=0;n<NABLA_NB_NODES;n+=1)\n\
 #define FOR_EACH_NODE_WARP(n) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
+#define FOR_EACH_NODE_WARP_SHARED(n,local) %sfor(int n=0;n<NABLA_NB_NODES_WARP;n+=1)\n\
 #define FOR_EACH_NODE_CELL(c)\
  for(int c=0,nc=NABLA_NODE_PER_CELL*n;c<NABLA_NODE_PER_CELL;c+=1,nc+=1)\n\n\
 #define FOR_EACH_NODE_CELL_MSH(c)\
@@ -125,6 +127,7 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_FACE(f) %sfor(int f=0;f<NABLA_NB_FACES;f+=1)\n\
 #define FOR_EACH_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES;f+=1)\n\
+#define FOR_EACH_FACE_WARP_SHARED(n,local) %sfor(int f=0;f<NABLA_NB_FACES;f+=1)\n\
 #define FOR_EACH_INNER_FACE(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
 #define FOR_EACH_INNER_FACE_WARP(f) %sfor(int f=0;f<NABLA_NB_FACES_INNER;f+=1)\n\
 #define FOR_EACH_OUTER_FACE(f)\
@@ -145,14 +148,17 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
           parallel_prefix_for_loop, // FOR_EACH_PARTICLE_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
+          parallel_prefix_for_loop, // FOR_EACH_OUTER_CELL
           parallel_prefix_for_loop, // FOR_EACH_OUTER_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
           parallel_prefix_for_loop, // FOR_EACH_CELL_SHARED
           parallel_prefix_for_loop, // FOR_EACH_NODE
           parallel_prefix_for_loop, // FOR_EACH_NODE_WARP
+          parallel_prefix_for_loop, // FOR_EACH_NODE_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_FACE
           parallel_prefix_for_loop, // FOR_EACH_FACE_WARP
+          parallel_prefix_for_loop, // FOR_EACH_FACE_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_INNER_FACE
           parallel_prefix_for_loop, // FOR_EACH_INNER_FACE_WARP
           parallel_prefix_for_loop, // FOR_EACH_OUTER_FACE

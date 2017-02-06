@@ -48,10 +48,11 @@
 inline ℝ geomCross2D(ℝ³ _u,ℝ³ _v){ return ℝ(_u.x*_v.y - _u.y*_v.x);}
 inline ℝ³ geomNormal(ℝ³ a, ℝ³ b){ return ℝ³(b.y-a.y,-b.x+a.x,0.0);}
 
-// Calcul de Δl: Length of the sides, before touching mesh
-void computeΔl(void) @ -30.0 {
-  Δl=fmin(NABLA_NB_NODES_X_TICK,NABLA_NB_NODES_Y_TICK);
-}
+// ****************************************************************************
+// * Calcul de Δl: Length of the sides, before touching mesh
+// ****************************************************************************
+∀ faces calcΔl @ -30.2 { l=norm(coord[0]-coord[1]); }
+∀ faces Δl <?= l @ -30.1;
 
 // ****************************************************************************
 // * randomDistortedQuads
@@ -67,26 +68,21 @@ void computeΔl(void) @ -30.0 {
 }
 
 // ****************************************************************************
-// * geomComputeSurfaceAndVolume @ -20.0 & 23.0
+// * geomComputeSurfaceAndVolume @ -28.0 & 23.0
 // ****************************************************************************
-∀ cells @ -20.0,23.0 {
+∀ cells X @ -28.1{//,23.0 {
   center=0;
   ∀ nodes center+=coord;
   center*=¼;
 }
-∀ cells @ -20.0,23.0 {
+∀ cells V @ -28.1{//,23.0 {
   const ℝ³ fst_edge = coord[2]-coord[0];
   const ℝ³ snd_edge = coord[0]-coord[1];
   V=geomCross2D(fst_edge,snd_edge);
 }
 
 // ****************************************************************************
-// * debug des positions des noeuds
-// ****************************************************************************
-
-// ****************************************************************************
 // * Calcul des résultantes aux sommets des mailles
-// * geomComputeCQsQuad @ -20.0,24.0
 // ****************************************************************************
-∀ cells @ -20.0,24.0 { ∀ node CQs = ½*geomNormal(coord[#-1],coord[#+1]); }
-∀ cells @ -19.9,24.1 { ∀ node absCQs=norm(CQs); }
+∀ cells CQs @ -28.1{//,24.0
+  ∀ nodes CQs = ½*geomNormal(coord[#-1],coord[#+1]); }

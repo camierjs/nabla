@@ -80,7 +80,7 @@ void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
     // Préparation du nom du job
   char job_name[NABLA_MAX_FILE_NAME];
   const unsigned long *adrs = (unsigned long*)&redjob->whens[redjob->when_index-1];
-  snprintf(job_name,NABLA_MAX_FILE_NAME,"reduction_%s_at_0x%lx",global_var_name,*adrs);
+  snprintf(job_name,NABLA_MAX_FILE_NAME,"reduction_%s_at_%lx",global_var_name,*adrs);
   redjob->name   = sdup(job_name);
   redjob->name_utf8 = sdup(job_name);
 
@@ -90,11 +90,19 @@ void xHookReduction(struct nablaMainStruct *nabla, astNode *n){
   const char* mix = min_reduction?"in":"ax";
   const char* min_or_max_operation = min_reduction?"<":">";
   // Génération de code associé à ce job de réduction
-  nprintf(nabla, NULL, "\n\
+  if (redjob->item[0]=='c')
+    nprintf(nabla, NULL, "\n\
 // ******************************************************************************\n\
 // * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
 // ******************************************************************************\n\
 void %s(const int NABLA_NB_CELLS_WARP, const int NABLA_NB_CELLS,",item_var_name,global_var_name,job_name);
+
+  if (redjob->item[0]=='f')
+    nprintf(nabla, NULL, "\n\
+// ******************************************************************************\n\
+// * Kernel de reduction de la variable '%s' vers la globale '%s'\n\
+// ******************************************************************************\n\
+void %s(const int NABLA_NB_FACES, const int NABLA_NB_FACES_INNER, const int NABLA_NB_FACES_OUTER,",item_var_name,global_var_name,job_name);
 
   
   nablaVariable *global_var=nMiddleVariableFind(nabla->variables, global_var_name);
@@ -157,12 +165,12 @@ void %s(const int NABLA_NB_CELLS_WARP, const int NABLA_NB_CELLS,",item_var_name,
           global_var_name, // %s_per_thread
           global_var_name, // %s_per_thread
           global_var_name, // %s_per_thread
-          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":"NULL",
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          (item_node->token[0]=='c')?"CELL":(item_node->token[0]=='n')?"NODE":(item_node->token[0]=='f')?"FACE":"NULL",
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":(item_node->token[0]=='f')?"f":"?",
           global_var_name,mix, // %s_per_thread[tid] & m%s
-          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":"?",
+          (item_node->token[0]=='c')?"cell":(item_node->token[0]=='n')?"node":(item_node->token[0]=='f')?"face":"?",
           item_var_name,
-          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":"?",
+          (item_node->token[0]=='c')?"c":(item_node->token[0]=='n')?"n":(item_node->token[0]=='f')?"f":"?",
           global_var_name,
           global_var_name,global_var_name,global_var_name, // global_%s & real_global_%s & global_%s
           global_var_name,mix,global_var_name,min_or_max_operation,mix,global_var_name,

@@ -434,28 +434,39 @@ void nMiddleJobFill(nablaMain *nabla,
   
   // Scan DFS pour récuérer les in/inout/out,
   // on dump dans le log les tokens de ce job
-  dbg("\n\t[nablaJobFill] Now dfsVariables:");
+  dbg("\n** [nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
   
-  dbg("\n\t[nablaJobFill] Now dfsEnumMax:");
+  dbg("\n** [nablaJobFill] Now dfsEnumMax:");
   //dfsEnumMax(nabla,job,n);
   dfsVariablesDump(nabla,job,n);
 
-  
   // On va chercher s'il y a des xyz dans les parameter_type_list
   // Ne devrait plus être utilisé
-  job->xyz = dfsFetchFirst(n,ruleToId(rule_nabla_xyz_declaration));
-  job->direction = dfsFetchFirst(n->children,
-                              ruleToId(rule_nabla_xyz_direction));
+  {
+    const char underscore=job->name[strlen(job->name)-2];
+    const char X_Y_Z=job->name[strlen(job->name)-1];
+    const bool xyz = underscore=='_' && X_Y_Z>='X' && X_Y_Z <='Z';
+    dbg("\n** [nablaJobFill] XYZ? underscore=%c, X_Y_Z=%c",underscore,X_Y_Z);
+    job->xyz = xyz?"xyz":NULL;
+    job->direction = xyz?
+      X_Y_Z=='X'?"MD_DirX":
+      X_Y_Z=='Y'?"MD_DirY":
+      X_Y_Z=='Z'?"MD_DirZ":"/*xyz_but_no_XYZ*/":NULL;
+      //job->xyz = dfsFetchFirst(n,ruleToId(rule_nabla_xyz_declaration));
+    //job->direction = dfsFetchFirst(n->children,ruleToId(rule_nabla_xyz_direction));
+  }
   
   // Vérification si l'on a des 'directions' dans les paramètres
   if (job->xyz!=NULL){
     dbg("\n\t[nablaJobFill] direction=%s, xyz=%s",
         job->direction?job->direction:"NULL",
         job->xyz?job->xyz:"NULL");
-    nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
+    //nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
+  
   // Récupération du type de retour
+  dbg("\n** [nablaJobFill] Recuperation du type de retour");
   job->returnTypeNode=dfsFetch(n->children->children,ruleToId(rule_type_specifier));
   
   // Récupération de la liste des paramètres
@@ -491,6 +502,7 @@ void nMiddleJobFill(nablaMain *nabla,
           job->name);
   
   // On va chercher les paramètres 'standards'
+  dbg("\n** [nablaJobFill] Parametres standards");
   // Si used_options et used_variables ont été utilisées
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   
@@ -500,6 +512,7 @@ void nMiddleJobFill(nablaMain *nabla,
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     
   // On va chercher les paramètres nabla in/out/inout
+  dbg("\n** [nablaJobFill] Parametres in/out");
   job->nblParamsNode=dfsFetch(n->children,ruleToId(rule_nabla_parameter_list));
 
   // Si on a un type de retour et des arguments
@@ -546,7 +559,7 @@ void nMiddleJobFill(nablaMain *nabla,
     dbg("\n\t[nablaJobFill] No selection statement in this job!");
   }
   
-  dbg("\n\t[nablaJobFill] prefixEnumerate");
+  dbg("\n** [nablaJobFill] prefixEnumerate");
   nprintf(nabla, NULL, "%s", cHOOKj(nabla,forall,prefix,job));
   
   dbg("\n\t[nablaJobFill] dumpEnumerate");
@@ -559,7 +572,7 @@ void nMiddleJobFill(nablaMain *nabla,
     nprintf(nabla, NULL, "%s", nabla->hook->forall->postfix(job));
   dbg("\n\t[nablaJobFill] postfixEnumerate done");
   
-  dbg("\n\t[nablaJobFill] Now parsing:");
+  dbg("\n** [nablaJobFill] Now parsing:");
   nMiddleJobParse(n,job);
 
   if (!job->parse.got_a_return)
@@ -570,7 +583,7 @@ void nMiddleJobFill(nablaMain *nabla,
           nabla->hook->call->oTask?
           nabla->hook->call->oTask(nabla,job):"\n}\n");
   
-  dbg("\n\t[nablaJobFill] done");
+  dbg("\n** [nablaJobFill] done");
 }
 
 

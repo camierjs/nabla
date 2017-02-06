@@ -41,31 +41,36 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+ofstream output("output.plot");
+ofstream results("result.plot");
 
 
 //∀ cells dumpGnuplotp @ 34.0 if (option_dump_at_end and (((iteration-1)%dump_iterations)==0))
-∀ cells dumpGnuplot @ 34.0 if (option_dump_at_end and ((time+δt)>dump_time)){
+// ****************************************************************************
+// * Dump Gnuplot
+// ****************************************************************************
+∀ cells dmpMsh @ 35.0 if (option_dump_at_end and ((time+δt)>=option_stoptime)){
   if (uid==0) info()<<"\33[1;31m[dumpGnuplot] Now dumping to outputp.plot file!\33[0m";
-  output3 << p << " ";
+  output << p << " ";
   ∀ node
-    output3 << coord.x << " " << coord.y << " ";
-  output3 << coord[0].x << " " << coord[0].y << " ";
-  output3 << "\n";
-  if (uid==NABLA_NB_CELLS-1) output3 << "\n\n";
+    output << coord.x << " " << coord.y << " ";
+  output << coord[0].x << " " << coord[0].y << " ";
+  output << "\n";
+  if (uid==NABLA_NB_CELLS-1) output << "\n\n";
 }
 
 
 // ****************************************************************************
 // * Dump Solution
 // ****************************************************************************
-∀ cells dumpSolution @ 36.0 if (option_dump_output and (time>=(option_stoptime-δt))){ 
+∀ cells dmpSol @ 35.0 if (option_dump_output and (time>=(option_stoptime-δt))){ 
   if (uid==0) info()<<"\33[1;31m[dumpSolution] Now dumping to result.plot file!\33[0m";
   results << "\t" << center.x 
           << "\t" << center.y
           << "\t" << p
           << "\t" << u.x
           << "\t" << u.y
-          << "\t" << temperature
+          << "\t" << θ
           << "\t" << pana
           << "\t" << uana.x
           << "\t" << uana.y

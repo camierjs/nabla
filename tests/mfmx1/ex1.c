@@ -45,10 +45,10 @@ using namespace mfem;
 int main(int argc, char *argv[])
 {
    // 1. Parse command-line options.
-   const char *mesh_file = "../data/star.mesh";
+   const char *mesh_file = "./star.mesh";
    int order = 1;
    bool static_cond = false;
-   bool visualization = 1;
+   bool visualization = true;
    bool linear_only = false;
    bool assemble_only = false;
    bool mfem_debug = false;
@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
    }
    args.PrintOptions(cout);
 
-   if (mfem_debug) mfemDbgOn();
 
    // 2. Read the mesh from the given mesh file. We can handle triangular,
    //    quadrilateral, tetrahedral, hexahedral, surface and volume meshes with

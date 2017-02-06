@@ -47,6 +47,8 @@
 
 with cartesian;
 
+//#include "assert.h"
+
 // ****************************************************************************
 // * Defines
 // ****************************************************************************
@@ -74,6 +76,11 @@ with cartesian;
 // * Options
 // ****************************************************************************
 options{
+  ℝ LENGTH                    = 1.125;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 8;
+
   ℝ option_dtfixed            = -1.0e-7;  // fixed time increment
   ℝ option_δt_initial         = 1.0e-7;   // variable time increment
   ℝ option_δt_courant         = 1.0e+20;
@@ -103,7 +110,7 @@ options{
   ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
   ℾ option_chaos              = false;
   ℝ option_chaos_seed         = 1.1234567890123;//456789;
-  ℕ option_max_iterations     = 32768;
+  ℕ option_max_iterations     = 128;
 };
 
 
@@ -165,13 +172,13 @@ global{
 // ****************************************************************************
 // * Initialization Part @ ]-∞,-0.0[
 // ****************************************************************************
-void ini(void) @ -10.0{
+iniδt @ -10.0{
   δt=(option_chaos)?option_δt_initial*option_chaos_seed:0.0;
   δt_hydro=option_δt_hydro;
   δt_courant=option_δt_courant;
 }
 
-∀ nodes @ -12.0 {
+∀ nodes chaosCoord @ -12.0 {
   coord *= (option_chaos)?option_chaos_seed:1.0;
 }
 
@@ -179,11 +186,11 @@ void ini(void) @ -10.0{
 // * Set up boundary condition information
 // * Set up elemement connectivity information
 // ****************************************************************************
-∀ cells @ -9.5{
+∀ cells iniCellBC @ -9.5{
   const ℝ zero = 0.0;
-  const ℝ maxBoundaryX = X_EDGE_TICK*X_EDGE_ELEMS;
-  const ℝ maxBoundaryY = Y_EDGE_TICK*Y_EDGE_ELEMS;
-  const ℝ maxBoundaryZ = Z_EDGE_TICK*Z_EDGE_ELEMS;
+  const ℝ maxBoundaryX = LENGTH;//X_EDGE_TICK*X_EDGE_ELEMS;
+  const ℝ maxBoundaryY = LENGTH;//Y_EDGE_TICK*Y_EDGE_ELEMS;
+  const ℝ maxBoundaryZ = LENGTH;//Z_EDGE_TICK*Z_EDGE_ELEMS;
   elemBC=0;
   ∀ node{
     elemBC |= (coord.x==zero)?XI_M_SYMM;
@@ -198,7 +205,7 @@ void ini(void) @ -10.0{
 // ****************************************************************************
 // * Cells initialization
 // ****************************************************************************
-∀ cells @ -8.0{
+∀ cells iniCells @ -8.0{
   ℝ³ X[8];
   const ℝ chaos = (((ℝ)uid)+1.0)*option_chaos_seed;
   v=1.0;
@@ -208,7 +215,7 @@ void ini(void) @ -10.0{
   volo=elemMass=calc_volume=computeElemVolume(X);
 }
 
-∀ nodes @ -6.9{
+∀ nodes iniNodalMass @ -6.9{
   nodalMass=0.0;
   ∀ cell{
     nodalMass+=calc_volume/8.0;
@@ -227,7 +234,7 @@ void ini(void) @ -10.0{
 // * certain prescribed amount from the value used in the previous step and is
 // * subject to the constraints δt_Courant and δt_hydro described in Section 1.5.3.
 // ****************************************************************************
-void timeIncrement(void) @ 0.1 {
+timeIncrement @ 0.1 {
   const ℝ target_δt = option_stoptime - time;
   const ℝ max_δt = 1.0e+20;
   const ℝ new_δt_courant = (δt_courant < max_δt)?½*δt_courant:max_δt;
@@ -242,6 +249,9 @@ void timeIncrement(void) @ 0.1 {
   const ℝ scaled_target_δt = (target_δt>δτ)?((target_δt<(4.0*δτ/3.0))?2.0*δτ/3.0:target_δt):target_δt;
   const ℝ scaled_δt = (scaled_target_δt < δτ)?scaled_target_δt:δτ;
   δt = scaled_δt ;
+  if (((time+δt)==option_stoptime)?true:false) exit;
+  if (((time+δt)==option_stoptime)?true:false)
+    assert(X_EDGE_ELEMS==8 && Y_EDGE_ELEMS==8 && Z_EDGE_ELEMS==8 && iteration==470);
   if (iteration >= option_max_iterations) exit;
 }
 
@@ -254,10 +264,11 @@ void timeIncrement(void) @ 0.1 {
 // * Thus, we initialize the diagonal terms of the stress tensor to
 // * -(p + q) in each element.
 // ****************************************************************************
-∀ cells @ 0.3 {
+∀ nodes sumNFrcIni @ 0.19 { nForce=0.0; }
+∀ cells sumNFrcOne @ 0.2 {
   const ℝ chaos = (((ℝ)0.0)+1.0)*option_chaos_seed;
   const ℝ sig = (option_chaos)?chaos:-p-q;
-  aligned ℝ³ fNormals,dj,x[8],B[8];
+  ℝ³ fNormals,dj,x[8],B[8];
   ∀ node x[n] = coord;
   ε = dj = -¼*((x[0]+x[1]+x[5]+x[4])-(x[3]+x[2]+x[6]+x[7]));
   calcElemShapeFunctionDerivatives(x,B);
@@ -268,28 +279,24 @@ void timeIncrement(void) @ 0.1 {
   Σ_FaceNormal(B,2,6,7,3,x);
   Σ_FaceNormal(B,3,7,4,0,x);
   Σ_FaceNormal(B,4,7,6,5,x);
-  ∀ node cForce = -sig*B[n];
+  //∀ node cForce = -sig*B[n];
+  ∀ node nForce += -sig*B[n];
 }
-
-∀ nodes @ 0.301 {
-  aligned ℝ³ Σ=0.0;
-  ∀ cell Σ+=cForce;
-  nForce=Σ;
-}
+//∀ nodes @ 0.301 { ℝ³ Σ=0.0; ∀ cell Σ+=cForce; nForce=Σ;}
 
 // ****************************************************************************
 // * calcFBHourglassForceForElems
 // * Calculates the Flanagan-Belytschko anti-hourglass force
 // * calcFBHourglassForceForElems
 // ****************************************************************************
-∀ cells @ 1.3{
+∀ cells sumNFrcTwo @ 1.3{
   const ℝ γ[4][8]={{ 1., 1.,-1.,-1.,-1.,-1., 1., 1.},
-                      { 1.,-1.,-1., 1.,-1., 1., 1.,-1.},
-                      { 1.,-1., 1.,-1., 1.,-1., 1.,-1.},
-                      {-1., 1.,-1., 1., 1.,-1., 1.,-1.}};
-  aligned ℝ η0[4],η1[4],η2[4],η3[4] ;
-  aligned ℝ η4[4],η5[4],η6[4],η7[4];
-  aligned ℝ³ x[8],xd[8],dvd[8],η[8];
+                   { 1.,-1.,-1., 1.,-1., 1., 1.,-1.},
+                   { 1.,-1., 1.,-1., 1.,-1., 1.,-1.},
+                   {-1., 1.,-1., 1., 1.,-1., 1.,-1.}};
+  ℝ η0[4],η1[4],η2[4],η3[4] ;
+  ℝ η4[4],η5[4],η6[4],η7[4];
+  ℝ³ x[8],xd[8],dvd[8],η[8];
   const ℝ hourg=option_hgcoef;
   const ℝ τv = volo*v;
   const ℝ volume13=∛(τv);
@@ -312,14 +319,10 @@ void timeIncrement(void) @ 0.1 {
   cHourglassModes(2,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
   cHourglassModes(3,determ,dvd,γ,x,η0,η1,η2,η3,η4,η5,η6,η7);
   calcElemFBHourglassForce(xd,η0,η1,η2,η3,η4,η5,η6,η7,θ,η);
-  ∀ node cForce = η[n];
+  //∀ node cForce = η[n];
+  ∀ node nForce += η[n];
 }
-
-∀ nodes @ 1.4 {
-  aligned ℝ³ Σ=0.0;
-  ∀ cell Σ+=cForce;
-  nForce+=Σ;
-}
+//∀ nodes @ 1.4 { ℝ³ Σ=0.0;  ∀ cell Σ+=cForce;  nForce+=Σ;}
 
 // ****************************************************************************
 // * The routine CalcAccelerationForNodes() calculates a three-dimensional
@@ -330,9 +333,7 @@ void timeIncrement(void) @ 0.1 {
 // * the mass at each node is also constant in time.
 // * The nodal mass values are set during the problem set up.
 // ****************************************************************************
-∀ nodes @ 2.8{
-  𝜕𝜕x = nForce/nodalMass;
-}
+∀ nodes calcAccForNodes @ 2.8{ 𝜕𝜕x = nForce/nodalMass; }
 
 // ****************************************************************************
 // * The routine ApplyAccelerationBoundaryConditions() applies symmetry boundary
@@ -342,7 +343,7 @@ void timeIncrement(void) @ 0.1 {
 // * This implies that the normal component of the velocity vector U will
 // * remain constant in time.
 // ****************************************************************************
-∀ outer nodes @ 2.9 {
+∀ outer nodes applyAccBCForNodes @ 2.9 {
   𝜕𝜕x.x=(coord.x==0.0)?0.0;
   𝜕𝜕x.y=(coord.y==0.0)?0.0;
   𝜕𝜕x.z=(coord.z==0.0)?0.0;
@@ -356,100 +357,63 @@ void timeIncrement(void) @ 0.1 {
 // * The reason for this cutoff is to prevent spurious mesh motion which may arise
 // * due to floating point roundoff error when the velocity is near zero.
 // ****************************************************************************
-∀ nodes @ 3.0{
+∀ nodes calcVelForNodes @ 3.0{
   𝜕x += 𝜕𝜕x*δt ;
-  𝜕x.x = (norm(𝜕x.x)<option_u_cut)?0.0;
-  𝜕x.y = (norm(𝜕x.y)<option_u_cut)?0.0;
-  𝜕x.z = (norm(𝜕x.z)<option_u_cut)?0.0;
+  𝜕x.x = (fabs(𝜕x.x)<option_u_cut)?0.0;
+  𝜕x.y = (fabs(𝜕x.y)<option_u_cut)?0.0;
+  𝜕x.z = (fabs(𝜕x.z)<option_u_cut)?0.0;
 }
+void eieio301(void) @ 3.01 { synchronize(𝜕x); }
 
 // ****************************************************************************
 // * The routine CalcPositionForNodes() performs the last step in the nodal
 // * advance portion of the algorithm by integrating the velocity at each node
 // * to advance the position of the node to tn+1.
 // ****************************************************************************
-∀ nodes @ 3.1 { coord += 𝜕x*δt; }
+∀ nodes calcPosForNodes @ 3.1 { coord += 𝜕x*δt; }
 
 // ****************************************************************************
 // * calcElemVolume
 // ****************************************************************************
 ∀ cells @ 4.0{
-  aligned ℝ³ X[8];
-  ∀ node X[n]=coord;
-  calc_volume = computeElemVolume(X);
-}
-
-∀ cells @ 4.01 { vnew = calc_volume/volo; }
-
-∀ cells @ 4.02 { delv = vnew - v; }
-
-∀ cells @ 4.01{
-  aligned ℝ³ X[8];
-  ∀ node X[n]=coord;
-  arealg = calcElemCharacteristicLength(X,calc_volume);
-}
-
-∀ cells @ 4.02{
+  const ℝ dt2= ½*δt;
   const ℝ δ = 1.e-36;
-  aligned ℝ³ X[8],Xd[8];
+  ℝ³ B[8],X[8],Xd[8];
+  ℝ DetJ,volume,ρVolume;
   ∀ node X[n]=coord;
   ∀ node Xd[n]=𝜕x;
+  volume = calc_volume = computeElemVolume(X);  
+  vnew = ρVolume = volume/volo;
+  delv = ρVolume - v;
+  arealg = calcElemCharacteristicLength(X,volume);
+  const ℝ vol = volo*vnew;
+  const ℝ nrm = 1.0/(vol+δ);
+  const ℝ³ di =  ¼*((X[1]+X[2]+X[6]+X[5])-(X[0]+X[3]+X[7]+X[4]));
   const ℝ³ dj = -¼*((X[0]+X[1]+X[5]+X[4])-(X[3]+X[2]+X[6]+X[7]));
   const ℝ³ dk =  ¼*((X[4]+X[5]+X[6]+X[7])-(X[0]+X[1]+X[2]+X[3]));
   const ℝ³ a_xi = (dj⨯dk);
-  const ℝ³ dv_xi  =  ¼*((Xd[1]+Xd[2]+Xd[6]+Xd[5])-(Xd[0]+Xd[3]+Xd[7]+Xd[4]));
-  const ℝ vol = volo*vnew;
-  const ℝ nrm = 1.0/(vol+δ);
-  delx_xi = vol/√(a_xi⋅a_xi+δ);
-  delv_xi = (a_xi*nrm)⋅dv_xi;
-}
-
-∀ cells @ 4.02{
-  const ℝ δ = 1.e-36;
-  aligned ℝ³ X[8],Xd[8];
-  ∀ node X[n]=coord;
-  ∀ node Xd[n]=𝜕x;
-  const ℝ³ di =  ¼*((X[1]+X[2]+X[6]+X[5])-(X[0]+X[3]+X[7]+X[4]));
-  const ℝ³ dk =  ¼*((X[4]+X[5]+X[6]+X[7])-(X[0]+X[1]+X[2]+X[3]));
   const ℝ³ a_eta = (dk⨯di);
-  const ℝ³ dv_eta = -¼*((Xd[0]+Xd[1]+Xd[5]+Xd[4])-(Xd[3]+Xd[2]+Xd[6]+Xd[7]));
-  const ℝ vol = volo*vnew;
-  const ℝ nrm = 1.0/(vol+δ);
-  delx_eta = vol/√(a_eta⋅a_eta+δ);
-  delv_eta = (a_eta*nrm)⋅dv_eta;
-}
-
-∀ cells @ 4.02{
-  const ℝ δ = 1.e-36;
-  aligned ℝ³ X[8],Xd[8];
-  ∀ node X[n]=coord;
-  ∀ node Xd[n]=𝜕x;
-  const ℝ³ di =  ¼*((X[1]+X[2]+X[6]+X[5])-(X[0]+X[3]+X[7]+X[4]));
-  const ℝ³ dj = -¼*((X[0]+X[1]+X[5]+X[4])-(X[3]+X[2]+X[6]+X[7]));
   const ℝ³ a_zeta = (di⨯dj);
+  const ℝ³ dv_xi  =  ¼*((Xd[1]+Xd[2]+Xd[6]+Xd[5])-(Xd[0]+Xd[3]+Xd[7]+Xd[4]));
+  const ℝ³ dv_eta = -¼*((Xd[0]+Xd[1]+Xd[5]+Xd[4])-(Xd[3]+Xd[2]+Xd[6]+Xd[7]));
   const ℝ³ dv_zeta = ¼*((Xd[4]+Xd[5]+Xd[6]+Xd[7])-(Xd[0]+Xd[1]+Xd[2]+Xd[3]));
-  const ℝ vol = volo*vnew;
-  const ℝ nrm = 1.0/(vol+δ);
+  delx_xi = vol/√(a_xi⋅a_xi+δ);
+  delx_eta = vol/√(a_eta⋅a_eta+δ);
   delx_zeta = vol/√(a_zeta⋅a_zeta+δ);
   delv_zeta = (a_zeta*nrm)⋅dv_zeta;     
-}
-
-∀ cells @ 4.0{
-  const ℝ dt2= ½*δt;
-  aligned ℝ³ B[8],X[8],Xd[8];
-  ∀ node X[n]=coord;
-  ∀ node Xd[n]=𝜕x;
-  ∀ node X[n]-=dt2*Xd[n];
-  const ℝ DetJ = calcElemShapeFunctionDerivatives(X,B);
-  ε = calcElemVelocityGradient(Xd,B,DetJ);
+  delv_xi = (a_xi*nrm)⋅dv_xi;
+  delv_eta = (a_eta*nrm)⋅dv_eta;
+  ∀ node X[n] -= dt2*Xd[n];
+  DetJ=calcElemShapeFunctionDerivatives(X,B);
+  ε=calcElemVelocityGradient(Xd,B,DetJ);
   vdov = ε.x+ε.y+ε.z;
-  ε -= ⅓*vdov;
+  ε -= ⅓*ℝ³(vdov,vdov,vdov);
 }
 
 // ****************************************************************************
 // * This routine performs the second part of the q calculation.
 // ****************************************************************************
-∀ cells @ 4.7{
+∀ cells calcMonotonicQForElemsByDirection_X @ 4.7{
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ bcSwitch;
@@ -458,12 +422,14 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_xi+ptiny);
   bcSwitch = elemBC & XI_M;
-  delvm = (bcSwitch == 0)?delv_xi[prevCellX];
+  //delvm = (bcSwitch == 0)?delv_xi[prevCellX];
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_xi[prevCell];
   delvm = (bcSwitch == XI_M_SYMM)?delv_xi;
   delvm = (bcSwitch == XI_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & XI_P;
-  delvp = (bcSwitch == 0)?delv_xi[nextCellX];
+  //delvp = (bcSwitch == 0)?delv_xi[nextCellX];
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_xi[nextCell];//lxip
   delvp = (bcSwitch == XI_P_SYMM)?delv_xi;
   delvp = (bcSwitch == XI_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -476,7 +442,7 @@ void timeIncrement(void) @ 0.1 {
   phixi = (phixi > monoq_max_slope)?monoq_max_slope;
 }
 
-∀ cells @ 4.7 {
+∀ cells calcMonotonicQForElemsByDirection_Y @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ register bcSwitch;
@@ -485,12 +451,14 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_eta+ptiny);
   bcSwitch = elemBC & ETA_M;
-  delvm = (bcSwitch == 0)?delv_eta[prevCellY];
+  //delvm = (bcSwitch == 0)?delv_eta[prevCellY];
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_eta[prevCell];//letam
   delvm = (bcSwitch == ETA_M_SYMM)?delv_eta;
   delvm = (bcSwitch == ETA_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & ETA_P;
-  delvp = (bcSwitch == 0)?delv_eta[nextCellY];
+  //delvp = (bcSwitch == 0)?delv_eta[nextCellY];
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_eta[nextCell];//letap
   delvp = (bcSwitch == ETA_P_SYMM)?delv_eta;
   delvp = (bcSwitch == ETA_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -503,7 +471,7 @@ void timeIncrement(void) @ 0.1 {
   phieta = (phieta > monoq_max_slope)?monoq_max_slope;
 }
 
-∀ cells @ 4.7 {
+∀ cells calcMonotonicQForElemsByDirection_Z @ 4.7 {
   const ℝ monoq_limiter_mult = option_monoq_limiter_mult;
   const ℝ monoq_max_slope = option_monoq_max_slope;
   ℤ bcSwitch;
@@ -512,12 +480,14 @@ void timeIncrement(void) @ 0.1 {
   const ℝ ptiny = 1.e-36;
   const ℝ nrm = 1./(delv_zeta+ptiny) ;
   bcSwitch = elemBC & ZETA_M;
-  delvm = (bcSwitch == 0)?delv_zeta[prevCellZ];
+  //delvm = (bcSwitch == 0)?delv_zeta[prevCellZ];
+  if (bcSwitch == 0 && (!prevCell.null())) delvm = delv_zeta[prevCell];
   delvm = (bcSwitch == ZETA_M_SYMM)?delv_zeta;
   delvm = (bcSwitch == ZETA_M_FREE)?0.0;
   delvm = delvm * nrm ;
   bcSwitch = elemBC & ZETA_P;
-  delvp = (bcSwitch == 0)?delv_zeta[nextCellZ];
+  //delvp = (bcSwitch == 0)?delv_zeta[nextCellZ];
+  if (bcSwitch == 0 && (!nextCell.null())) delvp = delv_zeta[nextCell];
   delvp = (bcSwitch == ZETA_P_SYMM)?delv_zeta;
   delvp = (bcSwitch == ZETA_P_FREE)?0.0;
   delvp = delvp * nrm ;
@@ -530,8 +500,7 @@ void timeIncrement(void) @ 0.1 {
   phizeta = (phizeta > monoq_max_slope )?monoq_max_slope;
 }
 
-
-∀ cells @ 4.72{
+∀ cells calcMonotonicQForElemsQQQL @ 4.72{
   const ℝ rho = elemMass/(volo*vnew);
   const ℝ qlc_monoq = option_qlc_monoq;
   const ℝ qqc_monoq = option_qqc_monoq;
@@ -563,7 +532,7 @@ void timeIncrement(void) @ 0.1 {
 // * Next, the routine EvalEOSForElems() is called and the array of modified
 // * relative element volumes is passed to it.
 // ****************************************************************************
-∀ cells @ 5.0{
+∀ cells applyMaterialPropertiesForElems0 @ 5.0{
   vnewc = vnew ;
   vnewc = (vnewc < option_eosvmin)?option_eosvmin;
   vnewc = (vnewc > option_eosvmax)?option_eosvmax;
@@ -582,7 +551,7 @@ void timeIncrement(void) @ 0.1 {
 // * requires knowledge of those variables at time tn while it computes the
 // * new time values.
 // ****************************************************************************
-∀ cells @ 6.0{
+∀ cells evalEOSForElems0 @ 6.0{
   const ℝ vchalf = vnewc - ( ½*delv);
   work = 0.0; 
   e_old = e;
@@ -593,7 +562,7 @@ void timeIncrement(void) @ 0.1 {
   compHalfStep = (1.0/vchalf)-1.0;
 }
 
-∀ cells @ 6.1 {
+∀ cells evalEOSForElems1 @ 6.1 {
   compHalfStep = (vnewc <= option_eosvmin)?compression;
 }
 
@@ -614,7 +583,7 @@ void timeIncrement(void) @ 0.1 {
 // * of equations and generate a unique solution.
 // ****************************************************************************
 // @ 7.1   calcEnergyForElems1
-∀ cells @ 7.1{
+∀ cells calcEnergyForElems1 @ 7.1{
   e_new = e_old - ½*delvc*(p_old + q_old) + ½*work;
   e_new = (e_new < option_emin)?option_emin;
 }
@@ -625,7 +594,7 @@ void timeIncrement(void) @ 0.1 {
 // * compression => compHalfStep
 // * e_old => e_new
 // ****************************************************************************
-∀ cells @ 7.2{
+∀ cells calcPressureForElems @ 7.2{
   const ℝ c1s = 2.0/3.0;
   bvc = c1s*(compHalfStep+1.0);
   pbvc = c1s;
@@ -708,7 +677,7 @@ inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
 // * The maximum value of sound_speed is used to calculate constraints on t_n+1
 // * which will be used for the next time advance step.
 // ****************************************************************************
-∀ cells @ 9.0{
+∀ cells calcSoundSpeedForElems @ 9.0{
   const ℝ ssTmpt = computeSoundSpeed(pbvc,e_new,vnewc,bvc,p_new,option_refdens);
   sound_speed = ssTmpt;
 }
@@ -725,7 +694,7 @@ inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
 // * from their initial values which may arise due to floating point roundoff
 // * error.
 // ****************************************************************************
-∀ cells @ 10.0{
+∀ cells updateVolumesForElems @ 10.0{
   const ℝ ν = vnew;
   const ℝ νt = (rabs(ν-1.0)<option_v_cut)?1.0:ν;
   v = νt;
@@ -738,7 +707,7 @@ inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
 // * If all element volumes remain the same, there is no Courant constraint
 // * applied during the subsequent δt calculation.
 // ****************************************************************************
-∀ cells @ 12.1{
+∀ cells calcCourantConstraintForElems @ 12.1{
   const ℝ arg_max_courant=1.0e+20;
   δt_cell_courant=arg_max_courant;
   const ℝ qqc2 = 64.0 * option_qqc * option_qqc ;
@@ -757,7 +726,7 @@ inline ℝ computeSoundSpeed(const ℝ c, const ℝ energy, const ℝ volume,
 // * δt_hydro for the element is some maximum allowable element volume change
 // * (prescribed) divided by dV/V in the element.
 // ****************************************************************************
-∀ cells @ 12.2{
+∀ cells calcHydroConstraintForElems @ 12.2{
   const ℝ arg_max_hydro=1.0e+20;
   δt_cell_hydro=arg_max_hydro;
   const ℝ δdv = rabs(vdov[m]);

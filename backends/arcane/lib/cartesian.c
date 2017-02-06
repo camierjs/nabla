@@ -52,10 +52,10 @@ char* nccArcLibCartesianHeader(void){
   return "\n#include \"arcane/MeshArea.h\"\n\
 #include \"arcane/ISubDomain.h\"\n\
 #include \"arcane/MeshAreaAccessor.h\"\n\
-//#include \"arcane/cea/ICartesianMesh.h\"\n\
-//#include \"arcane/cea/CellDirectionMng.h\"\n\
-//#include \"arcane/cea/FaceDirectionMng.h\"\n\
-//#include \"arcane/cea/NodeDirectionMng.h\"\n\n\
+#include \"arcane/cartesian/ICartesianMesh.h\"\n\
+#include \"arcane/cartesian/CellDirectionMng.h\"\n\
+#include \"arcane/cartesian/FaceDirectionMng.h\"\n\
+#include \"arcane/cartesian/NodeDirectionMng.h\"\n\n\
 ";
 }
 

@@ -208,9 +208,9 @@ if (ARCANE_FOUND)
   nabla_add_arcane_test(glace 1 run)
   nabla_add_arcane_test(glace2D 1 run)
   nabla_add_arcane_test(glc 1 run)
-  # No ICartesianMesh out of CEA
-  #nabla_add_arcane_test(lulesh 1 run)
-  #nabla_add_arcane_test(lulesh 8 run)
+  # Lulesh, Arcane version
+  nabla_add_arcane_test(llshrc 1 run)
+  nabla_add_arcane_test(llshrc 4 run)
 if (HYPRE_FOUND)
   nabla_add_arcane_test_with_additional_defines(darcy 1 run ALEPH_INDEX)
   nabla_add_arcane_test_with_additional_defines(darcy 4 run ALEPH_INDEX)
@@ -295,7 +295,7 @@ nabla_add_okina_test(p1apwb1D_two_state_semi_implicite 1 run std seq)
 ##########################
 # NABLA TESTS FOR LAMBDA #
 ##########################
-set(TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA "shydro sethi anyItem gad comd pDDFV")
+set(TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA "shydro sethi anyItem gad comd pDDFV llshrc")
 foreach(TST ${NABLA_TESTS})
   string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_LAMBDA} ${TST} TEST_SHOULD_PASS)
   if(${TEST_SHOULD_PASS} EQUAL -1)
@@ -333,7 +333,7 @@ nabla_add_lambda_test(p12D 1 run seq)
 # NABLA TESTS FOR KOKKOS #
 ##########################
 if(KOKKOS_FOUND)
-  set(TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS "shydro sethi anyItem gad comd pDDFV")
+  set(TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS "shydro sethi anyItem gad comd pDDFV llshrc")
   foreach(TST ${NABLA_TESTS})
      string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_KOKKOS} ${TST} TEST_SHOULD_PASS)
      if(${TEST_SHOULD_PASS} EQUAL -1)
@@ -375,7 +375,7 @@ endif(LEGION_FOUND)
 # NABLA TESTS FOR RAJA #
 ########################
 if(RAJA_FOUND)
-  set(TESTS_NOT_YET_SUPPORTED_WITH_RAJA "shydro sethi anyItem gad comd pDDFV")
+  set(TESTS_NOT_YET_SUPPORTED_WITH_RAJA "shydro sethi anyItem gad comd pDDFV llshrc")
   foreach(TST ${NABLA_TESTS})
      string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_RAJA} ${TST} TEST_SHOULD_PASS)
      if(${TEST_SHOULD_PASS} EQUAL -1)

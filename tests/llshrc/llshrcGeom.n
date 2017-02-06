@@ -1,0 +1,243 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// This NABLA port is an implementation of the benchmark LULESH:
+// the Livermore Unstructured Lagrangian Explicit Shock Hydrodynamics
+// (see https://computation.llnl.gov/casc/ShockHydro/ for details)
+
+// ****************************************************************************
+// * Geometrics functions
+// ****************************************************************************
+
+
+// ****************************************************************************
+// * calcElemShapeFunctionDerivatives
+// ****************************************************************************
+Real calcElemShapeFunctionDerivatives(const Real3* restrict X, Real3* restrict β){
+  const Real3 fjxi = ⅛*((X[6]-X[0])+(X[5]-X[3])-(X[7]-X[1])-(X[4]-X[2]));
+  const Real3 fjet = ⅛*((X[6]-X[0])-(X[5]-X[3])+(X[7]-X[1])-(X[4]-X[2]));
+  const Real3 fjze = ⅛*((X[6]-X[0])+(X[5]-X[3])+(X[7]-X[1])+(X[4]-X[2]));
+  // compute cofactors
+  const Real3 cjxi =  (fjet⨯fjze);
+  const Real3 cjet = -(fjxi⨯fjze);
+  const Real3 cjze =  (fjxi⨯fjet);
+  // calculate partials: this need only be done for 0,1,2,3
+  // since, by symmetry, (6,7,4,5) = - (0,1,2,3)
+  β[0] = - cjxi-cjet-cjze;
+  β[1] =   cjxi-cjet-cjze;
+  β[2] =   cjxi+cjet-cjze;
+  β[3] = - cjxi+cjet-cjze;
+  β[4] = -β[2];
+  β[5] = -β[3];
+  β[6] = -β[0];
+  β[7] = -β[1];
+  // calculate jacobian determinant (volume)
+  return 8.0*(fjet⋅cjet);
+}
+
+
+// ****************************************************************************
+// * calcElemVelocityGradient
+// ****************************************************************************
+Real3 calcElemVelocityGradient(const Real3* restrict υ,
+                               const Real3* restrict B,
+                               const Real detJ){
+  const Real inv_detJ=1.0/detJ;
+  const Real3 υ06=υ[0]-υ[6];
+  const Real3 υ17=υ[1]-υ[7];
+  const Real3 υ24=υ[2]-υ[4];
+  const Real3 υ35=υ[3]-υ[5];
+  return inv_detJ*(B[0]*υ06+B[1]*υ17+B[2]*υ24+B[3]*υ35);
+}
+
+
+// ****************************************************************************
+// * computeElemVolume
+// ****************************************************************************
+Real computeElemVolume(const Real3* restrict X){
+  const Real twelveth = 1.0/12.0;  
+  const Real3 d31=X[3]-X[1];
+  const Real3 d72=X[7]-X[2];
+  const Real3 d63=X[6]-X[3];
+  const Real3 d20=X[2]-X[0];
+  const Real3 d43=X[4]-X[3];
+  const Real3 d57=X[5]-X[7];
+  const Real3 d64=X[6]-X[4];
+  const Real3 d70=X[7]-X[0];
+  
+  const Real3 d14=X[1]-X[4];
+  const Real3 d25=X[2]-X[5];
+  const Real3 d61=X[6]-X[1];
+  const Real3 d50=X[5]-X[0];
+
+  const Real tp1 = (d31+d72)⋅(d63⨯d20);
+  const Real tp2 = (d43+d57)⋅(d64⨯d70);
+  const Real tp3 = (d14+d25)⋅(d61⨯d50);
+  return twelveth*(tp1+tp2+tp3);
+}
+
+
+// ****************************************************************************
+// * AreaFace
+// ****************************************************************************
+Real AreaFace(const Real3 X0, const Real3 X1, const Real3 X2, const Real3 X3){
+  const Real3 f=(X2-X0)-(X3-X1);
+  const Real3 g=(X2-X0)+(X3-X1);
+  return (f⋅f)*(g⋅g)-(f⋅g)*(f⋅g);
+}
+
+
+// ****************************************************************************
+// * calcElemCharacteristicLength
+// ****************************************************************************
+Real calcElemCharacteristicLength(const Real3 X[8], const Real ν){
+  Real χ=0.0;
+  χ=max(AreaFace(X[0],X[1],X[2],X[3]),χ);
+  χ=max(AreaFace(X[4],X[5],X[6],X[7]),χ);
+  χ=max(AreaFace(X[0],X[1],X[5],X[4]),χ);
+  χ=max(AreaFace(X[1],X[2],X[6],X[5]),χ);
+  χ=max(AreaFace(X[2],X[3],X[7],X[6]),χ);
+  χ=max(AreaFace(X[3],X[0],X[4],X[7]),χ);
+  return 4.0*ν/√(χ);
+}
+
+
+// ****************************************************************************
+// * Σ_FaceNormal
+// ****************************************************************************
+void Σ_FaceNormal(Real3* restrict β,
+                  const int ia, const int ib,
+                  const int ic, const int id,
+                  const Real3* X){
+  const Real3 bisect0 = ½*(X[id]+X[ic]-X[ib]-X[ia]);
+  const Real3 bisect1 = ½*(X[ic]+X[ib]-X[id]-X[ia]);
+  const Real3 α = ¼*(bisect0⨯bisect1);
+  β[ia] += α; β[ib] += α;  
+  β[ic] += α; β[id] += α;  
+}
+
+
+// ****************************************************************************
+// * calcElemVolumeDerivative
+// * We keep the next one to allow sequential binary reproductibility
+// ****************************************************************************
+Real3 𝜕VolumeUnReproductible(const Real3 Χ0, const Real3 Χ1, const Real3 Χ2,
+              const Real3 Χ3, const Real3 Χ4, const Real3 Χ5){
+  const Real3 v01 = Χ0+Χ1;
+  const Real3 v12 = Χ1+Χ2;
+  const Real3 v25 = Χ2+Χ5;
+  const Real3 v04 = Χ0+Χ4;
+  const Real3 v34 = Χ3+Χ4;
+  const Real3 v35 = Χ3+Χ5;
+  return (1.0/12.0)*((v12⨯v01)+(v04⨯v34)-(v25⨯v35));
+}
+
+Real3 𝜕Volume(const Real3 Χ0, const Real3 Χ1, const Real3 Χ2,
+              const Real3 Χ3, const Real3 Χ4, const Real3 Χ5){
+  const Real x0=Χ0.x; const Real x1=Χ1.x;
+  const Real x2=Χ2.x; const Real x3=Χ3.x;
+  const Real x4=Χ4.x; const Real x5=Χ5.x;
+  const Real y0=Χ0.y; const Real y1=Χ1.y;
+  const Real y2=Χ2.y; const Real y3=Χ3.y;
+  const Real y4=Χ4.y; const Real y5=Χ5.y;
+  const Real z0=Χ0.z; const Real z1=Χ1.z;
+  const Real z2=Χ2.z; const Real z3=Χ3.z;
+  const Real z4=Χ4.z; const Real z5=Χ5.z;
+  const Real x = (y1+y2)*(z0+z1)-(y0+y1)*(z1+z2)+(y0+y4)*(z3+z4)
+    -(y3+y4)*(z0+z4)-(y2+y5)*(z3+z5)+(y3+y5)*(z2+z5);
+  const Real y =-(x1+x2)*(z0+z1)+(x0+x1)*(z1+z2)-(x0+x4)*(z3+z4)
+    +(x3+x4)*(z0+z4)+(x2+x5)*(z3+z5)-(x3+x5)*(z2+z5);
+  const Real z =-(y1+y2)*(x0+x1)+(y0+y1)*(x1+x2)-(y0+y4)*(x3+x4)
+    +(y3+y4)*(x0+x4)+(y2+y5)*(x3+x5)-(y3+y5)*(x2+x5);
+  return (1.0/12.0)*Real3(x,y,z);
+}
+
+
+// ****************************************************************************
+// * calcElemFBHourglassForce
+// ****************************************************************************
+void calcElemFBHourglassForce(const Real3* restrict xd,
+                              const Real* restrict h0, const Real* restrict h1,
+                              const Real* restrict h2, const Real* restrict h3,
+                              const Real* restrict h4, const Real* restrict h5,
+                              const Real* restrict h6, const Real* restrict h7,
+                              const Real θ, Real3* restrict η){
+  const Real3 h00=h0[0]*xd[0] + h1[0]*xd[1] + h2[0]*xd[2] + h3[0]*xd[3] +h4[0]*xd[4] + h5[0]*xd[5] + h6[0]*xd[6] +h7[0]*xd[7];
+  const Real3 h01=h0[1]*xd[0]+h1[1]*xd[1]+h2[1]*xd[2]+h3[1]*xd[3]+h4[1]*xd[4]+h5[1]*xd[5]+h6[1]*xd[6]+h7[1]*xd[7];
+  const Real3 h02=h0[2]*xd[0]+h1[2]*xd[1]+h2[2]*xd[2]+h3[2]*xd[3]+h4[2]*xd[4]+h5[2]*xd[5]+h6[2]*xd[6]+h7[2]*xd[7];
+  const Real3 h03=h0[3]*xd[0]+h1[3]*xd[1]+h2[3]*xd[2]+h3[3]*xd[3]+h4[3]*xd[4]+h5[3]*xd[5]+h6[3]*xd[6]+h7[3]*xd[7];
+  
+  η[0]=θ*((h0[0]*h00)+(h0[1]*h01)+(h0[2]*h02)+(h0[3]*h03));
+  η[1]=θ*((h1[0]*h00)+(h1[1]*h01)+(h1[2]*h02)+(h1[3]*h03));
+  η[2]=θ*((h2[0]*h00)+(h2[1]*h01)+(h2[2]*h02)+(h2[3]*h03));
+  η[3]=θ*((h3[0]*h00)+(h3[1]*h01)+(h3[2]*h02)+(h3[3]*h03));
+  η[4]=θ*((h4[0]*h00)+(h4[1]*h01)+(h4[2]*h02)+(h4[3]*h03));
+  η[5]=θ*((h5[0]*h00)+(h5[1]*h01)+(h5[2]*h02)+(h5[3]*h03));
+  η[6]=θ*((h6[0]*h00)+(h6[1]*h01)+(h6[2]*h02)+(h6[3]*h03));
+  η[7]=θ*((h7[0]*h00)+(h7[1]*h01)+(h7[2]*h02)+(h7[3]*h03));
+}
+
+
+// ****************************************************************************
+// * compute the hourglass modes
+// ****************************************************************************
+void cHourglassModes(const int i, const Real δ,
+                     const Real3 *Δ, const Real γ[4][8],
+                     const Real3 *χ,
+                     Real* restrict h0, Real* restrict h1,
+                     Real* restrict h2, Real* restrict h3,
+                     Real* restrict h4, Real* restrict h5,
+                     Real* restrict h6, Real* restrict h7){
+  const Real υ=1.0/δ;
+  const Real3 η = χ[0]*γ[i][0]+χ[1]*γ[i][1]+χ[2]*γ[i][2]+χ[3]*γ[i][3]+
+    χ[4]*γ[i][4]+χ[5]*γ[i][5]+χ[6]*γ[i][6]+χ[7]*γ[i][7];
+  h0[i] = γ[i][0]-υ*(Δ[0]⋅η);
+  h1[i] = γ[i][1]-υ*(Δ[1]⋅η);
+  h2[i] = γ[i][2]-υ*(Δ[2]⋅η);
+  h3[i] = γ[i][3]-υ*(Δ[3]⋅η);
+  h4[i] = γ[i][4]-υ*(Δ[4]⋅η);
+  h5[i] = γ[i][5]-υ*(Δ[5]⋅η);
+  h6[i] = γ[i][6]-υ*(Δ[6]⋅η);
+  h7[i] = γ[i][7]-υ*(Δ[7]⋅η);
+}
+

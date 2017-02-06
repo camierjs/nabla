@@ -41,20 +41,19 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-∀ nodes @ -41.0 if (DEBUG){
+∀ nodes dbgCoords @ -41.0 if (DEBUG){
    info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
 }
 
-dbgΔl @ -29.99 {
+dbgΔl @ -30.0 {
   if (DEBUG) info()<<"\33[33m[computeΔl] Δl="<<Δl<<"\33[m";
 }
 
-∀ cells @ -19.99,23.00 if (DEBUG){
+∀ cells dbgV @ -28.0/*,23.01*/ if (DEBUG){
   printf("\n[37m[geo,std] V=%.15e[0m",V);
 }
 
-
-∀ cells dumpAQs @ 9.01 if (DEBUG) {
+∀ cells dbgAQs @ 9.1 if (DEBUG) {
   ∀ nodes
       printf("\n[31m[std] AQs[%d;node #%d]=\n\t\t[\
 [%.15e %.15e %.15e]\n\t\t\
@@ -65,7 +64,7 @@ dbgΔl @ -29.99 {
              AQs.z.x,AQs.z.y,AQs.z.z);
 }
 
-∀ cells dumpBQs @ 9.11 if (DEBUG){
+∀ cells dbgBQs @ 10.0 if (DEBUG){
   ∀ node
       printf("\n\t[31m[std] BQs[%d]=\n\t\t[\
 [%.15e %.15e %.15e]\n\t\t\
@@ -76,58 +75,58 @@ dbgΔl @ -29.99 {
            BQs.z.x,BQs.z.y,BQs.z.z);
 }
 
-∀ cells dumpTemporalSchemeReconstructPressure @ 10.01 if (DEBUG){
+∀ cells dbgAvgP @ 11.0 if (DEBUG){
   ∀ node
       printf("\n\t[32m[std] reconstructed_p=%.15e[0m",
              reconstructed_p);
 }
 
-∀ cells dumpTemporalSchemeReconstructVelocity @ 10.01 if (DEBUG){
+∀ cells dbgAvgU @ 11.0 if (DEBUG){
   ∀ node
       printf("\n\t[32m[std] reconstructed_u=(%.15e,%.15e,%.15e)[0m",
              reconstructed_u.x,reconstructed_u.y,reconstructed_u.z);
 }
 
-∀ nodes @ 12.01 if (DEBUG){
-    printf("\n\t[31m[std] Before BOUNDARIES node_u_matrix[%d]=\n\t\t[\
+∀ nodes dbgBCprefix @ 12.0 if (DEBUG){
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_mtx[%d]=\n\t\t[\
 [%.15e %.15e %.15e]\n\t\t\
 [%.15e %.15e %.15e]\n\t\t\
 [%.15e %.15e %.15e]][0m",uid,
-           node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
-           node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
-           node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
-    printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=\
+           node_u_mtx.x.x,node_u_mtx.x.y,node_u_mtx.x.z,
+           node_u_mtx.y.x,node_u_mtx.y.y,node_u_mtx.y.z,
+           node_u_mtx.z.x,node_u_mtx.z.y,node_u_mtx.z.z);
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_rhs[%d]=\
 (%.15e,%.15e,%.15e)[0m",uid,
-           node_u_second_member.x,
-           node_u_second_member.y,
-           node_u_second_member.z);
+           node_u_rhs.x,
+           node_u_rhs.y,
+           node_u_rhs.z);
 }
 
-∀ outer faces @ 13.21 if (DEBUG) {
+∀ outer faces dbgBC {//@ 13.21 if (DEBUG) {
   printf("\n\t[36m[std] BC face[%d]",uid);
   ∀ node
      printf("\n\t\t[36m[std] BC node[%d] (coord.x=%f)",#,coord.x);
 }
 
-∀ nodes dumpTemporalSchemeComputeNodesVelocity @ 14.01 if (DEBUG){
-    printf("\n\t[31m[std] node_u_matrix=[0m\n\t\t[31m[\
+∀ nodes dbgNodeU @ 16.0 if (DEBUG){
+    printf("\n\t[31m[std] node_u_mtx=[0m\n\t\t[31m[\
 [%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]][0m",
-         node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
-         node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
-         node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
-    printf("\n\t[31m[std] node_u_second_member=(%.15e,%.15e,%.15e)[0m",
-         node_u_second_member.x,
-         node_u_second_member.y,
-         node_u_second_member.z);
+         node_u_mtx.x.x,node_u_mtx.x.y,node_u_mtx.x.z,
+         node_u_mtx.y.x,node_u_mtx.y.y,node_u_mtx.y.z,
+         node_u_mtx.z.x,node_u_mtx.z.y,node_u_mtx.z.z);
+    printf("\n\t[31m[std] node_u_rhs=(%.15e,%.15e,%.15e)[0m",
+         node_u_rhs.x,
+         node_u_rhs.y,
+         node_u_rhs.z);
    printf("\n\t[31m[std] node_u[%d]=(%.15e,%.15e,%.15e)[0m",
            uid,node_u.x,node_u.y,node_u.z);
 }
 
-∀ cells dumpTemporalSchemeComputeStandardFluxesSum @ 16.01 if (DEBUG){
+∀ cells dbgFlxSum @ 19.0 if (DEBUG){
   printf("\n\t[32m[n+1] pressure_fluxes[%d]=(%.15e)[0m",uid,pressure_fluxes_Σ);  
 }
 
-∀ cells dumpTemporalSchemeApplyFluxesStandard @ 19.01 if (DEBUG){
+∀ cells dbgFlxStd @ 19.1 if (DEBUG){
   printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
   printf("\n\t[32m[n+1] pre u[%d]=(%.15e,%.15e,%.15e)[0m",uid,u.x,u.y,u.z);
   printf("\n\t[32m[n+1] velocity_fluxes_Σ[%d]=(%.15e,%.15e,%.15e)[0m",
@@ -138,22 +137,6 @@ dbgΔl @ -29.99 {
   printf("\n\t[32m[n+1] post p[%d]=(%.15e)[0m",uid,p);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-∀ cells dumpHydroTimeStepCtrlCells @ 30.01 if (DEBUG) {
-    printf("\n\t[33m p1_δt=%.15e[0m",p1_δt);
+∀ cells dbgCellTmStp @ 30.1 if (DEBUG) {
+    printf("\n\t[33m cell_δt=%.15e[0m",cell_δt);
 }

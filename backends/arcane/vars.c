@@ -105,7 +105,7 @@ nWhatWith arcaneOpCodesDefines[] ={
   {"opMod(a,b)","(a%b)"},
   {"opAdd(a,b)","(a+b)"},
   {"opSub(a,b)","(a-b)"},
-  {"opTernary(c,i,e)","(c)?i:e"},
+  {"opTernary(c,i,e)","((c)?(i):(e))"},
   {"log(a)","::log(a)"},
   {"exp(a)","::exp(a)"},
   {"min(a,b)","math::min(a,b)"},
@@ -131,6 +131,7 @@ NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity *entity){
   if (isAnArcaneAlone(entity->main))
     fprintf(target_file, "\
 #include \"math.h\"\n\
+#include \"assert.h\"\n\
 #include \"stdint.h\"\n\
 #include \"fenv.h\"\n\
 #include \"fpu_control.h\"\n\
@@ -153,7 +154,7 @@ NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity *entity){
 #include <arcane/utils/TraceAccessor.h>\n\
 #include <arcane/utils/TraceClassConfig.h>\n\
 #include <arcane/IMesh.h>\n\
-#include <arcane/cea/ICartesianMesh.h>\n\
+#include <arcane/cartesian/ICartesianMesh.h>\n\
 #include <arcane/ArcaneTypes.h>\n\
 #include <arcane/IEntryPoint.h>\n\
 #include <arcane/IEntryPointMng.h>\n\
@@ -176,7 +177,8 @@ using namespace Arcane;\n\
 //using namespace math;\n\
 using namespace Parallel;\n\
 \n\
-/*inline Cell opTernary(bool cond, Cell ifStatement, Cell elseStatement){\n \
+/*inline bool opTernary(bool cond, bool t, bool f){if (cond) return t; return f;}\n\
+inline Cell opTernary(bool cond, Cell ifStatement, Cell elseStatement){\n \
 if (cond==true) return ifStatement;\n\
 return elseStatement;\n\
 }\n\

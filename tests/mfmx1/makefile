@@ -4,10 +4,10 @@
 
 CXX = g++ #icpc
 
-MFEM_PATH = /home/camierjs/mfem-3.1
+MFEM_PATH = /usr/local/mfem
 
-CXXFLAGS = -Wall -g -std=gnu++11 -O3 -march=core-avx2 -I$(MFEM_PATH)
-LD_FLAGS = -L$(MFEM_PATH) -lmfem #-lrt
+CXXFLAGS = -Wall -g -std=gnu++11 -O3 -march=core-avx2 -I$(MFEM_PATH)/include
+LD_FLAGS = -L$(MFEM_PATH)/lib -lmfem #-lrt
 
 TGT = ex1
 

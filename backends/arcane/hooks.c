@@ -223,7 +223,13 @@ void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == BACKCELLUID)   nprintf(arc, "/*nablaSystem*/", "[%s->backCell().uniqueId()]",itm);
   if (n->tokenid == FRONTCELL)     nprintf(arc, "/*nablaSystem*/", "[%s->frontCell()]",(enum_enum=='\0')?itm:etm);
   if (n->tokenid == FRONTCELLUID)  nprintf(arc, "/*nablaSystem*/", "[%s->frontCell().uniqueId()]",itm);
+  if (n->tokenid == NEXTCELL_X)    nprintf(arc, "/*nablaSystem NEXTCELL_X*/", "[nextCellX]");
+  if (n->tokenid == NEXTCELL_Y)    nprintf(arc, "/*nablaSystem NEXTCELL_Y*/", "[nextCellY]");
+  if (n->tokenid == NEXTCELL_Z)    nprintf(arc, "/*nablaSystem NEXTCELL_Z*/", "[nextCellZ]");
   if (n->tokenid == NEXTCELL)      nprintf(arc, "/*nablaSystem NEXTCELL*/", "[nextCell]");
+  if (n->tokenid == PREVCELL_X)    nprintf(arc, "/*nablaSystem PREVCELL_X*/", "[prevCellX]");
+  if (n->tokenid == PREVCELL_Y)    nprintf(arc, "/*nablaSystem PREVCELL_Y*/", "[prevCellY]");
+  if (n->tokenid == PREVCELL_Z)    nprintf(arc, "/*nablaSystem PREVCELL_Z*/", "[prevCellZ]");
   if (n->tokenid == PREVCELL)      nprintf(arc, "/*nablaSystem PREVCELL*/", "[prevCell]");
   if (n->tokenid == NEXTNODE)      nprintf(arc, "/*nablaSystem NEXTNODE*/", "[nextNode]");
   if (n->tokenid == PREVNODE)      nprintf(arc, "/*nablaSystem PREVNODE*/", "[prevNode]");

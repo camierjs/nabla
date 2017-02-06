@@ -428,7 +428,7 @@ void timeIncrement(void) @ 0.1 {
 }
 
 ∀ nodes void ΣCellNodeForce(void) in (cell cForce) out (node nForce)@ 1.4 {
-  ℝ³ Σ=0.0;
+  ℝ³ Σ=ℝ³(0.0,0.0,0.0);//0.0;
   foreach cell Σ+=cForce;
   nForce+=Σ;
   //debug()<<"@1.4 nForce="<<nForce;
@@ -558,7 +558,10 @@ void timeIncrement(void) @ 0.1 {
   vdov = ε.x+ε.y+ε.z;
   //printf("\n[#%d] vdov=%.21e",uid, vdov);
   // make the rate of deformation tensor deviatoric
-  ε -= ⅓*vdov;
+  //ε -= ⅓*vdov;
+  const ℝ tvdov = ⅓*vdov;
+  const ℝ³ t3vdov = ℝ³(tvdov,tvdov,tvdov);
+  ε -= t3vdov;
   // See if any volumes are negative, and take appropriate action.
   //assert(vnew >= 0.0);//fatal("calcLagrangeElements","VolumeError");
 }
