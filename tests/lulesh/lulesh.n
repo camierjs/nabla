@@ -84,9 +84,9 @@ options{
   ℝ option_dvovmax            = 0.1;      // maximum allowable volume change
   ℝ option_refdens            = 1.0;      // reference density
   ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
-  ℾ option_chaos           = false;
+  ℾ option_chaos              = false;
   ℝ option_chaos_seed         = 1.1234567890123;//456789;
-  ℕ option_max_iterations     = 32768;//128;
+  ℕ option_max_iterations     = 32768;
 };
 
 

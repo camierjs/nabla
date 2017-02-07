@@ -590,7 +590,8 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, astNode *n,
     if (opt){
       nablaOption *new=nMiddleOptionFindName(job->used_options,token);
       if (new==NULL){
-        assert(left_of_assignment_expression==false);
+        // On autorise la modification des options
+        //assert(left_of_assignment_expression==false);
         dbg("\n\t\t[dfsVariables] Option '%s' is used (%s) in this job!",opt->name,rw);
         // Création d'une nouvelle used_option
         new = nMiddleOptionNew(nabla);

@@ -240,7 +240,7 @@ const static hookMain mains={
   kHookMainPreInit,
   xHookMainVarInitKernel,
   xHookMainVarInitCall,
-  xHookMainHLT,
+  kHookMainHLT,
   xHookMainPostInit,
   kHookMainPostfix
 };  

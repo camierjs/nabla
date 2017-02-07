@@ -158,3 +158,94 @@ NABLA_STATUS kHookMainPostfix(nablaMain *nabla){
   fprintf(nabla->entity->src, "\n\t#warning no Kokkos::finalize();");
   return NABLA_OK;
 }
+
+
+// ****************************************************************************
+// * hookMain
+// ****************************************************************************
+NABLA_STATUS kHookMainHLT(nablaMain *n){
+  nablaVariable *var;
+  nablaJob *entry_points;
+  int i,numParams,number_of_entry_points;
+  bool is_into_compute_loop=false;
+  double last_when;
+  n->HLT_depth=0;
+
+  dbg("\n[hookMain]");
+  number_of_entry_points=nMiddleNumberOfEntryPoints(n);
+  entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
+  
+  // Et on rescan afin de dumper, on rajoute les +2 ComputeLoop[End|Begin]
+  for(i=0,last_when=entry_points[i].whens[0];i<number_of_entry_points+2;++i){
+    if (strncmp(entry_points[i].name,"hltDive",7)==0) continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopEnd")==0) continue;
+    if (strcmp(entry_points[i].name,"ComputeLoopBegin")==0) continue;
+    
+    dbg("%s\n\t[hookMain] sorted #%d: %s @ %f in '%s'", (i==0)?"\n":"",i,
+        entry_points[i].name,
+        entry_points[i].whens[0],
+        entry_points[i].where);
+    
+    // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
+    if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
+      is_into_compute_loop=true;
+      nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);");
+      //xHookMainGLVis(n);
+      nprintf(n, NULL,"\n\twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
+      //xHookMainGLVis(n);
+    }
+    
+    if (entry_points[i].when_depth==(n->HLT_depth+1)){
+      nprintf(n, NULL, "\n\n\t// DIVING in HLT! (depth=%d)",n->HLT_depth);
+      nprintf(n, NULL, "\n\thlt_exit[hlt_level=%d]=true;\n\tdo{",n->HLT_depth);
+      n->HLT_depth=entry_points[i].when_depth;
+    }
+    if (entry_points[i].when_depth==(n->HLT_depth-1)){
+      nprintf(n, NULL, "\n\t// Poping from HLT!");
+//#warning HWed 'redo_with_a_smaller_time_step'
+      nprintf(n, NULL, "\n\t}while(hlt_exit[%d]);hlt_level-=1;\n",entry_points[i].when_depth);
+      n->HLT_depth=entry_points[i].when_depth;
+    }
+    
+    // \n ou if d'un IF after '@'
+    if (entry_points[i].ifAfterAt!=NULL){
+      dbg("\n\t[hookMain] dumpIfAfterAt!");
+      nprintf(n, NULL, "\n\t\tif (");
+      nMiddleDumpIfAfterAt(entry_points[i].ifAfterAt, n,false);
+      nprintf(n, NULL, ") ");
+    }else nprintf(n, NULL, "\n");
+    
+    // On provoque un parallel->sync
+    // si l'on découvre un temps logique différent
+    if (last_when!=entry_points[i].whens[0])
+      nprintf(n, NULL, "%s",
+              is_into_compute_loop?"\t\t":"\t");
+    last_when=entry_points[i].whens[0];
+    
+    // Dump de la tabulation et du nom du point d'entrée
+    //#warning f or s?
+    nprintf(n, NULL, "%s%s(",
+            is_into_compute_loop?"\t\t":"\t",
+            ///*@%f*/entry_points[i].whens[0],
+            //n->call->parallel->spawn(),
+            entry_points[i].name);
+        
+    // On s'autorise un endroit pour insérer des arguments
+    nMiddleArgsDumpFromDFS(n,&entry_points[i]);
+    
+    // Si on doit appeler des jobs depuis cette fonction @ée
+    if (entry_points[i].called_variables != NULL){
+      if (!entry_points[i].reduction)
+         nMiddleArgsAddExtra(n,&numParams);
+      //else nprintf(n, NULL, "NABLA_NB_CELLS_WARP,");
+      // Et on rajoute les called_variables en paramètre d'appel
+      dbg("\n\t[hookMain] Et on rajoute les called_variables en paramètre d'appel");
+      for(var=entry_points[i].called_variables;var!=NULL;var=var->next){
+        nprintf(n, NULL, ",\n\t\t/*used_called_variable*/%s_%s",var->item, var->name);
+      }
+    }//else nprintf(n,NULL,"/*NULL_called_variables*/");
+    nprintf(n, NULL, ");");
+  }
+  free(entry_points);
+  return NABLA_OK;
+}

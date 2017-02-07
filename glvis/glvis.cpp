@@ -46,9 +46,23 @@
 #include "assert.h"
 
 #include <iostream>
-
+//#include <stdio.h>
+#include <stdarg.h>
 using namespace std;
 using namespace mfem;
+
+// ****************************************************************************
+// * dbg
+// ****************************************************************************
+const static bool debug_mode = false;
+void dbg(const char *format, ...){
+  if (!debug_mode) return;
+  va_list args;
+  va_start(args,format);
+  vprintf(format,args);
+  fflush(NULL);
+  va_end(args);
+}
 
 // ****************************************************************************
 // * glvis1D
@@ -59,60 +73,70 @@ void glvis1D(const int nx,
 
 
 // ****************************************************************************
+// * Global variables
+// ****************************************************************************
+bool init=true;
+Mesh *mesh;
+FiniteElementCollection *fec;
+FiniteElementSpace *fespace;
+GridFunction *x;
+socketstream *sol_sock;
+
+// ****************************************************************************
 // * glvis2DQud
 // ****************************************************************************
 void glvis2DQud(const int nx,const int ny,
                 const double sx,const double sy,
                 double *coord,double *data){
-  const int dim = 2;
-  const int order = 1;
-  const int nb_coords = (nx+1)*(ny+1);
-  Mesh *mesh = new Mesh(nx,ny,Element::QUADRILATERAL,0,sx,sy);
-
-  // Dump des coords que l'on récupère
-  for(int i=0;i<nb_coords;i+=1){
-    double *v=&coord[3*i];
-    printf("\n\tcoord[%d]=(%f,%f,%f)",i,v[0],v[1],v[2]);
+  if (init){
+    dbg("\n[35m[glvis2DQud][m");
+    const int dim = 2;
+    const int order = 1;
+    //const int nb_coords = (nx+1)*(ny+1);
+    //Mesh(int nx, int ny, Element::Type type, int generate_edges = 0,double sx = 1.0, double sy = 1.0)
+    mesh = new Mesh(nx,ny,Element::QUADRILATERAL,0,sx,sy);
+    dbg("\n[35m[glvis2DQud] fec[m");
+    fec = new L2_FECollection(order, dim);
+    dbg("\n[35m[glvis2DQud] fespace[m");
+    fespace = new FiniteElementSpace(mesh, fec);
+    dbg("\n[35m[glvis2DQud] GridFunction[m");
+    x=new GridFunction(fespace);
+    dbg("\n[35m[glvis2DQud] x->VectorDim=%d[m",x->VectorDim());
+    assert(fespace->Conforming()==true);
+    dbg("\n[35m[glvis2DQud] socketstream[m");
+    sol_sock=new socketstream("localhost", 19916);
+    //sol_sock->precision(8);
+    init=false;
+    dbg("\n[35m[glvis2DQud] Init done![m");
   }
 
+  // On assigne les coordonées
+  dbg("\n[35;1m[glvis2DQud] On assigne les coords #NV=%d[m", mesh->GetNV());
   for(int i=0;i<mesh->GetNV();i++){
     double *v=mesh->GetVertex(i);
+    dbg("\n\t[35m[glvis2DQud] #%d %f,%f[m", i, coord[3*i+0],coord[3*i+1]);
     v[0]=coord[3*i+0];
     v[1]=coord[3*i+1];
-    v[2]=coord[3*i+2];
-    printf("\n\t    v[%d]=(%f,%f,%f)",i,v[0],v[1],v[2]);
   }
   
-  FiniteElementCollection *fec = new L2_FECollection(order, dim);
-  FiniteElementSpace *fespace = new FiniteElementSpace(mesh, fec);
-  
-  cout<<"\nfespace size is "<< fespace->GetNDofs();
-  GridFunction x(fespace);
-  assert(fespace->Conforming()==true);
-  
+  Array<int> dofs;
+  dbg("\n[35;1m[glvis2DQud] On place les dofs aux mailles #NE=%d[m", mesh->GetNE());
   for(int i=0;i<mesh->GetNE();i+=1){
-    const Element *element = mesh->GetElement(i);
-    const int nv=element->GetNVertices();
-    const int *iVertices=element->GetVertices();
-    //printf("\n\te[%d] has %d vertices",i,nv);
-    //for(int v=0;v<element->GetNVertices();v+=1) printf(" %d",iVertices[v]);
-    // Now working with DOFs
-    //printf("\n\tfespace->GetNDofs()=%d",fespace->GetNDofs());
-    Array<int> dofs;
     fespace->GetElementDofs(i,dofs);
-    for(int dof=0;dof<dofs.Size();dof+=1){
-      //printf("\n\t\tdof[%d] is #%d",dof,dofs[dof]);
-      // On les met tous à la même valeure pour l'instant
-      x[dofs[dof]]=data[i];
+    dbg("\n\t[35m[glvis2DQud] i=%d, dofs.Size()=%d[m",i,dofs.Size());
+    //cout<<"\n\t[35m[glvis2DQud] dofs="<<dofs<<"\n[m";
+    for(int k=0;k<dofs.Size();k+=1){
+      dbg("\n\t\t[35m[glvis2DQud] %d[m",dofs[k]);
+      (*x)[dofs[k]]=data[i];
     }
   }
-
-  socketstream sol_sock("localhost", 19916);
-  sol_sock << "solution\n" << *mesh << x << flush;
   
-  delete fespace;
-  delete fec;
-  delete mesh;
+  *sol_sock << "solution\n" << *mesh << *x << flush;
+
+  //delete x;
+  //delete fespace;
+  //delete fec;
+  //delete mesh;
 }
 
 
@@ -127,66 +151,38 @@ void glvis3DHex(const int nx, // Nombre de mailles en X,Y & Z
                 const double sy,
                 const double sz,
                 double *coord, double *data){
-  const int dim = 3;
-  const int order = 1;
-  //const char *mesh_file = "/home/nabla/nabla/tpl/mfem/data/inline-hex.mesh";
-  Mesh *mesh = new Mesh(nx,ny,nz,Element::HEXAHEDRON,0,sx,sy,sz);
+  if (init){
+    dbg("\n[glvis3DHex] init!");
+    const int dim = 3;
+    const int order = 1;
+    mesh = new Mesh(nx,ny,nz,Element::HEXAHEDRON,0,sx,sy,sz);
+    fec = new L2_FECollection(order, dim);
+    fespace = new FiniteElementSpace(mesh, fec);
+    x=new GridFunction(fespace);
+    //dbg("\n[35m[glvis3DHex] x->VectorDim=%d[m\n",x->VectorDim());
+    assert(fespace->Conforming()==true);
+    sol_sock=new socketstream("localhost", 19916);
+    init=false;
+  }
   
-  // Dump des coords que l'on récupère
-  /*for(int i=0;i<nv;i+=1){
-    double *v=&node_coord[3*i];
-    printf("\n\tnode_coord[%d]=(%f,%f,%f)",i,v[0],v[1],v[2]);
-    }*/
-    
+  // On assigne les coordonées
   for(int i=0;i<mesh->GetNV();i++){
     double *v=mesh->GetVertex(i);
-    //printf("\n\tv[%d]=(%f,%f,%f)",i,v[0],v[1],v[2]);
-    //v->SetCoords(&node_coord[3*i]);
     v[0]=coord[3*i+0];
     v[1]=coord[3*i+1];
     v[2]=coord[3*i+2];
-    //printf("\n\tv[%d]=(%f,%f,%f)",i,v[0],v[1],v[2]);
   }
-
-  FiniteElementCollection *fec = new L2_FECollection(order, dim);
-  FiniteElementSpace *fespace = new FiniteElementSpace(mesh, fec);
-  
-  cout<<"\nfespace size is "<< fespace->GetNDofs();
-  GridFunction x(fespace);
-  assert(fespace->Conforming()==true);
-    
+ 
+  Array<int> dofs;
   for(int i=0;i<mesh->GetNE();i+=1){
-    const Element *element = mesh->GetElement(i);
-    const int nv=element->GetNVertices();
-    const int *iVertices=element->GetVertices();
-    //printf("\n\te[%d] has %d vertices",i,nv);
-    //for(int v=0;v<element->GetNVertices();v+=1) printf(" %d",iVertices[v]);
-    // Now working with DOFs
-    //printf("\n\tfespace->GetNDofs()=%d",fespace->GetNDofs());
-    Array<int> dofs;
     fespace->GetElementDofs(i,dofs);
-    for(int dof=0;dof<dofs.Size();dof+=1){
-      //printf("\n\t\tdof[%d] is #%d",dof,dofs[dof]);
-      // On les met tous à la même valeure pour l'instant
-      x[dofs[dof]]=data[i];
-    }
-  }
-
-  {
-    ofstream mesh_ofs("displaced.mesh");
-    mesh_ofs.precision(8);
-    mesh->Print(mesh_ofs);
-    ofstream sol_ofs("sol.gf");
-    sol_ofs.precision(8);
-    x.Save(sol_ofs);
+    for(int dof=0;dof<dofs.Size();dof+=1)
+      (*x)[dofs[dof]]=data[i];
   }
   
-  {
-    socketstream sol_sock("localhost", 19916);
-    sol_sock << "solution\n" << *mesh << x << flush;
-  }
+  *sol_sock << "solution\n" << *mesh << *x << flush;
   
-  delete fespace;
-  if (order > 0) { delete fec; }
-  delete mesh;
+  //delete fespace;
+  //if (order > 0) { delete fec; }
+  //delete mesh;
 }

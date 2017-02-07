@@ -56,6 +56,7 @@ char* kHookVarDeclPostfix(nablaMain*);
 NABLA_STATUS kHookMainPrefix(nablaMain*);
 NABLA_STATUS kHookMainPreInit(nablaMain*);
 NABLA_STATUS kHookMainPostfix(nablaMain*);
+NABLA_STATUS kHookMainHLT(nablaMain*);
 
 void kHookVariablesPrefix(nablaMain*);
 void kHookVariablesMalloc(nablaMain*);

@@ -76,6 +76,7 @@ options{
   ℝ cflv        = 0.1;    // volume change limit for timestep
   ℝ rinit       = 1.0;    // initial density for main mesh
   ℝ einit       = 0.0;    // initial energy for main mesh
+  ℾ impacts     = false;
   ℾ subregion   = true;
   ℝ sbxmin      = 0.0;
   ℝ sbxmax      = 0.3;
@@ -197,11 +198,28 @@ global{
 ∀ cells iniMeshCalcSideFracs @ -31.7 { ∀ faces smf = sarea/zarea; }
 
 iniGlobals @ -20.0 { time=0; cycle=0; }
+iniTestCase @ -20 {
+  if (!impacts) return;
+  subregion=false;
+  cfl=0.15;
+}
 
 ∀ cells iniZr @ -14.9 { zr=rinit; }
 ∀ cells iniZe @ -14.9 { ze=einit; }
 ∀ cells iniZwrate @ -14.9 { zwrate=0; }
 
+∀ cells iniImpacts @ -14.8 if (impacts) {
+  const int n=NABLA_NB_CELLS;
+  const int l=√(n);
+  const int center=n/2+l/2;
+  const int k0=n/4+l/3;
+  const int k1=3*n/4+l/4;
+  if (uid==center || uid==k0 || uid==k1){
+    cout<<"\n[35m[iniImpacts]"<<uid<<"[m";
+    zr = rinitsub;
+    ze = einitsub;
+  }
+}
 ∀ cells iniSubRegion @ -14.8 if (subregion) {
   if (!(zx.x > (sbxmin-ε) && zx.x < (sbxmax+ε) &&
         zx.y > (sbymin-ε) && zx.y < (sbymax+ε))) continue;

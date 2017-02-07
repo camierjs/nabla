@@ -383,7 +383,7 @@ static void xHookMainGLVis(nablaMain *n){
   const bool dim2D = ((n->entity->libraries&(1<<with_real2))!=0);
   const bool dim3D = (!dim1D) && (!dim2D);
   
-  nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
+  //nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
   nprintf(n, NULL,"\n\tif (glvis) %s,(double*)i2var[glvis_optarg]);",
           dim3D?"glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
           dim2D?"glvis2DQud(X_EDGE_ELEMS,Y_EDGE_ELEMS,LENGTH,LENGTH,(double*)node_coord":
@@ -421,8 +421,9 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
       nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);");
-      //xHookMainGLVis(n);
+      xHookMainGLVis(n);
       nprintf(n, NULL,"\n\twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
+      xHookMainGLVis(n);
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1)){
