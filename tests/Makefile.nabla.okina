@@ -54,17 +54,20 @@ LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 # LIBS #
 ########
 LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
+ifeq ("${MFEM_FOUND}","YES")
+LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/lib/libmfem.a
+endif
 
 all:$(TGT) $(NABLA) 
 
 $(TGT).cc: $(TGT_FILE) $(NABLA)
-	$(NABLA) $(LOG) --okina $(TGT) --$(SIMD) --$(PARALLEL) -i $(TGT_FILE) #--$(COLORS)
+	$(NABLA) $(LOG) --okina $(TGT) --$(SIMD) --$(PARALLEL) -i $(TGT_FILE)
 
 $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_$(PARALLEL)_GOMP) $(LIB_ORGOPT)
+	$(CXX) $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_$(SIMD)_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL)_$(SIMD) $(TGT).o $(LIB_$(PARALLEL)_GOMP) $(LIB_ORGOPT) $(LIB_GLVIS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

@@ -114,6 +114,7 @@ void xHookVariablesFree(nablaMain*);
 char* xHookVariablesODecl(nablaMain*);
 
 // main
+void xHookMainGLVisI2a(nablaMain*);
 NABLA_STATUS xHookMainPrefix(nablaMain*);
 NABLA_STATUS xHookMainPreInit(nablaMain*);
 NABLA_STATUS xHookMainVarInitKernel(nablaMain*);

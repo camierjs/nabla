@@ -85,6 +85,7 @@
 NABLA_STATUS rajaHookMainPreInit(nablaMain *nabla){
   int i;
   dbg("\n[hookMainPreInit]");
+  xHookMainGLVisI2a(nabla);
   fprintf(nabla->entity->src, "\n\n\t// BACKEND_MAIN_PREINIT");
   if (isWithLibrary(nabla,with_real))
     xHookMesh1DConnectivity(nabla);

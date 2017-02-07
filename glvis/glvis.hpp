@@ -43,7 +43,8 @@
 #ifndef NABLA_GLVIS
 #define NABLA_GLVIS
 
-void glvis(const int nx,const int ny,const int nz,
-           const double sz,double *node_coord);
+void glvis3DHex(const int nx,const int ny,const int nz,const double sx,const double sy,const double sz,double *coord, double *var);
+void glvis2DQud(const int nx,const int ny,const double sx,const double sy,double *coord,double *var);
+void glvis1D(const int nx,const double sx,double *coord,double *var);
 
 #endif // ABLA_GLVIS

@@ -51,7 +51,10 @@ extern char* nablaAlephHeader(nablaMain*);
 #define BACKEND_MAIN_FORWARDS "\n\
 //extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
 extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
-extern void glvis(const int,const int,const int,const double,double*,double*);\n\n\n"
+extern void glvis3DHex(const int,const int,const int,const double,const double,const double,double*,double*);\n\
+extern void glvis2DQud(const int,const int,const double,const double,double*,double*);\n\
+extern void glvis1D(const int,const double,double*,double*);\n\
+\n\n\n"
 
 // ****************************************************************************
 // * Backend PREFIX - Génération du 'main'
@@ -70,7 +73,8 @@ int main(int argc, char *argv[]){\n"
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
 \t// Initialisation des Swirls\n\
 \t__attribute__((unused)) int hlt_level=0;\n\
-\t__attribute__((unused)) bool visualization=false;\n\
+\t__attribute__((unused)) bool glvis=false;\n\
+\t__attribute__((unused)) int glvis_optarg=0;\n\
 \t__attribute__((unused)) bool* hlt_exit=(bool*)calloc(64,sizeof(bool));\n\
 \t// Initialisation de la précision du cout\n\
 \tstd::cout.precision(14);//21, 14 pour Arcane\n\
@@ -90,7 +94,7 @@ int main(int argc, char *argv[]){\n"
 \t// ********************************************************\n\
 \tint o; int longindex=0;\n\
 \tconst struct option longopts[]={\n\
-\t\t{\"vis\",no_argument,NULL,0x5d8a73d0},\n\
+\t\t{\"vis\",required_argument,NULL,0x5d8a73d0},\n\
 \t\t{\"org\",required_argument,NULL,0x3c0f6f4c},\n"
 #define BACKEND_MAIN_OPTIONS_POSTFIX "\
 \t\t{NULL,0,NULL,0}\n\
@@ -99,7 +103,9 @@ int main(int argc, char *argv[]){\n"
 \twhile ((o=getopt_long_only(argc, argv, \"\",longopts,&longindex))!=-1){\n\
 \t\tswitch (o){\n\
 \t\tcase 0x5d8a73d0:{\n\
-\t\t\tvisualization=true;\n\
+\t\t\tglvis=true;\n\
+\t\t\tglvis_optarg=atoi(optarg);\n\
+\t\t\tprintf(\"[1;33mGLVis optarg offset is %%d[m\\n\",glvis_optarg);\n\
 \t\t\tbreak;\n\
 \t\t\t};\n\
 \t\tcase 0x3c0f6f4c:{//optorg\n\
@@ -150,10 +156,14 @@ static void dumpOptions(nablaMain *nabla,const int tabs){
 }
 
 
+// ****************************************************************************
+// * xHookMainPrefix
+// ****************************************************************************
 NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   dbg("\n[hookMainPrefix]");
   if ((nabla->entity->libraries&(1<<with_aleph))!=0)
     fprintf(nabla->entity->hdr, "%s", nablaAlephHeader(nabla));
+  
   fprintf(nabla->entity->src, BACKEND_MAIN_FORWARDS);
   fprintf(nabla->entity->src, BACKEND_MAIN_FUNCTION);
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
@@ -164,7 +174,7 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
 
   dumpOptions(nabla,3);
-  
+    
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX_BIS);
   
   dumpOptions(nabla,0);
@@ -172,6 +182,29 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_POSTFIX);
   return NABLA_OK;
 }
+
+
+// ****************************************************************************
+// * xHookMainGLVisI2a
+// ****************************************************************************
+void xHookMainGLVisI2a(nablaMain *n){
+  int nb_var=0;
+  // On ne compte pas les globales, et que les type real
+  for(nablaVariable *var=n->variables;var!=NULL;var=var->next){
+    if (var->item[0]=='g') continue;
+    if (strcmp(var->type, "real")!=0) continue;
+    nb_var+=1;
+  }
+  nprintf(n, NULL,"\n\tconst real* i2var[%d]={",nb_var+1);
+  for(nablaVariable *var=n->variables;var!=NULL;var=var->next){
+    if (var->item[0]=='g') continue;
+    if (strcmp(var->type, "real")!=0) continue;
+    nprintf(n,NULL,"\n\t\t%s_%s,",var->item,var->name);
+  }
+  nprintf(n,NULL,"\n\t\tNULL");
+  nprintf(n, NULL,"\n\t};");
+}
+
 
 // ****************************************************************************
 // * Backend PREINIT - Génération du 'main'
@@ -216,6 +249,8 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;
   dbg("\n[hookMainPreInit]");
+  
+  xHookMainGLVisI2a(nabla);
   
   fprintf(nabla->entity->src, "\n\n\t// BACKEND_MAIN_PREINIT");
 
@@ -339,6 +374,21 @@ NABLA_STATUS xHookMainVarInitCall(nablaMain *nabla){
   return NABLA_OK;
 }
 
+  
+// ****************************************************************************
+// * GLVis
+// ****************************************************************************
+static void xHookMainGLVis(nablaMain *n){
+  const bool dim1D = ((n->entity->libraries&(1<<with_real))!=0);
+  const bool dim2D = ((n->entity->libraries&(1<<with_real2))!=0);
+  const bool dim3D = (!dim1D) && (!dim2D);
+  
+  nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
+  nprintf(n, NULL,"\n\tif (glvis) %s,(double*)i2var[glvis_optarg]);",
+          dim3D?"glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
+          dim2D?"glvis2DQud(X_EDGE_ELEMS,Y_EDGE_ELEMS,LENGTH,LENGTH,(double*)node_coord":
+          dim1D?"glvis1D(X_EDGE_ELEMS,LENGTH,(double*)node_coord":"");
+}
 
 
 // ****************************************************************************
@@ -351,7 +401,7 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
   bool is_into_compute_loop=false;
   double last_when;
   n->HLT_depth=0;
-  
+
   dbg("\n[hookMain]");
   number_of_entry_points=nMiddleNumberOfEntryPoints(n);
   entry_points=nMiddleEntryPointsSort(n,number_of_entry_points);
@@ -370,9 +420,9 @@ NABLA_STATUS xHookMainHLT(nablaMain *n){
     // Si l'on passe pour la première fois la frontière du zéro, on écrit le code pour boucler
     if (entry_points[i].whens[0]>=0 && is_into_compute_loop==false){
       is_into_compute_loop=true;
-      nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);\n\
-\t//if (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_e);\n\
-\twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
+      nprintf(n, NULL,"\n\tgettimeofday(&st, NULL);");
+      //xHookMainGLVis(n);
+      nprintf(n, NULL,"\n\twhile ((global_time[0]<option_stoptime) && (global_iteration[0]!=option_max_iterations)){");
     }
     
     if (entry_points[i].when_depth==(n->HLT_depth+1)){
@@ -449,8 +499,6 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 \n\t\t//printf(\"\\ntime=%%e, dt=%%e\\n\", global_time[0], *(double*)&global_greek_deltat[0]);\
 \n\t}\
 \n\tgettimeofday(&et, NULL);\n\
-\n\t//#warning no visualization\n\
-\n\t//if (visualization) glvis(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,(double*)node_coord,(double*)cell_p);\n\
 \talltime = ((et.tv_sec-st.tv_sec)*1000.+ (et.tv_usec - st.tv_usec)/1000.0);\n\
 \tprintf(\"\\n\\t\\33[7m[#%%04d] Elapsed time = %%12.6e(s)\\33[m\\n\", global_iteration[0]-1, alltime/1000.0);\n"
 
@@ -460,6 +508,7 @@ NABLA_STATUS xHookMainPostInit(nablaMain *nabla){
 // ****************************************************************************
 NABLA_STATUS xHookMainPostfix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_POSTFIX);
+  xHookMainGLVis(nabla);
   xHookMeshFreeConnectivity(nabla);
   return NABLA_OK;
 }
