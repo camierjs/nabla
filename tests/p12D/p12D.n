@@ -54,8 +54,8 @@ with ℝ²;
 options{
   // Mesh options
   ℝ LENGTH       = 1.0;             // ! utilisé en dur dans le backend !
-  ℕ X_EDGE_ELEMS = 4;               // ! utilisé en dur dans le backend !
-  ℕ Y_EDGE_ELEMS = 4;               // ! utilisé en dur dans le backend !
+  ℕ X_EDGE_ELEMS = 3;               // ! utilisé en dur dans le backend !
+  ℕ Y_EDGE_ELEMS = 3;               // ! utilisé en dur dans le backend !
   ℕ Z_EDGE_ELEMS = 1;               // ! utilisé en dur dans le backend !
 
   ℾ DEBUG = false;

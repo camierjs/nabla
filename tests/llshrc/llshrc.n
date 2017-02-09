@@ -110,7 +110,7 @@ options{
   ℝ option_dtmax              = 1.0e-2;   // maximum allowable time increment
   ℾ option_chaos              = false;
   ℝ option_chaos_seed         = 1.1234567890123;//456789;
-  ℕ option_max_iterations     = 128;
+  ℕ option_max_iterations     = 32768;
 };
 
 
@@ -363,7 +363,7 @@ timeIncrement @ 0.1 {
   𝜕x.y = (fabs(𝜕x.y)<option_u_cut)?0.0;
   𝜕x.z = (fabs(𝜕x.z)<option_u_cut)?0.0;
 }
-void eieio301(void) @ 3.01 { synchronize(𝜕x); }
+syncVelForNode @ 3.01 { synchronize(𝜕x); }
 
 // ****************************************************************************
 // * The routine CalcPositionForNodes() performs the last step in the nodal
@@ -521,6 +521,9 @@ void eieio301(void) @ 3.01 { synchronize(𝜕x); }
   qq = qquadt;
   ql = qlint;
 }
+
+syncQL @ 4.73{ synchronize(ql);}
+syncQQ @ 4.73{ synchronize(qq);}
 
 // ****************************************************************************
 // * The routine ApplyMaterialPropertiesForElems() updates the pressure and

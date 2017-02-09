@@ -213,9 +213,9 @@ iniTestCase @ -20 {
   const int l=√(n);
   const int center=n/2+l/2;
   const int k0=n/4+l/3;
-  const int k1=3*n/4+l/4;
+  const int k1=k0;//3*n/4+l/4;
   if (uid==center || uid==k0 || uid==k1){
-    cout<<"\n[35m[iniImpacts]"<<uid<<"[m";
+    //cout<<"\n[35m[iniImpacts]"<<uid<<"[m";
     zr = rinitsub;
     ze = einitsub;
   }
