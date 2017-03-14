@@ -60,7 +60,7 @@ static char *strKillQuote(const char *str){
  * astTreeSaveNodes
  *****************************************************************************/
 static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
-                                     astNode *n,
+                                     node *n,
                                      unsigned int id){
   for(;n not_eq NULL;n=n->next){
     if (n->rule not_eq NULL)
@@ -82,8 +82,8 @@ static unsigned int astTreeSaveNodes(FILE *fTreeOutput,
  * astTreeSaveEdges
  *****************************************************************************/
 static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
-                                     const astNode *n,
-                                     const astNode *father){
+                                     const node *n,
+                                     const node *father){
   //dbg("\n\t\t[astTreeSaveEdges]");
   for(;n not_eq NULL;n=n->next){
     fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, n->id);
@@ -96,7 +96,7 @@ static NABLA_STATUS astTreeSaveEdges(FILE *fTreeOutput,
 /*****************************************************************************
  * astTreeSave
  *****************************************************************************/
-NABLA_STATUS astTreeSave(const char *nabla_entity_name, astNode *root){
+NABLA_STATUS astTreeSave(const char *nabla_entity_name, node *root){
   FILE *fDot;
   char fName[NABLA_MAX_FILE_NAME];
   sprintf(fName, "%s.dot", nabla_entity_name);
@@ -120,7 +120,7 @@ NABLA_STATUS astTreeSave(const char *nabla_entity_name, astNode *root){
 /*****************************************************************************
  * getInOutPutsNodes
  *****************************************************************************/
-void getInOutPutsNodes(FILE *fOut, astNode *n, char *color){
+void getInOutPutsNodes(FILE *fOut, node *n, char *color){
   if (fOut==NULL) return;
   if (n->token not_eq NULL){
     if (n->tokenid == CELL){
@@ -142,7 +142,7 @@ void getInOutPutsNodes(FILE *fOut, astNode *n, char *color){
 /*****************************************************************************
  * getInOutPutsEdges
  *****************************************************************************/
-void getInOutPutsEdges(FILE *fOut, astNode *n, int inout, char *nName1, char* nName2){
+void getInOutPutsEdges(FILE *fOut, node *n, int inout, char *nName1, char* nName2){
   if (fOut==NULL) return;
   if (n->token != NULL){
     if (n->tokenid == CELL){

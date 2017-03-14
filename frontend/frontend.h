@@ -103,24 +103,24 @@ enum{
 // ****************************************************************************
 typedef struct RuleActionStruct{
   int ruleid;
-  void (*action)(astNode*,void*);
+  void (*action)(node*,void*);
 } RuleAction;
 
 
 // ****************************************************************************
 // * DFS functions
 // ****************************************************************************
-void dfsDumpToken(astNode*);
+void dfsDumpToken(node*);
 
-void scanTokensForActions(astNode*, RuleAction*, void*);
-char *dfsFetchFirst(astNode*, int);
-char *dfsFetchAll(astNode*,const int,int*,char*);
-astNode *dfsFetch(astNode*,int);
+void scanTokensForActions(node*, RuleAction*, void*);
+char *dfsFetchFirst(node*, int);
+char *dfsFetchAll(node*,const int,int*,char*);
+node *dfsFetch(node*,int);
 
-astNode *dfsFetchTokenId(astNode*,int);
-astNode *dfsFetchToken(astNode*, const char *);
-astNode *dfsFetchRule(astNode*,int);
-int dfsScanJobsCalls(void*,void*,astNode*);
+node *dfsFetchTokenId(node*,int);
+node *dfsFetchToken(node*, const char *);
+node *dfsFetchRule(node*,int);
+int dfsScanJobsCalls(void*,void*,node*);
 void iniUsedRuleNames(void);
 
 #endif // _NABLA_FRONTEND_H_

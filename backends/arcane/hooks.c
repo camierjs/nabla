@@ -53,7 +53,7 @@ char* nccArcSystemPrefix(void){ return "m_"; }
 // ****************************************************************************
 // * hookPrimaryExpressionToReturn
 // ****************************************************************************
-bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, node *n){
   const char* var=dfsFetchFirst(job->stdParamsNode,ruleToId(rule_direct_declarator));
   dbg("\n\t[hookPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
@@ -102,9 +102,9 @@ char* arcaneHookDfsArgType(nablaMain *nabla, nablaVariable *var){
 // ****************************************************************************
 void aHookDfsForCalls(nablaMain *nabla,
                       nablaJob *fct,
-                      astNode *n,
+                      node *n,
                       const char *namespace,
-                      astNode *nParams){
+                      node *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -186,7 +186,7 @@ void arcaneFatal(nablaMain *nabla){
 
 void arcaneAddCallNames(nablaMain *nabla,
                         nablaJob *job,
-                        astNode *n){
+                        node *n){
   dbg("\n[arcaneAddCallNames]");
   /*nothing to do*/
 }
@@ -207,7 +207,7 @@ void arcaneTurnTokenToOption(nablaMain *nabla,nablaOption *opt){
 // * Traitement des tokens SYSTEM
 // *****************************************************************************
 //#warning nablaSystem and test error (ddfv alpha)
-void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
+void arcaneHookSystem(node * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   //if (n->tokenid == DIESE)         nprintf(arc, "/*nablaSystem*/", "%s.index()",etm);//asInteger

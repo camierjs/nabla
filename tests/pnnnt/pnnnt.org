@@ -1,7 +1,43 @@
-  - first_is_lost = 0
-  - option_max_iterations = 0
-  - impacts = true
-  - cstop = 1024
-  - tstop = 1.0
-  - dtinit = 0.00000025
-
+* Pennant Options
+** Geometry
+   LENGTH = 1.125
+   X_EDGE_ELEMS = 8
+   Y_EDGE_ELEMS = 4
+   Z_EDGE_ELEMS = 1
+** Time Options: Time, δt
+   - cstop = 64     // simulation stop cycle
+   - tstop = 1.0    // simulation stop time
+   - option_stoptime = 1.0
+   - option_δt_initial = 1e-7
+   - option_max_iterations = 0
+   - dtmax       = 1.e99  // maximum timestep size
+   - dtinit      = 0.0025 // initial timestep size
+   - dtfac       = 1.2    // factor limiting timestep growth
+   - dtreport    = 10     // frequency for timestep reports
+** Trace Options
+   trace       = false
+** CFL Options
+   cfl         = 0.6    // Courant number, limits timestep
+   cflv        = 0.1    // volume change limit for timestep
+** Initial conditions
+*** Variables
+    rinit       = 1.0    // initial density for main mesh
+    einit       = 0.0    // initial energy for main mesh
+    impacts     = false
+    rinitsub    = 1.0    // initial density in subregion
+    einitsub    = 40.222 // initial energy in subregion
+    uinitradial = 0.0    // initial velocity in radial direction
+*** Initiale Geometry
+    subregion   = true
+    sbxmin      = 0.0
+    sbxmax      = 0.3
+    sbymin      = 0.0
+    sbymax      = 0.3
+    γ           = 1.6666666666666667 //5./3.  // coeff. for ideal gas equation
+** EOS & CST
+   ssmin       = 0.1    // minimum sound speed for gas
+   alpha       = 0.5    // alpha coefficient for TTS model
+   q1          = 0.1    // linear coefficients for Q model
+   q2          = 1.0    // quadratic coefficients for Q model
+   ε           = 1.e-12
+   ι           = 1.e-99

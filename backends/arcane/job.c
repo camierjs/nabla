@@ -283,7 +283,7 @@ char* arcaneHookItem(nablaJob *job,const char j, const char itm, char enum_enum)
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void arcaneHookSwitchToken(astNode *n, nablaJob *job){
+void arcaneHookSwitchToken(node *n, nablaJob *job){
   nablaMain *arc=job->entity->main;
   const char support=job->item[0];
   const char forall=job->parse.enum_enum;
@@ -684,7 +684,7 @@ void arcaneHookSwitchToken(astNode *n, nablaJob *job){
 /***************************************************************************** 
  * nccArcaneJob
  *****************************************************************************/
-void arcaneJob(nablaMain *nabla, astNode *n){
+void arcaneJob(nablaMain *nabla, node *n){
   nablaJob *job = nMiddleJobNew(nabla->entity);
   nMiddleJobAdd(nabla->entity, job);
   nMiddleJobFill(nabla,job,n,nabla->name);

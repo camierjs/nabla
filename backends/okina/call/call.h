@@ -129,7 +129,7 @@ char *nOkinaPragmaIccAlign(void);
 char *nOkinaPragmaGccAlign(void);
 
 // hooks/nOkinaHookGather
-char* gather(astNode*,nablaJob*);
+char* gather(node*,nablaJob*);
 
 // hooks/nOkinaHookScatter
 char* scatter(nablaJob*);

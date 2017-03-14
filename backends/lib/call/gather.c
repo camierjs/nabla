@@ -164,7 +164,7 @@ char* xCallGather(nablaJob *job,nablaVariable* var){
 // ****************************************************************************
 // * Idem, si on a différents ∀, pour l'instant ils gatherent trop!
 // ****************************************************************************
-char* xCallFilterGather(astNode *n,nablaJob *job){
+char* xCallFilterGather(node *n,nablaJob *job){
   dbg("\n\t\t\t\t[xFilterGather]");
   char *gather_src_buffer=NULL;  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)

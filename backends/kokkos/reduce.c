@@ -46,13 +46,13 @@
 // ****************************************************************************
 // * hookReduction
 // ****************************************************************************
-void kHookReduction(struct nablaMainStruct *nabla, astNode *n){
-  astNode *item_node = dfsFetch(n->children,ruleToId(rule_nabla_items));
+void kHookReduction(struct nablaMainStruct *nabla, node *n){
+  node *item_node = dfsFetch(n->children,ruleToId(rule_nabla_items));
   assert(item_node);
-  astNode *global_var_node = n->children->next;
-  astNode *reduction_operation_node = global_var_node->next;
-  astNode *item_var_node = reduction_operation_node->next;
-  astNode *at_single_cst_node = dfsFetch(n->children->next, ruleToId(rule_at_constant));
+  node *global_var_node = n->children->next;
+  node *reduction_operation_node = global_var_node->next;
+  node *item_var_node = reduction_operation_node->next;
+  node *at_single_cst_node = dfsFetch(n->children->next, ruleToId(rule_at_constant));
   assert(at_single_cst_node!=NULL);
   const char *global_var_name = global_var_node->token;
   const char *item_var_name = item_var_node->token;

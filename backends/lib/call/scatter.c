@@ -104,7 +104,7 @@ char* xCallScatter(nablaJob *job,
 // ****************************************************************************
 // * Filtrage du SCATTER
 // ****************************************************************************
-char* xCallFilterScatter(astNode *n,nablaJob *job){
+char* xCallFilterScatter(node *n,nablaJob *job){
   char *scatters=NULL;
     
   if ((scatters=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)

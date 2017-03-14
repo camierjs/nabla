@@ -57,7 +57,7 @@ char *last_identifier=NULL;
 #undef YY_BUF_SIZE
 #define YY_BUF_SIZE 131072
 #undef YY_NEED_STRLEN
-#define YYSTYPE  astNode*   
+#define YYSTYPE  node*   
 #include "nabla.tab.h"
 static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 

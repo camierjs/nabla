@@ -145,14 +145,14 @@ nablaJob *nMiddleJobFind(nablaJob *jobs,const char *name){
 // ****************************************************************************
 // * Backend Generic for JOBS - New, Add, Last functions
 // ****************************************************************************
-static void actNablaJobParameterItem(astNode * n, void *current_item){
+static void actNablaJobParameterItem(node * n, void *current_item){
   current_item=(void*)n->children->token;
   dbg("\n\titem set to '%s' ", n->children->token);
 }
-static void actNablaJobParameterDirectDeclarator(astNode * n, void *current_item){
+static void actNablaJobParameterDirectDeclarator(node * n, void *current_item){
   dbg("'%s'", n->children->token);
 }
-void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
+void nMiddleScanForNablaJobParameter(node * n, int ruleid, nablaMain *arc){
   char *current_item=NULL;
   RuleAction tokact[]={
     {ruleToId(rule_nabla_item),actNablaJobParameterItem},
@@ -177,7 +177,7 @@ void nMiddleScanForNablaJobParameter(astNode * n, int ruleid, nablaMain *arc){
 // ****************************************************************************
 // * scanForNablaJobAtConstant
 // ****************************************************************************
-void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *nabla){
+void nMiddleScanForNablaJobAtConstant(node *n, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=AT) continue;
     // Si ce Nabla Job a un 'AT', c'est qu'il faut renseigner les .config et .axl
@@ -196,7 +196,7 @@ void nMiddleScanForNablaJobAtConstant(astNode *n, nablaMain *nabla){
 // *****************************************************************************
 // * nMiddleScanForIfAfterAt
 // *****************************************************************************
-void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla){
+void nMiddleScanForIfAfterAt(node *n, nablaJob *entry_point, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=IF) continue;
     dbg("\n\t[scanForIfAfterAt] %s ", n->token);
@@ -211,19 +211,19 @@ void nMiddleScanForIfAfterAt(astNode *n, nablaJob *entry_point, nablaMain *nabla
 // * static dumpIfAfterAt functions
 // * A cleaner!
 // ****************************************************************************
-static void dumpIfAfterAtFormat(astNode *n, nablaMain *nabla, bool dump_in_header,char *info, char *format){
+static void dumpIfAfterAtFormat(node *n, nablaMain *nabla, bool dump_in_header,char *info, char *format){
   if (dump_in_header)
     hprintf(nabla, info, format, n->token);
   else
     nprintf(nabla, info, format, n->token);
 }
-static void dumpIfAfterAtToken(astNode *n, nablaMain *nabla, bool dump_in_header){
+static void dumpIfAfterAtToken(node *n, nablaMain *nabla, bool dump_in_header){
   if (dump_in_header)
     hprintf(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
   else
     nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
 }
-static void dumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
+static void dumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
 // #warning LAMBDA vs ARCANE in middlend!
   if (!dump_in_header){ // LAMBDA ici
     nablaVariable *var=NULL;
@@ -258,7 +258,7 @@ static void dumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
 // *****************************************************************************
 // * dumpIfAfterAt
 // ****************************************************************************
-void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
+void nMiddleDumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
   if (n->token!=NULL) dumpIfAfterAt(n,nabla,dump_in_header);
   if(n->children != NULL) nMiddleDumpIfAfterAt(n->children,nabla,dump_in_header);
   if(n->next != NULL) nMiddleDumpIfAfterAt(n->next,nabla,dump_in_header);
@@ -268,7 +268,7 @@ void nMiddleDumpIfAfterAt(astNode *n, nablaMain *nabla, bool dump_in_header){
 // *****************************************************************************
 // * nMiddleScanForNablaJobForallItem
 // *****************************************************************************
-char nMiddleScanForNablaJobForallItem(astNode *n){
+char nMiddleScanForNablaJobForallItem(node *n){
   char it;
   //if (n->tokenid==FORALL) return n->next->children->token[0];
   if (n->ruleid==ruleToId(rule_forall_switch)) return n->children->token[0];
@@ -285,7 +285,7 @@ char nMiddleScanForNablaJobForallItem(astNode *n){
 // ****************************************************************************
 // * Différentes actions pour un job Nabla
 // ****************************************************************************
-void nMiddleJobParse(astNode *n, nablaJob *job){
+void nMiddleJobParse(node *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   
@@ -375,7 +375,7 @@ void nMiddleJobParse(astNode *n, nablaJob *job){
 // ****************************************************************************
 void nMiddleJobFill(nablaMain *nabla,
                     nablaJob *job,
-                    astNode *n,
+                    node *n,
                     const char *namespace){
   dbg("\n\t[nMiddleJobFill] calloc");
   char *set=(char*)calloc(1024,sizeof(char));
@@ -418,7 +418,7 @@ void nMiddleJobFill(nablaMain *nabla,
     job->return_type=sdup("void");
   }else{
     dbg("\n\tdfsFetchTokenId IDENTIFIER");
-    astNode* id_node=dfsFetchTokenId(n->children,IDENTIFIER);
+    node* id_node=dfsFetchTokenId(n->children,IDENTIFIER);
     assert(id_node);
     job->name=sdup(id_node->token);
     job->name_utf8 = sdup(id_node->token_utf8);
@@ -470,7 +470,7 @@ void nMiddleJobFill(nablaMain *nabla,
   job->returnTypeNode=dfsFetch(n->children->children,ruleToId(rule_type_specifier));
   
   // Récupération de la liste des paramètres
-  astNode *nd=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
+  node *nd=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
   if (nd) job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
       (job->scope!=NULL)?job->scope:"", (job->region!=NULL)?job->region:"",

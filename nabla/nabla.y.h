@@ -54,14 +54,14 @@
 // ****************************************************************************
 // * Forward declarations
 // ****************************************************************************
-void rhsAdd(astNode**,int,astNode**);
-void rhsPatchAndAdd(const int, const char,astNode**,int,astNode**);
-void rhsYSandwich(astNode**,int,astNode**,int,int);
-void rhsTailSandwich(astNode**,int,int,int,astNode**);
+void rhsAdd(node**,int,node**);
+void rhsPatchAndAdd(const int, const char,node**,int,node**);
+void rhsYSandwich(node**,int,node**,int,int);
+void rhsTailSandwich(node**,int,int,int,node**);
 
-void rhsAddVariadic(astNode**,int,int,...);
-void rhsYSandwichVariadic(astNode**,int,int,int,int,...);
-void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
+void rhsAddVariadic(node**,int,int,...);
+void rhsYSandwichVariadic(node**,int,int,int,int,...);
+void rhsTailSandwichVariadic(node**,int,int,int,int,...);
 
 
 // ****************************************************************************
@@ -133,27 +133,27 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 // * Operations Sandwich
 // *****************************************************************************
 #define Yop3p(lhs, n1, op, n3)                                        \
-  astNode *nOp=astNewNode(toolOpName(op->token_utf8),op->tokenid);    \
-  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
-  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                    \
-  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
+  node *nOp=astNewNode(toolOpName(op->token_utf8),op->tokenid);    \
+  node *pIn=astNewNode("(",YYTRANSLATE('('));                      \
+  node *nComa=astNewNode(",",YYTRANSLATE(','));                    \
+  node *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
   ast(nOp,pIn,n1,nComa,n3,pOut)
  
 #define YopTernary5p(lhs,cond,qstn,if,doubleDot,else)                   \
-  astNode *nOp=astNewNode("opTernary",0);                               \
-  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                        \
-  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                      \
-  astNode *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
-  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
+  node *nOp=astNewNode("opTernary",0);                               \
+  node *pIn=astNewNode("(",YYTRANSLATE('('));                        \
+  node *nComa=astNewNode(",",YYTRANSLATE(','));                      \
+  node *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
+  node *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
   ast(nOp,pIn,cond,nComa,if,nComa2,else,pOut)
 
 #define YopDuaryExpression(lhs,ident,op,cond,ifState)                   \
-  astNode *nOp=astNewNode("opTernary",0);                               \
-  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                        \
-  astNode *nComa=astNewNode(",",YYTRANSLATE(','));                      \
-  astNode *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
-  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
-  astNode *elseState=astNewNodeRule(ident->rule,ident->ruleid);         \
+  node *nOp=astNewNode("opTernary",0);                               \
+  node *pIn=astNewNode("(",YYTRANSLATE('('));                        \
+  node *nComa=astNewNode(",",YYTRANSLATE(','));                      \
+  node *nComa2=astNewNode(",",YYTRANSLATE(','));                     \
+  node *pOut=astNewNode(")",YYTRANSLATE(')'));                       \
+  node *elseState=astNewNodeRule(ident->rule,ident->ruleid);         \
   elseState->children=ident->children;                                  \
   ast(ident,op,nOp,pIn,cond,nComa,ifState,nComa2,elseState,pOut)
 
@@ -161,38 +161,38 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 
 // *****************************************************************************
 // * Other singular operations
-// * astNode *pi=astNewNode("(",YYTRANSLATE('('));                       
-// * astNode *po=astNewNode(")",YYTRANSLATE(')'));                     
+// * node *pi=astNewNode("(",YYTRANSLATE('('));                       
+// * node *po=astNewNode(")",YYTRANSLATE(')'));                     
 // * decl_spec->children=type_spec;                                      
 // * type_spec->children=vd;                                             
-// * astNode *decl_spec=astNewNode(NULL,rulenameToId("declaration_specifiers")); 
+// * node *decl_spec=astNewNode(NULL,rulenameToId("declaration_specifiers")); 
 // *****************************************************************************
 #define voidIDvoid_rhs(lhs,id,at,cst,statement)                         \
-  astNode *decl_spec=astNewNodeRule("declaration_specifiers",           \
+  node *decl_spec=astNewNodeRule("declaration_specifiers",           \
                                     rulenameToId("declaration_specifiers")); \
-  astNode *type_spec=astNewNodeRule("type_specifier",                   \
+  node *type_spec=astNewNodeRule("type_specifier",                   \
                                     rulenameToId("type_specifier"));    \
   decl_spec->children=type_spec;                                        \
-  astNode *rvd=astNewNode("void",VOID);                                 \
-  astNode *avd=astNewNode("void",VOID);                                 \
+  node *rvd=astNewNode("void",VOID);                                 \
+  node *avd=astNewNode("void",VOID);                                 \
   type_spec->children=rvd;                                              \
-  astNode *decl=astNewNodeRule("declarator",rulenameToId("declarator")); \
-  astNode *direct_decl=astNewNodeRule("direct_declarator",              \
+  node *decl=astNewNodeRule("declarator",rulenameToId("declarator")); \
+  node *direct_decl=astNewNodeRule("direct_declarator",              \
                                       rulenameToId("direct_declarator")); \
-  astNode *direct_decl_bis=astNewNodeRule("direct_declarator",          \
+  node *direct_decl_bis=astNewNodeRule("direct_declarator",          \
                                           rulenameToId("direct_declarator")); \
   decl->children=direct_decl;                                           \
   direct_decl->children=id;                                             \
   direct_decl->children=direct_decl_bis;                                \
   direct_decl_bis->children=id;                                         \
-  astNode *parameter_type_list=astNewNodeRule("parameter_type_list",    \
+  node *parameter_type_list=astNewNodeRule("parameter_type_list",    \
                                               rulenameToId("parameter_type_list")); \
-  astNode *parameter_declaration=astNewNodeRule("parameter_declaration",    \
+  node *parameter_declaration=astNewNodeRule("parameter_declaration",    \
                                               rulenameToId("parameter_declaration")); \
-  astNode *arg_type_spec=astNewNodeRule("type_specifier",               \
+  node *arg_type_spec=astNewNodeRule("type_specifier",               \
                                         rulenameToId("type_specifier")); \
-  astNode *pi=astNewNode("(",YYTRANSLATE('('));                         \
-  astNode *po=astNewNode(")",YYTRANSLATE(')'));                         \
+  node *pi=astNewNode("(",YYTRANSLATE('('));                         \
+  node *po=astNewNode(")",YYTRANSLATE(')'));                         \
   direct_decl_bis->next=pi;                                             \
   pi->next=parameter_type_list;                                         \
   parameter_type_list->next=po;                                         \
@@ -202,16 +202,16 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   ast(decl_spec,decl,at,cst,statement)
 
 #define nabla_job_id_rhs(lhs,prefix,id)                                 \
-  astNode *decl_spec=astNewNodeRule("declaration_specifiers",rulenameToId("declaration_specifiers")); \
-  astNode *type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
-  astNode *return_void=astNewNode("void",VOID);                         \
-  astNode *pi=astNewNode("(",YYTRANSLATE('('));                         \
-  astNode *po=astNewNode(")",YYTRANSLATE(')'));                         \
-  astNode *parameter_type_list=astNewNodeRule("parameter_type_list",rulenameToId("parameter_type_list")); \
-  astNode *parameter_list=astNewNodeRule("parameter_list",rulenameToId("parameter_list")); \
-  astNode *parameter_declaration=astNewNodeRule("parameter_declaration",rulenameToId("parameter_declaration")); \
-  astNode *parameter_type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
-  astNode *parameter_void=astNewNode("void",VOID);                      \
+  node *decl_spec=astNewNodeRule("declaration_specifiers",rulenameToId("declaration_specifiers")); \
+  node *type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  node *return_void=astNewNode("void",VOID);                         \
+  node *pi=astNewNode("(",YYTRANSLATE('('));                         \
+  node *po=astNewNode(")",YYTRANSLATE(')'));                         \
+  node *parameter_type_list=astNewNodeRule("parameter_type_list",rulenameToId("parameter_type_list")); \
+  node *parameter_list=astNewNodeRule("parameter_list",rulenameToId("parameter_list")); \
+  node *parameter_declaration=astNewNodeRule("parameter_declaration",rulenameToId("parameter_declaration")); \
+  node *parameter_type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  node *parameter_void=astNewNode("void",VOID);                      \
   decl_spec->children=type_spec;                                        \
   type_spec->children=return_void;                                      \
   parameter_type_list->children=parameter_list;                         \
@@ -224,35 +224,35 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
   char *dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));         \
   dest=strcat(dest,ident->token);                                     \
   dest=strcat(dest,"np1");                                            \
-  astNode *superNP1Node=astNewNode(dest,IDENTIFIER);                  \
+  node *superNP1Node=astNewNode(dest,IDENTIFIER);                  \
   ast(superNP1Node)
 
 #define Ypow(lhs,n1,pow)                                              \
-  astNode *pPow=astNewNode("pow",IDENTIFIER);                         \
-  astNode *pIn=astNewNode("(",YYTRANSLATE('('));                      \
-  astNode *pTwo=astNewNode("," #pow ".0",IDENTIFIER);                 \
-  astNode *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
+  node *pPow=astNewNode("pow",IDENTIFIER);                         \
+  node *pIn=astNewNode("(",YYTRANSLATE('('));                      \
+  node *pTwo=astNewNode("," #pow ".0",IDENTIFIER);                 \
+  node *pOut=astNewNode(")",YYTRANSLATE(')'));                     \
   ast(pPow,pIn,n1,pTwo,pOut)
 
 #define remainY1(lhs)                                                   \
-  astNode *timeRemainNode=astNewNode("slurmTremain()",YYTRANSLATE(REMAIN)); \
+  node *timeRemainNode=astNewNode("slurmTremain()",YYTRANSLATE(REMAIN)); \
   ast(timeRemainNode)
 
 #define limitY1(lhs)                                                  \
-  astNode *timeLimitNode=astNewNode("slurmTlimit()",YYTRANSLATE(LIMIT)); \
+  node *timeLimitNode=astNewNode("slurmTlimit()",YYTRANSLATE(LIMIT)); \
   ast(timeLimitNode)
 
 #define volatilePreciseY1(lhs, gmpType){                              \
-    astNode *mpTypeNode;                                              \
+    node *mpTypeNode;                                              \
     if (gmpType==GMP_INTEGER)                                         \
       mpTypeNode=astNewNode("mpInteger",YYTRANSLATE(gmpType));        \
     else                                                              \
       mpTypeNode=astNewNode("mpReal",YYTRANSLATE(gmpType));           \
-    astNode *volatileNode=astNewNode("VOLATILE",VOLATILE);            \
+    node *volatileNode=astNewNode("VOLATILE",VOLATILE);            \
     ast(mpTypeNode,volatileNode);}
 
 #define preciseY1(lhs, gmpType){                                      \
-    astNode *mpTypeNode;                                              \
+    node *mpTypeNode;                                              \
     if (gmpType==GMP_INTEGER)                                         \
       mpTypeNode=astNewNode("mpInteger",YYTRANSLATE(gmpType));        \
     else                                                              \
@@ -262,13 +262,13 @@ void rhsTailSandwichVariadic(astNode**,int,int,int,int,...);
 #define primeY1ident(lhs, ident)                                      \
   char token[1024];                                                   \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",ident->token);          \
-  astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK);  \
+  node *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK);  \
   ast(mathlinkPrimeNode)
 
 #define primeY1(lhs, cst)                                             \
   char token[1024];                                                   \
   sprintf(token, "m_mathlink->Prime(%s);\n\t",cst->token);            \
-  astNode *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK)); \
+  node *mathlinkPrimeNode=astNewNode(token,YYTRANSLATE(MATHLINK)); \
   ast(mathlinkPrimeNode)
 
 

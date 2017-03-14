@@ -59,7 +59,7 @@ void aHookAddExtraParametersDFS(nablaMain *nabla,
 // ****************************************************************************
 void aHookDumpNablaParameterListDFS(nablaMain *nabla,
                                     nablaJob *job,
-                                    astNode *n,
+                                    node *n,
                                     int *numParams){
   nprintf(nabla, NULL, "/*nothing in hookDumpNablaParameterListDFS*/");
 }

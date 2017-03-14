@@ -70,7 +70,7 @@ static nablaMain *nMiddleInit(const char *nabla_entity_name){
 // ****************************************************************************
 // * nMiddleSwitch
 // ****************************************************************************
-NABLA_STATUS nMiddleSwitch(astNode *root,
+NABLA_STATUS nMiddleSwitch(node *root,
                            const int optionDumpTree,
                            const char *nabla_entity_name,
                            const NABLA_BACKEND backend,

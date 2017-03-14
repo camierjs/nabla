@@ -106,7 +106,7 @@ nablaOption *nMiddleOptionFindName(nablaOption *options, const char *name) {
 // ****************************************************************************
 // * nMiddleCatTillToken
 // ****************************************************************************
-static void nMiddleCatTillToken(astNode * n, char **dflt){
+static void nMiddleCatTillToken(node * n, char **dflt){
   if (n==NULL) return;
   if (n->token != NULL)
     if (n->tokenid != ';')
@@ -119,7 +119,7 @@ static void nMiddleCatTillToken(astNode * n, char **dflt){
 // ****************************************************************************
 // * type_specifier
 // ****************************************************************************
-static void actOptionsTypeSpecifier(astNode * n, void *generic_arg){
+static void actOptionsTypeSpecifier(node * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option = nMiddleOptionNew(nabla);
   dbg("\n\t\t[actGenericOptionsTypeSpecifier] %s",n->children->token);
@@ -131,7 +131,7 @@ static void actOptionsTypeSpecifier(astNode * n, void *generic_arg){
 // ****************************************************************************
 // * direct_declarator
 // ****************************************************************************
-static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
+static void actOptionsDirectDeclarator(node * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actGenericOptionsDirectDeclarator] %s", n->children->token);
@@ -144,7 +144,7 @@ static void actOptionsDirectDeclarator(astNode * n, void *generic_arg){
 // ****************************************************************************
 // * primary_expression
 // ****************************************************************************
-static void actOptionsExpression(astNode * n, void *generic_arg){
+static void actOptionsExpression(node * n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaOption *option =nMiddleOptionLast(nabla->options);
   dbg("\n\t\t[actOptionsExpression] rule=%s", n->rule);
@@ -159,7 +159,7 @@ static void actOptionsExpression(astNode * n, void *generic_arg){
 // ****************************************************************************
 // * Scan pour la déclaration des options
 // ****************************************************************************
-void nMiddleOptions(astNode * n, int ruleid, nablaMain *nabla){
+void nMiddleOptions(node * n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
     {ruleToId(rule_type_specifier),actOptionsTypeSpecifier},
     {ruleToId(rule_direct_declarator),actOptionsDirectDeclarator},
@@ -177,7 +177,7 @@ void nMiddleOptions(astNode * n, int ruleid, nablaMain *nabla){
 // ****************************************************************************
 // * Transformation de tokens en options
 // ****************************************************************************
-nablaOption *nMiddleTurnTokenToOption(astNode * n, nablaMain *nabla){
+nablaOption *nMiddleTurnTokenToOption(node * n, nablaMain *nabla){
   nablaOption *opt=nMiddleOptionFindName(nabla->options, n->token);
   // Si on ne trouve pas d'option, on a rien à faire
   if (opt == NULL) return NULL;

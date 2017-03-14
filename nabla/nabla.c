@@ -45,7 +45,7 @@
 extern FILE *yyin;
 extern int yylineno;
 #define YYSTYPE astNode*
-int yyparse (astNode **);
+int yyparse (node **);
 extern char nabla_input_file[]; 
 static char *unique_temporary_file_name=NULL;
 extern char nabla_version[]; 
@@ -143,7 +143,7 @@ void nablaErrorVariadic(const char *file,
 // ****************************************************************************
 // * yyerror
 // ****************************************************************************
-void yyerror(astNode **root, char *error){
+void yyerror(node **root, char *error){
   fflush(stdout);
   printf("\r%s:%d: %s\n",nabla_input_file,yylineno-1, error);
 }
@@ -162,7 +162,7 @@ static NABLA_STATUS nablaParsing(const char *nabla_entity_name,
                                  char *interface_name,
                                  char *specific_path,
                                  char *service_name){
-  astNode *root=NULL;  
+  node *root=NULL;  
   if(!(yyin=fopen(npFileName,"r")))
     return NABLA_ERROR | dbg("\n\t[nablaParsing] Could not open '%s' file",
                              npFileName);

@@ -79,7 +79,7 @@ void xHookTurnBracketsToParentheses(nablaMain* nabla,
 /***************************************************************************** 
  * Traitement des tokens SYSTEM
  *****************************************************************************/
-void xHookSystem(astNode *n,
+void xHookSystem(node *n,
                  nablaMain *nabla,
                  const char cnf,
                  char enum_enum){
@@ -420,7 +420,7 @@ static bool xHookTurnTokenToGatheredVariable(nablaMain *nabla,
 // ****************************************************************************
 // * Transformation de tokens en variables selon les contextes
 // ****************************************************************************
-nablaVariable *xHookTurnTokenToVariable(astNode * n,
+nablaVariable *xHookTurnTokenToVariable(node * n,
                                         nablaMain *nabla,
                                         nablaJob *job){
   nablaVariable *var=nMiddleVariableFind(nabla->variables, n->token);

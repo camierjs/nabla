@@ -272,7 +272,7 @@ static void timeTreeSaveNodes(FILE *fTreeOutput, nablaJob *job,
  * timeTreeSaveEdges
  *****************************************************************************/
 __attribute__((unused))
-static NABLA_STATUS timeTreeSaveEdges(FILE *fTreeOutput, astNode *l, astNode *father){
+static NABLA_STATUS timeTreeSaveEdges(FILE *fTreeOutput, node *l, node *father){
   for(;l not_eq NULL;l=l->next){
     fprintf(fTreeOutput, "\n\tnode_%d -> node_%d;", father->id, l->id);
     timeTreeSaveEdges(fTreeOutput, l->children, l);
@@ -313,7 +313,7 @@ NABLA_STATUS nMiddleTimeTreeSave(nablaMain *nabla,
 // *****************************************************************************
 // * getInOutPutsNodes
 // *****************************************************************************
-void getInOutPutsNodes(FILE *fOut, astNode *n, char *color){
+void getInOutPutsNodes(FILE *fOut, node *n, char *color){
   if (fOut==NULL) return;
   if (n->token not_eq NULL){
     if (n->tokenid == CELL){
@@ -335,7 +335,7 @@ void getInOutPutsNodes(FILE *fOut, astNode *n, char *color){
 // *****************************************************************************
 // * getInOutPutsEdges
 // *****************************************************************************
-void getInOutPutsEdges(FILE *fOut, astNode *n, int inout, char *nName1, char* nName2){
+void getInOutPutsEdges(FILE *fOut, node *n, int inout, char *nName1, char* nName2){
   if (fOut==NULL) return;
   if (n->token != NULL){
     if (n->tokenid == CELL){

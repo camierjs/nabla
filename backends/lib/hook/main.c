@@ -94,8 +94,8 @@ int main(int argc, char *argv[]){\n"
 \t// ********************************************************\n\
 \tint o; int longindex=0;\n\
 \tconst struct option longopts[]={\n\
-\t\t{\"vis\",required_argument,NULL,0x5d8a73d0},\n\
-\t\t{\"org\",required_argument,NULL,0x3c0f6f4c},\n"
+\t\t{\"vis\",required_argument,NULL,(int)0x5d8a73d0},\n\
+\t\t{\"org\",required_argument,NULL,(int)0x3c0f6f4c},\n"
 #define BACKEND_MAIN_OPTIONS_POSTFIX "\
 \t\t{NULL,0,NULL,0}\n\
 \t};\n"
@@ -114,14 +114,18 @@ int main(int argc, char *argv[]){\n"
 \t\t\tchar *org_optarg=strdup(optarg);\n\
 \t\t\tprintf(\"[1;33morg input file '%%s'[0m\\n\",optarg);\n\
 \t\t\t{\n\t\t\t\tint org_o,org_longindex=0;\n\
-\t\t\t\tint org_argc=0;\n\
+\t\t\t\tint org_argc=1;// +1 for the fake cmd name\n\
 \t\t\t\tchar **org_argv=(char**)calloc(1024,sizeof(char*));\n\
 \t\t\t\tint status=inOpt(optarg,&org_argc,org_argv);\n\
-\t\t\t\tprintf(\"[1;33morg_argc=%%d[0m\\n\",org_argc);\n\
+\t\t\t\t//printf(\"[1;33morg_argc=%%d[0m\\n\",org_argc);\n\
+\t\t\t\t//for(int i=0;i<1024;i+=1)\n\
+\t\t\t\t//\tif (org_argv[i]!=NULL)\n\
+\t\t\t\t//\t\tprintf(\"\\t[33morg_argv[%%d] is '%%s'[m\\n\",i,org_argv[i]);\n\
 \t\t\t\tassert(status==0);\n\
 \t\t\t\twhile ((org_o=getopt_long_only(org_argc,\n\
 \t\t\t\t\t\t\t\t\t\t\t\t\t\t\torg_argv,\"\",\n\
 \t\t\t\t\t\t\t\t\t\t\t\t\t\t\tlongopts,&org_longindex))!=-1){\n\
+\t\t\t\t\t\t//printf(\"\\t[33morg_o=0x%%X[m\\n\",org_o);\n\
 \t\t\t\t\tswitch (org_o){\n"
 
 #define BACKEND_MAIN_OPTIONS_WHILE_PREFIX_BIS "\
@@ -142,12 +146,16 @@ int main(int argc, char *argv[]){\n"
 \t}"
 
 
-static void dumpOptions(nablaMain *nabla,const int tabs){
+static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
     const char *ascii_name=opt->name;
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase (int)%p: //%s %s\n",opt, opt->type, ascii_name);
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
+    if (brk){
+      for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+      fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
+    }
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+    fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
     if (opt->type[0]=='i') fprintf(nabla->entity->src, " %s=atol(optarg);\n",opt->name);
     if (opt->type[0]=='b') fprintf(nabla->entity->src, " %s=(0==strcmp(optarg,\"true\"));\n",opt->name);
@@ -173,11 +181,11 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
 
-  dumpOptions(nabla,3);
+  dumpOptions(nabla,3,false);
     
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX_BIS);
   
-  dumpOptions(nabla,0);
+  dumpOptions(nabla,0,true);
   
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_POSTFIX);
   return NABLA_OK;

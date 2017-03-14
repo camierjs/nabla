@@ -1,10 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -41,144 +42,77 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-Real _exact_p_sol_0(Real t, Real3 position){
-  return 1.0-position.x;
+ℝ  _exact_p_sol_0(ℝ t, ℝ³ X){ return 1.0-X.x;}
+ℝ³ _exact_u_sol_0(ℝ t, ℝ³ X){ return ℝ³(1.,0.,0.);}
+ℝ  _exact_t_sol_0(ℝ t, ℝ³ X){ return 1.0-X.x;}
+
+ℝ  _exact_p_sol_1(ℝ t, ℝ³ X){ return exp(-t);}
+ℝ³ _exact_u_sol_1(ℝ t, ℝ³ X){ return ℝ³(X.x*exp(-t),0.,0.);}
+ℝ  _exact_t_sol_1(ℝ t, ℝ³ X){ return exp(-t);}
+
+ℝ  _exact_p_sol_2(ℝ t, ℝ³ X){ return (½*(1.-exp(-2.*t)));}
+ℝ³ _exact_u_sol_2(ℝ t, ℝ³ X){ return ℝ³(0.,0.,0.);}
+ℝ  _exact_t_sol_2(ℝ t, ℝ³ X){ return (½*(1.+exp(-2.*t)));}
+
+ℝ  _exact_p_sol_3(ℝ t, ℝ³ X){ return (exp(-¼*t)*cos(X.x));}
+ℝ³ _exact_u_sol_3(ℝ t, ℝ³ X){ return ℝ³(0.75*exp(-¼*t)*sin(X.x),0.,0.);}
+ℝ  _exact_t_sol_3(ℝ t, ℝ³ X){ return (2.*exp(-¼*t)*cos(X.x));}
+
+
+ℝ _exact_p_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_p_sol_0(t,X);
+  if (option_case==1) return _exact_p_sol_1(t,X);
+  if (option_case==2) return _exact_p_sol_2(t,X);
+  if (option_case==3) return _exact_p_sol_3(t,X);
+  printf("\n The test problem (%d) does not exist",option_case);
+  assert(false);
 }
 
-Real3 _exact_u_sol_0(Real t, Real3 position){
-  return Real3(1.0,0.0,0.0);
+ℝ³ _exact_u_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_u_sol_0(t,X);
+  if (option_case==1) return _exact_u_sol_1(t,X);
+  if (option_case==2) return _exact_u_sol_2(t,X);
+  if (option_case==3) return _exact_u_sol_3(t,X);
+  printf("\n Cas test non géré");
+  assert(false);
 }
 
-Real _exact_t_sol_0(Real t, Real3 position){
-  return 1.0-position.x;
+ℝ _exact_t_sol(ℝ t, ℝ³ X){
+  if (option_case==0) return _exact_t_sol_0(t,X);
+  if (option_case==1) return _exact_t_sol_1(t,X);
+  if (option_case==2) return _exact_t_sol_2(t,X);
+  if (option_case==3) return _exact_t_sol_3(t,X);
+  printf("\n Cas test non géré");
+  assert(false);
 }
 
-Real _exact_p_sol_1(Real t, Real3 position){
-  return exp(-t);
-}
-
-Real3 _exact_u_sol_1(Real t, Real3 position){
-  return Real3(position.x*exp(-t),0.0,0.0);
-}
-
-Real _exact_t_sol_1(Real t, Real3 position){
-  return exp(-t);
-}
-
-Real _exact_p_sol_2(Real t, Real3 position){
-  return (0.5*(1.-exp(-2.*t)));
-}
-
-Real3 _exact_u_sol_2(Real t, Real3 position){
-  return Real3(0.0,0.0,0.0);
-}
-
-Real _exact_t_sol_2(Real t, Real3 position){
-  return (0.5*(1.+exp(-2.*t)));
-}
-
-Real _exact_p_sol_3(Real t, Real3 position){
-  return (exp(-0.25*t)*cos(position.x));
-}
-
-Real3 _exact_u_sol_3(Real t, Real3 position){
-  return Real3(0.75*exp(-0.25*t)*sin(position.x),0.0,0.0);
-}
-
-Real _exact_t_sol_3(Real t, Real3 position){
-  return (2.*exp(-0.25*t)*cos(position.x));
-}
-
-// on reimpose la solution exacte sur les ghost cells
-/*Real _exact_p_sol(Real t, Real3 position){
-  switch (option_case){
-  case 0 :
-    return _exact_p_sol_0(t, position);
-  case 1 : 
-    return _exact_p_sol_1(t, position);
-  case 2 :
-    return _exact_p_sol_2(t, position);
-  default:
-    printf("\n The test problem (%d) does not exist",option_case);
-    exit(-1);
-  }
-  }*/
-
-Real _exact_p_sol(Real t, Real3 position){
-  if (option_case==0)
-    return _exact_p_sol_0(t, position);
-  if (option_case==1)
-    return _exact_p_sol_1(t, position);
-  if (option_case==2)
-    return _exact_p_sol_2(t, position);
-  if (option_case==3)
-    return _exact_p_sol_3(t, position);
-  else {
-    printf("\n The test problem (%d) does not exist",option_case);
-    error;
-  }
-}
-
-/*Real3 _exact_u_sol(Real t, Real3 position){
-  switch (option_case){
-  case 0 :
-    return _exact_u_sol_0(t, position);
-  case 1 : 
-    return _exact_u_sol_1(t, position);
-  case 2 :
-    return _exact_u_sol_2(t, position);
-  default:
-    printf("\n Cas test non géré");
-    exit(-1);
-  }
-}*/
-
-Real3 _exact_u_sol(Real t, Real3 position){
-  if (option_case==0)
-    return _exact_u_sol_0(t, position);
-  if (option_case==1)
-    return _exact_u_sol_1(t, position);
-  if (option_case==2)
-    return _exact_u_sol_2(t, position);
-  if (option_case==3)
-    return _exact_u_sol_3(t, position);
-  else{
-     printf("\n Cas test non géré");
-     error;
-  }
-}
-
-/*Real _exact_t_sol(Real t, Real3 position){
-  switch (option_case){
-  case 0 :
-    return _exact_t_sol_0(t, position);
-  case 1 : 
-    return _exact_t_sol_1(t, position);
-  case 2 :
-    return _exact_t_sol_2(t, position);
-  default:
-    printf("\n Cas test non géré");
-    exit(-1);
-  }
-  }*/
-Real _exact_t_sol(Real t, Real3 position){
-  if (option_case==0)
-    return _exact_t_sol_0(t, position);
-  if (option_case==1)
-    return _exact_t_sol_1(t, position);
-  if (option_case==2)  
-    return _exact_t_sol_2(t, position);
-  if (option_case==3)
-    return _exact_t_sol_3(t, position);
-  else{ 
-     printf("\n Cas test non géré");
-     error;
-  }
-}
-
-
-∀ cells void analyticSol(void)@ 30.1 {
+∀ cells analyticSol @ 30.1 {
   pana=_exact_p_sol(time,center);
   uana=_exact_u_sol(time,center);
   tana=_exact_t_sol(time,center);
+}
+
+iniL2Error @ 30.0 {
+  pL2error=0.;
+  uL2error=0.;
+  tL2error=0.;
+  Vtot=0.;
+}
+
+∀ cells computeL2Error @ 30.1 {
+  pL2error+=(pana-p)*(pana-p)*V²;
+  uL2error+=(uana-u)⋅(uana-u)*V²;
+  tL2error+=(tana-θ)*(tana-θ)*V²;
+  Vtot+=V;
+}
+
+printL2Error @ 35.0 {
+  if ((time<(option_stoptime-δt))) return;
+  pL2error=√(pL2error)/Vtot;
+  uL2error=√(uL2error)/Vtot;
+  tL2error=√(tL2error)/Vtot;
+  printf("\n\t[33m[printL2Error] Erreur sur p=(%.15e)[m",pL2error);
+  printf("\n\t[33m[printL2Error] Erreur sur u=(%.15e)[m",uL2error);
+  printf("\n\t[33m[printL2Error] Erreur sur T=(%.15e)[m",tL2error);
+
 }

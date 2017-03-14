@@ -67,7 +67,7 @@ nablaPowerType *nMiddlePowerTypeAdd(nablaVariable *var, nablaPowerType *ptype) {
 // ****************************************************************************
 // * dfsPowerArgs
 // ****************************************************************************
-static void dfsPowerArgs(astNode *n, nablaPowerType *ptype){
+static void dfsPowerArgs(node *n, nablaPowerType *ptype){
   if (n->tokenid==IDENTIFIER){
     dbg("\n\t\t\t\t[1;33m[dfsPower] arg '%s'[0m",n->token);
     ptype->args[ptype->nargs++]=sdup(n->token);
@@ -80,7 +80,7 @@ static void dfsPowerArgs(astNode *n, nablaPowerType *ptype){
 // ****************************************************************************
 // * dfsPower
 // ****************************************************************************
-static void dfsPower(astNode *n, nablaPowerType *ptype){
+static void dfsPower(node *n, nablaPowerType *ptype){
   if (n->ruleid==ruleToId(rule_power_dimension)){
     if (n->children->ruleid==ruleToId(rule_power_function)){
       dbg("\n\t\t\t[1;33m[dfsPower] power '%s' function[0m",n->children->children->token);
@@ -100,7 +100,7 @@ static void dfsPower(astNode *n, nablaPowerType *ptype){
 // ****************************************************************************
 // * nMiddlePower
 // ****************************************************************************
-void nMiddlePower(astNode *n,nablaMain *nabla,nablaVariable *var){
+void nMiddlePower(node *n,nablaMain *nabla,nablaVariable *var){
   nablaPowerType *ptype=nMiddlePowerTypeNew();
   assert(ptype);
   dfsPower(n,ptype);

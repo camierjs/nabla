@@ -59,7 +59,7 @@ static void dumpAtEndofAt(nablaJob *job, const char *token){
 // ****************************************************************************
 // * nablaAtConstantParse
 // ****************************************************************************
-void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla){
+void nMiddleAtConstantParse(nablaJob *job,node *n, nablaMain *nabla){
   // On évite les parenthèses rajoutée lors du parsing .y 'at_constant'
   if (n->tokenid == '-') {
     // On s'assure pour l'instant que les temps logiques

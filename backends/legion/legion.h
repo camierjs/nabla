@@ -66,8 +66,8 @@ NABLA_STATUS legionHookMainPostfix(nablaMain*);
 
 // TOKENS
 char* legionHookTokenPrefix(nablaMain*);
-void legionHookTokenSwitch(astNode*, nablaJob*);
-nablaVariable *legionHookTokenVariable(astNode*,nablaMain*,nablaJob*);
+void legionHookTokenSwitch(node*, nablaJob*);
+nablaVariable *legionHookTokenVariable(node*,nablaMain*,nablaJob*);
 void legionHookTokenOption(nablaMain*,nablaOption*);
 void legionHookTokenExit(nablaMain*, nablaJob*);
 void legionHookTokenTime(nablaMain*);

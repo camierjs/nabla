@@ -45,7 +45,7 @@
 // ****************************************************************************
 // * Dump pour le header
 // ****************************************************************************
-int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode *n){
+int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, node *n){
   int number_of_parameters_here=0;
   
   // Si on  a pas eu de parameter_type_list, on a rien à faire
@@ -87,9 +87,9 @@ int nMiddleDumpParameterTypeList(nablaMain *nabla, FILE *file, astNode *n){
 // * nMiddleDfsForCalls
 // ****************************************************************************
 void nMiddleDfsForCalls(nablaMain *nabla,
-                        nablaJob *job, astNode *n,
+                        nablaJob *job, node *n,
                         const char *namespace,
-                        astNode *nParams){
+                        node *nParams){
   int nb_called;
   nablaVariable *var;
   // On scan en dfs pour chercher ce que cette fonction va appeler
@@ -114,7 +114,7 @@ void nMiddleDfsForCalls(nablaMain *nabla,
 // *****************************************************************************
 void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
                                        nablaJob *fct,
-                                       astNode *n,
+                                       node *n,
                                        const char *namespace){
   int i=0;
   
@@ -221,7 +221,7 @@ void nMiddleArgsAddGlobal(nablaMain *nabla, nablaJob *job, int *numParams){
 // ****************************************************************************
 // * Dump dans le src des arguments nabla en in comme en out
 // ****************************************************************************
-void nMiddleArgsDump(nablaMain *nabla, astNode *n, int *numParams){
+void nMiddleArgsDump(nablaMain *nabla, node *n, int *numParams){
   //nprintf(nabla,"\n\t[nMiddleArgsDump]",NULL);
   if (n==NULL) return;
   // Si on tombe sur la '{', on arrête; idem si on tombe sur le token '@'

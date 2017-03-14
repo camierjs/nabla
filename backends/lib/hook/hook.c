@@ -111,9 +111,9 @@ void xHookFunctionName(nablaMain *nabla){
 // ****************************************************************************
 void xHookDfsForCalls(nablaMain *nabla,
                       nablaJob *fct,
-                      astNode *n,
+                      node *n,
                       const char *namespace,
-                      astNode *nParams){
+                      node *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -144,7 +144,7 @@ void xHookIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "global_iteration[0]");
 }
 
-void xHookAddCallNames(nablaMain *nabla,nablaJob *fct,astNode *n){
+void xHookAddCallNames(nablaMain *nabla,nablaJob *fct,node *n){
   nablaJob *foundJob;
   const char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*xHookAddCallNames*/");

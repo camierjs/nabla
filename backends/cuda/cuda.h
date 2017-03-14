@@ -58,7 +58,7 @@ void cuHeaderItems(nablaMain*);
 // ****************************************************************************
 void cuHookSourceOpen(nablaMain*);
 
-void cuHookReduction(nablaMain*,astNode*);
+void cuHookReduction(nablaMain*,node*);
 
 void cuHookHeaderDump(nablaMain*);
 void cuHookHeaderIncludes(nablaMain*);
