@@ -1,11 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
-//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -42,101 +41,104 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 with ℝ²;
-
-// ****************************************************************************
-// * αβγδεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
-// * ∀ℝℕℤℾ√∛ ½⅓¼⅛𝜕ℵ∂⋅⨯⤫⊗⨂⊛⁾ⁱ²³ⁿ⁺¹∞
-// ****************************************************************************
+#include "assert.h"
+ofstream output("evol.plot");
+ofstream output2("mesh.plot");
+ofstream output3("output.plot");
+ofstream results("result.plot");
 
 // ****************************************************************************
 // * Options du schéma
 // ****************************************************************************
 options{
   // Mesh options
-  ℝ LENGTH       = 1.0;             // ! utilisé en dur dans le backend !
-  ℕ X_EDGE_ELEMS = 3;               // ! utilisé en dur dans le backend !
-  ℕ Y_EDGE_ELEMS = 3;               // ! utilisé en dur dans le backend !
-  ℕ Z_EDGE_ELEMS = 1;               // ! utilisé en dur dans le backend !
+  ℝ LENGTH                    = 1.0;
+  ℕ X_EDGE_ELEMS              = 8;
+  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ Z_EDGE_ELEMS              = 1;
 
-  ℾ DEBUG = false;
-  ℾ option_test_sod = true;
-  ℾ option_semi_implicit = false;
-  ℕ option_case = 1;
-  ℝ option_coupling_coef=1;
+  Bool DEBUG = false;
+  Bool option_test_sod = true;
+  Bool option_semi_implicit = false;
+  Integer option_case = 2;
+  Real option_coupling_coef=1;
+  Real option_ini_zg_p = 1.0;
+  Real option_ini_zd_p = 1.0;
+  Real option_ini_zg_u = 0.0;
+  Real option_ini_zd_u = 0.0;
+  Real option_ini_zg_t = 1.0;
+  Real option_ini_zd_t = 1.0;
 
-  ℝ option_ini_zg_p = 1.0;
-  ℝ option_ini_zd_p = 1.0;
-  ℝ option_ini_zg_u = 0.0;
-  ℝ option_ini_zd_u = 0.0;
-  ℝ option_ini_zg_t = 1.0;
-  ℝ option_ini_zd_t = 1.0;
-
-  ℝ option_x_min = 0.0;
-  ℝ option_y_min = 0.0;
-  ℝ option_x_interface = LENGTH/2.0;
-  ℝ option_x_max = LENGTH;
-  ℝ option_y_max = LENGTH;
+  Real option_x_min = 0.0;
+  Real option_y_min = 0.0;
+  Real option_x_interface = 0.5;
+  Real option_x_max = LENGTH;
+  Real option_y_max = LENGTH;
   
-  ℝ option_δt_initial = 1e-7;       // ! utilisé en dur dans le backend lambda !
-  ℝ option_δt_min = 1e-15;
-  ℝ option_δt_max = 1.e-1;
-  ℝ option_stoptime = 1.;           // ! utilisé en dur dans le backend lambda !
-  ℝ option_δt_control = 0.15;       // Contrôle du pas de temps hydrodynamique
+  Real option_δt_initial = 1e-7;         // ! utilisé en dur dans le backend lambda !
+  Real option_δt_min = 1e-15;
+  Real option_δt_max = 1.e-1;
+  Real option_stoptime = 1.;             // ! utilisé en dur dans le backend lambda !
+  Real option_δt_control = 0.15;           // Contrôle du pas de temps hydrodynamique
 
-  ℝ option_δt_min_variation = 0.99; // Décroissance maximale tolérée du pas de temps
-  ℝ option_δt_max_variation = 0.10; // Amplitude maximale de croissance du pas de temps
-  ℾ option_δt_last_exact = true;
-  ℾ option_ini_exact = true;
+  Real option_δt_min_variation = 0.99;     // Décroissance maximale tolérée du pas de temps
+  Real option_δt_max_variation = 0.10;     // Amplitude maximale de croissance du pas de temps
+  Bool option_δt_last_exact = true;
+  Bool option_ini_exact = false;
   
-  ℾ option_dump_at_end =false;
-  ℾ option_dump_output = false;          
-  ℕ option_max_iterations = 0;      // ! utilisé en dur dans le backend lambda !
-  ℝ dump_dt = 0.1;   
-  ℝ option_rdq_α=0.3;
-  ℝ λ = 1.0;
+  Bool option_dump_at_end =true;
+  Bool option_dump_output = true;          
+  Integer option_max_iterations = 0;   // ! utilisé en dur dans le backend lambda !
+  Integer dump_iterations = 1000;   
+  Real option_rdq_α=0.4;
 };
 
 // ****************************************************************************
 // * Déclaration des variables aux noeuds
 // ****************************************************************************
 nodes{
-  ℝ³   node_u;                      // Vitesse nodale du maillage
-  ℝ³ˣ³ node_u_mtx;               // Matrice aux sommets pour le calcul de la vitesse
-  ℝ³   node_u_rhs;        // Second membre aux sommets pour le calcul de la vitesse
+  Real3   node_u;                          // Vitesse nodale du maillage
+  Real3x3 node_u_matrix;                   // Matrice aux sommets pour le calcul de la vitesse
+  Real3   node_u_second_member;            // Second membre aux sommets pour le calcul de la vitesse
 };
-
-// ****************************************************************************
-// * Déclaration des variables aux faces
-// ****************************************************************************
-faces{ ℝ l; };
 
 // ****************************************************************************
 // * Déclaration des variables aux mailles
 // ****************************************************************************
 cells{  
-  ℝ³ center;                        // Centre des mailles
-  ℝ V;                              // Volume des mailles
-  ℝ p,pana;                         // Pression moyenne/analytique
-  ℝ³ u,uana;                        // Vitesse moyenne/analytique
-  ℝ θ,tana;                         // Temperature moyenne/analytique
-  ℝ cell_δt;
-  ℝ³ CQs[nodes];                    // Résultantes aux sommets
-  ℝ³ˣ³ AQs[nodes];                  // Matrices de contributions aux sommets
-  ℝ³ˣ³ BQs[nodes];                  // Matrices de contributions aux sommets
-  ℝ³ reconstructed_u[nodes];        // Tableau des vitesses reconstruites
-  ℝ reconstructed_p[nodes];         // Tableau des pressions reconstruites
-  ℝ³ velocity_fluxes_Σ;
-  ℝ pressure_fluxes_Σ;
-  ℝ θ_source_Σ;
+  Real3 center;
+  Real V;                                  // Volume des mailles
+  Real p;                                  // Pression
+  Real3 u;                                 // Vitesse moyenne
+  Real temperature;                        // Temperature
+  Real pana;                               // Pression analytique
+  Real3 uana;                              // Vitesse moyenne analytique
+  Real tana;                               // Temperature analytique
+  Real p1_δt;
+  Real absCQs[nodes];
+  Real3 CQs[nodes];                        // Résultantes aux sommets
+  Real3x3 AQs[nodes];                      // Matrices de contributions aux sommets
+  Real3x3 BQs[nodes];                      // Matrices de contributions aux sommets
+  Real3 reconstructed_u[nodes];            // Tableau des vitesses reconstruites
+  Real reconstructed_p[nodes];             // Tableau des pressions reconstruites
+  Real3 velocity_fluxes_Σ;
+  Real pressure_fluxes_Σ;
+  Real temperature_source_Σ;
+  Real minCellDelta;
 };
 
 // ****************************************************************************
 // * Globals
 // ****************************************************************************
 global{
-  ℝ Δl,ε,σ_a,σ_s,σ;
-  ℝ Vtot,e_tp,global_δt;
-  ℝ pL2error,uL2error,tL2error;
+  ℝ global_δt;
+  ℝ e_tp;
+  ℝ Δl;
+  ℝ minΔ;
+  ℝ sigma_a;
+  ℝ sigma_s;
+  ℝ sigma;
+  ℝ epsilon;
 };
 
 // ****************************************************************************
@@ -144,158 +146,265 @@ global{
 // ****************************************************************************
 
 // ****************************************************************************
-// * calcAQs
+// * computeAQsMatrices
 // ****************************************************************************
-∀ cells AQs @ 9.0 {
-  ∀ node AQs = λ*(CQs⊗CQs)/norm(CQs);
+∀ cells void computeAQsMatrices(void)@ 9.0 {
+  const Real lambda = 1.0;
+  ∀ node{
+    AQs = CQs⊗CQs;
+    AQs *= lambda/absCQs;
+    if (DEBUG)
+      printf("\n[31m[std] AQs[%d;node #%d]=\n\t\t[\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]][0m",uid,n,
+           AQs.x.x,AQs.x.y,AQs.x.z,
+           AQs.y.x,AQs.y.y,AQs.y.z,
+           AQs.z.x,AQs.z.y,AQs.z.z);
+  }
 }
 
 // ****************************************************************************
-// * calcBQs
+// * computeBQsMatrices
 // ****************************************************************************
-∀ cells BQs @ 9.1 {
-  const ℝ σIε = σ/ε;
-  ∀ node BQs = σIε*(CQs⊗(coord[#]-center));
+∀ cells void computeBQsMatrices(void)@ 9.1 {
+  const Real3 ccell=center;
+  const Real3 X[4] = {coord[0],coord[1],coord[2],coord[3]};
+
+  ∀ node{
+    const int i=#;
+    BQs = CQs⊗(X[i]-ccell);
+    BQs *= sigma_s/epsilon;
+    if (DEBUG)
+      printf("\n\t[31m[std] BQs[%d]=\n\t\t[\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]][0m",uid,
+           BQs.x.x,BQs.x.y,BQs.x.z,
+           BQs.y.x,BQs.y.y,BQs.y.z,
+           BQs.z.x,BQs.z.y,BQs.z.z);
+  }
 }
 
 // ****************************************************************************
-// * avgP
+// * temporalSchemeReconstructPressure
 // ****************************************************************************
-∀ cells avgP @ 10.0 { ∀ node reconstructed_p=p; }
+∀ cells @ 10.0{
+  ∀ node{
+    reconstructed_p=p;
+    if (DEBUG)
+      printf("\n\t[32m[std] reconstructed_p=%.15e[0m",
+             reconstructed_p);
+  }
+}
 
 // ****************************************************************************
-// * avgU
+// * temporalSchemeReconstructVelocity
 // ****************************************************************************
-∀ cells avgU @ 10.0 { ∀ node reconstructed_u=u; }
+∀ cells void temporalSchemeReconstructVelocity(void)@ 10.0{
+  ∀ node{
+    reconstructed_u=u;
+    if (DEBUG)
+      printf("\n\t[32m[std] reconstructed_u=(%.15e,%.15e,%.15e)[0m",
+           reconstructed_u.x,reconstructed_u.y,reconstructed_u.z);
+  }
+}
 
 // ****************************************************************************
 // * temporalSchemeIniMatricesAndSecondMember
 // ****************************************************************************
-∀ nodes iniNdMtxRhs @ 11.0{
-  node_u_mtx=ℝ³ˣ³();
-  node_u_mtx.z=ℝ³(0.,0.,1.);
-  node_u_rhs=ℝ³(0.,0.,0.);
+∀ nodes void temporalSchemeIniMatricesAndSecondMember(void)@ 11.0{
+  node_u_matrix=Real3x3();
+  node_u_matrix.z=Real3(0,0,1);
+  node_u_second_member=0;
 }
 
 // ****************************************************************************
 // * temporalSchemeAssembleMatricesAndSecondMember
 // ****************************************************************************
-∀ cells sumMtxRhs @ 12.0{
+∀ cells void temporalSchemeAssembleMatricesAndSecondMember(void)@ 12.0{
   ∀ node{
-    const ℝ³ˣ³ local_matrix = AQs;
-    node_u_mtx += AQs;
-    node_u_mtx += BQs;
-    node_u_rhs += local_matrix ⨂ reconstructed_u;
-    node_u_rhs += CQs*reconstructed_p;
+    const Real3x3 local_matrix = AQs;
+    node_u_matrix += AQs;
+    node_u_matrix += BQs;
+    node_u_second_member += local_matrix ⨂ reconstructed_u;
+    node_u_second_member += CQs*reconstructed_p;
   }
+}
+∀ nodes @ 12.1{ // On revient APRES les écritures aux noeuds pour dumper
+  if (DEBUG)
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_matrix[%d]=\n\t\t[\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]\n\t\t\
+[%.15e %.15e %.15e]][0m",uid,
+           node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
+           node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
+           node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
+  if (DEBUG)
+    printf("\n\t[31m[std] Before BOUNDARIES node_u_second_member[%d]=\
+(%.15e,%.15e,%.15e)[0m",uid,
+           node_u_second_member.x,
+           node_u_second_member.y,
+           node_u_second_member.z);
 }
 
 // ****************************************************************************
 // * Le calcul aux boundaries se fait ici @ 13.1,13.2
 // ****************************************************************************
-∀ outer faces outerBC @ 13.2 {
-  const ℝ³ˣ³ I = matrix3x3Id();
-  ∀ node{
-    node_u_mtx = I;
-    node_u_rhs = 0;
-  }
-}
 
 // ****************************************************************************
-// * synchronize pour Arcane node_u_mtx & node_u_mtx_second_member
+// * synchronize pour Arcane node_u_matrix & node_u_matrix_second_member
 // ****************************************************************************
-syncMtxRhs @ 13.4{ synchronize(node_u_mtx); synchronize(node_u_rhs); }
+void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
+  synchronize(node_u_matrix);
+  synchronize(node_u_second_member);
+}
 
 // ****************************************************************************
 // * temporalSchemeComputeNodesVelocity
 // ****************************************************************************
-∀ nodes invMtxRhs @ 14.0{
-  const ℝ determinent = matrixDeterminant(node_u_mtx);
+∀ nodes void temporalSchemeComputeNodesVelocity(void)@ 14.0{
+  if (DEBUG)
+    printf("\n\t[31m[std] node_u_matrix=[0m\n\t\t[31m[\
+[%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]\n\t\t[%.15e %.15e %.15e]][0m",
+         node_u_matrix.x.x,node_u_matrix.x.y,node_u_matrix.x.z,
+         node_u_matrix.y.x,node_u_matrix.y.y,node_u_matrix.y.z,
+         node_u_matrix.z.x,node_u_matrix.z.y,node_u_matrix.z.z);
+  const Real determinent = matrixDeterminant(node_u_matrix);
+  if (DEBUG)
+    printf("\n\t[31m[std] node_u_second_member=(%.15e,%.15e,%.15e)[0m",
+         node_u_second_member.x,
+         node_u_second_member.y,
+         node_u_second_member.z);
   assert(determinent!=0.0);
-  node_u_mtx = inverseMatrix(node_u_mtx, determinent);
-  node_u = node_u_mtx ⨂ node_u_rhs;
+  node_u_matrix = inverseMatrix(node_u_matrix, determinent);
+  node_u = node_u_matrix ⨂ node_u_second_member;
   node_u.z=0.0;
+  if (DEBUG)
+    printf("\n\t[31m[std] node_u[%d]=(%.15e,%.15e,%.15e)[0m",
+           uid,node_u.x,node_u.y,node_u.z);
 }
   
 // ****************************************************************************
 // * temporalSchemeIniFluxesSum
 // ****************************************************************************
-∀ cells iniFlxSum @ 14.0{
-  velocity_fluxes_Σ = ℝ³(0.,0.,0.);
+∀ cells void temporalSchemeIniFluxesSum(void)@ 15.0{
+  velocity_fluxes_Σ = Real3(0.,0.,0.);
   pressure_fluxes_Σ = 0.0;
-  θ_source_Σ = 0.0;
+  temperature_source_Σ = 0.0;
 }
 
 // ****************************************************************************
 // * temporalSchemeComputeStandardFluxesSum
 // ****************************************************************************
-∀ cells calcSumFlx @ 16.0{
+∀ cells void temporalSchemeComputeStandardFluxesSum(void) @ 16.0{
+    
+//  temperature_source_Σ -= e_tp * (temperature - p);    
   ∀ node{
-    const ℝ³ Δu = reconstructed_u-node_u;
-    ℝ³ FQs = AQs ⨂ Δu;
-    velocity_fluxes_Σ -= FQs/ε;
-    pressure_fluxes_Σ -= (CQs⋅node_u)/ε;
+    const Real3 Δu = -node_u+reconstructed_u;
+    if (DEBUG) printf("\n\t[32m[n+1] Δu[%d]=(%.15e,%.15e)[0m",uid,Δu.x,Δu.y);   
+//    Real3 FQs = (CQs⋅Δu)/absCQs*CQs;
+//    if (DEBUG) printf("\n\t[32m[n+1] 1:FQs[%d]=(%.15e,%.15e)[0m",uid,FQs.x,FQs.y);
+    Real3 FQs = AQs ⨂ Δu;
+    if (DEBUG) printf("\n\t[32m[n+1] 2:FQs[%d]=(%.15e,%.15e)[0m",uid,FQs.x,FQs.y);
+//    FQs += reconstructed_p*CQs;
+    velocity_fluxes_Σ -= FQs/epsilon;
+    pressure_fluxes_Σ -= (CQs⋅node_u)/epsilon;
   }
+  if (DEBUG) printf("\n\t[32m[n+1] pressure_fluxes[%d]=(%.15e)[0m",uid,pressure_fluxes_Σ);  
 }
 
 // ****************************************************************************
 // * temporalSchemeApplyFluxesStandard
 // ****************************************************************************
-∀ cells applyStdFlx @ 19.0{
+∀ cells void temporalSchemeApplyFluxesStandard(void)@ 19.0{
+  if (DEBUG) printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
+  if (DEBUG) printf("\n\t[32m[n+1] pre u[%d]=(%.15e,%.15e,%.15e)[0m",uid,u.x,u.y,u.z);
+  if (DEBUG)
+    printf("\n\t[32m[n+1] velocity_fluxes_Σ[%d]=(%.15e,%.15e,%.15e)[0m",uid,velocity_fluxes_Σ.x,velocity_fluxes_Σ.y,velocity_fluxes_Σ.z);
   u += δt*velocity_fluxes_Σ/V;
+  if (DEBUG)
+    printf("\n\t[32m[n+1] post u[%d]=(%.15e,%.15e,%.15e)[0m",uid,u.x,u.y,u.z);
+  if (DEBUG) printf("\n\t[32m[n+1] pre p[%d]=(%.15e)[0m",uid,p);
+  if (DEBUG)
+    printf("\n\t[32m[n+1] pressure_fluxes_Σ[%d]=(%.15e)[0m",uid,pressure_fluxes_Σ);
   p += δt*pressure_fluxes_Σ/V;
-  if (option_coupling_coef==0) e_tp = (σ_a * δt)/(ε*ε+2.*σ_a*δt);
-  if (option_coupling_coef==1) e_tp = 0.5*(1.-exp(-2.*σ_a*δt/(ε*ε)));
-  if (option_coupling_coef==2) e_tp = σ_a*δt/(ε*ε);
+  if (option_coupling_coef==0)
+    e_tp = (sigma_a * δt)/(epsilon*epsilon+2.*sigma_a*δt);
+  if (option_coupling_coef==1)
+    e_tp = 0.5*(1.-exp(-2.*sigma_a*δt/(epsilon*epsilon)));
+  if (option_coupling_coef==2)
+    e_tp = sigma_a*δt/(epsilon*epsilon);
   if (option_semi_implicit){    
-    θ_source_Σ = e_tp/(1. + 2.*e_tp) * (p - θ);
-    p-= θ_source_Σ;
-    θ += θ_source_Σ;
+    temperature_source_Σ = e_tp/(1. + 2.*e_tp) * (p - temperature);
+    p-= temperature_source_Σ;
+    temperature += temperature_source_Σ;///V;
   } else {
-    θ_source_Σ = e_tp * (p - θ);
-    p-= θ_source_Σ;
-    θ += θ_source_Σ;
+    temperature_source_Σ = e_tp * (p - temperature);
+    p-= temperature_source_Σ;
+    temperature += temperature_source_Σ;///V;
   }
-}
+//  temperature_source_Σ -= e_tp * (temperature - p);    
+  //p += -temperature_source_Σ;///V;
 
-// Impose les conditions aux bords
-∀ outer cells outerCellsBC @ 19.1 {
-  p=_exact_p_sol(time,center);
-  u=_exact_u_sol(time,center);
-  θ=_exact_t_sol(time,center);
+  if (DEBUG) printf("\n\t[32m[n+1] post p[%d]=(%.15e)[0m",uid,p);
 }
 
 // ****************************************************************************
-// * X,V @ 23,24
+// * geomComputeCQsQuad @ 23.0
+// * geomComputeSurfaceAndVolume @ 24.0 
 // ****************************************************************************
 
 // ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
+// * glaceEOS vient se placer ici: [26.0 → 30.0]
 // ****************************************************************************
-∀ cells cellTimeStepCtrl @ 30.0{
-  ℝ Σljr=0.0;
-  ∀ node Σljr+=norm(CQs);
-  cell_δt=V*ε/(2.0*Σljr);
-}
 
 // ****************************************************************************
 // * Réduction min vers le global_δt
 // ****************************************************************************
-∀ cells global_δt <?= cell_δt @ 31.0;
+∀ cells global_δt <?= p1_δt @ 31.0;
+
+∀ cells void dumpGnuplot(void) @ 34.0 if (option_dump_at_end and (((iteration-1)%dump_iterations)==0)){
+  if (uid==0) info()<<"\33[1;31m[dumpGnuplot] Now dumping to output.plot file!\33[0m";
+  output3 << p << " ";
+  ∀ node
+    output3 << coord.x << " " << coord.y << " ";
+  output3 << coord[0].x << " " << coord[0].y << " ";
+  output3 << "\n";
+  if (uid==NABLA_NB_CELLS-1) output3 << "\n\n";
+}
+
 
 // ****************************************************************************
-// * dmpMsh @ 34.0
+// * Dump Output
 // ****************************************************************************
+∀ cells void dumpOutput(void) @ 35.0 if (((iteration-1)%dump_iterations)==0) {
+  if (uid==0) info()<<"\33[1;31m[dumpOutput] Now dumping to evol.plot file!\33[0m";
+  output  << "\t" << center.x 
+          << "\t" << center.y
+          << "\t" << p
+          << "\t" << u.x
+          << "\t" << u.y
+          << "\t" << temperature
+          << "\t" << pana
+          << "\t" << uana.x
+          << "\t" << uana.y
+          << "\t" << tana
+          << "\n";
+  if (c==(NABLA_NB_CELLS-1)) output << "\n";
+} 
+
 
 // ****************************************************************************
 // * glaceTimeStepCtrl
 // ****************************************************************************
-globalTimeStepCtrl @ 35.0{
-  ℝ new_δt=option_δt_control*global_δt;
-  printf("\n\t[1m iteration=%d, time=%f, δt=%f[0m",iteration,time,global_δt);
+void hydroTimeStepCtrl(void) @ 35.0{
+  Real new_δt=option_δt_control*global_δt;
+  if (true)
+    printf("\n\t[1m iteration=%d, time=%f, global_δt=%.15e[0m",iteration,time,global_δt);
   // on calcule les variations min et max autorisées
-  const ℝ max_time_step = (1.0+option_δt_max_variation)*δt;
-  const ℝ min_time_step = (1.0-option_δt_min_variation)*δt;
+  const Real max_time_step = (1.0+option_δt_max_variation)*δt;
+  const Real min_time_step = (1.0-option_δt_min_variation)*δt;
   if (new_δt > max_time_step) new_δt=max_time_step;
   if (new_δt < min_time_step) new_δt=min_time_step;
   new_δt = min(new_δt, option_δt_max);
@@ -306,17 +415,32 @@ globalTimeStepCtrl @ 35.0{
   δt=new_δt;
 }
 
+
 // ****************************************************************************
-// * dumpSolution @ 36.0
+// * Dump Solution
 // ****************************************************************************
+∀ cells void dumpSolution(void) @ 36.0 if (option_dump_output and (time>=(option_stoptime-δt))){ 
+  if (uid==0) info()<<"\33[1;31m[dumpSolution] Now dumping to result.plot file!\33[0m";
+  results << "\t" << center.x 
+          << "\t" << center.y
+          << "\t" << p
+          << "\t" << u.x
+          << "\t" << u.y
+          << "\t" << temperature
+          << "\t" << pana
+          << "\t" << uana.x
+          << "\t" << uana.y
+          << "\t" << tana
+          << "\n";
+}
+
 
 // ****************************************************************************
 // * Test for QUIT
 // ****************************************************************************
-testForQuit @ 40.0{
+void testForQuit(void) @ 40.0{
   if (option_max_iterations!=0 && iteration >= option_max_iterations) exit;
   if ((time<(option_stoptime-δt))) return;
-  if ((X_EDGE_ELEMS==8) && (Y_EDGE_ELEMS==8)) assert(tL2error==4.023316714693764e-02);
-  if ((X_EDGE_ELEMS==4) && (Y_EDGE_ELEMS==4)) assert(tL2error==6.093190912983532e-02);
+  printf("\n[1;33m final δt=%.15e[0m\n",δt);
   exit;
 }

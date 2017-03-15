@@ -1,11 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // NABLA - a Numerical Analysis Based LAnguage                               //
 //                                                                           //
-// Copyright (C) 2014~2016 CEA/DAM/DIF                                       //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
 // IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
 //                                                                           //
 // Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
-//                 LABOURASSE Emmanuel - Emmanuel.Labourasse@cea.fr          //
 //                                                                           //
 // This software is a computer program whose purpose is to translate         //
 // numerical-analysis specific sources and to generate optimized code        //
@@ -45,44 +44,64 @@
 // ****************************************************************************
 // * Fonctions locales de géométrie
 // ****************************************************************************
-inline ℝ geomCross2D(ℝ³ _u,ℝ³ _v){ return ℝ(_u.x*_v.y - _u.y*_v.x);}
-inline ℝ³ geomNormal(ℝ³ a, ℝ³ b){ return ℝ³(b.y-a.y,-b.x+a.x,0.0);}
+inline Real geomCross2D(Real3 _u,Real3 _v){
+  return Real(_u.x*_v.y - _u.y*_v.x);
+}
+inline Real3 geomNormal(Real3 a, Real3 b){
+  return Real3(b.y-a.y,-b.x+a.x,0.0);
+}
 
-// ****************************************************************************
-// * Calcul de Δl: Length of the sides, before touching mesh
-// ****************************************************************************
-∀ faces calcΔl @ -30.2 { l=norm(coord[0]-coord[1]); }
-∀ faces Δl <?= l @ -30.1;
+∀ nodes @ -41.0{
+  if (DEBUG)
+    info()<<"[37m[geo,ini] coord["<<uid<<"]="<<coord<<"[0m";
+}
 
-// ****************************************************************************
-// * randomDistortedQuads
-// ****************************************************************************
-∀ nodes randomDistortedQuads @ -29.0 {
-  const ℝ α=option_rdq_α;
-  const ℝ ρ1=drand48()+drand48()-1.0;
-  const ℝ ρ2=drand48()+drand48()-1.0;
+// Calcul de Δl: Length of the sides, before touching mesh
+void computeΔl(void) @ -30 {
+  Δl=min(NABLA_NB_NODES_X_TICK,NABLA_NB_NODES_Y_TICK);
+  info()<<"\33[33m[computeΔl] Δl="<<Δl<<"\33[m";
+}
+
+∀ nodes void randomDistortedQuads(void) @ -29 {
+  
+  const Real α=option_rdq_α;
+  const Real ρ1=drand48()+drand48()-1.0;
+  const Real ρ2=drand48()+drand48()-1.0;
   if (coord.x == 0.0 || coord.x == LENGTH) continue;
   if (coord.y == 0.0 || coord.y == LENGTH) continue;
+  //info()<<"\33[33m[rdq] node #"<<this->uniqueId().asInteger()<<"@"<<coord<<"\33[m";
   coord.x+=α*ρ1*Δl;
   coord.y+=α*ρ2*Δl;
+  //debug()<<"\t\33[33m[rdq] => "<<coord<<"\33[m";
 }
 
 // ****************************************************************************
-// * geomComputeSurfaceAndVolume @ -28.0 & 23.0
+// * geomComputeSurfaceAndVolume @ -20.0 & 23.0
 // ****************************************************************************
-∀ cells X @ -28.1{//,23.0 {
-  center=0;
-  ∀ nodes center+=coord;
-  center*=¼;
-}
-∀ cells V @ -28.1{//,23.0 {
-  const ℝ³ fst_edge = coord[2]-coord[0];
-  const ℝ³ snd_edge = coord[0]-coord[1];
+∀ cells @ -20.0,23.0 {
+  const Real3 fst_edge = coord[2]-coord[0];
+  const Real3 snd_edge = coord[0]-coord[1];
+  center=0.25*(coord[0]+coord[1]+coord[2]+coord[3]);
   V=geomCross2D(fst_edge,snd_edge);
+  if (DEBUG)
+    printf("\n[37m[geo,std] V=%.15e[0m",V);
 }
+
+// ****************************************************************************
+// * debug des positions des noeuds
+// ****************************************************************************
 
 // ****************************************************************************
 // * Calcul des résultantes aux sommets des mailles
+// * geomComputeCQsQuad @ -20.0,24.0
 // ****************************************************************************
-∀ cells CQs @ -28.1{//,24.0
-  ∀ nodes CQs = ½*geomNormal(coord[#-1],coord[#+1]); }
+∀ cells @ -20.0,24.0 {
+  const Real3 X[4] = {coord[0],coord[1],coord[2],coord[3]};
+  ∀ node{
+    const int i=(#+nbNode-1)%nbNode;
+    const int j=(#+nbNode+1)%nbNode;
+    CQs = 0.5*geomNormal(X[i],X[j]);
+    absCQs=norm(CQs);
+    if (DEBUG) cout << "\n[37m[geo,std] CQs["<<#<<"]: "<<CQs<<"[0m";
+  }
+}
