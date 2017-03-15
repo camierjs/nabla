@@ -76,7 +76,6 @@ using namespace std;\n\
 // * kHookHeaderPostfix
 // ****************************************************************************
 void kHookHeaderPostfix(nablaMain *nabla){
-  xHookMeshStruct(nabla);
   fprintf(nabla->entity->hdr,"\n\n\
 // *********************************************************\n\
 // * Forward enumerates\n\

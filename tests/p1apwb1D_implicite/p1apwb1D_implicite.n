@@ -51,8 +51,8 @@ with ℝ, ℵ;
 // ****************************************************************************
 
 //ofstream output("schema1.plot");
-ofstream outputCv("cv.plot");
-ofstream outputCvFinal("AP4.plot");     
+//ofstream outputCv("cv.plot");
+ofstream outputCvFinal("outputCvFinal.plot");     
        
 
 // ****************************************************************************v 
@@ -166,11 +166,9 @@ void tstForTstQuit(void) @ 4.0 {
 }
 
 
-∀ cells void dumpOutputCvFinal(void)
-  in (cell cV, cell center) @ 4.0 if (global_tstQuit[0]==1){
+∀ cells dumpOutputCvFinal @ 4.0 if (global_tstQuit[0]==1){
   outputCvFinal<<  center << "\t " << 0.5*(cV+cW)<< P_condlimi(center,n_time)<<"\n";
 }   
-
 
 void tstForQuit(void) @ 4.1 {
   n_time+=δt;

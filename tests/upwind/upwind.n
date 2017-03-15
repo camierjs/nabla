@@ -1,4 +1,7 @@
 with ℝ;
+
+ofstream results("results.plot");
+
 // αβγδδδεεζηθικλμνξοπρςστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ
 // ∀
 // ℝℕℤ
@@ -199,7 +202,8 @@ void dbgLoop(void) @ 1.0 {
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File results){
+∀ cells dumpSolution @ 3.9 if (time>=(option_stoptime-δt)){
+  printf("\n\t[testForQuit] iteration>time_steps, \33[7mdumping\33[m\n");
   results << "\t" << center
           << "\t" << δx
           << "\t" << cP
@@ -211,11 +215,5 @@ void dbgLoop(void) @ 1.0 {
 void tstForQuit(void) @ 4.0 {
   //printf("\n\t[testForQuit] iteration =%d, time=%f, delta_t=%f", iteration, time,(double)δt);
   if ((time<(option_stoptime-δt))) return;
-  {
-    file(results,plot);
-    printf("\n\t[testForQuit] iteration>time_steps, \33[7mdumping\33[m\n");
-    //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
-    dumpSolution(results,NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,&δx,cP,cU);
-  }
   exit;
 }

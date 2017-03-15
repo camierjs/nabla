@@ -357,7 +357,8 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
       (!nabla->hook->grammar->dfsExtra(nabla,job,true))){
     const char j=job->item[0];
     const char e=job->enum_enum;
-    //printf("job %s, e=%c",job->name,e);
+    const char r=job->region?job->region[0]:'x';
+   
     if (j=='c') {
       nprintf(nabla, NULL,"%sconst int NABLA_NB_CELLS_WARP,const int NABLA_NB_CELLS",numParams==0?"":",");
       numParams+=2;
@@ -388,6 +389,13 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
       nprintf(nabla, NULL,"%sconst int NABLA_NB_PARTICLES",numParams==0?"":",");
       numParams+=1;
     }
+
+    //if (r=='o') printf("\n[33mjob %s, j=%c, e=%c, r=%c[m",job->name,j,e,r);
+    if (j=='c' && r=='o'){
+      nprintf(nabla, NULL,",const nablaMesh *msh");
+      numParams+=1;
+    }
+
   }
   i=numParams;
 
@@ -464,6 +472,8 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
        (!nabla->hook->grammar->dfsExtra(nabla,job,false)))){
     const char j=job->item[0];
     const char e=job->enum_enum;
+    const char r=job->region?job->region[0]:'x';
+    
     dbg("[1;34m[nMiddleArgsDumpFromDFS] job %s, j=%c, enum_enum=%c[0m\n",job->name,j,e?e:'0');
     if (j=='c'){
       nprintf(nabla, NULL,"NABLA_NB_CELLS_WARP,NABLA_NB_CELLS");
@@ -491,6 +501,11 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
     }
     if (j=='p'){
       nprintf(nabla, NULL,"NABLA_NB_PARTICLES");
+      i+=1;
+    }
+    //if (r=='o') printf("\n[33mjob %s, j=%c, e=%c, r=%c[m",job->name,j,e,r);
+    if (j=='c' && r=='o'){
+      nprintf(nabla, NULL,", &msh");
       i+=1;
     }
   }

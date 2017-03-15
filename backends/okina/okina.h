@@ -44,6 +44,7 @@
 #define _NABLA_OKINA_HOOK_H_
 
 void nOkinaHeaderDump(nablaMain*);
+void nOkinaHeaderDumpWithLibs(nablaMain*);
 void nOkinaMfemDump(nablaMain*);
 
 hooks* okina(nablaMain*);

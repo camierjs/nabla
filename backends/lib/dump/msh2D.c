@@ -304,9 +304,9 @@ static int nabla_ini_face_cell_outer_plus(const nablaMesh msh,
   face_cell[0*msh.NABLA_NB_FACES+f] = (c<<MD_Shift)|MD_Plus|(MD_Dir+1);
   face_cell[1*msh.NABLA_NB_FACES+f] = -(MD_Plus|(MD_Dir+1));
   dbg(DBG_INI_FACE," %%s-%%c->%%s",
-      f2d(face_cell[0*NABLA_NB_FACES+f]),
+      f2d(face_cell[0*msh.NABLA_NB_FACES+f]),
       cXY(MD_Dir),
-      f2d(face_cell[1*NABLA_NB_FACES+f]));
+      f2d(face_cell[1*msh.NABLA_NB_FACES+f]));
   return 1;
 }
 static void nabla_ini_face_cell_XY(const nablaMesh msh,
@@ -562,7 +562,7 @@ static void nabla_ini_node_coord(const nablaMesh msh,
   dbg(DBG_INI_NODE,"\nasserting (NABLA_NB_CELLS %% 1)==0...");
   assert((msh.NABLA_NB_CELLS %% 1)==0);
     
-  for(int iNode=0; iNode<NABLA_NB_NODES; iNode+=1){
+  for(int iNode=0; iNode<msh.NABLA_NB_NODES; iNode+=1){
     const int n=iNode;
     Real x,y;
     x=set(xOf7(msh,n));

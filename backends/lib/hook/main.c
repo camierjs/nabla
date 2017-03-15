@@ -251,7 +251,9 @@ void xHookMainGLVisI2a(nablaMain *n){
 \t\tNABLA_NODES_PADDING,\n\
 \t\tNABLA_NB_CELLS,\n\
 \t\tNABLA_NB_NODES_WARP,\n\
-\t\tNABLA_NB_CELLS_WARP};\n\
+\t\tNABLA_NB_CELLS_WARP,\n\
+\t\tNABLA_NB_OUTER_CELLS_WARP\n\
+};\n\
 \tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n \
 \tnabla_ini_connectivity(msh,node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){

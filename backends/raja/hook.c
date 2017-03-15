@@ -91,7 +91,6 @@ using namespace std;\n\
 // * rajaHookHeaderPostfix
 // ****************************************************************************
 void rajaHookHeaderPostfix(nablaMain *nabla){
-  xHookMeshStruct(nabla);
   fprintf(nabla->entity->hdr,"\n\n\
 // *********************************************************\n\
 // * Forward deep enumerates\n\

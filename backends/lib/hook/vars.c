@@ -293,14 +293,15 @@ void xHookVariablesPrefix(nablaMain *nabla){
 // * Malloc des variables
 // ****************************************************************************
 void xHookVariablesMalloc(nablaMain *nabla){
-
+  // On met les initialisation ici, dans le main,
+  // une fois que les options aient été parsées
   if (isWithLibrary(nabla,with_real))
     xHookMesh1D(nabla);
   else if (isWithLibrary(nabla,with_real2))
     xHookMesh2D(nabla);
   else
     xHookMesh3D(nabla);
-  
+    
   fprintf(nabla->entity->src,"\n\
 \t// ********************************************************\n\
 \t// * Déclaration & Malloc des Variables\n\

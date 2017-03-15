@@ -157,6 +157,13 @@ void nOkinaHeaderDump(nablaMain *nabla){
 }
 
 
+// ****************************************************************************
+// * nOkinaHeaderDumpWithLibs
+// ****************************************************************************
+void nOkinaHeaderDumpWithLibs(nablaMain *nabla){
+  xHookMeshStruct(nabla);
+}
+
 
 // ****************************************************************************
 // * nOkinaMfemDump

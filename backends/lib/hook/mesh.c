@@ -85,6 +85,7 @@ typedef struct nablaMshStruct{\n\
 \tint NABLA_NB_CELLS;\n\
 \tint NABLA_NB_NODES_WARP;\n\
 \tint NABLA_NB_CELLS_WARP;\n\
+\tint NABLA_NB_OUTER_CELLS_WARP;\n\
 }nablaMesh;\n");
 }
 
@@ -125,8 +126,12 @@ const int NABLA_NODE_PER_CELL = 2;\n\
 const int NABLA_CELL_PER_NODE = 2;\n\
 const int NABLA_CELL_PER_FACE = 0;\n\
 const int NABLA_NODE_PER_FACE = 0;\n\
-const int NABLA_FACE_PER_CELL = 0;\n\
-\n\
+const int NABLA_FACE_PER_CELL = 0;");
+  
+  fprintf(nabla->entity->src,"\n\n\t\
+// ********************************************************\n\
+// * MESH GENERATION (1D)\n\
+// ********************************************************\n\
 const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
 const int NABLA_NB_NODES_Y_AXIS = 1;\n\
 const int NABLA_NB_NODES_Z_AXIS = 1;\n\
@@ -186,7 +191,7 @@ void xHookMesh2DConnectivity(nablaMain *nabla){
 // * xHookMesh2D
 // ****************************************************************************
 void xHookMesh2D(nablaMain *nabla){
-  fprintf(nabla->entity->hdr,"\n\
+  fprintf(nabla->entity->hdr,"\n\n\
 // ********************************************************\n\
 // * MESH GENERATION (2D)\n\
 // ********************************************************\n\
@@ -194,48 +199,54 @@ const int NABLA_NODE_PER_CELL = 4;\n\
 const int NABLA_CELL_PER_NODE = 4;\n\
 const int NABLA_CELL_PER_FACE = 2;\n\
 const int NABLA_NODE_PER_FACE = 2;\n\
-const int NABLA_FACE_PER_CELL = 4;\n\
-\n\
-const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\
-const int NABLA_NB_NODES_Z_AXIS = 1;\n\
-\n\
-const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\
-const int NABLA_NB_CELLS_Z_AXIS = 1;\n\
-\n\
-const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS;\n\
-const int NABLA_NB_FACES_Z_INNER = 0;\n\
-const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS;\n\
-const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS;\n\
-const int NABLA_NB_FACES_Z_OUTER = 0;\n\
-const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\
-const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER;\n\
-const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\
-\n\
-const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\
-const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\
-const double NABLA_NB_NODES_Z_TICK = 0.0;\n\
-\n\
-const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS);\n\
-const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\
-const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n\
-\n\
-const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\
-const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\
-const int NABLA_NB_OUTER_CELLS_WARP   = ((2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4)/WARP_SIZE);\n\
-int nxtOuterCellOffset(const int c){\n\
-  //printf(\"NABLA_NB_OUTER_CELLS_WARP=%%d, NABLA_NB_CELLS_X_AXIS=%%d\",NABLA_NB_OUTER_CELLS_WARP,NABLA_NB_CELLS_X_AXIS);\n\
-  if (c<NABLA_NB_CELLS_X_AXIS) {/*printf(\"1\");*/ return 1;}\n\
-  if (c>=(NABLA_NB_CELLS-NABLA_NB_CELLS_X_AXIS)) {/*printf(\"4\");*/ return 1;}\n\
-  if ((c%%(NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"2\");*/ return NABLA_NB_CELLS_X_AXIS-1;}\n\
-  if (((c+1)%%(NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"3\");*/ return 1;}\n \
+const int NABLA_FACE_PER_CELL = 4;\n");
+  
+  fprintf(nabla->entity->hdr,"\n\n\
+int nxtOuterCellOffset(const int c, const struct nablaMshStruct *msh){\n\
+  //printf(\"msh->NABLA_NB_OUTER_CELLS_WARP=%%d, NABLA_NB_CELLS_X_AXIS=%%d\",msh->NABLA_NB_OUTER_CELLS_WARP,NABLA_NB_CELLS_X_AXIS);\n\
+  if (c<msh->NABLA_NB_CELLS_X_AXIS) {/*printf(\"1\");*/ return 1;}\n\
+  if (c>=(msh->NABLA_NB_CELLS-msh->NABLA_NB_CELLS_X_AXIS)) {/*printf(\"4\");*/ return 1;}\n\
+  if ((c%%(msh->NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"2\");*/ return msh->NABLA_NB_CELLS_X_AXIS-1;}\n\
+  if (((c+1)%%(msh->NABLA_NB_CELLS_X_AXIS))==0) {/*printf(\"3\");*/ return 1;}\n \
   /*printf(\"else\");*/\n\
-  return NABLA_NB_CELLS_X_AXIS-1;\n\
-}\n\
-\n\
-int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
+  return msh->NABLA_NB_CELLS_X_AXIS-1;\n\
+}\n");
+  
+  fprintf(nabla->entity->src,"\n\n\t\
+// ********************************************************\n\t\
+// * MESH GENERATION (2D)\n\t\
+// ********************************************************\n\t\
+const int NABLA_NB_NODES_X_AXIS = X_EDGE_ELEMS+1;\n\t\
+const int NABLA_NB_NODES_Y_AXIS = Y_EDGE_ELEMS+1;\n\t\
+const int NABLA_NB_NODES_Z_AXIS = 1;\n\t\
+\n\t\
+const int NABLA_NB_CELLS_X_AXIS = X_EDGE_ELEMS;\n\t\
+const int NABLA_NB_CELLS_Y_AXIS = Y_EDGE_ELEMS;\n\t\
+const int NABLA_NB_CELLS_Z_AXIS = 1;\n\t\
+\n\t\
+const int NABLA_NB_FACES_X_INNER = (X_EDGE_ELEMS-1)*Y_EDGE_ELEMS;\n\t\
+const int NABLA_NB_FACES_Y_INNER = (Y_EDGE_ELEMS-1)*X_EDGE_ELEMS;\n\t\
+const int NABLA_NB_FACES_Z_INNER = 0;\n\t\
+const int NABLA_NB_FACES_X_OUTER = 2*NABLA_NB_CELLS_Y_AXIS;\n\t\
+const int NABLA_NB_FACES_Y_OUTER = 2*NABLA_NB_CELLS_X_AXIS;\n\t\
+const int NABLA_NB_FACES_Z_OUTER = 0;\n\t\
+const int NABLA_NB_FACES_INNER = NABLA_NB_FACES_X_INNER+NABLA_NB_FACES_Y_INNER;\n\t\
+const int NABLA_NB_FACES_OUTER = NABLA_NB_FACES_X_OUTER+NABLA_NB_FACES_Y_OUTER;\n\t\
+const int NABLA_NB_FACES = NABLA_NB_FACES_INNER+NABLA_NB_FACES_OUTER;\n\t\
+\n\t\
+const double NABLA_NB_NODES_X_TICK = LENGTH/(NABLA_NB_CELLS_X_AXIS);\n\t\
+const double NABLA_NB_NODES_Y_TICK = LENGTH/(NABLA_NB_CELLS_Y_AXIS);\n\t\
+const double NABLA_NB_NODES_Z_TICK = 0.0;\n\t\
+\n\t\
+const int NABLA_NB_NODES        = (NABLA_NB_NODES_X_AXIS*NABLA_NB_NODES_Y_AXIS);\n\t\
+const int NABLA_NODES_PADDING   = (((NABLA_NB_NODES%%WARP_SIZE)==0)?0:1);\n\t\
+const int NABLA_NB_CELLS        = (NABLA_NB_CELLS_X_AXIS*NABLA_NB_CELLS_Y_AXIS);\n\t\
+\n\t\
+const int NABLA_NB_NODES_WARP   = (NABLA_NODES_PADDING+NABLA_NB_NODES/WARP_SIZE);\n\t\
+const int NABLA_NB_CELLS_WARP   = (NABLA_NB_CELLS/WARP_SIZE);\n\t\
+const int NABLA_NB_OUTER_CELLS_WARP   = ((2*(X_EDGE_ELEMS+Y_EDGE_ELEMS)-4)/WARP_SIZE);\n\t\
+\n\t\
+//int NABLA_NB_PARTICLES /*= NB_PARTICLES*/;\n\
 ");
 }
 
