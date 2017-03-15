@@ -33,16 +33,17 @@ $(TGT).o: $(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(KOKKOS_CXXFLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(KOKKOS_LDFLAGS) $(TGT).o $(KOKKOS_LIBS) $(LIB_ORGOPT) $(LIB_GLVIS)
+	$(CXX) $(KOKKOS_CXXFLAGS) -o $(TGT)_$(PARALLEL) $(KOKKOS_LDFLAGS) $(TGT).o $(KOKKOS_LIBS) $(LIB_ORGOPT) $(LIB_GLVIS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
 run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=1 ./$(TGT)_$(PARALLEL)
+
 run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=4 ./$(TGT)_$(PARALLEL)
 
 #############
 # DOT 2 PNG #

@@ -39,20 +39,19 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_FRNTND) $(LIB_GLVIS)
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_FRNTND) $(LIB_GLVIS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
 #	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
+
 run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(PARALLEL)
+
 run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(PARALLEL)
 
 #############
 # DOT 2 PNG #
