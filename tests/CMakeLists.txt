@@ -288,7 +288,7 @@ nabla_add_okina_test(p1apwb1D_gosse 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_irregular_mesh 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_semi_implicite 1 run std seq)
 
-#nabla_add_okina_test(p12d 1 run std seq)
+#nabla_add_okina_test(p12del 1 run std seq)
 #nabla_add_okina_test(propagateur 1 run std seq)
 
 
@@ -322,7 +322,7 @@ if (HYPRE_FOUND)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} xgnplt 1 run seq)
 endif (HYPRE_FOUND)
    
-nabla_add_lambda_test(p12d 1 run seq)
+nabla_add_lambda_test(p12del 1 run seq)
 nabla_add_lambda_test(pdfLgvn 1 run seq)
 nabla_add_lambda_test(propagateur 1 run seq)
 
