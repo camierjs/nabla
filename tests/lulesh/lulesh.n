@@ -341,7 +341,7 @@ void timeIncrement(void) @ 0.1 {
   //debug()<<"sig="<<sig;
   ∀ node x[n] = coord;
   ε = dj = -¼*((x[0]+x[1]+x[5]+x[4])-(x[3]+x[2]+x[6]+x[7]));
-  calcElemShapeFunctionDerivatives(x,B);
+  //calcElemShapeFunctionDerivatives(x,B);
   ∀ node B[n]=0.0;
   Σ_FaceNormal(B,0,1,2,3,x);
   Σ_FaceNormal(B,0,4,5,1,x);

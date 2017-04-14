@@ -42,7 +42,7 @@
      <!--file internal-partition="true">../../unf/sqrhq.unf</file-->
      <meshgenerator>
  		 <cartesian>
-			<nsd>4 1 1</nsd>
+			<nsd>4 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
 			<lx nx="10" prx="1.0">1.0</lx>
 			<ly ny="10" pry="1.0">1.0</ly>

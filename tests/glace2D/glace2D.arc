@@ -45,7 +45,7 @@
          <y set='false' delta='1.0'>4</y>
      </sod-->
      <cartesian>
-			<nsd>4 1 1</nsd>
+			<nsd>4 1</nsd>
 			<origine>0.0 0.0 0.0</origine>
 			<lx nx="8" prx="1.0">1.125</lx>
 			<ly ny="8" pry="1.0">1.125</ly>
