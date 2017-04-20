@@ -1,6 +1,6 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
 (defconst nabla-version "nabla" "Nabla Mode version number")
-(defconst nabla-time-stamp "2017-01-24"
+(defconst nabla-time-stamp "2017-04-18"
   "Nabla Mode time stamp for last update.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -21,6 +21,7 @@
   '("exit" "checkpoint" "coord" 
     "uid" "lid" "sid" "this" "nbNode" "iNode" "fatal"
     "backCell" "backCellUid" "frontCell" "frontCellUid" 
+    "next" "prev"
     "nextCell" "prevCell"
     "nextNextCell" "prevPrevCell"
     "deltat" "nbCell"

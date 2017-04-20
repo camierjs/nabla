@@ -348,7 +348,7 @@ nablaVariable *nMiddleVariableFind(nablaVariable*,const char*);
 nablaVariable *nMiddleVariableFindKoffset(nablaVariable*,const char*,const int);
 nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain*,nablaJob*,
                                                   nablaVariable*,const char*);
-what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
+what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,nablaJob*,
                                                          node*,
                                                          const char,
                                                          char );

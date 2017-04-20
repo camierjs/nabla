@@ -315,7 +315,7 @@ void nMiddleJobParse(node *n, nablaJob *job){
     if (n->children->ruleid == ruleToId(rule_postfix_expression))
       if (n->children->next != NULL)
         if (n->children->next->tokenid == '[')
-          if ((job->parse.isPostfixed=nMiddleVariables(nabla,n,cnfgem,job->parse.enum_enum))==1)
+          if ((job->parse.isPostfixed=nMiddleVariables(nabla,job,n,cnfgem,job->parse.enum_enum))==1)
             return;
           
 

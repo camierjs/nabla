@@ -213,11 +213,116 @@ nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain *nabla,
 
 
 static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
+                                         nablaJob *job,
                                          int tokenid,
                                          char **prefix,
                                          char **system,
                                          char **postfix){
+  // We want a job and not a function
+  assert(job->item!=NULL);
+  assert(!job->is_a_function);
+  // If the job is using the '_XYZ' functionnality, use it
+  dbg("\n\t[nMiddleVariablesSystemSwitch] xyz=%s, direction=%s",job->xyz,job->direction);
+  dbg("\n\t[nMiddleVariablesSystemSwitch] tokenid=%d",tokenid);
+  const int dir = (job->xyz!=NULL)?
+    (job->direction[6]=='X')?DIR_X:
+    (job->direction[6]=='Y')?DIR_Y:
+    (job->direction[6]=='Z')?DIR_Z:DIR_UNKNOWN:
+    DIR_UNKNOWN;
+  const char itm = job->item[0];
   switch(tokenid){
+    
+  case(ARROW_UP):{ // ⇒ next in Y direction
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_UP\n");
+    *prefix=cHOOK(nabla,xyz,prefix);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_Y);
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
+  case(ARROW_RIGHT):{ // ⇒ next in X direction
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_RIGHT\n");
+    *prefix=cHOOK(nabla,xyz,prefix);
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_X);
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
+  case(ARROW_DOWN):{ // ⇒ prev in Y direction
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_DOWN\n");
+    *prefix=cHOOK(nabla,xyz,prefix);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_Y);
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
+  case(ARROW_LEFT):{ // ⇒ prev in X direction
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_LEFT\n");
+    *prefix=cHOOK(nabla,xyz,prefix);
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_X);
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
+
+  case(ARROW_NORTH_EAST):{ // ⇒ ↗
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_NORTH_EAST\n");
+    *prefix="ARROW";
+    *system="NORTH";
+    *postfix="EAST";
+    return;
+  }
+  case(ARROW_SOUTH_EAST):{ // ⇒ ↘
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_SOUTH_EAST\n");
+    *prefix="ARROW";
+    *system="SOUTH";
+    *postfix="EAST";
+    return;
+  }
+  case(ARROW_SOUTH_WEST):{ // ⇒ ↙
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_SOUTH_WEST\n");
+    *prefix="ARROW";
+    *system="SOUTH";
+    *postfix="WEST";
+    return;
+  }
+  case(ARROW_NORTH_WEST):{ // ⇒ ↖
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_NORTH_WEST\n");
+    *prefix="ARROW";
+    *system="NORTH";
+    *postfix="WEST";
+    return;
+  }
+
+  case(ARROW_BACK):{ // ⇒ ⊠
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_BACK\n");
+    *prefix="ARROW";
+    *system="_";
+    *postfix="BACK";
+    return;
+  }
+  case(ARROW_FRONT):{ // ⇒ ⊡
+    dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_FRONT\n");
+    *prefix="ARROW";
+    *system="_";
+    *postfix="FRONT";
+    return;
+  }
+    
+  case(NEXT):{
+    assert(itm=='c');// For now, we just work with cell jobs
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXT prefix (dir=%d, DIR_X=%d, direction=%s)",dir,DIR_X,job->direction);
+    *prefix=cHOOK(nabla,xyz,prefix);
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXT system");
+    *system=cHOOKi(nabla,xyz,nextCell,dir);
+    dbg("\n\t[nMiddleVariablesSystemSwitch] NEXT postfix");
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
+  case(PREV):{
+    assert(itm=='c');// For now, we just work with cell jobs
+    dbg("\n\t[nMiddleVariablesSystemSwitch] PREV %d ?",dir);
+    *prefix=cHOOK(nabla,xyz,prefix);
+    *system=cHOOKi(nabla,xyz,prevCell,dir);
+    *postfix=cHOOK(nabla,xyz,postfix);
+    return;
+  }
   case(NEXTCELL):{
     dbg("\n\t[nMiddleVariablesSystemSwitch] NEXTCELL UNKNOWN");
     *prefix=cHOOK(nabla,xyz,prefix);
@@ -303,6 +408,7 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
 // * C'est une des fonctions qu'il faudrait revoir et même supprimer
 // ****************************************************************************
 what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
+                                                         nablaJob *job,
                                                          node * n,
                                                          const char cnf,
                                                          char enum_enum){
@@ -349,7 +455,7 @@ what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain *nabla,
         char *prefix=NULL;
         char *system=NULL;
         char *postfix=NULL;
-        nMiddleVariablesSystemSwitch(nabla,nabla_system->tokenid,&prefix,&system,&postfix);
+        nMiddleVariablesSystemSwitch(nabla,job,nabla_system->tokenid,&prefix,&system,&postfix);
         assert(prefix); assert(system); assert(postfix);
         dbg("\n\t[nMiddleVariables] prefix='%s'",prefix);
         dbg("\n\t[nMiddleVariables] system='%s'",system);

@@ -1,0 +1,345 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+with cartesian;
+
+// ℕℝℾ
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  // Precision
+  ℝ huge = sqrt(huge(1.0*0.1));
+  ℝ eps = 10.0/huge;
+  ℝ eps_io = 1.0e-9;
+
+  // Constants
+  ℕ FNAME_MAX_LEN = 256;      // filename maximum length
+  ℕ KEYWORD_MAX_LEN = 30;     // maximum length of keywords
+  ℕ GRIDS_MAX_NBR = 100;      // maximum number of grids
+  ℕ GAGES_MAX_NBR = 500;      // maximum number of gages 
+  ℕ UNITS_MAX_NBR = 89;       // maximum number of simultaneous open units
+  ℕ FIRST_UNIT = 9;           // first used unit
+  ℕ ERR_MSG_MAX_LEN = 256;    // maximum length of error message
+  ℕ LINE_MAX_LEN = GRIDS_MAX_NBR*FNAME_MAX_LEN; // maximum line width
+  ℕ NT_CK_EXP_MIN = 10;       // minimum number of time steps between two checkings of explosion
+
+  // Configuration
+  ℝ GZ = 9.81;                // standard acceleration due to gravity
+  ℝ PI = acos(-1.0);          // pi constant
+  ℝ DT_STD_OUT = 2.0;         // time step between two standard output
+  ℝ DT_CK_EXP = 2.0;          // time step between two checkings of explosion
+  ℝ FILL_VALUE = -999999.0;   // fill value for netcdf files
+  ℝ H_MAX = 500.0;            // maximum water height before considering explosion
+
+  ℕ VERBOSITY = 1;
+                                                                                    
+  ℕ Ndim = 2;          // dimension (1 or 2)
+  ℕ number_of_grids=0; // number of grids
+  ℕ verbosity = 1;
+  ℕ west_bound=-1; // code of the west boundary condition
+  ℕ east_bound=-1; // code of the east boundary condition
+  ℕ north_bound=-1; // code of the north boundary condition
+  ℕ south_bound=-1; // code of the south boundary condition
+  
+  ℝ time_of_simulation  = 0.0; // time of simulation
+  ℝ start_time          = 0.0; // start time
+  ℝ time_step_to_output = 0.0; // time step to output grids
+  ℝ time_step_of_gages  = -1.0; // time step of gages
+
+//𝕊output_dir; // output directory name
+//  𝕊water_inlet_fname; // the name of the water inlet file
+//  𝕊surf_fname; // the name of a surface file
+//  𝕊uvel_fname; // the name of the file with the velocity field along the x-axis
+//  𝕊vvel_fname; // the name of the file with the velocity field along the y-axis
+//  𝕊gages_fname; // the name of the file with gages
+//  𝕊sources_fname; // the name of the file with sources
+//  𝕊grid_coord_sys; // the name of the coordinate system of the grid
+  
+  // for each grid
+  ℾ do_two_ways_interp/*[GRIDS_MAX_NBR]*/=false;
+  ℾ is_runup/*[GRIDS_MAX_NBR]*/;           // is there run-up ? (for each grid)
+  ℾ is_boussinesq/*[GRIDS_MAX_NBR]*/=false;      // is it Boussinesq resolution ? (for each grid)
+  ℾ do_init_source/*[GRIDS_MAX_NBR]*/=false;     // do source initialization
+  ℕ hldg_grid_id/*[GRIDS_MAX_NBR]*/=-1;     // holding grid identification (for each grid)
+  ℕ space_scheme_order/*[GRIDS_MAX_NBR]*/=1;// the order of the space scheme (for each grid)
+  ℝ time_step/*[GRIDS_MAX_NBR]*/;           // time step (for each grid)
+  ℝ epsd/*[GRIDS_MAX_NBR]*/=0.0;            // minimum water depth computed (for each grid)
+  ℝ epshd/*[GRIDS_MAX_NBR]*/=0.0;           // minimum water thickness computed (for each grid)
+  ℝ dcut/*[GRIDS_MAX_NBR]*/=0.0;            // depth thresold from which the seabottom is flatten (for each grid)
+//  𝕊time_scheme[GRIDS_MAX_NBR] = "ICN"; // time scheme name (for each grid)
+//  𝕊 depth_fname[GRIDS_MAX_NBR];        // depth file names (for each grid)
+//  𝕊 output_types[OUT_TYPES_MAX_NBR] = "";   // list of output types
+
+  // Private attributes
+  ℾ is_output_velocities = false;
+  ℾ output_velocities = false;            // deprecated parameter -> use output_types instead
+  ℾ is_master_proc;                       // is it the master process ?
+  ℾ is_parallel;                          // is it a parallel run?
+  ℕ grid_id/*[GRIDS_MAX_NBR]*/=-1;            // grid identification
+  ℕ grids_call_init_seism/*[GRIDS_MAX_NBR]*/ = 0; // list of grids calling initializing with the source
+  ℝ epshd = 1.0e-9;
+};
+
+
+// ****************************************************************************
+// * Cells
+// ****************************************************************************
+cells{
+  ℝ hnp; // h^(n+1) matrix
+  ℝ unp; // u^(n+1) matrix
+  ℝ vnp; // v^(n+1) matrix
+
+  ℝ d;
+  ℝ d_hn;
+  ℝ hn; // the water height matrix
+  ℝ un; // the velocity matrix along the x-axis
+  ℝ vn; // the velocity matrix along the y-axis
+  ℝ deqh;
+  ℝ fc; // Coriolis force
+};
+
+
+// ***************************************************************************
+// * Faces
+// ***************************************************************************
+faces{
+  ℝ bv;
+};
+
+
+// ***************************************************************************
+// * Globals
+// ***************************************************************************
+global{
+  ℝ dt,t; // time step, time
+  ℕ nt; // iteration
+  ℝ cfl_max; // maximum value of CFL
+  ℝ inv_dx,inv_dy;
+  ℝ ti; // the initial time
+  ℝ tf; // final time
+};
+
+
+// ***************************************************************************
+// * Initialisation part
+// ***************************************************************************
+conf_init @ -11.9 { debug()<<"[1;33m[conf_init][m"; }
+simulation_init @ -11.9 { debug()<<"[1;33m[simulation_init][m"; }
+cliona_start @ -12.0 { debug()<<"[1;33m[cliona_start][m"; }
+
+
+// ***************************************************************************
+// * Compute loop
+// ***************************************************************************
+
+time_scheme_leapfrog_iterate @ 1.0 {
+// Time t_n to t_n+1
+}
+
+∀ cells eulerIterateEqh @ 1.1 {
+  d_hn = d + hn;
+}
+
+// Compute space derivatives of the equation of
+// conservation of mass (eq. h) and do one iteration of
+// Euler time scheme
+∀ cells space_scheme_nlsw_1st_order_compute_eqh_X @ 1.2 {
+  // Term: d((d+h)u)/dx
+  const ℝ dhn1=(un>0.0)?d_hn[→]:d_hn;
+  const ℝ dhn2=(un[←]>0.0)?d_hn[←]:d_hn;
+  const ℝ deqh_dx = (un*dhn1-un[→]*dhn2)*inv_dx;
+}
+∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y @ 1.2 {
+  // Term: d((d+h)v)/dy
+  const ℝ dhn1=(vn>0.0)?d_hn[↑]:d_hn;
+  const ℝ dhn2=(vn[↓]>0.0)?d_hn[↓]:d_hn;
+  const ℝ deqh_dy = (vn*dhn1-vn[↓]*dhn2)*inv_dx;
+}
+∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y_sum @ 1.21 {
+  deqh = deqh_dx + deqh_dy;
+}
+∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y_euler_time_iteration @ 1.22 {
+  hnp = hn - dt*deqh;
+}
+
+time_scheme_update_hn @ 1.3 { hn = hnp; }
+time_scheme_update_un @ 1.3 { un = unp; }
+time_scheme_update_vn @ 1.3 { if (Ndim == 2) vn = vnp; }
+
+// Time t_n+1/2 to t_n+3/2
+// Euler iteration on equation of conservation of moment
+
+// space_scheme_nlsw_1st_order_compute_equ
+// Computes pace derivatives of the equation of
+// conservation of moment along x-axis (eq. u) and do one
+// iteration of Euler time scheme
+∀ cells space_scheme_nlsw_1st_order_compute_equ @ 1.4 {
+  const ℕ i_tu1 = i - (un <= 0.0);
+  const ℝ tv = 0.25*(vn[↓]+vn[↘]+vn+v[→]);
+  const ℕ j_tu2 = j - (tv <= 0.0);
+  const ℝ tu1 = un * (un[i_tu1,j]-un[i_tu1-1,j]); // u*du/dx
+  const ℝ tu2 = tv * (un[i,j_tu2]-un[i,j_tu2-1]); // v*du/dy
+  const ℝ thu = gz * (hn[→]-hn); // g*dh/dx
+  const ℝ tfc = -tv * fc; // Coriolis force
+  dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
+  unp = un - dt*dequ; // Euler time iteration
+}
+∀ cells space_scheme_nlsw_1st_order_compute_eqv @ 1.4 {
+  const ℝ tu = 0.25 * (un[←]+un+un[↖]+un[↑]);
+  const ℕ j_tv2 = j - (vn <= 0.0);
+  const ℕ i_tv1 = i - (tu <= 0.0);
+  const ℝ tv1 = tu * (vn[i_tv1,j]-vn[i_tv1-1,j]); // u*dv/dx
+  const ℝ tv2 = vn[i,j] * (vn[i,j_tv2]-vn[i,j_tv2-1]); // v*dv/dy
+  const ℝ thv = GZ * (hn[↑]-hn); // g*dh/dy
+  const ℝ tfc = tu * fc; // Coriolis force
+  deqv = tv1*inv_dx + (tv2+thv)*inv_dy + tfc;
+  vnp[i-Nf,jj] = vn - dt*deqv; // Euler time iteration
+}
+
+// time_scheme_leapfrog_iterate: Runup
+// time_scheme_leapfrog_iterate: Update temporary matrix
+∀ cells time_scheme_leapfrog_iterate_update_temporary_matrix @ 1.5 {
+  d_hn = d + hn;
+}
+
+// time_scheme_leapfrog_iterate: Treatment for velocities
+void runup_treat_vel_d_dhn_hn_cn_cnp(ℝ cn, ℝ cnp){
+  const ℕ Nf = 1;
+  // if at least the west neighbour cell is wet
+  if (d_hn< epshd){
+    // - both cells are dry (cases a1, c1 [CK98]) or if no flood
+    // is possible because water surface at a wet cell is lower than the bottom 
+    // of the neighbour dry cell (case c2 [CK98])
+    if (d_hn[i+i1,j+j1] < epshd or hn[i+i1,j+j1] < -d) {
+      cnp[↙] = 0.0;
+      // - if flood is possible, a correction of grad(h) in the equation of 
+      // conservation of moments (equ,eqv) is required 
+      // (use d_hn instead of hn in term 'thu', cases b1 and c3 [CK98])
+    }else{
+      if (cn[i,j] < 0.0 and hn[i+i1,j+j1] > hn) {
+        cnp[↙] = cnp[i-Nf,j-Nf] - coef_grad_h[jj]*(hn[i,j]+d[i+i1,j+j1]);
+      }
+    }
+  }
+  // if only the east neighbour cell is wet
+  else {
+    if (d_hn[i+i1,j+j1] < epshd) {
+      // if no flood is possible because water surface at a 
+      // wet cell is lower than the bottom of the neighbour 
+      // dry cell (case a2 [CK98])
+      if (hn < -d[i+i1,j+j1]) {
+        cnp[i-Nf,j-Nf] = 0.0;
+        // - if flood is possible, a correction of grad(h) in the equation of 
+        // conservation of moments (equ,eqv) is required 
+        // (use d_hn instead of hn in term 'thu', cases a3 and d1 [CK98])
+      }else {
+        if (cn > 0.0 and (hn > hn[i+i1,j+j1])) {
+          cnp[↙] = cnp[↙] + coef_grad_h[jj]*(hn[i+i1,j+j1]+d);
+        }
+      }
+    }
+      // if both cells are wet but the water surface of one is lower 
+      // than the bottom of the neighbour dry cell a correction of 
+      // grad(h) in the equation of conservation of moments (equ,eqv) is required 
+      else{
+        // - cases d2 [fig. 2, CK98]
+        if (cn[i,j] > 0.0) {
+          if (-d[i,j] > hn[i+i1,j+j1]) {
+            cnp[↙] = cnp[i-Nf,j-Nf] + coef_grad_h[jj]*(hn[i+i1,j+j1]+d);
+          }
+        }
+        // - case b2 [fig. 2, CK98]
+        else 
+          if(-d[i+i1,j+j1] > hn[i,j]) {
+            cnp[i-Nf,j-Nf] = cnp[i-Nf,j-Nf] - coef_grad_h[jj]*(hn[i,j]+d[i+i1,j+j1]);
+          }
+      }
+  }
+}
+runup_treat_vel_d_dhn_hn_un_unp @ 1.6{
+  runup_treat_vel_d_dhn_hn_cn_cnp(un,unp);
+  runup_treat_vel_d_dhn_hn_cn_cnp(vn,vnp);
+}
+
+// time_scheme_leapfrog_iterate update_vel
+time_scheme_update_vel_u @ 1.7 { un = unp; }
+time_scheme_update_vel_v @ 1.7 { if (Ndim == 2) vn = vnp; }
+
+// [time_scheme_leapfrog_iterate] Check explosion
+time_scheme_check_explosion @ 1.8 {
+  ℾ is_explosion = false;
+  // Check for NaN in the first computed cell only
+  // Check for high values
+  // abort the simulation if explosion
+}
+
+
+model_iterate_time_update @ 1.9 {
+  t = t + dt;
+  nt = nt + 1;
+}
+
+model_iterate_segment_update @ 2.0 { }
+
+
+model_iterate_boundary_update @ 2.1 { // d, hn, un, vn, nt
+  
+}
+
+boundary_force @ 2.11 { if (is_forced_bound); }
+boundary_set_value_forced @ 2.12 {}
+
+boundary_continuative @ 2.13 {}
+boundary_set_value_continue @ 2.14 {}
+
+boundary_reflective @ 2.15 {}
+boundary_set_value_reflect @ 2.16 {}
+
+model_iterate_snapshots_update_extreme @ 2.2 { }
+
+//      call error("nabla")
+
+
+
+

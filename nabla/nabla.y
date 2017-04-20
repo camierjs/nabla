@@ -111,7 +111,11 @@ extern char *last_identifier;
 %token SUPERSCRIPT_N_PLUS_ONE
 
  // Nabla Cartesian
-%token XYZ NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
+%token ARROW_UP ARROW_RIGHT ARROW_DOWN ARROW_LEFT ARROW_BACK ARROW_FRONT
+%token ARROW_NORTH_EAST ARROW_SOUTH_EAST ARROW_SOUTH_WEST ARROW_NORTH_WEST
+%token XYZ NEXT PREV
+%token NEXTNODE PREVNODE
+%token PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
 %token NEXTCELL PREVCELL
 %token NEXTCELL_X PREVCELL_X NEXTCELL_Y PREVCELL_Y NEXTCELL_Z PREVCELL_Z
 
@@ -346,6 +350,18 @@ nabla_system
 | BACKCELLUID {rhs;}
 | FRONTCELL {rhs;}
 | FRONTCELLUID {rhs;}
+| NEXT {rhs;}
+| PREV {rhs;}
+| ARROW_UP {rhs;}
+| ARROW_NORTH_EAST {rhs;}
+| ARROW_RIGHT {rhs;}
+| ARROW_SOUTH_EAST {rhs;}
+| ARROW_DOWN {rhs;}
+| ARROW_SOUTH_WEST {rhs;}
+| ARROW_LEFT {rhs;}
+| ARROW_NORTH_WEST {rhs;}
+| ARROW_BACK {rhs;}
+| ARROW_FRONT {rhs;}
 | NEXTCELL {rhs;}
 | NEXTCELL_X {rhs;}
 | NEXTCELL_Y {rhs;}
@@ -842,12 +858,6 @@ nabla_option_declaration
 | preproc {rhs;}
 ;
 
-///////////////////////////
-// ∇ '[#(±k)]' definitions //
-///////////////////////////
-//k_offset
-//: DIESE '+' Z_CONSTANT {rhs;}
-//;
 
 ///////////////////////
 // ∇ '@' definitions //
@@ -1176,14 +1186,14 @@ inline void rhsAdd(node **lhs,int yyn, node* *yyvsp){
     astAddNext(first,next);
   }
 }
-inline void rhsPatchAndAdd(const int offset, const char chr,node **lhs,int yyn, node* *yyvsp){
+inline void rhsPatchAndAdd(const int k, const char chr,node **lhs,int yyn, node* *yyvsp){
   const int yynrhs = yyr2[yyn];
   assert(yynrhs==1);
   assert(yyvsp[0]->token);
   // Sanity check & patch
   // On échappe au const du token ici
   char *token=(char*)yyvsp[0]->token;
-  token[offset]=chr;
+  token[k]=chr;
   dbg("[1;33m[rhsPatchAndAdd] yynrhs=%d, %s[m\n",yynrhs, yyvsp[0]->token);
   rhsAdd(lhs,yyn, yyvsp);
 }

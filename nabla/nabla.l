@@ -171,8 +171,21 @@ __asm__           { return tok(&yylval, ASM);}
 "FILE"            { return tok(&yylval, FILETYPE);}
 "ofstream"        { return tok(&yylval, OFSTREAM);}
 
+"↑"               { return tok(&yylval, ARROW_UP);}
+"↗"               { return tok(&yylval, ARROW_NORTH_EAST);}
+"→"               { return tok(&yylval, ARROW_RIGHT);}
+"↘"               { return tok(&yylval, ARROW_SOUTH_EAST);}
+"↓"               { return tok(&yylval, ARROW_DOWN);}
+"↙"               { return tok(&yylval, ARROW_SOUTH_WEST);}
+"←"               { return tok(&yylval, ARROW_LEFT);}
+"↖"               { return tok(&yylval, ARROW_NORTH_WEST);}
+"⊠"               { return tok(&yylval, ARROW_BACK);}
+"⊡"               { return tok(&yylval, ARROW_FRONT);}
+
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
+"next"            { return tok(&yylval, NEXT);}
+"prev"            { return tok(&yylval, PREV);}
 "nextCell"        { return tok(&yylval, NEXTCELL);}
 "prevCell"        { return tok(&yylval, PREVCELL);}
 "nextCellX"        { return tok(&yylval, NEXTCELL_X);}
