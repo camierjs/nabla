@@ -1,0 +1,103 @@
+void dump6(double *data){
+  printf("\n[33m[[%.6f,%.6f,%.6f,%6f,%6f,%6f][m",data[0],data[1],data[2],data[3],data[4],data[5]);
+  printf("\n[33m [%.6f,%.6f,%.6f,%6f,%6f,%6f][m",data[6],data[7],data[8],data[9],data[10],data[11]);
+  printf("\n[33m [%.6f,%.6f,%.6f,%6f,%6f,%6f][m",data[12],data[13],data[14],data[15],data[16],data[17]);
+  printf("\n[33m [%.6f,%.6f,%.6f,%6f,%6f,%6f][m",data[18],data[19],data[20],data[21],data[22],data[23]);
+  printf("\n[33m [%.6f,%.6f,%.6f,%6f,%6f,%6f][m",data[24],data[25],data[26],data[27],data[28],data[29]);
+  printf("\n[33m [%.6f,%.6f,%.6f,%6f,%6f,%6f]][m",data[30],data[31],data[32],data[33],data[34],data[35]);
+}
+
+void dump6e(double *data){
+  printf("\n[33m[[%.6e,%.6e,%.6e,%6e,%6e,%6e][m",data[0],data[1],data[2],data[3],data[4],data[5]);
+  printf("\n[33m [%.6e,%.6e,%.6e,%6e,%6e,%6e][m",data[6],data[7],data[8],data[9],data[10],data[11]);
+  printf("\n[33m [%.6e,%.6e,%.6e,%6e,%6e,%6e][m",data[12],data[13],data[14],data[15],data[16],data[17]);
+  printf("\n[33m [%.6e,%.6e,%.6e,%6e,%6e,%6e][m",data[18],data[19],data[20],data[21],data[22],data[23]);
+  printf("\n[33m [%.6e,%.6e,%.6e,%6e,%6e,%6e][m",data[24],data[25],data[26],data[27],data[28],data[29]);
+  printf("\n[33m [%.6e,%.6e,%.6e,%6e,%6e,%6e]][m",data[30],data[31],data[32],data[33],data[34],data[35]);
+}
+
+void fill6(double *m) {
+  m[0]=0.110011;
+  m[1]=0.210012;
+  m[2]=0.310013;
+  m[3]=0.410014;
+  m[4]=0.510015;
+  m[5]=0.610016;
+
+  m[6]=0.120021;
+  m[7]=0.220022;
+  m[8]=0.320023;
+  m[9]=0.420024;
+  m[10]=0.520025;
+  m[11]=0.620026;
+
+  m[12]=0.130031;
+  m[13]=0.230032;
+  m[14]=0.330033;
+  m[15]=0.430034;
+  m[16]=0.530035;
+  m[17]=0.630036;
+ 
+  m[18]=0.140041;
+  m[19]=0.240042;
+  m[20]=0.340043;
+  m[21]=0.440044;
+  m[22]=0.540045;
+  m[23]=0.640046;
+
+  m[24]=0.150051;
+  m[25]=0.250052;
+  m[26]=0.350053;
+  m[27]=0.450054;
+  m[28]=0.550055;
+  m[29]=0.650056;
+
+  m[30]=0.160061;
+  m[31]=0.260062;
+  m[32]=0.360063;
+  m[33]=0.460064;
+  m[34]=0.560065;
+  m[35]=0.660066;
+}
+
+gridPrintX @ -10.7 {info()<<"[33m[Grid] print [x]=["<<xmin<<","<<xmax<<"][m";}
+gridPrintY @ -10.7 {info()<<"[33m[Grid] print [y]=["<<ymin<<","<<ymax<<"][m";}
+
+//dumpDX @ -10.66 { info()<<"[33m[dump] dx:[m"; dump6(dx);}
+//dumpDY @ -10.66 { info()<<"[33m[dump] dy:[m"; dump6(dy);}
+
+//∀ cells @ -10.5 {info()<<"[33m[Grid] d=["<<d<<"][m";}
+//dumpX @ -10.4 { info()<<"[33m[dump] x:[m"; dump6(x);}
+//dumpY @ -10.4 { info()<<"[33m[dump] y:[m"; dump6(y);}
+//dumpD @ -10.4 { info()<<"[33m[dump] d:[m"; dump6(d);}
+//dumpHN @ -10.4 { info()<<"[33m[dump] hn:[m"; dump6(hn);}
+//dumpUN @ -10.4 { info()<<"[33m[dump] un:[m"; dump6(un);}
+//dumpVN @ -10.4 { info()<<"[33m[dump] vn:[m"; dump6(vn);}
+
+dumpD06 @ -10.06 { info()<<"[33m[ini] d:[m"; dump6(d);}
+dumpDW @ -8.8 { info()<<"[33m[ini] hn:[m"; dump6(hn);}
+dumpUN87 @ -8.7 { info()<<"[33m[ini] un:[m"; dump6(un);}
+dumpVN87 @ -8.7 { info()<<"[33m[ini] vn:[m"; dump6(vn);}
+//dumpFCm50 @ -4.9 { info()<<"[33m[dump] fc:[m"; dump6e(fc);}
+
+dumpUNPm3p4 @ -3.4 { info()<<"[33m[ini] unp:[m"; dump6(unp);}
+dumpVNPm3p4 @ -3.4 { info()<<"[33m[ini] vnp:[m"; dump6(vnp);}
+
+
+//dumpDp1p1 @ 1.101 { info()<<"[33m[iterate] d:[m"; dump6(d);}
+//dumpHp1p1 @ 1.101 { info()<<"[33m[iterate] h:[m"; dump6(hn);}
+//dumpDpHp1p1 @ 1.101 { info()<<"[33m[iterate] d_h:[m"; dump6(d_hn);}
+
+//dumpHpp1p1 @ 1.221 { info()<<"[33m[iterate] hnp:[m"; dump6(hnp);}
+
+//dumpH1p5 @ 1.5 { info()<<"[33m[eqU] h:[m"; dump6(hn);}
+//dumpU1p5 @ 1.5 { info()<<"[33m[eqU] u:[m"; dump6(un);}
+//dumpV1p5 @ 1.5 { info()<<"[33m[eqU] v:[m"; dump6(vn);}
+
+//dumpUnpp2p01 @ 2.01 { info()<<"[33m[iterate] unp:[m"; dump6(unp);}
+//dumpVnpp2p01 @ 2.01 { info()<<"[33m[iterate] vnp:[m"; dump6(vnp);}
+
+//dumpDp8p0 @ 8.0 { info()<<"[33m d:[m"; dump6(d);}
+//dumpHp8p0 @ 8.0 { info()<<"[33m hn:[m"; dump6(hn);}
+//dumpUp8p0 @ 8.0 { info()<<"[33m un:[m"; dump6(un);}
+//dumpVp8p0 @ 8.0 { info()<<"[33m vn:[m"; dump6(vn);}

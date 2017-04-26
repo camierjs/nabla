@@ -1,0 +1,7 @@
+ℝ deg_to_rad(ℝ deg){
+  return deg*DEG2RAD;
+}
+
+ℝ lon_to_m(ℝ _dx_lon, ℝ _y_lat){ return _dx_lon*DEG2M*cos(_y_lat*DEG2RAD); }
+
+ℝ lat_to_m(ℝ _dy_lat){ return _dy_lat*DEG2M; }

@@ -51,7 +51,7 @@ typedef struct hookForAllStruct{
   char* (*dump)(nablaJob*); // jobs
   // Dump la référence à un item au sein d'un ENUMERATE_*
   char* (*item)(nablaJob*,const char, const char, char); // jobs
-  // Dump l'ENUMERATE_*
+  // Postfix à l'ENUMERATE_*
   char* (*postfix)(nablaJob*); // jobs, functions
 } hookForAll;
 

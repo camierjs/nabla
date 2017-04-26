@@ -391,7 +391,7 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     }
 
     //if (r=='o') printf("\n[33mjob %s, j=%c, e=%c, r=%c[m",job->name,j,e,r);
-    if (j=='c' && r=='o'){
+    if (j=='c' && (r=='o' || r=='i')){
       nprintf(nabla, NULL,",const nablaMesh *msh");
       numParams+=1;
     }
@@ -504,7 +504,7 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
       i+=1;
     }
     //if (r=='o') printf("\n[33mjob %s, j=%c, e=%c, r=%c[m",job->name,j,e,r);
-    if (j=='c' && r=='o'){
+    if (j=='c' && (r=='o'||r=='i')){
       nprintf(nabla, NULL,", &msh");
       i+=1;
     }

@@ -212,6 +212,17 @@ int nxtOuterCellOffset(const int c, const struct nablaMshStruct *msh){\n\
   return msh->NABLA_NB_CELLS_X_AXIS-1;\n\
 }\n");
   
+  // 
+  /*fprintf(nabla->entity->hdr,"\n\n\
+int nxtInnerCellOffset(const int c, const struct nablaMshStruct *msh){\n\
+  if (c<msh->NABLA_NB_CELLS_X_AXIS) {printf(\"1\"); return 1;}\n\
+  if (c>=(msh->NABLA_NB_CELLS-msh->NABLA_NB_CELLS_X_AXIS)) {printf(\"4\"); return 1;}\n\
+  if ((c%%(msh->NABLA_NB_CELLS_X_AXIS))==0) {printf(\"2\"); return msh->NABLA_NB_CELLS_X_AXIS-1;}\n\
+  if (((c+1)%%(msh->NABLA_NB_CELLS_X_AXIS))==0) {printf(\"3\"); return 1;}\n \
+  printf(\"else\");\n\
+  return msh->NABLA_NB_CELLS_X_AXIS-1;\n\
+  }\n");*/
+  
   fprintf(nabla->entity->src,"\n\n\t\
 // ********************************************************\n\t\
 // * MESH GENERATION (2D)\n\t\

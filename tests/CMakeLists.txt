@@ -312,6 +312,15 @@ nabla_add_test(lambda ${VT100_FG_MAGENTA} upwindAP 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} hlt 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pennant 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pnnnt 1 run seq)
+# calypso test, copy depth.nc and inlet.data
+nabla_add_test(lambda ${VT100_FG_MAGENTA} calypso 1 run seq)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/depth.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/depth.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/inlet.data
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/inlet.data)
+
 nabla_add_test_with_defines(lambda ${VT100_FG_MAGENTA} deflex 1 run seq -DNO_DEFINES 100000)
 if (HYPRE_FOUND)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} aleph1D 1 run seq)

@@ -42,10 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _NABLA_LIB_HOOK_H_
 #define _NABLA_LIB_HOOK_H_
-//bool xHookSwitchForall(astNode *n, nablaJob *job);
-//bool xHookSwitchAleph(astNode *n, nablaJob *job);
 
 // forall
+char* xHookForAllPrefix(nablaJob*);
 char* xHookForAllDump(nablaJob*);
 char* xHookForAllItem(nablaJob*,const char,const char,char);
 char* xHookForAllPostfix(nablaJob*);

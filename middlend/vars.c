@@ -659,6 +659,13 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, node *n,
         dfsAddToUsedVariables(job,"iteration",var,0,rw,left_of_assignment_expression);
     }
     //dfsVarThisOne(nabla,job,n,PREVCELL,"cell_prev",left_of_assignment_expression);
+    
+    dfsVarThisOne(nabla,job,n,ARROW_LEFT,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,ARROW_RIGHT,"cell_next",left_of_assignment_expression);
+    
+    dfsVarThisOne(nabla,job,n,ARROW_DOWN,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,ARROW_UP,"cell_next",left_of_assignment_expression);
+    
     dfsVarThisOne(nabla,job,n,PREVCELL_X,"cell_prev",left_of_assignment_expression);
     dfsVarThisOne(nabla,job,n,PREVCELL_Y,"cell_prev",left_of_assignment_expression);
     dfsVarThisOne(nabla,job,n,PREVCELL_Z,"cell_prev",left_of_assignment_expression);

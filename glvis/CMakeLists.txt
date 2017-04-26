@@ -5,4 +5,6 @@ set(GLVis_C glvis.cpp)
 if (MFEM_FOUND)
    include_directories(${MFEM_INCLUDE_PATH})
    add_library(NablaGLVis ${GLVis_C})
-endif (MFEM_FOUND)
+   endif (MFEM_FOUND)
+   
+install(TARGETS NablaGLVis DESTINATION lib)

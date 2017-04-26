@@ -22,8 +22,8 @@
 
   <mesh>
     <meshgenerator><sod zyx='true'>
-        <x set='true' delta='0.125'>8</x>
-        <y set='true' delta='0.125'>8</y>
+        <x set='true' delta='0.25'>4</x>
+        <y set='true' delta='0.25'>4</y>
       </sod></meshgenerator>
   </mesh>
 
