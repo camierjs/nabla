@@ -50,6 +50,9 @@ static char* xCallGatherCells(nablaJob *job,
                               nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   const bool has_non_null_koffset = var->koffset!=0;
   char str_pip_koffset[64];
@@ -66,12 +69,13 @@ static char* xCallGatherCells(nablaJob *job,
   
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
-/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
+/*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+             var->type,
+             is_int_t?"int":is_real_t?"real":dim1D?"real":is_real3x3_t?"real3x3":dim2D?"real2":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
-             strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+             is_int_t?"N":is_real_t?"":dim1D?"":is_real3x3_t?"3x3":"3",
              has_non_null_koffset ? str_pip_koffset:iterator,
              var->item,
              var->name,
@@ -79,16 +83,17 @@ static char* xCallGatherCells(nablaJob *job,
   
   if (var->item[0]=='f')
     snprintf(gather, 1024, "\
-/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-              strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
-              var->item,
-              var->name,
+/*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+             var->type,
+             is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":"real3",
+             var->item,
+             var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
-              strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-              has_non_null_koffset ? str_pip_koffset:iterator,
-              var->item,
-              var->name,
-              strcmp(var->type,"real")==0?"":"");
+             is_int_t?"N":is_real_t?"":is_real3x3_t?"3x3":"3",
+             has_non_null_koffset ? str_pip_koffset:iterator,
+             var->item,
+             var->name,
+             strcmp(var->type,"real")==0?"":"");
   
   return sdup(gather);
 }

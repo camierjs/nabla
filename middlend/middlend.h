@@ -51,7 +51,11 @@ typedef enum {
   DIR_UNKNOWN,
   DIR_X,
   DIR_Y,
-  DIR_Z
+  DIR_Z,
+  DIR_NE,
+  DIR_SE,
+  DIR_SW,
+  DIR_NW
 } dir_xyz;
 
   

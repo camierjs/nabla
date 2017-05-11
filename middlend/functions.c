@@ -329,8 +329,14 @@ void nMiddleFunctionFill(nablaMain *nabla,
       (fct->region!=NULL)?fct->region:"Null",
       fct->item,//2+
       fct->return_type, fct->name);
+  
+  dbg("\n\t[nablaFctFill] Gestion du '@' de cette fonction");
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
-  dbg("\n\t[nablaFctFill] Now fillinf SRC file");
+  
+  dbg("\n\t[nablaFctFill]  Gestion du 'if' de cette fonction");
+  nMiddleScanForIfAfterAt(n->children, fct, nabla);
+
+  dbg("\n\t[nablaFctFill] Now filling SRC file");
   nprintf(nabla, NULL, "\n\
 %s ********************************************************\n\
 %s * %s fct\n\

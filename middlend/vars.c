@@ -263,45 +263,45 @@ static void nMiddleVariablesSystemSwitch(nablaMain *nabla,
 
   case(ARROW_NORTH_EAST):{ // ⇒ ↗
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_NORTH_EAST\n");
-    *prefix="ARROW";
-    *system="NORTH";
-    *postfix="EAST";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_NE);//"NORTH";
+    *postfix=cHOOK(nabla,xyz,postfix);//"EAST";
     return;
   }
   case(ARROW_SOUTH_EAST):{ // ⇒ ↘
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_SOUTH_EAST\n");
-    *prefix="ARROW";
-    *system="SOUTH";
-    *postfix="EAST";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_SE);//"SOUTH";
+    *postfix=cHOOK(nabla,xyz,postfix);//"EAST";
     return;
   }
   case(ARROW_SOUTH_WEST):{ // ⇒ ↙
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_SOUTH_WEST\n");
-    *prefix="ARROW";
-    *system="SOUTH";
-    *postfix="WEST";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_SW);//"SOUTH";
+    *postfix=cHOOK(nabla,xyz,postfix);//"WEST";
     return;
   }
   case(ARROW_NORTH_WEST):{ // ⇒ ↖
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_NORTH_WEST\n");
-    *prefix="ARROW";
-    *system="NORTH";
-    *postfix="WEST";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_NW);//"NORTH";
+    *postfix=cHOOK(nabla,xyz,postfix);//"WEST";
     return;
   }
 
   case(ARROW_BACK):{ // ⇒ ⊠
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_BACK\n");
-    *prefix="ARROW";
-    *system="_";
-    *postfix="BACK";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,prevCell,DIR_Z);//"_";
+    *postfix=cHOOK(nabla,xyz,postfix);//"BACK";
     return;
   }
   case(ARROW_FRONT):{ // ⇒ ⊡
     dbg("\n\t[nMiddleVariablesSystemSwitch] ARROW_FRONT\n");
-    *prefix="ARROW";
-    *system="_";
-    *postfix="FRONT";
+    *prefix=cHOOK(nabla,xyz,prefix);//"ARROW";
+    *system=cHOOKi(nabla,xyz,nextCell,DIR_Z);//"_";
+    *postfix=cHOOK(nabla,xyz,postfix);//"FRONT";
     return;
   }
     
@@ -666,6 +666,11 @@ void dfsVariables(nablaMain *nabla, nablaJob *job, node *n,
     dfsVarThisOne(nabla,job,n,ARROW_DOWN,"cell_prev",left_of_assignment_expression);
     dfsVarThisOne(nabla,job,n,ARROW_UP,"cell_next",left_of_assignment_expression);
     
+    dfsVarThisOne(nabla,job,n,ARROW_NORTH_EAST,"cell_next",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,ARROW_SOUTH_EAST,"cell_next",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,ARROW_SOUTH_WEST,"cell_prev",left_of_assignment_expression);
+    dfsVarThisOne(nabla,job,n,ARROW_NORTH_WEST,"cell_prev",left_of_assignment_expression);
+
     dfsVarThisOne(nabla,job,n,PREVCELL_X,"cell_prev",left_of_assignment_expression);
     dfsVarThisOne(nabla,job,n,PREVCELL_Y,"cell_prev",left_of_assignment_expression);
     dfsVarThisOne(nabla,job,n,PREVCELL_Z,"cell_prev",left_of_assignment_expression);

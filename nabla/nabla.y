@@ -816,7 +816,11 @@ statement_list
 function_definition
 : declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
-| IDENTIFIER AT at_constant compound_statement {voidIDvoid_rhs($$,$1,$2,$3,$4);}
+| declaration_specifiers declarator AT at_constant IF '(' constant_expression ')' compound_statement {rhs;}
+//| AT at_constant compound_statement { voidNoIDvoid_rhs($$,$1,$2,$3); }
+//| AT at_constant IF '(' constant_expression ')' compound_statement { voidNoIDvoidIF_rhs($$,$1,$2,$3,$4,$5,$6,$7); }
+| IDENTIFIER AT at_constant compound_statement { voidIDvoid_rhs($$,$1,$2,$3,$4); }
+| IDENTIFIER AT at_constant IF '(' constant_expression ')' compound_statement { voidIDvoidIF_rhs($$,$1,$2,$3,$4,$5,$6,$7,$8);}
 ;
 
 /////////////////////////

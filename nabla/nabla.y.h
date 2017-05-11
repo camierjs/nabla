@@ -167,32 +167,53 @@ void rhsTailSandwichVariadic(node**,int,int,int,int,...);
 // * type_spec->children=vd;                                             
 // * node *decl_spec=astNewNode(NULL,rulenameToId("declaration_specifiers")); 
 // *****************************************************************************
-#define voidIDvoid_rhs(lhs,id,at,cst,statement)                         \
-  node *decl_spec=astNewNodeRule("declaration_specifiers",           \
-                                    rulenameToId("declaration_specifiers")); \
-  node *type_spec=astNewNodeRule("type_specifier",                   \
-                                    rulenameToId("type_specifier"));    \
+//#define voidNoIDvoid_rhs(lhs,at,cst,statement) voidIDvoid_rhs(lhs,"NoID",at,cst,statement)
+//#define voidNoIDvoidIF_rhs(lhs,at,cst,ifs,pin,tst,pout,statement) voidIDvoid_rhs(lhs,"NoID",at,cst,statement)
+#define voidIDvoidIF_rhs(lhs,id,at,cst,ifs,pin,tst,pout,statement) \
+  node *decl_spec=astNewNodeRule("declaration_specifiers",rulenameToId("declaration_specifiers")); \
+  node *type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
   decl_spec->children=type_spec;                                        \
-  node *rvd=astNewNode("void",VOID);                                 \
-  node *avd=astNewNode("void",VOID);                                 \
+  node *rvd=astNewNode("void",VOID);                                    \
+  node *avd=astNewNode("void",VOID);                                    \
   type_spec->children=rvd;                                              \
-  node *decl=astNewNodeRule("declarator",rulenameToId("declarator")); \
-  node *direct_decl=astNewNodeRule("direct_declarator",              \
-                                      rulenameToId("direct_declarator")); \
-  node *direct_decl_bis=astNewNodeRule("direct_declarator",          \
-                                          rulenameToId("direct_declarator")); \
+  node *decl=astNewNodeRule("declarator",rulenameToId("declarator"));   \
+  node *direct_decl=astNewNodeRule("direct_declarator",rulenameToId("direct_declarator")); \
+  node *direct_decl_bis=astNewNodeRule("direct_declarator",rulenameToId("direct_declarator")); \
   decl->children=direct_decl;                                           \
   direct_decl->children=id;                                             \
   direct_decl->children=direct_decl_bis;                                \
   direct_decl_bis->children=id;                                         \
-  node *parameter_type_list=astNewNodeRule("parameter_type_list",    \
-                                              rulenameToId("parameter_type_list")); \
-  node *parameter_declaration=astNewNodeRule("parameter_declaration",    \
-                                              rulenameToId("parameter_declaration")); \
-  node *arg_type_spec=astNewNodeRule("type_specifier",               \
-                                        rulenameToId("type_specifier")); \
-  node *pi=astNewNode("(",YYTRANSLATE('('));                         \
-  node *po=astNewNode(")",YYTRANSLATE(')'));                         \
+  node *parameter_type_list=astNewNodeRule("parameter_type_list",rulenameToId("parameter_type_list")); \
+  node *parameter_declaration=astNewNodeRule("parameter_declaration",rulenameToId("parameter_declaration")); \
+  node *arg_type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  node *pi=astNewNode("(",YYTRANSLATE('('));                            \
+  node *po=astNewNode(")",YYTRANSLATE(')'));                            \
+  direct_decl_bis->next=pi;                                             \
+  pi->next=parameter_type_list;                                         \
+  parameter_type_list->next=po;                                         \
+  parameter_type_list->children=parameter_declaration;                  \
+  parameter_declaration->children=arg_type_spec;                        \
+  arg_type_spec->children=avd;                                          \
+  ast(decl_spec,decl,at,cst,ifs,pin,tst,pout,statement)
+#define voidIDvoid_rhs(lhs,id,at,cst,statement)                         \
+  node *decl_spec=astNewNodeRule("declaration_specifiers",rulenameToId("declaration_specifiers")); \
+  node *type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  decl_spec->children=type_spec;                                        \
+  node *rvd=astNewNode("void",VOID);                                    \
+  node *avd=astNewNode("void",VOID);                                    \
+  type_spec->children=rvd;                                              \
+  node *decl=astNewNodeRule("declarator",rulenameToId("declarator"));   \
+  node *direct_decl=astNewNodeRule("direct_declarator",rulenameToId("direct_declarator")); \
+  node *direct_decl_bis=astNewNodeRule("direct_declarator",rulenameToId("direct_declarator")); \
+  decl->children=direct_decl;                                           \
+  direct_decl->children=id;                                             \
+  direct_decl->children=direct_decl_bis;                                \
+  direct_decl_bis->children=id;                                         \
+  node *parameter_type_list=astNewNodeRule("parameter_type_list",rulenameToId("parameter_type_list")); \
+  node *parameter_declaration=astNewNodeRule("parameter_declaration",rulenameToId("parameter_declaration")); \
+  node *arg_type_spec=astNewNodeRule("type_specifier",rulenameToId("type_specifier")); \
+  node *pi=astNewNode("(",YYTRANSLATE('('));                            \
+  node *po=astNewNode(")",YYTRANSLATE(')'));                            \
   direct_decl_bis->next=pi;                                             \
   pi->next=parameter_type_list;                                         \
   parameter_type_list->next=po;                                         \

@@ -73,7 +73,12 @@ char* xHookPrevCell(int direction){
     return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS+c],";
   if (direction==DIR_Z)
     return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+c],";
-  assert(NULL);
+  if (direction==DIR_NW)
+    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS\
++xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";
+  if (direction==DIR_SW)
+    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS\
++xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";  assert(NULL);
   return NULL;
 }
 
@@ -88,6 +93,12 @@ char* xHookNextCell(int direction){
     return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS+c],";
   if (direction==DIR_Z)
     return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirZ*NABLA_NB_CELLS+c],";
+  if (direction==DIR_NE)
+    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS\
++xs_cell_next[MD_DirX*NABLA_NB_CELLS+c]],";
+  if (direction==DIR_SE)
+    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS\
++xs_cell_next[MD_DirX*NABLA_NB_CELLS+c]],";
   assert(NULL);
   return NULL;
 }

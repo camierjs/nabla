@@ -49,6 +49,9 @@ inline real rgatherk(const int a, const real *data){
 inline real3 rgather3k(const int a, const real3 *data){
   return data[a];
 }
+inline int rgatherNk(const int a, const int *data){
+  return data[a];
+}
 inline real3x3 rgather3x3k(const int a, const real3x3 *data){
   return data[a];
 }

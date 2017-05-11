@@ -155,7 +155,7 @@ static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
       fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
     }
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
-    fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
+    //fprintf(nabla->entity->src, "\t\t\tprintf(\"[1;33m%s %s = %%s[0m\\n\", optarg);", opt->type, opt->name);
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
     if (opt->type[0]=='i') fprintf(nabla->entity->src, " %s=atol(optarg);\n",opt->name);
     if (opt->type[0]=='b') fprintf(nabla->entity->src, " %s=(0==strcmp(optarg,\"true\"));\n",opt->name);
@@ -254,7 +254,7 @@ void xHookMainGLVisI2a(nablaMain *n){
 \t\tNABLA_NB_CELLS_WARP,\n\
 \t\tNABLA_NB_OUTER_CELLS_WARP\n\
 };\n\
-\tprintf(\"%%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n \
+\tprintf(\"[nabla] %%d noeuds, %%d mailles & %%d faces\",NABLA_NB_NODES,NABLA_NB_CELLS,NABLA_NB_FACES);\n \
 \tnabla_ini_connectivity(msh,node_coord,\n\t\t\t\t\t\t\t\t\txs_cell_node,xs_cell_prev,xs_cell_next,xs_cell_face,\n\t\t\t\t\t\t\t\t\txs_node_cell,xs_node_cell_corner,xs_node_cell_and_corner,\n\t\t\t\t\t\t\t\t\txs_face_cell,xs_face_node);\n"
 NABLA_STATUS xHookMainPreInit(nablaMain *nabla){
   int i;
@@ -389,13 +389,18 @@ NABLA_STATUS xHookMainVarInitCall(nablaMain *nabla){
 // * GLVis
 // ****************************************************************************
 static void xHookMainGLVis(nablaMain *n){
+  //const bool inner = (getenv("NABLA_GLVIS_INNER")==NULL);
   const bool dim1D = ((n->entity->libraries&(1<<with_real))!=0);
   const bool dim2D = ((n->entity->libraries&(1<<with_real2))!=0);
   const bool dim3D = (!dim1D) && (!dim2D);
   
   //nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
-  nprintf(n, NULL,"\n\tif (glvis) %s,(double*)i2var[glvis_optarg]);",
+  nprintf(n,NULL,"gettimeofday(&et, NULL);\n");
+  //nprintf(n,NULL,"printf(\"%%ld\", (et.tv_sec-st.tv_sec));\n");
+  nprintf(n, NULL,"\n\tif (glvis and global_iteration[0]%32==0) %s,(double*)i2var[glvis_optarg]);",
+          //nprintf(n, NULL,"\n\tif (glvis and (et.tv_usec-st.tv_usec)%100) %s,(double*)i2var[glvis_optarg]);",
           dim3D?"glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
+          //inner?"glvis2DQud(X_EDGE_ELEMS-2,Y_EDGE_ELEMS-2,LENGTH,LENGTH,(double*)node_coord":
           dim2D?"glvis2DQud(X_EDGE_ELEMS,Y_EDGE_ELEMS,LENGTH,LENGTH,(double*)node_coord":
           dim1D?"glvis1D(X_EDGE_ELEMS,LENGTH,(double*)node_coord":"");
 }
