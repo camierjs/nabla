@@ -118,6 +118,7 @@ extern char *last_identifier;
 %token PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
 %token NEXTCELL PREVCELL
 %token NEXTCELL_X PREVCELL_X NEXTCELL_Y PREVCELL_Y NEXTCELL_Z PREVCELL_Z
+%token NORTH EAST SOUTH WEST
 
  // Nabla LIBRARIES
 %token LIB_MPI LIB_ALEPH LIB_CARTESIAN LIB_GMP LIB_MATHEMATICA LIB_SLURM MAIL LIB_MAIL LIB_DFT
@@ -327,11 +328,19 @@ nabla_items
 ;
 nabla_scope: OWN {rhs;} | ALL {rhs;};
 nabla_region: INNER {rhs;} | OUTER {rhs;};
+nabla_nesw: NORTH {rhs;} | '~' NORTH {rhs;} |
+            EAST {rhs;}  | '~' EAST {rhs;} |
+            SOUTH {rhs;} | '~' SOUTH {rhs;} |
+            WEST {rhs;}  | '~' WEST {rhs;};
 nabla_family
 : nabla_items {rhs;}
 | nabla_scope nabla_items {rhs;}
 | nabla_region nabla_items {rhs;}
+| nabla_nesw nabla_items {rhs;}
 | nabla_scope nabla_region nabla_items {rhs;}
+| nabla_scope nabla_nesw nabla_items {rhs;}
+| nabla_region nabla_nesw nabla_items {rhs;}
+| nabla_scope nabla_region nabla_nesw nabla_items {rhs;}
 ;
 nabla_set
 : nabla_family {rhs;}
@@ -779,6 +788,9 @@ forall_switch
 ;
 forall_range
 : forall_switch {rhs;}
+| nabla_region forall_switch {rhs;}
+| nabla_nesw forall_switch {rhs;}
+| nabla_region nabla_nesw forall_switch {rhs;}
 | IDENTIFIER forall_switch {rhs;}
 ;
 

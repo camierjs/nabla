@@ -159,7 +159,7 @@ static void actOptionsExpression(node * n, void *generic_arg){
 // ****************************************************************************
 // * Scan pour la déclaration des options
 // ****************************************************************************
-void nMiddleOptions(node * n, int ruleid, nablaMain *nabla){
+void nMiddleOptions(node *n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
     {ruleToId(rule_type_specifier),actOptionsTypeSpecifier},
     {ruleToId(rule_direct_declarator),actOptionsDirectDeclarator},

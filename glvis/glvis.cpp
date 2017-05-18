@@ -135,7 +135,8 @@ void glvis2DQud(const int nx,const int ny,
   if (init){
     *sol_sock << "keys\n" << "gAmmff.\n" << flush;
     //*sol_sock << "valuerange\n" << "-0.01\n" << "0.055\n" << flush;
-    //*sol_sock << "autoscale\n" << "off\n"  << flush;
+    *sol_sock << "valuerange\n" << "-0.02\n" << "0.1\n" << flush;
+    *sol_sock << "autoscale\n" << "off\n"  << flush;
     *sol_sock << "window_size\n" << "1024\n" << "768\n" << flush;
     init=false;
   }

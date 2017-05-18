@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "nabla.tab.h"
 
 // ****************************************************************************
 // * Dump pour le header
@@ -254,29 +255,6 @@ void nMiddleArgsDump(nablaMain *nabla, node *n, int *numParams){
 
 
 // ****************************************************************************
-// * xsArgs
-// ****************************************************************************
-static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return ", xs_cell_node";
-  if (j=='c' and v=='f' and d=='0') return ", xs_cell_face";
-  if (j=='c' and v=='x' and d=='0') return ", xs_cell_prev";
-  if (j=='c' and v=='x' and d=='1') return ", xs_cell_next";
-
-  if (j=='n' and v=='c' and d=='0') return ", xs_node_cell";
-  if (j=='n' and v=='f' and d=='0') return ", xs_node_face";
-  if (j=='n' and v=='c' and d=='1') return ", xs_node_cell, xs_node_cell_corner";
-  
-  if (j=='f' and v=='n' and d=='0') return ", xs_face_node";
-  if (j=='f' and v=='c' and d=='0') return ", xs_face_cell";
-
-  
-  nprintf(nabla, NULL,"/*xsArgs, error!*/");
-  assert(NULL);
-  return NULL;
-}
-
-
-// ****************************************************************************
 // * iRTNo
 // ****************************************************************************
 static char* iRTNo(nablaMain *nabla,
@@ -291,6 +269,8 @@ static char* iRTNo(nablaMain *nabla,
   free(dest);
   return rtn;
 }
+
+
 // ****************************************************************************
 // * iRTN2o
 // ****************************************************************************
@@ -306,6 +286,64 @@ static char* iRTN2o(nablaMain *nabla,
   char* rtn=sdup(dest);
   free(dest);
   return rtn;
+}
+
+
+// ****************************************************************************
+// * xsOuterArgs
+// ****************************************************************************
+static char* xsOuterArgs(nablaMain *nabla, nablaJob *job){
+  dbg("\n\t\t[xsOuterArgs] ");
+  if (!job->enum_enum_node) return "";
+  dbg("with enum_enum_node");
+  node *forall_range = job->enum_enum_node;
+  const node *region = dfsHit(forall_range->children,ruleToId(rule_nabla_region));
+  if (region && region->children->tokenid==OUTER){
+    dbg(" and OUTER");
+   return ", xs_cell_face";
+  }
+  dbg(" and nothing");
+  return "";
+}
+
+
+// ****************************************************************************
+// * xsOuterParams
+// ****************************************************************************
+static char* xsOuterParams(nablaMain *nabla, nablaJob *job){
+  dbg("\n\t\t[xsOuterParams] ");
+  if (!job->enum_enum_node) return "";
+  dbg("with enum_enum_node");
+  node *forall_range = job->enum_enum_node;
+  const node *region = dfsHit(forall_range->children,ruleToId(rule_nabla_region));
+  if (region && region->children->tokenid==OUTER){
+    dbg(" and OUTER");
+    return iRTNo(nabla,"int","xs_cell_face");
+  }
+  dbg(" and nothing");
+  return "";
+}
+
+
+// ****************************************************************************
+// * xsArgs
+// ****************************************************************************
+static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
+  if (j=='c' and v=='n' and d=='0') return ", xs_cell_node";
+  if (j=='c' and v=='f' and d=='0') return ", xs_cell_face";
+  if (j=='c' and v=='x' and d=='0') return ", xs_cell_prev";
+  if (j=='c' and v=='x' and d=='1') return ", xs_cell_next";
+
+  if (j=='n' and v=='c' and d=='0') return ", xs_node_cell";
+  if (j=='n' and v=='f' and d=='0') return ", xs_node_face";
+  if (j=='n' and v=='c' and d=='1') return ", xs_node_cell, xs_node_cell_corner";
+  
+  if (j=='f' and v=='n' and d=='0') return ", xs_face_node";
+  if (j=='f' and v=='c' and d=='0') return ", xs_face_cell";
+
+  nprintf(nabla, NULL,"/*xsArgs, error!*/");
+  assert(NULL);
+  return NULL;
 }
 
 
@@ -448,6 +486,9 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     nXS+=1;
   }
   free(XS);
+  
+  // Rajout des xs si l'on a des enum d'enum avec des outer
+  nprintf(nabla, NULL, xsOuterParams(nabla,job));
 
   if (job->is_a_function && job->exists){
     nprintf(nabla, NULL,"%sconst int hlt_level, bool* hlt_exit",i==0?"":",");
@@ -547,6 +588,9 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
   }
   free(XS);
 
+  // Rajout des xs si l'on a des enum d'enum avec des outer
+  nprintf(nabla, NULL, xsOuterArgs(nabla,job));
+  
   if (job->exists)
     nprintf(nabla, NULL,"%shlt_level,hlt_exit",i==0?"":",");
 }

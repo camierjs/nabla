@@ -43,6 +43,9 @@
 #ifndef _NABLA_LIB_GATHER_H_
 #define _NABLA_LIB_GATHER_H_
 
+inline bool rgatherBk(const int a, const bool *data){
+  return data[a];
+}
 inline real rgatherk(const int a, const real *data){
   return data[a];
 }

@@ -138,6 +138,36 @@ node *dfsFetch(node *n, int ruleid){
 
 
 // ****************************************************************************
+// On lance une recherche dfs jusqu'au premier hit
+// ****************************************************************************
+node *dfsHit(node *n, int ruleid){
+  /*if (n->ruleid!=0) dbg("\n\t\t[dfsHit] n->rule=%s, n->ruleid=%d, ruleid=%d",
+                        n->rule?n->rule:"xNULL",
+                        n->ruleid,ruleid);*/
+  if (n->ruleid==ruleid){
+    //dbg("\n\t\t[dfsHit] hit ruleid=%d",ruleid);
+    return n;
+  }
+  if (n->children != NULL){
+    node *rtn=dfsHit(n->children, ruleid);
+    if (rtn!=NULL){
+      //dbg("\n\t\t[dfsHit] return %s",rtn->rule?rtn->rule:"yNULL");
+      return rtn;
+    }
+  }
+  if (n->next != NULL){
+    node *rtn=dfsHit(n->next, ruleid);
+    if (rtn!=NULL){
+      //dbg("\n\t\t[dfsHit] return %s", rtn->rule?rtn->rule:"zNULL");
+      return rtn;
+    }
+  }
+  //dbg("\n\t\t[dfsHit] return NULL");
+  return NULL;
+}
+
+
+// ****************************************************************************
 // 
 // ****************************************************************************
 void dfsDumpToken(node *n){

@@ -228,6 +228,7 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       //entry_points[i].scope = job->scope;
       entry_points[i].region = job->region;
       entry_points[i].item=job->item;
+      entry_points[i].enum_enum_node=job->enum_enum_node;
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=job->is_a_function;
       //assert(job->type!=NULL);

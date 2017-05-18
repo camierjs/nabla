@@ -166,9 +166,11 @@ typedef struct nablaJobStruct{
   bool has_to_be_unlinked;
   char *scope;
   char *region;
+  node *nesw;
   char *item;
   char *item_set;
   int nb_in_item_set;
+  node *enum_enum_node;
   char *return_type;
   char *name;
   char *name_utf8;
@@ -276,7 +278,7 @@ typedef struct nablaMainStruct{
   BACKEND_PARALLELISM parallelism;
   BACKEND_COMPILER compiler;
   char *interface_name; // Arcane specific
-  char *specific_path; // Arcane specific
+  char *specific_path;  // Arcane specific
   char *service_name;   // Arcane specific
   int optionDumpTree;
   int HLT_depth;

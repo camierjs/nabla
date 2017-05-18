@@ -1,6 +1,6 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
 (defconst nabla-version "nabla" "Nabla Mode version number")
-(defconst nabla-time-stamp "2017-04-18"
+(defconst nabla-time-stamp "2017-05-18"
   "Nabla Mode time stamp for last update.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9,6 +9,7 @@
     "if" "is" "else" "do" "while" "continue" "break" "for"
     "foreach"
     "all" "own" "inner" "outer"
+    "north" "east" "south" "west"
     "in" "out" "inout" "with")
   "List of Nabla keywords regexps")
 
@@ -56,7 +57,7 @@
 
 (defconst nabla-types
   '("bool" "Bool" "Uid"
-    "void" "int" "char" "Integer" "Int32" "Int64"
+    "void" "int" "long" "unsigned" "char" "Integer" "Int32" "Int64"
     "float" "double" "Real" "Real3" "Real3x3" 
     "cell" "cells" "Cell"
     "node" "nodes" "Node"

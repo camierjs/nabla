@@ -133,6 +133,31 @@ char* xHookForAllItem(nablaJob *j,
 \tif (!(opMod(c,X_EDGE_ELEMS))) continue;\n\
 \tif (!(opMod((opAdd(c,1)),X_EDGE_ELEMS))) continue;\n"
 
+
+// ****************************************************************************
+// * Fonction qui prend le noeud nesw du job et qui ressort
+// * '\0', n,e,s,w ou N,E,S,W s'il sont not'é
+// ****************************************************************************
+static char neswOrNot(const nablaMain *n, const node *nesw){
+  if (nesw==NULL) return '\0';
+  // Vérification si c'est un 'not ('~' devant)
+  const bool isNot = (nesw->token[0]=='~');
+  // Récupération du char NESW, suivant s'il y a un '~' devant
+  const char cNESW = isNot?nesw->next->token[0]:nesw->token[0];
+  //nprintf(n, NULL, "/*neswOrNot %s, %c*/",isNot?"isNot":"isStd",cNESW);
+  // not n|e|s|w
+  if (isNot && cNESW=='n') return 'N';
+  if (isNot && cNESW=='e') return 'E';
+  if (isNot && cNESW=='s') return 'S';
+  if (isNot && cNESW=='w') return 'W';
+  // n|e|s|w
+  if (!isNot && cNESW=='n') return 'n';
+  if (!isNot && cNESW=='e') return 'e';
+  if (!isNot && cNESW=='s') return 's';
+  if (!isNot && cNESW=='w') return 'w';
+  return '\0';
+}
+
 // ****************************************************************************
 // * Fonction postfix à l'ENUMERATE_*
 // ****************************************************************************
@@ -141,15 +166,38 @@ char* xHookForAllPostfix(nablaJob *job){
   const char *grp=job->scope;   // OWN||ALL
   const char rgn=job->region?job->region[0]:'\0';  // INNER, OUTER
   const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  const char nesw=neswOrNot(n,job->nesw);
+  const bool xyz = (n->entity->libraries&(1<<with_cartesian))!=0;
   dbg("\n\t[xHookForAllPostfix]");
+  //nprintf(n, NULL, "/*xHookForAllPostfix nesw='%c'*/",nesw);
+
+  // INNER Cell job, no OWN|ALL loops on all NABLA_NB_CELLS and 'continues' with if statements
   if (itm=='c' && !grp && rgn=='i'){
-    if ((n->entity->libraries&(1<<with_cartesian))!=0){
-      nprintf(n, NULL, INNER_XYZ);
-    }else{
-      nprintf(n, NULL, "/*std INNER*/");
-    }
+    if (xyz) nprintf(n, NULL, INNER_XYZ);
+    else nprintf(n, NULL, "/*std INNER*/");
+    //return xCallFilterGather(NULL,job);
   }
-  if (itm=='c' && !grp && rgn=='o') ;
+  
+  // OUTER Cell job is done with FOR_EACH_OUTER_CELL_WARP and its nxtOuterCellOffset
+  // No need to: if (itm=='c' && !grp && rgn=='o') ;
+  
+  if (itm=='c' && !grp && rgn=='i' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=(X_EDGE_ELEMS-2)) continue;\n");
+  if (itm=='c' && !grp && rgn=='i' && nesw=='E') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==(X_EDGE_ELEMS-2)) continue;\n");
+  
+  if (itm=='c' && !grp && rgn=='i' && nesw=='s') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-1)) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='s') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=0) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='n') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-1)) continue;\n");
+  if (itm=='c' && !grp && rgn=='i' && nesw=='n') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-2)) continue;\n");
+
+  if (itm=='c' && !grp && rgn=='o' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=(X_EDGE_ELEMS-2)) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='E') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==(X_EDGE_ELEMS-2)) continue;\n");
+
+//  #warning should be un-commented
+  //if (itm=='c' && !grp && rgn=='o' && nesw=='w') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=0) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='W') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==0) continue;\n");
+
+  if (itm=='c' && !grp && rgn=='o' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=opSub(X_EDGE_ELEMS,1)) continue;\n");
+
   return xCallFilterGather(NULL,job);
 }
 

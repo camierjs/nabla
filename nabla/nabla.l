@@ -182,6 +182,11 @@ __asm__           { return tok(&yylval, ASM);}
 "⊠"               { return tok(&yylval, ARROW_BACK);}
 "⊡"               { return tok(&yylval, ARROW_FRONT);}
 
+"north"           { return tok(&yylval, NORTH);}
+"south"           { return tok(&yylval, SOUTH);}
+"east"            { return tok(&yylval, EAST);}
+"west"            { return tok(&yylval, WEST);}
+
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
 "next"            { return tok(&yylval, NEXT);}

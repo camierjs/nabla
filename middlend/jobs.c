@@ -70,6 +70,7 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->is_a_function=false;
   job->nb_in_item_set=0;
   job->scope=job->region=job->item=job->item_set=job->name=job->xyz=job->direction=NULL;
+  job->nesw=NULL;
   job->at[0]=0;
   job->when_sign=1.0;// permet de gérer les '-' pour les '@'
   job->when_index=0; // permet de gérer les ',' pour les '@'
@@ -281,6 +282,16 @@ char nMiddleScanForNablaJobForallItem(node *n){
   return '\0';
 }
 
+node* nMiddleFetchEnumEnum(node *n){
+  node *it;
+  if (n->ruleid==ruleToId(rule_forall_range)) return n;
+  if(n->children != NULL)
+    if ((it=nMiddleFetchEnumEnum(n->children))!=NULL) return it;
+  if(n->next != NULL)
+    if ((it=nMiddleFetchEnumEnum(n->next))!=NULL) return it;
+  return NULL;
+}
+
 
 // ****************************************************************************
 // * Différentes actions pour un job Nabla
@@ -389,9 +400,16 @@ void nMiddleJobFill(nablaMain *nabla,
   job->scope  = dfsFetchFirst(n->children,ruleToId(rule_nabla_scope));
   dbg("\n\tRécupération region");
   job->region = dfsFetchFirst(n->children,ruleToId(rule_nabla_region));
+  dbg("\n\tRécupération nesw");
+  node *nabla_job_prefix_node = dfsHit(n->children,ruleToId(rule_nabla_job_prefix));
+  assert(nabla_job_prefix_node);
+  job->nesw   = dfsFetch(nabla_job_prefix_node->children,ruleToId(rule_nabla_nesw));
   dbg("\n\tRécupération items");
   job->item   = dfsFetchFirst(n->children,ruleToId(rule_nabla_items));
-  
+  dbg("\n\tRécupération enum_enum");
+  job->enum_enum_node=nMiddleFetchEnumEnum(n->children);
+  if (job->enum_enum_node) dbg("\n\tenum_enum_node found!");
+    
   // On va chercher tous les items de l'ensemble, on stop au token SET_END
   dbg("\n\tdfsFetchAll item_set");
   job->item_set = dfsFetchAll(n->children->children,

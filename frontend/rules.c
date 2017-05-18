@@ -47,8 +47,7 @@
 // ****************************************************************************
 // * Rules still used directly by Nabla
 // ****************************************************************************
-#define NB_USED_RULENAMES 44
-const static char* usedRuleNames[NB_USED_RULENAMES]={
+const static char* usedRuleNames[nb_used_rulenames]={
   "argument_expression_list",
   "assignment_expression",
   "assignment_operator",
@@ -66,12 +65,14 @@ const static char* usedRuleNames[NB_USED_RULENAMES]={
   "nabla_item_declaration",
   "nabla_items",
   "nabla_job_definition",
+  "nabla_job_prefix",
   "nabla_options_definition",
   "nabla_option_declaration",
   "nabla_parameter_declaration",
   "nabla_parameter_list",
   "nabla_reduction",
   "nabla_region",
+  "nabla_nesw",
   "nabla_scope",
   "nabla_system",
   "nabla_xyz_declaration",
@@ -92,13 +93,14 @@ const static char* usedRuleNames[NB_USED_RULENAMES]={
   "power_dimension",
   "power_function",
   "power_args",
+  "forall_range",
   "forall_switch"
 };
-static int usedRuleNamesId[NB_USED_RULENAMES];
+static int usedRuleNamesId[nb_used_rulenames];
 
 
 void iniUsedRuleNames(void){
-  const int nb_used_rulename=NB_USED_RULENAMES;
+  const int nb_used_rulename=nb_used_rulenames;
   dbg("\n\t[iniUsedRuleNames] iniUsedRuleNames=%d",nb_used_rulename);
   for(int i=0;i<nb_used_rulename;i+=1){
     const int ruleid=rulenameToId(usedRuleNames[i]);
@@ -109,6 +111,6 @@ void iniUsedRuleNames(void){
 
 
 const int ruleToId(const int rule){
-  assert(rule<NB_USED_RULENAMES);
+  assert(rule<nb_used_rulenames);
   return usedRuleNamesId[rule]; 
 }
