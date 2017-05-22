@@ -274,9 +274,9 @@ static char* iRTNo(nablaMain *nabla,
 // ****************************************************************************
 // * iRTN2o
 // ****************************************************************************
-static char* iRTN2o(nablaMain *nabla,
-                    const char *type, const char *var,
-                    const char *type2, const char *var2){
+__attribute__((unused)) static char* iRTN2o(nablaMain *nabla,
+                                            const char *type, const char *var,
+                                            const char *type2, const char *var2){
   char* dest=(char*)calloc(NABLA_MAX_FILE_NAME,sizeof(char));
   sprintf(dest,", const %s%s%s %s, %s%s%s %s",
           cHOOKn(nabla,vars,idecl),type,
@@ -326,57 +326,86 @@ static char* xsOuterParams(nablaMain *nabla, nablaJob *job){
 
 
 // ****************************************************************************
+// * xsArgsJobVar
+// ****************************************************************************
+static char* xsArgsJobVar(nablaMain *nabla, const char j,const char v){
+  if (j=='c' and v=='n') return ", xs_cell_node";
+  if (j=='c' and v=='f') return ", xs_cell_face";
+  if (j=='c' and v=='x') return ", xs_cell_prev";
+  if (j=='c' and v=='x') return ", xs_cell_next";
+
+  if (j=='n' and v=='c') return ", xs_node_cell";
+  if (j=='n' and v=='f') return ", xs_node_face";
+  if (j=='n' and v=='x') return ", xs_node_xxx";
+  
+  if (j=='f' and v=='n') return ", xs_face_node";
+  if (j=='f' and v=='c') return ", xs_face_cell";
+  if (j=='f' and v=='x') return ", xs_face_xxx";
+
+  nprintf(nabla, NULL,"/*xsArgsJobVar, error!*/");
+  assert(NULL);
+  return NULL;
+}
+// ****************************************************************************
 // * xsArgs
 // ****************************************************************************
-static char* xsArgs(nablaMain *nabla, const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return ", xs_cell_node";
-  if (j=='c' and v=='f' and d=='0') return ", xs_cell_face";
-  if (j=='c' and v=='x' and d=='0') return ", xs_cell_prev";
-  if (j=='c' and v=='x' and d=='1') return ", xs_cell_next";
-
-  if (j=='n' and v=='c' and d=='0') return ", xs_node_cell";
-  if (j=='n' and v=='f' and d=='0') return ", xs_node_face";
-  if (j=='n' and v=='c' and d=='1') return ", xs_node_cell, xs_node_cell_corner";
-  
-  if (j=='f' and v=='n' and d=='0') return ", xs_face_node";
-  if (j=='f' and v=='c' and d=='0') return ", xs_face_cell";
-
-  nprintf(nabla, NULL,"/*xsArgs, error!*/");
+static char* xsArgsJobVarDim(nablaMain *nabla, const char j,const char v,const char d){
+  if (j=='n' and v=='c' and d=='1') return ", xs_node_cell_corner";
+  nprintf(nabla, NULL,"/*xsArgsJobVarDim, error!*/");
   assert(NULL);
   return NULL;
 }
 
 
 // ****************************************************************************
-// * xsParam
+// * xsParamJobVar
 // ****************************************************************************
-static char* xsParam(nablaMain *nabla, const char j,const char v,const char d){
-  if (j=='c' and v=='n' and d=='0') return iRTNo(nabla,"int","xs_cell_node");
-  if (j=='c' and v=='f' and d=='0') return iRTNo(nabla,"int","xs_cell_face");
-  if (j=='c' and v=='x' and d=='0') return iRTNo(nabla,"int","xs_cell_prev");
-  if (j=='c' and v=='x' and d=='1') return iRTNo(nabla,"int","xs_cell_next");
+static char* xsParamJobVar(nablaMain *nabla, const char j,const char v){
+  if (j=='c' and v=='n') return iRTNo(nabla,"int","xs_cell_node");
+  if (j=='c' and v=='f') return iRTNo(nabla,"int","xs_cell_face");
+  if (j=='c' and v=='x') return iRTNo(nabla,"int","xs_cell_prev");
 
-  if (j=='n' and v=='c' and d=='0') return iRTNo(nabla,"int","xs_node_cell");
-  if (j=='n' and v=='f' and d=='0') return iRTNo(nabla,"int","xs_node_face");
-  if (j=='n' and v=='c' and d=='1') return iRTN2o(nabla,
-                                                  "int","xs_node_cell",
-                                                  "int","xs_node_cell_corner");
+  if (j=='n' and v=='c') return iRTNo(nabla,"int","xs_node_cell");
+  if (j=='n' and v=='f') return iRTNo(nabla,"int","xs_node_face");
+  if (j=='n' and v=='x') return iRTNo(nabla,"int","xs_node_xxx");
   
-  if (j=='f' and v=='n' and d=='0') return iRTNo(nabla,"int","xs_face_node");
-  if (j=='f' and v=='c' and d=='0') return iRTNo(nabla,"int","xs_face_cell");
+  if (j=='f' and v=='n') return iRTNo(nabla,"int","xs_face_node");
+  if (j=='f' and v=='c') return iRTNo(nabla,"int","xs_face_cell");
+  if (j=='f' and v=='x') return iRTNo(nabla,"int","xs_face_xxx");
   
-  nprintf(nabla, NULL,"/*xsParam, error!*/");
+  nprintf(nabla, NULL,"/*xsParamJobVar, error!*/");
   assert(NULL);
   return NULL;
 }
 
 // ****************************************************************************
-// * isInXS
+// * xsParamJobVarDim
 // ****************************************************************************
-static bool isInXS(const char j,const char v,const char d,
-                   const char *XS, const int m){
-  for(int i=0;i<3*m;i+=3)
+static char* xsParamJobVarDim(nablaMain *nabla, const char j,const char v,const char d){
+  if (j=='n' and v=='c' and d=='1') return iRTNo(nabla, "int","xs_node_cell_corner");
+  nprintf(nabla, NULL,"/*xsParamJobVarDim, error!*/");
+  assert(NULL);
+  return NULL;
+}
+
+
+// ****************************************************************************
+// * isJobVarDimXS
+// ****************************************************************************
+static bool isJobVarDimXS(const char j,const char v,const char d,
+                          const char *XS, const int max){
+  for(int i=0;i<3*max;i+=3)
     if (j==XS[i] and v==XS[i+1] and d==XS[i+2]) return true;
+  return false;
+}
+
+// ****************************************************************************
+// * isJobVarXS
+// ****************************************************************************
+static bool isJobVarXS(const char j,const char v,
+                       const char *XS, const int max){
+  for(int i=0;i<3*max;i+=3)
+    if (j==XS[i] and v==XS[i+1]) return true;
   return false;
 }
 
@@ -452,7 +481,6 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     arg->name=sdup(var->name);
     if (args_variables==NULL) args_variables=arg;
     else nMiddleVariableLast(args_variables)->next=arg;
-    
     nprintf(nabla, NULL, "%s%s%s%s %s%s_%s",//__restrict__
             (i==0)?"":",",
             cHOOKn(nabla,vars,idecl),
@@ -472,13 +500,15 @@ void nMiddleParamsDumpFromDFS(nablaMain *nabla, nablaJob *job, int numParams){
     const char j=job->item[0];
     const char v=var->item[0];
     const char d='0'+var->dim;
-    nprintf(nabla, NULL,"/*isInXS(%c,%c,%c,\"%s\",%d)?*/",j,v,d,XS,nXS);
-    if (isInXS(j,v,d,XS,nXS)){
-      nprintf(nabla, NULL,"/*isInXS, continuing!*/");
+    nprintf(nabla, NULL,"/*isInXS(%s)(%c,%c,%c,\"%s\",%d)?*/",var->name,j,v,d,XS,nXS);
+    if (isJobVarDimXS(j,v,d,XS,nXS))
       continue;
-    }
     nprintf(nabla, NULL, "/*new XS:%c->%c%c*/",j,v,d);
-    nprintf(nabla, NULL, xsParam(nabla,j,v,d));
+    if (!isJobVarXS(j,v,XS,nXS))
+      nprintf(nabla, NULL, xsParamJobVar(nabla,j,v));
+    if (var->dim==1)
+      nprintf(nabla, NULL, xsParamJobVarDim(nabla,j,v,d));
+    
     // Et on rajoute cette connectivité
     XS[3*nXS+0]=j;
     XS[3*nXS+1]=v;
@@ -579,8 +609,13 @@ void nMiddleArgsDumpFromDFS(nablaMain *nabla, nablaJob *job){
     const char j=job->item[0];
     const char v=var->item[0];
     const char d='0'+var->dim;
-    if (isInXS(j,v,d,XS,nXS)) continue;
-    nprintf(nabla, NULL, xsArgs(nabla,j,v,d));
+    if (isJobVarDimXS(j,v,d,XS,nXS)) continue;
+    
+    if (!isJobVarXS(j,v,XS,nXS))
+      nprintf(nabla, NULL, xsArgsJobVar(nabla,j,v));
+    if (var->dim==1)
+      nprintf(nabla, NULL, xsArgsJobVarDim(nabla,j,v,d));
+    
     XS[3*nXS+0]=j;
     XS[3*nXS+1]=v;
     XS[3*nXS+2]=d;

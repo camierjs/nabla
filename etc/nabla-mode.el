@@ -7,7 +7,7 @@
 (defconst nabla-keywords
   '("inline" "restrict" "aligned" "const" "return" "register" "volatile"
     "if" "is" "else" "do" "while" "continue" "break" "for"
-    "foreach"
+    "foreach" "forall"
     "all" "own" "inner" "outer"
     "north" "east" "south" "west"
     "in" "out" "inout" "with")

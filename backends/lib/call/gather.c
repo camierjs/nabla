@@ -73,7 +73,7 @@ static char* xCallGatherCells(nablaJob *job,
     snprintf(gather, 1024, "\
 /*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
              var->type,
-             is_int_t?"int":is_real_t?"real":dim1D?"real":is_real3x3_t?"real3x3":dim2D?"real2":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
@@ -87,7 +87,7 @@ static char* xCallGatherCells(nablaJob *job,
     snprintf(gather, 1024, "\
 /*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
              var->type,
-             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
@@ -107,11 +107,16 @@ static char* xCallGatherCells(nablaJob *job,
 // ****************************************************************************
 static char* xCallGatherNodes(nablaJob *job,
                               nablaVariable* var){
-  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_bool_t = strcmp(var->type,"bool")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_node_cell[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],%s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+           is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
            var->item,
            var->name,
            var->dim==0?"":"xs_node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],",
@@ -126,12 +131,18 @@ static char* xCallGatherNodes(nablaJob *job,
 // ****************************************************************************
 static char* xCallGatherFaces(nablaJob *job,
                               nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_bool_t = strcmp(var->type,"bool")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              var->dim==0?"":"xs_node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+f],",
@@ -140,7 +151,7 @@ static char* xCallGatherFaces(nablaJob *job,
   if (var->item[0]=='c')
     snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_face_cell[NABLA_NB_FACES*(c<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              var->dim==0?"":"/*xCallGatherFaces and var->dim==1*/",

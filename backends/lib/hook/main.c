@@ -397,7 +397,7 @@ static void xHookMainGLVis(nablaMain *n){
   //nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
   nprintf(n,NULL,"gettimeofday(&et, NULL);\n");
   //nprintf(n,NULL,"printf(\"%%ld\", (et.tv_sec-st.tv_sec));\n");
-  nprintf(n, NULL,"\n\tif (glvis and global_iteration[0]%32==0) %s,(double*)i2var[glvis_optarg]);",
+  nprintf(n, NULL,"\n\tif (glvis and global_iteration[0]%64==0) %s,(double*)i2var[glvis_optarg]);",
           //nprintf(n, NULL,"\n\tif (glvis and (et.tv_usec-st.tv_usec)%100) %s,(double*)i2var[glvis_optarg]);",
           dim3D?"glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
           //inner?"glvis2DQud(X_EDGE_ELEMS-2,Y_EDGE_ELEMS-2,LENGTH,LENGTH,(double*)node_coord":
