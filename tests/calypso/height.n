@@ -41,55 +41,76 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-// ****************************************************************************
-// * updatePhysicalDensity
-// ****************************************************************************
-∀ cells @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
+∀ outer west cells @ -17 { hn=inlet[0]; }
+
+iniHnFill @ -15 if (option_fill) { fill(hn); }
+
+∀ outer ~west cells @ -13 { ∀ outer south face hn=hn[↑]; }
+∀ outer ~west cells @ -13 { ∀ outer north face hn=hn[↓]; }
+∀ outer ~west cells @ -11 { ∀ outer east faces hn=hn[←]; }
+∀ outer ~west cells @ -11 { ∀ outer west faces hn=hn[→]; }
+
+iniHMax @ -17 { hmax=-∞;}
+∀ inner cells @ -9 { hmax = fmax(hn,hmax); }
+iniMaxWaterHeight @ -7 { hmax0=fmax(hmax,hmax_bound);}
+
+// ***************************************************************************
+// * Compute loop
+// ***************************************************************************
+iniHmax @ 0 { hmax=-∞; }
+∀ inner cells @ 1 { hmax = fmax(hn,hmax); }
+
+∀ inner cells @ 1.2 {
+  const ℝ dhr=(un>0.0)?d_hn:d_hn[→];
+  const ℝ dhl=(un[←]>0.0)?d_hn[←]:d_hn;
+  deqh_dx = (un*dhr-un[←]*dhl)*inv_dx;
 }
 
-// ****************************************************************************
-// * 
-// ****************************************************************************
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
-
-// ****************************************************************************
-// * computeTotalInternalEnergyFromTotalEnergy
-// ****************************************************************************
-∀ cells @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
+∀ inner cells @ 1.2 {
+  const ℝ dhu=(vn>0.0)?d_hn:d_hn[↑];
+  const ℝ dhd=(vn[↓]>0.0)?d_hn[↓]:d_hn;
+  deqh_dy = (vn*dhu-vn[↓]*dhd)*inv_dy;
 }
 
-// ****************************************************************************
-// * updateTotalPressure
-// ****************************************************************************
-∀ cells @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
-}
+∀ inner cells @ 1.21 { deqh = deqh_dx + deqh_dy; }
 
-// ****************************************************************************
-// * computeTotalSoundSpeed
-// ****************************************************************************
-∀ cells @ -18.0,28.0{
-  css=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
-  //if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
-}
+∀ outer cells @ 1.22 { hnp = hn; }
+∀ inner cells @ 1.23 { hnp = hn - δt*deqh; }
 
-// ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
-// ****************************************************************************
-∀ cells @ 30.0{
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(css*Σljr);
-  if (DEBUG) printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
+∀ inner cells @ 1.3 { hn = hnp; }
+
+// ***************************************************************************
+// * HN read INLETs
+// ***************************************************************************
+∀ outer west cells @ 7.0 { // Lecture et application des inlet à l'ouest
+  hn=inlet[(iteration-1)%MAX_INLET_NB];
+}
+loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
+
+// ***************************************************************************
+// * HN Boundaries
+// ***************************************************************************
+∀ outer ~west cells @ 7.2 { ∀ outer south face hn=hn[↑]; }
+∀ outer ~west cells @ 7.2 { ∀ outer north face hn=hn[↓]; }
+∀ outer ~west cells @ 7.2 { ∀ outer east faces hn=hn[←]; }
+∀ outer ~west cells @ 7.2 { ∀ outer west faces hn=hn[→]; }
+
+// ***************************************************************************
+// * H for output
+// ***************************************************************************
+∀ cells @ 9.1 { h=hn; }
+∀ outer cells @ 9.1 { ∀ outer south face h=hn[↑];}
+∀ outer cells @ 9.1 { ∀ outer north face h=hn[↓];}
+∀ outer cells @ 9.1 { ∀ outer east faces h=hn[←];}
+∀ outer cells @ 9.1 { ∀ outer west faces h=hn[→];}
+
+// ***************************************************************************
+// * Checksum on velocity
+// ***************************************************************************
+∀ cells @ 11.1 if (iteration==(option_max_iterations-1)) {
+  const long int hnhl=*(long int*)&hn;
+  const int hnh=(int)(hnhl>>32);
+  const int hnl=(int)(hnhl&((1l<<32)-1));
+  chkH ^= hnh;
+  chkH ^= hnl;
 }

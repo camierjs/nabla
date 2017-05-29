@@ -40,56 +40,76 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include "netcdf.h"
 
 // ****************************************************************************
-// * updatePhysicalDensity
+// * Lecture du fichier 'depth'
 // ****************************************************************************
-∀ cells @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
+netcdfReadBath @ -20.0 {
+  ℕ ncid=0;
+  ℕ ndims, nvars, natts, unlimdimid;
+  char depthXxY[1024];
+  sprintf(depthXxY,"./data/depth%dx%d.nc",NX,NY);  
+  if (nc_open(depthXxY,NC_WRITE,&ncid)!=NC_NOERR){
+    printf("\n[1;31mCould not find '%s' file[m\n", depthXxY);
+    return;
+  }
+  debug()<<"[39m[NetCDF] read info, filename='"<<depthXxY<<"'[m";
+  // inquiring the IDs of dims x and y
+  if (nc_inq(ncid, &ndims, &nvars, &natts, &unlimdimid)!=NC_NOERR) return;
+  assert(nvars==3);
+  assert(natts==0);
+  assert(unlimdimid==-1);
+  size_t len[4]={0,0,0,0};
+  char name[NC_MAX_NAME];
+  for(ℕ i=0;i<ndims;i+=1)
+    if (nc_inq_dim(ncid, i, name, &len[i])!=NC_NOERR) return;
+  // Récupération des 'x'
+  if (nc_inq_varname(ncid, 0, name)!=NC_NOERR) return;
+  assert(name[0]=='x');
+  if (nc_get_var_double(ncid,0,x)!=NC_NOERR) return;
+  // Récupération des 'y'
+  if (nc_inq_varname(ncid, 1, name)!=NC_NOERR) return;
+  assert(name[0]=='y');
+  if (nc_get_var_double(ncid, 1, y)!=NC_NOERR) return;
+  // Récupération des 'z'  
+  if (nc_inq_varname(ncid, 2, name)!=NC_NOERR) return;
+  assert(name[0]=='z');
+  if (nc_get_var_double(ncid, 2, z)!=NC_NOERR) return;
+  // On refait une passe à l'envers pour shifter au centre
+  for(ℕ k=X_EDGE_ELEMS*Y_EDGE_ELEMS-X_EDGE_ELEMS,
+        i=NX*NY-1; k>X_EDGE_ELEMS;k-=1){
+    if (!(k%X_EDGE_ELEMS)) {z[k]=-0.0;continue;}
+    if (!((k+1)%X_EDGE_ELEMS)) {z[k]=-0.0;continue;}
+    const ℕ xi = k%X_EDGE_ELEMS-1;
+    const ℕ yi = k/X_EDGE_ELEMS-1;
+    x[k]=x[xi];
+    y[k]=y[yi];
+    z[k]=z[i];
+    i-=1;
+  }
+  // On flush le reste
+  for(ℕ k=X_EDGE_ELEMS;k>=0;k-=1) z[k]=-0.0;
+  for(ℕ k=X_EDGE_ELEMS;k>=0;k-=1) x[k]=y[k]=0.0;
+  for(ℕ k=X_EDGE_ELEMS-1;k>=0;k-=1) z[X_EDGE_ELEMS*Y_EDGE_ELEMS-1-k]=-0.0;
+  // Closes the open netCDF dataset
+  if (nc_close(ncid)!=NC_NOERR) return;
+  debug()<<"[39m[NetCDF] done[m";
 }
 
-// ****************************************************************************
-// * 
-// ****************************************************************************
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
 
 // ****************************************************************************
-// * computeTotalInternalEnergyFromTotalEnergy
+// * Lecture du fichier 'inlet'
 // ****************************************************************************
-∀ cells @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
-}
-
-// ****************************************************************************
-// * updateTotalPressure
-// ****************************************************************************
-∀ cells @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
-}
-
-// ****************************************************************************
-// * computeTotalSoundSpeed
-// ****************************************************************************
-∀ cells @ -18.0,28.0{
-  css=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
-  //if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
-}
-
-// ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
-// ****************************************************************************
-∀ cells @ 30.0{
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(css*Σljr);
-  if (DEBUG) printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
+read_water_inlet @ -20.0 {
+  ℝ tm;
+  FILE *stream=fopen("./data/inlet.data", "r");
+  assert(stream);
+  debug()<<"[37m[boundary] Water inlet file[m";
+  hmax_bound=0.0;
+  for(ℕ k=0;k<MAX_INLET_NB;k+=1){
+    if (fscanf(stream,"%lf %lf", &tm,&inlet[k])!=2) return;
+    hmax_bound=fmax(hmax_bound,inlet[k]);
+  }
+  fclose(stream);
 }

@@ -51,8 +51,8 @@ with ℝ²;
 options{
   // Mesh options
   ℝ LENGTH                    = 1.125;
-  ℕ X_EDGE_ELEMS              = 8;
-  ℕ Y_EDGE_ELEMS              = 8;
+  ℕ X_EDGE_ELEMS              = 4;
+  ℕ Y_EDGE_ELEMS              = 4;
   ℕ Z_EDGE_ELEMS              = 1;
   Bool DEBUG = false;
   Bool TRACE = false;
@@ -137,8 +137,10 @@ global{
     AQs *= ρc/absCQs;
     //AQs = 10*c+n+Real3x3(Real3(0.11,0.22,0.33),Real3(0.44,0.55,0.66),Real3(0.77,0.88,0.99));
     if (DEBUG) printf("\n\t[32m[std] AQs=");
-    if (DEBUG) cout<<AQs<<"[0m";
-  }
+    //if (DEBUG) cout<<AQs<<"[0m";
+    if (DEBUG)
+      printf("[%.15e %.15e]\n\t\t  [%.15e %.15e]][0m\n",
+             AQs.x.x,AQs.x.y,AQs.y.x,AQs.y.y);  }
 }
 
 // ****************************************************************************
@@ -277,13 +279,13 @@ void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
 // * temporalSchemeApplyFluxesStandard
 // ****************************************************************************
 ∀ cells @ 19.0{
-  if (DEBUG) printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
-  if (DEBUG) printf("\n\t[32m[n+1] pre u=(%.15e,%.15e,%.15e)[0m",u.x,u.y,u.z);
-  if (DEBUG)
+  //if (DEBUG) printf("\n\t[32m[n+1] deltaT=%.15e[0m",δt);
+  //if (DEBUG) printf("\n\t[32m[n+1] pre u=(%.15e,%.15e,%.15e)[0m",u.x,u.y,u.z);
+  /*if (DEBUG)
     printf("\n\t[32m[n+1] momentum_fluxes_Σ=(%.15e,%.15e,%.15e)[0m",
            momentum_fluxes_Σ.x,
            momentum_fluxes_Σ.y,
-           momentum_fluxes_Σ.z);
+           momentum_fluxes_Σ.z);*/
   u += δt*momentum_fluxes_Σ/m;
   if (DEBUG)
     printf("\n\t[32m[n+1] post u=(%.15e,%.15e,%.15e)[0m",u.x,u.y,u.z);
@@ -294,11 +296,10 @@ void synchronizeNodeUMatrixAndSecondMember(void)@ 13.4{
 // * temporalSchemeMoveNodes
 // ****************************************************************************
 ∀ nodes @ 22.0{
-  if (DEBUG)
-    printf("\n\t[32m[n+1] greek_deltat=%.15e[0m",δt);
+  // if (DEBUG) printf("\n\t[32m[n+1] greek_deltat=%.15e[0m",δt);
   coord += δt*node_u;
   if (DEBUG)
-    printf("\n\t[31m[n+1] node_coord[%d]=(%.15e,%.15e,%.15e)[0m",
+    printf("\n\t[33m[n+1] node_coord[%d]=(%.15e,%.15e,%.15e)[0m",
          uid, coord.x, coord.y, coord.z);
 }
 

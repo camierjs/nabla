@@ -424,16 +424,28 @@ void arcaneHookSwitchToken(node *n, nablaJob *job){
   }
     
   case(FORALL):{
-    int tokenid;
+    dbg("\n\t\t\t\t\t[arcaneHookSwitchToken] forall_range");
+    node *forall_range = n->next;
+    assert(forall_range);
+    job->enum_enum_node=forall_range;
+    
+    dbg("\n\t\t\t\t\t[arcaneHookSwitchToken] dfsHit switch");
+    node *forall_switch = dfsHit(forall_range->children,ruleToId(rule_forall_switch));
+    assert(forall_switch);
+    
+    // Récupération du tokenid du forall_switch
+    const int tokenid = forall_switch->children->tokenid;
+    dbg("\n\t\t\t\t\t[arcaneHookSwitchToken] tokenid=%d",tokenid);
+
     char *iterator=NULL;
-    if (n->next->children->tokenid==IDENTIFIER){
+    /*if (n->next->children->tokenid==IDENTIFIER){
       dbg("\n\t[arcaneHookSwitchToken] iterator %s", n->next->children->token);
       dbg("\n\t[arcaneHookSwitchToken] n->next->next->token=%s", n->next->children->next->children->token);
       iterator=sdup(n->next->children->token);
       tokenid=n->next->children->next->children->tokenid;
     }else{
       tokenid=n->next->children->children->tokenid;
-    }
+      }*/
     switch(tokenid){
     case(CELL):
     case(CELLS):{

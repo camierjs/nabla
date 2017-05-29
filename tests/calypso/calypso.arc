@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<case codeversion="1.0" codename="llshrc" xml:lang="en">
+<case codeversion="1.0" codename="calypso" xml:lang="en">
   <arcane>
 	 <title>MonaiValeyTest</title>
 	 <timeloop>calypsoLoop</timeloop>

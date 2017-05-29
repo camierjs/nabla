@@ -65,10 +65,13 @@ static const bool uCa(char **a,char **p,
 // ****************************************************************************
 static void u2a(char **a, char **p){
 //  if (uCa(a,p,"","")) return;
+  //printf("\n[36ma='%s'[0m",*a);
+  //printf("\n[36mp='%s'[0m",*p);
  
   if (uCa(a,p,"²",2,"^^2",3)) return;
   if (uCa(a,p,"³",2,"^^3",3)) return;
-  
+  if (uCa(a,p,"∑",3,"N_ARY_SUM",9)) return;
+
   if (uCa(a,p,"∛",3,"cube_root",9)) return;
   if (uCa(a,p,"√",3,"square_root",11)) return;
   if (uCa(a,p,"⋅",3,"opScaMul",8)) return;

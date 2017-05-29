@@ -63,6 +63,9 @@ static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 
 static void ignoreLineComments(void);
 static int tok_type(YYSTYPE*);
+ 
+//∑
+ 
 %}
 
 D					[0-9]
@@ -260,7 +263,7 @@ __asm__           { return tok(&yylval, ASM);}
 "∨"					{ return tok(&yylval, IOR_OP);}
 "or"              { return tok(&yylval, IOR_OP);}
 
-{L}({L}|{D})*		{ return tok_type(&yylval); } // TYPEDEF or IDENTIFIER
+{L}({L}|{D})*	{ return tok_type(&yylval); } // TYPEDEF or IDENTIFIER
 
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
@@ -388,11 +391,11 @@ loop:
 // * Tokenizer
 // ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
-  //dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
+  dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
   if (tokenid==PREPROCS){
     long line_jump=atol(yytext+1);
     assert(line_jump>0);
-    //dbg("\n\t\t[tok] PREPROCS: line_jump=%d and yylineno=%d", line_jump, yylineno);
+    dbg("\n\t\t[tok] PREPROCS: line_jump=%ld and yylineno=%d", line_jump, yylineno);
     yylineno=line_jump-1;
   }
   (*yylval) = astNewNode(yytext,tokenid);

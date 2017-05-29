@@ -41,55 +41,98 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-// ****************************************************************************
-// * updatePhysicalDensity
-// ****************************************************************************
-∀ cells @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
+iniVnFill6 @ -8.8 if (option_fill) { fill(vn); }
+
+∀ outer cells @ -8.7 { ∀ outer west faces vn=vn[→]; }
+∀ outer cells @ -8.7 { ∀ outer east faces vn=vn[←]; }
+
+∀ outer south cells @ -8.7 { vn=0.0; }
+∀ outer north cells @ -8.7 { vn=0.0; }
+∀ inner north cells @ -8.7 { vn=0.0; }
+
+∀ inner cells nlsw1_eqV @ -3.4 {
+  const ℝ tu = ¼*(un[←]+un+un[↖]+un[↑]);
+  const ℝ vl = (tu>0)?vn:vn[→];
+  const ℝ vr = (tu>0)?vn[←]:vn;
+  const ℝ vu = (vn>0)?vn:vn[↑];
+  const ℝ vd = (vn>0)?vn[↓]:vn;
+  const ℝ tv1 = tu*(vl-vr);
+  const ℝ tv2 = vn*(vu-vd);
+  const ℝ thv = GZ*(hn[↑]-hn);
+  const ℝ tfc = tu*fc;
+  const ℝ deqv = tv1*inv_dx + (tv2+thv)*inv_dy + tfc;
+  vnp = vn - ½*δt*deqv;
 }
 
-// ****************************************************************************
-// * 
-// ****************************************************************************
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
+∀ inner north cells @ -3.35 { vnp=0.0; }
 
-// ****************************************************************************
-// * computeTotalInternalEnergyFromTotalEnergy
-// ****************************************************************************
-∀ cells @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
+iniVMinMax @ -4.0 { vmin=+∞; vmax=-∞;}
+∀ inner cells @ -3.9{
+  vmin = fmin(vn,vmin);
+  vmax = fmax(vn,vmax);
 }
 
-// ****************************************************************************
-// * updateTotalPressure
-// ****************************************************************************
-∀ cells @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
+∀ inner cells ini_update_vn @ -3 { vn = vnp; }
+
+
+// ***************************************************************************
+// * Compute loop
+// ***************************************************************************
+
+∀ outer cells @ 2.0 { vnp=0.0; }
+
+∀ inner cells @ 2.0 {
+  const ℝ tu = ¼*(un[←]+un+un[↖]+un[↑]);
+  const ℝ vl = (tu>0.0)?vn:vn[→];
+  const ℝ vr = (tu>0.0)?vn[←]:vn;
+  const ℝ vu = (vn>0.0)?vn:vn[↑];
+  const ℝ vd = (vn>0.0)?vn[↓]:vn;
+  const ℝ tv1 = tu*(vl-vr);
+  const ℝ tv2 = vn*(vu-vd);
+  const ℝ thv = GZ*(hn[↑]-hn);
+  const ℝ tfc = tu*fc;
+  const ℝ deqv = tv1*inv_dx + (tv2+thv)*inv_dy + tfc;
+  vnp = vn - δt*deqv;
 }
 
-// ****************************************************************************
-// * computeTotalSoundSpeed
-// ****************************************************************************
-∀ cells @ -18.0,28.0{
-  css=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
-  //if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
+//∀ inner north cells @ 2.1 { vnp=0.0; }
+
+∀ inner cells @ 2.2 { // Runup
+  const ℝ ε = option_epsd;
+  const ℝ coef_grad_h = coef_grady_h;
+  const ℾ dorh = d_hn[↑]<ε or hn[↑]<-d;
+  const ℾ vorh = vnp<0.0 and hn[↑]>hn;
+  vnp=(d_hn<ε and dorh)?0.0:(d_hn<ε and vorh)?vnp-coef_grad_h*(hn+d[↑]):vnp;
+  if (d_hn[↑] < ε){
+    if (hn < -d[↑]) vnp = 0.0;
+    if (vnp>0.0 and hn>hn[↑]) vnp += coef_grad_h*(hn[↑]+d);
+    continue;
+  }
+  if (vnp>0.0){
+    if (-d>hn[↑]) vnp += coef_grad_h*(hn[↑]+d);
+    if (-d[↑]>hn) vnp -= coef_grad_h*(hn+d[↑]);
+  }
 }
 
-// ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
-// ****************************************************************************
-∀ cells @ 30.0{
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(css*Σljr);
-  if (DEBUG) printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
+∀ inner cells @ 3 { vn = vnp; }
+
+// ***************************************************************************
+// * VN Boundaries
+// ***************************************************************************
+∀ outer cells @ 7.2 { ∀ outer west faces vn=vn[→]; }
+∀ outer cells @ 7.2 { ∀ outer east faces vn=vn[←]; }
+
+//∀ outer south cells @ 7.2 { vn=0.0; }
+∀ outer north cells @ 7.2 { vn=0.0; }
+∀ inner north cells @ 7.2 { vn=0.0; }
+
+// ***************************************************************************
+// * Checksum on velocity
+// ***************************************************************************
+∀ inner cells @ 11.1 if (iteration==(option_max_iterations-1)) {
+  const long int vnhl=*(long int*)&vn;
+  const int vnh=(int)(vnhl>>32);
+  const int vnl=(int)(vnhl&((1l<<32)-1));
+  chkV ^= vnh;
+  chkV ^= vnl;
 }

@@ -43,107 +43,64 @@
 with ℝ²,cartesian;
 
 // ****************************************************************************
-// * Constants
+// * Definitions & Enumerations
 // ****************************************************************************
 #define MAX_INLET_NB 9201
-const ℝ DEG2RAD = acos(-1.0)/180.0;
-const ℝ RME = 6367449.0; // Earth's average meridional radius
-const ℝ DEG2M = RME*DEG2RAD; // Coefficient to convert degrees to meters
+enum{SOUTH,EAST,NORTH,WEST};
+
+// ****************************************************************************
+// * Physical Constants
+// ****************************************************************************
+const ℝ GZ = 9.81;           // AccelerationDueToGravity is 9.80665 m/s²
 
 // ****************************************************************************
 // * Options
 // ****************************************************************************
 options{
-  ℝ LENGTH = 1.0;
-  ℕ X_EDGE_ELEMS = 4+2;
-  ℕ Y_EDGE_ELEMS = 4+2;
-  ℝ option_stoptime = 1.0;
-  ℕ option_max_iterations = MAX_INLET_NB;
-
-  // Config
-  ℕ verbosity           = 5;
-  ℝ time_of_simulation  = 60.0;   // time of simulation
-  ℝ start_time          = 0.0;    // start time
-  ℕ space_scheme_order  = 1;      // the order of the space scheme (for each grid)
-  ℝ time_step_to_output = 60.0;   // time step to output grids
-  ℕ number_of_grids     = 1;      // number of grids
-  ℝ time_step           = 0.0025; // time step (for each grid)
-  ℝ epsd                = -1;     // minimum water depth computed (for each grid)
-  ℝ epshd               = 1.0e-9; // minimum water thickness computed (for each grid)
-  ℝ dcut                = 0.0;    // depth thresold from which the seabottom is flatten
-  ℕ west_bound          = 1;      // code of the west boundary condition
-  ℕ east_bound          = 3;      // code of the east boundary condition
-  ℕ north_bound         = 3;      // code of the north boundary condition
-  ℕ south_bound         = 3;      // code of the south boundary condition
-  ℝ time_step_of_gages  = 0.05;   // time step of gages
-  ℝ eps_fp              = 0.235853e-152; // 
-  ℝ eps_io              = 1.0e-9; // 
-
-  // Configuration
-  ℝ GZ = 9.81;                 // standard acceleration due to gravity
-  ℝ PI = acos(-1.0);           // pi constant
-  ℝ DT_STD_OUT = 2.0;          // time step between two standard output
-  ℝ DT_CK_EXP = 2.0;           // time step between two checkings of explosion
-  ℝ FILL_VALUE = -999999.0;    // fill value for netcdf files
-  ℝ H_MAX = 500.0;             // maximum water height before considering explosion
-
-  // for each grid
-  ℾ do_two_ways_interp = false;
-  ℾ is_runup = false;          // is there run-up ? (for each grid)
-  ℾ is_boussinesq = false;     // is it Boussinesq resolution ? (for each grid)
-  ℾ do_init_source = false;    // do source initialization
-  ℕ hldg_grid_id = -1;         // holding grid identification (for each grid)
-
-  // Private attributes
-  ℾ is_output_velocities = false;
-  ℾ output_velocities = false; // deprecated parameter -> use output_types instead
-  ℾ is_master_proc = true;     // is it the master process ?
-  ℾ is_parallel = false;       // is it a parallel run?
-  ℕ grid_id=-1;                // grid identification
-  ℕ grids_call_init_seism = 0; // list of grids calling initializing with the source
-  ℾ is_forced_bound = true;
-  ℝ cfl_max = 0.25; // LEAPFROG_CFL_MAX maximum value of CFL
+  ℕ NX                    = 64;      // Number of inner X cells
+  ℕ NY                    = 48;      // Number of inner Y cells
+  ℝ LENGTH                = 1.0;
+  ℕ X_EDGE_ELEMS          = NX+2;    // Inner + Fictitious X cells
+  ℕ Y_EDGE_ELEMS          = NY+2;    // Inner + Fictitious Y cells
+  ℝ option_stoptime       = 60.0;
+  ℕ option_max_iterations = 8;
+  ℝ option_eps_fp         = 1.0/∞;
+  ℝ option_epsd           = 1.0e-9;
+  ℝ option_time_step      = 0.0025;
+  ℝ option_cfl_max        = 0.25;
+  ℾ option_fill           = true;
+  ℾ option_debug          = false;
 };
 
 // ****************************************************************************
 // * Cells
 // ****************************************************************************
 cells{
-  ℝ x,dx,xg,y,dy,yg,z;
-  ℝ hn,hnp; // the water height matrix, h^(n+1) matrix
-  ℝ un,unp; // the velocity matrix along the x-axis, u^(n+1) matrix
-  ℝ vn,vnp; // the velocity matrix along the y-axis, v^(n+1) matrix
-  ℝ d,d_hn;
+  ℝ x,dx;
+  ℝ y,dy;
+  ℝ z,d,d_hn; // depth
+  ℝ h,hn,hnp; // height
+  ℝ un,unp;   // velocity X
+  ℝ vn,vnp;   // velocity Y
   ℝ deqh,deqh_dx,deqh_dy;
-  ℝ fc; // Coriolis force
-  ℕ fictitious;
-};
-
-// ***************************************************************************
-// * Faces
-// ***************************************************************************
-faces{
-  ℝ bv;
-  ℕ ffb;
+  ℝ coef_gradx_h,coef_grady_h;
+  ℝ fc;       // Coriolis force
 };
 
 // ***************************************************************************
 // * Globals
 // ***************************************************************************
 global{
-  ℝ dt,dt_max,t; // time step, time
-  ℕ Nt; // iteration
   ℝ inv_dx,inv_dy;
-  ℝ ti; // the initial time
-  ℝ tf; // final time
   ℝ xmin,xmax;
   ℝ ymin,ymax;
   ℝ hmax_bound,hmax,hmax0;
-  ℝ dmax,dxmax,dymax;
+  ℝ dmax,dxmax,inv_dx_max,dymax,inv_dy_max;
   ℝ umax,umin,vmax,vmin;
   ℝ cfl;
   ℝ dx_lon, dy_lat;
   ℝ dxy_min;
+  ℕ chkH,chkU,chkV;
 };
 double inlet[MAX_INLET_NB];
 
@@ -151,324 +108,91 @@ double inlet[MAX_INLET_NB];
 // ***************************************************************************
 // * Initialisation part
 // ***************************************************************************
-mainStart @ -12.0 { info()<<"[1;33m[main] start[m"; }
-calypsoStart @ -11.9 { info()<<"[1;33m[calypso] Read conf_file parameters[m"; }
-conf_check @ -11.8 {
-//#warning true_int needs to be negated!
-  info()<<"[1;34m[conf_check] true_int="<<-(1.>0.)<<"[";
-  info()<<"[1;34m[conf_check] fals_int="<<(0.>1.)<<"[";
-}
-simulation_init @ -11.0 {
-  info()<<"[1;35m[simulation_init] Set attributes of a simulation[m";
-  ti=start_time;
-  info()<<"[1;35m[simulation_init] Start: ti = "<<ti<<" s[m";
-  tf=time_of_simulation;
-  info()<<"[1;35m[simulation_init] End:   tf = "<<tf<<" s[m";
-  t=ti;
-  Nt=1;
-  info()<<"[1;35m[simulation_init] Number of time steps: "<<Nt<<"[m";
-}
 
-// netcdf @ -10.9
+// netcdf @ -20.0
 
-∀ cells xmin <?= x @ -10.8;
-∀ cells xmax >?= x @ -10.8;
-∀ cells ymin <?= y @ -10.8;
-∀ cells ymax >?= y @ -10.8;
+// read_water_inlet @ -20.0
 
-dxLon @ -10.69 {
-  dx_lon = (xmax-xmin)/(X_EDGE_ELEMS-2-1);
-  //info()<<"[33m[grid_init] dx_lon="<<dx_lon<<"[m";
-}
-dyLat @ -10.69 {
-  dy_lat = (ymax-ymin)/(Y_EDGE_ELEMS-2-1);
-  //info()<<"[33m[grid_init] dy_lat="<<dy_lat<<"[m";
-}
+∀ cells @ -19 {d=-z;}
 
-// convert dx and dy to linear units [m]
-∀ cells geogr_to_cart_dx @ -10.67 {
-  dx = lon_to_m(dx_lon,y); // Longitude to meters
-  dy = lat_to_m(dy_lat); // Latitude to meters
-}
-∀ cells ini_inv_dx @ -10.66 { inv_dx = 1.0/dx; }
-∀ cells ini_inv_dy @ -10.66 { inv_dy = 1.0/dy; }
+∀ cells xmin <?= x @ -17;
+∀ cells xmax >?= x @ -17;
+∀ cells ymin <?= y @ -17;
+∀ cells ymax >?= y @ -17;
 
-∀ cells @ -10.6 {d=-z;}
+dxLon @ -15 { dx_lon = (xmax-xmin)/(NX-1);}
+dyLat @ -15 { dy_lat = (ymax-ymin)/(NY-1);}
 
-// read_water_inlet @ -10.2
+∀ cells geogr_to_cart_dx @ -13 { dx = lon_to_m(dx_lon,y);}
+∀ cells geogr_to_cart_dy @ -13 { dy = lat_to_m(dy_lat);}
 
-∀ cells @ -10.1 {fictitious=0;}
-∀ faces @ -10.1 {ffb=0;}
-∀ outer faces @ -10.09 {fictitious[0]=1;}
+∀ cells dxmax >?= dx @ -11;
+∀ cells dymax >?= dy @ -11;
 
-∀ inner faces @ -10.08 {
-  // On enlève les faces internes qui ne voient aucune maille fictive
-  if ((fictitious[frontCell]==0) and (fictitious[backCell]==0)) continue;
-  // On enlève les faces internes qui voient 2 mailles fictives
-  if ((fictitious[frontCell]==1) and (fictitious[backCell]==1)) continue;
-  if (fictitious[frontCell]!=0) {ffb=1;}//info()<<"[33m[inner faces] front #"<<frontCell<<"[m";}
-  if (fictitious[backCell]!=0) {ffb=2;}//info()<<"[33m[inner faces] back #"<<backCell<<"[m";}
-}
-∀ inner faces @ -10.07 {
-  if (ffb==0) continue;
-  //info()<<"[33m[faces] ffb="<<ffb<<", cells: "<<backCell<<"->"<<frontCell<<"[m";
-  if (ffb==1) d[frontCell]=d[backCell];
-  if (ffb==2) d[backCell]=d[frontCell];
-}
+∀ cells ini_inv_dx @ -11 { assert(dx>0); inv_dx = 1.0/dx; }
+∀ cells ini_inv_dy @ -11 { assert(dy>0); inv_dy = 1.0/dy; }
 
-∀ outer cells @ -8.9 {
-  if (uid%X_EDGE_ELEMS) continue; // On évite les mailles de l'Est
-  hn=inlet[Nt-1];
-  info()<<"[33m[boundary_force] West #"<<uid<<", Nt="<<Nt-1<<", hn="<<hn<<"[m";
-}
-//iniHnFill6 @ -8.89 { fill6(hn); }
+∀ cells ini_coef_gradx_h @ -11 { coef_gradx_h = option_time_step*GZ/dx; }
+∀ cells ini_coef_grady_h @ -11 { coef_grady_h = option_time_step*GZ/dy; }
 
-
-∀ outer cells @ -8.7 {
-  if (uid%X_EDGE_ELEMS) continue; // On évite les mailles de l'Est
-  if (d==0.0) continue; // on évite les corners
-  un = hn * sqrt(GZ/d);
-}
-
-∀ outer cells @ -8.7 {
-  if (uid%X_EDGE_ELEMS) continue;
-  if (d==0.0) continue; // on évite les corners
-  //vn = vn[↓];
-}
-
-//∀ cells hmax >?= hn @ -7.0;
-iniHMX @ -7.0 { hmax=-∞;}
-∀ inner cells @ -6.99{
-  //info()<<"[1;34m[max H] #"<<uid<<"[m";
-  hmax = (hn>hmax)?hn;
-}
-
-initialMaximiumWaterHeight @ -6.9 {
-  //info()<<"[1;34m[model_init] hmax="<<hmax<<"[m";
-  hmax0=max(hmax,hmax_bound);
-  info()<<"[1;34m[model_init] hmax0="<<hmax0<<"[m";
-  //info()<<"[1;34m[model_init] hmax_bound="<<hmax_bound<<"[m";
-}
-
-∀ cells space_scheme_init @ -5.0 { d_hn = d + hn; }
-
-∀ cells space_scheme_init_coriolis @ -5.0 {
+∀ cells space_scheme_init_coriolis @ -11 {
+  const ℝ PI = acos(-1.0);
   const ℝ T_SIDEREAL = 86164.1;
-  const ℝ OMEGA_T = 2.0 * PI / T_SIDEREAL;
-  const ℝ d_omega_t = 2.0 * OMEGA_T;
-  fc = d_omega_t * sin(deg_to_rad(y));
-  //info()<<"[1;38m[space_scheme_init_coriolis] #"<<uid<<": y="<<y<<", fc="<<fc<<"[m";
+  const ℝ ΩT = 2.0*PI/T_SIDEREAL;
+  const ℝ dΩt = 2.0*ΩT;
+  fc = dΩt * sin(deg_to_rad(y));
 }
 
-
-// ***************************************************************************
-// * Time Scheme Init
-// ***************************************************************************
-∀ cells dmax >?= d @ -4.000001; // Les puissance de 2 font des hexa sans point, cf. reduce.c d'arcane
-
-// On est obligé de travailler pour reduce que sur les inners
-iniUN @ -4.0 { umin=vmin=+∞; umax=vmax=-∞;}
-∀ inner cells timeSchemeInitMax @ -3.9{
-  //info()<<"[1;34m[timeSchemeInitMax] #"<<uid<<"[m";
-  umin = (un<umin)?un;
-  umax = (un>umax)?un;
-  vmin = (vn<vmin)?vn;
-  vmax = (vn>vmax)?vn;
+time_scheme_cfl @ -7.0 {
+  const ℝ cgmax = √(GZ*(dmax+hmax0));
+  const ℝ cumax = fmax(fabs(umax),fabs(umin))+cgmax;
+  const ℝ cvmax = fmax(fabs(vmax),fabs(vmin))+cgmax;
+  inv_dx_max = 1.0/dxmax;
+  inv_dy_max = 1.0/dymax;
+  δt=option_time_step;
+  cfl = fmax(δt*cumax*inv_dx_max, δt*cvmax*inv_dy_max);
+  assert(δt<cfl);
+  dxy_min = 1.0/fmax(inv_dx_max,inv_dy_max);
 }
-
-∀ cells dxmax >?= dx @ -3.9;
-∀ cells dymax >?= dy @ -3.9;
-
-time_scheme_check_cfl @ -3.8 {
-  const ℝ cgmax = sqrt(GZ*(dmax+hmax0));
-  const ℝ cumax = max(fabs(umax),fabs(umin)) + cgmax;
-  const ℝ cvmax = max(fabs(vmax),fabs(vmin)) + cgmax;
-  const ℝ inv_dx_max = 1.0/dxmax;
-  //info()<<"[1;31m[time_scheme_check_CFL] dxmax="<<dxmax<<"[m";
-  //info()<<"[1;31m[time_scheme_check_CFL] inv_dx_max="<<inv_dx_max<<"[m";
-  const ℝ inv_dy_max = 1.0/dymax;
-  //info()<<"[1;31m[time_scheme_check_CFL] inv_dy_max="<<inv_dy_max<<"[m";
-  //info()<<"[1;31m[time_scheme_check_CFL] dmax="<<dmax<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] umin="<<umin<<" umax="<<umax<<"[m";
-  dt=time_step;
-  cfl = max(dt*cumax*inv_dx_max, dt*cvmax*inv_dy_max);
-  dxy_min = 1.0/max(inv_dx_max,inv_dy_max);
-  if (inv_dy_max < eps_fp)dt_max = cfl_max/(cumax*inv_dx_max);
-  else if (inv_dx_max < eps_fp) dt_max = cfl_max/(cvmax*inv_dy_max);
-  else dt_max =  min(cfl_max/(cumax*inv_dx_max),cfl_max/(cvmax*inv_dy_max));
-  info()<<"[1;31m[time_scheme_check_CFL] - h_max = "<<hmax0<<" m"<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] - d_max = "<<dmax<<" m"<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] - dxy_min = "<<dxy_min<<" m"<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] - c_max = "<<max(cumax,cvmax)<<" m/s"<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] - dt_max = "<<dt_max<<" s"<<"[m";
-  info()<<"[1;31m[time_scheme_check_CFL] - CFL = "<<cfl<<"[m";
-}
-
-time_scheme_check_explosion @ -3.7 {}
-
-time_scheme_leapfrog_init @ -3.6 {
-  info()<<"[1;31m[leapfrog_init] Euler iteration from time t_0 to t_1/2[m";
-}
-
-//hn, un, vn, un, vn, dt/2.0, unp, vnp
-euler_iterate_eqvel @ -3.5 {
-  info()<<"[1;31m[euler_iterate_eqvel] iterate eqVEL[m";
-}
-
-∀ cells nlsw1_eqU @ -3.4 {
-  const ℝ tv = ¼*(vn[↓]+vn[↓]+vn+vn[→]);// 2nd ↓ vs ↘
-  const ℝ ul = (un>0.0)?un:un[→];
-  const ℝ ur = (un>0.0)?un[←]:un;
-  const ℝ uu = (un>0.0)?un:un[↑];
-  const ℝ ud = (un>0.0)?un[↓]:un;
-  const ℝ tu1 = un*(ul-ur); // u*du/dx
-  const ℝ tu2 = tv*(uu-ud); // v*du/dy
-  const ℝ thu = GZ*(hn[→]-hn); // g*dh/dx
-  const ℝ tfc = -tv*fc; // Coriolis force
-  const ℝ dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
-  unp = un - ½*dt*dequ; // Euler time iteration
-}
-
-∀ cells nlsw1_eqV @ -3.4 {
-  const ℝ tu = ¼*(un[←]+un+un[↑]+un[↑]);// first ↖ vs ↑
-  const ℝ vl = (vn>0.0)?vn:vn[→];
-  const ℝ vr = (vn>0.0)?vn[←]:vn;
-  const ℝ vu = (vn>0.0)?vn:vn[↑];
-  const ℝ vd = (vn>0.0)?vn[↓]:vn;
-  const ℝ tv1 = tu*(vr-vl); // u*dv/dx
-  const ℝ tv2 = vn*(vu-vd); // v*dv/dy
-  const ℝ thv = GZ*(hn[↑]-hn); // g*dh/dy
-  const ℝ tfc = tu*fc; // Coriolis force
-  const ℝ deqv = tv1*inv_dx + (tv2+thv)*inv_dy + tfc;
-  vnp = vn - ½*dt*deqv; // Euler time iteration
-}
-ini_update_un @ -3.3 { un = unp; }
-ini_update_vn @ -3.3 { vn = vnp; }
-
-// Gage network to do
-
-// Snapshots initialisation to do
-
-cliona_start @ -1.0 { info()<<"[1;33m[Cliona] Run the simulation[m"; }
 
 
 // ***************************************************************************
 // * Compute loop
 // ***************************************************************************
-loopHMX @ 0.01 { hmax=-∞;}
-∀ inner cells @ 0.02 { hmax = (hn>hmax)?hn; }
 
-model_iterate @ 0.1 {
-  info()<<"[1;34m[model_iterate] #"<<iteration<<", hmax="<<hmax<<"[m";
+model_iterate @ 0.0 if (!(iteration%1024)) {
+  printf("\n[1;35m[ %d ] t=%.5fs, hmax = %0.11f[m",iteration,time,hmax);
 }
 
 
-model_iterate_time_iteration @ 0.2 {
-  debug()<< "[1;34m[model_iterate] Time iteration[m";
+// ***************************************************************************
+// * Quit test
+// ***************************************************************************
+quit @ 10.0 if (iteration==option_max_iterations) { exit; }
+
+
+// ***************************************************************************
+// * Verification Checksum for Un & Vn with the 64x48 test case
+// ***************************************************************************
+chkIni @ 11.0 if (iteration==(option_max_iterations-1)) { chkU=chkV=chkH=0; }
+chk64x48x8 @ 11.2 if (iteration==(option_max_iterations-1) &&
+                      NX==64 && NY==48 && option_max_iterations==8 &&
+                      option_time_step==0.0025 && option_fill==true) {
+  assert((unsigned int)chkU==0xD5C2A03C &&
+         (unsigned int)chkV==0x843E3C00 &&
+         (unsigned int)chkH==0x1E01DE90);
+  checked(&chkU,&chkV,&chkH);
 }
 
-time_scheme_leapfrog_iterate @ 1.0 {}
-
-//d, hn, un, vn, hn, dt, d_hn, hnp
-∀ cells eulerIterateEqh @ 1.1 { d_hn = d + hn; }
-
-∀ cells space_scheme_nlsw_1st_order_compute_eqh_X @ 1.2 {
-  // Term: d((d+h)u)/dx
-  const ℝ dhr=(un>0.0)?d_hn[→]:d_hn;
-  const ℝ dhl=(un[←]>0.0)?d_hn[←]:d_hn;
-  deqh_dx = (un*dhr-un[←]*dhl)*inv_dx;
-}
-∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y @ 1.2 {
-  // Term: d((d+h)v)/dy
-  const ℝ dhu=(vn>0.0)?d_hn[↑]:d_hn;
-  const ℝ dhd=(vn[↓]>0.0)?d_hn[↓]:d_hn;
-  deqh_dy = (vn*dhu-vn[↓]*dhd)*inv_dy;
-}
-∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y_sum @ 1.21 {
-  deqh = deqh_dx + deqh_dy;
-}
-∀ cells space_scheme_nlsw_1st_order_compute_eqh_Y_euler_time_iteration @ 1.22 {
-  hnp = hn - dt*deqh; // Euler time iteration
+chk64x48x8192 @ 11.2 if (iteration==(option_max_iterations-1) &&
+                         NX==64 && NY==48 && option_max_iterations==8192 &&
+                         option_time_step==0.0025 && option_fill==false) {
+  assert((unsigned int)chkU==0xA7B040F3 &&
+         (unsigned int)chkV==0x45A24469 &&
+         (unsigned int)chkH==0xE8DD076B);
+  checked(&chkU,&chkV,&chkH);
 }
 
-∀ cells time_scheme_update_hn @ 1.3 { hn = hnp; }
-
-
-time_scheme_leapfrog_iterate_p1p4 @ 1.4 {
-  debug()<<"[1;31m[time_scheme_leapfrog_iterate]  Time t_n+1/2 to t_n+3/2[m";
+void checked(void) {
+  printf("\n[1;32m[checked] (0x%X,0x%X,0x%X) ![m",chkU,chkV,chkH);
 }
-
-time_scheme_leapfrog_iterate_p1p5 @ 1.5 {
-  debug()<< "[1;31m[time_scheme_leapfrog_iterate] Euler iteration moment[m";
-}
-
-// hn, un, vn, un, vn, dt, unp, vnp
-∀ inner cells nlsw1_eqU_p2p0 @ 2.0 {
-  const ℝ tv = ¼*(vn[↓]+vn[↓]+vn+vn[→]);// 2nd ↓ vs ↘
-  const ℝ ul = (un>0.0)?un:un[→];
-  const ℝ ur = (un>0.0)?un[←]:un;
-  const ℝ uu = (un>0.0)?un:un[↑];
-  const ℝ ud = (un>0.0)?un[↓]:un;
-  const ℝ tu1 = un*(ul-ur); // u*du/dx
-  const ℝ tu2 = tv*(uu-ud); // v*du/dy
-  const ℝ thu = GZ*(hn[→]-hn); // g*dh/dx
-  const ℝ tfc = -tv*fc; // Coriolis force
-  const ℝ dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
-  unp = un - ½*dt*dequ; // Euler time iteration
-}
-
-∀ cells nlsw1_eqV_p2p0 @ 2.0 {
-  const ℝ tu = ¼*(un[←]+un+un[↑]+un[↑]);// first ↖ vs ↑
-  const ℝ vl = (vn>0.0)?vn:vn[→];
-  const ℝ vr = (vn>0.0)?vn[←]:vn;
-  const ℝ vu = (vn>0.0)?vn:vn[↑];
-  const ℝ vd = (vn>0.0)?vn[↓]:vn;
-  const ℝ tv1 = tu*(vr-vl); // u*dv/dx
-  const ℝ tv2 = vn*(vu-vd); // v*dv/dy
-  const ℝ thv = GZ*(hn[↑]-hn); // g*dh/dy
-  const ℝ tfc = tu*fc; // Coriolis force
-  const ℝ deqv = tv1*inv_dx + (tv2+thv)*inv_dy + tfc;
-  vnp = vn - ½*dt*deqv; // Euler time iteration
-}
-
-
-// time_scheme_leapfrog_iterate: Runup
-// time_scheme_leapfrog_iterate: Update temporary matrix
-∀ cells time_scheme_leapfrog_iterate_update_temporary_matrix @ 3.0 {
-  d_hn = d + hn;
-}
-
-// Treatment for velocities
-// runup_treat_vel_d_dhn_hn_un_unp @ 1.6;
-
-// time_scheme_leapfrog_iterate update_vel
-∀ cells time_scheme_update_vel_u @ 3.1 { un = unp; }
-∀ cells time_scheme_update_vel_v @ 3.1 { vn = vnp; }
-
-// Check explosion
-
-model_iterate_time_update @ 4.0 {
-  t = t + dt;
-  Nt = Nt + 1;
-}
-
-//model_iterate_segment_update @ 5.0 { }
-
-model_iterate_boundary_update @ 6.0 {}
-
-boundary_force @ 6.1 {}
-
-boundary_continuative @ 6.2 {}
-
-boundary_reflective @ 6.3 {}
-
-∀ outer cells @ 7.0 {
-  if (uid%X_EDGE_ELEMS) continue; // On évite les mailles de l'Est
-  hn=inlet[Nt-1];
-  //info()<<"[33m[boundary_force] West #"<<uid<<", Nt="<<Nt-1<<", hn="<<hn<<"[m";
-}
-//loopHnFill6 @ 8.0 { fill6(hn); }
-
-//model_iterate_snapshots_update_extreme @ 7.0 { }
-
-//mainFinalize @ 10.0 { info()<<"[1;33m[main] finalize[m"; }

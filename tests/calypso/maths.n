@@ -41,55 +41,60 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+
 // ****************************************************************************
-// * updatePhysicalDensity
+// * Constants
 // ****************************************************************************
-∀ cells @ 26.0{
-  ρ = m/V;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] rho[%d]=%.15e[0m",uid,ρ);
+const ℝ RME = 6367449.0;     // Earth's average meridional radius
+const ℝ DEG2RAD = acos(-1.0)/180.0;
+const ℝ DEG2M = RME*DEG2RAD; // Coefficient to convert degrees to meters
+
+
+// ***************************************************************************
+// * Conversions
+// ***************************************************************************
+ℝ deg_to_rad(ℝ deg){ return deg*DEG2RAD; }
+
+ℝ lat_to_m(ℝ _dy_lat){ return _dy_lat*DEG2M; }
+
+ℝ lon_to_m(ℝ _dx_lon, ℝ _y_lat){ return _dx_lon*DEG2M*cos(_y_lat*DEG2RAD); }
+
+
+// ***************************************************************************
+// * Dump
+// ***************************************************************************
+void dumpIJ(const double *data, const int im, const int iMax, const int jm, const int jMax){
+  printf("\n[33m");
+  for(int j=jm;j<jMax;j+=1){
+    printf("[");
+    for(int i=im;i<iMax;i+=1){
+      const double value=data[j*X_EDGE_ELEMS+i];
+      if (value>=0.0)
+        printf(" %.12f",value);
+      else
+        printf("-%.12f",-value);
+    }
+    printf("]%c",j!=(jMax-1)?'\n':' ');
+  }
+  printf("[m");
 }
 
-// ****************************************************************************
-// * 
-// ****************************************************************************
-∀ cells @ 26.1 if (DEBUG){
-  printf("\n\t[35m[eos,n+1] rhoE[%d]=%.15e[0m",uid,ρΕ);
- }
+void      dump(const double *data) {dumpIJ(data,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS);}
+void innerDump(const double *data) {dumpIJ(data,1,X_EDGE_ELEMS-1,1,Y_EDGE_ELEMS-1);}
 
-// ****************************************************************************
-// * computeTotalInternalEnergyFromTotalEnergy
-// ****************************************************************************
-∀ cells @ -16.0,26.2{
-  ιΕ = ρΕ-½*u.abs2();
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] iE[%d]=%.15e[0m",uid,ιΕ);
-}
 
-// ****************************************************************************
-// * updateTotalPressure
-// ****************************************************************************
-∀ cells @ 27.0{
-  p=(γ-1.0)*ρ*ιΕ;
-  if (DEBUG)
-    printf("\n\t[35m[eos,n+1] p[%d]=%.15e[0m",uid,p);
-}
-
-// ****************************************************************************
-// * computeTotalSoundSpeed
-// ****************************************************************************
-∀ cells @ -18.0,28.0{
-  css=√(γ*p/ρ);
-  if (DEBUG) printf("\n\t[31m[eos,n+1] css=%.15e[0m",css);
-  //if (uid==0) printf("\t[31m[eos,n+1] css[%d]=%.15e[0m\n",uid,css);
-}
-
-// ****************************************************************************
-// * hydroTimeStepCtrlCells: Calcul du δt par maille
-// ****************************************************************************
-∀ cells @ 30.0{
-  Real Σljr=0.0;
-  ∀ node Σljr+=absCQs;
-  glace_δt=2.0*V/(css*Σljr);
-  if (DEBUG) printf("\n\t[33m glace_δt=%.15e[0m",glace_δt);
+// ***************************************************************************
+// * Fill
+// ***************************************************************************
+void fill(double *m) {
+  //printf("\n[1;37mfill!!![m");
+  for(int j=1;j<=Y_EDGE_ELEMS;j+=1){
+    for(int i=1;i<=X_EDGE_ELEMS;i+=1){
+      double data = 0.0;
+      data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+      data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+      //data = -data;
+      m[(j-1)*X_EDGE_ELEMS+i-1]=data;
+    }
+  }
 }
