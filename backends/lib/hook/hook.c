@@ -78,7 +78,8 @@ char* xHookPrevCell(int direction){
 +xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";
   if (direction==DIR_SW)
     return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS\
-+xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";  assert(NULL);
++xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";
+  assert(NULL);
   return NULL;
 }
 

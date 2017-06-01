@@ -43,7 +43,7 @@
 
 ∀ outer west cells @ -17 { hn=inlet[0]; }
 
-iniHnFill @ -15 if (option_fill) { fill(hn); }
+//iniHnFill @ -15 if (option_fill) { fill(hn); }
 
 ∀ outer ~west cells @ -13 { ∀ outer south face hn=hn[↑]; }
 ∀ outer ~west cells @ -13 { ∀ outer north face hn=hn[↓]; }
@@ -85,7 +85,7 @@ iniHmax @ 0 { hmax=-∞; }
 ∀ outer west cells @ 7.0 { // Lecture et application des inlet à l'ouest
   hn=inlet[(iteration-1)%MAX_INLET_NB];
 }
-loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
+//loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
 
 // ***************************************************************************
 // * HN Boundaries
@@ -103,14 +103,3 @@ loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
 ∀ outer cells @ 9.1 { ∀ outer north face h=hn[↓];}
 ∀ outer cells @ 9.1 { ∀ outer east faces h=hn[←];}
 ∀ outer cells @ 9.1 { ∀ outer west faces h=hn[→];}
-
-// ***************************************************************************
-// * Checksum on velocity
-// ***************************************************************************
-∀ cells @ 11.1 if (iteration==(option_max_iterations-1)) {
-  const long int hnhl=*(long int*)&hn;
-  const int hnh=(int)(hnhl>>32);
-  const int hnl=(int)(hnhl&((1l<<32)-1));
-  chkH ^= hnh;
-  chkH ^= hnl;
-}

@@ -40,133 +40,100 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
-with ℝ²,cartesian;
-
-// ****************************************************************************
-// * Definitions & Enumerations
-// ****************************************************************************
-#define MAX_INLET_NB 9201
-enum{SOUTH,EAST,NORTH,WEST};
-
-// ****************************************************************************
-// * Physical Constants
-// ****************************************************************************
-const ℝ GZ = 9.81;           // AccelerationDueToGravity is 9.80665 m/s²
-
-// ****************************************************************************
-// * Options
-// ****************************************************************************
-options{
-  ℕ NX                    = 64;      // Number of inner X cells
-  ℕ NY                    = 48;      // Number of inner Y cells
-  ℝ LENGTH                = 1.0;
-  ℕ X_EDGE_ELEMS          = NX+2;    // Inner + Fictitious X cells
-  ℕ Y_EDGE_ELEMS          = NY+2;    // Inner + Fictitious Y cells
-  ℝ option_stoptime       = 60.0;
-  ℕ option_max_iterations = 8;
-  ℝ option_eps_fp         = 1.0/∞;
-  ℝ option_epsd           = 1.0e-9;
-  ℝ option_time_step      = 0.0025;
-  ℝ option_cfl_max        = 0.25;
-  ℾ option_fill           = false;
-  ℾ option_debug          = false;
-};
-
-// ****************************************************************************
-// * Cells
-// ****************************************************************************
-cells{
-  ℝ x,dx;
-  ℝ y,dy;
-  ℝ z,d,d_hn; // depth
-  ℝ h,hn,hnp; // height
-  ℝ un,unp;   // velocity X
-  ℝ vn,vnp;   // velocity Y
-  ℝ deqh,deqh_dx,deqh_dy;
-  ℝ coef_gradx_h,coef_grady_h;
-  ℝ fc;       // Coriolis force
-};
 
 // ***************************************************************************
-// * Globals
+// * Verification Checksum for Un & Vn with the 64x48 test case
 // ***************************************************************************
-global{
-  ℝ inv_dx,inv_dy;
-  ℝ xmin,xmax;
-  ℝ ymin,ymax;
-  ℝ hmax_bound,hmax,hmax0;
-  ℝ dmax,dxmax,inv_dx_max,dymax,inv_dy_max;
-  ℝ umax,umin,vmax,vmin;
-  ℝ cfl;
-  ℝ dx_lon, dy_lat;
-  ℝ dxy_min;
-  ℕ chkH,chkU,chkV;
-};
-double inlet[MAX_INLET_NB];
-
-
-// ***************************************************************************
-// * Initialisation part
-// ***************************************************************************
-
-// netcdf @ -20.0
-
-// read_water_inlet @ -20.0
-
-∀ cells @ -19 {d=-z;}
-
-∀ cells xmin <?= x @ -17;
-∀ cells xmax >?= x @ -17;
-∀ cells ymin <?= y @ -17;
-∀ cells ymax >?= y @ -17;
-
-dxLon @ -15 { dx_lon = (xmax-xmin)/(NX-1);}
-dyLat @ -15 { dy_lat = (ymax-ymin)/(NY-1);}
-
-∀ cells geogr_to_cart_dx @ -13 { dx = lon_to_m(dx_lon,y);}
-∀ cells geogr_to_cart_dy @ -13 { dy = lat_to_m(dy_lat);}
-
-∀ cells dxmax >?= dx @ -11;
-∀ cells dymax >?= dy @ -11;
-
-∀ cells ini_inv_dx @ -11 { assert(dx>0); inv_dx = 1.0/dx; }
-∀ cells ini_inv_dy @ -11 { assert(dy>0); inv_dy = 1.0/dy; }
-
-∀ cells ini_coef_gradx_h @ -11 { coef_gradx_h = option_time_step*GZ/dx; }
-∀ cells ini_coef_grady_h @ -11 { coef_grady_h = option_time_step*GZ/dy; }
-
-∀ cells space_scheme_init_coriolis @ -11 {
-  const ℝ PI = acos(-1.0);
-  const ℝ T_SIDEREAL = 86164.1;
-  const ℝ ΩT = 2.0*PI/T_SIDEREAL;
-  const ℝ dΩt = 2.0*ΩT;
-  fc = dΩt * sin(deg_to_rad(y));
+chkIni @ 11.0 if (iteration==(option_max_iterations-1)) { chkU=0;chkV=0;chkH=0; }
+chk64x48x8 @ 11.2 if (iteration==(option_max_iterations-1) &&
+                      NX==64 && NY==48 && option_max_iterations==8 &&
+                      option_time_step==0.0025 && option_fill==true) {
+  assert((unsigned int)chkU==0xD5C2A03C &&
+         (unsigned int)chkV==0x843E3C00 &&
+         (unsigned int)chkH==0x1E01DE90);
+  checked(&chkU,&chkV,&chkH);
 }
 
-time_scheme_cfl @ -7.0 {
-  const ℝ cgmax = √(GZ*(dmax+hmax0));
-  const ℝ cumax = fmax(fabs(umax),fabs(umin))+cgmax;
-  const ℝ cvmax = fmax(fabs(vmax),fabs(vmin))+cgmax;
-  inv_dx_max = 1.0/dxmax;
-  inv_dy_max = 1.0/dymax;
-  δt=option_time_step;
-  cfl = fmax(δt*cumax*inv_dx_max, δt*cvmax*inv_dy_max);
-  assert(δt<cfl);
-  dxy_min = 1.0/fmax(inv_dx_max,inv_dy_max);
+chk64x48x8192 @ 11.2 if (iteration==(option_max_iterations-1) &&
+                         NX==64 && NY==48 && option_max_iterations==8192 &&
+                         option_time_step==0.0025 && option_fill==false) {
+  assert((unsigned int)chkU==0xA7B040F3 &&
+         (unsigned int)chkV==0x45A24469 &&
+         (unsigned int)chkH==0xE8DD076B);
+  checked(&chkU,&chkV,&chkH);
 }
 
-
-// ***************************************************************************
-// * Compute loop
-// ***************************************************************************
-
-model_iterate @ 0.0 if (!(iteration%1024)) {
-  printf("\n[1;35m[ %d ] t=%.5fs, hmax = %0.11f[m",iteration,time,hmax);
+void checked(void) {
+  printf("\n[1;32m[checked] (0x%X,0x%X,0x%X) ![m",chkU,chkV,chkH);
 }
 
+// ***************************************************************************
+// * Checksum on velocity
+// ***************************************************************************
+∀ cells @ 11.1 if (iteration==(option_max_iterations-1)) {
+  const long int hnhl=*(long int*)&hn;
+  const int hnh=(int)(hnhl>>32);
+  const int hnl=(int)(hnhl&((1l<<32)-1));
+  chkH = chkH^hnh;
+  chkH = chkH^hnl;
+}
 
 // ***************************************************************************
-// * Quit test
+// * Checksum on velocity
 // ***************************************************************************
-quit @ 10.0 if (iteration==option_max_iterations) { exit; }
+∀ inner cells @ 11.1 if (iteration==(option_max_iterations-1)) {
+  const long int unhl=*(long int*)&un;
+  const int unh=(int)(unhl>>32);
+  const int unl=(int)(unhl&((1l<<32)-1));
+  chkU = chkU^unh;
+  chkU = chkU^unl;
+}
 
+// ***************************************************************************
+// * Checksum on velocity
+// ***************************************************************************
+∀ inner cells @ 11.1 if (iteration==(option_max_iterations-1)) {
+  const long int vnhl=*(long int*)&vn;
+  const int vnh=(int)(vnhl>>32);
+  const int vnl=(int)(vnhl&((1l<<32)-1));
+  chkV ^= vnh;
+  chkV ^= vnl;
+}
+
+// ***************************************************************************
+// * Fill
+// ***************************************************************************
+void fill(double *m) {
+  //printf("\n[1;37mfill!!![m");
+  for(int j=1;j<=Y_EDGE_ELEMS;j+=1){
+    for(int i=1;i<=X_EDGE_ELEMS;i+=1){
+      double data = 0.0;
+      data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+      data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+      //data = -data;
+      m[(j-1)*X_EDGE_ELEMS+i-1]=data;
+    }
+  }
+}
+
+// ***************************************************************************
+// * Dump
+// ***************************************************************************
+void dumpIJ(const double *data, const int im, const int iMax, const int jm, const int jMax){
+  printf("\n[33m");
+  for(int j=jm;j<jMax;j+=1){
+    printf("[");
+    for(int i=im;i<iMax;i+=1){
+      const double value=data[j*X_EDGE_ELEMS+i];
+      if (value>=0.0)
+        printf(" %.12f",value);
+      else
+        printf("-%.12f",-value);
+    }
+    printf("]%c",j!=(jMax-1)?'\n':' ');
+  }
+  printf("[m");
+}
+
+void      dump(const double *data) {dumpIJ(data,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS);}
+void innerDump(const double *data) {dumpIJ(data,1,X_EDGE_ELEMS-1,1,Y_EDGE_ELEMS-1);}

@@ -78,7 +78,22 @@ void nccArcLibCartesianIni(nablaMain *arc){
 \n\nvoid %s%s::libCartesianInitialize(void){\n\
 \tIMesh* mesh = defaultMesh();\n\
 \tm_cartesian_mesh = arcaneCreateCartesianMesh(mesh);\n\
-\tm_cartesian_mesh->computeDirections();\n}",arc->name,nablaArcaneColor(arc));
+\tm_cartesian_mesh->computeDirections();\n\
+\n\
+\tIItemFamily* cell_family = mesh->cellFamily();\n\
+\tInt32Array outer_cells_lid;\n\
+\touter_cells_lid.reserve(cell_family->allItems().size());\n\
+\tENUMERATE_FACE(iface,mesh->outerFaces()){\n\
+\t\tFace face = *iface;\n\
+\t\tCell front_cell = face.frontCell();\n\
+\t\tCell back_cell = face.backCell();\n\
+\t\tif (!front_cell.null())\n\
+\t\t\touter_cells_lid.add(front_cell.localId());\n\
+\t\tif (!back_cell.null())\n\
+\t\t\touter_cells_lid.add(back_cell.localId());\n\
+\t}\n\
+\tCellGroup outer_cells_group = cell_family->createGroup(String(\"outerCells\"),outer_cells_lid,true);\n\
+}",arc->name,nablaArcaneColor(arc));
   nablaJob *libCartesianInitialize=nMiddleJobNew(arc->entity);
   libCartesianInitialize->is_an_entry_point=true;
   libCartesianInitialize->is_a_function=true;

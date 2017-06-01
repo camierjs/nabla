@@ -211,7 +211,7 @@ if (ARCANE_FOUND)
   # Lulesh, Arcane version
   nabla_add_arcane_test(llshrc 1 run)
   nabla_add_arcane_test(llshrc 4 run)
-  #nabla_add_arcane_test(calypso 1 run)
+  nabla_add_arcane_test(calypso 1 run)
 if (HYPRE_FOUND)
   nabla_add_arcane_test_with_additional_defines(darcy 1 run ALEPH_INDEX)
   nabla_add_arcane_test_with_additional_defines(darcy 4 run ALEPH_INDEX)

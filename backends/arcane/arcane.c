@@ -55,8 +55,10 @@ static const hookHeader header={
 };
 
 static const hookXyz xyz={
-  nccArcSystemPrefix,
-  NULL, NULL, NULL
+  arcaneXyzPrefix,
+  arcaneXyzPrevCell,
+  arcaneXyzNextCell,
+  NULL
 };
 
 static const hookForAll forall={

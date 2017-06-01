@@ -101,10 +101,10 @@ char* arcaneHookDfsArgType(nablaMain*,nablaVariable*);
 //char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
 //char* nccArcScatter(nablaVariable* var);
 
-char* nccArcSystemPrefix(void);
+char* arcaneXyzPrefix(void);
 //char* nccArcSystemPostfix(void);
-//char* nccArcPrevCell(int);
-//char* nccArcNextCell(int);
+char* arcaneXyzPrevCell(int);
+char* arcaneXyzNextCell(int);
 //char* nccArcIncludes(void);
 
 char *nablaArcaneColor(nablaMain*);

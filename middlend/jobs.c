@@ -72,9 +72,9 @@ nablaJob *nMiddleJobNew(nablaEntity *entity){
   job->scope=job->region=job->item=job->item_set=job->name=job->xyz=job->direction=NULL;
   job->nesw=NULL;
   job->at[0]=0;
-  job->when_sign=1.0;// permet de gÈrer les '-' pour les '@'
-  job->when_index=0; // permet de gÈrer les ',' pour les '@'
-  job->when_depth=0; // permet de spÈcifier la hiÈrarchie des '@'
+  job->when_sign=1.0;// permet de g√©rer les '-' pour les '@'
+  job->when_index=0; // permet de g√©rer les ',' pour les '@'
+  job->when_depth=0; // permet de sp√©cifier la hi√©rarchie des '@'
   for(i=0;i<NABLA_JOB_WHEN_MAX;++i)
     job->whens[i]=HUGE_VAL;
   job->jobNode=NULL;
@@ -166,7 +166,7 @@ void nMiddleScanForNablaJobParameter(node * n, int ruleid, nablaMain *arc){
   
   if (ruleid ==  n->ruleid){
     //dbg("\n\t[scanForNablaJobParameter] %s", n->token);
-    // On peut en profiter pour gÈnÈrer les IN, OUT & INOUT pour ce job
+    // On peut en profiter pour g√©n√©rer les IN, OUT & INOUT pour ce job
     //getInOutPutsNodes(fOut, n->children->children->next, "CCCCCC");
     scanTokensForActions(n, tokact, (void*)&current_item);
   }
@@ -201,7 +201,7 @@ void nMiddleScanForIfAfterAt(node *n, nablaJob *entry_point, nablaMain *nabla){
   for(;n not_eq NULL;n=n->next){
     if (n->tokenid!=IF) continue;
     dbg("\n\t[scanForIfAfterAt] %s ", n->token);
-    // Si ce Nabla Job a un IF aprËs le 'AT', c'est qu'il faudra l'insÈrer lors de la gÈnÈration
+    // Si ce Nabla Job a un IF apr√®s le 'AT', c'est qu'il faudra l'ins√©rer lors de la g√©n√©ration
     entry_point->ifAfterAt=n->next->next->children;
     return;
   }
@@ -224,6 +224,11 @@ static void dumpIfAfterAtToken(node *n, nablaMain *nabla, bool dump_in_header){
   else
     nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
 }
+
+
+// *****************************************************************************
+// * dumpIfAfterAt
+// *****************************************************************************
 static void dumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
 // #warning LAMBDA vs ARCANE in middlend!
   if (!dump_in_header){ // LAMBDA ici
@@ -238,10 +243,15 @@ static void dumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
   char *info=NULL;
   char *format=NULL;
   if (n->token) dbg("\n\t[dumpIfAfterAt] token='%s' ", n->token);
+  // Si on hit ietration
+  if (strncmp(n->token,"iteration",9)==0){
+    info="/*iteration*/";
+    format="/*%s*/subDomain()->commonVariables().globalIteration()";   
+  }  
   // Si on hit une option
   if (nMiddleOptionFindName(nabla->options, n->token)!=NULL){
     info="/*dumpIfAfterAt+Option*/";
-//#warning HOOK NEEDED HERE!
+    //#warning HOOK NEEDED HERE!
     format="options()->%s()";
   }
   // Si on hit une variable
@@ -257,7 +267,7 @@ static void dumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
 
 
 // *****************************************************************************
-// * dumpIfAfterAt
+// * nMiddleDumpIfAfterAt
 // ****************************************************************************
 void nMiddleDumpIfAfterAt(node *n, nablaMain *nabla, bool dump_in_header){
   if (n->token!=NULL) dumpIfAfterAt(n,nabla,dump_in_header);
@@ -294,7 +304,7 @@ node* nMiddleFetchEnumEnum(node *n){
 
 
 // ****************************************************************************
-// * DiffÈrentes actions pour un job Nabla
+// * Diff√©rentes actions pour un job Nabla
 // ****************************************************************************
 void nMiddleJobParse(node *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
@@ -310,7 +320,7 @@ void nMiddleJobParse(node *n, nablaJob *job){
       && (job->parse.function_call_arguments==false))
     job->parse.function_call_arguments=true;
 
-    // On regarde de quel cotÈ d'un assignment nous sommes
+    // On regarde de quel cot√© d'un assignment nous sommes
   if (n->ruleid == ruleToId(rule_assignment_expression))
     if (n->children!=NULL)
       if (n->children->next!=NULL)
@@ -320,7 +330,7 @@ void nMiddleJobParse(node *n, nablaJob *job){
   // On cherche les doubles postfix_expression suivies d'un '[' pour gestion des variables
   // nablaVariables retourne
   //             0 pour continuer (pas une variable nabla),
-  //            '1' s'il faut return'er car on y a trouvÈ un nNablaSystem,
+  //            '1' s'il faut return'er car on y a trouv√© un nNablaSystem,
   //             2 pour continuer mais en informant turnTokenToVariable (hit but unknown)
   if (n->ruleid == ruleToId(rule_postfix_expression))
     if (n->children->ruleid == ruleToId(rule_postfix_expression))
@@ -351,12 +361,12 @@ void nMiddleJobParse(node *n, nablaJob *job){
                                       n->children->children->token[0],
                                       job->parse.enum_enum));
     
-  // DÈs qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
+  // D√©s qu'on a une primary_expression, on teste pour voir si ce n'est pas une option
   if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL))
     if (nMiddleTurnTokenToOption(n->children,nabla)!=NULL)
       return;
     
-  // DÈs qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
+  // D√©s qu'on a une primary_expression, on teste pour voir si ce n'est pas une variable
   if ((n->ruleid == ruleToId(rule_primary_expression)) && (n->children->token!=NULL)){
     nablaVariable *var;
     dbg("\n\t[nablaJobParse] PRIMARY Expression=%s child->token=%s",n->rule,n->children->token);
@@ -382,7 +392,7 @@ void nMiddleJobParse(node *n, nablaJob *job){
 
 // ****************************************************************************
 // * Remplissage de la structure 'job
-// * Dump dans le src de la dÈclaration de ce job en fonction du backend
+// * Dump dans le src de la d√©claration de ce job en fonction du backend
 // ****************************************************************************
 void nMiddleJobFill(nablaMain *nabla,
                     nablaJob *job,
@@ -396,17 +406,17 @@ void nMiddleJobFill(nablaMain *nabla,
   assert(job != NULL);
   dbg("\n\t[nMiddleJobFill] job != NULL");
   
-  dbg("\n\tRÈcupÈration scope");
+  dbg("\n\tR√©cup√©ration scope");
   job->scope  = dfsFetchFirst(n->children,ruleToId(rule_nabla_scope));
-  dbg("\n\tRÈcupÈration region");
+  dbg("\n\tR√©cup√©ration region");
   job->region = dfsFetchFirst(n->children,ruleToId(rule_nabla_region));
-  dbg("\n\tRÈcupÈration nesw");
+  dbg("\n\tR√©cup√©ration nesw");
   node *nabla_job_prefix_node = dfsHit(n->children,ruleToId(rule_nabla_job_prefix));
   assert(nabla_job_prefix_node);
   job->nesw   = dfsFetch(nabla_job_prefix_node->children,ruleToId(rule_nabla_nesw));
-  dbg("\n\tRÈcupÈration items");
+  dbg("\n\tR√©cup√©ration items");
   job->item   = dfsFetchFirst(n->children,ruleToId(rule_nabla_items));
-  dbg("\n\tRÈcupÈration enum_enum");
+  dbg("\n\tR√©cup√©ration enum_enum");
   job->enum_enum_node=nMiddleFetchEnumEnum(n->children);
   if (job->enum_enum_node) dbg("\n\tenum_enum_node found!");
     
@@ -426,8 +436,8 @@ void nMiddleJobFill(nablaMain *nabla,
   // On va chercher le premier identifiant qui est le nom du job *ou pas*
   dbg("\n\tOn va chercher le premier identifiant pour un nom");
   //dbg("\n\n\t// **********************************************************************");
-  if (!job->return_type){ // Pas de 'void', pas de nom, on en crÈÈ un
-    dbg("\n\tPas de 'void', pas de nom, on en crÈÈ un");
+  if (!job->return_type){ // Pas de 'void', pas de nom, on en cr√©√© un
+    dbg("\n\tPas de 'void', pas de nom, on en cr√©√© un");
     const char* kName=mkktemp("kernel");
     dbg("\n\tkName=%s\n",kName);
     job->has_to_be_unlinked=true;
@@ -450,7 +460,7 @@ void nMiddleJobFill(nablaMain *nabla,
       set);
   //dbg("\n\t// **********************************************************************");
   
-  // Scan DFS pour rÈcuÈrer les in/inout/out,
+  // Scan DFS pour r√©cu√©rer les in/inout/out,
   // on dump dans le log les tokens de ce job
   dbg("\n** [nablaJobFill] Now dfsVariables:");
   dfsVariables(nabla,job,n,false);
@@ -460,22 +470,53 @@ void nMiddleJobFill(nablaMain *nabla,
   dfsVariablesDump(nabla,job,n);
 
   // On va chercher s'il y a des xyz dans les parameter_type_list
-  // Ne devrait plus Ítre utilisÈ
+  // Ne devrait plus √™tre utilis√©
   {
     const char underscore=job->name[strlen(job->name)-2];
     const char X_Y_Z=job->name[strlen(job->name)-1];
     const bool xyz = underscore=='_' && X_Y_Z>='X' && X_Y_Z <='Z';
-    dbg("\n** [nablaJobFill] XYZ? underscore=%c, X_Y_Z=%c",underscore,X_Y_Z);
+    if (xyz)
+      dbg("\n** [nablaJobFill] XYZ? underscore=%c, X_Y_Z=%c",underscore,X_Y_Z);
     job->xyz = xyz?"xyz":NULL;
     job->direction = xyz?
       X_Y_Z=='X'?"MD_DirX":
       X_Y_Z=='Y'?"MD_DirY":
       X_Y_Z=='Z'?"MD_DirZ":"/*xyz_but_no_XYZ*/":NULL;
-      //job->xyz = dfsFetchFirst(n,ruleToId(rule_nabla_xyz_declaration));
-    //job->direction = dfsFetchFirst(n->children,ruleToId(rule_nabla_xyz_direction));
+  }
+  { // On va chercher s'il y a des ‚Üë‚Üó‚Üí‚Üò‚Üì‚Üô‚Üê‚Üñ‚ä†‚ä°
+    const bool arrow_up = dfsFetchTokenId(n,ARROW_UP)!=NULL;
+    const bool arrow_ne = dfsFetchTokenId(n,ARROW_NORTH_EAST)!=NULL;
+    const bool arrow_rt = dfsFetchTokenId(n,ARROW_RIGHT)!=NULL;
+    const bool arrow_se = dfsFetchTokenId(n,ARROW_SOUTH_EAST)!=NULL;
+    const bool arrow_dn = dfsFetchTokenId(n,ARROW_DOWN)!=NULL;
+    const bool arrow_sw = dfsFetchTokenId(n,ARROW_SOUTH_WEST)!=NULL;
+    const bool arrow_lt = dfsFetchTokenId(n,ARROW_LEFT)!=NULL;
+    const bool arrow_nw = dfsFetchTokenId(n,ARROW_NORTH_WEST)!=NULL;
+    const bool arrow_bk = dfsFetchTokenId(n,ARROW_BACK)!=NULL;
+    const bool arrow_ft = dfsFetchTokenId(n,ARROW_FRONT)!=NULL;
+    const bool using_arrows = (arrow_up || arrow_ne || arrow_rt ||
+                               arrow_se || arrow_dn || arrow_sw ||
+                               arrow_lt || arrow_nw || arrow_bk ||
+                               arrow_ft);
+    if (using_arrows){
+      dbg("\n** [nablaJobFill] using_arrows");
+      job->xyz=sdup("arrows");
+      char *arrows=sdup("          ");
+      if (arrow_up) arrows[0]='N';
+      if (arrow_ne) arrows[1]='e';
+      if (arrow_rt) arrows[2]='E';
+      if (arrow_se) arrows[3]='s';
+      if (arrow_dn) arrows[4]='S';
+      if (arrow_sw) arrows[5]='w';
+      if (arrow_lt) arrows[6]='W';
+      if (arrow_nw) arrows[7]='n';
+      if (arrow_bk) arrows[8]='B';
+      if (arrow_ft) arrows[9]='F';
+      job->direction = arrows;
+    }
   }
   
-  // VÈrification si l'on a des 'directions' dans les paramËtres
+  // V√©rification si l'on a des 'directions' dans les param√®tres
   if (job->xyz!=NULL){
     dbg("\n\t[nablaJobFill] direction=%s, xyz=%s",
         job->direction?job->direction:"NULL",
@@ -483,11 +524,11 @@ void nMiddleJobFill(nablaMain *nabla,
     //nprintf(nabla, NULL, "\n\n/*For next job: xyz=%s*/", job->xyz);
   }
   
-  // RÈcupÈration du type de retour
+  // R√©cup√©ration du type de retour
   dbg("\n** [nablaJobFill] Recuperation du type de retour");
   job->returnTypeNode=dfsFetch(n->children->children,ruleToId(rule_type_specifier));
   
-  // RÈcupÈration de la liste des paramËtres
+  // R√©cup√©ration de la liste des param√®tres
   node *nd=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
   if (nd) job->stdParamsNode=nd->children;
   dbg("\n\t[nablaJobFill] scope=%s region=%s item=%s type_de_retour=%s name=%s",
@@ -519,9 +560,9 @@ void nMiddleJobFill(nablaMain *nabla,
           isAnArcaneService(nabla)?"Service::":"::":"",
           job->name);
   
-  // On va chercher les paramËtres 'standards'
+  // On va chercher les param√®tres 'standards'
   dbg("\n** [nablaJobFill] Parametres standards");
-  // Si used_options et used_variables ont ÈtÈ utilisÈes
+  // Si used_options et used_variables ont √©t√© utilis√©es
   numParams=nMiddleDumpParameterTypeList(nabla,nabla->entity->src, job->stdParamsNode);
   
   //nprintf(nabla, NULL,"/*job numParams=%d*/",numParams);
@@ -529,7 +570,7 @@ void nMiddleJobFill(nablaMain *nabla,
       nabla->hook->grammar->dfsVariable(nabla):false) 
     nMiddleParamsDumpFromDFS(nabla,job,numParams);
     
-  // On va chercher les paramËtres nabla in/out/inout
+  // On va chercher les param√®tres nabla in/out/inout
   dbg("\n** [nablaJobFill] Parametres in/out");
   job->nblParamsNode=dfsFetch(n->children,ruleToId(rule_nabla_parameter_list));
 
@@ -540,8 +581,8 @@ void nMiddleJobFill(nablaMain *nabla,
     job->parse.returnFromArgument=true;
   }
   
-  // On s'autorise un endroit pour insÈrer des paramËtres
-  dbg("\n\t[nablaJobFill] On s'autorise un endroit pour insÈrer des paramËtres");
+  // On s'autorise un endroit pour ins√©rer des param√®tres
+  dbg("\n\t[nablaJobFill] On s'autorise un endroit pour ins√©rer des param√®tres");
   if (nabla->hook->call->addExtraParameters!=NULL) 
     nabla->hook->call->addExtraParameters(nabla, job,&numParams);
   
@@ -550,7 +591,7 @@ void nMiddleJobFill(nablaMain *nabla,
   if (nabla->hook->call->dumpNablaParameterList!=NULL)
     nabla->hook->call->dumpNablaParameterList(nabla,job,job->nblParamsNode,&numParams);
   
-  // On ferme la parenthËse des paramËtres que l'on avait pas pris dans les tokens
+  // On ferme la parenth√®se des param√®tres que l'on avait pas pris dans les tokens
   nprintf(nabla, NULL, "%s",
           nabla->hook->call->iTask?
           nabla->hook->call->iTask(nabla,job):
@@ -560,13 +601,13 @@ void nMiddleJobFill(nablaMain *nabla,
     if (nabla->hook->grammar->returnFromArgument)
       nabla->hook->grammar->returnFromArgument(nabla,job);
 
-  // On prÈpare le bon ENUMERATE suivant le forall interne
-  // On saute l'Èventuel forall du dÈbut
-  dbg("\n\t[nablaJobFill] On prÈpare le bon ENUMERATE");
+  // On pr√©pare le bon ENUMERATE suivant le forall interne
+  // On saute l'√©ventuel forall du d√©but
+  dbg("\n\t[nablaJobFill] On pr√©pare le bon ENUMERATE");
   if ((job->forall_item=nMiddleScanForNablaJobForallItem(n->children->next))!='\0')
     dbg("\n\t[nablaJobFill] scanForNablaJobForallItem found '%c'", job->forall_item);
 
-  dbg("\n\t[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de paramËtres");
+  dbg("\n\t[nablaJobFill] On avance jusqu'au COMPOUND_JOB_INI afin de sauter les listes de param√®tres");
   for(n=n->children->next; n->tokenid!=COMPOUND_JOB_INI; n=n->next);
   
   dbg("\n\t[nablaJobFill] On cherche s'il y a un selection statement");

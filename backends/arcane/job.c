@@ -47,68 +47,116 @@
 extern bool adrs_it;
 
 
-/*****************************************************************************
- * Fonction prefix à l'ENUMERATE_*
- *****************************************************************************/
-char* arcaneHookPrefixEnumerate(nablaJob *j){
-  dbg("\n\t[arcaneHookPrefixEnumerate]");
-  char *grp=j->scope;   // OWN||ALL
-  char *rgn=j->region;  // INNER, OUTER
-  char itm=j->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  char *direction=j->direction; // Direction
-  if (j->xyz==NULL){
-    if (itm=='c' && j->forall_item=='c'){
-      return "CellCellGroup cells_pairgroup(allCells(),allCells(),IK_Node);";
-    }else{
-      if (isAnArcaneFamily(j->entity->main)) return "";
-      char prefix[2048];
-      snprintf(prefix,2048,"debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());\n\t",j->entity->name,j->name);
-      return sdup(prefix);
-    }
-  }
-  if (itm=='c'){
-    char str[1024];
-    if (sprintf(str,"CellDirectionMng cdm(m_cartesian_mesh->cellDirection(%s));",direction)<0)
-      return NULL;
-    return sdup(str);
-  }
-  if (itm=='n'){
-    char str[1024];
-    if (sprintf(str,"NodeDirectionMng ndm(m_cartesian_mesh->nodeDirection(%s));",direction)<0)
-      return NULL;
-    return sdup(str);
-  }
-  // Pour une fonction, on ne fait que le debug
-  if (itm=='\0'){// && !isAnArcaneFamily(j->entity->main)){
-    char prefix[2048];
-    snprintf(prefix,2048,"\n\tdebug()<<\"\33[2;37m[%sEntity::%s]\33[0m\";\n\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
-    return sdup(prefix);
-  }
+// ****************************************************************************
+// * Fonctions pour le PREFIX de l'ENUMERATE_*
+// * Cas où il n'y a pas de XYZ
+// ****************************************************************************
+static char* arcaneHookPrefixEnumerateNoXYZ(nablaJob *j, const char itm){
+  if (itm=='c' && j->forall_item=='c')
+    return "CellCellGroup cells_pairgroup(allCells(),allCells(),IK_Node);";
 
-  dbg("\n\t[arcaneHookPrefixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm);
-  nablaError("[arcaneHookPrefixEnumerate] Could not distinguish ENUMERATE!");
-  return NULL;
+  if (isAnArcaneFamily(j->entity->main)) return "";
+  
+  char prefix[2048];
+  snprintf(prefix,2048,"\
+debug()<<\"\33[1;37m[%sEntity::%s]\33[0m\";\n\
+\tARCANE_HYODA_SOFTBREAK(subDomain());\n\t",j->entity->name,j->name);
+  return sdup(prefix);
 }
 
 
-// *************************************************************
-// * Fonction produisant l'ENUMERATE_* avec XYZ
-// *************************************************************
-char *arcaneHookDumpEnumerateXYZ(nablaJob *job){
-  char *grp=job->scope;   // OWN||ALL
-  char *rgn=job->region;  // INNER, OUTER
-  char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal|(p)articles
-  // Pour une fonction, on fait rien ici
-  if (itm=='\0') return "";
-  if (itm=='p' && grp==NULL && rgn==NULL)
-    return "ENUMERATE_PARTICLE(particle,m_particle_family->allItems())";
-  if (itm=='c' && grp==NULL && rgn==NULL)   return "ENUMERATE_CELL(cell,cdm.allCells())";
-  if (itm=='c' && grp==NULL && rgn[0]=='o') return "ENUMERATE_CELL(cell,cdm.outerCells())";
-  if (itm=='c' && grp==NULL && rgn[0]=='i') return "ENUMERATE_CELL(cell,cdm.innerCells())";
-  if (itm=='n' && grp==NULL && rgn==NULL)   return "ENUMERATE_NODE(node,ndm.allNodes())";
-  if (itm=='n' && grp==NULL && rgn[0]=='o') return "ENUMERATE_NODE(node,ndm.outerNodes())";
-  if (itm=='n' && grp==NULL && rgn[0]=='i') return "ENUMERATE_NODE(node,ndm.innerNodes())";
-  nablaError("Could not distinguish ENUMERATE with XYZ!");
+// ****************************************************************************
+// * Cas où il y a des ARROWS pour un CELL job
+// ****************************************************************************
+static char* arcaneHookPrefixEnumerateCellsArrows(nablaJob *j){
+  char prefix[2048];
+  prefix[0]=0;
+   if (j->direction[0]=='N'||
+       j->direction[1]=='e'||
+       j->direction[3]=='s'||
+       j->direction[4]=='S'||
+       j->direction[5]=='w'||
+       j->direction[7]=='n')
+     strcat(prefix,"\n\tCellDirectionMng cdy(m_cartesian_mesh->cellDirection(MD_DirY));\n\t");
+   if (j->direction[1]=='e'||
+       j->direction[2]=='E'||
+       j->direction[3]=='s'||
+       j->direction[5]=='w'||
+       j->direction[6]=='W'||
+       j->direction[7]=='n')
+     strcat(prefix,"\n\tCellDirectionMng cdx(m_cartesian_mesh->cellDirection(MD_DirX));\n\t");
+   if (j->direction[8]=='B'||j->direction[9]=='F')
+     strcat(prefix,"\n\tCellDirectionMng cdz(m_cartesian_mesh->cellDirection(MD_DirZ));\n\t");
+   return sdup(prefix);   
+}
+
+// ****************************************************************************
+// * Cas où il y a des XYX pour un CELL job
+// ****************************************************************************
+static char* arcaneHookPrefixEnumerateXYZCells(nablaJob *j, const char *dir){
+  char str[1024];
+  if (sprintf(str,"\n\
+\tCellDirectionMng cdm(m_cartesian_mesh->cellDirection(%s));",dir)<0)
+    return NULL;
+  return sdup(str);
+}
+
+// ****************************************************************************
+// * Cas où il y a des XYX pour un NODE job
+// ****************************************************************************
+static char* arcaneHookPrefixEnumerateXYZNodes(nablaJob *j, const char *dir){
+  char str[1024];
+  if (sprintf(str,"\n\
+\tNodeDirectionMng ndm(m_cartesian_mesh->nodeDirection(%s));",dir)<0)
+    return NULL;
+  return sdup(str);
+}
+
+// ****************************************************************************
+// * Cas où il y a des XYX pour une fonction
+// ****************************************************************************
+static char* arcaneHookPrefixEnumerateXYZFunction(nablaJob *j, const char *dir){
+  char prefix[2048];
+  snprintf(prefix,2048,"\n\
+\tdebug()<<\"\33[2;37m[%sEntity::%s]\33[0m\";\n\
+\tARCANE_HYODA_SOFTBREAK(subDomain());",j->entity->name,j->name);
+  return sdup(prefix);
+}
+
+// ****************************************************************************
+// * Fonctions pour le PREFIX de l'ENUMERATE_*
+// ****************************************************************************
+char* arcaneHookPrefixEnumerate(nablaJob *j){
+  dbg("\n\t[arcaneHookPrefixEnumerate]");
+  const char *grp=j->scope;   // OWN||ALL
+  const char *rgn=j->region;  // INNER, OUTER
+  const char *dir=j->direction; // Direction
+  const char itm=j->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+ 
+  if (j->xyz==NULL)
+    return arcaneHookPrefixEnumerateNoXYZ(j,itm);
+  
+  const bool arrows = strncmp(j->xyz,"arrows",6)==0;
+
+  // A partir d'ici, il y a au moins une direction à gérer
+
+  if (itm=='c' && arrows)
+    return arcaneHookPrefixEnumerateCellsArrows(j);
+
+  if (itm=='c' && !arrows)
+    return arcaneHookPrefixEnumerateXYZCells(j,dir);
+
+  if (itm=='n' && !arrows)
+    return arcaneHookPrefixEnumerateXYZNodes(j,dir);
+  
+  // Pour une fonction, on ne fait que le debug
+  if (itm=='\0')
+    return arcaneHookPrefixEnumerateXYZFunction(j,dir);
+
+  // On ne devrait pas être ici
+  dbg("\n\t[arcaneHookPrefixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm);
+  nablaError("[arcaneHookPrefixEnumerate] Could not distinguish ENUMERATE!");
+  assert(NULL);
   return NULL;
 }
 
@@ -174,21 +222,22 @@ char* arcaneHookDumpEnumerate(nablaJob *job){
   char *grp=job->scope;   // OWN||ALL
   char *rgn=job->region;  // INNER, OUTER
   char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
-  char *xyz=job->xyz;// Direction
+  //char *xyz=job->xyz;// Direction
   char forall_item=job->forall_item;
-  //#warning Should avoid testing NULL and [0]!
-  if (xyz!=NULL) return arcaneHookDumpEnumerateXYZ(job);
+  
+  // Gestion des AnyItems
   if (job->nb_in_item_set>0) return arcaneHookDumpAnyEnumerate(job);
-  //if (funcRegion!=NULL) funcRegion[0]-=32; // Si on a une région, on inner|outer => Inner|Outer
+  
   dbg("\n\t[arcaneHookDumpEnumerate] forall_item='%c'", forall_item);
+  
   // Pour une fonction, on fait rien ici
   if (itm=='\0') return "";
 
   if (itm=='c' && forall_item=='c')           return "ENUMERATE_ITEMPAIR(Cell,Cell,cell,cells_pairgroup)";
   if (itm=='p' && grp==NULL && rgn==NULL)     return "ENUMERATE_PARTICLE(particle,m_particle_family->allItems())";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "ENUMERATE_CELL(cell,allCells())";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_CELL(cell,innerCells())";
-  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "ENUMERATE_CELL(cell,outerCells())";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_CELL(cell,defaultMesh()->findGroup(\"innerCells\"))";
+  if (itm=='c' && grp==NULL && rgn[0]=='o')   return "ENUMERATE_CELL(cell,defaultMesh()->findGroup(\"outerCells\"))";
   if (itm=='c' && grp!=NULL && rgn==NULL)     return "ENUMERATE_CELL(cell,ownCells())";
   if (itm=='n' && grp==NULL && rgn==NULL)     return "ENUMERATE_NODE(node,allNodes())";
   if (itm=='n' && grp==NULL && rgn[0]=='i')   return "ENUMERATE_NODE(node,allCells().innerFaceGroup().nodeGroup())";
@@ -220,30 +269,91 @@ char* arcaneHookPostfixEnumerate(nablaJob *job){
   char *rgn=job->region; // INNER, OUTER
   char *itm=job->item;   // (c)ells|(f)aces|(n)odes|(g)lobal
   char *xyz=job->xyz;    // Direction
+  
   if (xyz==NULL){
     dbg("\n\t[postfixEnumerate] no xyz, returning");
     return "";// void ENUMERATE postfix";
   }
+  
   assert(itm!=NULL);
   if (itm[0]=='\0'){
     dbg("\n\t[postfixEnumerate] function, returning");
-    return "";// Pour une fonction, on fait rien ici
+    return "";// Pour une fonction, on ne fait rien ici
   }
-  dbg("\n\t[postfixEnumerate] job with direction, working!");  
-  if (itm[0]=='c') return "\tDirCell cc(cdm.cell(*cell));\n\
+  
+  const bool arrows = strncmp(job->xyz,"arrows",6)==0;
+
+  if (itm[0]=='c' && arrows){
+    char postfix[1024];
+    postfix[0]=0;
+    
+    // Dès qu'on a besoin d'un accès en Y
+    if (job->direction[0] == 'N' ||
+        job->direction[1] == 'e' ||
+        job->direction[3] == 's' ||
+        job->direction[4] == 'S' ||
+        job->direction[5] == 'w' ||
+        job->direction[7] == 'n') strcat(postfix,"\n\
+\t\tDirCell cy(cdy.cell(*cell));");
+
+    // Dès qu'on a besoin d'un accès en X
+    if (job->direction[1] == 'e' ||
+        job->direction[2] == 'E' ||
+        job->direction[3] == 's' ||
+        job->direction[5] == 'w' ||
+        job->direction[6] == 'W' ||
+        job->direction[7] == 'n') strcat(postfix,"\n\
+\t\tDirCell cx(cdx.cell(*cell));");
+        
+    if (job->direction[0] == 'N')
+      strcat(postfix,"\n\t\tCell north=cy.next();\n");
+
+    if (job->direction[1] == 'e')
+      strcat(postfix,"\n\
+\t\tDirCell cyx(cdx.cell(cy.next()));\n\
+\t\tCell north_east=cyx.next();\n");
+
+    if (job->direction[2] == 'E')
+      strcat(postfix,"\n\t\tCell east=cx.next();\n");
+    
+    if (job->direction[3] == 's')
+      strcat(postfix,"\n\
+\t\tDirCell cyx(cdx.cell(cy.previous()));\n\
+\t\tCell south_east=cyx.next();\n");
+
+    if (job->direction[4] == 'S')
+      strcat(postfix,"\n\t\tCell south=cy.previous();\n");
+
+    if (job->direction[5] == 'w')
+      strcat(postfix,"\n\
+\t\tDirCell cyx(cdx.cell(cy.previous()));\n\
+\t\tCell south_west=cyx.next();\n");
+
+    if (job->direction[6] == 'W')
+      strcat(postfix,"\n\t\tCell west=cx.previous();\n");
+    
+    if (job->direction[7] == 'n')
+      strcat(postfix,"\n\
+\t\tDirCell cyx(cdx.cell(cy.previous()));\n\
+\t\tCell north_west=cyx.next();\n");
+
+    // On retourne notre chaîne construite
+    return sdup(postfix);
+  }
+  
+  if (itm[0]=='c' && !arrows) return "\n\
+\t\tDirCell cc(cdm.cell(*cell));\n\
 \t\t__attribute__((unused)) Cell nextCell=cc.next();\n\
-\t\t// Should test for !nextCell.null() to build ccn\n\
-\t\t//                      DirCell ccn(cdm.cell(nextCell));\n\
-\t\t//__attribute__((unused)) Cell nextNextCell=ccn.next();\n\
-\t\t__attribute__((unused)) Cell prevCell=cc.previous();\n\
-\t\t// Should test for !prevCell.null() to build ccp\n\
-\t\t//                        DirCell ccp(cdm.cell(prevCell));\n\
-\t\t//__attribute__((unused)) Cell prevPrevCell=ccp.previous();\n\
-\t\t__attribute__((unused)) DirCellNode cn(cdm.cellNode(*cell));\n";  
-  if (itm[0]=='n') return "\tDirNode cc(ndm.node(*node));\n\
-\t\tNode rightNode=cc.next();\n\t\tNode leftNode=cc.previous();";
+\t\t__attribute__((unused)) Cell prevCell=cc.previous();\n";
+  
+  if (itm[0]=='n' && !arrows) return "\n\
+\t\tDirNode cc(ndm.node(*node));\n\
+\t\t__attribute__((unused)) Node rightNode=cc.next();\n\
+\t\t__attribute__((unused)) Node leftNode=cc.previous();\n";
+  
   dbg("\n\t[postfixEnumerate] grp=%c rgn=%c itm=%c", grp[0], rgn[0], itm[0]);
   nablaError("Could not distinguish ENUMERATE!");
+  assert(NULL);
   return NULL;
 }
 
@@ -378,6 +488,9 @@ void arcaneHookSwitchToken(node *n, nablaJob *job){
     nprintf(arc, "/*ALEPH_NEW_VALUE*/",".newValue");
     break;
   }
+    
+  case(IOR_OP): { fprintf(arc->entity->src, " || "); break; } 
+  case(AND_OP): { fprintf(arc->entity->src, " && "); break; } 
 
   case(CELL):{
     /* permet par exemple en particle de choper la cell sous-jacente */

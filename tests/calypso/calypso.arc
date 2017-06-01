@@ -27,5 +27,9 @@
       </sod></meshgenerator>
   </mesh>
 
-  <module-main></module-main>
+  <calypso>
+    <X_EDGE_ELEMS>66</X_EDGE_ELEMS>
+    <Y_EDGE_ELEMS>50</Y_EDGE_ELEMS>
+    <option_eps_fp>1.0e-12</option_eps_fp>
+  </calypso>
 </case>

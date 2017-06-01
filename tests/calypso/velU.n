@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
+//iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
 
 ∀ outer west cells iniUow @ -8.7 {
   assert(d!=0.0);
@@ -132,14 +132,3 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 
 ∀ outer west cells @ 7.2 { ∀ outer south faces un=un[↑]; }
 ∀ outer west cells @ 7.2 { ∀ outer north faces un=un[↓]; }
-
-// ***************************************************************************
-// * Checksum on velocity
-// ***************************************************************************
-∀ inner cells @ 11.1 if (iteration==(option_max_iterations-1)) {
-  const long int unhl=*(long int*)&un;
-  const int unh=(int)(unhl>>32);
-  const int unl=(int)(unhl&((1l<<32)-1));
-  chkU ^= unh;
-  chkU ^= unl;
-}

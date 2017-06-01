@@ -45,9 +45,21 @@
 #include "backends/arcane/arcane.h"
 
 // ****************************************************************************
-// * nHookXyz pre/post fix
+// * arcaneXyz pre/post fix
 // ****************************************************************************
-char* nccArcSystemPrefix(void){ return "m_"; }
+char* arcaneXyzPrefix(void){
+  dbg("\n\t[arcaneXyzPrefix]");
+  return "m_"; }
+
+char* arcaneXyzPrevCell(int dir){
+  dbg("\n\t[arcaneXyzPrevCell]");
+  return "";
+}
+
+char* arcaneXyzNextCell(int dir){
+  dbg("\n\t[arcaneXyzNextCell]");
+  return "";
+}
 
 
 // ****************************************************************************
@@ -237,6 +249,16 @@ void arcaneHookSystem(node * n,nablaMain *arc, const char cnf, char enum_enum){
   if (n->tokenid == PREVRIGHT)     nprintf(arc, "/*nablaSystem PREVRIGHT*/", "[cn.previousRight()]");
   if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*nablaSystem NEXTLEFT*/", "[cn.nextLeft()]");
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*nablaSystem NEXTRIGHT*/", "[cn.nextRight()]");
+  if (n->tokenid == ARROW_UP)      nprintf(arc, NULL, "[north]");
+  if (n->tokenid == ARROW_NORTH_EAST) nprintf(arc, NULL, "[north_east]");
+  if (n->tokenid == ARROW_RIGHT)   nprintf(arc, NULL, "[east]");
+  if (n->tokenid == ARROW_SOUTH_EAST) nprintf(arc, NULL, "[south_east]");
+  if (n->tokenid == ARROW_DOWN)    nprintf(arc, NULL, "[south]");
+  if (n->tokenid == ARROW_SOUTH_WEST) nprintf(arc, NULL, "[south_west]");
+  if (n->tokenid == ARROW_LEFT)    nprintf(arc, NULL, "[west]");
+  if (n->tokenid == ARROW_NORTH_WEST) nprintf(arc, NULL, "[north_west]");
+  if (n->tokenid == ARROW_BACK)    nprintf(arc, NULL, "[back]");
+  if (n->tokenid == ARROW_FRONT)    nprintf(arc, NULL, "[front]");
 }
 
 // ****************************************************************************

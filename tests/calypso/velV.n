@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-iniVnFill6 @ -8.8 if (option_fill) { fill(vn); }
+//iniVnFill6 @ -8.8 if (option_fill) { fill(vn); }
 
 ∀ outer cells @ -8.7 { ∀ outer west faces vn=vn[→]; }
 ∀ outer cells @ -8.7 { ∀ outer east faces vn=vn[←]; }
@@ -125,14 +125,3 @@ iniVMinMax @ -4.0 { vmin=+∞; vmax=-∞;}
 //∀ outer south cells @ 7.2 { vn=0.0; }
 ∀ outer north cells @ 7.2 { vn=0.0; }
 ∀ inner north cells @ 7.2 { vn=0.0; }
-
-// ***************************************************************************
-// * Checksum on velocity
-// ***************************************************************************
-∀ inner cells @ 11.1 if (iteration==(option_max_iterations-1)) {
-  const long int vnhl=*(long int*)&vn;
-  const int vnh=(int)(vnhl>>32);
-  const int vnl=(int)(vnhl&((1l<<32)-1));
-  chkV ^= vnh;
-  chkV ^= vnl;
-}
