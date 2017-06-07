@@ -42,6 +42,7 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
 #############
 CXX=${CMAKE_CXX_COMPILER}
 CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
+			-fno-strict-aliasing \
 			-I/usr/lib/openmpi/include\
 			-I${ARCANE_ROOT}/include\
 			-I${HYPRE_INCLUDE_DIR}\

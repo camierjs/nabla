@@ -141,8 +141,8 @@ iniHmax @ 0 { hmax=-∞; }
   if ((uid%X_EDGE_ELEMS)==0) printf("\n");
   printf(" %.12f",h);
   if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
-  }*/
-
+  }
+*/
 ∀ outer cells @ 9.1 { ∀ outer south face h=hn[↑];}
 ∀ outer cells @ 9.1 { ∀ outer north face h=hn[↓];}
 ∀ outer cells @ 9.1 { ∀ outer east faces h=hn[←];}

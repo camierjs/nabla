@@ -129,6 +129,7 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 }
 
 ∀ inner east cells @ 2.1 { unp=0.0; }
+∀ inner east cells @ 7.2 if (option_arcane) { un=0.0;}
 
 /*∀ cells @ 2.1 {
   if (uid==0) printf("\n[33m[UnP] unp:[m");
@@ -176,9 +177,13 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 ∀ outer /*west*/ cells @ 7.2 { ∀ outer south faces un=un[↑]; }
 ∀ outer /*west*/ cells @ 7.2 { ∀ outer north faces un=un[↓]; }
 
+//∀ outer east cells @ 7.21 { printf("\n[33m[outer east Un] un[%d][m",uid); un = 0.0; }
+
 /*∀ cells @ 7.3 {
   if (uid==0) printf("\n[33m[Un Boundaries] un:[m");
-  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  if ( option_arcane && (uid%X_EDGE_ELEMS)==0) printf("\n");
+  if (!option_arcane && (uid%X_EDGE_ELEMS)==0) printf("\nxx: ");
   printf(" %.12f",un);
   if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
-  }*/
+  }
+*/

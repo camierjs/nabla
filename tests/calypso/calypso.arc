@@ -14,9 +14,18 @@
 	 <output-period>0</output-period>
     <output-history-period>0</output-history-period>
     <end-execution-output>0</end-execution-output>
+	 <output>
+		<variable>cell_h</variable>
+		<variable>cell_hn</variable>
+		<variable>cell_d</variable>
+ 		<variable>cell_un</variable>
+ 		<variable>cell_vn</variable>
+     <group>AllCells</group>
+ 	 </output>
   </arcane-post-processing>
 
   <arcane-checkpoint>
+    <period>0</period>
     <do-dump-at-end>false</do-dump-at-end>
   </arcane-checkpoint>
 
@@ -38,5 +47,6 @@
     <Y_EDGE_ELEMS>50</Y_EDGE_ELEMS>
     <option_eps_fp>1.0e-12</option_eps_fp>
     <option_arcane>true</option_arcane>
+    <option_max_iterations>8</option_max_iterations>
   </calypso>
 </case>

@@ -142,8 +142,8 @@ NABLA_STATUS nccArcaneEntityIncludes(const nablaEntity *entity){
 #include <arcane/utils/Real3x3.h>\n\
 #include <arcane/utils/Real2x2.h>\n\
 #include <arcane/utils/Real3.h>\n\
-//#include <arcane/hyoda/Hyoda.h>\n\
-#define ARCANE_HYODA_SOFTBREAK(dummy)\n\
+#include <arcane/hyoda/Hyoda.h>\n\
+//#define ARCANE_HYODA_SOFTBREAK(dummy)\n\
 #include <arcane/ArcaneTypes.h>\n\
 #include <arcane/utils/ArcanePrecomp.h>\n\
 #include <arcane/utils/ArcaneGlobal.h>\n\
