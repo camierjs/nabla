@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "netcdf.h"
+double *_x_,*_y_,*_z_;
 
 // ****************************************************************************
 // * Lecture du fichier 'depth'
@@ -67,35 +68,39 @@ netcdfReadBath @ -20.0 {
   // Récupération des 'x'
   if (nc_inq_varname(ncid, 0, name)!=NC_NOERR) return;
   assert(name[0]=='x');
-  if (nc_get_var_double(ncid,0,x)!=NC_NOERR) return;
+  _x_=(ℝ*)calloc(len[0],sizeof(ℝ));
+  _y_=(ℝ*)calloc(len[1],sizeof(ℝ));
+  _z_=(ℝ*)calloc(len[2]*len[3],sizeof(ℝ));
+  if (nc_get_var_double(ncid,0,_x_)!=NC_NOERR) return;
   // Récupération des 'y'
   if (nc_inq_varname(ncid, 1, name)!=NC_NOERR) return;
   assert(name[0]=='y');
-  if (nc_get_var_double(ncid, 1, y)!=NC_NOERR) return;
+  if (nc_get_var_double(ncid, 1, _y_)!=NC_NOERR) return;
   // Récupération des 'z'  
   if (nc_inq_varname(ncid, 2, name)!=NC_NOERR) return;
   assert(name[0]=='z');
-  if (nc_get_var_double(ncid, 2, z)!=NC_NOERR) return;
-  // On refait une passe à l'envers pour shifter au centre
-  for(ℕ k=X_EDGE_ELEMS*Y_EDGE_ELEMS-X_EDGE_ELEMS,
-        i=NX*NY-1; k>X_EDGE_ELEMS;k-=1){
-    if (!(k%X_EDGE_ELEMS)) {z[k]=-0.0;continue;}
-    if (!((k+1)%X_EDGE_ELEMS)) {z[k]=-0.0;continue;}
-    const ℕ xi = k%X_EDGE_ELEMS-1;
-    const ℕ yi = k/X_EDGE_ELEMS-1;
-    x[k]=x[xi];
-    y[k]=y[yi];
-    z[k]=z[i];
-    i-=1;
-  }
-  // On flush le reste
-  for(ℕ k=X_EDGE_ELEMS;k>=0;k-=1) z[k]=-0.0;
-  for(ℕ k=X_EDGE_ELEMS;k>=0;k-=1) x[k]=y[k]=0.0;
-  for(ℕ k=X_EDGE_ELEMS-1;k>=0;k-=1) z[X_EDGE_ELEMS*Y_EDGE_ELEMS-1-k]=-0.0;
+  if (nc_get_var_double(ncid, 2, _z_)!=NC_NOERR) return;
   // Closes the open netCDF dataset
   if (nc_close(ncid)!=NC_NOERR) return;
   debug()<<"[39m[NetCDF] done[m";
 }
+
+int ix,iy,iz;
+iniIdx @ -19.99 {ix=iy=iz=0;}
+
+∀ inner cells @ -19.99 {
+  const ℕ k = ix++%X_EDGE_ELEMS;
+  //info()<<"[35m[iniX] iy="<<iy<<", k="<<k<<"[m";
+  x=_x_[k];
+}
+∀ cells @ -19.99 {
+  const ℕ k = iy++/X_EDGE_ELEMS-1;
+  if (k<0) continue;
+  //info()<<"[35m[iniY] iy="<<iy-1<<", k="<<k<<"[m";
+  y=_y_[k];
+}
+∀ inner cells @ -19.99 { z=_z_[iz++];}
+∀ outer cells @ -19.99 { z=-0.0;}
 
 
 // ****************************************************************************

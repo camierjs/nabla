@@ -134,7 +134,7 @@ void %s%s::%s(){\n",
           isAnArcaneModule(nabla)?"Module":"Service",
           job_name);
   
-  nprintf(nabla, NULL, "\n\tm_global_%s=%f;\n",global_var_name,reduction_init);
+  nprintf(nabla, NULL, "\tm_global_%s=%f;\n",global_var_name,reduction_init);
   if (cnf=='c') nprintf(nabla, NULL, "\tENUMERATE_CELL(cell,ownCells()){");
   if (cnf=='n') nprintf(nabla, NULL, "\tENUMERATE_NODE(node,ownNodes()){");
   nprintf(nabla, NULL, "\n\t\tm_global_%s=::fm%s(m_global_%s(),m_%s_%s[%s]);",

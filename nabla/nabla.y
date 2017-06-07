@@ -1154,7 +1154,7 @@ inline void rhsTailSandwichVariadic(node **lhs,int yyn,int yynrhs,
     va_end(args);
     return;
   }
-  // S'il y en a plus qu'un. on déroule les boucles
+  // S'il y en a plus qu'un, on déroule les boucles
   astAddChild(first,next);
   // On saute le premier et s'arrète avant le dernier
   for(int i=1;i<yynrhs-1;i+=1){

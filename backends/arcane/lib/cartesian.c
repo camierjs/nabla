@@ -64,15 +64,38 @@ char* nccArcLibCartesianHeader(void){
  * PRIVATES
  *****************************************************************************/
 char* nccArcLibCartesianPrivates(void){
-  return "\nprivate:\n\
+  return "\
+\n\tbool faceIsOuter(FaceEnumerator f){return f->isSubDomainBoundary();}\
+\n\tbool faceIsSouth(FaceEnumerator f){return (f.index()==3)?true:false;}\
+\n\tbool faceIsNorth(FaceEnumerator f){return (f.index()==1)?true:false;}\
+\n\tbool faceIsWest(FaceEnumerator f){return (f.index()==0)?true:false;}\
+\n\tbool faceIsEast(FaceEnumerator f){return (f.index()==2)?true:false;}\
+\n\tbool faceIsOuterSouth(FaceEnumerator f){return faceIsSouth(f) and faceIsOuter(f);}\
+\n\tbool faceIsOuterNorth(FaceEnumerator f){return faceIsNorth(f) and faceIsOuter(f);}\
+\n\tbool faceIsOuterWest(FaceEnumerator f){return faceIsWest(f) and faceIsOuter(f);}\
+\n\tbool faceIsOuterEast(FaceEnumerator f){return faceIsEast(f) and faceIsOuter(f);}\
+\nprivate:\n\
 \tvoid libCartesianInitialize(void);\n\
 \tICartesianMesh* m_cartesian_mesh;";
 }
 
 
-/******************************************************************************
- * Initialisation
- ******************************************************************************/
+// ****************************************************************************
+// * Initialisation
+// * Création des groups:
+// *   - outerCells
+
+// *   - outerWestCells
+// *   - outerSouthCells
+// *   - outerNorthCells
+// *   - outerEastCells
+// *   - outerOtherThanWestCells
+
+// *   - innerCells
+// *   - innerEastCells
+// *   - innerSouthCells
+// *   - innerNorthCells
+// ****************************************************************************
 void nccArcLibCartesianIni(nablaMain *arc){
   fprintf(arc->entity->src, "\
 \n\nvoid %s%s::libCartesianInitialize(void){\n\
@@ -83,17 +106,64 @@ void nccArcLibCartesianIni(nablaMain *arc){
 \tIItemFamily* cell_family = mesh->cellFamily();\n\
 \tInt32Array outer_cells_lid;\n\
 \touter_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array inner_cells_lid;\n\
+\tinner_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array outerWest_cells_lid;\n\
+\touterWest_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array outerSouth_cells_lid;\n\
+\touterSouth_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array outerNorth_cells_lid;\n\
+\touterNorth_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array innerNorth_cells_lid;\n\
+\tinnerNorth_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array outerOtherThanWest_cells_lid;\n\
+\touterOtherThanWest_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array outerEast_cells_lid;\n\
+\touterEast_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array innerEast_cells_lid;\n\
+\tinnerEast_cells_lid.reserve(cell_family->allItems().size());\n\
+\tInt32Array innerSouth_cells_lid;\n\
+\tinnerSouth_cells_lid.reserve(cell_family->allItems().size());\n\
 \tENUMERATE_FACE(iface,mesh->outerFaces()){\n\
 \t\tFace face = *iface;\n\
 \t\tCell front_cell = face.frontCell();\n\
 \t\tCell back_cell = face.backCell();\n\
-\t\tif (!front_cell.null())\n\
+\t\tif (!front_cell.null() and !outer_cells_lid.contains(front_cell.localId()))\n\
 \t\t\touter_cells_lid.add(front_cell.localId());\n\
-\t\tif (!back_cell.null())\n\
+\t\tif (!back_cell.null() and !outer_cells_lid.contains(back_cell.localId()))\n\
 \t\t\touter_cells_lid.add(back_cell.localId());\n\
 \t}\n\
 \tCellGroup outer_cells_group = cell_family->createGroup(String(\"outerCells\"),outer_cells_lid,true);\n\
-}",arc->name,nablaArcaneColor(arc));
+\tENUMERATE_CELL(cell,allCells()){\n\
+\t\tconst Int64 c = cell->uniqueId();\n\
+\t\tconst int nbx = options()->X_EDGE_ELEMS();\n\
+\t\tconst int nby = options()->Y_EDGE_ELEMS();\n\
+\t\tif ((opMod(c,nbx))==(nby-2) && (c>=nbx && c<nbx*(nby-1))) innerEast_cells_lid.add(cell->localId());\n\
+\t\tif (c>nbx && c<(2*nbx-1)) innerSouth_cells_lid.add(cell->localId());\n\
+\t\tif (c>nbx*(nby-2) && c<(nbx*(nby-1)-1)) innerNorth_cells_lid.add(cell->localId());\n\
+\t\tif (c>nbx && c<nbx*(nby-1) && opMod(c,nbx)!=0 && opMod(c,nbx)!=(nbx-1)) inner_cells_lid.add(cell->localId());\n\
+\t}\n\
+\tCellGroup inner_cells_group = cell_family->createGroup(String(\"innerCells\"),inner_cells_lid,true);\n\
+\tCellGroup innerEast_cells_group = cell_family->createGroup(String(\"innerEastCells\"),innerEast_cells_lid,true);\n\
+\tCellGroup innerSouth_cells_group = cell_family->createGroup(String(\"innerSouthCells\"),innerSouth_cells_lid,true);\n\
+\tCellGroup innerNorth_cells_group = cell_family->createGroup(String(\"innerNorthCells\"),innerNorth_cells_lid,true);\n\
+\tENUMERATE_CELL(cell,defaultMesh()->findGroup(\"outerCells\")){\n\
+\t\tconst Int64 c = cell->uniqueId();\n\
+\t\tconst int nbx = options()->X_EDGE_ELEMS();\n\
+\t\tconst int nby = options()->Y_EDGE_ELEMS();\n\
+\t\tif (c<nbx) outerSouth_cells_lid.add(cell->localId());\n\
+\t\tif (c>=nbx*(nby-1)) outerNorth_cells_lid.add(cell->localId());\n\
+\t\tif (opMod(c,nbx)==0) outerWest_cells_lid.add(cell->localId());\n\
+\t\tif (opMod(c,nbx)==nbx-1) outerEast_cells_lid.add(cell->localId());\n\
+\t\tif (opMod(c,nbx)!=0) outerOtherThanWest_cells_lid.add(cell->localId());\n\
+\t}\n\
+\tCellGroup outerSouth_cells_group = cell_family->createGroup(String(\"outerSouthCells\"),outerSouth_cells_lid,true);\n\
+\tCellGroup outerNorth_cells_group = cell_family->createGroup(String(\"outerNorthCells\"),outerNorth_cells_lid,true);\n\
+\tCellGroup outerEast_cells_group = cell_family->createGroup(String(\"outerEastCells\"),outerEast_cells_lid,true);\n\
+\tCellGroup outerWest_cells_group = cell_family->createGroup(String(\"outerWestCells\"),outerWest_cells_lid,true);\n\
+\tCellGroup outerOtherThanWest_cells_group = cell_family->createGroup(String(\"outerOtherThanWestCells\"),outerOtherThanWest_cells_lid,true);\n\
+}",
+          arc->name,nablaArcaneColor(arc));
   nablaJob *libCartesianInitialize=nMiddleJobNew(arc->entity);
   libCartesianInitialize->is_an_entry_point=true;
   libCartesianInitialize->is_a_function=true;

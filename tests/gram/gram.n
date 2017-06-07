@@ -136,8 +136,9 @@ faces{ ℝ f;};
   }*/
 
 //∀ inner ~east cells innerNotEastCellJob @ -8.7 { α=0.0; }
-∀ outer cells one @ -14 { ∀ faces α=α[↑]; }
-∀ outer cells two @ -14 { ∀ i faces α=α[↑];}
+∀ outer cells one @ -13 { ∀ outer south face α=α[↑];}
+//∀ outer cells one @ -14 { ∀ faces α=α[↑]; }
+//∀ outer cells two @ -14 { ∀ i faces α=α[↑];}
 // Arcane does not like this one yet: ∀ outer cells thr @ -14 { ∀ outer faces α=α[↑]; }
 
 //void ini(void) @ -10.0{}

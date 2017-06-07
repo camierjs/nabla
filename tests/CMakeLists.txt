@@ -321,6 +321,12 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                 ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
                 ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/inlet.data)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth64x48.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/depth64x48.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/inlet.data)
 
 nabla_add_test_with_defines(lambda ${VT100_FG_MAGENTA} deflex 1 run seq -DNO_DEFINES 100000)
 if (HYPRE_FOUND)

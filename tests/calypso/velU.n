@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-//iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
+iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
 
 ∀ outer west cells iniUow @ -8.7 {
   assert(d!=0.0);
@@ -69,7 +69,7 @@
 }
 
 ∀ inner east cells @ -3.35 { unp=0.0; }
-∀ inner south cells innerSouth @ -3.35 { unp=0.0; }
+∀ inner south cells @ -3.35 { unp=0.0; }
 
 iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 ∀ inner cells @ -3.9{

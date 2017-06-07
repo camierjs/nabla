@@ -43,6 +43,7 @@
 #ifndef _NABLA_TOOLS_H_
 #define _NABLA_TOOLS_H_
 
+char neswOrNot(const nablaMain*, const node*);
 
 char *sdup(const char*);
 void sfree(void);

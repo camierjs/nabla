@@ -135,30 +135,6 @@ char* xHookForAllItem(nablaJob *j,
 
 
 // ****************************************************************************
-// * Fonction qui prend le noeud nesw du job et qui ressort
-// * '\0', n,e,s,w ou N,E,S,W s'il sont not'é
-// ****************************************************************************
-static char neswOrNot(const nablaMain *n, const node *nesw){
-  if (nesw==NULL) return '\0';
-  // Vérification si c'est un 'not ('~' devant)
-  const bool isNot = (nesw->token[0]=='~');
-  // Récupération du char NESW, suivant s'il y a un '~' devant
-  const char cNESW = isNot?nesw->next->token[0]:nesw->token[0];
-  //nprintf(n, NULL, "/*neswOrNot %s, %c*/",isNot?"isNot":"isStd",cNESW);
-  // not n|e|s|w
-  if (isNot && cNESW=='n') return 'N';
-  if (isNot && cNESW=='e') return 'E';
-  if (isNot && cNESW=='s') return 'S';
-  if (isNot && cNESW=='w') return 'W';
-  // n|e|s|w
-  if (!isNot && cNESW=='n') return 'n';
-  if (!isNot && cNESW=='e') return 'e';
-  if (!isNot && cNESW=='s') return 's';
-  if (!isNot && cNESW=='w') return 'w';
-  return '\0';
-}
-
-// ****************************************************************************
 // * Fonction postfix à l'ENUMERATE_*
 // ****************************************************************************
 char* xHookForAllPostfix(nablaJob *job){

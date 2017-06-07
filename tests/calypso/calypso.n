@@ -68,8 +68,9 @@ options{
   ℝ option_epsd           = 1.0e-9;
   ℝ option_time_step      = 0.0025;
   ℝ option_cfl_max        = 0.25;
-  ℾ option_fill           = false;
+  ℾ option_fill           = true;
   ℾ option_debug          = false;
+  ℾ option_arcane         = false;
 };
 
 // ****************************************************************************
@@ -87,10 +88,15 @@ cells{
   ℝ fc;       // Coriolis force
 };
 
+faces{
+  ℕ fid;
+};
+
 // ***************************************************************************
 // * Globals
 // ***************************************************************************
 global{
+  //ℕ idx;
   ℝ inv_dx,inv_dy;
   ℝ xmin,xmax;
   ℝ ymin,ymax;
@@ -108,6 +114,35 @@ double inlet[MAX_INLET_NB];
 // ***************************************************************************
 // * Initialisation part
 // ***************************************************************************
+//∀ nodes @ -40 if (option_arcane) {info()<<"[33m[ini] node["<<uid<<"] @ "<<coord<<"[m";}
+//∀ cells @ -40 if (option_arcane) { x=0; ∀ nodes x += coord.x; x*=¼;}
+//∀ cells @ -40 if (option_arcane) { y=0; ∀ nodes y += coord.y; y*=¼;}
+//∀ cells @ -40 if (option_arcane) { z=-drand48();}
+/*∀ faces @ -40 if (option_arcane) {
+  fid=uid;
+  info()<<"[32m[face_node] face #"<<uid<<"[m";
+  ∀ node{
+    info()<<"\t[32m[face_node] "<<coord<<"[m";
+  }
+}*/
+/*∀ cells tst @ -40 if (option_arcane) {
+  info()<<"[32m[cell_face] cell #"<<uid<<"[m";
+  ∀ north face{
+    info()<<"\t[32m[face] "<<fid<<", index="<<f.index()<<"[m";
+  }
+}*/
+//∀ outer cells @ -40 { info()<<"[32m[outerCells] cell #"<<uid<<"[m";}
+//∀ inner cells innerCells @ -40 { info()<<"[31m[inner] cell #"<<uid<<"[m";}
+//∀ inner east cells innerEast @ -40 { info()<<"[35m[inner east] cell #"<<uid<<"[m";}
+//∀ inner south cells innerSouth @ -40 { info()<<"[36m[inner south] cell #"<<uid<<"[m";}
+//∀ inner north cells innerNorth @ -40 { info()<<"[37m[inner north] cell #"<<uid<<"[m";}
+
+//∀ outer south cells outerSouth @ -40 { info()<<"[31m[outer south] cell #"<<uid<<"[m";}
+//∀ outer west cells outerWest @ -40 { info()<<"[35m[outer west] cell #"<<uid<<"[m";}
+//∀ outer north cells outerNorth @ -40 { info()<<"[36m[outer north] cell #"<<uid<<"[m";}
+//∀ outer east cells outerEast @ -40 { info()<<"[37m[outer east] cell #"<<uid<<"[m";}
+//∀ outer ~west cells outerOtherThanWest @ -40 { info()<<"[31m[outer ~west] cell #"<<uid<<"[m";}
+//exitHere @ -39 {exit;}
 
 // netcdf @ -20.0
 
@@ -120,8 +155,13 @@ double inlet[MAX_INLET_NB];
 ∀ cells ymin <?= y @ -17;
 ∀ cells ymax >?= y @ -17;
 
-dxLon @ -15 { dx_lon = (xmax-xmin)/(NX-1);}
-dyLat @ -15 { dy_lat = (ymax-ymin)/(NY-1);}
+dxLon @ -15 {
+  //info()<<"xmax="<<xmax<<", xmin="<<xmin;
+  dx_lon = (xmax-xmin)/(NX-1);}
+dyLat @ -15 {
+  //info()<<"ymax="<<ymax<<", ymin="<<ymin;
+  dy_lat = (ymax-ymin)/(NY-1);
+}
 
 ∀ cells geogr_to_cart_dx @ -13 { dx = lon_to_m(dx_lon,y);}
 ∀ cells geogr_to_cart_dy @ -13 { dy = lat_to_m(dy_lat);}
@@ -151,7 +191,8 @@ time_scheme_cfl @ -7.0 {
   inv_dy_max = 1.0/dymax;
   δt=option_time_step;
   cfl = fmax(δt*cumax*inv_dx_max, δt*cvmax*inv_dy_max);
-  assert(δt<cfl);
+  //info()<< "[33m[time_scheme_cfl] cfl="<<cfl<<"[m";
+  /*if (!option_arcane)*/ assert(δt<cfl);
   dxy_min = 1.0/fmax(inv_dx_max,inv_dy_max);
 }
 

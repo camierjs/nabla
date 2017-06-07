@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-//iniVnFill6 @ -8.8 if (option_fill) { fill(vn); }
+iniVnFill6 @ -8.8 if (option_fill) { fill(vn); }
 
 ∀ outer cells @ -8.7 { ∀ outer west faces vn=vn[→]; }
 ∀ outer cells @ -8.7 { ∀ outer east faces vn=vn[←]; }

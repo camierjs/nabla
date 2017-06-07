@@ -302,7 +302,7 @@ NABLA_STATUS nccArcaneEntityVirtuals(const nablaEntity *entity){
       fprintf(entity->hdr, ";");
       continue;
     }
-      // Si on est une Family et que le job a un '@', on ne fait rien!
+    // Si on est une Family et que le job a un '@', on ne fait rien!
     if (isAnArcaneFamily(nabla) && job->is_an_entry_point) continue;
     // Cela se fait aussi lors de la génération de l'axl afin de pouvoir traiter les @ -4,4
     dbg("\n\t[nccArcaneEntityVirtuals] virtuals for job %s", job->name);

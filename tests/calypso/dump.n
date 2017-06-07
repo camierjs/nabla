@@ -58,12 +58,12 @@
 
 dumpUN87 @ -8.69 if (option_debug) {
   info()<<"[1;37m[iniU0][m u0";
-  dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
+  //dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
 }
 
 dumpVN87 @ -8.69 if (option_debug) {
   info()<<"[1;37m[iniV0][m v0:";
-  dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
+  //dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
 }
 
 dumpHmax0 @ -6.89 if (option_debug) { info()<<"[1;34m[model_init] hmax0="<<hmax0<<"[m"; }
@@ -146,7 +146,7 @@ dumpVnpp2p01 @ 2.2 if (option_debug) {
 // ***************************************************************************
 dumpUp8p0 @ 8.2 if (option_debug) {
   info()<<"   [1;37m[boundary_update][m un:";
-  dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
+  //dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
 }
 
 // ***************************************************************************
@@ -154,7 +154,7 @@ dumpUp8p0 @ 8.2 if (option_debug) {
 // ***************************************************************************
 dumpVp8p0 @ 9.0 if (option_debug) {
   info()<<"   [1;37m[boundary_update][m vn:";
-  dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
+  //dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
 }
 
 

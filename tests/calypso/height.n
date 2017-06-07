@@ -43,10 +43,23 @@
 
 ∀ outer west cells @ -17 { hn=inlet[0]; }
 
-//iniHnFill @ -15 if (option_fill) { fill(hn); }
+iniHnFill @ -15 if (option_fill) { fill(hn); }
 
-∀ outer ~west cells @ -13 { ∀ outer south face hn=hn[↑]; }
-∀ outer ~west cells @ -13 { ∀ outer north face hn=hn[↓]; }
+zeroIdx @ -15 {ix=iy=iz=0;}
+∀ cells @ -15 if (option_fill) {
+  const ℕ i = (ix++%X_EDGE_ELEMS)+1;
+  const ℕ j = (iy++/X_EDGE_ELEMS)+1;
+  ℝ data = 0.0;
+  data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+  data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+  hn=data;
+  ℝ refilled_data = inner_refill(uid);
+  printf("\nhn=%.12f vs [%d,%d] data=%.12f, inner_refill=%.12f",hn,i,j,data,refilled_data);
+  hn=refilled_data;
+ }
+
+∀ outer ~west cells outerNotWestCellsHeight @ -13 { ∀ outer south face hn=hn[↑]; }
+∀ outer ~west cells @ -13 { ∀ outer north faces hn=hn[↓]; }
 ∀ outer ~west cells @ -11 { ∀ outer east faces hn=hn[←]; }
 ∀ outer ~west cells @ -11 { ∀ outer west faces hn=hn[→]; }
 
@@ -85,7 +98,7 @@ iniHmax @ 0 { hmax=-∞; }
 ∀ outer west cells @ 7.0 { // Lecture et application des inlet à l'ouest
   hn=inlet[(iteration-1)%MAX_INLET_NB];
 }
-//loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
+loopHnFill6 @ 7.1 if (option_fill) { fill(hn); }
 
 // ***************************************************************************
 // * HN Boundaries

@@ -104,16 +104,34 @@ void checked(void) {
 // * Fill
 // ***************************************************************************
 void fill(double *m) {
-  //printf("\n[1;37mfill!!![m");
+  //printf("\n[1;37m[fill][m[37m:");
   for(int j=1;j<=Y_EDGE_ELEMS;j+=1){
+    //printf("\nj=%d: ",j-1);
     for(int i=1;i<=X_EDGE_ELEMS;i+=1){
       double data = 0.0;
       data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
       data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
       //data = -data;
+      //printf(" %d",i-1);
       m[(j-1)*X_EDGE_ELEMS+i-1]=data;
     }
   }
+  printf("[m");
+}
+
+// ***************************************************************************
+// * inner_refill
+// ***************************************************************************
+int kReFill=0;
+ℝ inner_refill(const ℕ offset){
+  if (offset==0) kReFill=0;
+  const ℕ k= kReFill++;
+  const ℕ i = (k%X_EDGE_ELEMS)+1;
+  const ℕ j = (k/X_EDGE_ELEMS)+1;
+  ℝ data = 0.0;
+  data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+  data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+  return data;
 }
 
 // ***************************************************************************
