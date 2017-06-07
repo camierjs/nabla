@@ -313,17 +313,24 @@ nabla_add_test(lambda ${VT100_FG_MAGENTA} hlt 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pennant 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pnnnt 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} glcNxt 1 run seq)
-# calypso test, copy depth.nc and inlet.data
+# calypso LAMBDA test, copy depth.nc and inlet.data
 nabla_add_test(lambda ${VT100_FG_MAGENTA} calypso 1 run seq)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                 ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth64x48.nc
                 ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/depth64x48.nc)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth4x4.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/depth4x4.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                 ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
                 ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/inlet.data)
+# calypso ARCANE test, copy depth.nc and inlet.data
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                 ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth64x48.nc
                 ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/depth64x48.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth4x4.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/depth4x4.nc)
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
                 ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
                 ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/inlet.data)

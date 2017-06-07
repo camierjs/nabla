@@ -51,6 +51,13 @@
 ∀ outer north cells @ -8.7 { vn=0.0; }
 ∀ inner north cells @ -8.7 { vn=0.0; }
 
+/*∀ cells @ -8.7 {
+  if (uid==0) printf("\n[33m[V ini] vn:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",vn);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
 ∀ inner cells nlsw1_eqV @ -3.4 {
   const ℝ tu = ¼*(un[←]+un+un[↖]+un[↑]);
   const ℝ vl = (tu>0)?vn:vn[→];
@@ -66,6 +73,13 @@
 }
 
 ∀ inner north cells @ -3.35 { vnp=0.0; }
+
+/*∀ cells @ -3.35 {
+  if (uid==0) printf("\n[33m[Vnp ini] vnp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",vnp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
 
 iniVMinMax @ -4.0 { vmin=+∞; vmax=-∞;}
 ∀ inner cells @ -3.9{
@@ -126,3 +140,10 @@ iniVMinMax @ -4.0 { vmin=+∞; vmax=-∞;}
 //∀ outer south cells @ 7.2 { vn=0.0; }
 ∀ outer north cells @ 7.2 { vn=0.0; }
 ∀ inner north cells @ 7.2 { vn=0.0; }
+
+/*∀ cells @ 7.3 {
+  if (uid==0) printf("\n[33m[Vn Boundaries] vn:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",vn);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/

@@ -45,6 +45,7 @@
 ∀ cells @ -8.8 if (option_fill) { un=refill(uid); }
 
 ∀ outer west cells iniUow @ -8.7 {
+  //info()<<"[iniUow] #"<<uid<<", d="<<d;
   assert(d!=0.0);
   un = hn * √(GZ/d);
 }
@@ -54,6 +55,13 @@
 
 ∀ outer cells iniUoosf @ -8.7 { ∀ outer south face un=un[↑]; }
 ∀ outer cells iniUoonf @ -8.7 { ∀ outer north face un=un[↓]; }
+
+/*∀ cells @ -8.7 {
+  if (uid==0) printf("\n[33m[U ini] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
 
 ∀ inner cells nlsw1_eqU @ -3.4 {
   const ℝ tv = ¼*(vn[↓]+vn[↘]+vn+vn[→]);
@@ -68,9 +76,22 @@
   const ℝ dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
   unp = un - ½*δt*dequ;
 }
+/*∀ cells @ -3.39 {
+  if (uid==0) printf("\n[33m[Unp ini] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
 
 ∀ inner east cells @ -3.35 { unp=0.0; }
-∀ inner south cells @ -3.35 { unp=0.0; }
+//∀ inner south cells @ -3.35 { unp=0.0; }
+
+/*∀ cells @ -3.34 {
+  if (uid==0) printf("\n[33m[Unp ini] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
 
 iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 ∀ inner cells @ -3.9{
@@ -79,6 +100,13 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 }
 
 ∀ inner cells ini_update_un @ -3 { un = unp; }
+
+/*∀ cells @ -3 {
+  if (uid==0) printf("\n[33m[Un before loop] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
 
 // ***************************************************************************
 // * Compute loop
@@ -102,6 +130,13 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 
 ∀ inner east cells @ 2.1 { unp=0.0; }
 
+/*∀ cells @ 2.1 {
+  if (uid==0) printf("\n[33m[UnP] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
 ∀ inner cells @ 2.2 { // Runup
   const ℝ ε = option_epsd;
   const ℝ coef_grad_h = coef_gradx_h;
@@ -123,6 +158,13 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
 
 ∀ inner cells @ 3 { un = unp; }
 
+/*∀ cells @ 3 {
+  if (uid==0) printf("\n[33m[Un] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
 // ***************************************************************************
 // * UN Boundaries
 // ***************************************************************************
@@ -131,5 +173,12 @@ iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
   un = hn * √(GZ/d);
 }
 
-∀ outer west cells @ 7.2 { ∀ outer south faces un=un[↑]; }
-∀ outer west cells @ 7.2 { ∀ outer north faces un=un[↓]; }
+∀ outer /*west*/ cells @ 7.2 { ∀ outer south faces un=un[↑]; }
+∀ outer /*west*/ cells @ 7.2 { ∀ outer north faces un=un[↓]; }
+
+/*∀ cells @ 7.3 {
+  if (uid==0) printf("\n[33m[Un Boundaries] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/

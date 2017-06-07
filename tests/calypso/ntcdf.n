@@ -110,11 +110,27 @@ read_water_inlet @ -20.0 {
   ℝ tm;
   FILE *stream=fopen("./data/inlet.data", "r");
   assert(stream);
-  debug()<<"[37m[boundary] Water inlet file[m";
+  info()<<"[37m[boundary] Water inlet file[m";
   hmax_bound=0.0;
   for(ℕ k=0;k<MAX_INLET_NB;k+=1){
     if (fscanf(stream,"%lf %lf", &tm,&inlet[k])!=2) return;
     hmax_bound=fmax(hmax_bound,inlet[k]);
   }
   fclose(stream);
+}
+
+
+// ***************************************************************************
+// * refill
+// ***************************************************************************
+int kReFill=0;
+ℝ refill(const ℕ offset){
+  if (offset==0) kReFill=0;
+  const ℕ k= kReFill++;
+  const ℕ i = (k%X_EDGE_ELEMS)+1;
+  const ℕ j = (k/X_EDGE_ELEMS)+1;
+  ℝ data = 0.0;
+  data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+  data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+  return data;
 }

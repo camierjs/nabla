@@ -66,10 +66,10 @@ char* nccArcLibCartesianHeader(void){
 char* nccArcLibCartesianPrivates(void){
   return "\
 \n\tbool faceIsOuter(FaceEnumerator f){return f->isSubDomainBoundary();}\
-\n\tbool faceIsSouth(FaceEnumerator f){return (f.index()==3)?true:false;}\
-\n\tbool faceIsNorth(FaceEnumerator f){return (f.index()==1)?true:false;}\
-\n\tbool faceIsWest(FaceEnumerator f){return (f.index()==0)?true:false;}\
-\n\tbool faceIsEast(FaceEnumerator f){return (f.index()==2)?true:false;}\
+\n\tbool faceIsSouth(FaceEnumerator f){return (f.index()==0)?true:false;}\
+\n\tbool faceIsNorth(FaceEnumerator f){return (f.index()==2)?true:false;}\
+\n\tbool faceIsWest(FaceEnumerator f){return (f.index()==3)?true:false;}\
+\n\tbool faceIsEast(FaceEnumerator f){return (f.index()==1)?true:false;}\
 \n\tbool faceIsOuterSouth(FaceEnumerator f){return faceIsSouth(f) and faceIsOuter(f);}\
 \n\tbool faceIsOuterNorth(FaceEnumerator f){return faceIsNorth(f) and faceIsOuter(f);}\
 \n\tbool faceIsOuterWest(FaceEnumerator f){return faceIsWest(f) and faceIsOuter(f);}\

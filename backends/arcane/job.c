@@ -383,8 +383,8 @@ char* arcaneHookPostfixEnumerate(nablaJob *job){
     
     if (job->direction[7] == 'n')
       strcat(postfix,"\n\
-\t\tDirCell cyx(cdx.cell(cy.previous()));\n\
-\t\tCell north_west=cyx.next();\n\t\t");
+\t\tDirCell cyx(cdx.cell(cy.next()));\n\
+\t\tCell north_west=cyx.previous();\n\t\t");
 
     // On retourne notre chaîne construite
     return sdup(postfix);
