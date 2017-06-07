@@ -120,10 +120,10 @@ void fill(double *m) {
 }
 
 // ***************************************************************************
-// * inner_refill
+// * refill
 // ***************************************************************************
 int kReFill=0;
-ℝ inner_refill(const ℕ offset){
+ℝ refill(const ℕ offset){
   if (offset==0) kReFill=0;
   const ℕ k= kReFill++;
   const ℕ i = (k%X_EDGE_ELEMS)+1;

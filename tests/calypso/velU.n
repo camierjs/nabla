@@ -41,7 +41,8 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
-iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
+//iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
+∀ cells @ -8.8 if (option_fill) { un=refill(uid); }
 
 ∀ outer west cells iniUow @ -8.7 {
   assert(d!=0.0);
