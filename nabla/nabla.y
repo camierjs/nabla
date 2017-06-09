@@ -82,7 +82,7 @@ extern char *last_identifier;
 %token ATTRIBUTE ASM // GNU_VA_LIST
 %token IS IS_OP_INI IS_OP_END
 %token SET_INI SET_END
-%token K_OFFSET
+%token STARHEAD K_OFFSET
 
  // MATHS tokens
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
@@ -961,6 +961,7 @@ with_library: WITH with_library_list ';'{rhs;};
 nabla_grammar
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
 : INCLUDES {/*$1->token[0]='#';*/   {rhsPatch(0,'#');}}
+| STARHEAD                      {/* Just skip it */}
 | preproc                       {rhs;}
 | with_library                  {rhs;}
 | declaration                   {rhs;}

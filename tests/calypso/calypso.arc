@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <case codeversion="1.0" codename="calypso" xml:lang="en">
+  
   <arcane>
 	 <title>MonaiValeyTest</title>
 	 <timeloop>calypsoLoop</timeloop>
@@ -17,7 +18,7 @@
 	 <output>
 		<variable>cell_h</variable>
 		<variable>cell_hn</variable>
-		<variable>cell_d</variable>
+		<!--variable>cell_d</variable-->
  		<variable>cell_un</variable>
  		<variable>cell_vn</variable>
      <group>AllCells</group>
@@ -32,10 +33,10 @@
   <mesh>
     <meshgenerator>
       <cartesian>
-		  <nsd>4 1</nsd>
+		  <nsd>2 1</nsd>
 		  <origine>0.0 0.0 0.0</origine>
-		  <lx nx="66" prx="1.0">1.0</lx>
-		  <ly ny="50" pry="1.0">1.0</ly>
+		  <lx nx="66" prx="1.0">0.1</lx>
+		  <ly ny="50" pry="1.0">0.1</ly>
 	   </cartesian>
     </meshgenerator>
   </mesh>
@@ -46,6 +47,7 @@
     <X_EDGE_ELEMS>66</X_EDGE_ELEMS>
     <Y_EDGE_ELEMS>50</Y_EDGE_ELEMS>
     <option_eps_fp>1.0e-12</option_eps_fp>
+    <option_fill>false</option_fill>
     <option_arcane>true</option_arcane>
     <option_max_iterations>8</option_max_iterations>
   </calypso>

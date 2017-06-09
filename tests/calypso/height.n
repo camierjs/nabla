@@ -136,6 +136,11 @@ iniHmax @ 0 { hmax=-∞; }
 // ***************************************************************************
 ∀ cells @ 9.1 { h=hn; }
 
+∀ outer cells @ 9.1 { ∀ outer south face h=-hn[↑];}
+∀ outer cells @ 9.1 { ∀ outer north face h=-hn[↓];}
+∀ outer cells @ 9.1 { ∀ outer east faces h=-hn[←];}
+∀ outer cells @ 9.1 { ∀ outer west faces h=-hn[→];}
+
 /*∀ cells @ 9.1 {
   if (uid==0) printf("\n[33m[H] h:[m");
   if ((uid%X_EDGE_ELEMS)==0) printf("\n");
@@ -143,7 +148,3 @@ iniHmax @ 0 { hmax=-∞; }
   if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
   }
 */
-∀ outer cells @ 9.1 { ∀ outer south face h=hn[↑];}
-∀ outer cells @ 9.1 { ∀ outer north face h=hn[↓];}
-∀ outer cells @ 9.1 { ∀ outer east faces h=hn[←];}
-∀ outer cells @ 9.1 { ∀ outer west faces h=hn[→];}

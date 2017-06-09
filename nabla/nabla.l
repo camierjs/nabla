@@ -74,6 +74,7 @@ H					[a-fA-F0-9]
 E					[Ee][+-]?{D}+
 FS					(f|F|l|L)
 IS					(u|U|l|L)*
+starhead       [\n][*]([ ]|{L}+)*
 preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-4])*
 includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 koffsets       [\[][#][+-]?[0-9]*[\]]
@@ -355,6 +356,7 @@ __asm__           { return tok(&yylval, ASM);}
 
 [ \t\v\f]		   { /*ignore*/ }
 
+{starhead}		   { return tok(&yylval, STARHEAD); }
 {preprocs}		   { return tok(&yylval, PREPROCS); }
 {includes}		   { return tok(&yylval, INCLUDES); }
 {koffsets}		   { return tok(&yylval, K_OFFSET); }

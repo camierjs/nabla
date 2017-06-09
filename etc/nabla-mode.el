@@ -1,6 +1,6 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
 (defconst nabla-version "nabla" "Nabla Mode version number")
-(defconst nabla-time-stamp "2017-05-18"
+(defconst nabla-time-stamp "2017-06-09"
   "Nabla Mode time stamp for last update.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -130,6 +130,7 @@
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
    ;; highlight special keywords
+   '("^* .+" . font-lock-comment-face)
    ;'("\\(⁰\\)" . font-lock-variable-name-face)
    '("\\(ⁿ⁺¹\\|ⁿ⁼⁰\\|ⁿ\\)" . font-lock-constant-face)
    '("\\(²ˣ²\\|³ˣ³\\)" . font-lock-type-face)
