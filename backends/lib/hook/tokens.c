@@ -43,8 +43,8 @@
 #include "nabla.h"
 #include "nabla.tab.h"
 
-static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, const astNode *n){
-  const astNode* isNode = dfsFetchTokenId(n->next,IS);
+static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, const node *n){
+  const node* isNode = dfsFetchTokenId(n->next,IS);
   assert(isNode);
   assert(isNode->next);
   const char *token2function = isNode->next->token;
@@ -57,7 +57,7 @@ static void xHookIsTestIni(nablaMain *nabla, nablaJob *job, const astNode *n){
 //#warning Et on purge le token pour pas quil soit parsé
   isNode->next->token[0]=0;
 }
-static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, const astNode *n){
+static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, const node *n){
   nprintf(nabla, "/*IS_OP_END*/", ")");
 }
 
@@ -65,7 +65,7 @@ static void xHookIsTestEnd(nablaMain *nabla, nablaJob *job, const astNode *n){
 // *****************************************************************************
 // *
 // *****************************************************************************
-void xHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+void xHookIsTest(nablaMain *nabla, nablaJob *job, node *n, int token){
   assert(token==IS || token==IS_OP_INI || token==IS_OP_END);
   if (token==IS_OP_INI) xHookIsTestIni(nabla,job,n);
   if (token==IS) return;
@@ -85,26 +85,31 @@ void xHookTurnTokenToOption(struct nablaMainStruct *nabla,nablaOption *opt){
 // ****************************************************************************
 // * FORALL token switch
 // ****************************************************************************
-static bool xHookSwitchForall(astNode *n, nablaJob *job){
+static bool xHookSwitchForall(node *n, nablaJob *job){
   const char cnfg=job->item[0];
 
-// Preliminary pertinence test
+  // Preliminary pertinence test
   if (n->tokenid != FORALL) return false;
   
-  if (n->token) dbg("\n\t\t\t\t\t[hookSwitchForall] token=%s",n->token);
-  
-  // Now we're allowed to work
-  const int tokenid = // si on a un identifiant ici
-    (n->next->children->tokenid==IDENTIFIER)?
-    n->next->children->next->children->tokenid: // on prend celui sous le forall_switch
-    n->next->children->children->tokenid; // sinon il est là
+  if (n->token) dbg("\n\t\t\t\t\t[xHookSwitchForall] token=%s",n->token);
 
-  dbg("\n\t\t\t\t\t[hookSwitchForall] tokenid=%d",tokenid);
+  dbg("\n\t\t\t\t\t[xHookSwitchForall] forall_range");
+  node *forall_range = n->next;
+  assert(forall_range);
+  job->enum_enum_node=forall_range;
+  
+  dbg("\n\t\t\t\t\t[xHookSwitchForall] dfsHit switch");
+  node *forall_switch = dfsHit(forall_range->children,ruleToId(rule_forall_switch));
+  assert(forall_switch);
+      
+  // Récupération du tokenid du forall_switch
+  const int tokenid = forall_switch->children->tokenid;
+  dbg("\n\t\t\t\t\t[xHookSwitchForall] tokenid=%d",tokenid);
   
   switch(tokenid){
-  case(CELL): dbg("\n\t\t\t\t\t[hookSwitchForall] CELL");
+  case(CELL): dbg("\n\t\t\t\t\t[xHookSwitchForall] CELL");
   case(CELLS):{
-    dbg("\n\t\t\t\t\t[hookSwitchForall] CELLS");
+    dbg("\n\t\t\t\t\t[xHookSwitchForall] CELLS");
     job->parse.enum_enum='c';
     if (job->item[0]=='f')
       nprintf(job->entity->main, "/*f_foreach_c*/", "FOR_EACH_FACE_CELL(c)");
@@ -112,9 +117,9 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
       nprintf(job->entity->main, "/*n_foreach_c*/", "FOR_EACH_NODE_CELL(c)");
     return true;
   }
-  case(NODE): dbg("\n\t\t\t\t\t[hookSwitchForall] NODE");
+  case(NODE): dbg("\n\t\t\t\t\t[xHookSwitchForall] NODE");
   case(NODES):{
-    dbg("\n\t\t\t\t\t[hookSwitchForall] NODES");
+    dbg("\n\t\t\t\t\t[xHookSwitchForall] NODES");
     job->parse.enum_enum='n';
     if ((job->entity->libraries&(1<<with_real))!=0) // Iteration 1D
       nprintf(job->entity->main, "/*chsf n*/", "for(int n=0;n<2;++n)");
@@ -129,9 +134,9 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
     }
     return true;
   }
-  case(FACE):dbg("\n\t\t\t\t\t[hookSwitchForall] FACE");
+  case(FACE):dbg("\n\t\t\t\t\t[xHookSwitchForall] FACE");
   case(FACES):{
-    dbg("\n\t\t\t\t\t[hookSwitchForall] FACES");
+    dbg("\n\t\t\t\t\t[xHookSwitchForall] FACES");
     job->parse.enum_enum='f';
     if (job->item[0]=='c')
       nprintf(job->entity->main, "/*chsf fc*/", "for(int f=0;f<4;++f)");
@@ -141,18 +146,18 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
   }
   case(SET):{
     const char *idMax=n->next->children->token;
-    dbg("\n\t\t\t\t\t[hookSwitchForall] SET");
+    dbg("\n\t\t\t\t\t[xHookSwitchForall] SET");
     nprintf(job->entity->main, "/*set*/", "for(int s=0;s<%s;s+=1)",idMax);
     //Skip de l'id et du forall_switch
     *n=*n->next->next;
     return true;
   }
     
-  default: exit(printf("[hookSwitchForall] UNKNOWN!"));
+  default: exit(printf("[xHookSwitchForall] UNKNOWN!"));
   }
   // Attention au cas où on a un @ au lieu d'un statement
   if (n->next->next->tokenid == AT){
-    dbg("\n\t\t\t\t\t[hookSwitchForall] @ au lieu d'un statement!");
+    dbg("\n\t\t\t\t\t[xHookSwitchForall] @ au lieu d'un statement!");
     nprintf(job->entity->main, "/* Found AT */", NULL);
   }
   return true;
@@ -162,7 +167,7 @@ static bool xHookSwitchForall(astNode *n, nablaJob *job){
 // *****************************************************************************
 // * xHookSwitchAleph
 // *****************************************************************************
-static bool xHookSwitchAleph(astNode *n, nablaJob *job){
+static bool xHookSwitchAleph(node *n, nablaJob *job){
   const nablaMain *nabla=job->entity->main;
 
   //nprintf(nabla, "/*xHookSwitchAleph*/","/*xHookSwitchAleph*/");
@@ -237,7 +242,7 @@ static bool xHookSwitchAleph(astNode *n, nablaJob *job){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void xHookSwitchToken(astNode *n, nablaJob *job){
+void xHookSwitchToken(node *n, nablaJob *job){
   nablaMain *nabla=job->entity->main;
   const char cnfgem=job->item[0];
   const char forall=job->parse.enum_enum;
@@ -257,6 +262,8 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
   switch(n->tokenid){
 
     // Si il y a un forall, il y a un item à skiper après
+  case(OUTER):break; case(INNER):break;
+  case(NORTH):break; case(EAST):break; case(SOUTH):break; case(WEST):break;
   case(FORALL):break;
   case(NODE):break;
   case(NODES):break;
@@ -533,6 +540,10 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     break;
   }
     
+  case (ITERATION):{
+    nprintf(nabla, NULL, "global_iteration[0]");
+    break;
+  }
   case (SID):{
     nprintf(nabla, NULL, "subDomain()->subDomainId()");
     break;
@@ -567,7 +578,7 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
     if (nabla->parallelism==BACKEND_PARALLELISM_OMP){
       char mnx[4]={'M','x','x','\0'};
       const char *var=dfsFetchFirst(job->stdParamsNode,ruleToId(rule_direct_declarator));
-      astNode *compound_statement=
+      node *compound_statement=
         dfsFetch(job->nblParamsNode,ruleToId(rule_compound_statement))->parent;
       //compound_statement=compound_statement->parent;
       assert(compound_statement!=NULL);
@@ -576,8 +587,8 @@ void xHookSwitchToken(astNode *n, nablaJob *job){
       /////////////////////////////////////
       // A *little* bit too cavalier here!
       /////////////////////////////////////
-      astNode *min=dfsFetchToken(compound_statement,"min");
-      astNode *max=dfsFetchToken(compound_statement,"max");
+      node *min=dfsFetchToken(compound_statement,"min");
+      node *max=dfsFetchToken(compound_statement,"max");
       assert(min!=NULL || max !=NULL);
       if (min!=NULL) {mnx[1]='i';mnx[2]='n'; nprintf(nabla,"/*MIN*/","/*OpenMP REDUCE MIN*/");}
       if (max!=NULL) {mnx[1]='a';mnx[2]='x'; nprintf(nabla,"/*MAX*/","/*OpenMP REDUCE MMAXIN*/");}

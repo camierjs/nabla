@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Node structure used for the AST
 // ****************************************************************************
-typedef struct astNodeStruct{
+typedef struct nodeStruct{
   unsigned int id; // Unique node ID
   char *token;
   const char *token_utf8;
@@ -54,25 +54,25 @@ typedef struct astNodeStruct{
   const char *rule;
   int ruleid;
   bool type_name;
-  struct astNodeStruct *next, *children, *parent;  
-}astNode;
+  struct nodeStruct *next, *children, *parent;  
+}node;
 
 
 // ****************************************************************************
 // * Forward declaration of AST NODE functions
 // ****************************************************************************
 void nAstListFree(void);
-astNode *astNewNode(char*, const unsigned int);
-astNode *astNewNodeRule(const char*,unsigned int);
-astNode *astAddChild(astNode*,astNode*);
-astNode *astAddNext(astNode*,astNode*);
+node *astNewNode(char*, const unsigned int);
+node *astNewNodeRule(const char*,unsigned int);
+node *astAddChild(node*,node*);
+node *astAddNext(node*,node*);
 
 // ****************************************************************************
 // * Forward declaration of AST TREE functions
 // ****************************************************************************
-NABLA_STATUS astTreeSave(const char*, astNode*);
-void getInOutPutsNodes(FILE*,astNode*,char*);
-void getInOutPutsEdges(FILE*,astNode*,int,char*,char*);
+NABLA_STATUS astTreeSave(const char*, node*);
+void getInOutPutsNodes(FILE*,node*,char*);
+void getInOutPutsEdges(FILE*,node*,int,char*,char*);
 
 
 int yyUndefTok(void);

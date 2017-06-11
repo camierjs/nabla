@@ -105,7 +105,7 @@ nodes{
 // ****************************************************************************
 // * Déclaration des variables aux mailles
 // ****************************************************************************
-cells{  
+cells{
   Real3 center;
   Real V;                                  // Volume des mailles
   Real p;                                  // Pression

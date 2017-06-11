@@ -1,0 +1,189 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+//iniUnFill6 @ -8.8 if (option_fill) { fill(un); }
+∀ cells @ -8.8 if (option_fill) { un=refill(uid); }
+
+∀ outer west cells iniUow @ -8.7 {
+  //info()<<"[iniUow] #"<<uid<<", d="<<d;
+  assert(d!=0.0);
+  un = hn * √(GZ/d);
+}
+
+∀ outer east cells iniUoe @ -8.7 { un=0.0; }
+∀ inner east cells iniUie @ -8.7 { un=0.0; }
+
+∀ outer cells iniUoosf @ -8.7 { ∀ outer south face un=un[↑]; }
+∀ outer cells iniUoonf @ -8.7 { ∀ outer north face un=un[↓]; }
+
+/*∀ cells @ -8.7 {
+  if (uid==0) printf("\n[33m[U ini] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+∀ inner cells nlsw1_eqU @ -3.4 {
+  const ℝ tv = ¼*(vn[↓]+vn[↘]+vn+vn[→]);
+  const ℝ ul = (un>0.0)?un:un[→];
+  const ℝ ur = (un>0.0)?un[←]:un;
+  const ℝ uu = (tv>0.0)?un:un[↑];
+  const ℝ ud = (tv>0.0)?un[↓]:un;
+  const ℝ tu1 = un*(ul-ur);
+  const ℝ tu2 = tv*(uu-ud);
+  const ℝ thu = GZ*(hn[→]-hn);
+  const ℝ tfc = -tv*fc;
+  const ℝ dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
+  unp = un - ½*δt*dequ;
+}
+/*∀ cells @ -3.39 {
+  if (uid==0) printf("\n[33m[Unp ini] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+∀ inner east cells @ -3.35 { unp=0.0; }
+//∀ inner south cells @ -3.35 { unp=0.0; }
+
+/*∀ cells @ -3.34 {
+  if (uid==0) printf("\n[33m[Unp ini] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+iniUMinMax @ -4.0 { umin=+∞; umax=-∞;}
+∀ inner cells @ -3.9{
+  umin = fmin(un,umin);
+  umax = fmax(un,umax);
+}
+
+∀ inner cells ini_update_un @ -3 { un = unp; }
+
+/*∀ cells @ -3 {
+  if (uid==0) printf("\n[33m[Un before loop] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+// ***************************************************************************
+// * Compute loop
+// ***************************************************************************
+
+∀ outer cells @ 2.0 { unp=0.0; }
+
+∀ inner cells @ 2.0 {
+  const ℝ tv = ¼*(vn[↓]+vn[↘]+vn+vn[→]);
+  const ℝ ul = (un>0.0)?un:un[→];
+  const ℝ ur = (un>0.0)?un[←]:un;
+  const ℝ uu = (tv>0.0)?un:un[↑];
+  const ℝ ud = (tv>0.0)?un[↓]:un;
+  const ℝ tu1 = un*(ul-ur);
+  const ℝ tu2 = tv*(uu-ud);
+  const ℝ thu = GZ*(hn[→]-hn);
+  const ℝ tfc = -tv*fc;
+  const ℝ dequ = (tu1+thu)*inv_dx + tu2*inv_dy + tfc;
+  unp = un - δt*dequ;
+}
+
+∀ inner east cells @ 2.1 { unp=0.0; }
+∀ inner east cells @ 7.2 if (option_arcane) { un=0.0;}
+
+/*∀ cells @ 2.1 {
+  if (uid==0) printf("\n[33m[UnP] unp:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",unp);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+∀ inner cells @ 2.2 { // Runup
+  const ℝ ε = option_epsd;
+  const ℝ coef_grad_h = coef_gradx_h;
+  if (d_hn < ε){
+    if (d_hn[→]<ε or hn[→]<-d) unp = 0.0;
+    if (unp<0.0 and hn[→]>hn) unp -=  coef_grad_h*(hn+d[→]);
+    continue;
+  }
+  if (d_hn[→] < ε){
+    if (hn < -d[→]) unp = 0.0;
+    if (unp>0.0 and hn>hn[→]) unp += coef_grad_h*(hn[→]+d);
+    continue;
+  }
+  if (unp>0.0){
+    if (-d>hn[→]) unp += coef_grad_h*(hn[→]+d);
+    if (-d[→]>hn) unp -= coef_grad_h*(hn+d[→]);
+  }
+}
+
+∀ inner cells @ 3 { un = unp; }
+
+/*∀ cells @ 3 {
+  if (uid==0) printf("\n[33m[Un] un:[m");
+  if ((uid%X_EDGE_ELEMS)==0) printf("\n");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }*/
+
+// ***************************************************************************
+// * UN Boundaries
+// ***************************************************************************
+∀ outer west cells @ 7.2 {
+  assert(d!=0.0);
+  un = hn * √(GZ/d);
+}
+
+∀ outer /*west*/ cells @ 7.2 { ∀ outer south faces un=un[↑]; }
+∀ outer /*west*/ cells @ 7.2 { ∀ outer north faces un=un[↓]; }
+
+//∀ outer east cells @ 7.21 { printf("\n[33m[outer east Un] un[%d][m",uid); un = 0.0; }
+
+/*∀ cells @ 7.3 {
+  if (uid==0) printf("\n[33m[Un Boundaries] un:[m");
+  if ( option_arcane && (uid%X_EDGE_ELEMS)==0) printf("\n");
+  if (!option_arcane && (uid%X_EDGE_ELEMS)==0) printf("\nxx: ");
+  printf(" %.12f",un);
+  if (uid==(X_EDGE_ELEMS*Y_EDGE_ELEMS-1)) printf("\n[m");
+  }
+*/

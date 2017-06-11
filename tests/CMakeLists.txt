@@ -211,6 +211,7 @@ if (ARCANE_FOUND)
   # Lulesh, Arcane version
   nabla_add_arcane_test(llshrc 1 run)
   nabla_add_arcane_test(llshrc 4 run)
+  nabla_add_arcane_test(calypso 1 run)
 if (HYPRE_FOUND)
   nabla_add_arcane_test_with_additional_defines(darcy 1 run ALEPH_INDEX)
   nabla_add_arcane_test_with_additional_defines(darcy 4 run ALEPH_INDEX)
@@ -222,8 +223,8 @@ if (HYPRE_FOUND)
   # OK, mais trop de temps:nabla_add_arcane_test_with_additional_defines(pDDFV 4 run ALEPH_INDEX)
   # A FAIRE nabla_add_arcane_test_with_additional_defines(propagateur 1 run ALEPH_INDEX)
 endif (HYPRE_FOUND)
-  # No ICartesianMesh out of CEA # nabla_add_arcane_test(sethi 1 run)
-  # No ICartesianMesh out of CEA # nabla_add_arcane_test(sethi 4 run)
+  # No ICartesianMesh out of CEA #nabla_add_arcane_test(sethi 1 run)
+  # No ICartesianMesh out of CEA #nabla_add_arcane_test(sethi 4 run)
   nabla_add_arcane_test(shydro 1 run)
   # OK, mais trop de temps:nabla_add_arcane_test(shydro 3 run)
   # OK, mais trop de temps:nabla_add_arcane_test(shydro 4 run)
@@ -288,7 +289,7 @@ nabla_add_okina_test(p1apwb1D_gosse 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_irregular_mesh 1 run std seq)
 nabla_add_okina_test(p1apwb1D_two_state_semi_implicite 1 run std seq)
 
-#nabla_add_okina_test(p12d 1 run std seq)
+#nabla_add_okina_test(p12del 1 run std seq)
 #nabla_add_okina_test(propagateur 1 run std seq)
 
 
@@ -311,6 +312,29 @@ nabla_add_test(lambda ${VT100_FG_MAGENTA} upwindAP 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} hlt 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pennant 1 run seq)
 nabla_add_test(lambda ${VT100_FG_MAGENTA} pnnnt 1 run seq)
+nabla_add_test(lambda ${VT100_FG_MAGENTA} glcNxt 1 run seq)
+# calypso LAMBDA test, copy depth.nc and inlet.data
+nabla_add_test(lambda ${VT100_FG_MAGENTA} calypso 1 run seq)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth64x48.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/depth64x48.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth4x4.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/depth4x4.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/lambda/1/run/seq/data/inlet.data)
+# calypso ARCANE test, copy depth.nc and inlet.data
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth64x48.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/depth64x48.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/depth4x4.nc
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/depth4x4.nc)
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                ${CMAKE_CURRENT_SOURCE_DIR}/calypso/data/inlet.data
+                ${CMAKE_CURRENT_BINARY_DIR}/calypso/arcane/1/run/data/inlet.data)
+
 nabla_add_test_with_defines(lambda ${VT100_FG_MAGENTA} deflex 1 run seq -DNO_DEFINES 100000)
 if (HYPRE_FOUND)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} aleph1D 1 run seq)
@@ -322,7 +346,7 @@ if (HYPRE_FOUND)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} xgnplt 1 run seq)
 endif (HYPRE_FOUND)
    
-nabla_add_lambda_test(p12d 1 run seq)
+nabla_add_lambda_test(p12del 1 run seq)
 nabla_add_lambda_test(pdfLgvn 1 run seq)
 nabla_add_lambda_test(propagateur 1 run seq)
 

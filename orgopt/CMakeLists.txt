@@ -10,7 +10,7 @@ add_library(NablaOrgOpt ${BISON_oParser_OUTPUTS} ${FLEX_oScanner_OUTPUTS}
             ${NABLA_SOURCE_DIR}/frontend/dbg.c)
 
 add_executable(orgopt orgopt.c)
-target_link_libraries(orgopt NablaOrgOpt)
+target_link_libraries(orgopt NablaOrgOpt NablaFrontend)
 
 install(TARGETS orgopt DESTINATION bin)
 install(TARGETS NablaOrgOpt DESTINATION lib)

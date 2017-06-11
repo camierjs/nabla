@@ -41,6 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
+#include "nabla.tab.h"
 
 
 // ****************************************************************************
@@ -50,6 +51,10 @@ static char* xCallGatherCells(nablaJob *job,
                               nablaVariable* var){
   const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
   const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_bool_t = strcmp(var->type,"bool")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   const bool has_non_null_koffset = var->koffset!=0;
   char str_pip_koffset[64];
@@ -66,12 +71,13 @@ static char* xCallGatherCells(nablaJob *job,
   
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
-/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":dim1D?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
+/*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_node[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+             var->type,
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
-             strcmp(var->type,"real")==0?"":dim1D?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
+             is_int_t?"N":is_real_t?"":dim1D?"":is_real3x3_t?"3x3":"3",
              has_non_null_koffset ? str_pip_koffset:iterator,
              var->item,
              var->name,
@@ -79,16 +85,17 @@ static char* xCallGatherCells(nablaJob *job,
   
   if (var->item[0]=='f')
     snprintf(gather, 1024, "\
-/*const*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
-              strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":dim2D?"real2":"real3",
-              var->item,
-              var->name,
+/*const %s*/ %s gathered_%s_%s%s=rgather%sk(xs_cell_face[%s*NABLA_NB_CELLS+(c<<WARP_BIT)],%s_%s%s);\n\t\t\t",
+             var->type,
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
+             var->item,
+             var->name,
              has_non_null_koffset ? str_uds_koffset:"",             
-              strcmp(var->type,"real")==0?"":strcmp(var->type,"real3x3")==0?"3x3":"3",
-              has_non_null_koffset ? str_pip_koffset:iterator,
-              var->item,
-              var->name,
-              strcmp(var->type,"real")==0?"":"");
+             is_bool_t?"B":is_int_t?"N":is_real_t?"":is_real3x3_t?"3x3":"3",
+             has_non_null_koffset ? str_pip_koffset:iterator,
+             var->item,
+             var->name,
+             strcmp(var->type,"real")==0?"":"");
   
   return sdup(gather);
 }
@@ -100,11 +107,16 @@ static char* xCallGatherCells(nablaJob *job,
 // ****************************************************************************
 static char* xCallGatherNodes(nablaJob *job,
                               nablaVariable* var){
-  bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_bool_t = strcmp(var->type,"bool")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_node_cell[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],%s %s_%s);\n\t\t\t",
-           strcmp(var->type,"real")==0?"real":dim1D?"real":"real3",
+           is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
            var->item,
            var->name,
            var->dim==0?"":"xs_node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+c],",
@@ -119,12 +131,18 @@ static char* xCallGatherNodes(nablaJob *job,
 // ****************************************************************************
 static char* xCallGatherFaces(nablaJob *job,
                               nablaVariable* var){
+  const bool dim1D = (job->entity->libraries&(1<<with_real))!=0;
+  const bool dim2D = (job->entity->libraries&(1<<with_real2))!=0;
+  const bool is_int_t = strcmp(var->type,"integer")==0;
+  const bool is_real_t = strcmp(var->type,"real")==0;
+  const bool is_bool_t = strcmp(var->type,"bool")==0;
+  const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   
   if (var->item[0]=='n')
     snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_face_node[NABLA_NB_FACES*(n<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              var->dim==0?"":"xs_node_cell_corner[NABLA_NODE_PER_CELL*(n<<WARP_BIT)+f],",
@@ -133,7 +151,7 @@ static char* xCallGatherFaces(nablaJob *job,
   if (var->item[0]=='c')
     snprintf(gather, 1024, "\
 %s gathered_%s_%s=rGatherAndZeroNegOnes(xs_face_cell[NABLA_NB_FACES*(c<<WARP_BIT)+f],%s %s_%s);\n\t\t\t",
-             strcmp(var->type,"real")==0?"real":strcmp(var->type,"real3x3")==0?"real3x3":"real3",
+             is_bool_t?"bool":is_int_t?"int":is_real_t?"real":is_real3x3_t?"real3x3":dim2D?"real2":dim1D?"real":"real3",
              var->item,
              var->name,
              var->dim==0?"":"/*xCallGatherFaces and var->dim==1*/",
@@ -156,6 +174,33 @@ char* xCallGather(nablaJob *job,nablaVariable* var){
 
 
 // ****************************************************************************
+// * 
+// ****************************************************************************
+static void xCallEnumEnumContinues(node *n,nablaJob *job){
+  const nablaMain *nabla = job->entity->main;
+  //dbg("\n\t\t\t\t[xCallEnumEnumContinues]");
+  assert(job->enum_enum_node);
+  node *forall_range = job->enum_enum_node;
+  const node *nesw = dfsHit(forall_range,ruleToId(rule_nabla_nesw));
+  const node *region = dfsHit(forall_range->children,ruleToId(rule_nabla_region));
+  
+  if (nesw && nesw->children->tokenid==NORTH)
+    nprintf(nabla,NULL,"if (f!=2/*NORTH*/) continue;");
+  if (nesw && nesw->children->tokenid==EAST)
+    nprintf(nabla,NULL,"if (f!=1/*EAST*/) continue;");
+  if (nesw && nesw->children->tokenid==SOUTH)
+    nprintf(nabla,NULL,"if (f!=0/*SOUTH*/) continue;");
+  if (nesw && nesw->children->tokenid==WEST)
+    nprintf(nabla,NULL,"if (f!=3/*WEST*/) continue;");
+  
+  if (region && region->children->tokenid==OUTER)
+    nprintf(nabla,NULL,"\n\t\t\tconst int fid=xs_cell_face[f*NABLA_NB_CELLS+(c<<WARP_BIT)];\
+\n\t\t\tif (fid<msh->NABLA_NB_FACES_INNER) continue;\n\t\t\t");
+
+}
+
+
+// ****************************************************************************
 // * Filtrage du GATHER
 // ****************************************************************************
 // * Une passe devrait être faite à priori afin de déterminer les contextes
@@ -164,7 +209,13 @@ char* xCallGather(nablaJob *job,nablaVariable* var){
 // ****************************************************************************
 // * Idem, si on a différents ∀, pour l'instant ils gatherent trop!
 // ****************************************************************************
-char* xCallFilterGather(astNode *n,nablaJob *job){
+char* xCallFilterGather(node *n,nablaJob *job){
+  if (n!=NULL && job->enum_enum_node){
+    // n==NULL quand on vient de xHookForAllPostfix, ce qu'on veut pas
+    dbg("\n\t\t\t\t[xFilterGather] Launching xCallEnumEnumContinues");
+    xCallEnumEnumContinues(n,job);
+  }
+  
   dbg("\n\t\t\t\t[xFilterGather]");
   char *gather_src_buffer=NULL;  
   if ((gather_src_buffer=calloc(NABLA_MAX_FILE_NAME,sizeof(char)))==NULL)

@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * Generic DFS scan for specifics actions
 // ****************************************************************************
-void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc){
+void scanTokensForActions(node * n, RuleAction *tokact, void *arc){
   unsigned int nId=tokenidToRuleid(n->tokenid);
   for(int i=0;tokact[i].action!=NULL;++i)
     if ((nId==tokact[i].ruleid)||(n->ruleid==tokact[i].ruleid)) tokact[i].action(n,arc);
@@ -58,7 +58,7 @@ void scanTokensForActions(astNode * n, RuleAction *tokact, void *arc){
 // ****************************************************************************
 // * DFS scan until a first hit is found
 // ****************************************************************************
-char *dfsFetchFirst(astNode *n, int ruleid){
+char *dfsFetchFirst(node *n, int ruleid){
   char *rtn;
   //if (n->ruleid!=0) dbg("\n\t[dfsFetchFirst] n->rule=%s",n->rule);
   if (n->ruleid==ruleid) {
@@ -89,7 +89,7 @@ char *dfsFetchFirst(astNode *n, int ruleid){
 // ****************************************************************************
 // * DFS scan until a all hit is found
 // ****************************************************************************
-char *dfsFetchAll(astNode *n, const int ruleid,
+char *dfsFetchAll(node *n, const int ruleid,
                 int *idx,
                 char *rtn){
   //if (n->ruleid) dbg("\n\t[dfsFetchAll] n->rule=%s",n->rule);
@@ -112,12 +112,12 @@ char *dfsFetchAll(astNode *n, const int ruleid,
 // ****************************************************************************
 // On lance une recherche dfs jusqu'à un token en next 
 // ****************************************************************************
-astNode *dfsFetch(astNode *n, int ruleid){
+node *dfsFetch(node *n, int ruleid){
   //if (n==NULL) return;
   //if (n->ruleid!=0) dbg("\n\t\t[dfsFetch] n->rule=%s",n->rule?rtn->rule:"xNULL");
   if (n->ruleid==ruleid) return n->children;
   if (n->children != NULL){
-    astNode *rtn=dfsFetch(n->children, ruleid);
+    node *rtn=dfsFetch(n->children, ruleid);
     if (rtn!=NULL){
       //dbg("\n\t\t[dfsFetch] return %s",rtn->rule?rtn->rule:"yNULL");
       return rtn;
@@ -126,7 +126,7 @@ astNode *dfsFetch(astNode *n, int ruleid){
   // Si on a un voisin token non null, on évite de parser tout la branche pour rien
   //if (n->next!=NULL)    if (n->next->token!=0)      return NULL;
   if (n->next != NULL){
-    astNode *rtn=dfsFetch(n->next, ruleid);
+    node *rtn=dfsFetch(n->next, ruleid);
     if (rtn!=NULL){
       //dbg("\n\t\t[dfsFetch] return %s", rtn->rule?rtn->rule:"zNULL");
       return rtn;
@@ -138,9 +138,39 @@ astNode *dfsFetch(astNode *n, int ruleid){
 
 
 // ****************************************************************************
+// On lance une recherche dfs jusqu'au premier hit
+// ****************************************************************************
+node *dfsHit(node *n, int ruleid){
+  /*if (n->ruleid!=0) dbg("\n\t\t[dfsHit] n->rule=%s, n->ruleid=%d, ruleid=%d",
+                        n->rule?n->rule:"xNULL",
+                        n->ruleid,ruleid);*/
+  if (n->ruleid==ruleid){
+    //dbg("\n\t\t[dfsHit] hit ruleid=%d",ruleid);
+    return n;
+  }
+  if (n->children != NULL){
+    node *rtn=dfsHit(n->children, ruleid);
+    if (rtn!=NULL){
+      //dbg("\n\t\t[dfsHit] return %s",rtn->rule?rtn->rule:"yNULL");
+      return rtn;
+    }
+  }
+  if (n->next != NULL){
+    node *rtn=dfsHit(n->next, ruleid);
+    if (rtn!=NULL){
+      //dbg("\n\t\t[dfsHit] return %s", rtn->rule?rtn->rule:"zNULL");
+      return rtn;
+    }
+  }
+  //dbg("\n\t\t[dfsHit] return NULL");
+  return NULL;
+}
+
+
+// ****************************************************************************
 // 
 // ****************************************************************************
-void dfsDumpToken(astNode *n){
+void dfsDumpToken(node *n){
   if (n->token!=NULL) dbg("%s",n->token);
   if (n->children != NULL) dfsDumpToken(n->children);
   if (n->next != NULL) dfsDumpToken(n->next);
@@ -150,7 +180,7 @@ void dfsDumpToken(astNode *n){
 // ****************************************************************************
 // * DFS scan until tokenid is found
 // ****************************************************************************
-astNode *dfsFetchTokenId(astNode *n, int tokenid){
+node *dfsFetchTokenId(node *n, int tokenid){
   if (n==NULL){
     //dbg("\n\t\t[dfsFetchToken] return first NULL");
     return NULL;
@@ -161,14 +191,14 @@ astNode *dfsFetchTokenId(astNode *n, int tokenid){
     return n;
   }
   if (n->children != NULL){
-    astNode* dfs_id=dfsFetchTokenId(n->children, tokenid);
+    node* dfs_id=dfsFetchTokenId(n->children, tokenid);
     if (dfs_id!=NULL){
       //dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
       return dfs_id;
     }
   }
   if (n->next != NULL){
-    astNode* dfs_id=dfsFetchTokenId(n->next, tokenid);
+    node* dfs_id=dfsFetchTokenId(n->next, tokenid);
     if (dfs_id!=NULL){
       //dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
       return dfs_id;
@@ -182,7 +212,7 @@ astNode *dfsFetchTokenId(astNode *n, int tokenid){
 // ****************************************************************************
 // * DFS scan until token is found
 // ****************************************************************************
-astNode *dfsFetchToken(astNode *n, const char *token){
+node *dfsFetchToken(node *n, const char *token){
   dbg("\n\t\t[dfsFetchToken] looking for token '%s'", token);
   if (n==NULL){
     dbg("\n\t\t[dfsFetchToken] n==NULL, returning");
@@ -197,14 +227,14 @@ astNode *dfsFetchToken(astNode *n, const char *token){
     }
   }
   if (n->children != NULL){
-    astNode* rtn=dfsFetchToken(n->children, token);
+    node* rtn=dfsFetchToken(n->children, token);
     if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchToken] cFound return %s", rtn->token);
       return rtn;
     }
   }
   if (n->next != NULL){
-    astNode *rtn=dfsFetchToken(n->next, token);
+    node *rtn=dfsFetchToken(n->next, token);
     if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchToken] nFound return %s", rtn->token);
       return rtn;
@@ -219,7 +249,7 @@ astNode *dfsFetchToken(astNode *n, const char *token){
 // ****************************************************************************
 // * dfsFetchRule
 // ****************************************************************************
-astNode *dfsFetchRule(astNode *n, int ruleid){
+node *dfsFetchRule(node *n, int ruleid){
   if (n==NULL){
     dbg("\n\t\t[dfsFetchRule] return first NULL");
     return NULL;
@@ -230,14 +260,14 @@ astNode *dfsFetchRule(astNode *n, int ruleid){
     return n;
   }
   if (n->children != NULL){
-    astNode *rtn=dfsFetchRule(n->children, ruleid);
+    node *rtn=dfsFetchRule(n->children, ruleid);
     if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchRule] cFound return %s", rtn->rule);
       return rtn;
     }
   }
   if (n->next != NULL){
-    astNode *rtn=dfsFetchRule(n->next, ruleid);
+    node *rtn=dfsFetchRule(n->next, ruleid);
     if (rtn!=NULL){
       dbg("\n\t\t[dfsFetchRule] nFound return %s", rtn->rule);
       return rtn;
@@ -252,7 +282,7 @@ astNode *dfsFetchRule(astNode *n, int ruleid){
 // * Ajout des variables d'un job trouvé depuis une fonction @ée
 // *****************************************************************************
 static void addNablaVariableList(nablaMain *nabla,
-                                 astNode *n,
+                                 node *n,
                                  nablaVariable **variables){
   if (n==NULL) return;
   if (n->tokenid!=0)
@@ -313,7 +343,7 @@ static void addNablaVariableList(nablaMain *nabla,
 // * DFS scan to get all job calls
 // ****************************************************************************
 //#warning Seules les fonctions @ées peuvent lancer des jobs!
-int dfsScanJobsCalls(void *vars, void *main, astNode * n){
+int dfsScanJobsCalls(void *vars, void *main, node * n){
   nablaMain *nabla=(nablaMain*)main;
   nablaVariable **variables=(nablaVariable**)vars;
   int nb_called=0;

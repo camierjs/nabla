@@ -44,11 +44,11 @@
 #include "nabla.h"
 #include "nabla.y.h" 
 #undef YYDEBUG
-#define YYSTYPE astNode*
+#define YYSTYPE node*
 int yylineno;
 char nabla_input_file[1024];
 int yylex(void);
-void yyerror(astNode **root, const char *s);
+void yyerror(node **root, const char *s);
 bool type_volatile=false;
 bool type_precise=false;
 bool adrs_it=false;
@@ -82,7 +82,7 @@ extern char *last_identifier;
 %token ATTRIBUTE ASM // GNU_VA_LIST
 %token IS IS_OP_INI IS_OP_END
 %token SET_INI SET_END
-%token K_OFFSET
+%token STARHEAD K_OFFSET
 
  // MATHS tokens
 %token SQUARE_ROOT_OP CUBE_ROOT_OP N_ARY_CIRCLED_TIMES_OP
@@ -106,14 +106,20 @@ extern char *last_identifier;
 %token FORALL FORALL_INI FORALL_END FORALL_NODE_INDEX FORALL_CELL_INDEX FORALL_MTRL_INDEX
 %token PARTICLE PARTICLES PARTICLETYPE
 %token FILECALL FILETYPE OFSTREAM
+ //%token N_ARY_SUMMATION
 
  // Nabla SUPERSCRIPT_*
 %token SUPERSCRIPT_N_PLUS_ONE
 
  // Nabla Cartesian
-%token XYZ NEXTNODE PREVNODE PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
+%token ARROW_UP ARROW_RIGHT ARROW_DOWN ARROW_LEFT ARROW_BACK ARROW_FRONT
+%token ARROW_NORTH_EAST ARROW_SOUTH_EAST ARROW_SOUTH_WEST ARROW_NORTH_WEST
+%token XYZ NEXT PREV
+%token NEXTNODE PREVNODE
+%token PREVLEFT PREVRIGHT NEXTLEFT NEXTRIGHT
 %token NEXTCELL PREVCELL
 %token NEXTCELL_X PREVCELL_X NEXTCELL_Y PREVCELL_Y NEXTCELL_Z PREVCELL_Z
+%token NORTH EAST SOUTH WEST
 
  // Nabla LIBRARIES
 %token LIB_MPI LIB_ALEPH LIB_CARTESIAN LIB_GMP LIB_MATHEMATICA LIB_SLURM MAIL LIB_MAIL LIB_DFT
@@ -157,7 +163,7 @@ extern char *last_identifier;
 %error-verbose
 %start entry_point
 %token-table
-%parse-param {astNode **root}
+%parse-param {node **root}
 %right '?' ':' ','
 %right REAL REAL2 REAL3 REAL3x3 '('
 
@@ -323,11 +329,19 @@ nabla_items
 ;
 nabla_scope: OWN {rhs;} | ALL {rhs;};
 nabla_region: INNER {rhs;} | OUTER {rhs;};
+nabla_nesw: NORTH {rhs;} | '~' NORTH {rhs;} |
+            EAST {rhs;}  | '~' EAST {rhs;} |
+            SOUTH {rhs;} | '~' SOUTH {rhs;} |
+            WEST {rhs;}  | '~' WEST {rhs;};
 nabla_family
 : nabla_items {rhs;}
 | nabla_scope nabla_items {rhs;}
 | nabla_region nabla_items {rhs;}
+| nabla_nesw nabla_items {rhs;}
 | nabla_scope nabla_region nabla_items {rhs;}
+| nabla_scope nabla_nesw nabla_items {rhs;}
+| nabla_region nabla_nesw nabla_items {rhs;}
+| nabla_scope nabla_region nabla_nesw nabla_items {rhs;}
 ;
 nabla_set
 : nabla_family {rhs;}
@@ -346,6 +360,18 @@ nabla_system
 | BACKCELLUID {rhs;}
 | FRONTCELL {rhs;}
 | FRONTCELLUID {rhs;}
+| NEXT {rhs;}
+| PREV {rhs;}
+| ARROW_UP {rhs;}
+| ARROW_NORTH_EAST {rhs;}
+| ARROW_RIGHT {rhs;}
+| ARROW_SOUTH_EAST {rhs;}
+| ARROW_DOWN {rhs;}
+| ARROW_SOUTH_WEST {rhs;}
+| ARROW_LEFT {rhs;}
+| ARROW_NORTH_WEST {rhs;}
+| ARROW_BACK {rhs;}
+| ARROW_FRONT {rhs;}
 | NEXTCELL {rhs;}
 | NEXTCELL_X {rhs;}
 | NEXTCELL_Y {rhs;}
@@ -594,8 +620,8 @@ postfix_expression
 | FATAL '(' argument_expression_list ')' {rhs;}
 | postfix_expression '(' argument_expression_list ')'{
   // On rajoute un noeud pour annoncer qu'il faut peut-être faire quelque chose lors de l'appel à la fonction
-  astNode *callNode=astNewNode("/*call*/",CALL);
-  astNode *argsNode=astNewNode("/*args*/",END_OF_CALL);
+  node *callNode=astNewNode("/*call*/",CALL);
+  node *argsNode=astNewNode("/*args*/",END_OF_CALL);
   ast(callNode,$1,$2,$3,argsNode,$4);
   }
 | postfix_expression '.' IDENTIFIER {rhs;}
@@ -763,6 +789,9 @@ forall_switch
 ;
 forall_range
 : forall_switch {rhs;}
+| nabla_region forall_switch {rhs;}
+| nabla_nesw forall_switch {rhs;}
+| nabla_region nabla_nesw forall_switch {rhs;}
 | IDENTIFIER forall_switch {rhs;}
 ;
 
@@ -800,7 +829,11 @@ statement_list
 function_definition
 : declaration_specifiers declarator compound_statement {rhs;}
 | declaration_specifiers declarator AT at_constant compound_statement {rhs;}
-| IDENTIFIER AT at_constant compound_statement {voidIDvoid_rhs($$,$1,$2,$3,$4);}
+| declaration_specifiers declarator AT at_constant IF '(' constant_expression ')' compound_statement {rhs;}
+//| AT at_constant compound_statement { voidNoIDvoid_rhs($$,$1,$2,$3); }
+//| AT at_constant IF '(' constant_expression ')' compound_statement { voidNoIDvoidIF_rhs($$,$1,$2,$3,$4,$5,$6,$7); }
+| IDENTIFIER AT at_constant compound_statement { voidIDvoid_rhs($$,$1,$2,$3,$4); }
+| IDENTIFIER AT at_constant IF '(' constant_expression ')' compound_statement { voidIDvoidIF_rhs($$,$1,$2,$3,$4,$5,$6,$7,$8);}
 ;
 
 /////////////////////////
@@ -842,12 +875,6 @@ nabla_option_declaration
 | preproc {rhs;}
 ;
 
-///////////////////////////
-// ∇ '[#(±k)]' definitions //
-///////////////////////////
-//k_offset
-//: DIESE '+' Z_CONSTANT {rhs;}
-//;
 
 ///////////////////////
 // ∇ '@' definitions //
@@ -934,6 +961,7 @@ with_library: WITH with_library_list ';'{rhs;};
 nabla_grammar
 // On patche l'espace qui nous a été laissé par le sed pour remettre le bon '#'include
 : INCLUDES {/*$1->token[0]='#';*/   {rhsPatch(0,'#');}}
+| STARHEAD                      {/* Just skip it */}
 | preproc                       {rhs;}
 | with_library                  {rhs;}
 | declaration                   {rhs;}
@@ -1068,17 +1096,17 @@ const int rulenameToId(const char *rulename){
 // *****************************************************************************
 // * Standard rhsTailSandwich
 // *****************************************************************************
-inline void rhsTailSandwich(astNode **lhs,int yyn,
-                            int left_tokenid, int right_tokenid, astNode* *yyvsp){
+inline void rhsTailSandwich(node **lhs,int yyn,
+                            int left_tokenid, int right_tokenid, node* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   // Le first est le nouveau noeud que l'on va insérer
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // Le next pointe pour l'instant sur le premier noeud en argument
-  astNode *next=yyvsp[(0+1)-(yynrhs)];
+  node *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare les 2 tokens à rajouter
-  astNode *left= astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
-  astNode *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
+  node *left= astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  node *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1096,7 +1124,7 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,
     astAddNext(first,next);
   }
    // On récupère le dernier
-  astNode *tail=yyvsp[0];
+  node *tail=yyvsp[0];
   // Et on sandwich
   astAddNext(next,left);
   astAddNext(left,tail);
@@ -1107,18 +1135,18 @@ inline void rhsTailSandwich(astNode **lhs,int yyn,
 // *****************************************************************************
 // * Variadic rhsTailSandwich
 // *****************************************************************************
-inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
+inline void rhsTailSandwichVariadic(node **lhs,int yyn,int yynrhs,
                                     int left_tokenid, int right_tokenid, ...){
   va_list args;
   va_start(args, right_tokenid);
   //("[1;33m[rhsTailSandwich] yynrhs=%d\n[m",yynrhs);
   // Le first est le nouveau noeud que l'on va insérer
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // Le next pointe pour l'instant sur le premier noeud en argument
-  astNode *next=va_arg(args,astNode*);
+  node *next=va_arg(args,node*);
   // On prépare les 2 tokens à rajouter
-  astNode *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
-  astNode *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
+  node *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  node *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1127,17 +1155,17 @@ inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
     va_end(args);
     return;
   }
-  // S'il y en a plus qu'un. on déroule les boucles
+  // S'il y en a plus qu'un, on déroule les boucles
   astAddChild(first,next);
   // On saute le premier et s'arrète avant le dernier
   for(int i=1;i<yynrhs-1;i+=1){
     //printf("[1;33m[rhsTailSandwich] \t for\n[m");
     first=next;
-    next=va_arg(args,astNode*);
+    next=va_arg(args,node*);
     astAddNext(first,next);
   }
   // On récupère le dernier
-  astNode *tail=va_arg(args,astNode*);
+  node *tail=va_arg(args,node*);
   // Et on sandwich
   astAddNext(next,left);
   astAddNext(left,tail);
@@ -1154,7 +1182,7 @@ inline void rhsTailSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
 // *    YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM
 // * YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
 // *****************************************************************************
-inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
+inline void rhsAdd(node **lhs,int yyn, node* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   //const int symbol_num = yyr1[yyn];
@@ -1162,11 +1190,11 @@ inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
   //const int line=yyrline[yyn];
   // On accroche le nouveau noeud au lhs
   //printf("[1;33m[rhsAdd] rule '%s', id #%d, line=%d[0m\n",rule,symbol_num,line);
-  //astNode *first=*lhs=astNewNodeRule(rule,symbol_num);
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  //node *first=*lhs=astNewNodeRule(rule,symbol_num);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On va scruter tous les éléments
   // On commence par rajouter le premier comme fils
-  astNode *next=yyvsp[(0+1)-(yynrhs)];
+  node *next=yyvsp[(0+1)-(yynrhs)];
   astAddChild(first,next);
   // Et on rajoute des 'next' comme frères
   for(int yyi=1; yyi<yynrhs; yyi++){
@@ -1176,14 +1204,14 @@ inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
     astAddNext(first,next);
   }
 }
-inline void rhsPatchAndAdd(const int offset, const char chr,astNode **lhs,int yyn, astNode* *yyvsp){
+inline void rhsPatchAndAdd(const int k, const char chr,node **lhs,int yyn, node* *yyvsp){
   const int yynrhs = yyr2[yyn];
   assert(yynrhs==1);
   assert(yyvsp[0]->token);
   // Sanity check & patch
   // On échappe au const du token ici
   char *token=(char*)yyvsp[0]->token;
-  token[offset]=chr;
+  token[k]=chr;
   dbg("[1;33m[rhsPatchAndAdd] yynrhs=%d, %s[m\n",yynrhs, yyvsp[0]->token);
   rhsAdd(lhs,yyn, yyvsp);
 }
@@ -1192,19 +1220,19 @@ inline void rhsPatchAndAdd(const int offset, const char chr,astNode **lhs,int yy
 // *****************************************************************************
 // * Variadic rhsAdd
 // *****************************************************************************
-inline void rhsAddVariadic(astNode **lhs,int yyn,int yynrhs,...){
+inline void rhsAddVariadic(node **lhs,int yyn,int yynrhs,...){
   va_list args;
   assert(yynrhs>0);
   va_start(args, yynrhs);
   //"[rhsAddGeneric] On accroche le nouveau noeud au lhs\n");
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
-  astNode *next=va_arg(args,astNode*);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *next=va_arg(args,node*);
   assert(next);
   //("[rhsAddGeneric] On commence par rajouter le premier comme fils\n");
   astAddChild(first,next);
   for(int i=1;i<yynrhs;i+=1){
     first=next;
-    next=va_arg(args,astNode*);
+    next=va_arg(args,node*);
     astAddNext(first,next);
   }
   va_end(args);
@@ -1214,19 +1242,19 @@ inline void rhsAddVariadic(astNode **lhs,int yyn,int yynrhs,...){
 // *****************************************************************************
 // * rhsYSandwich
 // *****************************************************************************
-inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
+inline void rhsYSandwich(node **lhs,int yyn, node* *yyvsp,
                          int left_tokenid,
                          int right_tokenid){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   // Le first est le nouveau noeud que l'on va insérer
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
-  astNode *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  node *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
   // Le next pointe pour l'instant sur le premier noeud en argument
-  astNode *next=yyvsp[(0+1)-(yynrhs)];
+  node *next=yyvsp[(0+1)-(yynrhs)];
   // On prépare le token de droite à rajouter
-  astNode *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
+  node *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1245,7 +1273,7 @@ inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
     astAddNext(first,next);
   }
   // On récupère le dernier
-  astNode *tail=yyvsp[0];
+  node *tail=yyvsp[0];
   // Et on sandwich
   astAddNext(next,tail);
   astAddNext(tail,right);
@@ -1257,19 +1285,19 @@ inline void rhsYSandwich(astNode **lhs,int yyn, astNode* *yyvsp,
 // *****************************************************************************
 // * Variadic rhsYSandwich
 // *****************************************************************************
-inline void rhsYSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
+inline void rhsYSandwichVariadic(node **lhs,int yyn,int yynrhs,
                                  int left_tokenid,int right_tokenid, ...){
   va_list args;
   va_start(args, right_tokenid);
   //printf("[1;33m[rhsYSandwich] yynrhs=%d\n[m",yynrhs);
   // Le first est le nouveau noeud que l'on va insérer
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On prépare le token de gauche à rajouter
-  astNode *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
+  node *left=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(left_tokenid)])),left_tokenid);
   // Le next pointe pour l'instant sur le premier noeud en argument
-  astNode *next=va_arg(args,astNode*);
+  node *next=va_arg(args,node*);
   // On prépare le token de droite à rajouter
-  astNode *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
+  node *right=astNewNode(toolStrQuote(sdup(yytname[YYTRANSLATE(right_tokenid)])),right_tokenid);
   // Dans le cas où il n'y en a qu'un, le sandwich est différent:
   if (yynrhs==1){
     astAddChild(first,left);
@@ -1285,11 +1313,11 @@ inline void rhsYSandwichVariadic(astNode **lhs,int yyn,int yynrhs,
   for(int i=1;i<yynrhs-1;i+=1){
     //printf("[1;33m[rhsYSandwich] \t for\n[m");
     first=next;
-    next=va_arg(args,astNode*);
+    next=va_arg(args,node*);
     astAddNext(first,next);
   }
   // On récupère le dernier
-  astNode *tail=va_arg(args,astNode*);
+  node *tail=va_arg(args,node*);
   // Et on sandwich
   astAddNext(next,tail);
   astAddNext(tail,right);

@@ -1,0 +1,165 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+//dumpZ @ -18 if (option_debug) { info()<<"[33m[ini][m z:"; dump(z);}
+//dumpD @ -18 if (option_debug) { info()<<"[33m[ini][m d:"; dump(d);}
+
+//dumpXm17 @ -18 if (option_debug) { info()<<"[33m[iniGeom][m x:"; dump(x);}
+//dumpYm17 @ -18 if (option_debug) { info()<<"[33m[iniGeom][m y:"; dump(y);}
+
+//gridPrintX @ -16 if (option_debug) {info()<<"[33m[Grid] print [x]=["<<xmin<<","<<xmax<<"][m";}
+//gridPrintY @ -16 if (option_debug) {info()<<"[33m[Grid] print [y]=["<<ymin<<","<<ymax<<"][m";}
+
+//dxLonDump @ -14 if (option_debug) { info()<<"[33m[grid_init] dx_lon="<<dx_lon<<"[m";}
+//dyLatDump @ -14 if (option_debug) { info()<<"[33m[grid_init] dy_lat="<<dy_lat<<"[m";}
+
+
+//dumpHnFill @ -8.77 if (option_debug) { info()<<"[1;37m[iniH0][m h0:"; dump(hn);}
+
+dumpUN87 @ -8.69 if (option_debug) {
+  info()<<"[1;37m[iniU0][m u0";
+  //dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
+}
+
+dumpVN87 @ -8.69 if (option_debug) {
+  info()<<"[1;37m[iniV0][m v0:";
+  //dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
+}
+
+dumpHmax0 @ -6.89 if (option_debug) { info()<<"[1;34m[model_init] hmax0="<<hmax0<<"[m"; }
+
+//dumpFCm50 @ -4.9 if (option_debug) { info()<<"[33m[dump][m fc:"; dump(fc);}
+
+//dumpDX @ -3.91 if (option_debug) { info()<<"[33m[iniCFL] dx:[m"; dump(dx);}
+//dumpDY @ -3.91 if (option_debug) { info()<<"[33m[iniCFL] dy:[m"; dump(dy);}
+
+//dumpHm3q1 @ -3.41 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN hn:[m"; dump(hn);}
+
+//dumpUm3q1 @ -3.41 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN un:[m"; dump(un);}
+
+//dumpVm3q1 @ -3.41 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN vn:[m"; dump(vn);}
+
+time_scheme_dump_max @ -4.0 if (option_debug) {
+  info()<<"[1;31m[time_scheme_check_CFL] inv_dx_max="<<inv_dx_max<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] inv_dy_max="<<inv_dy_max<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] dmax="<<dmax<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] umin="<<umin<<" umax="<<umax<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] vmin="<<vmin<<" vmax="<<vmax<<"[m";
+}
+
+time_scheme_dump_δt @ -4.0 if (option_debug) {
+  ℝ δt_max=0.0;
+  const ℝ cgmax = √(GZ*(dmax+hmax0));
+  const ℝ cumax = fmax(fabs(umax),fabs(umin)) + cgmax;
+  const ℝ cvmax = fmax(fabs(vmax),fabs(vmin)) + cgmax;
+  if (inv_dy_max < option_eps_fp) δt_max = option_cfl_max/(cumax*inv_dx_max);
+  else if (inv_dx_max < option_eps_fp) δt_max = option_cfl_max/(cvmax*inv_dy_max);
+  else δt_max = fmin(option_cfl_max/(cumax*inv_dx_max),option_cfl_max/(cvmax*inv_dy_max));
+  info()<<"[1;31m[time_scheme_check_CFL] - h_max = "<<hmax0<<" m"<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] - d_max = "<<dmax<<" m"<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] - dxy_min = "<<dxy_min<<" m"<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] - c_max = "<<fmax(cumax,cvmax)<<" m/s"<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] - δt_max = "<<δt_max<<" s"<<"[m";
+  info()<<"[1;31m[time_scheme_check_CFL] - CFL = "<<cfl<<"[m";
+}
+
+
+/*dumpUNPm3p4 @ -3.39 if (option_debug) {
+  info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] OUT unp0:[m";
+  dumpIJ(unp,1,X_EDGE_ELEMS-2,1,Y_EDGE_ELEMS-1);
+}*/
+
+/*dumpVNPm3p4 @ -3.39 if (option_debug) {
+  info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] OUT vnp0:[m";
+  dumpIJ(vnp,1,X_EDGE_ELEMS-1,1,Y_EDGE_ELEMS-2);
+}*/
+
+//dumpHpp1p1 @ 1.24 if (option_debug) { info()<<"[1;32m[loopH] hnp:[m"; innerDump(hnp);}
+
+//dumpH1p5 @ 1.5 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN hn:[m"; dump(hn);}
+
+//dumpU1p5 @ 1.5 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN un:[m"; dump(un);}
+
+//dumpV1p5 @ 1.5 if (option_debug) { info()<<"[1;32m[space_scheme_nlsw_1st_order_compute_equ] IN vn:[m"; dump(vn);}
+
+/*dumpUnpp2p000001 @ 2.2000001 if (option_debug) {
+  info()<<"[1;32m[runup] unp:[m";
+  dumpIJ(unp,1,X_EDGE_ELEMS-2,1,Y_EDGE_ELEMS-1);
+}*/
+
+
+/*
+  dumpUnpp2p01 @ 2.3 if (option_debug) {
+  info()<<"[1;32m[loopUV] unp:[m";
+  dumpIJ(unp,1,X_EDGE_ELEMS-2,1,Y_EDGE_ELEMS-1);
+ }
+*/
+
+/*
+dumpVnpp2p01 @ 2.2 if (option_debug) {
+  info()<<"[1;32m[loopUV] vnp:[m";
+*/
+
+
+// ***************************************************************************
+// * Dump un if debug
+// ***************************************************************************
+dumpUp8p0 @ 8.2 if (option_debug) {
+  info()<<"   [1;37m[boundary_update][m un:";
+  //dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);
+}
+
+// ***************************************************************************
+// * Dump vn if debug
+// ***************************************************************************
+dumpVp8p0 @ 9.0 if (option_debug) {
+  info()<<"   [1;37m[boundary_update][m vn:";
+  //dumpIJ(vn,0,X_EDGE_ELEMS,0,Y_EDGE_ELEMS-1);
+}
+
+
+//dumpU3p0 @ 3.1 if (option_debug) { info()<<"   [1;37m[loop][m un:"; dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);}
+
+//dumpU3p0001 @ 3.1001 if (option_debug) { info()<<"   [1;37m[loop][m un:"; dumpIJ(un,0,X_EDGE_ELEMS-1,0,Y_EDGE_ELEMS);}
+
+//dumpHp8p0 @ 8.2 if (option_debug) { info()<<"   [1;37m[boundary_update][m hn:"; dump(hn);}

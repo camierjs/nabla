@@ -43,10 +43,16 @@
 #ifndef _NABLA_LIB_GATHER_H_
 #define _NABLA_LIB_GATHER_H_
 
+inline bool rgatherBk(const int a, const bool *data){
+  return data[a];
+}
 inline real rgatherk(const int a, const real *data){
   return data[a];
 }
 inline real3 rgather3k(const int a, const real3 *data){
+  return data[a];
+}
+inline int rgatherNk(const int a, const int *data){
   return data[a];
 }
 inline real3x3 rgather3x3k(const int a, const real3x3 *data){
@@ -71,12 +77,23 @@ inline real rGatherAndZeroNegOnes(const int a, const int corner, const real *dat
   if (a>=0) return real(p[i]);
   return 0.0;
 }
+
+// The next %%d is filled in the xDumpHeaderWithLibs function
+// which has access to which libraries are used
+const int factor = %d;
+
 inline real3 rGatherAndZeroNegOnes(const int a, const int corner, const real3 *data){
-  // The next %%d is filled in the xDumpHeaderWithKnownLibs function
-  // which has access to which libraries are used
-  const int i=3*(%d*a+corner);
+  const int i=3*(factor*a+corner);
   const double *p=(double*)data;
   if (a>=0) return real3(p[i+0],p[i+1],p[i+2]);
+  return 0.0;
+}
+inline real3x3 rGatherAndZeroNegOnes(const int a, const int corner, const real3x3 *data){
+  const int i=9*(factor*a+corner);
+  const double *p=(double*)data;
+  if (a>=0) return real3x3(real3(p[i+0],p[i+1],p[i+2]),
+                           real3(p[i+3],p[i+4],p[i+5]),
+                           real3(p[i+6],p[i+7],p[i+8]));
   return 0.0;
 }
 

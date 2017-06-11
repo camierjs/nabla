@@ -59,8 +59,12 @@ void xHookHeaderDump(nablaMain *nabla){
   xDumpHeader(nabla);
 }
 
+// ****************************************************************************
+// * xHookHeaderDumpWithLibs
+// ****************************************************************************
 void xHookHeaderDumpWithLibs(nablaMain *nabla){
   xDumpHeaderWithLibs(nabla);
+  xHookMeshStruct(nabla);
 }
 
 // ****************************************************************************
@@ -105,8 +109,10 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
 \n\
 #define FOR_EACH_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
 #define FOR_EACH_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
-#define FOR_EACH_OUTER_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=nxtOuterCellOffset(c))\n \
-#define FOR_EACH_OUTER_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=nxtOuterCellOffset(c))\n \
+#define FOR_EACH_OUTER_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=nxtOuterCellOffset(c,msh))\n\
+#define FOR_EACH_OUTER_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=nxtOuterCellOffset(c,msh))\n\
+#define FOR_EACH_INNER_CELL(c) %sfor(int c=0;c<NABLA_NB_CELLS;c+=1)\n\
+#define FOR_EACH_INNER_CELL_WARP(c) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
 #define FOR_EACH_CELL_WARP_SHARED(c,local) %sfor(int c=0;c<NABLA_NB_CELLS_WARP;c+=1)\n\
 #define FOR_EACH_CELL_NODE(n) for(int n=0;n<NABLA_NODE_PER_CELL;n+=1)\n\
 #define FOR_EACH_CELL_WARP_NODE(n) %sfor(int cn=WARP_SIZE*c+WARP_SIZE-1;cn>=WARP_SIZE*c;--cn)\\\n\
@@ -150,6 +156,8 @@ static void xHeaderDefineEnumerates(nablaMain *nabla){
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_OUTER_CELL
           parallel_prefix_for_loop, // FOR_EACH_OUTER_CELL_WARP
+          parallel_prefix_for_loop, // FOR_EACH_INNER_CELL
+          parallel_prefix_for_loop, // FOR_EACH_INNER_CELL_WARP
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_SHARED
           parallel_prefix_for_loop, // FOR_EACH_CELL_WARP_NODE
           parallel_prefix_for_loop, // FOR_EACH_CELL_SHARED
@@ -182,7 +190,6 @@ void xHookHeaderDefineEnumerates(nablaMain *nabla){
 // * 
 // ****************************************************************************
 void xHookHeaderPostfix(nablaMain *nabla){
-  xHookMeshStruct(nabla);
   xHeaderDefineEnumerates(nabla);
   fprintf(nabla->entity->hdr,
           "\n\n#endif // __BACKEND_%s_H__\n",

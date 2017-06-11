@@ -62,7 +62,7 @@ void kHookVariablesPrefix(nablaMain*);
 void kHookVariablesMalloc(nablaMain*);
 void kHookVariablesFree(nablaMain*);
 
-void kHookReduction(nablaMain*,astNode*);
+void kHookReduction(nablaMain*,node*);
 
 char* kHookEoe(nablaMain*); 
 bool kHookDfsExtra(nablaMain*,nablaJob*,bool);

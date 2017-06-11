@@ -1,0 +1,136 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+#include "netcdf.h"
+double *_x_,*_y_,*_z_;
+
+// ****************************************************************************
+// * Lecture du fichier 'depth'
+// ****************************************************************************
+netcdfReadBath @ -20.0 {
+  ℕ ncid=0;
+  ℕ ndims, nvars, natts, unlimdimid;
+  char depthXxY[1024];
+  sprintf(depthXxY,"./data/depth%dx%d.nc",NX,NY);  
+  if (nc_open(depthXxY,NC_WRITE,&ncid)!=NC_NOERR){
+    printf("\n[1;31mCould not find '%s' file[m\n", depthXxY);
+    return;
+  }
+  debug()<<"[39m[NetCDF] read info, filename='"<<depthXxY<<"'[m";
+  // inquiring the IDs of dims x and y
+  if (nc_inq(ncid, &ndims, &nvars, &natts, &unlimdimid)!=NC_NOERR) return;
+  assert(nvars==3);
+  assert(natts==0);
+  assert(unlimdimid==-1);
+  size_t len[4]={0,0,0,0};
+  char name[NC_MAX_NAME];
+  for(ℕ i=0;i<ndims;i+=1)
+    if (nc_inq_dim(ncid, i, name, &len[i])!=NC_NOERR) return;
+  // Récupération des 'x'
+  if (nc_inq_varname(ncid, 0, name)!=NC_NOERR) return;
+  assert(name[0]=='x');
+  _x_=(ℝ*)calloc(len[0],sizeof(ℝ));
+  _y_=(ℝ*)calloc(len[1],sizeof(ℝ));
+  _z_=(ℝ*)calloc(len[2]*len[3],sizeof(ℝ));
+  if (nc_get_var_double(ncid,0,_x_)!=NC_NOERR) return;
+  // Récupération des 'y'
+  if (nc_inq_varname(ncid, 1, name)!=NC_NOERR) return;
+  assert(name[0]=='y');
+  if (nc_get_var_double(ncid, 1, _y_)!=NC_NOERR) return;
+  // Récupération des 'z'  
+  if (nc_inq_varname(ncid, 2, name)!=NC_NOERR) return;
+  assert(name[0]=='z');
+  if (nc_get_var_double(ncid, 2, _z_)!=NC_NOERR) return;
+  // Closes the open netCDF dataset
+  if (nc_close(ncid)!=NC_NOERR) return;
+  debug()<<"[39m[NetCDF] done[m";
+}
+
+int ix,iy,iz;
+iniIdx @ -19.99 {ix=iy=iz=0;}
+
+∀ inner cells @ -19.99 {
+  const ℕ k = ix++%X_EDGE_ELEMS;
+  //info()<<"[35m[iniX] iy="<<iy<<", k="<<k<<"[m";
+  x=_x_[k];
+}
+∀ cells @ -19.99 {
+  const ℕ k = iy++/X_EDGE_ELEMS-1;
+  if (k<0) continue;
+  //info()<<"[35m[iniY] iy="<<iy-1<<", k="<<k<<"[m";
+  y=_y_[k];
+}
+∀ inner cells @ -19.99 { z=_z_[iz++];}
+∀ outer cells @ -19.99 { z=-0.0;}
+
+
+// ****************************************************************************
+// * Lecture du fichier 'inlet'
+// ****************************************************************************
+read_water_inlet @ -20.0 {
+  ℝ tm;
+  FILE *stream=fopen("./data/inlet.data", "r");
+  assert(stream);
+  info()<<"[37m[boundary] Water inlet file[m";
+  hmax_bound=0.0;
+  for(ℕ k=0;k<MAX_INLET_NB;k+=1){
+    if (fscanf(stream,"%lf %lf", &tm,&inlet[k])!=2) return;
+    hmax_bound=fmax(hmax_bound,inlet[k]);
+  }
+  fclose(stream);
+}
+
+
+// ***************************************************************************
+// * refill
+// ***************************************************************************
+int kReFill=0;
+ℝ refill(const ℕ offset){
+  if (offset==0) kReFill=0;
+  const ℕ k= kReFill++;
+  const ℕ i = (k%X_EDGE_ELEMS)+1;
+  const ℕ j = (k/X_EDGE_ELEMS)+1;
+  ℝ data = 0.0;
+  data =  i/1.e1+i/1.e2+i/1.e3+i/1.e10+i/1.e11+i/1.e12;
+  data += j/1.e4+j/1.e5+j/1.e6+j/1.e7+j/1.e8+j/1.e9;
+  return data;
+}

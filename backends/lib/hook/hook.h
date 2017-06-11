@@ -42,36 +42,35 @@
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef _NABLA_LIB_HOOK_H_
 #define _NABLA_LIB_HOOK_H_
-//bool xHookSwitchForall(astNode *n, nablaJob *job);
-//bool xHookSwitchAleph(astNode *n, nablaJob *job);
 
 // forall
+char* xHookForAllPrefix(nablaJob*);
 char* xHookForAllDump(nablaJob*);
 char* xHookForAllItem(nablaJob*,const char,const char,char);
 char* xHookForAllPostfix(nablaJob*);
 
 // token
-void xHookSwitchToken(astNode*, nablaJob*);
-nablaVariable* xHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void xHookSwitchToken(node*, nablaJob*);
+nablaVariable* xHookTurnTokenToVariable(node*,nablaMain*,nablaJob*);
 void xHookTurnTokenToOption(nablaMain*,nablaOption*);
-void xHookSystem(astNode*,nablaMain*,const char,char);
+void xHookSystem(node*,nablaMain*,const char,char);
 void xHookIteration(nablaMain*);
 void xHookExit(nablaMain*,nablaJob*);
 void xHookError(nablaMain*,nablaJob*);
 void xHookTime(nablaMain*);
 void xHookFatal(nablaMain*);
 void xHookTurnBracketsToParentheses(nablaMain*,nablaJob*,nablaVariable*,char);
-void xHookIsTest(nablaMain*, nablaJob*, astNode*, int);
+void xHookIsTest(nablaMain*, nablaJob*, node*, int);
 
 // gram
-void xHookReduction(nablaMain*,astNode*);
+void xHookReduction(nablaMain*,node*);
 bool xHookDfsVariable(nablaMain*);
 
 // call
-void xHookAddCallNames(nablaMain*,nablaJob*,astNode*);
+void xHookAddCallNames(nablaMain*,nablaJob*,node*);
 void xHookAddArguments(nablaMain*,nablaJob*);
 char* xHookEntryPointPrefix(nablaMain*,nablaJob*);
-void xHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+void xHookDfsForCalls(nablaMain*,nablaJob*,node*,const char*,node*);
 
 // xyz
 char* xHookPrevCell(int);

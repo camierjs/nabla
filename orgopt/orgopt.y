@@ -44,21 +44,21 @@
 #include "nabla.h"
 #include "nabla.y.h" 
 #undef YYDEBUG
-#define YYSTYPE astNode*
+#define YYSTYPE node*
 int yylineno;
 char nabla_input_file[1024];
 int yylex(void);
-void yyerror(astNode **root, const char *s);
+void yyerror(node **root, const char *s);
 extern FILE *yyin;
 %}
  
 ///////////////////////////////
 // Terminals used in grammar //
 ///////////////////////////////
-%token IDENTIFIER
+%token NEW_LINE IDENT PLUS_OR_MINUS
 %token ALPHA DELTA
 %token TRUE FALSE
-%token HEX_CONSTANT Z_CONSTANT R_CONSTANT
+%token H_CST Z_CST R_CST
 
 //////////////////////
 // Specific options //
@@ -67,55 +67,48 @@ extern FILE *yyin;
 %error-verbose
 %start entry_point
 %token-table
-%parse-param {astNode **root}
-
+%parse-param {node **root}
 %%
 
 /////////////////////////////////
 // Entry point of input stream //
 /////////////////////////////////
-entry_point: orgopt_inputstream{*root=$1;};
-orgopt_inputstream
-: orgopt_grammar {rhs;}
-| orgopt_inputstream orgopt_grammar {astAddChild($1,$2);}
+entry_point: inputstream{*root=$1;};
+
+inputstream
+: grammar {rhs;}
+| inputstream grammar {astAddChild($1,$2);}
 ;
 
-plus_moins:'+'|'-';
+plus_or_minus: '+' | '-';
 
-boolean
-: TRUE {rhs;}
-| FALSE {rhs;}
-;
+boolean: TRUE | FALSE;
+constant: H_CST | Z_CST | R_CST;
 
-value
-: HEX_CONSTANT
-| Z_CONSTANT
-| R_CONSTANT 
-;
-
-//id:IDENTIFIER {rhs;}
-
+option_prefix: plus_or_minus | NEW_LINE;
 option
-: '-' IDENTIFIER '=' boolean {rhs;}
-| '-' IDENTIFIER '=' value {rhs;}
-| '-' IDENTIFIER '=' plus_moins value {rhs;}
+: option_prefix IDENT '=' boolean {ast($2,$4);}
+| option_prefix IDENT '=' constant {ast($2,$4);}
+| option_prefix IDENT '=' plus_or_minus constant {ast($2,astNewNode("+/-",PLUS_OR_MINUS),$4,$5);}
 ;
 
-stars: '*'| stars '*';
+list_of_idents
+: IDENT | list_of_idents IDENT;
 
-header: stars IDENTIFIER;
+stars: '*' | stars '*';
+header: stars list_of_idents ;
 
 ////////////////////
 // orgopt grammar //
 ////////////////////
-orgopt_grammar: header | option;
+grammar: header | option | NEW_LINE;
 
 %%
 
 // ****************************************************************************
 // * yyerror
 // ****************************************************************************
-void yyerror(astNode **root, const char *error){
+void yyerror(node **root, const char *error){
   fflush(stdout);
   printf("\r%s:%d: %s\n",nabla_input_file,yylineno-1, error);
 }
@@ -139,17 +132,15 @@ static void stradd(char** str, const char *format, ...){
 // ****************************************************************************
 // * orgGrammar
 // ****************************************************************************
-static void orgGrammar(astNode *n, int *argc, char *argv[]){
+static void orgGrammar(node *n, int *argc, char *argv[]){
   if (n->ruleid == rulenameToId("option")){
-    const astNode *nnn=n->children->next->next->next;
-    const char *ascii_id=n->children->next->token;
-    if (nnn->tokenid=='-' or nnn->tokenid=='+')
-      stradd(&argv[*argc],"--%s=%s%s",ascii_id,nnn->token,nnn->next->token);
-    else
-      if (nnn->ruleid == rulenameToId("boolean"))
-        stradd(&argv[*argc],"--%s=%s",ascii_id,nnn->children->token);
-      else
-        stradd(&argv[*argc],"--%s=%s",ascii_id,nnn->token);
+    const node *cn=n->children->next;
+    const char *id=n->children->token;
+ 
+    if (cn->tokenid==PLUS_OR_MINUS)
+      stradd(&argv[*argc],"--%s=%s%s",id,cn->next->token,cn->next->next->token);
+    else 
+      stradd(&argv[*argc],"--%s=%s",id,cn->token);
     *argc+=1;
   }
   if(n->children != NULL) orgGrammar(n->children,argc,argv);
@@ -161,7 +152,7 @@ static void orgGrammar(astNode *n, int *argc, char *argv[]){
 // * inOpt
 // ****************************************************************************
 int inOpt(char *file,int *argc, char **argv){
-  astNode *root=NULL;
+  node *root=NULL;
   
   if(!(yyin=fopen(file,"r")))
     return NABLA_ERROR |
@@ -180,7 +171,7 @@ int inOpt(char *file,int *argc, char **argv){
   /*{
     const char *nabla_entity_name = "orgopt";
     astTreeSave(nabla_entity_name, root);
-    }*/
+  }*/
   
   orgGrammar(root,argc,argv);
   
@@ -194,14 +185,14 @@ int inOpt(char *file,int *argc, char **argv){
 // *    YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM
 // * YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
 // *****************************************************************************
-inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
+inline void rhsAdd(node **lhs,int yyn, node* *yyvsp){
   // Nombre d'éléments dans notre RHS
   const int yynrhs = yyr2[yyn];
   // On accroche le nouveau noeud au lhs
-  astNode *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
   // On va scruter tous les éléments
   // On commence par rajouter le premier comme fils
-  astNode *next=yyvsp[(0+1)-(yynrhs)];
+  node *next=yyvsp[(0+1)-(yynrhs)];
   astAddChild(first,next);
   // Et on rajoute des 'next' comme frères
   for(int yyi=1; yyi<yynrhs; yyi++){
@@ -210,6 +201,28 @@ inline void rhsAdd(astNode **lhs,int yyn, astNode* *yyvsp){
     next=yyvsp[(yyi+1)-(yynrhs)];
     astAddNext(first,next);
   }
+}
+
+
+// *****************************************************************************
+// * Variadic rhsAdd
+// *****************************************************************************
+inline void rhsAddVariadic(node **lhs,int yyn,int yynrhs,...){
+  va_list args;
+  assert(yynrhs>0);
+  va_start(args, yynrhs);
+  //"[rhsAddGeneric] On accroche le nouveau noeud au lhs\n");
+  node *first=*lhs=astNewNodeRule(yytname[yyr1[yyn]],yyr1[yyn]);
+  node *next=va_arg(args,node*);
+  assert(next);
+  //("[rhsAddGeneric] On commence par rajouter le premier comme fils\n");
+  astAddChild(first,next);
+  for(int i=1;i<yynrhs;i+=1){
+    first=next;
+    next=va_arg(args,node*);
+    astAddNext(first,next);
+  }
+  va_end(args);
 }
 
 

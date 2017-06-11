@@ -47,7 +47,7 @@
 // * List des noeuds alloués
 // ****************************************************************************
 typedef struct nAstList{
-  astNode *node;
+  node *n;
   struct nAstList *next; 
 } nAstList;
 static nAstList *nast=NULL;
@@ -55,7 +55,7 @@ static nAstList *nlst=NULL;
 void nAstListFree(void){
   for(nAstList *this,*list=nast;list!=NULL;){
     list=(this=list)->next;
-    free(this->node);
+    free(this->n);
     free(this);
   }
 }
@@ -64,13 +64,13 @@ void nAstListFree(void){
 // ****************************************************************************
 // * astNewNode
 // ****************************************************************************
-astNode *astNewNode(char *token, const unsigned int tokenid) {
-  astNode *n = (astNode*)calloc(1,sizeof(astNode));
+node *astNewNode(char *token, const unsigned int tokenid) {
+  node *n = (node*)calloc(1,sizeof(node));
   assert(n);
   
   nAstList *nl=(nAstList*)calloc(1,sizeof(nAstList));
   assert(nl);
-  nl->node=n;
+  nl->n=n;
   if (nast==NULL) nast=nlst=nl;
   else nlst=nlst->next=nl;
   
@@ -87,8 +87,8 @@ astNode *astNewNode(char *token, const unsigned int tokenid) {
 // ****************************************************************************
 // * astNewNodeRule
 // ****************************************************************************
-astNode *astNewNodeRule(const char *rule, unsigned int ruleid) {
-  astNode *n=astNewNode(NULL,0);
+node *astNewNodeRule(const char *rule, unsigned int ruleid) {
+  node *n=astNewNode(NULL,0);
   assert(rule != NULL);
   n->rule = rule; 
   n->ruleid = ruleid;   
@@ -99,9 +99,9 @@ astNode *astNewNodeRule(const char *rule, unsigned int ruleid) {
 // ****************************************************************************
 // * astAddChild
 // ****************************************************************************
-astNode *astAddChild(astNode *root, astNode *child) {
+node *astAddChild(node *root, node *child) {
   assert(root != NULL && child != NULL);
-  astNode *next=root->children;
+  node *next=root->children;
   // On set le parent du nouvel enfant
   child->parent=root;
   // S'il n'y a pas de fils, on le crée
@@ -116,16 +116,16 @@ astNode *astAddChild(astNode *root, astNode *child) {
 // ****************************************************************************
 // * astAddNext
 // ****************************************************************************
-astNode *astAddNext(astNode *root, astNode *node) {
-  assert(root != NULL && node != NULL);
-  astNode *next=root;
+node *astAddNext(node *root, node *n) {
+  assert(root != NULL && n != NULL);
+  node *next=root;
   // On set le parent du nouvel enfant
-  node->parent=root->parent;
+  n->parent=root->parent;
   // S'il n'y a pas de frère, on le crée
-  if(root->next == NULL) return root->next = node;
+  if(root->next == NULL) return root->next = n;
   // Sinon, on scrute jusqu'au dernier enfant
   for(;next->next!=NULL;next=next->next);
   // Et on l'append
-  return next->next=node;
+  return next->next=n;
 }
 

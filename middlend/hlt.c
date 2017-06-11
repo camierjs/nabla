@@ -59,7 +59,7 @@ static void dumpAtEndofAt(nablaJob *job, const char *token){
 // ****************************************************************************
 // * nablaAtConstantParse
 // ****************************************************************************
-void nMiddleAtConstantParse(nablaJob *job,astNode *n, nablaMain *nabla){
+void nMiddleAtConstantParse(nablaJob *job,node *n, nablaMain *nabla){
   // On évite les parenthèses rajoutée lors du parsing .y 'at_constant'
   if (n->tokenid == '-') {
     // On s'assure pour l'instant que les temps logiques
@@ -179,6 +179,8 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       snprintf(name,11+18,"hltDive%d",i);
       dbg("\n\t\t[nMiddleEntryPointsSort] Adding hltDive%d before %s @ %f, name=%s",
           i,job->name,when,name);
+      //entry_points[i].scope = sdup(job->scope);
+      entry_points[i].region = job->region?sdup(job->region):sdup("\0");
       entry_points[i].item = sdup("\0");
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=true;
@@ -223,7 +225,10 @@ nablaJob* nMiddleEntryPointsSort(nablaMain *nabla,
       if (hlt_current_depth>HLT_depth) // Si on trouve une transition en EXIT
         hlt_current_depth=HLT_depth;   // On met à jour notre profondeur
       
+      //entry_points[i].scope = job->scope;
+      entry_points[i].region = job->region;
       entry_points[i].item=job->item;
+      entry_points[i].enum_enum_node=job->enum_enum_node;
       entry_points[i].is_an_entry_point=true;
       entry_points[i].is_a_function=job->is_a_function;
       //assert(job->type!=NULL);

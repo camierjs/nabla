@@ -42,6 +42,7 @@ ARCANE_LIBS = -L${ARCANE_ROOT}/lib\
 #############
 CXX=${CMAKE_CXX_COMPILER}
 CFLAGS = -g -std=c++11 -O2 -Wall -fPIC \
+			-fno-strict-aliasing \
 			-I/usr/lib/openmpi/include\
 			-I${ARCANE_ROOT}/include\
 			-I${HYPRE_INCLUDE_DIR}\
@@ -88,7 +89,7 @@ main.o:$(TGT)Module.o
 
 
 $(TGT):main.o
-	$(CXX) -g -o $(TGT) $(ARCANE_LIBS) -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib main.o $(TGT)Module.o -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -lGL /usr/lib/libmpi.so /usr/lib/libmpi_cxx.so
+	$(CXX) -g -o $(TGT) $(ARCANE_LIBS) -Wl,-rpath,/usr/lib/openmpi/lib -Wl,-rpath,/usr/local/mesa/lib ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib main.o $(TGT)Module.o -Wl,-rpath,/usr/lib/openmpi/lib ${ICET_LIBRARIES} -lGL /usr/lib/libmpi.so /usr/lib/libmpi_cxx.so -lnetcdf
 #-Wl,-rpath,. -Wl,-rpath,/usr/lib/openmpi/lib -Wl,-rpath,${ICET_ROOT}/lib
 #${MPI_CXX_LIBRARIES} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
 #${CEA_LIB} ${GMP_LIB} ${SUPERLU_LIB} ${ICET_LIBRARIES} -Wl,-rpath,${ICET_ROOT}/lib
@@ -115,7 +116,7 @@ runc4:$(TGT)
 # HYODA #
 #########
 h1:$(TGT)
-	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 $(HYODA) ./$(TGT) $(ARC_FILE)
+	ARCANE_PARALLEL_SERVICE=Mpi ${MPIEXEC} -n 1 $(HYODA) $(shell pwd)/$(TGT) $(ARC_FILE)
 
 
 #########

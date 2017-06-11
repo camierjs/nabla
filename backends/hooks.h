@@ -51,7 +51,7 @@ typedef struct hookForAllStruct{
   char* (*dump)(nablaJob*); // jobs
   // Dump la référence à un item au sein d'un ENUMERATE_*
   char* (*item)(nablaJob*,const char, const char, char); // jobs
-  // Dump l'ENUMERATE_*
+  // Postfix à l'ENUMERATE_*
   char* (*postfix)(nablaJob*); // jobs, functions
 } hookForAll;
 
@@ -59,19 +59,19 @@ typedef struct hookForAllStruct{
 typedef struct hookTokenStruct{
   char* (*prefix)(nablaMain*); // variables
   // Gestion des différentes actions pour un job
-  void (*svvitch)(astNode*, nablaJob*); // jobs
+  void (*svvitch)(node*, nablaJob*); // jobs
   // Transformation de tokens en variables selon l'ENUMERATE_*
-  nablaVariable* (*variable)(astNode*, nablaMain*, nablaJob*); // jobs, functions
+  nablaVariable* (*variable)(node*, nablaMain*, nablaJob*); // jobs, functions
   // Hook pour mettre en forme les options
   void (*option)(nablaMain*,nablaOption*); // options
-  void (*system)(astNode*, nablaMain*, const char, char); // variables
+  void (*system)(node*, nablaMain*, const char, char); // variables
   void (*iteration)(nablaMain*); // functions
   void (*exit)(nablaMain*,nablaJob*);
   void (*error)(nablaMain*,nablaJob*);
   void (*time)(nablaMain*); // functions
   void (*fatal)(nablaMain*); // functions
   void (*turnBracketsToParentheses)(nablaMain*, nablaJob*, nablaVariable*, char); // jobs
-  void (*isTest)(nablaMain*,nablaJob*,astNode*,int); // jobs
+  void (*isTest)(nablaMain*,nablaJob*,node*,int); // jobs
   char* (*postfix)(nablaMain*); // variables
   char *comment; // prefix d'un commentaire
 } hookToken;
@@ -79,13 +79,13 @@ typedef struct hookTokenStruct{
 
 typedef struct hookGrammarStruct{
   // Hook de génération d'un kernel associé à une fonction
-  void (*function)(nablaMain*, astNode*); // grammar
+  void (*function)(nablaMain*, node*); // grammar
   // Génération d'un kernel associé à un support
-  void (*job)(nablaMain*, astNode*); // grammar
+  void (*job)(nablaMain*, node*); // grammar
   // Génération d'un kernel associé à une reduction
-  void (*reduction)(nablaMain*, astNode*); // grammar
+  void (*reduction)(nablaMain*, node*); // grammar
   // Should be removed: Hook pour transformer les variables à returner
-  bool (*primary_expression_to_return)(nablaMain*, nablaJob*, astNode*); // jobs
+  bool (*primary_expression_to_return)(nablaMain*, nablaJob*, node*); // jobs
   // Hook returnFromArgument for OKINA and OMP
   void (*returnFromArgument)(nablaMain*, nablaJob*); // jobs
   bool (*dfsVariable)(nablaMain*); // jobs, functions
@@ -100,14 +100,14 @@ typedef struct hookGrammarStruct{
 typedef struct hookCallStruct{
   // Hooks pour rajouter au fur et à mesure qu'on les découvre
   // les fonctions appelées et les arguments
-  void (*addCallNames)(nablaMain*,nablaJob*,astNode*); // functions
+  void (*addCallNames)(nablaMain*,nablaJob*,node*); // functions
   void (*addArguments)(nablaMain*,nablaJob*); // functions
   // Hook pour préfixer les points d'entrée (à-la inline, par exemple)
   char* (*entryPointPrefix)(nablaMain*,nablaJob*); // arguments, jobs, functions
   // Hook pour associer aux fonctions appelées les arguments à rajouter
-  void (*dfsForCalls)(nablaMain*,nablaJob*,astNode*,const char *,astNode *); // functions
+  void (*dfsForCalls)(nablaMain*,nablaJob*,node*,const char *,node *); // functions
   void (*addExtraParameters)(nablaMain*, nablaJob*, int*); // jobs, functions
-  void (*dumpNablaParameterList)(nablaMain*, nablaJob*, astNode*,int*); // jobs
+  void (*dumpNablaParameterList)(nablaMain*, nablaJob*, node*,int*); // jobs
   char* (*prefixType)(nablaMain*,const char*);
   char* (*iTask)(nablaMain*,nablaJob*);
   char* (*oTask)(nablaMain*,nablaJob*);

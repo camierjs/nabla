@@ -1,14 +1,15 @@
 ;;; nabla-mode.el --- major mode for editing Nabla files.
 (defconst nabla-version "nabla" "Nabla Mode version number")
-(defconst nabla-time-stamp "2017-01-24"
+(defconst nabla-time-stamp "2017-06-09"
   "Nabla Mode time stamp for last update.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defconst nabla-keywords
   '("inline" "restrict" "aligned" "const" "return" "register" "volatile"
     "if" "is" "else" "do" "while" "continue" "break" "for"
-    "foreach"
+    "foreach" "forall"
     "all" "own" "inner" "outer"
+    "north" "east" "south" "west"
     "in" "out" "inout" "with")
   "List of Nabla keywords regexps")
 
@@ -21,6 +22,7 @@
   '("exit" "checkpoint" "coord" 
     "uid" "lid" "sid" "this" "nbNode" "iNode" "fatal"
     "backCell" "backCellUid" "frontCell" "frontCellUid" 
+    "next" "prev"
     "nextCell" "prevCell"
     "nextNextCell" "prevPrevCell"
     "deltat" "nbCell"
@@ -55,7 +57,7 @@
 
 (defconst nabla-types
   '("bool" "Bool" "Uid"
-    "void" "int" "char" "Integer" "Int32" "Int64"
+    "void" "int" "long" "unsigned" "char" "Integer" "Int32" "Int64"
     "float" "double" "Real" "Real3" "Real3x3" 
     "cell" "cells" "Cell"
     "node" "nodes" "Node"
@@ -128,6 +130,7 @@
    (list nabla-types-regexp 1 'font-lock-type-face)
    (list nabla-warnings-regexp 1 'font-lock-warning-face)
    ;; highlight special keywords
+   '("^* .+" . font-lock-comment-face)
    ;'("\\(⁰\\)" . font-lock-variable-name-face)
    '("\\(ⁿ⁺¹\\|ⁿ⁼⁰\\|ⁿ\\)" . font-lock-constant-face)
    '("\\(²ˣ²\\|³ˣ³\\)" . font-lock-type-face)

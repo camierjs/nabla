@@ -1,0 +1,177 @@
+///////////////////////////////////////////////////////////////////////////////
+// NABLA - a Numerical Analysis Based LAnguage                               //
+//                                                                           //
+// Copyright (C) 2014~2017 CEA/DAM/DIF                                       //
+// IDDN.FR.001.520002.000.S.P.2014.000.10500                                 //
+//                                                                           //
+// Contributor(s): CAMIER Jean-Sylvain - Jean-Sylvain.Camier@cea.fr          //
+//                                                                           //
+// This software is a computer program whose purpose is to translate         //
+// numerical-analysis specific sources and to generate optimized code        //
+// for different targets and architectures.                                  //
+//                                                                           //
+// This software is governed by the CeCILL license under French law and      //
+// abiding by the rules of distribution of free software. You can  use,      //
+// modify and/or redistribute the software under the terms of the CeCILL     //
+// license as circulated by CEA, CNRS and INRIA at the following URL:        //
+// "http://www.cecill.info".                                                 //
+//                                                                           //
+// The CeCILL is a free software license, explicitly compatible with         //
+// the GNU GPL.                                                              //
+//                                                                           //
+// As a counterpart to the access to the source code and rights to copy,     //
+// modify and redistribute granted by the license, users are provided only   //
+// with a limited warranty and the software's author, the holder of the      //
+// economic rights, and the successive licensors have only limited liability.//
+//                                                                           //
+// In this respect, the user's attention is drawn to the risks associated    //
+// with loading, using, modifying and/or developing or reproducing the       //
+// software by the user in light of its specific status of free software,    //
+// that may mean that it is complicated to manipulate, and that also         //
+// therefore means that it is reserved for developers and experienced        //
+// professionals having in-depth computer knowledge. Users are therefore     //
+// encouraged to load and test the software's suitability as regards their   //
+// requirements in conditions enabling the security of their systems and/or  //
+// data to be ensured and, more generally, to use and operate it in the      //
+// same conditions as regards security.                                      //
+//                                                                           //
+// The fact that you are presently reading this means that you have had      //
+// knowledge of the CeCILL license and that you accept its terms.            //
+//                                                                           //
+// See the LICENSE file for details.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+//m -B && ./calypso_seq --NX=4 --X_EDGE_ELEMS=6 --NY=4 --Y_EDGE_ELEMS=6 
+
+with ℝ²,cartesian;
+
+// ****************************************************************************
+// * Definitions & Enumerations
+// ****************************************************************************
+#define MAX_INLET_NB 9201
+enum{SOUTH,EAST,NORTH,WEST};
+
+// ****************************************************************************
+// * Physical Constants
+// ****************************************************************************
+const ℝ GZ = 9.81;           // AccelerationDueToGravity is 9.80665 m/s²
+
+// ****************************************************************************
+// * Options
+// ****************************************************************************
+options{
+  ℕ NX                    = 64;      // Number of inner X cells
+  ℕ NY                    = 48;      // Number of inner Y cells
+  ℝ LENGTH                = 1.0;
+  ℕ X_EDGE_ELEMS          = NX+2;    // Inner + Fictitious X cells
+  ℕ Y_EDGE_ELEMS          = NY+2;    // Inner + Fictitious Y cells
+  ℝ option_stoptime       = 60.0;
+  ℕ option_max_iterations = 8;
+  ℝ option_eps_fp         = 1.0/∞;
+  ℝ option_epsd           = 1.0e-9;
+  ℝ option_time_step      = 0.0025;
+  ℝ option_cfl_max        = 0.25;
+  ℾ option_fill           = false;
+  ℾ option_debug          = false;
+  ℾ option_arcane         = false;
+};
+
+// ****************************************************************************
+// * Cells
+// ****************************************************************************
+cells{
+  ℝ x,dx;
+  ℝ y,dy;
+  ℝ z,d,d_hn; // depth
+  ℝ h,hn,hnp; // height
+  ℝ un,unp;   // velocity X
+  ℝ vn,vnp;   // velocity Y
+  ℝ deqh,deqh_dx,deqh_dy;
+  ℝ coef_gradx_h,coef_grady_h;
+  ℝ fc;       // Coriolis force
+};
+
+// ***************************************************************************
+// * Globals
+// ***************************************************************************
+global{
+  ℝ inv_dx,inv_dy;
+  ℝ xmin,xmax;
+  ℝ ymin,ymax;
+  ℝ hmax_bound,hmax,hmax0;
+  ℝ dmax,dxmax,inv_dx_max,dymax,inv_dy_max;
+  ℝ umax,umin,vmax,vmin;
+  ℝ cfl;
+  ℝ dx_lon, dy_lat;
+  ℝ dxy_min;
+  ℕ chkH,chkU,chkV;
+};
+double inlet[MAX_INLET_NB];
+
+
+// ***************************************************************************
+// * Initialisation part
+// ***************************************************************************
+
+// netcdf @ -20.0
+
+// read_water_inlet @ -20.0
+
+∀ cells @ -19 {d=-z;}
+
+∀ cells xmin <?= x @ -17;
+∀ cells xmax >?= x @ -17;
+∀ cells ymin <?= y @ -17;
+∀ cells ymax >?= y @ -17;
+
+dxLon @ -15 { dx_lon = (xmax-xmin)/(NX-1);}
+dyLat @ -15 { dy_lat = (ymax-ymin)/(NY-1);}
+
+∀ cells geogr_to_cart_dx @ -13 { dx = lon_to_m(dx_lon,y);}
+∀ cells geogr_to_cart_dy @ -13 { dy = lat_to_m(dy_lat);}
+
+∀ cells dxmax >?= dx @ -11;
+∀ cells dymax >?= dy @ -11;
+
+∀ cells ini_inv_dx @ -11 { assert(dx>0); inv_dx = 1.0/dx; }
+∀ cells ini_inv_dy @ -11 { assert(dy>0); inv_dy = 1.0/dy; }
+
+∀ cells ini_coef_gradx_h @ -11 { coef_gradx_h = option_time_step*GZ/dx; }
+∀ cells ini_coef_grady_h @ -11 { coef_grady_h = option_time_step*GZ/dy; }
+
+∀ cells space_scheme_init_coriolis @ -11 {
+  const ℝ PI = acos(-1.0);
+  const ℝ T_SIDEREAL = 86164.1;
+  const ℝ ΩT = 2.0*PI/T_SIDEREAL;
+  const ℝ dΩt = 2.0*ΩT;
+  fc = dΩt * sin(deg_to_rad(y));
+}
+
+time_scheme_cfl @ -7.0 {
+  const ℝ cgmax = √(GZ*(dmax+hmax0));
+  const ℝ cumax = fmax(fabs(umax),fabs(umin))+cgmax;
+  const ℝ cvmax = fmax(fabs(vmax),fabs(vmin))+cgmax;
+  inv_dx_max = 1.0/dxmax;
+  inv_dy_max = 1.0/dymax;
+  δt=option_time_step;
+  cfl = fmax(δt*cumax*inv_dx_max, δt*cvmax*inv_dy_max);
+  info()<< "[33m[time_scheme_cfl] cfl="<<cfl<<"[m";
+  /*if (!option_arcane)*/ assert(δt<cfl);
+  dxy_min = 1.0/fmax(inv_dx_max,inv_dy_max);
+}
+
+
+// ***************************************************************************
+// * Compute loop
+// ***************************************************************************
+
+model_iterate @ 0.0 if (!(iteration%1024)) {
+  printf("\n[1;35m[ %d ] t=%.5fs, hmax = %0.11f[m",iteration,time,hmax);
+}
+
+
+// ***************************************************************************
+// * Quit test
+// ***************************************************************************
+quit @ 10.0 if (iteration==option_max_iterations) { exit; }
+

@@ -229,7 +229,7 @@ void iniGlobals(void) @ -5.0{
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File results) {
+/*∀ cells void dumpSolution(File results) {
   results << "\t" << center  
           << "\t" << (cV + cW)*0.5
           << "\n";
@@ -240,21 +240,21 @@ void iniGlobals(void) @ -5.0{
   output << n_time
          << "\t" << 0.5*(cV+cW)
          << "\n";
-}    
+         }    */
 
 
 void tstForQuit(void) @ 4.0 {
-  if (option_dump_output){
+  /*if (option_dump_output){
     dumpOutput(NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,&n_time,cV,cW);
     output;
-  }
+    }*/
   if ((time<(option_stoptime-δt))) return;
-  if (option_dump_output){
+  /*if (option_dump_output){
     file(results,plot);
     // printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
     dumpSolution(results,NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,cV,cW);
-  }else printf("\n");
+    }else printf("\n");*/
   exit;
 }
 

@@ -67,11 +67,11 @@ void aHookSourceOpen(nablaMain*);
 void aHookSourceInclude(nablaMain*);
 char* aHookSourceNamespace(nablaMain*);
 
-bool aHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,astNode*);
+bool aHookPrimaryExpressionToReturn(nablaMain*,nablaJob*,node*);
 
 void aHookAddExtraParametersDFS(nablaMain*,nablaJob*,int*);
-void aHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,astNode*,int*);
-void aHookDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+void aHookDumpNablaParameterListDFS(nablaMain*,nablaJob*,node*,int*);
+void aHookDfsForCalls(nablaMain*,nablaJob*,node*,const char*,node*);
 
 void aHookHeaderDump(nablaMain*);
 void aHookHeaderOpen(nablaMain*);
@@ -84,14 +84,14 @@ char *nArcanePragmaGccIvdep(void);
 char *nArcanePragmaGccAlign(void);
 char* arcaneEntryPointPrefix(nablaMain*,nablaJob*);
 void arcaneAddArguments(nablaMain*,nablaJob*);
-void arcaneAddCallNames(nablaMain*,nablaJob*,astNode*);
+void arcaneAddCallNames(nablaMain*,nablaJob*,node*);
 void arcaneFatal(nablaMain*);
 void arcaneTime(nablaMain*);
 void arcaneExit(nablaMain*,nablaJob*);
 void arcaneError(nablaMain*,nablaJob*);
 void arcaneIteration(nablaMain*);
 void arcaneTurnTokenToOption(nablaMain*,nablaOption*);
-void arcaneHookReduction(nablaMain*,astNode*);
+void arcaneHookReduction(nablaMain*,node*);
 
 bool arcaneHookDfsVariable(nablaMain*);
 bool arcaneHookDfsExtra(nablaMain*,nablaJob*,bool);
@@ -101,10 +101,10 @@ char* arcaneHookDfsArgType(nablaMain*,nablaVariable*);
 //char* nccArcGather(nablaJob*,nablaVariable* var, GATHER_SCATTER_PHASE);
 //char* nccArcScatter(nablaVariable* var);
 
-char* nccArcSystemPrefix(void);
+char* arcaneXyzPrefix(void);
 //char* nccArcSystemPostfix(void);
-//char* nccArcPrevCell(int);
-//char* nccArcNextCell(int);
+char* arcaneXyzPrevCell(int);
+char* arcaneXyzNextCell(int);
 //char* nccArcIncludes(void);
 
 char *nablaArcaneColor(nablaMain*);
@@ -113,7 +113,7 @@ bool isAnArcaneModule(nablaMain*);
 bool isAnArcaneService(nablaMain*);
 bool isAnArcaneFamily(nablaMain*);
 
-void actFunctionDumpHdr(FILE*,astNode*);
+void actFunctionDumpHdr(FILE*,node*);
 
 char* nccArcLibMailHeader(void);
 char* nccArcLibMailPrivates(void);
@@ -186,23 +186,23 @@ void aHookFamilyHeader(nablaMain*);
 void aHookFamilyFooter(nablaMain*);
 void aHookFamilyVariablesPrefix(nablaMain*);
 
-void arcaneJob(nablaMain*, astNode*);
+void arcaneJob(nablaMain*, node*);
 void arcaneHookFunctionName(nablaMain*);
-void arcaneHookFunction(nablaMain*,astNode*);
-void arcaneItemDeclaration(astNode*,int,nablaMain*);
-void arcaneOptionsDeclaration(astNode*, int, nablaMain*);
+void arcaneHookFunction(nablaMain*,node*);
+void arcaneItemDeclaration(node*,int,nablaMain*);
+void arcaneOptionsDeclaration(node*, int, nablaMain*);
 char* arcaneHookPrefixEnumerate(nablaJob*);
 char* arcaneHookDumpEnumerateXYZ(nablaJob*);
 char* arcaneHookDumpEnumerate(nablaJob*);
 char* arcaneHookPostfixEnumerate(nablaJob*);
 char* arcaneHookItem(nablaJob*,const char, const char, char);
-void arcaneHookSwitchToken(astNode*, nablaJob*);
-nablaVariable *arcaneHookTurnTokenToVariable(astNode*,nablaMain*,nablaJob*);
+void arcaneHookSwitchToken(node*, nablaJob*);
+nablaVariable *arcaneHookTurnTokenToVariable(node*,nablaMain*,nablaJob*);
 void arcaneHookTurnBracketsToParentheses(nablaMain*, nablaJob*, nablaVariable*, char);
-void arcaneHookSystem(astNode*,nablaMain*, const char, char);
+void arcaneHookSystem(node*,nablaMain*, const char, char);
 char* arcaneHookTokenPrefix(nablaMain*);
 char* arcaneHookTokenPostfix(nablaMain*);
-void arcaneHookIsTest(nablaMain*,nablaJob*,astNode*,int);
+void arcaneHookIsTest(nablaMain*,nablaJob*,node*,int);
 
 // Transformations
 char *cellJobCellVar(const nablaMain*, const nablaJob*,  const nablaVariable*);

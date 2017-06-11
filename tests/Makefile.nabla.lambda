@@ -8,7 +8,7 @@ PARALLEL ?= seq
 BYFL_FLAGS  = #-bf-verbose #-bf-every-bb -bf-vectors -bf-inst-mix -bf-data-structs -bf-by-func -bf-call-stack
 
 AVX_EXTRA_FLAGS = -mCG_use_zeroupper=0 -mP1OPT_max_rec_copy_size=128
-SIMD_std_FLAGS  = $(BYFL_FLAGS) -std=c++11 -g -O2 -Wall -DNO_SSE2 -mno-avx  #-fPIC
+SIMD_std_FLAGS  = -std=c++11 -g -O2 -Wall -fno-strict-aliasing -DNO_SSE2 -mno-avx  #-fPIC
 
 LOG ?= -tnl #-v $(TGT).log
 
@@ -25,6 +25,7 @@ LIB_ALEPH = ${NABLA_BINARY_DIR}/aleph/libAleph.a ${NABLA_BINARY_DIR}/aleph/hypre
 LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
 LIB_MPI = /usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
 LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
+LIB_FRNTND = ${NABLA_BINARY_DIR}/frontend/libNablaFrontend.a
 ifeq ("${MFEM_FOUND}","YES")
 LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a ${MFEM_ROOT_PATH}/lib/libmfem.a
 endif
@@ -38,20 +39,19 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_GLVIS)
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_FRNTND) $(LIB_GLVIS) -lnetcdf
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)
 
 gen1:$(TGT).cc
 #	$(CXX) -S -c $(CFLAGS) $(TGT).cc -o $(TGT).S
+
 run1:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	${MPIEXEC} -n 1 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=1 CILK_NWORKERS=1 ./$(TGT)_$(PARALLEL)
+
 run4:$(TGT) $(NABLA) 
-	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(MESH)_$(PARALLEL)
-#	./$(TGT)_$(MESH)_$(PARALLEL)
+	OMP_NUM_THREADS=4 CILK_NWORKERS=4 ./$(TGT)_$(PARALLEL)
 
 #############
 # DOT 2 PNG #

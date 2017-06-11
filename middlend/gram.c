@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * nablaInsertSpace
 // ****************************************************************************
-void nMiddleInsertSpace(nablaMain *nabla, astNode * n){
+void nMiddleInsertSpace(nablaMain *nabla, node * n){
   if (n->token!=NULL) {
     if (n->parent!=NULL){
       if (n->parent->rule!=NULL){
@@ -80,7 +80,7 @@ static char *switchItemSupportTokenid(int item_support_tokenid){
 // ****************************************************************************
 // * nMiddleDeclarationDump
 // ****************************************************************************
-static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
+static void nMiddleDeclarationDump(nablaMain *nabla, node * n){
   for(;n->token != NULL;){
     dbg(" %s",n->token);
     nprintf(nabla, NULL, "%s ", n->token);
@@ -108,7 +108,7 @@ static void nMiddleDeclarationDump(nablaMain *nabla, astNode * n){
 // *    - nabla_job_definition
 // *    - nabla_reduction
 // ****************************************************************************
-void nMiddleGrammar(astNode *n, nablaMain *nabla){
+void nMiddleGrammar(node *n, nablaMain *nabla){
     
   /////////////////////////////////////
   // Règle de définitions des includes
@@ -182,7 +182,7 @@ void nMiddleGrammar(astNode *n, nablaMain *nabla){
     dbg("\n*** [nMiddleGrammar] rule hit %s", n->rule);
     bool is_an_entry_point=false;
     // On scan pour trouver un '@'
-    for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
+    for(node *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
       //if (nAt->token!=NULL) dbg("%s ",nAt->token);
       if (nAt->tokenid!=AT) continue;
       is_an_entry_point=true;
@@ -210,7 +210,7 @@ void nMiddleGrammar(astNode *n, nablaMain *nabla){
     bool is_an_entry_point=false;
     
     // On scan pour trouver un '@'
-    for(astNode *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
+    for(node *nAt=n->children;nAt not_eq NULL;nAt=nAt->next){
       //if (nAt->token!=NULL) dbg("%s ",nAt->token);
       if (nAt->tokenid!=AT) continue;
       is_an_entry_point=true;
@@ -243,8 +243,8 @@ void nMiddleGrammar(astNode *n, nablaMain *nabla){
   // On a une reduction Nabla //
   //////////////////////////////
   if (n->ruleid == ruleToId(rule_nabla_reduction)){
-    astNode *global_node = n->children->next;
-    astNode *item_node =n->children->next->next->next;
+    node *global_node = n->children->next;
+    node *item_node =n->children->next->next->next;
     const char *global_var_name = global_node->token;
     const char *item_var_name = item_node->token;
     dbg("\n*** [nMiddleGrammar] rule hit %s", n->rule);

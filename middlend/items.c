@@ -46,7 +46,7 @@
 // ****************************************************************************
 // * type_specifier
 // ****************************************************************************
-static void actItemTypeSpecifier(astNode *n, void *generic_arg){
+static void actItemTypeSpecifier(node *n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable = nMiddleVariableNew(nabla);
   if (n->children->tokenid==POWER){
@@ -91,7 +91,7 @@ static void actItemTypeSpecifier(astNode *n, void *generic_arg){
 /***************************************************************************** 
  * direct_declarator
  *****************************************************************************/
-static void actItemDirectDeclarator(astNode *n, void *generic_arg){
+static void actItemDirectDeclarator(node *n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   dbg("\n\t\t[actItemDirectDeclarator]");
@@ -105,7 +105,7 @@ static void actItemDirectDeclarator(astNode *n, void *generic_arg){
 // ***************************************************************************** 
 // * actItemNablaItems
 // *****************************************************************************
-static void actItemNablaItems(astNode *n, void *generic_arg){
+static void actItemNablaItems(node *n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   const char cfgn=variable->item[0];
@@ -130,7 +130,7 @@ static void actItemNablaItems(astNode *n, void *generic_arg){
 //***************************************************************************** 
 // * actItemPrimaryExpression
 // ****************************************************************************
-static void actItemPrimaryExpression(astNode *n, void *generic_arg){
+static void actItemPrimaryExpression(node *n, void *generic_arg){
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable =nMiddleVariableLast(nabla->variables);
   dbg("\n\t\t[actItemPrimaryExpression] %s", n->children->token);
@@ -144,7 +144,7 @@ static void actItemPrimaryExpression(astNode *n, void *generic_arg){
 //***************************************************************************** 
 // * actItemComa
 // ****************************************************************************
-static void actItemComa(astNode *n, void *generic_arg){
+static void actItemComa(node *n, void *generic_arg){
   dbg("\n\t\t[actItemComa]");
   nablaMain *nabla=(nablaMain*)generic_arg;
   nablaVariable *variable = nMiddleVariableNew(nabla);
@@ -162,7 +162,7 @@ static void actItemComa(astNode *n, void *generic_arg){
 /***************************************************************************** 
  * Scan pour la déclaration des variables
  *****************************************************************************/
-void nMiddleItems(astNode *n, int ruleid, nablaMain *nabla){
+void nMiddleItems(node *n, int ruleid, nablaMain *nabla){
   RuleAction tokact[]={
     {ruleToId(rule_type_specifier),actItemTypeSpecifier},
     {tokenidToRuleid(',') ,actItemComa},

@@ -54,7 +54,7 @@ static char* xHookSelectEnumerate(nablaJob *job){
   dbg("\n\t\t[lambdaHookSelectEnumerate] cell?");
   if (itm=='p' && grp==NULL && rgn==NULL)     return "FOR_EACH_PARTICLE%s(p)";
   if (itm=='c' && grp==NULL && rgn==NULL)     return "FOR_EACH_CELL%s(c)";
-  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "\n#warning Should be INNER cells\n\tFOR_EACH_CELL%s(c)";
+  if (itm=='c' && grp==NULL && rgn[0]=='i')   return "FOR_EACH_INNER_CELL%s(c)";
   if (itm=='c' && grp==NULL && rgn[0]=='o')   return "FOR_EACH_OUTER_CELL%s(c)";
   if (itm=='c' && grp[0]=='o' && rgn==NULL)   return "FOR_EACH_CELL%s(c)";
   dbg("\n\t\t[lambdaHookSelectEnumerate] node?");
@@ -125,9 +125,62 @@ char* xHookForAllItem(nablaJob *j,
 }
 
 // ****************************************************************************
+// * Definitions
+// ****************************************************************************
+#define INNER_XYZ "/*INNER_XYZ*/\n\
+\tif (c<opAdd(X_EDGE_ELEMS,1)) continue;\n\
+\tif (c>opMul(X_EDGE_ELEMS,(opSub(X_EDGE_ELEMS,1)))) continue;\n\
+\tif (!(opMod(c,X_EDGE_ELEMS))) continue;\n\
+\tif (!(opMod((opAdd(c,1)),X_EDGE_ELEMS))) continue;\n"
+
+
+// ****************************************************************************
 // * Fonction postfix à l'ENUMERATE_*
 // ****************************************************************************
 char* xHookForAllPostfix(nablaJob *job){
+  const nablaMain *n=job->entity->main;
+  const char *grp=job->scope;   // OWN||ALL
+  const char rgn=job->region?job->region[0]:'\0';  // INNER, OUTER
+  const char itm=job->item[0];  // (c)ells|(f)aces|(n)odes|(g)lobal
+  const char nesw=neswOrNot(n,job->nesw);
+  const bool xyz = (n->entity->libraries&(1<<with_cartesian))!=0;
   dbg("\n\t[xHookForAllPostfix]");
+  //nprintf(n, NULL, "/*xHookForAllPostfix nesw='%c'*/",nesw);
+
+  // INNER Cell job, no OWN|ALL loops on all NABLA_NB_CELLS and 'continues' with if statements
+  if (itm=='c' && !grp && rgn=='i'){
+    if (xyz) nprintf(n, NULL, INNER_XYZ);
+    else nprintf(n, NULL, "/*std INNER*/");
+    //return xCallFilterGather(NULL,job);
+  }
+  
+  // OUTER Cell job is done with FOR_EACH_OUTER_CELL_WARP and its nxtOuterCellOffset
+  // No need to: if (itm=='c' && !grp && rgn=='o') ;
+  
+  if (itm=='c' && !grp && rgn=='i' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=(X_EDGE_ELEMS-2)) continue;\n");
+  if (itm=='c' && !grp && rgn=='i' && nesw=='E') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==(X_EDGE_ELEMS-2)) continue;\n");
+  
+  if (itm=='c' && !grp && rgn=='i' && nesw=='s') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-1)) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='s') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=0) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='n') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-1)) continue;\n");
+  if (itm=='c' && !grp && rgn=='i' && nesw=='n') nprintf(n, NULL, "\tif ((c/X_EDGE_ELEMS)!=(Y_EDGE_ELEMS-2)) continue;\n");
+
+  if (itm=='c' && !grp && rgn=='o' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=(X_EDGE_ELEMS-2)) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='E') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==(X_EDGE_ELEMS-2)) continue;\n");
+
+//  #warning should be un-commented
+  //if (itm=='c' && !grp && rgn=='o' && nesw=='w') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=0) continue;\n");
+  if (itm=='c' && !grp && rgn=='o' && nesw=='W') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))==0) continue;\n");
+
+  if (itm=='c' && !grp && rgn=='o' && nesw=='e') nprintf(n, NULL, "\tif ((opMod(c,X_EDGE_ELEMS))!=opSub(X_EDGE_ELEMS,1)) continue;\n");
+
   return xCallFilterGather(NULL,job);
+}
+
+
+// ****************************************************************************
+// * Fonction prefix à l'ENUMERATE_*
+// ****************************************************************************
+char* xHookForAllPrefix(nablaJob *job){
+  return "/*xHookForAllPrefix*/";
 }

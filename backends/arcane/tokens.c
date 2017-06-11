@@ -49,7 +49,7 @@ extern bool adrs_it;
 // ****************************************************************************
 // * arcaneHookIsTest
 // ****************************************************************************
-void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, astNode *n, int token){
+void arcaneHookIsTest(nablaMain *nabla, nablaJob *job, node *n, int token){
   // Arcane, traite le test en 'objets'
   if (token!=IS) return;
   assert(n->children && n->children->next && n->children->next->token);
@@ -80,7 +80,7 @@ char* arcaneHookTokenPostfix(nablaMain *nabla){return sdup("");}
 // * Transformation de tokens en variables Arcane
 // * selon les contextes dans le cas d'un '[Cell|node]Enumerator'
 // ****************************************************************************
-nablaVariable *arcaneHookTurnTokenToVariable(astNode * n,
+nablaVariable *arcaneHookTurnTokenToVariable(node * n,
                                              nablaMain *arc,
                                              nablaJob *job){
   dbg("\n\t\t[arcaneHookTurnTokenToVariable]");

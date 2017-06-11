@@ -56,7 +56,7 @@ NABLA_STATUS rajaHookMainPreInit(nablaMain*);
 
 char* rajaHookForAllDump(nablaJob*);
 
-void rajaHookReduction(nablaMain*,astNode*);
+void rajaHookReduction(nablaMain*,node*);
 
 hooks* raja(nablaMain*);
 

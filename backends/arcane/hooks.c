@@ -45,15 +45,27 @@
 #include "backends/arcane/arcane.h"
 
 // ****************************************************************************
-// * nHookXyz pre/post fix
+// * arcaneXyz pre/post fix
 // ****************************************************************************
-char* nccArcSystemPrefix(void){ return "m_"; }
+char* arcaneXyzPrefix(void){
+  dbg("\n\t[arcaneXyzPrefix]");
+  return "m_"; }
+
+char* arcaneXyzPrevCell(int dir){
+  dbg("\n\t[arcaneXyzPrevCell]");
+  return "";
+}
+
+char* arcaneXyzNextCell(int dir){
+  dbg("\n\t[arcaneXyzNextCell]");
+  return "";
+}
 
 
 // ****************************************************************************
 // * hookPrimaryExpressionToReturn
 // ****************************************************************************
-bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, astNode *n){
+bool aHookPrimaryExpressionToReturn(nablaMain *nabla, nablaJob *job, node *n){
   const char* var=dfsFetchFirst(job->stdParamsNode,ruleToId(rule_direct_declarator));
   dbg("\n\t[hookPrimaryExpressionToReturn] ?");
   if (var!=NULL && strcmp(n->children->token,var)==0){
@@ -102,9 +114,9 @@ char* arcaneHookDfsArgType(nablaMain *nabla, nablaVariable *var){
 // ****************************************************************************
 void aHookDfsForCalls(nablaMain *nabla,
                       nablaJob *fct,
-                      astNode *n,
+                      node *n,
                       const char *namespace,
-                      astNode *nParams){
+                      node *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -186,7 +198,7 @@ void arcaneFatal(nablaMain *nabla){
 
 void arcaneAddCallNames(nablaMain *nabla,
                         nablaJob *job,
-                        astNode *n){
+                        node *n){
   dbg("\n[arcaneAddCallNames]");
   /*nothing to do*/
 }
@@ -207,7 +219,7 @@ void arcaneTurnTokenToOption(nablaMain *nabla,nablaOption *opt){
 // * Traitement des tokens SYSTEM
 // *****************************************************************************
 //#warning nablaSystem and test error (ddfv alpha)
-void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum){
+void arcaneHookSystem(node * n,nablaMain *arc, const char cnf, char enum_enum){
   char *itm=(cnf=='c')?"cell":(cnf=='n')?"node":"face";
   char *etm=(enum_enum=='c')?"c":(enum_enum=='n')?"n":"f";
   //if (n->tokenid == DIESE)         nprintf(arc, "/*nablaSystem*/", "%s.index()",etm);//asInteger
@@ -237,6 +249,16 @@ void arcaneHookSystem(astNode * n,nablaMain *arc, const char cnf, char enum_enum
   if (n->tokenid == PREVRIGHT)     nprintf(arc, "/*nablaSystem PREVRIGHT*/", "[cn.previousRight()]");
   if (n->tokenid == NEXTLEFT)      nprintf(arc, "/*nablaSystem NEXTLEFT*/", "[cn.nextLeft()]");
   if (n->tokenid == NEXTRIGHT)     nprintf(arc, "/*nablaSystem NEXTRIGHT*/", "[cn.nextRight()]");
+  if (n->tokenid == ARROW_UP)      nprintf(arc, NULL, "[north]");
+  if (n->tokenid == ARROW_NORTH_EAST) nprintf(arc, NULL, "[north_east]");
+  if (n->tokenid == ARROW_RIGHT)   nprintf(arc, NULL, "[east]");
+  if (n->tokenid == ARROW_SOUTH_EAST) nprintf(arc, NULL, "[south_east]");
+  if (n->tokenid == ARROW_DOWN)    nprintf(arc, NULL, "[south]");
+  if (n->tokenid == ARROW_SOUTH_WEST) nprintf(arc, NULL, "[south_west]");
+  if (n->tokenid == ARROW_LEFT)    nprintf(arc, NULL, "[west]");
+  if (n->tokenid == ARROW_NORTH_WEST) nprintf(arc, NULL, "[north_west]");
+  if (n->tokenid == ARROW_BACK)    nprintf(arc, NULL, "[back]");
+  if (n->tokenid == ARROW_FRONT)    nprintf(arc, NULL, "[front]");
 }
 
 // ****************************************************************************

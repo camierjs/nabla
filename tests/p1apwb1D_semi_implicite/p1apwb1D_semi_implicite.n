@@ -51,7 +51,8 @@ with ℝ;
 // * ∀ ℝℕℤℾ √∛ ½⅓¼⅛ 𝜕ℵ∂ * ⋅⨯⤫⊗⨂⊛ ∞ ⁰¹²³ⁱⁿ⁺⁼
 // ****************************************************************************
 
-ofstream output("schema1.plot");  
+ofstream output("output.plot");  
+ofstream result("result.plot");  
 
   
 // ****************************************************************************
@@ -212,7 +213,7 @@ void dbgLoop(void) @ 1.0{
 // ****************************************************************************
 // * Test for Quit & Dump Solution Found
 // ****************************************************************************
-∀ cells void dumpSolution(File results){
+/*∀ cells dumpSolution {
   results  << "\t" << center
            << "\t" << P_condlimi(center,option_stoptime)
            << "\t" << cP
@@ -220,31 +221,31 @@ void dbgLoop(void) @ 1.0{
            << "\n";
 }
 
-∀ cells void dumpOutput(void){
+∀ cells dumpOutput{
   if  (center!=0.005) continue;
   output << n_time
-    //<< "\t" << cU
          << "\t" << cP
          << "\t" << cP - pow(cTm,4)
          << "\n";
-}  
+         }  */
 
 void tstForQuit(void) @ 4.0 {
   //printf("\n\t[testForQuit] GlobalIteration =%d, time=%f, delta_t=%f",
   //    GlobalIteration, time,(double)δt);
+  /*
   if (option_dump_output){
     dumpOutput(NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,&n_time,cP,cTm);
     output << "\n";
-  }
+    }*/
   // file(resultsvstime ,plot);
   // dumpVsTimeSolution(resultsvstime);
   if ((time<(option_stoptime-δt))) return;  
-  if (option_dump_output){
+  /*if (option_dump_output){
     file(results,plot);
     //printf("\n\t[testForQuit] GlobalIteration>time_steps, \33[7mdumping\33[m\n");
     //results << "#33 "<<"globalNbCells"<<" "<<"globalNbNodes"<<"\n";
     dumpSolution(results,NABLA_NB_CELLS_WARP,NABLA_NB_CELLS,center,cP,cTm);
-  }else printf("\n");
+    }else printf("\n");*/
   exit;
 }
 

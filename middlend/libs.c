@@ -56,7 +56,7 @@ bool isWithLibrary(nablaMain *nabla, enum_library lib){
 // ****************************************************************************
 // * nMiddleLibrariesSwitch
 // ****************************************************************************
-static void nMiddleLibrariesSwitch(const astNode * n, nablaEntity *entity){
+static void nMiddleLibrariesSwitch(const node * n, nablaEntity *entity){
 
   //dbg("\n\t[nMiddleLibrariesSwitch] token= %s",n->children->token);
   if (strcmp(n->children->token,"Aleph")==0){
@@ -167,7 +167,7 @@ static void nMiddleLibrariesSwitch(const astNode * n, nablaEntity *entity){
 // ****************************************************************************
 // * DFS scan for libraries
 // ****************************************************************************
-void nMiddleLibraries(astNode * n, nablaEntity *entity){
+void nMiddleLibraries(node * n, nablaEntity *entity){
   if (n->ruleid == ruleToId(rule_single_library))
     nMiddleLibrariesSwitch(n,entity);
   if(n->children != NULL) nMiddleLibraries(n->children,  entity);

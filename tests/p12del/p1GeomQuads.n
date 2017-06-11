@@ -58,7 +58,9 @@ inline Real3 geomNormal(Real3 a, Real3 b){
 
 // Calcul de Δl: Length of the sides, before touching mesh
 void computeΔl(void) @ -30 {
-  Δl=min(NABLA_NB_NODES_X_TICK,NABLA_NB_NODES_Y_TICK);
+  const Real3 e0 = coord[2]-coord[0];
+  const Real3 e1 = coord[0]-coord[1];
+  Δl=min(fabs(e0.x-e1.x),fabs(e0.y-e1.y));
   info()<<"\33[33m[computeΔl] Δl="<<Δl<<"\33[m";
 }
 

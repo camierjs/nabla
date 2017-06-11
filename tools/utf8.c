@@ -65,10 +65,13 @@ static const bool uCa(char **a,char **p,
 // ****************************************************************************
 static void u2a(char **a, char **p){
 //  if (uCa(a,p,"","")) return;
+  //printf("\n[36ma='%s'[0m",*a);
+  //printf("\n[36mp='%s'[0m",*p);
  
   if (uCa(a,p,"²",2,"^^2",3)) return;
   if (uCa(a,p,"³",2,"^^3",3)) return;
-  
+  if (uCa(a,p,"∑",3,"N_ARY_SUM",9)) return;
+
   if (uCa(a,p,"∛",3,"cube_root",9)) return;
   if (uCa(a,p,"√",3,"square_root",11)) return;
   if (uCa(a,p,"⋅",3,"opScaMul",8)) return;
@@ -83,6 +86,17 @@ static void u2a(char **a, char **p){
   if (uCa(a,p,"è",2,"e",1)) return;
   if (uCa(a,p,"ï",2,"i",1)) return;
   
+  //↑↗→↘↓↙←↖⊠⊡
+  if (uCa(a,p,"↑",3,"_NP",3)) return; // North Point
+  if (uCa(a,p,"↗",3,"_NE",3)) return; // North East
+  if (uCa(a,p,"→",3,"_EP",3)) return; // East Point
+  if (uCa(a,p,"↘",3,"_SE",3)) return; // South East
+  if (uCa(a,p,"↓",3,"_SP",3)) return; // South Point
+  if (uCa(a,p,"↙",3,"_SW",3)) return; // South West
+  if (uCa(a,p,"←",3,"_WP",3)) return; // West Point
+  if (uCa(a,p,"↖",3,"_NW",3)) return; // North West
+  if (uCa(a,p,"⊠",3,"_BP",3)) return; // Back Point
+  if (uCa(a,p,"⊡",3,"_FP",3)) return; // Front Point
   
   if (uCa(a,p,"∨",3,"or",2)) return;
   if (uCa(a,p,"∧",3,"and",3)) return;

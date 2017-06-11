@@ -63,8 +63,7 @@
   const Real Y_MAX = option_y_max;
   const Real3x3 I = matrix3x3Id();
   const Real3 normaleY={0.0,1.0,0.0};
-  if (DEBUG)
-    printf("\n\t[36m[std] sym face[%d] option_y_max=%f",uid,option_y_max);
+  //if (DEBUG) printf("\n\t[36m[std] sym face[%d] option_y_max=%f",uid,option_y_max);
   ∀ node{
     if ((coord.y==Y_MIN)||(coord.y==Y_MAX)){
       if (DEBUG)
@@ -88,8 +87,7 @@
   const Real X_MAX = option_x_max;
   const Real value = option_u_ini;
   const Real3x3 I = matrix3x3Id();
-  if (DEBUG)
-    printf("\n\t[36m[std] BC face[%d]",uid);
+  //if (DEBUG) printf("\n\t[36m[std] BC face[%d]",uid);
   ∀ node{
     if (!((fabs(coord.x-X_MIN)<1.e-10) ||
           ((fabs(coord.x-X_MAX)<1.e-10)))) continue;

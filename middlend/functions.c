@@ -48,7 +48,7 @@
 // ****************************************************************************
 // * nMiddleFunctionDumpHeader
 // ****************************************************************************
-void nMiddleFunctionDumpHeader(FILE *file, astNode *n){
+void nMiddleFunctionDumpHeader(FILE *file, node *n){
   if (n->rule!=NULL)
     if (n->ruleid == ruleToId(rule_compound_statement))
       return;
@@ -66,7 +66,7 @@ void nMiddleFunctionDumpHeader(FILE *file, astNode *n){
 // * nMiddleFunctionParse
 // * Action de parsing d'une fonction
 // ****************************************************************************
-static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
+static void nMiddleFunctionParse(node * n, nablaJob *fct){
   nablaMain *nabla=fct->entity->main;
   // On utilise hook->grammar->skipBody
   const bool dump = (nabla->hook->grammar->dump?
@@ -280,12 +280,12 @@ static void nMiddleFunctionParse(astNode * n, nablaJob *fct){
  *****************************************************************************/
 void nMiddleFunctionFill(nablaMain *nabla,
                          nablaJob *fct,
-                         astNode *n,
+                         node *n,
                          const char *namespace){
   int numParams;
   fct->jobNode=n;
   fct->called_variables=NULL;
-  astNode *nFctName = dfsFetch(n->children,ruleToId(rule_direct_declarator));
+  node *nFctName = dfsFetch(n->children,ruleToId(rule_direct_declarator));
   assert(nFctName->children->tokenid==IDENTIFIER);
   dbg("\n* Fonction '%s'", nFctName->children->token); // org-mode function item
   dbg("\n\t// * [nablaFctFill] Fonction '%s'", nFctName->children->token);
@@ -321,7 +321,7 @@ void nMiddleFunctionFill(nablaMain *nabla,
 
   // Récupération de la liste des paramètres
   dbg("\n\t[nablaFctFill] On va chercher la list des paramètres");
-  astNode *nParams=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
+  node *nParams=dfsFetch(n->children,ruleToId(rule_parameter_type_list));
   fct->stdParamsNode=nParams->children;
   
   dbg("\n\t[nablaFctFill] scope=%s region=%s item=%s type=%s name=%s",
@@ -329,8 +329,14 @@ void nMiddleFunctionFill(nablaMain *nabla,
       (fct->region!=NULL)?fct->region:"Null",
       fct->item,//2+
       fct->return_type, fct->name);
+  
+  dbg("\n\t[nablaFctFill] Gestion du '@' de cette fonction");
   nMiddleScanForNablaJobAtConstant(n->children, nabla);
-  dbg("\n\t[nablaFctFill] Now fillinf SRC file");
+  
+  dbg("\n\t[nablaFctFill]  Gestion du 'if' de cette fonction");
+  nMiddleScanForIfAfterAt(n->children, fct, nabla);
+
+  dbg("\n\t[nablaFctFill] Now filling SRC file");
   nprintf(nabla, NULL, "\n\
 %s ********************************************************\n\
 %s * %s fct\n\

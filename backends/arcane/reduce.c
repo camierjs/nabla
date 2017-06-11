@@ -49,17 +49,17 @@
 // ****************************************************************************
 // *arcaneHookReduction
 // ****************************************************************************
-void arcaneHookReduction(nablaMain *nabla, astNode *n){
+void arcaneHookReduction(nablaMain *nabla, node *n){
   dbg("\n\t\t[arcaneHookReduction]");
-  astNode *nabla_items = dfsFetch(n->children,ruleToId(rule_nabla_items));
+  node *nabla_items = dfsFetch(n->children,ruleToId(rule_nabla_items));
   assert(nabla_items);
-  astNode *global_var_node = n->children->next;
+  node *global_var_node = n->children->next;
   assert(global_var_node);
-  astNode *reduction_operation_node = global_var_node->next;
+  node *reduction_operation_node = global_var_node->next;
   assert(reduction_operation_node);
-  astNode *item_var_node = reduction_operation_node->next;
+  node *item_var_node = reduction_operation_node->next;
   assert(item_var_node);
-  astNode *at_single_cst_node = dfsFetch(n->children->next, ruleToId(rule_at_constant));
+  node *at_single_cst_node = dfsFetch(n->children->next, ruleToId(rule_at_constant));
   assert(at_single_cst_node);
   const char *global_var_name = global_var_node->token;
   assert(global_var_name);
@@ -92,6 +92,7 @@ void arcaneHookReduction(nablaMain *nabla, astNode *n){
   if (ftoa[0]=='-') ftoa+=1;
   // On évite aussi le '.'
   char *locate_dot_sign_in_ftoa=index(ftoa,'.');
+  //printf("\nftoa='%s'",ftoa);
   assert(locate_dot_sign_in_ftoa);
   *locate_dot_sign_in_ftoa='_';
   // Ainsi que le '+'
@@ -133,7 +134,7 @@ void %s%s::%s(){\n",
           isAnArcaneModule(nabla)?"Module":"Service",
           job_name);
   
-  nprintf(nabla, NULL, "\n\tm_global_%s=%f;\n",global_var_name,reduction_init);
+  nprintf(nabla, NULL, "\tm_global_%s=%f;\n",global_var_name,reduction_init);
   if (cnf=='c') nprintf(nabla, NULL, "\tENUMERATE_CELL(cell,ownCells()){");
   if (cnf=='n') nprintf(nabla, NULL, "\tENUMERATE_NODE(node,ownNodes()){");
   nprintf(nabla, NULL, "\n\t\tm_global_%s=::fm%s(m_global_%s(),m_%s_%s[%s]);",

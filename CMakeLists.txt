@@ -126,3 +126,11 @@ add_subdirectory(backends/lib)
 # TESTS #
 #########
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+
+
+#########
+# Emacs #
+#########
+install(DIRECTORY etc
+        DESTINATION .
+        DIRECTORY_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)

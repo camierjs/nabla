@@ -25,7 +25,7 @@ $(TGT).o: $(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(KOKKOS_CXXFLAGS) -o $(TGT)_$(MESH)_$(PARALLEL) $(KOKKOS_LDFLAGS) $(TGT).o $(KOKKOS_LIBS)
+	$(CXX) $(KOKKOS_CXXFLAGS) -o $(TGT)_$(PARALLEL) $(KOKKOS_LDFLAGS) $(TGT).o $(KOKKOS_LIBS)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

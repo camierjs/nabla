@@ -73,6 +73,12 @@ char* xHookPrevCell(int direction){
     return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS+c],";
   if (direction==DIR_Z)
     return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirZ*NABLA_NB_CELLS+c],";
+  if (direction==DIR_NW)
+    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS\
++xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";
+  if (direction==DIR_SW)
+    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS\
++xs_cell_prev[MD_DirX*NABLA_NB_CELLS+c]],";
   assert(NULL);
   return NULL;
 }
@@ -88,6 +94,12 @@ char* xHookNextCell(int direction){
     return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS+c],";
   if (direction==DIR_Z)
     return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirZ*NABLA_NB_CELLS+c],";
+  if (direction==DIR_NE)
+    return "rGatherAndZeroNegOnes(xs_cell_next[MD_DirY*NABLA_NB_CELLS\
++xs_cell_next[MD_DirX*NABLA_NB_CELLS+c]],";
+  if (direction==DIR_SE)
+    return "rGatherAndZeroNegOnes(xs_cell_prev[MD_DirY*NABLA_NB_CELLS\
++xs_cell_next[MD_DirX*NABLA_NB_CELLS+c]],";
   assert(NULL);
   return NULL;
 }
@@ -111,9 +123,9 @@ void xHookFunctionName(nablaMain *nabla){
 // ****************************************************************************
 void xHookDfsForCalls(nablaMain *nabla,
                       nablaJob *fct,
-                      astNode *n,
+                      node *n,
                       const char *namespace,
-                      astNode *nParams){
+                      node *nParams){
   nMiddleFunctionDumpFwdDeclaration(nabla,fct,nParams,namespace);
 }
 
@@ -144,7 +156,7 @@ void xHookIteration(nablaMain *nabla){
   nprintf(nabla, "/*ITERATION*/", "global_iteration[0]");
 }
 
-void xHookAddCallNames(nablaMain *nabla,nablaJob *fct,astNode *n){
+void xHookAddCallNames(nablaMain *nabla,nablaJob *fct,node *n){
   nablaJob *foundJob;
   const char *callName=n->next->children->children->token;
   nprintf(nabla, "/*function_got_call*/", "/*xHookAddCallNames*/");

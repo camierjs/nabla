@@ -50,13 +50,13 @@ char* legionHookTokenPrefix(nablaMain *nabla){
 /*****************************************************************************
  * Différentes actions pour un job Nabla
  *****************************************************************************/
-void legionHookTokenSwitch(astNode *n, nablaJob *job){
+void legionHookTokenSwitch(node *n, nablaJob *job){
   //const nablaMain *nabla=job->entity->main;
   //if (n->token) nprintf(nabla, NULL, "\n\t-- token: %s",n->token);
 }
 
 
-nablaVariable *legionHookTokenVariable(astNode * n,
+nablaVariable *legionHookTokenVariable(node * n,
                                        nablaMain *nabla,
                                        nablaJob *job){
   return NULL;

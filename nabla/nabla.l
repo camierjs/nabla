@@ -57,12 +57,15 @@ char *last_identifier=NULL;
 #undef YY_BUF_SIZE
 #define YY_BUF_SIZE 131072
 #undef YY_NEED_STRLEN
-#define YYSTYPE  astNode*   
+#define YYSTYPE  node*   
 #include "nabla.tab.h"
 static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 
 static void ignoreLineComments(void);
 static int tok_type(YYSTYPE*);
+ 
+//∑
+ 
 %}
 
 D					[0-9]
@@ -71,6 +74,7 @@ H					[a-fA-F0-9]
 E					[Ee][+-]?{D}+
 FS					(f|F|l|L)
 IS					(u|U|l|L)*
+starhead       [\n][*]([ ]|{L}+)*
 preprocs       [#][ \t]*[1-9][0-9]*[ \t]*\".*\"([ \t]*[1-4])*
 includes	   	^[ ][i][n][c][l][u][d][e][ \t]*[\"<]*[a-zA-Z\./]*[\">]*
 koffsets       [\[][#][+-]?[0-9]*[\]]
@@ -171,8 +175,26 @@ __asm__           { return tok(&yylval, ASM);}
 "FILE"            { return tok(&yylval, FILETYPE);}
 "ofstream"        { return tok(&yylval, OFSTREAM);}
 
+"↑"               { return tok(&yylval, ARROW_UP);}
+"↗"               { return tok(&yylval, ARROW_NORTH_EAST);}
+"→"               { return tok(&yylval, ARROW_RIGHT);}
+"↘"               { return tok(&yylval, ARROW_SOUTH_EAST);}
+"↓"               { return tok(&yylval, ARROW_DOWN);}
+"↙"               { return tok(&yylval, ARROW_SOUTH_WEST);}
+"←"               { return tok(&yylval, ARROW_LEFT);}
+"↖"               { return tok(&yylval, ARROW_NORTH_WEST);}
+"⊠"               { return tok(&yylval, ARROW_BACK);}
+"⊡"               { return tok(&yylval, ARROW_FRONT);}
+
+"north"           { return tok(&yylval, NORTH);}
+"south"           { return tok(&yylval, SOUTH);}
+"east"            { return tok(&yylval, EAST);}
+"west"            { return tok(&yylval, WEST);}
+
 "cartesian"       { return tok(&yylval, LIB_CARTESIAN);}
 "xyz"             { return tok(&yylval, XYZ);}
+"next"            { return tok(&yylval, NEXT);}
+"prev"            { return tok(&yylval, PREV);}
 "nextCell"        { return tok(&yylval, NEXTCELL);}
 "prevCell"        { return tok(&yylval, PREVCELL);}
 "nextCellX"        { return tok(&yylval, NEXTCELL_X);}
@@ -242,7 +264,7 @@ __asm__           { return tok(&yylval, ASM);}
 "∨"					{ return tok(&yylval, IOR_OP);}
 "or"              { return tok(&yylval, IOR_OP);}
 
-{L}({L}|{D})*		{ return tok_type(&yylval); } // TYPEDEF or IDENTIFIER
+{L}({L}|{D})*	{ return tok_type(&yylval); } // TYPEDEF or IDENTIFIER
 
 0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
 0{D}+{IS}?             { return tok(&yylval, OCT_CONSTANT);}
@@ -334,6 +356,7 @@ __asm__           { return tok(&yylval, ASM);}
 
 [ \t\v\f]		   { /*ignore*/ }
 
+{starhead}		   { return tok(&yylval, STARHEAD); }
 {preprocs}		   { return tok(&yylval, PREPROCS); }
 {includes}		   { return tok(&yylval, INCLUDES); }
 {koffsets}		   { return tok(&yylval, K_OFFSET); }
@@ -370,11 +393,11 @@ loop:
 // * Tokenizer
 // ****************************************************************************
 static int tok(YYSTYPE *yylval, int tokenid){
-  //dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
+  dbg("\n\t[tok] line %d: '%s' (tokenid #%d)", yylineno, yytext, tokenid);
   if (tokenid==PREPROCS){
     long line_jump=atol(yytext+1);
     assert(line_jump>0);
-    //dbg("\n\t\t[tok] PREPROCS: line_jump=%d and yylineno=%d", line_jump, yylineno);
+    dbg("\n\t\t[tok] PREPROCS: line_jump=%ld and yylineno=%d", line_jump, yylineno);
     yylineno=line_jump-1;
   }
   (*yylval) = astNewNode(yytext,tokenid);

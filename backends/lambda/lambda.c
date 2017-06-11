@@ -74,7 +74,7 @@ static backendCalls calls={
 // * HOOKS
 // ****************************************************************************
 const static hookForAll forall={
-  NULL,
+  xHookForAllPrefix,
   xHookForAllDump,
   xHookForAllItem,
   xHookForAllPostfix

@@ -51,7 +51,11 @@ typedef enum {
   DIR_UNKNOWN,
   DIR_X,
   DIR_Y,
-  DIR_Z
+  DIR_Z,
+  DIR_NE,
+  DIR_SE,
+  DIR_SW,
+  DIR_NW
 } dir_xyz;
 
   
@@ -162,9 +166,11 @@ typedef struct nablaJobStruct{
   bool has_to_be_unlinked;
   char *scope;
   char *region;
+  node *nesw;
   char *item;
   char *item_set;
   int nb_in_item_set;
+  node *enum_enum_node;
   char *return_type;
   char *name;
   char *name_utf8;
@@ -176,11 +182,11 @@ typedef struct nablaJobStruct{
   int when_depth;
   double whens[NABLA_JOB_WHEN_MAX];
   char *where;
-  astNode *jobNode;
-  astNode *returnTypeNode;
-  astNode *stdParamsNode;
-  astNode *nblParamsNode;
-  astNode *ifAfterAt;
+  node *jobNode;
+  node *returnTypeNode;
+  node *stdParamsNode;
+  node *nblParamsNode;
+  node *ifAfterAt;
   nablaVariable *used_variables;
   nablaOption *used_options;
   nablaVariable *called_variables;
@@ -201,7 +207,7 @@ typedef struct nablaJobStruct{
     int isPostfixed;
     int isDotXYZ;
     bool diffracting;
-    astNode *statementToDiffract;
+    node *statementToDiffract;
     int diffractingXYZ;
     bool entityScopeToDump;
     char *entityScopeString;
@@ -258,7 +264,7 @@ typedef struct nablaEntityStruct{
 // Nabla MAIN struct
 // ****************************************************************************
 typedef struct nablaMainStruct{
-  astNode *root;
+  node *root;
   FILE *main, *cfg, *axl, *dot;
   const char *name;
   char *tmpVarKinds;
@@ -272,7 +278,7 @@ typedef struct nablaMainStruct{
   BACKEND_PARALLELISM parallelism;
   BACKEND_COMPILER compiler;
   char *interface_name; // Arcane specific
-  char *specific_path; // Arcane specific
+  char *specific_path;  // Arcane specific
   char *service_name;   // Arcane specific
   int optionDumpTree;
   int HLT_depth;
@@ -317,7 +323,7 @@ void middleGlobals(nablaMain*);
  
 // nMiddleLibraries.c
 bool isWithLibrary(nablaMain*,enum_library);
-void nMiddleLibraries(astNode*,nablaEntity*);
+void nMiddleLibraries(node*,nablaEntity*);
 
 // nMiddleEntities.c
 void nMiddleEntityFree(nablaEntity*);
@@ -325,18 +331,18 @@ nablaEntity *nMiddleEntityNew(nablaMain*);
 nablaEntity *nMiddleEntityAddEntity(nablaMain*,nablaEntity*);
 
 // nMiddleJobs.c
-void nMiddleScanForNablaJobParameter(astNode*,int,nablaMain*);
-void nMiddleScanForNablaJobAtConstant(astNode*,nablaMain*);
-char nMiddleScanForNablaJobForallItem(astNode*);
-void nMiddleScanForIfAfterAt(astNode*,nablaJob*,nablaMain*);
-void nMiddleDumpIfAfterAt(astNode*,nablaMain*,bool);
-int nMiddleDumpParameterTypeList(nablaMain*,FILE*,astNode*);
+void nMiddleScanForNablaJobParameter(node*,int,nablaMain*);
+void nMiddleScanForNablaJobAtConstant(node*,nablaMain*);
+char nMiddleScanForNablaJobForallItem(node*);
+void nMiddleScanForIfAfterAt(node*,nablaJob*,nablaMain*);
+void nMiddleDumpIfAfterAt(node*,nablaMain*,bool);
+int nMiddleDumpParameterTypeList(nablaMain*,FILE*,node*);
 nablaJob *nMiddleJobNew(nablaEntity*);
 nablaJob *nMiddleJobAdd(nablaEntity*,nablaJob*);
 nablaJob *nMiddleJobLast(nablaJob*);
 nablaJob *nMiddleJobFind(nablaJob*,const char*);
-void nMiddleJobParse(astNode*,nablaJob*);
-void nMiddleJobFill(nablaMain*,nablaJob*,astNode*,const char*);
+void nMiddleJobParse(node*,nablaJob*);
+void nMiddleJobFill(nablaMain*,nablaJob*,node*,const char*);
 void nMiddleJobFree(nablaMain*);
 
 // nMiddleVariables.c
@@ -348,20 +354,20 @@ nablaVariable *nMiddleVariableFind(nablaVariable*,const char*);
 nablaVariable *nMiddleVariableFindKoffset(nablaVariable*,const char*,const int);
 nablaVariable *nMiddleVariableFindWithSameJobItem(nablaMain*,nablaJob*,
                                                   nablaVariable*,const char*);
-what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,
-                                                         astNode*,
+what_to_do_with_the_postfix_expressions nMiddleVariables(nablaMain*,nablaJob*,
+                                                         node*,
                                                          const char,
                                                          char );
 int nMiddleVariableGmpRank(nablaVariable*);
 char *nMiddleVariableGmpNameRank(nablaVariable*,int);
 bool nMiddleVariableGmpDumpRank(nablaVariable*,int);
 int nMiddleVariableGmpDumpNumber(nablaVariable*);
-void dfsEnumMax(nablaMain*,nablaJob*,astNode*);
-void dfsExit(nablaMain*,nablaJob*,astNode*);
-void dfsVariables(nablaMain*,nablaJob*,astNode*,bool);
-void dfsVariablesDump(nablaMain*,nablaJob*,astNode*);
-bool dfsUsedInThisForall(nablaMain*,nablaJob*,astNode*,const char*);
-bool dfsUsedInThisForallKoffset(nablaMain*,nablaJob*,astNode*,const char*,const int);
+void dfsEnumMax(nablaMain*,nablaJob*,node*);
+void dfsExit(nablaMain*,nablaJob*,node*);
+void dfsVariables(nablaMain*,nablaJob*,node*,bool);
+void dfsVariablesDump(nablaMain*,nablaJob*,node*);
+bool dfsUsedInThisForall(nablaMain*,nablaJob*,node*,const char*);
+bool dfsUsedInThisForallKoffset(nablaMain*,nablaJob*,node*,const char*,const int);
 
 // nMiddleType
 nablaType *nMiddleTypeNew(void);
@@ -375,8 +381,8 @@ nablaOption *nMiddleOptionNew(nablaMain*);
 nablaOption *nMiddleOptionLast(nablaOption*);
 nablaOption *nMiddleOptionAdd(nablaMain*,nablaOption*);
 nablaOption *nMiddleOptionFindName(nablaOption*,const char*);
-void nMiddleOptions(astNode*,int,nablaMain*);
-nablaOption *nMiddleTurnTokenToOption(astNode*,nablaMain*);
+void nMiddleOptions(node*,int,nablaMain*);
+nablaOption *nMiddleTurnTokenToOption(node*,nablaMain*);
 
 // nMiddleHeader.c
 NABLA_STATUS nMiddleInclude(nablaMain*,const char*);
@@ -385,11 +391,11 @@ NABLA_STATUS nMiddleTypedefs(nablaMain*,const nWhatWith*);
 NABLA_STATUS nMiddleForwards(nablaMain*,const char**);
 
 // nMiddleGrammar.c
-void nMiddleGrammar(astNode*,nablaMain*);
-void nMiddleInsertSpace(nablaMain*,astNode*);
+void nMiddleGrammar(node*,nablaMain*);
+void nMiddleInsertSpace(nablaMain*,node*);
 
 // nMiddle
-NABLA_STATUS nMiddleSwitch(astNode*,
+NABLA_STATUS nMiddleSwitch(node*,
                            const int,
                            const char*,
                            const NABLA_BACKEND,
@@ -404,14 +410,14 @@ int nprintf(const struct nablaMainStruct*,const char*,const char*,...);
 int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
 
 // Items
-void nMiddleItems(astNode*,int,nablaMain*);
+void nMiddleItems(node*,int,nablaMain*);
 
 // Power Types Declarations
-void nMiddlePower(astNode*,nablaMain*,nablaVariable*);
+void nMiddlePower(node*,nablaMain*,nablaVariable*);
 void nMiddlePowerFree(nablaPowerType*);
 
 // nMiddleHLT: @ + When[s]
-void nMiddleAtConstantParse(nablaJob*,astNode*,nablaMain*);
+void nMiddleAtConstantParse(nablaJob*,node*,nablaMain*);
 void nMiddleStoreWhen(nablaJob*,nablaMain*);
 int nMiddleComparEntryPoints(const void*,const void*);
 int nMiddleNumberOfEntryPoints(nablaMain*);
@@ -421,19 +427,19 @@ nablaJob* nMiddleEntryPointsSort(nablaMain*,int);
 NABLA_STATUS nMiddleTimeTreeSave(nablaMain*,nablaJob*,int);
 
 // nMiddleFunctions
-void nMiddleFunctionDumpHeader(FILE*,astNode*);
-void nMiddleFunctionFill(nablaMain*,nablaJob*,astNode*,const char*);
+void nMiddleFunctionDumpHeader(FILE*,node*);
+void nMiddleFunctionFill(nablaMain*,nablaJob*,node*,const char*);
 
 NABLA_STATUS animate(nablaMain*);
 
 void nMiddleArgsAddExtra(nablaMain*,int*);
 void nMiddleArgsAddGlobal(nablaMain*,nablaJob*,int*);
-void nMiddleArgsDump(nablaMain*,astNode*,int*);
+void nMiddleArgsDump(nablaMain*,node*,int*);
 void nMiddleArgsDumpFromDFS(nablaMain*,nablaJob*);
 void nMiddleParamsDumpFromDFS(nablaMain*,nablaJob*,int);
 void nMiddleParamsAddExtra(nablaMain*,int*);
-void nMiddleDfsForCalls(nablaMain*,nablaJob*,astNode*,const char*,astNode*);
+void nMiddleDfsForCalls(nablaMain*,nablaJob*,node*,const char*,node*);
 
-void nMiddleFunctionDumpFwdDeclaration(nablaMain*,nablaJob*,astNode*,const char *);
+void nMiddleFunctionDumpFwdDeclaration(nablaMain*,nablaJob*,node*,const char *);
 
 #endif // _NABLA_MIDDLEND_H_

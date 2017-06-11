@@ -53,7 +53,7 @@ extern int yylineno;
 #undef YY_BUF_SIZE
 #define YY_BUF_SIZE 131072
 //#undef YY_NEED_STRLEN
-#define YYSTYPE  astNode*   
+#define YYSTYPE  node*   
 #include "orgopt.tab.h"
 static int tok(YYSTYPE *yylval, int tokenid);
 static void ignoreBlocComments(void); 
@@ -66,19 +66,20 @@ H					[a-fA-F0-9]
 E					[Ee][+-]?{D}+
 FS					(f|F|l|L)
 IS					(u|U|l|L)*
+OTHERS         [!@#$%^&:,.\[\]\{\}]
 
 %%
 
 "/*"					{ ignoreBlocComments();}
-"//"              { ignoreLineComments();}
-"#+"              { ignoreLineComments();}
+"//"              { ignoreLineComments(); return tok(&yylval, NEW_LINE);}
+"#+"              { ignoreLineComments(); return tok(&yylval, NEW_LINE);}
 
 "true"				{ return tok(&yylval, TRUE);}
 "false"				{ return tok(&yylval, FALSE);}
 
-{L}({L}|{D})*		{ return tok(&yylval, IDENTIFIER); }
+{L}({L}|{D})*		{ return tok(&yylval, IDENT); }
 
-"*"			      { return tok(&yylval, '*');}
+"*"      	      { return tok(&yylval, '*');}
 "-"			      { return tok(&yylval, '-');}
 "+"			      { return tok(&yylval, '+');}
 ":noexport:"      { /*ignore*/ }
@@ -86,23 +87,25 @@ IS					(u|U|l|L)*
 
 "α" {return tok(&yylval, ALPHA);}
 "δ" {return tok(&yylval, DELTA);}
-υ
-0[x]{H}+{IS}?          { return tok(&yylval, HEX_CONSTANT);}
-{D}+{IS}?			     { return tok(&yylval, Z_CONSTANT);}
-L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CONSTANT);}
-{D}+{E}{FS}?		     { return tok(&yylval, R_CONSTANT);}
-{D}*"."{D}+({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
-{D}+"."{D}*({E})?{FS}? { return tok(&yylval, R_CONSTANT);}
+
+0[x]{H}+{IS}?          { return tok(&yylval, H_CST);}
+{D}+{IS}?			     { return tok(&yylval, Z_CST);}
+L?'(\\.|[^\\'])+\'     { return tok(&yylval, R_CST);}
+{D}+{E}{FS}?		     { return tok(&yylval, R_CST);}
+{D}*"."{D}+({E})?{FS}? { return tok(&yylval, R_CST);}
+{D}+"."{D}*({E})?{FS}? { return tok(&yylval, R_CST);}
 
 "="					{ return tok(&yylval, '=');}
 
 [ \t\v\f]		   { /*ignore*/ }
 
-.						{ /* ignore bad characters */
-  printf("\nREJECTing '%s' in ",yytext);
-  REJECT;
-}
-\n                { yylineno+=1;}
+{OTHERS}          { /*ignore*/ }
+
+.                 { /* ignore bad characters */
+                    //printf("REJECTing '%s' in ",yytext);
+                    REJECT;
+                  }
+\n                { yylineno+=1; return tok(&yylval, NEW_LINE);}
 %%
 
 // ****************************************************************************
@@ -117,13 +120,13 @@ static void ignoreLineComments(void){
 // * Get rid of bloc comments
 // ****************************************************************************
 static void ignoreBlocComments(void){
-	char c, c1;
+  char c, c1;
 loop:
 	do {c = input(); if (c=='\n') yylineno+=1; } while (c != '*' && c != 0);
 	c1 = input();
 	if (c1 != '/' && c != 0){
-		unput(c1);
-		goto loop;
+     unput(c1);
+     goto loop;
 	}
 }
 

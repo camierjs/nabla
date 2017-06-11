@@ -245,7 +245,7 @@ const hookPragma pragmaGCC={
 
 const hookHeader header={
   nOkinaHeaderDump,
-  NULL,
+  nOkinaHeaderDumpWithLibs,
   xHookHeaderOpen,
   xHookHeaderDefineEnumerates,
   xHookHeaderPrefix,
