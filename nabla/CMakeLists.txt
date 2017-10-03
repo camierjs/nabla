@@ -4,7 +4,7 @@ bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLA
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
 add_flex_bison_dependency(nScanner nParser)
 
-set(nabla_exe nabla.exe)
+set(nabla_exe nablac)
 
 configure_file(nabla.S ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_executable(${nabla_exe} nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
