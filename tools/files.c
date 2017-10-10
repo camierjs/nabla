@@ -49,7 +49,7 @@ int toolMkstemp(const char *entity_name, char **unique_temporary_file_name){
   const int size = NABLA_MAX_FILE_NAME;
   if ((*unique_temporary_file_name=calloc(size,sizeof(char)))==NULL)
     nablaError("[nablaMakeTempFile] Could not calloc our unique_temporary_file_name!");
-  const int n=snprintf(*unique_temporary_file_name, size, "/tmp/nabla_%s_XXXXXX", entity_name);
+  const int n=snprintf(*unique_temporary_file_name, size, "nabla_%s_XXXXXX", entity_name);
   if (n > -1 && n < size)
     return mkstemp(*unique_temporary_file_name);
   nablaError("[nablaMakeTempFile] Error in snprintf into unique_temporary_file_name!");
@@ -87,7 +87,11 @@ int toolCatAndHackIncludes(const char *list_of_nabla_files,
       cat_sed_temporary_file_name);
   
   cat_sed_temporary_file=fopen(cat_sed_temporary_file_name,"w");
-  
+  if (cat_sed_temporary_file == NULL) {
+    perror("Opening sed file");
+    printf("Opening: %s\n", cat_sed_temporary_file_name);
+  }
+
   for(nabla_file_name=strtok(dup_list_of_nabla_files, " ");      
       /*test*/ nabla_file_name!=NULL;
       /*incr*/ nabla_file_name=strtok(NULL, " ")){
