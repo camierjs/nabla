@@ -155,11 +155,16 @@ const char* mkktemp(const char *prefix){
     nablaError("[mkktemp] Could not calloc our unique_temporary_kernel_name!");
   
   dbg("\n\t\t[mkktemp] snprintf");
-  const int n=snprintf(unique_temporary_kernel_name, size, "/tmp/nabla_%sXXXXXX", prefix);
+  const int n=snprintf(unique_temporary_kernel_name, size, "nabla_%sXXXXXX", prefix);
   
-  if (n > -1 && n < size)
-    if (mkstemp(unique_temporary_kernel_name)==-1)
+  if (n > -1 && n < size) {
+    int fd = 0;
+    fd = mkstemp(unique_temporary_kernel_name);
+    if (fd == -1)
       nablaError("[mkktemp] Could not mkstemp our unique_temporary_kernel_name!");
+    else
+      close(fd);
+  }
   
   assert(strrchr(prefix,'_')==NULL);
   rtn=sdup(strrchr(unique_temporary_kernel_name,'_')+1);
@@ -180,7 +185,7 @@ void toolUnlinkKtemp(nablaJob *job){
 
   for(;job!=NULL;job=job->next){
     if (!job->has_to_be_unlinked) continue;
-    snprintf(kernel_name, size, "/tmp/nabla_%s", job->name);
+    snprintf(kernel_name, size, "nabla_%s", job->name);
     dbg("\n\t\t[toolUnlinkKtemp] kernel_name to unlink: '%s'", kernel_name);
     if (unlink(kernel_name)!=0)
       nablaError("Error while removing '%s' file", kernel_name);
