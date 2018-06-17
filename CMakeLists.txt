@@ -31,7 +31,7 @@ set(CMAKE_BUILD_TYPE Debug)
 #set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_VERBOSE_MAKEFILE YES)
 set(CMAKE_INSTALL_PREFIX /usr/local/nabla)
-#set(CMAKE_INSTALL_DO_STRIP "1")
+set(CMAKE_INSTALL_DO_STRIP "1")
 
 #####################################
 # Test if we're an old Linux kernel #
@@ -48,11 +48,13 @@ endif(OLD_LINUX_KERNEL EQUAL 0)
 ####################
 set(CMAKE_C_FLAGS "-g -Wall -std=c99")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/nabla)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ncc)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/nabla)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/ncc)
 set(NABLA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(NABLA_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+#info("${VT100_BOLD}${VT100_FG_GREEN}NABLA_SOURCE_DIR=${NABLA_SOURCE_DIR}${VT100_RESET}")
+#info("${VT100_BOLD}${VT100_FG_GREEN}NABLA_BINARY_DIR=${NABLA_BINARY_DIR}${VT100_RESET}")
 
 ####################################
 # Executable, librairie et install #
@@ -76,7 +78,6 @@ endif(APPLE)
 ###############
 # FLEX, BISON #
 ###############
-#info("${VT100_BOLD}${VT100_FG_CYAN}NABLA${VT100_RESET} subdirectory, looking for: ${VT100_FG_YELLOW}BISON${VT100_RESET}, ${VT100_FG_YELLOW}FLEX${VT100_RESET} and ${VT100_FG_YELLOW}CUDA${VT100_RESET}")
 find_package(BISON REQUIRED)
 info("\t${VT100_FG_MAGENTA}BISON${VT100_RESET} version is ${VT100_BOLD}${BISON_VERSION}${VT100_RESET}")
 find_package(FLEX REQUIRED)
@@ -104,7 +105,7 @@ include(cmake/FindLegion.cmake)
 ##################
 # SUBDIRECTORIES #
 ##################
-add_subdirectory(nabla)
+add_subdirectory(ncc)
 add_subdirectory(orgopt)
 add_subdirectory(frontend)
 add_subdirectory(middlend)
@@ -113,14 +114,39 @@ add_subdirectory(aleph)
 add_subdirectory(glvis)
 add_subdirectory(okina)
 
-add_subdirectory(backends/arcane)
-add_subdirectory(backends/cuda)
+############
+# BACKENDS #
+############
+add_subdirectory(backends/lib)
 add_subdirectory(backends/okina)
 add_subdirectory(backends/lambda)
-add_subdirectory(backends/kokkos)
-add_subdirectory(backends/legion)
-add_subdirectory(backends/raja)
-add_subdirectory(backends/lib)
+
+if (ARCANE_FOUND)
+	add_subdirectory(backends/arcane)
+	add_definitions(-DARCANE_FOUND)
+endif (ARCANE_FOUND)
+
+if (CUDA_FOUND)
+	add_subdirectory(backends/cuda)
+	add_definitions(-DCUDA_FOUND)
+endif (CUDA_FOUND)
+
+
+if (KOKKOS_FOUND)
+	add_subdirectory(backends/kokkos)
+	add_definitions(-DKOKKOS_FOUND)
+endif (KOKKOS_FOUND)
+
+if (LEGION_FOUND)
+	add_subdirectory(backends/legion)
+	add_definitions(-DLEGION_FOUND)
+endif (LEGION_FOUND)
+
+if (RAJA_FOUND)
+	add_subdirectory(backends/raja)
+	add_definitions(-DRAJA_FOUND)
+endif (RAJA_FOUND)
+
 
 #########
 # TESTS #

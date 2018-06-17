@@ -4,14 +4,16 @@ bison_target(nParser nabla.y ${CMAKE_CURRENT_BINARY_DIR}/nabla.tab.c COMPILE_FLA
 flex_target(nScanner nabla.l ${CMAKE_CURRENT_BINARY_DIR}/nabla.lex.c COMPILE_FLAGS "")
 add_flex_bison_dependency(nScanner nParser)
 
+set(nabla_exe nablac)
+
 configure_file(nabla.S ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
-add_executable(nabla nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
+add_executable(${nabla_exe} nabla.c ${CMAKE_CURRENT_BINARY_DIR}/nabla.asm.S)
 add_library(Nabla ${BISON_nParser_OUTPUTS} ${FLEX_nScanner_OUTPUTS})
 
 ##################
 # Link libraries #
 ##################
-target_link_libraries(nabla Nabla NablaMiddlend NablaFrontend NablaTools
+target_link_libraries(${nabla_exe} Nabla NablaMiddlend NablaFrontend NablaTools
                       NablaArcane NablaCuda NablaOkina NablaLambda
                       NablaRaja NablaKokkos NablaLegion
                       NablaLibCall NablaLibHook NablaLibDump NablaAleph)
@@ -19,4 +21,4 @@ target_link_libraries(nabla Nabla NablaMiddlend NablaFrontend NablaTools
 ###########
 # INSTALL #
 ###########
-install(TARGETS nabla DESTINATION bin)
+install(TARGETS ${nabla_exe} DESTINATION bin)

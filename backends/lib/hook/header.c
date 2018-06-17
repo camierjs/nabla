@@ -87,7 +87,7 @@ void xHookHeaderAlloc(nablaMain *nabla){
 // * Allocation Tweaks\n\
 // *********************************************************\n\
 //int MPI_Init(int *argc, char ***argv){return 0;}\n\
-#if defined(__APPLE__)\n\
+#if defined(__APPLE__) || defined(_WIN32)\n\
 \t#define aligned_alloc(align,size) calloc(1,size)\n\
 #endif\n\n");
 }

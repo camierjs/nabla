@@ -91,12 +91,12 @@ void arcaneHookReduction(nablaMain *nabla, node *n){
   // S'il est negatif, on l'évite
   if (ftoa[0]=='-') ftoa+=1;
   // On évite aussi le '.'
-  char *locate_dot_sign_in_ftoa=index(ftoa,'.');
+  char *locate_dot_sign_in_ftoa=strchr(ftoa,'.');
   //printf("\nftoa='%s'",ftoa);
   assert(locate_dot_sign_in_ftoa);
   *locate_dot_sign_in_ftoa='_';
   // Ainsi que le '+'
-  char *locate_exp_sign_in_ftoa=rindex(ftoa,'+');
+  char *locate_exp_sign_in_ftoa=strrchr(ftoa,'+');
   assert(locate_exp_sign_in_ftoa);
   *locate_exp_sign_in_ftoa='_';
   dbg("\n\t\t[arcaneHookReduction] ftoa=%s",ftoa);

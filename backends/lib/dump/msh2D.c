@@ -394,7 +394,7 @@ static void addThisfaceToCellConnectivity(const nablaMesh msh,
   dbg(DBG_INI_FACE,"\n\t\t[addThisfaceToCellConnectivity] Adding face #%%d (%%d->%%d) to cell %%d ",f,n0,n1,c);
   for(int i=0;i<msh.NABLA_FACE_PER_CELL;i+=1){
     const int cn0=cell_node[i*msh.NABLA_NB_CELLS+c];
-    const int cn1=cell_node[((i+1)%NABLA_NODE_PER_CELL)*msh.NABLA_NB_CELLS+c];
+    const int cn1=cell_node[((i+1)%%NABLA_NODE_PER_CELL)*msh.NABLA_NB_CELLS+c];
     const int ocn0=min(cn0,cn1);
     const int ocn1=max(cn0,cn1);
     dbg(DBG_INI_FACE,", cell_nodes %%d->%%d",ocn0,ocn1); 
