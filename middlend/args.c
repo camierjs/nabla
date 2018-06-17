@@ -120,7 +120,7 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   int i=0;
   
   // On remplit la ligne du hdr
-  hprintf(nabla, NULL, "\n%s %s %s%s(",
+  nprinth(nabla, NULL, "\n%s %s %s%s(",
           nabla->hook->call->entryPointPrefix?
           nabla->hook->call->entryPointPrefix(nabla,fct):"",
           fct->return_type,
@@ -133,7 +133,7 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   // Dunp des variables du job dans le header
   nablaVariable *var=fct->used_variables;
   for(;var!=NULL;var=var->next,i+=1)
-    hprintf(nabla, NULL, "%s%s%s%s %s_%s",
+    nprinth(nabla, NULL, "%s%s%s%s %s_%s",
             (i==0)?"":",",
             cHOOKn(nabla,vars,idecl),
             //(var->in&&!var->out)?"/*in*/":"",
@@ -144,10 +144,10 @@ void nMiddleFunctionDumpFwdDeclaration(nablaMain *nabla,
   //printf("[1;34m[dfsExit] job %s exits? %s[m\n",fct->name, fct->exists?"yes":"no");
 
   if (fct->exists)
-    hprintf(nabla, NULL,"%sconst int hlt_level, bool* hlt_exit",
+    nprinth(nabla, NULL,"%sconst int hlt_level, bool* hlt_exit",
             i>0?",":"");
    
-  hprintf(nabla, NULL, ");");
+  nprinth(nabla, NULL, ");");
 }
 
 

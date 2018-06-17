@@ -3,13 +3,15 @@
 # gcc -dM -E -x c++ /dev/null #
 ###############################
 ifeq ($(shell uname),Darwin)
-  CMAKE_ROOT_PATH=/opt/local/bin
-  COMPILER_ROOT_PATH=/opt/local/bin
-  COMPILER_POSTFIX= #-mp-4.9
+  CMAKE_ROOT_PATH=/usr/local/bin
+  COMPILER_ROOT_PATH=/usr/local/bin
+  COMPILER_POSTFIX= -8
+# MPI_ROOT_PATH=/usr/local
 endif
 ifeq ($(shell uname),Linux)
   CMAKE_ROOT_PATH = /usr/bin
   COMPILER_ROOT_PATH = /usr/bin
+# 	 MPI_ROOT_PATH=/usr/local
 #  COMPILER_ROOT_PATH = /usr/local/gcc/4.9.3/bin
 #  COMPILER_ROOT_PATH = /usr/local/gcc/5.3.0/bin: undefined reference to symbol 'dlclose@@GLIBC_2.2.5'
 endif
@@ -24,8 +26,10 @@ endif
 ####################
 C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
-export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
-export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
+#export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
+#export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
+export CC  = $(COMPILER_ROOT_PATH)/mpicc
+export CXX = $(COMPILER_ROOT_PATH)/mpicxx
 
 #################
 # CMAKE OPTIONS #
@@ -38,8 +42,8 @@ HYODA = /usr/local/arcane/testing/bin/hyoda
 # PATHS #
 #########
 NABLA_PATH = $(shell pwd)
-#BUILD_PATH = build
-BUILD_PATH = /tmp/nabla
+BUILD_PATH = build
+#BUILD_PATH = /tmp/nabla
 
 ############
 # COMMANDS #
@@ -54,6 +58,7 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 ##################
 all:
 	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
+	@[ ! -f $(BUILD_PATH)/Makefile ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
 ##################
@@ -89,15 +94,15 @@ $(foreach backend,$(backends),$(eval $(call BACKEND_template,$(backend))))
 ###################
 # CTESTS TEMPLATE #
 ###################
+types = gen run
+backends = lambda okina #cuda kokkos arcane raja legion
 tests = nesw glcNxt sethi calypso llshrc pnnnt pennant ndspmhd comd pDDFV schrodinger glace aecjs nvknl darcy amber heat p1apwb1D_version_2 p12d p12D upwind p1apwb1D_implicite propagateur drc mhydro ddfv xgnplt pdfLgvn fmly deflex hlt aleph1D aleph2D glc glace2D xst upwindAP lulesh llsh gram
 #$(shell cd tests && find . -maxdepth 1 -type d -name \
 	[^.]*[^\\\(mesh\\\)]*[^\\\(gloci\\\)]*|\
 		sed -e "s/\\.\\// /g"|tr "\\n" " ")
 procs = 1 2 4
-types = gen run
-simds = std sse avx avx2 avx512 #mic warp
-backends = lambda okina cuda kokkos arcane raja legion
-parallels = seq omp smp mpi family #cilk
+simds = std sse avx avx2 #avx512 mic warp
+parallels = seq omp #smp mpi family cilk
 define CTEST_template =
 nabla_$(1)_$(2)_$(3)_$(4)_$(5)_$(6):
 	(tput reset && cd $(BUILD_PATH)/tests && \
@@ -114,8 +119,9 @@ $(foreach type,$(types),\
 ############
 # CLEANING #
 ############
-cln:;(cd $(BUILD_PATH) && make clean)
-clean:cln
+cln clean:
+	@[ ! -f $(BUILD_PATH)/Makefile ] && rm -rf $(BUILD_PATH) || exit 0
+	@[ -d $(BUILD_PATH) ] && (cd $(BUILD_PATH) && make clean) || exit 0
 
 #############
 # 2014~20XY #

@@ -1,4 +1,4 @@
-NABLA = ${NABLA_BINARY_DIR}/nabla/nabla
+NABLA = ${NABLA_BINARY_DIR}/ncc/ncc
 TGT_FILE = ${NABLA_SOURCE_DIR}/tests/$(TGT)/$(TGT).n
 TGT_FILE += $(ADDITIONAL_NABLA_FILES:%=${NABLA_SOURCE_DIR}/tests/$(TGT)/%)
 
@@ -18,12 +18,13 @@ PARALLEL_cilk_FLAGS = #-fcilkplus
 CXX = ${CMAKE_CXX_COMPILER}
 #CXX=/usr/local/bin/bf-clang++
 #CXX = mpc_g++
-CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline
+CFLAGS = $(PARALLEL_$(PARALLEL)_FLAGS) $(SIMD_std_FLAGS) -finline -I/usr/local/include
 #LIB_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 LIB_ALEPH = ${NABLA_BINARY_DIR}/aleph/libAleph.a ${NABLA_BINARY_DIR}/aleph/hypre/libAlephHYPRE.a
 # A mettre lors du configure
-LIB_HYPRE = ${HYPRE_LIB} #-Wl,-rpath,/usr/local/hypre/lib 
-LIB_MPI = /usr/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
+LIB_HYPRE = ${HYPRE_LIB} -llapack #-Wl,-rpath,/usr/local/hypre/lib
+#LIB_MPI = /usr/local/lib/libmpi.so /usr/lib/libmpi_cxx.so #/usr/lib/openmpi/lib/libmpi_cxx.so -Wl,-rpath,/usr/lib/openmpi/lib
+LIB_NETCDF = -L/usr/local/lib -lnetcdf
 LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
 LIB_FRNTND = ${NABLA_BINARY_DIR}/frontend/libNablaFrontend.a
 ifeq ("${MFEM_FOUND}","YES")
@@ -39,7 +40,7 @@ $(TGT).o:$(TGT).cc $(TGT_FILE)
 	$(CXX) $(ADDITIONAL_DEFINES) -c $(CFLAGS) $(TGT).cc -o $(TGT).o
 
 $(TGT):$(TGT).o $(TGT_FILE)
-	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_FRNTND) $(LIB_GLVIS) -lnetcdf
+	$(CXX) $(SIMD_std_FLAGS) -o $(TGT)_$(PARALLEL) $(TGT).o $(LIB_GOMP) $(LIB_ALEPH) $(LIB_HYPRE) $(LIB_MPI) $(LIB_ORGOPT) $(LIB_FRNTND) $(LIB_GLVIS) $(LIB_NETCDF)
 
 cln:
 	-rm -f *.o $(TGT).cc $(TGT).h $(TGT)

@@ -187,11 +187,11 @@ class IParallelMng{
   virtual void broadcast(vector<double> send_buf,int rank) =0;
   virtual void broadcast(vector<long unsigned int> send_buf,int rank) =0;
   
-  virtual Parallel::Request recv(vector<int> values,int rank,bool is_blocking) =0;
+  virtual Parallel::Request recv(vector<long long int> values,int rank,bool is_blocking) =0;
   virtual Parallel::Request recv(double* values,int rank,bool is_blocking) =0;
   virtual Parallel::Request recv(vector<double> values,int rank,bool is_blocking) =0;
   
-  virtual Parallel::Request send(vector<int> values,int rank,bool is_blocking) =0;
+  virtual Parallel::Request send(vector<long long int> values,int rank,bool is_blocking) =0;
   virtual Parallel::Request send(double* values,int rank,bool is_blocking) =0;
   virtual Parallel::Request send(vector<double> values,int rank,bool is_blocking) =0;
   
@@ -241,7 +241,7 @@ public:
   void broadcast(vector<double> send_buf,int rank) {throw std::logic_error("SequentialMng::");}
   void broadcast(vector<long unsigned int> send_buf,int rank) {throw std::logic_error("SequentialMng::");}
   
-  Parallel::Request recv(vector<int> values,int rank,bool is_blocking) {
+  Parallel::Request recv(vector<long long int> values,int rank,bool is_blocking) {
     throw std::logic_error("SequentialMng::");
     return Parallel::Request();
   }
@@ -254,7 +254,7 @@ public:
     return Parallel::Request();
   }
   
-  Parallel::Request send(vector<int> values,int rank,bool is_blocking) {
+  Parallel::Request send(vector<long long int> values,int rank,bool is_blocking) {
     throw std::logic_error("SequentialMng::");
     return Parallel::Request();
   }

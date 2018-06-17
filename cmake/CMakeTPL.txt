@@ -1,23 +1,21 @@
-set(MPI_C_INCLUDE_PATH /usr/include/mpi)
-set(MPI_C_LIBRARIES /usr/lib/openmpi/lib)
-set(MPI_CXX_INCLUDE_PATH /usr/include/mpi)
-set(MPI_CXX_LIBRARIES /usr/lib/openmpi/lib)
+set(MPI_C_COMPILER /usr/local/bin/mpicc)
+set(MPI_CXX_COMPILER /usr/local/bin/mpicxx)
+set(MPI_INCLUDE_PATH /usr/local/include)
 
-set(HYPRE_ROOT /usr/local/hypre)
+set(HYPRE_ROOT /usr/local)
 
 set(Trilinos_ROOT_PATH /usr/local/trilinos/11.12.1)
 
-set(ICET_ROOT /usr/local/iceT)
+set(ICET_ROOT /usr/local)
 
-set(RAJA_ROOT /usr/local/raja)
-#set(RAJA_ROOT /Users/camierjs/raja/RAJA)
+set(RAJA_ROOT /usr/local)
 
-set(KOKKOS_ROOT /usr/local/kokkos)
-#set(KOKKOS_ROOT /Users/camierjs/kokkos)
+set(KOKKOS_ROOT /usr/local)
 
-set(ARCANE_ROOT /usr/local/arcane/testing)
+set(ARCANE_ROOT /usr/local)
 
-set(MFEM_ROOT_PATH /usr/local/mfem)
-set(GLVIS_ROOT_PATH /usr/local/glvis)
+set(LEGION_ROOT /usr/local)
 
-set(LEGION_ROOT /usr/local/legion)
+set(MFEM_ROOT_PATH /usr/local)
+set(GLVIS_ROOT_PATH /usr/local)
+

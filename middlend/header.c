@@ -41,7 +41,7 @@
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
-#include "backends/arcane/arcane.h"
+//#include "backends/arcane/arcane.h"
 
 
 // ****************************************************************************
@@ -58,7 +58,11 @@ NABLA_STATUS nMiddleInclude(nablaMain *nabla, const char *include){
 // ****************************************************************************
 NABLA_STATUS nMiddleDefines(nablaMain *nabla, const nWhatWith *defines){
   int i;
+#ifdef ARCANE_FOUND
   FILE *target_file = isAnArcaneService(nabla)?nabla->entity->src:nabla->entity->hdr;
+#else
+  FILE *target_file = nabla->entity->hdr;
+#endif
   fprintf(target_file,"\n\
 \n// *****************************************************************************\
 \n// * Defines\

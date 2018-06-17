@@ -126,7 +126,7 @@ void AlephVector::create(void){
 // * setLocalComponents - without global indices
 // ****************************************************************************
 void AlephVector::setLocalComponents(vector<double> values){
-  vector<int> indexs;
+  vector<long long int> indexs;
   if (m_bkp_num_values==0){
     int row_offset=0;
     if (m_kernel->isInitialized())
@@ -156,7 +156,7 @@ void AlephVector::reSetLocalComponents(AlephVector *from){
 // * setLocalComponents - standard
 // ****************************************************************************
 void AlephVector::setLocalComponents(int num_values,
-												 vector<int> indexs,
+												 vector<long long int> indexs,
 												 vector<double> values){
   if (!m_kernel->isInitialized()){
     debug()<<"\33[1;36m[AlephVector::setLocalComponents] Trying to setLocalComponents from an uninitialized kernel!\33[0m";
@@ -323,7 +323,7 @@ void AlephVector::reassemble_waitAndFill(void){
 /******************************************************************************
  *****************************************************************************/
 void AlephVector::getLocalComponents(int vector_size,
-												 vector<int> global_indice,
+												 vector<long long int> global_indice,
 												 vector<double> vector_values){
   debug() << "\33[1;36m[AlephVector::getLocalComponents] vector_size="<<vector_size<<"\33[0m";
   if (!m_kernel->isParallel()){

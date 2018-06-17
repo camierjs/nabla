@@ -50,7 +50,7 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Forward des fonctions utilisées dans le main
 // ****************************************************************************
 #define BACKEND_MAIN_FORWARDS "\n\
-//extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
+extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
 extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
 extern void glvis3DHex(const int,const int,const int,const double,const double,const double,double*,double*);\n\
 extern void glvis2DQud(const int,const int,const double,const double,double*,double*);\n\
@@ -68,7 +68,7 @@ extern void glvis1D(const int,const double,double*,double*);\n\
 int main(int argc, char *argv[]){\n"
 
 #define BACKEND_MAIN_VARIABLES "\
-\t//MPI_Init(&argc,&argv);\n\
+\tMPI_Init(&argc,&argv);\n\
 \tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\

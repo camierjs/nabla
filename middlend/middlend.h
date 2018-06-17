@@ -405,9 +405,9 @@ NABLA_STATUS nMiddleSwitch(node*,
                            char*,char*,char*);
 
 // nMiddlePrintf
-int dprintf(const bool,const nablaMain*,const char*,const char*,...);
+int nprintd(const bool,const nablaMain*,const char*,const char*,...);
 int nprintf(const struct nablaMainStruct*,const char*,const char*,...);
-int hprintf(const struct nablaMainStruct*,const char*,const char*,...);
+int nprinth(const struct nablaMainStruct*,const char*,const char*,...);
 
 // Items
 void nMiddleItems(node*,int,nablaMain*);

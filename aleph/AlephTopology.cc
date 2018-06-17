@@ -64,13 +64,13 @@ AlephTopology::AlephTopology(ITraceMng *tm,
                              AlephKernel *kernel,
                              int nb_row_size,
                              int nb_row_rank): TraceAccessor(tm),
-                                                   m_kernel(kernel),
-                                                   m_nb_row_size(nb_row_size),
-                                                   m_nb_row_rank(nb_row_rank),
-                                                   m_gathered_nb_row_elements(),
-                                                   m_created(false),
-                                                   m_has_set_row_nb_elements(false),
-                                                   m_has_been_initialized(true){
+                                               m_kernel(kernel),
+                                               m_nb_row_size(nb_row_size),
+                                               m_nb_row_rank(nb_row_rank),
+                                               m_gathered_nb_row_elements(),
+                                               m_created(false),
+                                               m_has_set_row_nb_elements(false),
+                                               m_has_been_initialized(true){
   debug()<<"\33[1;32m\t[AlephTopology::AlephTopology] Loading AlephTopology"<<"\33[0m";
   
   m_gathered_nb_setValued.resize(m_kernel->size());
@@ -226,7 +226,7 @@ IParallelMng* AlephTopology::parallelMng(){
 
 /******************************************************************************
  *****************************************************************************/
-void AlephTopology::rowRange(int& min_row,int& max_row){
+void AlephTopology::rowRange(int& min_row, int& max_row){
   const int rank = m_kernel->rank();
   checkForInit();
   debug() << "\33[1;32m\t[AlephTopology::rowRange] rank="<<rank<<"\33[0m";

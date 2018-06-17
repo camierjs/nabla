@@ -94,9 +94,9 @@ public:
   }
 public:
   virtual void AlephVectorCreate(void)=0;
-  virtual void AlephVectorSet(const double*,const int*,int)=0;
+  virtual void AlephVectorSet(const double*, const long long int*,int)=0;
   virtual int AlephVectorAssemble(void)=0;
-  virtual void AlephVectorGet(double*,const int*,int)=0;
+  virtual void AlephVectorGet(double*, const long long int*,int)=0;
   virtual void writeToFile(const string)=0;
 protected:
   int m_index;
@@ -124,7 +124,7 @@ public:
   virtual void AlephMatrixCreate(void)=0;
   virtual void AlephMatrixSetFilled(bool)=0;
   virtual int AlephMatrixAssemble(void)=0;
-  virtual void AlephMatrixFill(int, int*, int*, double*)=0;
+  virtual void AlephMatrixFill(int, long long int*, long long int*, double*)=0;
   virtual int AlephMatrixSolve(AlephVector*,
 										 AlephVector*,
                                AlephVector*,
@@ -146,7 +146,7 @@ public:
   ~IAlephFactory(){
     debug()<<"\33[1;5;34m[~IAlephFactory]"<<"\33[0m";
   }
-  virtual IAlephTopology* GetTopology(AlephKernel *, int, int)=0;
+  virtual IAlephTopology* GetTopology(AlephKernel*, int, int)=0;
   virtual IAlephVector* GetVector(AlephKernel*, int)=0;
   virtual IAlephMatrix* GetMatrix(AlephKernel*, int)=0;
 };
