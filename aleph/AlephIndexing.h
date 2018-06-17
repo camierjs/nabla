@@ -48,10 +48,10 @@ class AlephIndexing: public TraceAccessor{
   AlephIndexing(AlephKernel*);
   ~AlephIndexing();
  public:
-  int updateKnownItems(vector<int>*,const int);
+  int updateKnownItems(vector<long long int>*,const int);
   int findWhichLidFromMapMap(double*,const int);
-  int get(double*, int*);
-  int get(double*, int);
+  int get(double*, long long int*);
+  int get(double*, long long int);
   void buildIndexesFromAddress(void);
   void nowYouCanBuildTheTopology(AlephMatrix*,AlephVector*,AlephVector*);
  private:
@@ -61,8 +61,8 @@ class AlephIndexing: public TraceAccessor{
   ISubDomain *m_sub_domain;
   int m_current_idx;
   int m_known_items_own;
-  vector<int*> m_known_items_all_address;
-  typedef std::map<double*,vector<int>* > VarMapIdx;
+  vector<long long int*> m_known_items_all_address;
+  typedef std::map<double*,vector<long long int>* > VarMapIdx;
   VarMapIdx m_var_map_idx;
 };
 

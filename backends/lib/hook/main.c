@@ -149,7 +149,8 @@ int main(int argc, char *argv[]){\n"
 static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
     const char *ascii_name=opt->name;
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase (int)%p: //%s %s\n",opt, opt->type, ascii_name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+    fprintf(nabla->entity->src, "\t\tcase (int)%p: //%s %s\n",opt, opt->type, ascii_name);
     if (brk){
       for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
       fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
@@ -159,7 +160,8 @@ static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
     if (opt->type[0]=='i') fprintf(nabla->entity->src, " %s=atol(optarg);\n",opt->name);
     if (opt->type[0]=='b') fprintf(nabla->entity->src, " %s=(0==strcmp(optarg,\"true\"));\n",opt->name);
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tbreak;\n");
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+    fprintf(nabla->entity->src, "\t\t\tbreak;\n");
   }
 }
 

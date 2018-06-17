@@ -42,6 +42,7 @@ function(get_additional_nabla_files_and_set_Makefile name backend path)
   endforeach()
 endfunction()
 
+#################################################
 # nabla_add_arcane_test_with_additional_defines #
 function(nabla_add_arcane_test_with_additional_defines name nb_proc cmd additional_defines)
   info("Adding ctest nabla_${VT100_FG_RED}${cmd}${VT100_RESET}_${VT100_FG_CYAN}arcane${VT100_RESET}_${VT100_FG_WHITE}${name}${VT100_RESET}_${nb_proc}_std_mpi")
@@ -58,7 +59,8 @@ function(nabla_add_arcane_test name nb_proc cmd)
    nabla_add_arcane_test_with_additional_defines(${name} ${nb_proc} ${cmd} NO_ADDITIONAL_DEFINES)
 endfunction()
 
-# nabla_add_arcane_test_family
+################################
+# nabla_add_arcane_test_family #
 function(nabla_add_arcane_test_family name)
   set(cmd gen)
   set(backend arcane)
@@ -70,8 +72,9 @@ function(nabla_add_arcane_test_family name)
 				COMMAND /bin/sh -c "${CMAKE_MAKE_PROGRAM} -kBf ${CMAKE_CURRENT_BINARY_DIR}/${name}/${backend}/${subpath}/Makefile family")
 endfunction()
 
+if(ARCANE_FOUND)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.nabla.arcane ${CMAKE_CURRENT_BINARY_DIR}/Makefile.nabla.arcane)
-
+endif(ARCANE_FOUND)
 
 ######################################
 # NABLA TEST MACRO FOR OKINA BACKEND #
@@ -181,6 +184,10 @@ endif (${RESULT_NABLA_TESTS})
 separate_arguments(NABLA_TESTS)
 #info("Loading NABLA_TESTS: '${NABLA_TESTS}'${VT100_RESET}")
 
+####################
+# ARCANE GEN TESTS #
+####################
+if (ARCANE_FOUND)
 foreach(tst ${NABLA_TESTS})
   #info("\tFocusing on test ${tst}")
   string(REGEX MATCH ".*_aleph_index$" ALEPH_INDEX ${tst})
@@ -190,7 +197,7 @@ foreach(tst ${NABLA_TESTS})
     nabla_add_arcane_test(${tst} 1 gen)
   endif (ALEPH_INDEX)
 endforeach(tst)
-
+endif(ARCANE_FOUND)
 
 ##########################
 # NABLA TESTS FOR ARCANE #
@@ -240,12 +247,12 @@ if(APPLE)
   set(SIMD_MODES "std sse")
   #set(PARALLEL_MODES "seq")
 endif(APPLE)
-  
+
 separate_arguments(SIMD_MODES)
 separate_arguments(PARALLEL_MODES)
 
 foreach(parallel seq omp cilk)
-  foreach(simd std sse avx avx2 avx512 mic)
+  foreach(simd std sse avx avx2) # avx512 mic)
     nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
@@ -345,7 +352,7 @@ if (HYPRE_FOUND)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} p1apwb1D_implicite 1 run seq)
    nabla_add_test(lambda ${VT100_FG_MAGENTA} xgnplt 1 run seq)
 endif (HYPRE_FOUND)
-   
+
 nabla_add_lambda_test(p12del 1 run seq)
 nabla_add_lambda_test(pdfLgvn 1 run seq)
 nabla_add_lambda_test(propagateur 1 run seq)
@@ -429,19 +436,19 @@ endif(RAJA_FOUND)
 ########################
 # NABLA TESTS FOR CUDA #
 ########################
-#set(TESTS_NOT_YET_SUPPORTED_WITH_CUDA "shydro sethi anyItem gad comd pDDFV")
-#foreach(TST ${NABLA_TESTS})
-#  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_CUDA} ${TST} TEST_SHOULD_PASS)
-#  if(${TEST_SHOULD_PASS} EQUAL -1)
-#    nabla_add_test(cuda ${TST} 1 gen seq)
-#  endif()
-#endforeach(TST)
-nabla_add_cuda_test(gram 1 gen)
-nabla_add_cuda_test(nvknl 1 gen)
-nabla_add_cuda_test(lulesh 1 gen)
-nabla_add_cuda_test(mhydro 1 gen)
-nabla_add_cuda_test(darcy 1 gen)
 if(CUDA_FOUND)
+  #set(TESTS_NOT_YET_SUPPORTED_WITH_CUDA "shydro sethi anyItem gad comd pDDFV")
+  #foreach(TST ${NABLA_TESTS})
+  #  string(FIND ${TESTS_NOT_YET_SUPPORTED_WITH_CUDA} ${TST} TEST_SHOULD_PASS)
+  #  if(${TEST_SHOULD_PASS} EQUAL -1)
+  #    nabla_add_test(cuda ${TST} 1 gen seq)
+  #  endif()
+  #endforeach(TST)
+  nabla_add_cuda_test(gram 1 gen)
+  nabla_add_cuda_test(nvknl 1 gen)
+  nabla_add_cuda_test(lulesh 1 gen)
+  nabla_add_cuda_test(mhydro 1 gen)
+  nabla_add_cuda_test(darcy 1 gen)
   #nabla_add_cuda_test(mhydro 1 run)
   nabla_add_cuda_test(lulesh 1 run)
   nabla_add_cuda_test(nvknl 1 run)

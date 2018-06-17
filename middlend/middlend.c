@@ -98,13 +98,23 @@ NABLA_STATUS nMiddleSwitch(node *root,
   dbg("\n\t[nablaMiddlendSwitch] Now switching...");
   // Switching between our possible backends:
   switch (backend){
+#ifdef ARCANE_FOUND
   case BACKEND_ARCANE: { nabla->hook=arcane(nabla); break;}
+#endif
+#ifdef CUDA_FOUND
   case BACKEND_CUDA:   { nabla->hook=cuda(nabla); break;}
+#endif
   case BACKEND_OKINA:  { nabla->hook=okina(nabla); break;}
   case BACKEND_LAMBDA: { nabla->hook=lambda(nabla); break;}
+#ifdef RAJA_FOUND
   case BACKEND_RAJA:   { nabla->hook=raja(nabla); break;}
+#endif
+#ifdef KOKKOS_FOUND
   case BACKEND_KOKKOS: { nabla->hook=kokkos(nabla); break;}
+#endif
+#ifdef LEGION_FOUND
   case BACKEND_LEGION: { nabla->hook=legion(nabla); break;}
+#endif
   default:
     exit(NABLA_ERROR|
          fprintf(stderr,

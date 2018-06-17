@@ -52,12 +52,12 @@ public:
   ~AlephMatrix();
 public:
   void create(void);
-  void create(vector<int>, bool=false);
+  void create(vector<long long int>, bool=false);
   void create_really(void);
   void reset(void);
-  int reIdx(int,vector<int*>&);
-  void reSetValuesIn(AlephMatrix*,vector<int*>&);
-  void reAddValuesIn(AlephMatrix*,vector<int*>&);
+  int reIdx(int,vector<long long int*>&);
+  void reSetValuesIn(AlephMatrix*,vector<long long int*>&);
+  void reAddValuesIn(AlephMatrix*,vector<long long int*>&);
   void updateKnownRowCol(int,int,double);
   void rowMapMapCol(int,int,double);
   void addValue(double*, int,

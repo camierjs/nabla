@@ -214,13 +214,13 @@ void nMiddleScanForIfAfterAt(node *n, nablaJob *entry_point, nablaMain *nabla){
 // ****************************************************************************
 static void dumpIfAfterAtFormat(node *n, nablaMain *nabla, bool dump_in_header,char *info, char *format){
   if (dump_in_header)
-    hprintf(nabla, info, format, n->token);
+    nprinth(nabla, info, format, n->token);
   else
     nprintf(nabla, info, format, n->token);
 }
 static void dumpIfAfterAtToken(node *n, nablaMain *nabla, bool dump_in_header){
   if (dump_in_header)
-    hprintf(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
+    nprinth(nabla, "/*h dumpIfAfterAtToken*/", " %s ", n->token);
   else
     nprintf(nabla, "/*n dumpIfAfterAtToken*/", " %s ", n->token);
 }
@@ -556,8 +556,12 @@ void nMiddleJobFill(nablaMain *nabla,
           nabla->hook->call->prefixType?
           nabla->hook->call->prefixType(nabla,job->return_type):job->return_type,
           namespace?namespace:"",
+#ifdef ARCANE_FOUND
           namespace?(isAnArcaneModule(nabla))?"Module::":
           isAnArcaneService(nabla)?"Service::":"::":"",
+#else
+          namespace?"::":"",
+#endif
           job->name);
   
   // On va chercher les paramètres 'standards'

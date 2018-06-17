@@ -42,7 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "nabla.h"
 #include "nabla.tab.h"
-#include "backends/arcane/arcane.h"
+#ifdef ARCANE_FOUND
+//#include "backends/arcane/arcane.h"
+#endif
 
 
 // ****************************************************************************
@@ -85,14 +87,14 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
     //dbg("\n\t\t[nablaFunctionParse] TOKEN '%s'", n->token);
     
     if(dump && n->tokenid==CONST){
-      dprintf(dump,nabla,
+      nprintd(dump,nabla,
               "/*CONST*/", "%s const ",
               cHOOK(fct->entity->main,pragma,align));
       break;
     }
         
     if(n->tokenid==FORALL_END){
-      dprintf(dump,nabla, "/*FORALL_END*/",NULL);
+      nprintd(dump,nabla, "/*FORALL_END*/",NULL);
       fct->parse.enum_enum='\0';
       break;
     }
@@ -112,47 +114,47 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
       }
       switch(tokenid){
       case(CELL):{
-        dprintf(dump,nabla, NULL, "/*FORALL CELL*/");
+        nprintd(dump,nabla, NULL, "/*FORALL CELL*/");
         // On annonce que l'on va travailler sur un forall cell
         fct->parse.enum_enum='c';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          dprintf(dump,nabla, NULL,
+          nprintd(dump,nabla, NULL,
                   "for(CellEnumerator c%s(%s->cells()); c%s.hasNext(); ++c%s)",
                   support,support,support,support);
         break;
       }
       case(FACE):{
-        dprintf(dump,nabla, NULL, "/*FORALL FACE*/");
+        nprintd(dump,nabla, NULL, "/*FORALL FACE*/");
         fct->parse.enum_enum='f';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          dprintf(dump,nabla, NULL,
+          nprintd(dump,nabla, NULL,
                   "for(FaceEnumerator f%s(%s->faces()); f%s.hasNext(); ++f%s)",
                   support,support,support,support);
         break;
       }
       case(NODE):{
-        dprintf(dump,nabla, NULL, "/*FORALL NODE*/");
+        nprintd(dump,nabla, NULL, "/*FORALL NODE*/");
         // On annonce que l'on va travailler sur un forall node
         fct->parse.enum_enum='n';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          dprintf(dump,nabla, NULL,
+          nprintd(dump,nabla, NULL,
                   "for(NodeEnumerator n%s(%s->nodes()); n%s.hasNext(); ++n%s)",
                   support,support,support,support);
         break;
       }
       case(PARTICLE):{
-        dprintf(dump,nabla, NULL, "/*FORALL PARTICLE*/");
+        nprintd(dump,nabla, NULL, "/*FORALL PARTICLE*/");
         fct->parse.enum_enum='p';
         if (support==NULL)
           nablaError("[nablaFunctionParse] No support for this FORALL!");
         else
-          dprintf(dump,nabla, NULL,
+          nprintd(dump,nabla, NULL,
                   "for(ParticleEnumerator p%s(cellParticles(%s->localId())); p%s.hasNext(); ++p%s)",
                   support,support,support,support);
         break;
@@ -171,7 +173,7 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
     }
     
     if(dump && n->tokenid == INT64){
-      dprintf(dump,nabla, NULL, "Int64 ");
+      nprintd(dump,nabla, NULL, "Int64 ");
       break;
     }
     
@@ -217,7 +219,7 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
 
     if (n->tokenid == PREPROCS){
       dbg("\n\t[nablaFunctionParse] PREPROCS");
-      dprintf(dump,nabla, "/*Preprocs*/", "\n");
+      nprintd(dump,nabla, "/*Preprocs*/", "\n");
       break;
     }
     
@@ -228,17 +230,17 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
       }*/
     
     if (n->tokenid == LIB_ALEPH){
-      dprintf(dump,nabla, "/*LIB_ALEPH*/", NULL);
+      nprintd(dump,nabla, "/*LIB_ALEPH*/", NULL);
       break;
     }
     
     if (n->tokenid == ALEPH_RESET){
-      dprintf(dump,nabla, "/*ALEPH_RESET*/", ".reset()");
+      nprintd(dump,nabla, "/*ALEPH_RESET*/", ".reset()");
       break;
     }
     
     if (n->tokenid == ALEPH_SOLVE){
-      dprintf(dump,nabla, "/*ALEPH_SOLVE*/", "alephSolve()");
+      nprintd(dump,nabla, "/*ALEPH_SOLVE*/", "alephSolve()");
       break;
     }
     
@@ -251,21 +253,21 @@ static void nMiddleFunctionParse(node * n, nablaJob *fct){
     if (dump && nabla->hook->token->variable(n, nabla, fct)!=NULL) break;
     if (dump && n->tokenid == '{'){ nprintf(nabla, NULL,"{\n"); break; }
     if (dump && n->tokenid == '}'){ nprintf(nabla, NULL,"}\n"); break; }
-    if (n->tokenid == ';'){ dprintf(dump,nabla, NULL,";\n"); break; }
+    if (n->tokenid == ';'){ nprintd(dump,nabla, NULL,";\n"); break; }
     
     if (n->tokenid==MIN_ASSIGN){
-      dprintf(dump,nabla,"/*MIN_ASSIGN*/","=ReduceMinToDouble");
+      nprintd(dump,nabla,"/*MIN_ASSIGN*/","=ReduceMinToDouble");
       break;
     }
     if (n->tokenid==MAX_ASSIGN){
-      dprintf(dump,nabla, "/*MAX_ASSIGN*/","=ReduceMaxToDouble");
+      nprintd(dump,nabla, "/*MAX_ASSIGN*/","=ReduceMaxToDouble");
       break;
     }
     
     // Dernière action possible: on dump
     //dbg("\n\t[nablaFunctionParse]  Dernière action possible: on dump ('%s')",n->token);
     fct->parse.left_of_assignment_operator=false;
-    dprintf(dump,nabla,NULL,"%s",n->token);
+    nprintd(dump,nabla,NULL,"%s",n->token);
     if (dump) nMiddleInsertSpace(nabla,n);
     break;
   }
@@ -353,8 +355,12 @@ void nMiddleFunctionFill(nablaMain *nabla,
           nabla->hook->token->comment:"":"",
           fct->return_type,
           namespace?namespace:"",
+#ifdef ARCANE_FOUND
           namespace?(isAnArcaneModule(nabla))?"Module::":
           isAnArcaneService(nabla)?"Service::":"::":"",
+#else
+          namespace?"::":"",
+#endif
           fct->name);
   dbg("\n\t[nablaFctFill] On va chercher les paramètres standards pour le src");
   

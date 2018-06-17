@@ -106,7 +106,7 @@ void AlephMatrix::create(void){
  * Matrix 'create' avec l'API qui spécifie le nombre d'éléments non nuls pas lignes
  * BaseForm[Hash["AlephMatrix::create(intConstArrayView,bool)", "CRC32"], 16] = 5c3111b1
  *****************************************************************************/
-void AlephMatrix::create(vector<int> row_nb_element,
+void AlephMatrix::create(vector<long long int> row_nb_element,
                          bool has_many_elements){
   debug()<<"\33[1;32m[AlephMatrix::create(old API)] API with row_nb_element + has_many_elements\33[0m";
   this->create();
@@ -264,7 +264,7 @@ void AlephMatrix::setValue(int row, int col, double val){
  * \brief reIdx recherche la correspondance de l'AlephIndexing
  */
 int AlephMatrix::reIdx(int ij,     
-                         vector<int*>&known_items_own_address){
+                         vector<long long int*>&known_items_own_address){
   return *known_items_own_address[ij];
 }
 
@@ -273,7 +273,7 @@ int AlephMatrix::reIdx(int ij,
  * \brief reSetValuesIn rejoue les setValue avec les indexes calculés via l'AlephIndexing
  */
 void AlephMatrix::reSetValuesIn(AlephMatrix *thisMatrix,
-                                vector<int*> &known_items_own_address){
+                                vector<long long int*> &known_items_own_address){
   for(int k=0,kMx=m_setValue_idx;k<kMx;k+=1){
     int i=reIdx(m_setValue_row[k], known_items_own_address);
     int j=reIdx(m_setValue_col[k], known_items_own_address);
@@ -286,7 +286,7 @@ void AlephMatrix::reSetValuesIn(AlephMatrix *thisMatrix,
  * \brief reAddValuesIn rejoue les addValue avec les indexes calculés via l'AlephIndexing
  */
 void AlephMatrix::reAddValuesIn(AlephMatrix *thisMatrix,
-                                vector<int*> &known_items_own_address){
+                                vector<long long int*> &known_items_own_address){
   for(int k=0,kMx=m_addValue_row.size();k<kMx;k+=1){
     const int row=reIdx(m_addValue_row[k], known_items_own_address);
     const int col=reIdx(m_addValue_col[k], known_items_own_address);
@@ -459,22 +459,22 @@ void AlephMatrix::assemble_waitAndFill(void){
 	 if (m_kernel->configured())
 		m_implementation->AlephMatrixSetFilled(false);// Activation de la protection de remplissage
 	 debug() << "\33[1;32m[AlephMatrix::assemble_waitAndFill] "<<m_index<<" fill"<<"\33[0m";
-    int *bfr_row_implem;
-    int *bfr_col_implem;
+    long long int *bfr_row_implem;
+    long long int *bfr_col_implem;
     double *bfr_val_implem;
  	 for( int iCpu=0;iCpu<m_kernel->size();++iCpu){
       if (m_kernel->rank()!=m_ranks[iCpu]) continue;  
       if (iCpu==m_kernel->rank()) {
-        bfr_row_implem  = reinterpret_cast<int*>(&m_setValue_row.front());
-        bfr_col_implem  = reinterpret_cast<int*>(&m_setValue_col.front());
+        bfr_row_implem  = reinterpret_cast<long long int*>(&m_setValue_row.front());
+        bfr_col_implem  = reinterpret_cast<long long int*>(&m_setValue_col.front());
         bfr_val_implem  = reinterpret_cast<double*>(&m_setValue_val.front());
         m_implementation->AlephMatrixFill(m_setValue_val.size(),
                                           bfr_row_implem,
                                           bfr_col_implem,
                                           bfr_val_implem);
       }else{
-        bfr_row_implem  = reinterpret_cast<int*>(&m_aleph_matrix_buffer_rows[iCpu].front());
-        bfr_col_implem  = reinterpret_cast<int*>(&m_aleph_matrix_buffer_cols[iCpu].front());
+        bfr_row_implem  = reinterpret_cast<long long int*>(&m_aleph_matrix_buffer_rows[iCpu].front());
+        bfr_col_implem  = reinterpret_cast<long long int*>(&m_aleph_matrix_buffer_cols[iCpu].front());
         bfr_val_implem  = reinterpret_cast<double*>(&m_aleph_matrix_buffer_vals[iCpu].front());
         m_implementation->AlephMatrixFill(m_aleph_matrix_buffer_vals[iCpu].size(),
                                           bfr_row_implem,

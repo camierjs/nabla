@@ -44,9 +44,9 @@
 
 
 // ****************************************************************************
-// * dprintf
+// * nprintd
 // ****************************************************************************
-int dprintf(const bool dump,
+int nprintd(const bool dump,
             const nablaMain *nabla,
             const char *debug, const char *format, ...){
   if (!dump) return 0;
@@ -55,9 +55,9 @@ int dprintf(const bool dump,
   if (format==NULL) return 0;
   va_start(args, format);
   if ((rtn=vfprintf(nabla->entity->src, format, args))<0)
-    exit(printf("[dprintf] error, format='%s'\n",format));
+    exit(printf("[nprintd] error, format='%s'\n",format));
   if (fflush(nabla->entity->src)!=0)
-    exit(printf("[dprintf] Could not flush to file\n"));
+    exit(printf("[nprintd] Could not flush to file\n"));
   va_end(args);
   return rtn;
 }
@@ -82,9 +82,9 @@ int nprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
 
 
 // ****************************************************************************
-// * hprintf
+// * nprinth
 // ****************************************************************************
-int hprintf(const nablaMain *nabla, const char *debug, const char *format, ...){
+int nprinth(const nablaMain *nabla, const char *debug, const char *format, ...){
   int rtn;
   va_list args;
   if ((dbgGet()&DBG_CYC)!=0)
