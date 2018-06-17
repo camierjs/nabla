@@ -90,7 +90,7 @@ class AlephVector: public TraceAccessor{
   vector<Parallel::Request> m_parallel_requests;
   vector<Parallel::Request> m_parallel_reassemble_requests;
  public:
-  int m_bkp_num_values;
+  long long int m_bkp_num_values;
   vector<long long int> m_bkp_indexs;
   vector<double> m_bkp_values;
 };

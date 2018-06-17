@@ -106,7 +106,7 @@ void AlephMatrix::create(void){
  * Matrix 'create' avec l'API qui spécifie le nombre d'éléments non nuls pas lignes
  * BaseForm[Hash["AlephMatrix::create(intConstArrayView,bool)", "CRC32"], 16] = 5c3111b1
  *****************************************************************************/
-void AlephMatrix::create(vector<long long int> row_nb_element,
+void AlephMatrix::create(vector<int> row_nb_element,
                          bool has_many_elements){
   debug()<<"\33[1;32m[AlephMatrix::create(old API)] API with row_nb_element + has_many_elements\33[0m";
   this->create();
@@ -126,16 +126,16 @@ void AlephMatrix::reset(void){
 /*!
  * \brief addValue à partir d'arguments en IVariables, items et double
  *****************************************************************************/
-void AlephMatrix::addValue(double *rowVar, int* rowItm,
-                           double *colVar, int* colItm,
+void AlephMatrix::addValue(double *rowVar, long long int* rowItm,
+                           double *colVar, long long int* colItm,
                            double val){
   addValue(rowVar,*rowItm,colVar,*colItm,val);
 }
-void AlephMatrix::addValue(double *rowVar, int rowItm,
-                           double *colVar, int colItm,
+void AlephMatrix::addValue(double *rowVar, long long int rowItm,
+                           double *colVar, long long int colItm,
                            double val){
-  int row=m_kernel->indexing()->get(rowVar,rowItm);
-  int col=m_kernel->indexing()->get(colVar,colItm);
+  long long int row=m_kernel->indexing()->get(rowVar,rowItm);
+  long long int col=m_kernel->indexing()->get(colVar,colItm);
   if (m_kernel->isInitialized()){
     const int row_offset=m_kernel->topology()->part()[m_kernel->rank()];
     row+=row_offset;
@@ -146,8 +146,8 @@ void AlephMatrix::addValue(double *rowVar, int rowItm,
 }
 
 
-void AlephMatrix::updateKnownRowCol(int row,
-                                    int col,
+void AlephMatrix::updateKnownRowCol(long long int row,
+                                    long long int col,
                                     double val){
   //debug()<<"\33[1;32m[AlephMatrix::updateKnownRowCol]\33[0m";
   m_addValue_row.push_back(row);
@@ -198,7 +198,7 @@ void AlephMatrix::rowMapMapCol(int row,
 /*!
  * \brief addValue standard en (i,j,val)
  */
-void AlephMatrix::addValue(int row, int col, double val){
+void AlephMatrix::addValue(long long int row, long long int col, double val){
   //debug()<<"\33[32m[AlephMatrix::addValue] addValue("<<row<<","<<col<<")="<<val<<"\33[0m";
   row=m_kernel->ordering()->swap(row);
   col=m_kernel->ordering()->swap(col);
@@ -210,8 +210,8 @@ void AlephMatrix::addValue(int row, int col, double val){
 /*!
  * \brief setValue à partir d'arguments en IVariables, item* et double
  */
-void AlephMatrix::setValue(double *rowVar, int* rowItm,
-                           double *colVar, int* colItm,
+void AlephMatrix::setValue(double *rowVar, long long int* rowItm,
+                           double *colVar, long long int* colItm,
                            double val){
   setValue(rowVar,*rowItm,colVar,*colItm,val);
 }
@@ -220,14 +220,14 @@ void AlephMatrix::setValue(double *rowVar, int* rowItm,
 /*!
  * \brief setValue à partir d'arguments en IVariables, items et double
  */
-void AlephMatrix::setValue(double *rowVar, int rowItm,
-                           double *colVar, int colItm,
+void AlephMatrix::setValue(double *rowVar, long long int rowItm,
+                           double *colVar, long long int colItm,
                            double val){
-  int row=m_kernel->indexing()->get(rowVar,rowItm);
-  int col=m_kernel->indexing()->get(colVar,colItm);
+  long long int row=m_kernel->indexing()->get(rowVar,rowItm);
+  long long int col=m_kernel->indexing()->get(colVar,colItm);
   //debug()<<"[AlephMatrix::setValue] dof #"<<m_setValue_idx<<" ["<<row<<","<<col<<"]="<<val;
   if (m_kernel->isInitialized()){
-    const int row_offset=m_kernel->topology()->part()[m_kernel->rank()];
+    const long long int row_offset=m_kernel->topology()->part()[m_kernel->rank()];
     row+=row_offset;
     col+=row_offset;
   }
@@ -238,7 +238,7 @@ void AlephMatrix::setValue(double *rowVar, int rowItm,
 /*!
  * \brief setValue standard à partir d'arguments (row,col,val)
  */
-void AlephMatrix::setValue(int row, int col, double val){
+void AlephMatrix::setValue(long long int row, long long int col, double val){
   // Re-ordering si besoin
   row=m_kernel->ordering()->swap(row);
   col=m_kernel->ordering()->swap(col);
@@ -264,7 +264,7 @@ void AlephMatrix::setValue(int row, int col, double val){
  * \brief reIdx recherche la correspondance de l'AlephIndexing
  */
 int AlephMatrix::reIdx(int ij,     
-                         vector<long long int*>&known_items_own_address){
+                       vector<long long int*>&known_items_own_address){
   return *known_items_own_address[ij];
 }
 
@@ -275,8 +275,8 @@ int AlephMatrix::reIdx(int ij,
 void AlephMatrix::reSetValuesIn(AlephMatrix *thisMatrix,
                                 vector<long long int*> &known_items_own_address){
   for(int k=0,kMx=m_setValue_idx;k<kMx;k+=1){
-    int i=reIdx(m_setValue_row[k], known_items_own_address);
-    int j=reIdx(m_setValue_col[k], known_items_own_address);
+    long long int i=reIdx(m_setValue_row[k], known_items_own_address);
+    long long int j=reIdx(m_setValue_col[k], known_items_own_address);
     thisMatrix->setValue(i,j,m_setValue_val[k]);
   }
 }
@@ -288,8 +288,8 @@ void AlephMatrix::reSetValuesIn(AlephMatrix *thisMatrix,
 void AlephMatrix::reAddValuesIn(AlephMatrix *thisMatrix,
                                 vector<long long int*> &known_items_own_address){
   for(int k=0,kMx=m_addValue_row.size();k<kMx;k+=1){
-    const int row=reIdx(m_addValue_row[k], known_items_own_address);
-    const int col=reIdx(m_addValue_col[k], known_items_own_address);
+    const long long int row=reIdx(m_addValue_row[k], known_items_own_address);
+    const long long int col=reIdx(m_addValue_col[k], known_items_own_address);
     const double val=m_addValue_val[k];
     thisMatrix->addValue(row,col,val);
   }

@@ -57,16 +57,16 @@ static char* xCallGatherCells(nablaJob *job,
   const bool is_real3x3_t = strcmp(var->type,"real3x3")==0;
   char gather[1024];
   const bool has_non_null_koffset = var->koffset!=0;
-  char str_pip_koffset[64];
-  char str_uds_koffset[64];
+  char str_pip_koffset[128];
+  char str_uds_koffset[128];
   char iterator[2]={job->parse.enum_enum,0};
   
   if (var->item[0]=='n')
-    sprintf(str_pip_koffset,"((n+NABLA_NODE_PER_CELL+(%d))%%NABLA_NODE_PER_CELL)",var->koffset);
+    sprintf(str_pip_koffset,"((n+NABLA_NODE_PER_CELL+(%d))%%%%NABLA_NODE_PER_CELL)",var->koffset);
   
   if (var->item[0]=='f')
-    sprintf(str_pip_koffset,"((%s+4+(%d))%%4)",iterator,var->koffset);
-  
+    sprintf(str_pip_koffset,"((%s+4+(%d))%%%%4)",iterator,var->koffset);
+  //assert();
   sprintf(str_uds_koffset,"_%02x",var->koffset);
   
   if (var->item[0]=='n')

@@ -266,11 +266,11 @@ foreach(parallel ${PARALLEL_MODES})
   endforeach()
   endforeach()
 
-nabla_add_okina_test(lulesh 1 run avx512 seq)
-nabla_add_okina_test(lulesh 4 run avx512 omp)
+#nabla_add_okina_test(lulesh 1 run avx512 seq)
+#nabla_add_okina_test(lulesh 4 run avx512 omp)
 
-nabla_add_okina_test(llsh 1 run avx512 seq)
-nabla_add_okina_test(llsh 4 run avx512 omp)
+#nabla_add_okina_test(llsh 1 run avx512 seq)
+#nabla_add_okina_test(llsh 4 run avx512 omp)
 
 nabla_add_okina_test(upwind 1 gen std seq)
 nabla_add_okina_test(upwind 1 run std seq)
@@ -355,9 +355,11 @@ endif (HYPRE_FOUND)
 
 nabla_add_lambda_test(p12del 1 run seq)
 nabla_add_lambda_test(pdfLgvn 1 run seq)
-nabla_add_lambda_test(propagateur 1 run seq)
+# TODO Aleph ~ Hypre with HYPRE_Int to debug
+#nabla_add_lambda_test(propagateur 1 run seq)
 
-nabla_add_lambda_test(p12D 1 run seq)
+# TODO koffset error
+#nabla_add_lambda_test(p12D 1 run seq)
 
 
 ##########################

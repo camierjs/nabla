@@ -52,24 +52,24 @@ public:
   ~AlephMatrix();
 public:
   void create(void);
-  void create(vector<long long int>, bool=false);
+  void create(vector<int>, bool=false);
   void create_really(void);
   void reset(void);
   int reIdx(int,vector<long long int*>&);
   void reSetValuesIn(AlephMatrix*,vector<long long int*>&);
   void reAddValuesIn(AlephMatrix*,vector<long long int*>&);
-  void updateKnownRowCol(int,int,double);
-  void rowMapMapCol(int,int,double);
-  void addValue(double*, int,
-                double*, int, double);
-  void addValue(double*, int*,
-                double*, int*, double);
-  void setValue(double*, int,
-                double*, int, double);
-  void setValue(double*, int*,
-                double*, int*, double);
-  void addValue(int,int,double);
-  void setValue(int,int,double);
+  void updateKnownRowCol(long long int,long long int,double);
+  void rowMapMapCol(int, int,double);
+  void addValue(double*, long long int,
+                double*, long long int, double);
+  void addValue(double*, long long int*,
+                double*, long long int*, double);
+  void setValue(double*, long long int,
+                double*, long long int, double);
+  void setValue(double*, long long int*,
+                double*, long long int*, double);
+  void addValue(long long int,long long int,double);
+  void setValue(long long int,long long int,double);
   void writeToFile(const string);
   void startFilling();
   void assemble();
@@ -86,27 +86,27 @@ private:
   IAlephMatrix* m_implementation;
 private:
   // Matrice utilisée dans le cas où nous sommes le solveur
-  vector<vector<int> > m_aleph_matrix_buffer_rows;
-  vector<vector<int> > m_aleph_matrix_buffer_cols;
+  vector<vector<long long int> > m_aleph_matrix_buffer_rows;
+  vector<vector<long long int> > m_aleph_matrix_buffer_cols;
   vector<vector<double> > m_aleph_matrix_buffer_vals;
   // Tableaux tampons des setValues
   int m_setValue_idx;
-  vector<int> m_setValue_row;
-  vector<int> m_setValue_col;
+  vector<long long int> m_setValue_row;
+  vector<long long int> m_setValue_col;
   vector<double> m_setValue_val;
  private:  // Tableaux tampons des addValues
-  typedef std::map<int,int> colMap;
-  typedef std::map<int,colMap*> rowColMap;
+  typedef std::map<long long int,long long int> colMap;
+  typedef std::map<long long int,colMap*> rowColMap;
   rowColMap m_row_col_map;
   int m_addValue_idx;
-  vector<int> m_addValue_row;
-  vector<int> m_addValue_col;
+  vector<long long int> m_addValue_row;
+  vector<long long int> m_addValue_col;
   vector<double> m_addValue_val;
  private:  // Tableaux des requètes
   vector<Parallel::Request> m_aleph_matrix_mpi_data_requests;
   vector<Parallel::Request> m_aleph_matrix_mpi_results_requests;
  private: // Résultats. Placés ici afin de les conserver hors du scope de la fonction les utilisant
-  vector<int> m_aleph_matrix_buffer_n_iteration;
+  vector<long long int> m_aleph_matrix_buffer_n_iteration;
   vector<double> m_aleph_matrix_buffer_residual_norm;
 };
 

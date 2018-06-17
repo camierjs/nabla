@@ -146,7 +146,7 @@ public:
   ~IAlephFactory(){
     debug()<<"\33[1;5;34m[~IAlephFactory]"<<"\33[0m";
   }
-  virtual IAlephTopology* GetTopology(AlephKernel *, int, int)=0;
+  virtual IAlephTopology* GetTopology(AlephKernel*, int, int)=0;
   virtual IAlephVector* GetVector(AlephKernel*, int)=0;
   virtual IAlephMatrix* GetMatrix(AlephKernel*, int)=0;
 };
