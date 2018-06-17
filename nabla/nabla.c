@@ -223,14 +223,17 @@ static int sysPreprocessor(const char *nabla_entity_name,
   //    - sed'er les includes, par exemple
   snprintf(cat_sed_temporary_file_name,
            size,
-           "/tmp/nabla_%s_sed_XXXXXX", nabla_entity_name);
+           "nabla_%s_sed_XXXXXX", nabla_entity_name);
   cat_sed_temporary_fd=mkstemp(cat_sed_temporary_file_name);
-  if (cat_sed_temporary_fd==-1)
+  if (cat_sed_temporary_fd==-1) {
+    perror(NULL);
     nablaError("[sysPreprocessor] Could not mkstemp cat_sed_temporary_fd!");
-  
+  }
+  close(cat_sed_temporary_fd); // On Windows, cannot open twice the same file.
   toolCatAndHackIncludes(list_of_nabla_files,
                          cat_sed_temporary_file_name);
-  
+
+  close(unique_temporary_file_fd); // On Windows, cannot open twice the same file.
   // Et on lance la commande de préprocessing
   // -P Inhibit generation of linemarkers in the output from the preprocessor.
   //    This might be useful when running the preprocessor on something that is not C code,

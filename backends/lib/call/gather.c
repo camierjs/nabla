@@ -62,7 +62,7 @@ static char* xCallGatherCells(nablaJob *job,
   char iterator[2]={job->parse.enum_enum,0};
   
   if (var->item[0]=='n')
-    sprintf(str_pip_koffset,"((n+NABLA_NODE_PER_CELL+(%d))%%NABLA_NODE_PER_CELL)",var->koffset);
+    sprintf(str_pip_koffset,"((n+NABLA_NODE_PER_CELL+(%d))%%%%NABLA_NODE_PER_CELL)",var->koffset);
   
   if (var->item[0]=='f')
     sprintf(str_pip_koffset,"((%s+4+(%d))%%4)",iterator,var->koffset);
