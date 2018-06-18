@@ -251,8 +251,8 @@ endif(APPLE)
 separate_arguments(SIMD_MODES)
 separate_arguments(PARALLEL_MODES)
 
-foreach(parallel seq omp cilk)
-  foreach(simd std sse avx avx2) # avx512 mic)
+foreach(parallel seq omp) # cilk
+  foreach(simd std sse avx) # avx2 avx512 mic)
     nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
