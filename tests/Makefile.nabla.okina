@@ -55,7 +55,7 @@ LIB_omp_GOMP = $(shell $(CXX) -print-file-name=libgomp.a)
 ########
 LIB_ORGOPT = ${NABLA_BINARY_DIR}/orgopt/libNablaOrgOpt.a
 ifeq ("${MFEM_FOUND}","YES")
-LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a /usr/local/lib/libmfem.a
+#LIB_GLVIS = ${NABLA_BINARY_DIR}/glvis/libNablaGLVis.a /usr/local/lib/libmfem.a
 endif
 
 all:$(TGT) $(NABLA) 
