@@ -1,6 +1,8 @@
 sudo: false
 
-language: c c+
+language:
+   - c
+   - c++
 
 dist: trusty
 
