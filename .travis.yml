@@ -11,13 +11,15 @@ cache:
   apt: true
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
        echo LINUX;
     fi
     
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew update
-        brew install mfem
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update;
+        brew install mfem;
     fi
 
 script: make && make test
