@@ -11,4 +11,4 @@ cache:
 
 script:
    - make
-   - cd build/test && ctest -V -R nabla_run_okina_lulesh_1_std_seq
+   - cd build/tests && ctest -V -R nabla_run_okina_lulesh_1_std_seq
