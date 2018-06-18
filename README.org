@@ -1,5 +1,7 @@
-[![Build Status](https://travis-ci.org/camierjs/nabla.svg?branch=master)](https://travis-ci.org/camierjs/nabla)
-NABLA - a Numerical Analysis Based LAnguage
+
+[[https://travis-ci.org/camierjs/nabla][https://travis-ci.org/camierjs/nabla.svg?branch=master]]
+
+* NABLA - a Numerical Analysis Based LAnguage
 
 Copyright (C) 2014~2017 CEA/DAM/DIF
 IDDN.FR.001.520002.000.S.P.2014.000.10500
