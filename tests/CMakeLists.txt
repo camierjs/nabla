@@ -241,7 +241,7 @@ endif(ARCANE_FOUND)
 #########################
 # NABLA TESTS FOR OKINA #
 #########################
-set(SIMD_MODES "std sse avx avx2") #mic
+set(SIMD_MODES "std sse avx") #avx2 mic
 set(PARALLEL_MODES "seq omp") #cilk
 if(APPLE)
   set(SIMD_MODES "std sse")
@@ -251,8 +251,8 @@ endif(APPLE)
 separate_arguments(SIMD_MODES)
 separate_arguments(PARALLEL_MODES)
 
-foreach(parallel seq omp cilk)
-  foreach(simd std sse avx avx2) # avx512 mic)
+foreach(parallel seq omp) # cilk
+  foreach(simd std sse avx) # avx2 avx512 mic)
     nabla_add_okina_test(lulesh 1 gen ${simd} ${parallel})
   endforeach()
 endforeach()
@@ -265,6 +265,11 @@ foreach(parallel ${PARALLEL_MODES})
     nabla_add_okina_test(llsh 2 run ${simd} ${parallel})
   endforeach()
   endforeach()
+  
+###########################
+# RETURN FROM CURRENT DIR #
+###########################
+return()
 
 #nabla_add_okina_test(lulesh 1 run avx512 seq)
 #nabla_add_okina_test(lulesh 4 run avx512 omp)

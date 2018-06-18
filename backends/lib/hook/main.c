@@ -50,11 +50,11 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Forward des fonctions utilisées dans le main
 // ****************************************************************************
 #define BACKEND_MAIN_FORWARDS "\n\
-extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
+//extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
 extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
-extern void glvis3DHex(const int,const int,const int,const double,const double,const double,double*,double*);\n\
-extern void glvis2DQud(const int,const int,const double,const double,double*,double*);\n\
-extern void glvis1D(const int,const double,double*,double*);\n\
+//extern void glvis3DHex(const int,const int,const int,const double,const double,const double,double*,double*);\n\
+//extern void glvis2DQud(const int,const int,const double,const double,double*,double*);\n\
+//extern void glvis1D(const int,const double,double*,double*);\n\
 \n\n\n"
 
 // ****************************************************************************
@@ -68,7 +68,7 @@ extern void glvis1D(const int,const double,double*,double*);\n\
 int main(int argc, char *argv[]){\n"
 
 #define BACKEND_MAIN_VARIABLES "\
-\tMPI_Init(&argc,&argv);\n\
+\t//MPI_Init(&argc,&argv);\n\
 \tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
@@ -207,14 +207,14 @@ void xHookMainGLVisI2a(nablaMain *n){
     if (strcmp(var->type, "real")!=0) continue;
     nb_var+=1;
   }
-  nprintf(n, NULL,"\n\tconst real* i2var[%d]={",nb_var+1);
+  nprintf(n, NULL,"\n\t/*const real* i2var[%d]={",nb_var+1);
   for(nablaVariable *var=n->variables;var!=NULL;var=var->next){
     if (var->item[0]=='g') continue;
     if (strcmp(var->type, "real")!=0) continue;
     nprintf(n,NULL,"\n\t\t%s_%s,",var->item,var->name);
   }
   nprintf(n,NULL,"\n\t\tNULL");
-  nprintf(n, NULL,"\n\t};");
+  nprintf(n, NULL,"\n\t};*/");
 }
 
 
@@ -401,12 +401,12 @@ static void xHookMainGLVis(nablaMain *n){
   //nprintf(n, NULL,"\n\tif (glvis) printf(\"[1;33mGLVis var offset: %%d[m\",glvis_optarg);");
   nprintf(n,NULL,"gettimeofday(&et, NULL);\n");
   //nprintf(n,NULL,"printf(\"%%ld\", (et.tv_sec-st.tv_sec));\n");
-  nprintf(n, NULL,"\n\tif (glvis and global_iteration[0]%2==0) %s,(double*)i2var[glvis_optarg]);",
+  nprintf(n, NULL,"\n\t//if (glvis and global_iteration[0]%%2==0) %s,(double*)i2var[glvis_optarg]);",
           //nprintf(n, NULL,"\n\tif (glvis and (et.tv_usec-st.tv_usec)%100) %s,(double*)i2var[glvis_optarg]);",
-          dim3D?"glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
+          dim3D?"//glvis3DHex(X_EDGE_ELEMS,Y_EDGE_ELEMS,Z_EDGE_ELEMS,LENGTH,LENGTH,LENGTH,(double*)node_coord":
           //inner?"glvis2DQud(X_EDGE_ELEMS-2,Y_EDGE_ELEMS-2,LENGTH,LENGTH,(double*)node_coord":
-          dim2D?"glvis2DQud(X_EDGE_ELEMS,Y_EDGE_ELEMS,LENGTH,LENGTH,(double*)node_coord":
-          dim1D?"glvis1D(X_EDGE_ELEMS,LENGTH,(double*)node_coord":"");
+          dim2D?"//glvis2DQud(X_EDGE_ELEMS,Y_EDGE_ELEMS,LENGTH,LENGTH,(double*)node_coord":
+          dim1D?"//glvis1D(X_EDGE_ELEMS,LENGTH,(double*)node_coord":"");
 }
 
 

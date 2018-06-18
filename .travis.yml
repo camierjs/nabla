@@ -1,13 +1,15 @@
 sudo: false
 
+language:
+   - c
+   - c++
+
 dist: trusty
 
-language: c
+cache:
+  apt: true
 
-compiler:
-  - clang
-  - gcc
-  
-#before_install: autoreconf -fi
-
-script: make && make test
+script:
+   - make
+   - (cd build/tests && ctest -V -R nabla_run_okina_lulesh_1_std_seq)
+   - make test

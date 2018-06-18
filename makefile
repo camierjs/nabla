@@ -1,3 +1,5 @@
+#travis:;which cmake
+
 ###############################
 # MacOS||Linux switch||CentOS #
 # gcc -dM -E -x c++ /dev/null #
@@ -28,14 +30,16 @@ C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
 #export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
 #export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
-export CC  = $(COMPILER_ROOT_PATH)/mpicc
-export CXX = $(COMPILER_ROOT_PATH)/mpicxx
+#export CC  = $(COMPILER_ROOT_PATH)/mpicc
+#export CXX = $(COMPILER_ROOT_PATH)/mpicxx
 
 #################
 # CMAKE OPTIONS #
 #################
-CMAKE = $(CMAKE_ROOT_PATH)/cmake
-CTEST = $(CMAKE_ROOT_PATH)/ctest
+#CMAKE = $(CMAKE_ROOT_PATH)/cmake
+#CTEST = $(CMAKE_ROOT_PATH)/ctest
+CMAKE = cmake
+CTEST = ctest
 HYODA = /usr/local/arcane/testing/bin/hyoda
 
 #########
@@ -59,6 +63,7 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 all:
 	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@[ ! -f $(BUILD_PATH)/Makefile ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
+#	@echo PWD=`pwd` # PWD=/home/travis/build/camierjs/nabla
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
 ##################
