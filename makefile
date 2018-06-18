@@ -63,7 +63,7 @@ NUMBR_PROCS = $(shell getconf _NPROCESSORS_ONLN)
 all:
 	@[ ! -d $(BUILD_PATH) ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
 	@[ ! -f $(BUILD_PATH)/Makefile ] && ($(BUILD_MKDIR) && $(BUILD_CMAKE)) || exit 0
-	@echo PWD=`pwd`
+#	@echo PWD=`pwd` # PWD=/home/travis/build/camierjs/nabla
 	@cd $(BUILD_PATH) && make -j $(NUMBR_PROCS)
 
 ##################

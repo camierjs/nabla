@@ -1,25 +1,35 @@
 sudo: false
-
+language: c
 dist: trusty
 
-language: c
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
-compiler:
-  - gcc
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
 
 cache:
   apt: true
 
-before_install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-       echo LINUX;
-    fi
-    
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew update;
-        brew install mfem;
-    fi
-
-script: make && make test
+script:
+   - make
+   - make test
