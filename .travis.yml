@@ -5,7 +5,6 @@ dist: trusty
 language: c
 
 compiler:
-  - clang
   - gcc
   
 #before_install: autoreconf -fi

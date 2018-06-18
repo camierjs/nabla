@@ -1,4 +1,4 @@
-travis:;which cmake
+#travis:;which cmake
 
 ###############################
 # MacOS||Linux switch||CentOS #
@@ -30,14 +30,16 @@ C_FLAGS = -std=c99
 MAKEFLAGS = --no-print-directory
 #export CC  = $(COMPILER_ROOT_PATH)/gcc$(COMPILER_POSTFIX)
 #export CXX = $(COMPILER_ROOT_PATH)/g++$(COMPILER_POSTFIX)
-export CC  = $(COMPILER_ROOT_PATH)/mpicc
-export CXX = $(COMPILER_ROOT_PATH)/mpicxx
+#export CC  = $(COMPILER_ROOT_PATH)/mpicc
+#export CXX = $(COMPILER_ROOT_PATH)/mpicxx
 
 #################
 # CMAKE OPTIONS #
 #################
-CMAKE = $(CMAKE_ROOT_PATH)/cmake
-CTEST = $(CMAKE_ROOT_PATH)/ctest
+#CMAKE = $(CMAKE_ROOT_PATH)/cmake
+#CTEST = $(CMAKE_ROOT_PATH)/ctest
+CMAKE = cmake
+CTEST = ctest
 HYODA = /usr/local/arcane/testing/bin/hyoda
 
 #########
