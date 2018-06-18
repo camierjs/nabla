@@ -11,4 +11,4 @@ cache:
 
 script:
    - make
-   - make nabla_run_okina_lulesh_1_std_seq
+   - gmake nabla_run_okina_lulesh_1_std_seq
