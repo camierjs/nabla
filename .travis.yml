@@ -6,7 +6,18 @@ language: c
 
 compiler:
   - gcc
-  
-#before_install: autoreconf -fi
+
+cache:
+  apt: true
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-get update -q
+    fi
+    
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update
+        brew install mfem
+    fi
 
 script: make && make test
