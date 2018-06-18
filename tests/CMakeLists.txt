@@ -265,6 +265,11 @@ foreach(parallel ${PARALLEL_MODES})
     nabla_add_okina_test(llsh 2 run ${simd} ${parallel})
   endforeach()
   endforeach()
+  
+###########################
+# RETURN FROM CURRENT DIR #
+###########################
+return()
 
 #nabla_add_okina_test(lulesh 1 run avx512 seq)
 #nabla_add_okina_test(lulesh 4 run avx512 omp)
