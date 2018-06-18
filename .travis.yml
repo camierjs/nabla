@@ -12,6 +12,7 @@ cache:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+       echo LINUX
     fi
     
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
