@@ -152,9 +152,7 @@ const hookXyz cuHookXyz={
   xHookSysPostfix
 };
 
-const static hookPragma cuHookPragma={
-  NULL 
-};
+//const static hookPragma cuHookPragma={ NULL };
 
 const static hookHeader cuHookHeader={
   cuHookHeaderDump,

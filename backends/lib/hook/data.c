@@ -157,12 +157,12 @@ static void xHookTurnTokenToVariableForCellJob(nablaMain *nabla,
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='n' && koffset==0)
       nprintf(nabla, NULL, "[n+NABLA_NODE_PER_CELL*c]");  
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='n' && koffset!=0)
-      nprintf(nabla, NULL, "[((n+NABLA_NODE_PER_CELL+(%d))%%NABLA_NODE_PER_CELL)+NABLA_NODE_PER_CELL*c]",koffset);
+      nprintf(nabla, NULL, "[((n+NABLA_NODE_PER_CELL+(%d))%%%%NABLA_NODE_PER_CELL)+NABLA_NODE_PER_CELL*c]",koffset);
     
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='f' && koffset==0)
       nprintf(nabla, NULL, "[f+NABLA_FACE_PER_CELL*c]");
     if (var->dim==1 && isPostfixed!=2 && enum_enum=='f' && koffset!=0)
-      nprintf(nabla, NULL, "[((f+NABLA_FACE_PER_CELL+(%d))%%NABLA_FACE_PER_CELL)+NABLA_FACE_PER_CELL*c]",koffset);
+      nprintf(nabla, NULL, "[((f+NABLA_FACE_PER_CELL+(%d))%%%%NABLA_FACE_PER_CELL)+NABLA_FACE_PER_CELL*c]",koffset);
     
     // Mais on est pas encore dans le ∀ du ∀
     if (var->dim==1 && isPostfixed==2 &&  var->vitem=='f' && enum_enum=='\0'){

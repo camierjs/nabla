@@ -40,6 +40,7 @@
 //                                                                           //
 // See the LICENSE file for details.                                         //
 ///////////////////////////////////////////////////////////////////////////////
+#include <inttypes.h>
 #include "nabla.h"
 
 extern char* nablaAlephHeader(nablaMain*);
@@ -49,7 +50,7 @@ extern char* nablaAlephHeader(nablaMain*);
 // * Forward des fonctions utilisées dans le main
 // ****************************************************************************
 #define BACKEND_MAIN_FORWARDS "\n\
-//extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
+extern \"C\" int MPI_Init(int*, char ***);\n\n\n\
 extern \"C\" int inOpt(char *file,int *argc, char **argv);\n\n\n\
 extern void glvis3DHex(const int,const int,const int,const double,const double,const double,double*,double*);\n\
 extern void glvis2DQud(const int,const int,const double,const double,double*,double*);\n\
@@ -67,7 +68,7 @@ extern void glvis1D(const int,const double,double*,double*);\n\
 int main(int argc, char *argv[]){\n"
 
 #define BACKEND_MAIN_VARIABLES "\
-\t//MPI_Init(&argc,&argv);\n\
+\tMPI_Init(&argc,&argv);\n\
 \tfloat alltime=0.0;\n\
 \tstruct timeval st, et;\n\
 \t__attribute__((unused)) const int NABLA_NB_PARTICLES=(argc==1)?1024:atoi(argv[1]);\n\
@@ -149,9 +150,10 @@ int main(int argc, char *argv[]){\n"
 static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
   for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next){
     const char *ascii_name=opt->name;
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\tcase (int)%p: //%s %s\n",opt, opt->type, ascii_name);
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src, "\t");
+    fprintf(nabla->entity->src, "\t\tcase (int)0x%" PRIxPTR ": //%s %s\n", (uintptr_t)opt, opt->type, ascii_name);
     if (brk){
-      for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+      for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src, "\t");
       fprintf(nabla->entity->src, "\t\t\tif (!optarg) break;\n");
     }
     for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
@@ -159,7 +161,8 @@ static void dumpOptions(nablaMain *nabla,const int tabs, const bool brk){
     if (opt->type[0]=='r') fprintf(nabla->entity->src, " %s=atof(optarg);\n",opt->name);
     if (opt->type[0]=='i') fprintf(nabla->entity->src, " %s=atol(optarg);\n",opt->name);
     if (opt->type[0]=='b') fprintf(nabla->entity->src, " %s=(0==strcmp(optarg,\"true\"));\n",opt->name);
-    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t"); fprintf(nabla->entity->src, "\t\t\tbreak;\n");
+    for(int t=tabs;t>0;t-=1) fprintf(nabla->entity->src,"\t");
+    fprintf(nabla->entity->src, "\t\t\tbreak;\n");
   }
 }
 
@@ -176,8 +179,9 @@ NABLA_STATUS xHookMainPrefix(nablaMain *nabla){
   fprintf(nabla->entity->src, BACKEND_MAIN_FUNCTION);
   fprintf(nabla->entity->src, BACKEND_MAIN_VARIABLES);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_PREFIX);
-  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next)
-    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,(int)%p},\n",opt->name,opt);
+  for(nablaOption *opt=nabla->options;opt!=NULL;opt=opt->next) {
+    fprintf(nabla->entity->src, "\t\t{\"%s\",required_argument,NULL,(int)0x%" PRIxPTR "},\n", opt->name, (uintptr_t )opt);
+  }
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_POSTFIX);
   fprintf(nabla->entity->src, BACKEND_MAIN_OPTIONS_WHILE_PREFIX);
 

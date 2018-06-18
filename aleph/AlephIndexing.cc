@@ -64,7 +64,7 @@ AlephIndexing::AlephIndexing(AlephKernel *kernel):
 // ****************************************************************************
 // * updateKnownItems
 // ****************************************************************************
-int AlephIndexing::updateKnownItems(vector<int> *var_idx,
+int AlephIndexing::updateKnownItems(vector<long long int> *var_idx,
                                     const int itm){
   debug()<<"\t\33[33m[updateKnownItems] itm="<<itm<<"\33[m";
   // Dans tous les cas l'adresse est celle-ci
@@ -100,7 +100,7 @@ int AlephIndexing::findWhichLidFromMapMap(double *var, const int itm){
     //string var_idx_name("var");//var->name());
     //var_idx_name+="_idx";
     //#warning Cell|Node|Faces Variable? for size!
-    vector<int> *var_idx=new vector<int>(subDomain()->defaultMesh()->size()+1);
+    vector<long long int> *var_idx=new vector<long long int>(subDomain()->defaultMesh()->size()+1);
     // var->itemKind());
     // On rajoute à notre map la variable '_idx' de cette variable
     m_var_map_idx.insert(std::make_pair(var,var_idx));
@@ -109,7 +109,7 @@ int AlephIndexing::findWhichLidFromMapMap(double *var, const int itm){
     return updateKnownItems(var_idx,itm);
   }
   debug()<<"\t\33[33m[findWhichLidFromMapMap] KNOWN variable *var @"<<var<<"\33[m";
-  vector<int> *var_idx = iVarMap->second;
+  vector<long long int> *var_idx = iVarMap->second;
   // Si cet item n'est pas connu de cette variable, on rajoute une entrée
   if ((*var_idx)[itm]==ALEPH_INDEX_NOT_USED){
     debug()<<"\t\33[33m[findWhichLidFromMapMap] Cet item n'est pas connu de cette variable, on rajoute une entrée\33[m";
@@ -126,11 +126,11 @@ int AlephIndexing::findWhichLidFromMapMap(double *var, const int itm){
 // * get qui trig findWhichLidFromMapMap
 // ****************************************************************************
 int AlephIndexing::get(double *variable,
-                       int* itm){
+                       long long int* itm){
   return get(variable, *itm);
 }
 int AlephIndexing::get(double *variable,
-                       int itm){
+                       long long int itm){
   double *var=variable;//variable.variable();
   if (m_kernel->isInitialized())
     return  (m_var_map_idx.find(var)->second)->at(itm)-m_kernel->topology()->part()[m_kernel->rank()];
@@ -153,7 +153,7 @@ void AlephIndexing::buildIndexesFromAddress(void){
   // On ré-indice et synchronise toutes les variables qu'on a pu voir passer
   for(;iVarIdx!=m_var_map_idx.end(); ++iVarIdx){
     //items group = iVarIdx->first->itemGroup();
-    vector<int> *var_idx = iVarIdx->second;
+    vector<long long int> *var_idx = iVarIdx->second;
     for(int i=0;i!=var_idx->size();++i){
       // Si cet item n'est pas utilisé, on s'en occupe pas
       if (var_idx->at(i)==ALEPH_INDEX_NOT_USED) continue;

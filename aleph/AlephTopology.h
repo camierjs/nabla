@@ -52,7 +52,7 @@ class AlephTopology: public TraceAccessor{
   virtual ~AlephTopology();
  public:
   void create(int);
-  void setRowNbElements( vector<int> row_nb_element);
+  void setRowNbElements(vector<int> row_nb_element);
   vector<int> ptr_low_up_array();
   vector<int> part();
   IParallelMng* parallelMng();

@@ -58,11 +58,11 @@ class AlephVector: public TraceAccessor{
   void update(void){throw std::domain_error(A_FUNCINFO);}
   void reSetLocalComponents(AlephVector*);
   void setLocalComponents(int num_values,
-                          vector<int> glob_indices,
+                          vector<long long int> glob_indices,
                           vector<double> values);
   void setLocalComponents(vector<double> values);
   void getLocalComponents(int vector_size,
-                          vector<int> global_indice,
+                          vector<long long int> global_indice,
                           vector<double>   vector_values);  
   void getLocalComponents(vector<double> &values);  
   void startFilling(void);
@@ -81,17 +81,17 @@ class AlephVector: public TraceAccessor{
   IAlephVector* m_implementation;
  private:
   // Buffers utilisés dans le cas où nous sommes le solveur
-  vector<int> m_aleph_vector_buffer_idxs;
+  vector<long long int> m_aleph_vector_buffer_idxs;
   vector<double> m_aleph_vector_buffer_vals;
  private:
-  vector<int> m_aleph_vector_buffer_idx;
+  vector<long long int> m_aleph_vector_buffer_idx;
   vector<double> m_aleph_vector_buffer_val;
  private:
   vector<Parallel::Request> m_parallel_requests;
   vector<Parallel::Request> m_parallel_reassemble_requests;
  public:
-  int m_bkp_num_values;
-  vector<int> m_bkp_indexs;
+  long long int m_bkp_num_values;
+  vector<long long int> m_bkp_indexs;
   vector<double> m_bkp_values;
 };
 

@@ -86,7 +86,7 @@ void cuHeaderError(nablaMain *nabla){
 __attribute__((unused)) void cuHeaderDebug(nablaMain *nabla){
   nablaVariable *var;
   fprintf(nabla->entity->hdr,dumpExternalFile(cuDebug_h));
-  hprintf(nabla,NULL,"\n\n\
+  nprinth(nabla,NULL,"\n\n\
 // *****************************************************************************\n\
 // * Debug macro functions\n\
 // * unused?\n\
@@ -97,18 +97,18 @@ __attribute__((unused)) void cuHeaderDebug(nablaMain *nabla){
     if (strcmp(var->name, "time")==0) continue;
     if (strcmp(var->name, "coord")==0) continue;
     //continue;
-    hprintf(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
+    nprinth(nabla,NULL,"\ndbg%sVariable%sDim%s(%s);",
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
             var->name);
     continue;
-    hprintf(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
+    nprinth(nabla,NULL,"// dbg%sVariable%sDim%s_%s();",
             (var->item[0]=='n')?"Node":"Cell",
             (strcmp(var->type,"real3")==0)?"XYZ":"",
             (var->dim==0)?"0":"1",
             var->name);
   }
-  hprintf(nabla,NULL,"\n");
+  nprinth(nabla,NULL,"\n");
 }
 
