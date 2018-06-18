@@ -1,3 +1,5 @@
+travis:;which cmake
+
 ###############################
 # MacOS||Linux switch||CentOS #
 # gcc -dM -E -x c++ /dev/null #
